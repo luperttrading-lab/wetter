@@ -178,7 +178,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.6</span>
+      <span class="ver">v1.7</span>
     </div>
   </header>
 
@@ -478,14 +478,21 @@ function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
   return `<svg width="30" height="30" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14.5" fill="#f4f7fb" stroke="#e3e9f1" stroke-width="2"/><line x1="18" y1="18" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2f86cf" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="18" r="2.4" fill="#5c6b80"/></svg>`;}
 function sunArc(d){const W=360,H=86,cx0=22,cx1=W-22,cy=H-12,rx=(cx1-cx0)/2,ry=52,mx=(cx0+cx1)/2;
-  const today=new Date(),rU=sunUT(today,true),sU=sunUT(today,false),uNow=new Date().getUTCHours()+new Date().getUTCMinutes()/60;
-  let frac=(rU!=null&&sU!=null)?(uNow-rU)/(sU-rU):0.5;frac=Math.max(0,Math.min(1,frac));
+  const rU=sunUT(new Date(),true),sU=sunUT(new Date(),false),uNow=new Date().getUTCHours()+new Date().getUTCMinutes()/60;
+  const haveSun=rU!=null&&sU!=null,isDay=haveSun&&uNow>=rU&&uNow<=sU;
+  let frac=haveSun?(uNow-rU)/(sU-rU):0.5;frac=Math.max(0,Math.min(1,frac));
   const ang=Math.PI*(1-frac),sx=mx+Math.cos(ang)*rx,sy=cy-Math.sin(ang)*ry;
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="sa" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7b733" stop-opacity=".5"/><stop offset="1" stop-color="#f7b733"/></linearGradient></defs>
-    <path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${cx1} ${cy}" fill="none" stroke="#e7ecf3" stroke-width="2.5" stroke-dasharray="1.5 5.5"/>
-    <path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${sx.toFixed(1)} ${sy.toFixed(1)}" fill="none" stroke="url(#sa)" stroke-width="3.2"/>
-    <line x1="${cx0-2}" y1="${cy}" x2="${cx1+2}" y2="${cy}" stroke="#edf1f6" stroke-width="2"/>
-    <circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="11" fill="#f7b733" opacity=".2"/><circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5" fill="#f7b733"/></svg>`;}
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="sa" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7b733" stop-opacity=".5"/><stop offset="1" stop-color="#f7b733"/></linearGradient></defs>`;
+  s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${cx1} ${cy}" fill="none" stroke="#e7ecf3" stroke-width="2.5" stroke-dasharray="1.5 5.5"/>`;
+  s+=`<line x1="${cx0-2}" y1="${cy}" x2="${cx1+2}" y2="${cy}" stroke="#edf1f6" stroke-width="2"/>`;
+  if(isDay){
+    s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${sx.toFixed(1)} ${sy.toFixed(1)}" fill="none" stroke="url(#sa)" stroke-width="3.2"/>`;
+    s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="11" fill="#f7b733" opacity=".2"/><circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5" fill="#f7b733"/>`;
+  }else if(haveSun){
+    const ex=uNow<rU?cx0:cx1;
+    s+=`<circle cx="${ex}" cy="${cy+6}" r="5" fill="#c9b888" opacity=".5"/>`;
+  }
+  return s+`</svg>`;}
 
 function renderTiles(s,d){
   const g=el("grid");
