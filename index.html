@@ -130,7 +130,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v0.7</span>
+      <span class="ver">v0.8</span>
     </div>
   </header>
 
@@ -252,6 +252,12 @@ function sunUT(date,isRise){const rad=Math.PI/180,deg=180/Math.PI,N=dayOfYear(da
 function utToLocal(date,ut){if(ut==null)return"–";const ms=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)+ut*3600e3;
   return new Date(ms).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});}
 function isNight(iso){const d=new Date(iso),r=sunUT(d,true),s=sunUT(d,false);if(r==null||s==null)return false;const u=d.getUTCHours()+d.getUTCMinutes()/60;return u<r||u>s;}
+function sunMoment(date,isRise){const ut=sunUT(date,isRise);if(ut==null)return null;return Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())+ut*3600e3;}
+function durHM(ms){let m=Math.max(0,Math.round(ms/60000));const h=Math.floor(m/60);m=m%60;return h>0?(h+" Std "+m+" Min"):(m+" Min");}
+function sunCountdown(){const now=Date.now(),t=new Date(),rise=sunMoment(t,true),set=sunMoment(t,false);if(rise==null||set==null)return null;
+  if(now<rise)return{ms:rise-now,up:false};
+  if(now<set)return{ms:set-now,up:true};
+  const tom=new Date(t.getTime()+864e5),r2=sunMoment(tom,true);return r2==null?null:{ms:r2-now,up:false};}
 
 function latestOf(rows,f){for(let i=rows.length-1;i>=0;i--){const v=rows[i][f];if(v!=null&&!isNaN(v))return v;}return null;}
 function valueAt(rows,targetMs,f,tolH){let best=null,bd=Infinity;for(const r of rows){const v=r[f];if(v==null||isNaN(v))continue;const d=Math.abs(new Date(r.timestamp).getTime()-targetMs);if(d<bd){bd=d;best=v;}}return bd<=tolH*3600e3?best:null;}
@@ -419,8 +425,9 @@ function renderTiles(s,d){
     tile("Niederschlag heute",d.precip!=null?d.precip.toLocaleString("de-DE",{maximumFractionDigits:1}):"0","mm",d.precip>0?"gemessen":"trocken")+
     tile("Sonnenenergie heute",d.solar!=null&&d.solar>0?d.solar.toLocaleString("de-DE",{maximumFractionDigits:1}):"–","kWh/m²","Globalstrahlung gesamt")+
     `<div class="tile wide"><div class="k">Vergleich zu gestern</div><div class="cmp" style="margin-top:7px"><div class="big" style="color:${cmpCol}">${cmpArrow} ${dT!=null?Math.abs(dT).toFixed(0)+"°":""}</div><div class="sub" style="margin:0">${cmpTxt} um diese Uhrzeit</div></div></div>`+
-    `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>
-      <div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
+    `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
+      (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
+      `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
 }
 
 /* ---------- Demo (realer Hitze-Snapshot mit allen Feldern) ---------- */
