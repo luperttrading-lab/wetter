@@ -94,6 +94,13 @@
   .hcell.now{background:rgba(27,34,48,.05)}
   .hcell.now .ht{color:var(--txt);font-weight:700}
   .hbar{width:4px;border-radius:2px;background:var(--accent)}
+  .hcell.fc .hbar{opacity:.4}
+  .hcell.fc .ht{color:var(--muted-2);font-style:italic}
+  .hcell.fc .hv{color:var(--muted)}
+  .legend{position:absolute;left:12px;top:8px;display:none;align-items:center;gap:12px;font-size:10.5px;color:var(--muted-2);z-index:2}
+  .legend.on{display:flex}
+  .legend i{display:inline-block;width:16px;height:0;border-top:2px solid var(--muted-2);margin-right:4px;vertical-align:middle}
+  .legend i.dash{border-top-style:dashed}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 8px;margin:6px 2px;
     border-left:1px dashed var(--line);}
   .hsep span{font-size:11px;font-weight:700;color:var(--muted-2);writing-mode:vertical-rl;transform:rotate(180deg);
@@ -132,7 +139,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
-      <span class="ver">v0.3</span>
+      <span class="ver">v0.4</span>
     </div>
   </header>
 
@@ -179,7 +186,9 @@
 
   <div class="panel">
     <div class="view on" id="viewHours"><div id="hours"></div></div>
-    <div class="view" id="viewCurve"><div id="curveWrap"><canvas id="curve"></canvas></div></div>
+    <div class="view" id="viewCurve"><div id="curveWrap"><canvas id="curve"></canvas></div>
+      <div class="legend" id="legend"><span><i></i>gemessen</span><span><i class="dash"></i>Vorhersage</span></div>
+    </div>
     <div class="state on" id="stLoading"><div class="spinner"></div><p>Messwerte werden geladen …</p></div>
     <div class="state" id="stError">
       <p id="stErrorMsg">Keine Verbindung zur Wetterstation.</p>
@@ -278,17 +287,21 @@ async function load(){
   try{
     const now=new Date();
     const from=new Date(now.getTime()-36*3600e3);
-    const url=`https://api.brightsky.dev/weather?lat=${LAT}&lon=${LON}&date=${isoDate(from)}&last_date=${isoDate(now)}&tz=Europe/Berlin`;
+    const to=new Date(now.getTime()+24*3600e3);     // bis morgen -> MOSMIX-Vorhersage füllt die Beobachtungslücke
+    const url=`https://api.brightsky.dev/weather?lat=${LAT}&lon=${LON}&date=${isoDate(from)}&last_date=${isoDate(to)}&tz=Europe/Berlin`;
     const r=await fetch(url,{headers:{Accept:"application/json"}});
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json();
-    const src=(j.sources&&j.sources[0])||{};
+    const srcs=j.sources||[];
+    const fcIds=new Set(srcs.filter(s=>(s.observation_type||"").toLowerCase()==="forecast").map(s=>s.id));
+    const obsSrc=srcs.find(s=>(s.observation_type||"").toLowerCase()!=="forecast")||srcs[0]||{};
     let rows=(j.weather||[]).filter(w=>w.temperature!=null && new Date(w.timestamp)<=now)
-      .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+      .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp))
+      .map(w=>({...w,_fc:fcIds.has(w.source_id)}));
     if(!rows.length) throw new Error("Keine Messwerte im Zeitfenster.");
     rows=rows.slice(-WINDOW_HOURS);
-    render(rows,src,false);
-    tryCurrent(src);                 // defensiv: frischeren Synop-Wert nachladen
+    render(rows,obsSrc,false);
+    tryCurrent(obsSrc);
   }catch(err){
     console.warn("Live-Abruf fehlgeschlagen:",err);
     el("stErrorMsg").textContent="Keine Verbindung zur Wetterstation ("+err.message+").";
@@ -297,7 +310,7 @@ async function load(){
 }
 
 /* frischeren Wert von /current_weather – nur wenn dieselbe Station und neuer */
-async function tryCurrent(weatherSrc){
+async function tryCurrent(obsSrc){
   try{
     const r=await fetch(`https://api.brightsky.dev/current_weather?lat=${LAT}&lon=${LON}`,{headers:{Accept:"application/json"}});
     if(!r.ok) return;
@@ -305,14 +318,21 @@ async function tryCurrent(weatherSrc){
     const w=j.weather||{}; const s=(j.sources&&j.sources[0])||{};
     const t=w.temperature;
     if(!Number.isFinite(t)||!w.timestamp) return;
-    const same=(s.dwd_station_id&&weatherSrc.dwd_station_id&&s.dwd_station_id===weatherSrc.dwd_station_id)
-             ||(s.station_name&&weatherSrc.station_name&&s.station_name===weatherSrc.station_name);
+    const same=(s.dwd_station_id&&obsSrc.dwd_station_id&&s.dwd_station_id===obsSrc.dwd_station_id)
+             ||(s.station_name&&obsSrc.station_name&&s.station_name===obsSrc.station_name);
     if(!same) return;
-    if(heroTs && new Date(w.timestamp)<=new Date(heroTs)) return;   // nicht neuer
-    // Hero auf frischen Wert heben
+    if(!lastRows||!lastRows.length) return;
+    const lastTs=lastRows[lastRows.length-1].timestamp;
+    if(new Date(w.timestamp)<=new Date(lastTs)) return;   // nicht neuer
     const pt={timestamp:w.timestamp,temperature:t,icon:w.icon,relative_humidity:w.relative_humidity,
-              wind_speed:(w.wind_speed_10!=null?w.wind_speed_10:w.wind_speed)};
+              wind_speed:(w.wind_speed_10!=null?w.wind_speed_10:w.wind_speed),_fc:false,_live:true};
+    const rows=lastRows.concat([pt]).slice(-WINDOW_HOURS);
+    lastRows=rows;
+    const temps=rows.map(r=>r.temperature); const tMin=Math.min(...temps),tMax=Math.max(...temps);
+    el("range").textContent=Math.round(tMin)+"–"+Math.round(tMax)+"°";
     paintHero(pt,"fresh");
+    renderHours(rows,tMin,tMax);
+    if(currentView==="curve") drawCurve(rows,tMin,tMax);
   }catch(e){/* still ignorieren */}
 }
 
@@ -371,9 +391,11 @@ function paintHero(pt, mode){
 function renderHours(rows,tMin,tMax){
   const span=Math.max(1,tMax-tMin);
   const h=el("hours"); h.innerHTML=""; let prevDay=null;
+  const hasFc=rows.some(r=>r._fc);
+  el("legend").classList.toggle("on",hasFc);
   rows.forEach((r,i)=>{
     const day=ymd(r.timestamp);
-    if(prevDay && day!==prevDay){                 // Datums-Trenner bei Tageswechsel
+    if(prevDay && day!==prevDay){
       const sep=document.createElement("div"); sep.className="hsep";
       sep.innerHTML=`<span>${dateShort(r.timestamp)}</span>`; h.appendChild(sep);
     }
@@ -381,7 +403,7 @@ function renderHours(rows,tMin,tMax){
     const c=thermal(r.temperature);
     const barH=18+Math.round(((r.temperature-tMin)/span)*46);
     const cell=document.createElement("div");
-    cell.className="hcell"+(i===rows.length-1?" now":"");
+    cell.className="hcell"+(i===rows.length-1?" now":"")+(r._fc?" fc":"");
     cell.innerHTML=`<div class="ht">${i===rows.length-1?"jetzt":hourShort(r.timestamp)}</div>`+
       `<div class="hi">${iconSVG(r.icon,rgb(c))}</div>`+
       `<div class="hbar" style="height:${barH}px;background:${rgb(c)}"></div>`+
@@ -397,7 +419,7 @@ function drawCurve(rows,tMin,tMax){
   const W=wrap.clientWidth,H=wrap.clientHeight;
   cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+"px";cv.style.height=H+"px";
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
-  const padL=34,padR=14,padT=14,padB=24;
+  const padL=34,padR=14,padT=14,padB=30;
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   let lo=Math.floor(tMin-1),hi=Math.ceil(tMax+1); if(hi-lo<4){hi=lo+4;}
   const X=i=>x0+(x1-x0)*(rows.length===1?0.5:i/(rows.length-1));
@@ -414,16 +436,21 @@ function drawCurve(rows,tMin,tMax){
     const lab=new Date(r.timestamp).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit"});
     ctx.textAlign=isLast?"right":"center";ctx.fillText(lab,isLast?x1:X(i),y1+6);});
   ctx.textAlign="center";
-  const grad=ctx.createLinearGradient(0,y0,0,y1);
-  for(let s=0;s<=6;s++){const t=hi-(hi-lo)*s/6;grad.addColorStop(s/6,rgb(thermal(t)));}
   ctx.beginPath();ctx.moveTo(X(0),Y(rows[0].temperature));
   rows.forEach((r,i)=>ctx.lineTo(X(i),Y(r.temperature)));
   ctx.lineTo(X(rows.length-1),y1);ctx.lineTo(X(0),y1);ctx.closePath();
   const fillG=ctx.createLinearGradient(0,y0,0,y1);
   fillG.addColorStop(0,rgba(thermal(hi),.20));fillG.addColorStop(1,rgba(thermal(lo),.03));
   ctx.fillStyle=fillG;ctx.fill();
-  ctx.lineJoin="round";ctx.lineCap="round";ctx.lineWidth=2.6;ctx.strokeStyle=grad;
-  ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r.temperature);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  // Linie segmentweise: gemessen durchgezogen, Vorhersage gestrichelt; Farbe thermisch je Segment
+  ctx.lineJoin="round";ctx.lineCap="round";ctx.lineWidth=2.6;
+  for(let i=1;i<rows.length;i++){
+    const fc=rows[i]._fc||rows[i-1]._fc;
+    ctx.setLineDash(fc?[5,4]:[]);
+    ctx.strokeStyle=rgb(thermal((rows[i-1].temperature+rows[i].temperature)/2));
+    ctx.beginPath();ctx.moveTo(X(i-1),Y(rows[i-1].temperature));ctx.lineTo(X(i),Y(rows[i].temperature));ctx.stroke();
+  }
+  ctx.setLineDash([]);
   const lx=X(rows.length-1),ly=Y(rows[rows.length-1].temperature);const cc=thermal(rows[rows.length-1].temperature);
   ctx.beginPath();ctx.arc(lx,ly,8,0,7);ctx.fillStyle=rgba(cc,.18);ctx.fill();
   ctx.beginPath();ctx.arc(lx,ly,4,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#ffffff";ctx.stroke();
@@ -452,8 +479,12 @@ function DEMO(){
     [30.1,"partly-cloudy-day"],[33.0,"clear-day"],[35.8,"clear-day"],[37.3,"clear-day"],[38.4,"clear-day"],[38.5,"clear-day"]];
   const hums=[61,53,49,39,34,29,28,28,26,26,28,34,44,57,67,65,68,73,78,70,83,82,74,69,55,49,43,32,28,23,22];
   const now=new Date(); const top=new Date(now); top.setMinutes(0,0,0);
-  return seq.map((s,i)=>{const d=new Date(top.getTime()-(seq.length-1-i)*3600e3);
-    return {timestamp:d.toISOString(),temperature:s[0],icon:s[1],relative_humidity:hums[i],wind_speed:[8,11,14][i%3]+6,wind_direction:[135,110,160][i%3]};});
+  const n=seq.length;
+  return seq.map((s,i)=>{const d=new Date(top.getTime()-(n-1-i)*3600e3);
+    const fc = (i>=n-6 && i<n-1);        // vorletzte ~5 Std = Vorhersage (gestrichelt)
+    const live = (i===n-1);              // letzter Punkt = Live (durchgezogen, "jetzt")
+    return {timestamp:d.toISOString(),temperature:s[0],icon:s[1],relative_humidity:hums[i],
+            wind_speed:[8,11,14][i%3]+6,wind_direction:[135,110,160][i%3],_fc:fc,_live:live};});
 }
 
 load();
