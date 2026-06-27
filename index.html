@@ -178,7 +178,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.7</span>
+      <span class="ver">v1.8</span>
     </div>
   </header>
 
@@ -483,14 +483,14 @@ function sunArc(d){const W=360,H=86,cx0=22,cx1=W-22,cy=H-12,rx=(cx1-cx0)/2,ry=52
   let frac=haveSun?(uNow-rU)/(sU-rU):0.5;frac=Math.max(0,Math.min(1,frac));
   const ang=Math.PI*(1-frac),sx=mx+Math.cos(ang)*rx,sy=cy-Math.sin(ang)*ry;
   let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="sa" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7b733" stop-opacity=".5"/><stop offset="1" stop-color="#f7b733"/></linearGradient></defs>`;
-  s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${cx1} ${cy}" fill="none" stroke="#e7ecf3" stroke-width="2.5" stroke-dasharray="1.5 5.5"/>`;
-  s+=`<line x1="${cx0-2}" y1="${cy}" x2="${cx1+2}" y2="${cy}" stroke="#edf1f6" stroke-width="2"/>`;
+  s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${cx1} ${cy}" fill="none" stroke="#c4cdd9" stroke-width="2.5"/>`;
+  s+=`<line x1="${cx0-2}" y1="${cy}" x2="${cx1+2}" y2="${cy}" stroke="#dde3ea" stroke-width="2"/>`;
   if(isDay){
-    s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${sx.toFixed(1)} ${sy.toFixed(1)}" fill="none" stroke="url(#sa)" stroke-width="3.2"/>`;
+    s+=`<path d="M ${cx0} ${cy} A ${rx} ${ry} 0 0 1 ${sx.toFixed(1)} ${sy.toFixed(1)}" fill="none" stroke="url(#sa)" stroke-width="3.4"/>`;
     s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="11" fill="#f7b733" opacity=".2"/><circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5" fill="#f7b733"/>`;
   }else if(haveSun){
     const ex=uNow<rU?cx0:cx1;
-    s+=`<circle cx="${ex}" cy="${cy+6}" r="5" fill="#c9b888" opacity=".5"/>`;
+    s+=`<circle cx="${ex}" cy="${cy+6}" r="5" fill="#c2a85e" opacity=".6"/>`;
   }
   return s+`</svg>`;}
 
