@@ -398,7 +398,9 @@ function renderTiles(s,d){
   const windSub=`${compass(s.dir)} ${s.dir!=null?"aus "+dirName(s.dir):""}${s.gust!=null?" · Böen "+Math.round(s.gust):""}`;
   const pTrend=d.press3!=null&&s.press!=null?(s.press-d.press3):null;
   const pArrow=pTrend==null?"":(pTrend>0.6?"↗ steigend":pTrend<-0.6?"↘ fallend":"→ gleichbleibend");
-  const pSub=pTrend!=null?`${pArrow} · ${pTrend>0?"+":""}${pTrend.toFixed(0)} hPa / 3 h`:"—";
+  const pr=pTrend!=null?Math.round(pTrend):null;
+  const pNum=pr==null?"":(pr>0?"+"+pr:pr<0?String(pr):"±0");
+  const pSub=pTrend!=null?`${pArrow} · ${pNum} hPa / 3 h`:"—";
   const dewSub=s.dew==null?"":(s.dew<10?"angenehm trocken":s.dew<16?"behaglich":s.dew<19?"leicht schwül":"schwül");
   const cloudSub=s.cloud==null?"":(s.cloud<15?"klar":s.cloud<50?"aufgelockert":s.cloud<85?"stark bewölkt":"bedeckt");
   const visSub=s.vis==null?"":(s.vis>=30000?"sehr klar":s.vis>=10000?"klar":s.vis>=4000?"diesig":"Nebel");
