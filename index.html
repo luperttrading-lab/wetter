@@ -95,11 +95,17 @@
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
   .chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
-  .chart-row{display:flex;align-items:stretch}
+  .chart-row{display:flex;align-items:stretch;position:relative}
   #chartAxis{width:32px;height:172px;flex:0 0 32px;display:block}
   .chart-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x}
   .chart-scroll::-webkit-scrollbar{height:0}
   #chart{height:172px;display:block}
+  .chart-cursor{position:absolute;top:0;bottom:0;left:calc(50% + 16px);transform:translateX(-50%);width:0;pointer-events:none;z-index:3}
+  .cc-line{position:absolute;top:24px;bottom:30px;left:0;width:1.5px;transform:translateX(-50%);background:rgba(23,32,46,.5);border-radius:1px}
+  .cc-val{position:absolute;top:0;left:0;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.12)}
+  .cc-time{position:absolute;bottom:2px;left:0;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#5c6b80;font-variant-numeric:tabular-nums;padding:1px 6px;border-radius:7px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.1)}
+  .cc-time.fc{font-style:italic;color:#8a93a3}
+  .cc-dot{position:absolute;left:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(15,23,42,.1)}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-s)}
@@ -184,7 +190,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.17</span>
+      <span class="ver">v1.18</span>
     </div>
   </header>
 
@@ -213,7 +219,7 @@
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div class="sect">Verlauf</div>
     <div class="strip-card"><div class="strip" id="strip"></div></div>
-    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div></div></div>
+    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -324,7 +330,7 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false;
+let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, chartGeom=null, _cursorRAF=0;
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
@@ -460,19 +466,20 @@ function drawChart(rows){
   const dpr=Math.min(window.devicePixelRatio||1,3),H=cv.clientHeight||172;
   const T=r=>new Date(r.timestamp).getTime();
   const tMin=T(rows[0]),tMax=T(rows[rows.length-1]),totalH=Math.max(1,(tMax-tMin)/3600e3),pxPerH=viewW/CHART_VIEW_H;
-  const padL=6,padR=12,padT=12,padB=22;
-  const W=Math.max(viewW,Math.round(padL+padR+pxPerH*totalH));
+  const padT=12,padB=22,lead=Math.round(viewW/2);
+  const W=lead*2+Math.round(pxPerH*totalH);
   cv.style.width=W+"px";cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
-  const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
+  const x0=lead,x1=W-lead,y0=padT,y1=H-padB;
   const temps=rows.map(r=>r.temperature);
   let lo=Math.floor(Math.min(...temps))-1,hi=Math.ceil(Math.max(...temps))+1;if(hi-lo<5)hi=lo+5;
   const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
+  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows};
   // Prognose-Bereich (rechts von jetzt) leicht getönt
   if(nowMs<tMax&&nowMs>tMin){const nx=X(nowMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
   // Nacht-Schattierung
   for(let i=0;i<rows.length;i++){if(isNight(rows[i].timestamp)){const a=i>0?(T(rows[i-1])+T(rows[i]))/2:T(rows[i])-1800e3,b=i<rows.length-1?(T(rows[i])+T(rows[i+1]))/2:T(rows[i])+1800e3;ctx.fillStyle="rgba(40,52,74,.05)";ctx.fillRect(X(a),y0,X(b)-X(a),y1-y0);}}
   // horizontale Gridlines (Labels auf der fixen Achse)
-  for(let s=0;s<=4;s++){const y=Y(lo+(hi-lo)*s/4);ctx.strokeStyle="rgba(15,23,42,.07)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();}
+  for(let s=0;s<=4;s++){const y=Y(lo+(hi-lo)*s/4);ctx.strokeStyle="rgba(15,23,42,.07)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(W-4,y);ctx.stroke();}
   // Tagesgrenzen + Tagesnamen
   ctx.font="10px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.fillStyle="#9aa7b8";
   let prevDay=ymd(rows[0].timestamp),dayStartX=X(tMin);
@@ -494,6 +501,20 @@ function drawChart(rows){
     if(obs){const lx=X(T(obs)),ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#fff";ctx.stroke();}}
   drawAxis(lo,hi,H,padT,padB);
   if(!chartInit){const nx=(nowMs>=tMin&&nowMs<=tMax)?X(nowMs):W/2;host.scrollLeft=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
+  requestAnimationFrame(updateCursor);
+}
+function updateCursor(){
+  const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;
+  const host=el("chartScroll"),max=g.W-g.viewW,frac=max>0?Math.max(0,Math.min(1,host.scrollLeft/max)):0;
+  const ct=g.tMin+frac*(g.tMax-g.tMin),rows=g.rows,TS=r=>new Date(r.timestamp).getTime();
+  let temp=rows[0].temperature;
+  for(let i=1;i<rows.length;i++){const t0=TS(rows[i-1]),t1=TS(rows[i]);if(ct>=t0&&ct<=t1){const f=t1>t0?(ct-t0)/(t1-t0):0;temp=rows[i-1].temperature+(rows[i].temperature-rows[i-1].temperature)*f;break;}if(i===rows.length-1)temp=rows[i].temperature;}
+  const vEl=el("ccVal"),tEl=el("ccTime"),dEl=el("ccDot");if(!vEl)return;
+  vEl.textContent=fmt1(temp)+"°";vEl.style.color=rgb(thermal(temp));
+  const d=new Date(ct),fut=ct>Date.now();
+  tEl.textContent=d.toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short"})+" "+d.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+(fut?" · Prog.":"");
+  tEl.classList.toggle("fc",fut);
+  const y=g.y1-(g.y1-g.y0)*((temp-g.lo)/(g.hi-g.lo));dEl.style.top=y+"px";dEl.style.background=rgb(thermal(temp));
 }
 function drawAxis(lo,hi,H,padT,padB){
   const dpr=Math.min(window.devicePixelRatio||1,3),W=cax.clientWidth||32;
@@ -503,6 +524,7 @@ function drawAxis(lo,hi,H,padT,padB){
   for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=y1-(y1-y0)*((t-lo)/(hi-lo));axx.fillText(Math.round(t)+"°",W-3,y);}
 }
 let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(chartRows&&chartRows.length>1)drawChart(chartRows);else if(lastRows)drawChart(lastRows);if(lastUVH)drawUV(lastUVH);},150);});
+el("chartScroll").addEventListener("scroll",()=>{if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});},{passive:true});
 
 function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div><div class="val">${val}${unit?` <small>${unit}</small>`:""}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;}
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
