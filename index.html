@@ -79,9 +79,8 @@
   .sect{font-size:12px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin:22px 6px 9px}
 
   .strip-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);overflow:hidden}
-  .jump-now{position:absolute;top:7px;right:7px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:0 2px 8px rgba(20,30,50,.18);display:none;place-items:center;cursor:pointer;z-index:6;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);color:#48566b;padding:0}
-  .jump-now.show{display:grid}
-  .jump-now svg{width:17px;height:17px;display:block}
+  .jump-now{position:absolute;top:7px;right:7px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:0 2px 8px rgba(20,30,50,.18);display:grid;place-items:center;cursor:pointer;z-index:6;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);padding:0}
+  .jump-now svg{width:18px;height:18px;display:block}
   .strip{display:flex;overflow-x:auto;overflow-y:hidden;padding:0 6px;-webkit-overflow-scrolling:touch;
     -webkit-mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
     mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
@@ -197,7 +196,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.36</span>
+      <span class="ver">v1.37</span>
     </div>
   </header>
 
@@ -878,14 +877,10 @@ function recenterStrip(){const h=el("strip");const nowEl=h.querySelector(".col.n
   s.addEventListener("wheel",()=>{stripUserScrolled=true;},{passive:true});
   s.addEventListener("dblclick",recenterStrip);
   s.addEventListener("scroll",()=>{if(!_sjRAF)_sjRAF=requestAnimationFrame(()=>{_sjRAF=0;updateStripJump();});},{passive:true});})();
-const REFRESH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>';
+const REFRESH='<svg viewBox="0 0 32 32" fill="none"><path d="M6.91 10.75 A10.5 10.5 0 0 1 26.14 18.72" stroke="#4DA8E0" stroke-width="4"/><path d="M25.36 20.77 L29.98 19.23 L22.48 17.5 Z" fill="#4DA8E0"/><path d="M25.09 21.25 A10.5 10.5 0 0 1 5.86 13.28" stroke="#D43E2A" stroke-width="4"/><path d="M6.64 11.23 L2.02 12.77 L9.52 14.5 Z" fill="#D43E2A"/></svg>';
 let _sjRAF=0;
-function updateChartJump(){const g=chartGeom,btn=el("chartJump");if(!btn)return;if(!g||g.nowX==null){btn.classList.remove("show");return;}
-  const mx=Math.max(0,g.W-g.viewW),nowC=Math.max(0,Math.min(mx,g.nowX-g.viewW/2));
-  btn.classList.toggle("show",Math.abs(chartScrollX-nowC)>6);}
-function updateStripJump(){const h=el("strip"),btn=el("stripJump");if(!btn)return;const nowEl=h.querySelector(".col.now");if(!nowEl){btn.classList.remove("show");return;}
-  const mx=h.scrollWidth-h.clientWidth,nowC=Math.max(0,Math.min(mx,nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2));
-  btn.classList.toggle("show",Math.abs(h.scrollLeft-nowC)>6);}
+function updateChartJump(){}
+function updateStripJump(){}
 el("chartJump").innerHTML=REFRESH;el("stripJump").innerHTML=REFRESH;
 el("chartJump").addEventListener("click",recenterChart);
 el("stripJump").addEventListener("click",recenterStrip);
