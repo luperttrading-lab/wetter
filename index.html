@@ -95,7 +95,11 @@
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
   .chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
-  .chart-card canvas{width:100%;height:172px;display:block}
+  .chart-row{display:flex;align-items:stretch}
+  #chartAxis{width:32px;height:172px;flex:0 0 32px;display:block}
+  .chart-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+  .chart-scroll::-webkit-scrollbar{height:0}
+  #chart{height:172px;display:block}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-s)}
@@ -180,7 +184,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.14</span>
+      <span class="ver">v1.15</span>
     </div>
   </header>
 
@@ -209,7 +213,7 @@
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div class="sect">Verlauf</div>
     <div class="strip-card"><div class="strip" id="strip"></div></div>
-    <div class="chart-card"><canvas id="chart"></canvas></div>
+    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -228,7 +232,7 @@
 
 <script>
 "use strict";
-const LAT=50.6034, LON=8.6516, WINDOW_HOURS=72;
+const LAT=50.6034, LON=8.6516, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48, CHART_VIEW_H=48;
 const OLD_MIN=90;
 
 /* ---------- thermische Skala (nur Zahl/Akzent) ---------- */
@@ -320,24 +324,25 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false;
+let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false;
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
 async function load(){
   showState("loading");el("refresh").classList.add("spin");
   try{
-    const now=new Date(), from=new Date(now-74*3600e3), to=new Date(now.getTime()+24*3600e3);
+    const now=new Date(), from=new Date(now-(CHART_PAST_H+2)*3600e3), to=new Date(now.getTime()+CHART_FUT_H*3600e3);
     const url=`https://api.brightsky.dev/weather?lat=${LAT}&lon=${LON}&date=${isoDate(from)}&last_date=${isoDate(to)}&tz=Europe/Berlin`;
     const r=await fetch(url,{headers:{Accept:"application/json"}});
     if(!r.ok)throw new Error("HTTP "+r.status);
     const j=await r.json(), srcs=j.sources||[];
     const fcIds=new Set(srcs.filter(s=>(s.observation_type||"").toLowerCase()==="forecast").map(s=>s.id));
     const obsSrc=srcs.find(s=>(s.observation_type||"").toLowerCase()!=="forecast")||srcs[0]||{};
-    const all=(j.weather||[]).filter(w=>w.temperature!=null&&new Date(w.timestamp)<=now)
+    const sorted=(j.weather||[]).filter(w=>w.temperature!=null)
       .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)).map(w=>({...w,_fc:fcIds.has(w.source_id)}));
+    const all=sorted.filter(w=>new Date(w.timestamp)<=now);
     if(!all.length)throw new Error("Keine Messwerte im Zeitfenster.");
-    isDemo=false; fullRows=all;
+    isDemo=false; fullRows=all; chartRows=sorted; chartInit=false;
     render(all.slice(-WINDOW_HOURS),all,obsSrc,false);
     tryCurrent(obsSrc);
     loadExtras();
@@ -356,6 +361,7 @@ async function tryCurrent(obsSrc){
       wind_speed:(w.wind_speed_10!=null?w.wind_speed_10:w.wind_speed),wind_direction:(w.wind_direction_10!=null?w.wind_direction_10:w.wind_direction),
       pressure_msl:w.pressure_msl,dew_point:w.dew_point,cloud_cover:w.cloud_cover,visibility:w.visibility,wind_gust_speed:w.wind_gust_speed_10!=null?w.wind_gust_speed_10:w.wind_gust_speed,_fc:false,_live:true};
     fullRows=fullRows.concat([pt]);
+    chartRows=(chartRows||fullRows).concat([pt]).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
     render(fullRows.slice(-WINDOW_HOURS),fullRows,obsSrc,false);
   }catch(e){}
 }
@@ -392,7 +398,7 @@ function render(rows,all,src,demo){
   setHaze(snap.temp);
   paintHero(snap,demo,today,der);
   renderStrip(rows);
-  drawChart(rows);
+  drawChart(chartRows&&chartRows.length>1?chartRows:rows);
   renderTiles(snap,der);
 }
 
@@ -443,38 +449,56 @@ function renderStrip(rows){
   requestAnimationFrame(()=>{h.scrollLeft=h.scrollWidth;});
 }
 
-const cv=el("chart"), ctx=cv.getContext("2d");
+const cv=el("chart"), ctx=cv.getContext("2d"), cax=el("chartAxis"), axx=cax.getContext("2d");
 function drawChart(rows){
   if(!rows||rows.length<2)return;
-  const dpr=Math.min(window.devicePixelRatio||1,3), W=cv.clientWidth, H=cv.clientHeight;
-  if(!W||!H)return;
-  cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
-  const padL=30,padR=12,padT=12,padB=22,x0=padL,x1=W-padR,y0=padT,y1=H-padB;
+  const host=el("chartScroll"),viewW=host.clientWidth;if(!viewW)return;
+  const dpr=Math.min(window.devicePixelRatio||1,3),H=cv.clientHeight||172;
+  const T=r=>new Date(r.timestamp).getTime();
+  const tMin=T(rows[0]),tMax=T(rows[rows.length-1]),totalH=Math.max(1,(tMax-tMin)/3600e3),pxPerH=viewW/CHART_VIEW_H;
+  const padL=6,padR=12,padT=12,padB=22;
+  const W=Math.max(viewW,Math.round(padL+padR+pxPerH*totalH));
+  cv.style.width=W+"px";cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   const temps=rows.map(r=>r.temperature);
   let lo=Math.floor(Math.min(...temps))-1,hi=Math.ceil(Math.max(...temps))+1;if(hi-lo<5)hi=lo+5;
-  const X=i=>x0+(x1-x0)*(i/(rows.length-1)), Y=t=>y1-(y1-y0)*((t-lo)/(hi-lo));
+  const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
+  // Prognose-Bereich (rechts von jetzt) leicht getönt
+  if(nowMs<tMax&&nowMs>tMin){const nx=X(nowMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
   // Nacht-Schattierung
-  for(let i=0;i<rows.length;i++){if(isNight(rows[i].timestamp)){const xa=X(Math.max(0,i-0.5)),xb=X(Math.min(rows.length-1,i+0.5));ctx.fillStyle="rgba(40,52,74,.05)";ctx.fillRect(xa,y0,xb-xa,y1-y0);}}
-  // horizontale Gridlines + Temp-Labels
-  ctx.font="10px -apple-system,system-ui,sans-serif";ctx.textBaseline="middle";
-  for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=Y(t);ctx.strokeStyle="rgba(15,23,42,.07)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.fillStyle="#9aa7b8";ctx.textAlign="right";ctx.fillText(Math.round(t)+"°",x0-5,y);}
+  for(let i=0;i<rows.length;i++){if(isNight(rows[i].timestamp)){const a=i>0?(T(rows[i-1])+T(rows[i]))/2:T(rows[i])-1800e3,b=i<rows.length-1?(T(rows[i])+T(rows[i+1]))/2:T(rows[i])+1800e3;ctx.fillStyle="rgba(40,52,74,.05)";ctx.fillRect(X(a),y0,X(b)-X(a),y1-y0);}}
+  // horizontale Gridlines (Labels auf der fixen Achse)
+  for(let s=0;s<=4;s++){const y=Y(lo+(hi-lo)*s/4);ctx.strokeStyle="rgba(15,23,42,.07)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();}
   // Tagesgrenzen + Tagesnamen
-  ctx.textBaseline="top";ctx.fillStyle="#9aa7b8";let prevDay=ymd(rows[0].timestamp),dayStartX=X(0);
-  for(let i=1;i<rows.length;i++){const day=ymd(rows[i].timestamp);if(day!==prevDay){const x=X(i-0.5);
+  ctx.font="10px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.fillStyle="#9aa7b8";
+  let prevDay=ymd(rows[0].timestamp),dayStartX=X(tMin);
+  for(let i=1;i<rows.length;i++){const day=ymd(rows[i].timestamp);if(day!==prevDay){const x=X((T(rows[i-1])+T(rows[i]))/2);
     ctx.strokeStyle="rgba(15,23,42,.09)";ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();ctx.setLineDash([]);
     const wd=new Date(rows[i-1].timestamp).toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short"});ctx.textAlign="center";if(x-dayStartX>26)ctx.fillText(wd,(dayStartX+x)/2,y1+5);dayStartX=x;prevDay=day;}}
-  {const wd=new Date(rows[rows.length-1].timestamp).toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short"});ctx.textAlign="center";if(X(rows.length-1)-dayStartX>26)ctx.fillText(wd,(dayStartX+X(rows.length-1))/2,y1+5);}
+  {const lastX=X(tMax),wd=new Date(rows[rows.length-1].timestamp).toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short"});ctx.textAlign="center";if(lastX-dayStartX>26)ctx.fillText(wd,(dayStartX+lastX)/2,y1+5);}
   // Fläche
-  ctx.beginPath();ctx.moveTo(X(0),Y(rows[0].temperature));rows.forEach((r,i)=>ctx.lineTo(X(i),Y(r.temperature)));ctx.lineTo(X(rows.length-1),y1);ctx.lineTo(X(0),y1);ctx.closePath();
-  const fg=ctx.createLinearGradient(0,y0,0,y1);fg.addColorStop(0,rgba(thermal(hi),.18));fg.addColorStop(1,rgba(thermal(lo),.02));ctx.fillStyle=fg;ctx.fill();
-  // Linie segmentweise thermisch
+  ctx.beginPath();ctx.moveTo(X(tMin),Y(rows[0].temperature));rows.forEach(r=>ctx.lineTo(X(T(r)),Y(r.temperature)));ctx.lineTo(X(tMax),y1);ctx.lineTo(X(tMin),y1);ctx.closePath();
+  const fg=ctx.createLinearGradient(0,y0,0,y1);fg.addColorStop(0,rgba(thermal(hi),.16));fg.addColorStop(1,rgba(thermal(lo),.02));ctx.fillStyle=fg;ctx.fill();
+  // Linie: beobachtet durchgezogen, Prognose gestrichelt
   ctx.lineJoin="round";ctx.lineCap="round";ctx.lineWidth=2.2;
-  for(let i=1;i<rows.length;i++){const cm=thermal((rows[i-1].temperature+rows[i].temperature)/2);ctx.strokeStyle=rgb(cm);ctx.beginPath();ctx.moveTo(X(i-1),Y(rows[i-1].temperature));ctx.lineTo(X(i),Y(rows[i].temperature));ctx.stroke();}
-  // aktueller Punkt
-  const lx=X(rows.length-1),ly=Y(rows[rows.length-1].temperature),cc=thermal(rows[rows.length-1].temperature);
-  ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#fff";ctx.stroke();
+  for(let i=1;i<rows.length;i++){ctx.setLineDash(T(rows[i])>nowMs?[4,3]:[]);ctx.strokeStyle=rgb(thermal((rows[i-1].temperature+rows[i].temperature)/2));ctx.beginPath();ctx.moveTo(X(T(rows[i-1])),Y(rows[i-1].temperature));ctx.lineTo(X(T(rows[i])),Y(rows[i].temperature));ctx.stroke();}
+  ctx.setLineDash([]);
+  // jetzt-Linie + aktueller Punkt
+  if(nowMs>=tMin&&nowMs<=tMax){const nx=X(nowMs);ctx.strokeStyle="rgba(23,32,46,.35)";ctx.setLineDash([3,3]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(nx,y0);ctx.lineTo(nx,y1);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#5c6b80";ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";ctx.fillText("jetzt",nx,1);
+    let obs=null;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obs=rows[i];break;}}
+    if(obs){const lx=X(T(obs)),ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#fff";ctx.stroke();}}
+  drawAxis(lo,hi,H,padT,padB);
+  if(!chartInit){const nx=(nowMs>=tMin&&nowMs<=tMax)?X(nowMs):W/2;host.scrollLeft=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
 }
-let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(lastRows)drawChart(lastRows);if(lastUVH)drawUV(lastUVH);},150);});
+function drawAxis(lo,hi,H,padT,padB){
+  const dpr=Math.min(window.devicePixelRatio||1,3),W=cax.clientWidth||32;
+  cax.width=W*dpr;cax.height=H*dpr;axx.setTransform(dpr,0,0,dpr,0,0);axx.clearRect(0,0,W,H);
+  const y0=padT,y1=H-padB;
+  axx.font="10px -apple-system,system-ui,sans-serif";axx.textBaseline="middle";axx.textAlign="right";axx.fillStyle="#9aa7b8";
+  for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=y1-(y1-y0)*((t-lo)/(hi-lo));axx.fillText(Math.round(t)+"°",W-3,y);}
+}
+let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(chartRows&&chartRows.length>1)drawChart(chartRows);else if(lastRows)drawChart(lastRows);if(lastUVH)drawUV(lastUVH);},150);});
 
 function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div><div class="val">${val}${unit?` <small>${unit}</small>`:""}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;}
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
@@ -549,19 +573,19 @@ function renderTiles(s,d){
 
 /* ---------- Demo (realer Hitze-Snapshot mit allen Feldern) ---------- */
 function DEMO(){
-  const now=new Date(),top=new Date(now);top.setMinutes(0,0,0);const N=72,out=[];
-  for(let i=0;i<N;i++){
-    const d=new Date(top.getTime()-(N-1-i)*3600e3), H=d.getHours()+d.getMinutes()/60;
+  const now=new Date(),top=new Date(now);top.setMinutes(0,0,0);const out=[];
+  for(let i=-CHART_PAST_H;i<=CHART_FUT_H;i++){
+    const d=new Date(top.getTime()+i*3600e3), H=d.getHours()+d.getMinutes()/60, k=i+CHART_PAST_H, future=d.getTime()>now.getTime();
     const temp=Math.round((29.5+9.3*Math.sin(2*Math.PI*(H-9.5)/24))*10)/10;
-    const night=H<5.3||H>21.6, cf=[5,10,35,60,20,10,45][(i*3+Math.floor(i/5))%7];
+    const night=H<5.3||H>21.6, cf=[5,10,35,60,20,10,45][(k*3+Math.floor(k/5))%7];
     const ic=night?(cf>55?"cloudy":cf>22?"partly-cloudy-night":"clear-night"):(cf>55?"cloudy":cf>22?"partly-cloudy-day":"clear-day");
     const rh=Math.max(22,Math.min(86,Math.round(96-temp*1.75)));
     out.push({timestamp:d.toISOString(),temperature:temp,icon:ic,relative_humidity:rh,
-      wind_speed:[7,10,13,9][i%4]+3,wind_direction:[90,110,135,160][i%4],wind_gust_speed:[15,20,24][i%3]+5,
-      pressure_msl:Math.round((1014+2.2*Math.sin(i/9))*10)/10,dew_point:Math.round((temp-(100-rh)/5)*10)/10,cloud_cover:cf,
-      visibility:[40000,35000,30000][i%3],sunshine:night?0:(ic.includes("clear")?58:ic.includes("partly")?32:0),
+      wind_speed:[7,10,13,9][k%4]+3,wind_direction:[90,110,135,160][k%4],wind_gust_speed:[15,20,24][k%3]+5,
+      pressure_msl:Math.round((1014+2.2*Math.sin(k/9))*10)/10,dew_point:Math.round((temp-(100-rh)/5)*10)/10,cloud_cover:cf,
+      visibility:[40000,35000,30000][k%3],sunshine:night?0:(ic.includes("clear")?58:ic.includes("partly")?32:0),
       solar:(!night&&ic.includes("clear"))?Math.round(0.85*Math.max(0,Math.sin(Math.PI*(H-5.3)/16))*100)/100:0,
-      precipitation:0,_fc:(i>=N-4&&i<N-1),_live:i===N-1});
+      precipitation:0,_fc:future,_live:(i===0)});
   }
   return out;
 }
@@ -744,7 +768,7 @@ function DEMO_EXTRAS(){
 
 el("refresh").onclick=()=>load();
 el("retryBtn").onclick=()=>load();
-el("demoBtn").onclick=()=>{const d=DEMO();fullRows=d;render(d.slice(-WINDOW_HOURS),d,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
+el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
 load();
 </script>
 </body>
