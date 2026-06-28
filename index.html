@@ -197,7 +197,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.45</span>
+      <span class="ver">v1.46</span>
     </div>
   </header>
 
@@ -550,7 +550,7 @@ function animateScrollTo(target){stopAnim();const start=chartScrollX,d=target-st
   _momRAF=requestAnimationFrame(step);}
 function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;if(span<=0)return;
   const ref=g.obsMs||Date.now(),Xref=g.x0+(g.x1-g.x0)*((ref-g.tMin)/(g.tMax-g.tMin));
-  animateScrollTo(Math.max(0,Math.min(span,Math.round(Xref-g.viewW/2))));}
+  animateScrollTo(Math.max(0,Math.min(span,Xref-g.viewW/2)));}
 (function(){const host=el("chartScroll");let sx=0,sy=0,sScroll=0,dir=null,drag=false,tapT=0,vx=0,lastX=0,lastT=0;
   host.addEventListener("touchstart",e=>{const t=e.touches[0];sx=lastX=t.clientX;sy=t.clientY;sScroll=chartScrollX;dir=null;drag=true;vx=0;lastT=performance.now();stopAnim();},{passive:true});
   host.addEventListener("touchmove",e=>{if(!drag)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
