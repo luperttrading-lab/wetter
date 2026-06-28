@@ -194,7 +194,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.30</span>
+      <span class="ver">v1.31</span>
     </div>
   </header>
 
@@ -214,7 +214,7 @@
     </div>
     <div class="feel" id="feelBox">
       <span class="gf">Gefühlt <b id="feelV">–</b></span>
-      <span class="hl">Heute <span class="up" id="hiV">–</span>&nbsp;&nbsp;<span class="dn" id="loV">–</span></span>
+      <span class="hl">Heute bisher <span class="up" id="hiV">–</span>&nbsp;&nbsp;<span class="dn" id="loV">–</span></span>
     </div>
     <div class="heat" id="heat"><span class="ic" id="heatIc"></span><div class="tx" id="heatTx"></div></div>
   </section>
@@ -336,7 +336,7 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0;
+let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, stripUserScrolled=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0;
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
@@ -354,7 +354,7 @@ async function load(){
       .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)).map(w=>({...w,_fc:fcIds.has(w.source_id)}));
     const all=sorted.filter(w=>new Date(w.timestamp)<=now);
     if(!all.length)throw new Error("Keine Messwerte im Zeitfenster.");
-    isDemo=false; fullRows=all; chartRows=sorted; chartInit=false; stripInit=false;
+    isDemo=false; fullRows=all; chartRows=sorted; chartInit=false; stripInit=false; stripUserScrolled=false;
     render(all.slice(-WINDOW_HOURS),all,obsSrc,false);
     tryCurrent(obsSrc);
     loadExtras();
@@ -461,8 +461,7 @@ function renderStrip(rows){
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
-  const doPos=!stripInit;stripInit=true;
-  requestAnimationFrame(()=>{if(!doPos)return;const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));});
+  requestAnimationFrame(()=>{if(stripUserScrolled)return;const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));});
 }
 
 const cv=el("chart"), ctx=cv.getContext("2d"), cax=el("chartAxis"), axx=cax.getContext("2d");
@@ -867,7 +866,8 @@ function DEMO_EXTRAS(){
 
 el("refresh").onclick=()=>load();
 el("retryBtn").onclick=()=>load();
-el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;stripInit=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
+(()=>{const s=el("strip");const mark=()=>{stripUserScrolled=true;};s.addEventListener("pointerdown",mark,{passive:true});s.addEventListener("touchstart",mark,{passive:true});s.addEventListener("wheel",mark,{passive:true});})();
+el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;stripInit=false;stripUserScrolled=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
 load();
 </script>
 </body>
