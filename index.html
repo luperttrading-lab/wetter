@@ -178,7 +178,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.10</span>
+      <span class="ver">v1.11</span>
     </div>
   </header>
 
@@ -648,7 +648,7 @@ function renderAirGrid(air){
     const pkTime=pkI>=0?new Date(h.time[pkI]).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"–";
     let uvN=0;for(let i=0;i<h.time.length-1;i++){const t0=new Date(h.time[i]).getTime(),t1=new Date(h.time[i+1]).getTime();if(nowMs>=t0&&nowMs<t1){uvN=h._real[i]!=null?h._real[i]:0;break;}}
     const [un,ucol]=uvCat(uvN);
-    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index heute</div><div class="uvnow">jetzt <b style="color:${ucol}">${fmt1(uvN)}</b> · <span style="color:${ucol};font-weight:700">${un}</span></div></div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="ln"></i>real (bis jetzt)</span><span><i class="ln max"></i>max. möglich</span></div><div class="uvnote">„real" = max. möglich × gemessene Bewölkung der Station (Schätzung, keine UV-Messung)</div></div>`;
+    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index heute</div><div class="uvnow">jetzt <b style="color:${ucol}">${fmt1(uvN)}</b> · <span style="color:${ucol};font-weight:700">${un}</span></div></div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="ln"></i>real (bis jetzt)</span><span><i class="ln max"></i>max. möglich</span></div><div class="uvnote">grün = ab UV 3 kann der Körper Vitamin D bilden · „real" = max. möglich × gemessene Bewölkung (Schätzung, keine UV-Messung)</div></div>`;
   }
   html+=moonTile(moonInfo(new Date()));
   if(c){
@@ -671,10 +671,13 @@ function drawUV(h){
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const gx0=22,gx1=W-10,gy0=10,gy1=H-16,yMax=Math.max(3,Math.ceil(Math.max(...cs.slice(i0,i1+1))));
   const X=t=>gx0+(gx1-gx0)*((t-tms[i0])/(tms[i1]-tms[i0])),Y=u=>gy1-(gy1-gy0)*(u/yMax);
+  // Vit-D-Schwelle: Schnittpunkte der max-möglich-Kurve mit UV 3
+  const TH=3,cross=[];for(let i=i0;i<i1;i++){const a=cs[i],b=cs[i+1];if(a==null||b==null)continue;if((a<TH)!==(b<TH)){const f=(TH-a)/(b-a);cross.push(tms[i]+f*(tms[i+1]-tms[i]));}}
+  const crossX=cross.map(t=>X(t));
   x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="middle";
-  for(let g=0;g<=yMax;g+=(yMax>6?3:2)){const yy=Y(g);x.strokeStyle="rgba(15,23,42,.06)";x.lineWidth=1;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();x.fillStyle="#9aa7b8";x.textAlign="right";x.fillText(g,gx0-4,yy);}
+  for(let g=0;g<=yMax;g+=(yMax>6?3:2)){if(g===3)continue;const yy=Y(g);x.strokeStyle="rgba(15,23,42,.06)";x.lineWidth=1;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();x.fillStyle="#9aa7b8";x.textAlign="right";x.fillText(g,gx0-4,yy);}
   x.textBaseline="top";x.textAlign="center";
-  for(let i=i0;i<=i1;i++){if(new Date(tms[i]).getHours()%4===0){x.fillStyle="#9aa7b8";x.fillText(new Date(tms[i]).getHours(),X(tms[i]),gy1+4);}}
+  for(let i=i0;i<=i1;i++){if(new Date(tms[i]).getHours()%4===0){const xx=X(tms[i]);if(crossX.some(cxp=>Math.abs(xx-cxp)<17))continue;x.fillStyle="#9aa7b8";x.fillText(new Date(tms[i]).getHours(),xx,gy1+4);}}
   // max. möglich = blasse Referenz (ganzer Tag)
   x.lineJoin="round";x.lineCap="round";x.lineWidth=1.6;x.strokeStyle="rgba(150,160,176,.55)";
   x.beginPath();x.moveTo(X(tms[i0]),Y(cs[i0]));for(let i=i0;i<=i1;i++)x.lineTo(X(tms[i]),Y(cs[i]));x.stroke();
@@ -693,6 +696,16 @@ function drawUV(h){
     let uvNow=0;for(let i=i0;i<i1;i++){if(now>=tms[i]&&now<tms[i+1]){uvNow=(real[i]!=null)?real[i]:0;break;}}
     const yn=Y(uvNow);x.beginPath();x.arc(xn,yn,4.5,0,7);x.fillStyle=uvCat(uvNow)[1];x.fill();x.lineWidth=1.6;x.strokeStyle="#fff";x.stroke();
     x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign=xn>gx1-30?"right":"left";x.fillText("jetzt",xn+(xn>gx1-30?-3:3),gy0+9);}
+  // Vit-D-Schwelle (UV 3) grün + Schnittzeiten
+  const gC="#3f9b6e",y3=Y(3);
+  x.setLineDash([4,3]);x.lineWidth=1.6;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
+  x.fillStyle=gC;x.font="700 9px -apple-system,system-ui,sans-serif";x.textBaseline="middle";x.textAlign="right";x.fillText("3",gx0-4,y3);
+  x.textBaseline="bottom";x.fillText("Vit-D",gx1,y3-3);
+  cross.forEach(t=>{const cxp=X(t);
+    x.setLineDash([2,2]);x.lineWidth=1;x.strokeStyle="rgba(63,155,110,.55)";x.beginPath();x.moveTo(cxp,y3);x.lineTo(cxp,gy1);x.stroke();x.setLineDash([]);
+    x.beginPath();x.arc(cxp,y3,3.5,0,7);x.fillStyle=gC;x.fill();x.lineWidth=1.4;x.strokeStyle="#fff";x.stroke();
+    x.fillStyle=gC;x.font="700 9px -apple-system,system-ui,sans-serif";x.textBaseline="top";x.textAlign="center";
+    x.fillText(new Date(t).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}),cxp,gy1+4);});
 }
 
 /* --- Lader (parallel, fehlertolerant) --- */
