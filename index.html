@@ -78,7 +78,12 @@
 
   .sect{font-size:12px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin:22px 6px 9px}
 
-  .strip-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);overflow:hidden}
+  .strip-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);overflow:hidden}
+  .jump-now{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);border:1px solid var(--line);box-shadow:0 2px 8px rgba(20,30,50,.16);display:none;place-items:center;cursor:pointer;z-index:6;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);color:#48566b;padding:0}
+  .jump-now.show{display:grid}
+  .jump-now.left{left:7px}
+  .jump-now.right{right:7px}
+  .jump-now svg{width:18px;height:18px;display:block}
   .strip{display:flex;overflow-x:auto;overflow-y:hidden;padding:0 6px;-webkit-overflow-scrolling:touch;
     -webkit-mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
     mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
@@ -94,7 +99,7 @@
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
-  .chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
+  .chart-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
   .chart-row{display:flex;align-items:stretch;position:relative}
   #chartAxis{width:32px;height:172px;flex:0 0 32px;display:block}
   .chart-scroll{flex:1;overflow:hidden;position:relative;touch-action:pan-y}
@@ -194,7 +199,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.33</span>
+      <span class="ver">v1.35</span>
     </div>
   </header>
 
@@ -221,8 +226,8 @@
 
   <div id="content">
     <div class="sect">Verlauf</div>
-    <div class="strip-card"><div class="strip" id="strip"></div></div>
-    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div></div>
+    <div class="strip-card"><div class="strip" id="strip"></div><button class="jump-now" id="stripJump" aria-label="Zurück zu jetzt"></button></div>
+    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div><button class="jump-now" id="chartJump" aria-label="Zurück zu jetzt"></button></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
@@ -461,7 +466,7 @@ function renderStrip(rows){
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
-  requestAnimationFrame(()=>{if(stripUserScrolled)return;const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));});
+  requestAnimationFrame(()=>{if(!stripUserScrolled){const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));}if(typeof updateStripJump==="function")updateStripJump();});
 }
 
 const cv=el("chart"), ctx=cv.getContext("2d"), cax=el("chartAxis"), axx=cax.getContext("2d");
@@ -479,7 +484,8 @@ function drawChart(rows){
   let lo=Math.floor(Math.min(...temps))-1,hi=Math.ceil(Math.max(...temps))+1;if(hi-lo<5)hi=lo+5;
   const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
   let obsMs=tMin;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obsMs=T(rows[i]);break;}}
-  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows,obsMs};
+  const nowX=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):null;
+  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows,obsMs,nowX};
   // Prognose-Bereich (rechts vom letzten Messwert) leicht getönt
   if(obsMs<tMax&&obsMs>tMin){const nx=X(obsMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
   // Nacht-Schattierung
@@ -509,7 +515,7 @@ function drawChart(rows){
   if(!chartInit){const nx=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):W/2;chartScrollX=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
   else chartScrollX=Math.max(0,Math.min(W-viewW,chartScrollX));
   cv.style.transform="translateX("+(-chartScrollX)+"px)";
-  requestAnimationFrame(updateCursor);
+  requestAnimationFrame(updateCursor);if(typeof updateChartJump==="function")updateChartJump();
 }
 function updateCursor(){
   const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;
@@ -532,7 +538,7 @@ function drawAxis(lo,hi,H,padT,padB){
   for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=y1-(y1-y0)*((t-lo)/(hi-lo));axx.fillText(Math.round(t)+"°",W-3,y);}
 }
 let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(chartRows&&chartRows.length>1)drawChart(chartRows);else if(lastRows)drawChart(lastRows);if(lastUVH)drawUV(lastUVH);},150);});
-function setScrollX(v){const g=chartGeom;const mx=g?Math.max(0,g.W-g.viewW):0;chartScrollX=Math.max(0,Math.min(mx,v));cv.style.transform="translateX("+(-chartScrollX)+"px)";if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});}
+function setScrollX(v){const g=chartGeom;const mx=g?Math.max(0,g.W-g.viewW):0;chartScrollX=Math.max(0,Math.min(mx,v));cv.style.transform="translateX("+(-chartScrollX)+"px)";if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});updateChartJump();}
 function stopAnim(){if(_momRAF){cancelAnimationFrame(_momRAF);_momRAF=0;}}
 function animateScrollTo(target){stopAnim();const start=chartScrollX,d=target-start,t0=performance.now(),dur=340;
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);setScrollX(start+d*e);_momRAF=k<1?requestAnimationFrame(step):0;};
@@ -806,11 +812,10 @@ function drawUV(h){
   for(let g=0;g<=yMax;g+=(yMax>6?3:2)){if(g===3)continue;const yy=Y(g);x.strokeStyle="rgba(15,23,42,.06)";x.lineWidth=1;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();x.fillStyle="#9aa7b8";x.textAlign="right";x.fillText(g,gx0-4,yy);}
   x.textBaseline="top";x.textAlign="center";
   for(let i=i0;i<=i1;i++){if(new Date(tms[i]).getHours()%4===0){const xx=X(tms[i]);if(crossX.some(cxp=>Math.abs(xx-cxp)<17))continue;x.fillStyle="#9aa7b8";x.fillText(new Date(tms[i]).getHours(),xx,gy1+4);}}
-  // max. möglich = feine vertikale Balken, Farbe = UV-Höhe (BfS-Stil), ganzer Tag
-  const ug=x.createLinearGradient(0,Y(0),0,Y(yMax));for(let u=0;u<=yMax;u+=0.25)ug.addColorStop(Math.min(1,u/yMax),uvFine(u));
+  // max. möglich = feine vertikale Balken, jeder Balken einfarbig in seiner UV-Farbe (Variante B)
   const csAt=t=>{for(let i=i0;i<i1;i++){if(t>=tms[i]&&t<=tms[i+1]){let f=(t-tms[i])/(tms[i+1]-tms[i]);f=(1-Math.cos(f*Math.PI))/2;return cs[i]+(cs[i+1]-cs[i])*f;}}return 0;};
   const step=2.6,bw=2.0;
-  for(let px=gx0;px<gx1;px+=step){const t=tms[i0]+((px-gx0)/(gx1-gx0))*(tms[i1]-tms[i0]);const uv=csAt(t);if(uv<=0.03)continue;const top=Y(uv);x.save();x.beginPath();x.rect(px,top,Math.min(bw,gx1-px),gy1-top);x.clip();x.globalAlpha=.92;x.fillStyle=ug;x.fillRect(0,0,W,H);x.restore();}
+  for(let px=gx0;px<gx1;px+=step){const t=tms[i0]+((px-gx0)/(gx1-gx0))*(tms[i1]-tms[i0]);const uv=csAt(t);if(uv<=0.03)continue;const top=Y(uv);x.globalAlpha=.92;x.fillStyle=uvFine(uv);x.fillRect(px,top,Math.min(bw,gx1-px),gy1-top);}
   x.globalAlpha=1;
   // max-Kurve als feine Konturlinie obendrauf
   x.lineJoin="round";x.lineCap="round";x.lineWidth=1.1;x.strokeStyle="rgba(120,130,150,.5)";
@@ -873,7 +878,23 @@ function recenterStrip(){const h=el("strip");const nowEl=h.querySelector(".col.n
   s.addEventListener("touchmove",e=>{const t=e.touches[0];if(Math.abs(t.clientX-tx)>8||Math.abs(t.clientY-ty)>8)moved=true;},{passive:true});
   s.addEventListener("touchend",()=>{if(moved)return;const n=Date.now();if(n-tapT<320){tapT=0;recenterStrip();}else tapT=n;},{passive:true});
   s.addEventListener("wheel",()=>{stripUserScrolled=true;},{passive:true});
-  s.addEventListener("dblclick",recenterStrip);})();
+  s.addEventListener("dblclick",recenterStrip);
+  s.addEventListener("scroll",()=>{if(!_sjRAF)_sjRAF=requestAnimationFrame(()=>{_sjRAF=0;updateStripJump();});},{passive:true});})();
+const ARR_R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+const ARR_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>';
+let _sjRAF=0;
+function updateChartJump(){const g=chartGeom,btn=el("chartJump");if(!btn)return;if(!g||g.nowX==null){btn.classList.remove("show");return;}
+  const L=chartScrollX,R=chartScrollX+g.viewW,m=22;
+  if(g.nowX<L+m){btn.className="jump-now right show";btn.innerHTML=ARR_L;}
+  else if(g.nowX>R-m){btn.className="jump-now left show";btn.innerHTML=ARR_R;}
+  else btn.classList.remove("show");}
+function updateStripJump(){const h=el("strip"),btn=el("stripJump");if(!btn)return;const nowEl=h.querySelector(".col.now");if(!nowEl){btn.classList.remove("show");return;}
+  const c=nowEl.offsetLeft+nowEl.offsetWidth/2,L=h.scrollLeft,R=h.scrollLeft+h.clientWidth,m=18;
+  if(c<L+m){btn.className="jump-now right show";btn.innerHTML=ARR_L;}
+  else if(c>R-m){btn.className="jump-now left show";btn.innerHTML=ARR_R;}
+  else btn.classList.remove("show");}
+el("chartJump").addEventListener("click",recenterChart);
+el("stripJump").addEventListener("click",recenterStrip);
 el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;stripInit=false;stripUserScrolled=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
 load();
 </script>
