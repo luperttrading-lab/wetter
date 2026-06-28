@@ -197,7 +197,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.44</span>
+      <span class="ver">v1.45</span>
     </div>
   </header>
 
@@ -383,6 +383,7 @@ async function tryCurrent(obsSrc){
       pressure_msl:w.pressure_msl,dew_point:w.dew_point,cloud_cover:w.cloud_cover,visibility:w.visibility,wind_gust_speed:w.wind_gust_speed_10!=null?w.wind_gust_speed_10:w.wind_gust_speed,_fc:false,_live:true};
     fullRows=fullRows.concat([pt]);
     chartRows=(chartRows||fullRows).concat([pt]).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+    chartInit=false;  // Live-Messpunkt kam erst nach der ersten Zentrierung -> erneut auf jetzt ausrichten
     render(fullRows.slice(-WINDOW_HOURS),fullRows,obsSrc,false);
   }catch(e){}
 }
@@ -489,7 +490,7 @@ function drawChart(rows){
   const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
   let obsMs=tMin;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obsMs=T(rows[i]);break;}}
   const nowX=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):null;
-  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows,obsMs,nowX};
+  chartGeom={tMin,tMax,lo,hi,W,viewW,x0,x1,y0,y1,rows,obsMs,nowX};
   // Prognose-Bereich (rechts vom letzten Messwert) leicht getönt
   if(obsMs<tMax&&obsMs>tMin){const nx=X(obsMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
   // Nacht-Schattierung
@@ -523,8 +524,8 @@ function drawChart(rows){
 }
 function updateCursor(){
   const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;
-  const max=g.W-g.viewW,frac=max>0?Math.max(0,Math.min(1,chartScrollX/max)):0;
-  const ct=g.tMin+frac*(g.tMax-g.tMin),rows=g.rows,TS=r=>new Date(r.timestamp).getTime();
+  const px=chartScrollX+g.viewW/2;  // Canvas-Pixel unter dem fixen Cursor (Bildschirmmitte)
+  const ct=g.tMin+(g.tMax-g.tMin)*((px-g.x0)/(g.x1-g.x0)),rows=g.rows,TS=r=>new Date(r.timestamp).getTime();
   let temp=rows[0].temperature;
   for(let i=1;i<rows.length;i++){const t0=TS(rows[i-1]),t1=TS(rows[i]);if(ct>=t0&&ct<=t1){const f=t1>t0?(ct-t0)/(t1-t0):0;temp=rows[i-1].temperature+(rows[i].temperature-rows[i-1].temperature)*f;break;}if(i===rows.length-1)temp=rows[i].temperature;}
   const vEl=el("ccVal"),tEl=el("ccTime"),dEl=el("ccDot");if(!vEl)return;
@@ -548,7 +549,8 @@ function animateScrollTo(target){stopAnim();const start=chartScrollX,d=target-st
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);setScrollX(start+d*e);_momRAF=k<1?requestAnimationFrame(step):0;};
   _momRAF=requestAnimationFrame(step);}
 function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;if(span<=0)return;
-  const ref=g.obsMs||Date.now(),frac=(ref>=g.tMin&&ref<=g.tMax)?(ref-g.tMin)/(g.tMax-g.tMin):0.5;animateScrollTo(Math.round(frac*span));}
+  const ref=g.obsMs||Date.now(),Xref=g.x0+(g.x1-g.x0)*((ref-g.tMin)/(g.tMax-g.tMin));
+  animateScrollTo(Math.max(0,Math.min(span,Math.round(Xref-g.viewW/2))));}
 (function(){const host=el("chartScroll");let sx=0,sy=0,sScroll=0,dir=null,drag=false,tapT=0,vx=0,lastX=0,lastT=0;
   host.addEventListener("touchstart",e=>{const t=e.touches[0];sx=lastX=t.clientX;sy=t.clientY;sScroll=chartScrollX;dir=null;drag=true;vx=0;lastT=performance.now();stopAnim();},{passive:true});
   host.addEventListener("touchmove",e=>{if(!drag)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
