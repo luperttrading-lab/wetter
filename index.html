@@ -79,8 +79,9 @@
   .sect{font-size:12px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin:22px 6px 9px}
 
   .strip-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);overflow:hidden}
-  .sect-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 6px 9px}
+  .sect-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 6px 11px}
   .sect-row .sect{margin:0}
+  .sect-row .act-btn{margin:-10px 0}
   .strip{display:flex;overflow-x:auto;overflow-y:hidden;padding:0 6px;-webkit-overflow-scrolling:touch;
     -webkit-mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
     mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
@@ -96,7 +97,7 @@
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
-  .chart-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
+  .chart-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px}
   .chart-row{display:flex;align-items:stretch;position:relative}
   #chartAxis{width:32px;height:172px;flex:0 0 32px;display:block}
   .chart-scroll{flex:1;overflow:hidden;position:relative;touch-action:pan-y}
@@ -200,7 +201,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="-1 -1 34 34" fill="none"><path d="M6.50 9.35 A11.60 11.60 0 0 1 27.56 14.99" stroke="url(#wbg)" stroke-width="4.4"/><path d="M27.49 17.61 L32.55 14.26 L22.52 15.31 Z" fill="url(#wbg)"/><path d="M25.50 22.65 A11.60 11.60 0 0 1 4.44 17.01" stroke="url(#wrg)" stroke-width="4.4"/><path d="M4.51 14.39 L-0.55 17.74 L9.48 16.69 Z" fill="url(#wrg)"/></svg>
       </div>
-      <span class="ver">v1.40</span>
+      <span class="ver">v1.41</span>
     </div>
   </header>
 
