@@ -165,8 +165,8 @@
   .uvmax b{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
   .uvcard canvas{width:100%;height:104px;display:block;margin-top:6px}
   .uvleg{display:flex;gap:14px;justify-content:center;margin-top:4px;font-size:10.5px;color:var(--muted)}
-  .uvleg i.ln{display:inline-block;width:14px;height:0;border-top:2.8px solid #e07a1f;vertical-align:middle;margin-right:5px;border-radius:2px}
-  .uvleg i.ln.max{border-top:2px solid #aab2c0}
+  .uvleg i.ln{display:inline-block;width:14px;height:0;border-top:2.8px solid #1c2432;vertical-align:middle;margin-right:5px;border-radius:2px}
+  .uvleg i.ln.max{height:9px;border-top:0;border-radius:2px;background:linear-gradient(0deg,#46a13a,#f5d800,#f15a16,#c41f3e)}
   .uvnote{font-size:9.5px;color:var(--faint);text-align:center;margin-top:3px;line-height:1.3}
   .bfscard{padding:13px 14px 9px}
   .bfswrap{margin-top:8px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--line)}
@@ -194,7 +194,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.28</span>
+      <span class="ver">v1.29</span>
     </div>
   </header>
 
@@ -655,6 +655,9 @@ function fetchJSON(u,ms){return Promise.race([fetch(u,{headers:{Accept:"applicat
 const WMO={0:["clear-day","Klar"],1:["clear-day","Meist klar"],2:["partly-cloudy-day","Teils bewölkt"],3:["cloudy","Bewölkt"],45:["fog","Nebel"],48:["fog","Nebel"],51:["rain","Niesel"],53:["rain","Niesel"],55:["rain","Niesel"],56:["sleet","Gefr. Niesel"],57:["sleet","Gefr. Niesel"],61:["rain","Regen"],63:["rain","Regen"],65:["rain","Starkregen"],66:["sleet","Gefr. Regen"],67:["sleet","Gefr. Regen"],71:["snow","Schnee"],73:["snow","Schnee"],75:["snow","Schnee"],77:["snow","Schneegriesel"],80:["rain","Schauer"],81:["rain","Schauer"],82:["rain","Starkschauer"],85:["snow","Schneeschauer"],86:["snow","Schneeschauer"],95:["thunderstorm","Gewitter"],96:["thunderstorm","Gewitter"],99:["thunderstorm","Gewitter"]};
 const wmo=c=>WMO[c]||["cloudy","—"];
 function uvCat(u){if(u==null)return["","#9aa7b8"];if(u<3)return["niedrig","#3a9d5d"];if(u<6)return["mäßig","#c79100"];if(u<8)return["hoch","#e07a1f"];if(u<11)return["sehr hoch","#d23b3b"];return["extrem","#8b3fb0"];}
+function _hx(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+const UVSTOPS=[[0,"#46a13a"],[2,"#84c63c"],[3,"#d4d400"],[4,"#f5d800"],[5,"#f9b105"],[6,"#f7820a"],[7,"#f15a16"],[8,"#df2f1e"],[9,"#c41f3e"],[10,"#a51f6b"],[11,"#7a3fa0"]];
+function uvFine(u){if(u==null)return"#9aa7b8";if(u<=0)return UVSTOPS[0][1];if(u>=11)return UVSTOPS[10][1];for(let i=0;i<UVSTOPS.length-1;i++){if(u>=UVSTOPS[i][0]&&u<=UVSTOPS[i+1][0]){const f=(u-UVSTOPS[i][0])/(UVSTOPS[i+1][0]-UVSTOPS[i][0]),A=_hx(UVSTOPS[i][1]),B=_hx(UVSTOPS[i+1][1]);return`rgb(${Math.round(A[0]+(B[0]-A[0])*f)},${Math.round(A[1]+(B[1]-A[1])*f)},${Math.round(A[2]+(B[2]-A[2])*f)})`;}}return UVSTOPS[10][1];}
 function aqiCat(a){if(a==null)return["","#9aa7b8"];if(a<=20)return["sehr gut","#3a9d5d"];if(a<=40)return["gut","#79b51c"];if(a<=60)return["mäßig","#c79100"];if(a<=80)return["schlecht","#e07a1f"];if(a<=100)return["sehr schlecht","#d23b3b"];return["extrem schlecht","#8b3fb0"];}
 function pollenCat(v){if(v==null||v<1)return["keine","#cbd5e1"];if(v<10)return["niedrig","#79b51c"];if(v<30)return["mäßig","#c79100"];if(v<60)return["hoch","#e07a1f"];return["sehr hoch","#d23b3b"];}
 function cmfUV(cc){if(cc==null)return 1;return Math.max(0.25,1-0.70*Math.pow(cc/100,2));}
@@ -772,7 +775,7 @@ function renderAirGrid(air){
     const pkTime=pkI>=0?new Date(h.time[pkI]).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"–";
     let uvN=0;for(let i=0;i<h.time.length-1;i++){const t0=new Date(h.time[i]).getTime(),t1=new Date(h.time[i+1]).getTime();if(nowMs>=t0&&nowMs<t1){uvN=h._real[i]!=null?h._real[i]:0;break;}}
     const [un,ucol]=uvCat(uvN);
-    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index heute</div><div class="uvnow">jetzt <b style="color:${ucol}">${fmt1(uvN)}</b> · <span style="color:${ucol};font-weight:700">${un}</span></div></div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="ln"></i>real (bis jetzt)</span><span><i class="ln max"></i>max. möglich</span></div><div class="uvnote">grün = ab UV 3 kann der Körper Vitamin D bilden · „real" = max. möglich × gemessene Bewölkung (Schätzung) · amtliche Messung siehe unten</div></div>`;
+    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index heute</div><div class="uvnow">jetzt <b style="color:${ucol}">${fmt1(uvN)}</b> · <span style="color:${ucol};font-weight:700">${un}</span></div></div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="ln"></i>real (bis jetzt)</span><span><i class="ln max"></i>max. möglich</span></div><div class="uvnote">Fläche nach UV-Stärke gefärbt (grün → rot) · ab UV 3 (grüne Linie) = Vitamin-D-Bildung möglich · „real" = max. möglich × gemessene Bewölkung · amtliche Messung siehe unten</div></div>`;
     html+=`<div class="tile wide bfscard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_today.png?ts=${Date.now()}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg (heute)" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none'" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung (kein Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=moonTile(moonInfo(new Date()));
@@ -803,23 +806,24 @@ function drawUV(h){
   for(let g=0;g<=yMax;g+=(yMax>6?3:2)){if(g===3)continue;const yy=Y(g);x.strokeStyle="rgba(15,23,42,.06)";x.lineWidth=1;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();x.fillStyle="#9aa7b8";x.textAlign="right";x.fillText(g,gx0-4,yy);}
   x.textBaseline="top";x.textAlign="center";
   for(let i=i0;i<=i1;i++){if(new Date(tms[i]).getHours()%4===0){const xx=X(tms[i]);if(crossX.some(cxp=>Math.abs(xx-cxp)<17))continue;x.fillStyle="#9aa7b8";x.fillText(new Date(tms[i]).getHours(),xx,gy1+4);}}
-  // max. möglich = blasse Referenz (ganzer Tag)
-  x.lineJoin="round";x.lineCap="round";x.lineWidth=1.6;x.strokeStyle="rgba(150,160,176,.55)";
+  // max. möglich = farbige Fläche (Farbe = UV-Höhe, BfS-Stil), ganzer Tag
+  x.save();
+  x.beginPath();x.moveTo(X(tms[i0]),gy1);for(let i=i0;i<=i1;i++)x.lineTo(X(tms[i]),Y(cs[i]));x.lineTo(X(tms[i1]),gy1);x.closePath();x.clip();
+  const ug=x.createLinearGradient(0,Y(0),0,Y(yMax));for(let u=0;u<=yMax;u+=0.5)ug.addColorStop(Math.min(1,u/yMax),uvFine(u));
+  x.globalAlpha=.85;x.fillStyle=ug;x.fillRect(0,0,W,H);x.restore();
+  // max-Kurve als feine Konturlinie obendrauf
+  x.lineJoin="round";x.lineCap="round";x.lineWidth=1.3;x.strokeStyle="rgba(120,130,150,.6)";
   x.beginPath();x.moveTo(X(tms[i0]),Y(cs[i0]));for(let i=i0;i<=i1;i++)x.lineTo(X(tms[i]),Y(cs[i]));x.stroke();
-  // reale Indizes (bis jetzt)
+  // real (bis jetzt) = dunkle Linie über der Fläche
   const rIdx=[];for(let i=i0;i<=i1;i++)if(real[i]!=null)rIdx.push(i);
   if(rIdx.length>1){
-    // Fläche unter real
-    x.beginPath();x.moveTo(X(tms[rIdx[0]]),Y(real[rIdx[0]]));rIdx.forEach(i=>x.lineTo(X(tms[i]),Y(real[i])));x.lineTo(X(tms[rIdx[rIdx.length-1]]),gy1);x.lineTo(X(tms[rIdx[0]]),gy1);x.closePath();
-    const fg=x.createLinearGradient(0,gy0,0,gy1);fg.addColorStop(0,"rgba(224,122,31,.20)");fg.addColorStop(1,"rgba(224,122,31,.02)");x.fillStyle=fg;x.fill();
-    // reale Linie, fett & UV-farbig
-    x.lineWidth=2.8;
-    for(let k=1;k<rIdx.length;k++){const a=rIdx[k-1],b=rIdx[k];x.strokeStyle=uvCat((real[a]+real[b])/2)[1];x.beginPath();x.moveTo(X(tms[a]),Y(real[a]));x.lineTo(X(tms[b]),Y(real[b]));x.stroke();}
+    x.lineWidth=2.4;x.strokeStyle="rgba(28,36,50,.85)";
+    x.beginPath();x.moveTo(X(tms[rIdx[0]]),Y(real[rIdx[0]]));rIdx.forEach(i=>x.lineTo(X(tms[i]),Y(real[i])));x.stroke();
   }
   // jetzt-Marker + Punkt am Ende der realen Kurve
   const now=Date.now();if(now>=tms[i0]&&now<=tms[i1]){const xn=X(now);x.strokeStyle="rgba(23,32,46,.3)";x.setLineDash([2,2]);x.lineWidth=1;x.beginPath();x.moveTo(xn,gy0);x.lineTo(xn,gy1);x.stroke();x.setLineDash([]);
     let uvNow=0;for(let i=i0;i<i1;i++){if(now>=tms[i]&&now<tms[i+1]){uvNow=(real[i]!=null)?real[i]:0;break;}}
-    const yn=Y(uvNow);x.beginPath();x.arc(xn,yn,4.5,0,7);x.fillStyle=uvCat(uvNow)[1];x.fill();x.lineWidth=1.6;x.strokeStyle="#fff";x.stroke();
+    const yn=Y(uvNow);x.beginPath();x.arc(xn,yn,4.5,0,7);x.fillStyle=uvFine(uvNow);x.fill();x.lineWidth=1.6;x.strokeStyle="#fff";x.stroke();
     x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign=xn>gx1-30?"right":"left";x.fillText("jetzt",xn+(xn>gx1-30?-3:3),gy0+9);}
   // Vit-D-Schwelle (UV 3) grün + Schnittzeiten
   const gC="#3f9b6e",y3=Y(3);
