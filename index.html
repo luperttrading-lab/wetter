@@ -97,9 +97,8 @@
   .chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;margin-top:11px}
   .chart-row{display:flex;align-items:stretch;position:relative}
   #chartAxis{width:32px;height:172px;flex:0 0 32px;display:block}
-  .chart-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
-  .chart-scroll::-webkit-scrollbar{height:0}
-  #chart{height:172px;display:block}
+  .chart-scroll{flex:1;overflow:hidden;position:relative;touch-action:pan-y}
+  #chart{height:172px;display:block;will-change:transform}
   .chart-cursor{position:absolute;top:0;bottom:0;left:calc(50% + 16px);transform:translateX(-50%);width:0;pointer-events:none;z-index:3}
   .cc-line{position:absolute;top:24px;bottom:30px;left:0;width:1.5px;transform:translateX(-50%);background:rgba(23,32,46,.5);border-radius:1px}
   .cc-val{position:absolute;top:0;left:0;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.12)}
@@ -190,7 +189,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.19</span>
+      <span class="ver">v1.21</span>
     </div>
   </header>
 
@@ -242,7 +241,7 @@ const LAT=50.6034, LON=8.6516, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48,
 const OLD_MIN=90;
 
 /* ---------- thermische Skala (nur Zahl/Akzent) ---------- */
-const STOPS=[[-10,31,102,214],[-1,20,136,221],[5,3,156,171],[10,10,150,118],[16,60,150,52],[20,124,140,28],[24,176,128,20],[28,214,108,28],[32,222,80,40],[37,210,52,50],[41,200,40,58]];
+const STOPS=[[-16,48,18,59],[-12,65,69,171],[-8,70,116,236],[-4,50,143,223],[0,22,166,170],[4,26,172,121],[8,64,165,71],[12,101,155,36],[16,133,148,33],[20,169,138,40],[24,204,125,36],[28,235,96,20],[32,217,56,6],[36,177,25,1],[40,122,4,3]];
 function thermal(t){if(t==null||isNaN(t))return[120,132,150];if(t<=STOPS[0][0])return STOPS[0].slice(1);if(t>=STOPS.at(-1)[0])return STOPS.at(-1).slice(1);
   for(let i=0;i<STOPS.length-1;i++){const a=STOPS[i],b=STOPS[i+1];if(t>=a[0]&&t<=b[0]){const f=(t-a[0])/(b[0]-a[0]);return[a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f];}}return STOPS.at(-1).slice(1);}
 const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`,rgba=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
@@ -330,7 +329,7 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, chartGeom=null, _cursorRAF=0;
+let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0;
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
@@ -426,7 +425,7 @@ function paintHero(s,demo,today,d){
   el("temp").innerHTML=fmt1(s.temp)+'<span class="deg">°C</span>';el("temp").style.color=rgb(c);
   el("condIc").innerHTML=icon(s.icon||"cloudy",54);
   el("condLbl").textContent=LABELS[s.icon]||"—";
-  const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";
+  const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
   el("hiV").textContent="↑ "+fmt1(d.hi)+"°";el("loV").textContent="↓ "+fmt1(d.lo)+"°";
 
   // Hitze/Kälte-Hinweis nur bei Schwellen
@@ -500,12 +499,14 @@ function drawChart(rows){
     let obs=null;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obs=rows[i];break;}}
     if(obs){const lx=X(T(obs)),ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#fff";ctx.stroke();}}
   drawAxis(lo,hi,H,padT,padB);
-  if(!chartInit){const nx=(nowMs>=tMin&&nowMs<=tMax)?X(nowMs):W/2;host.scrollLeft=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
+  if(!chartInit){const nx=(nowMs>=tMin&&nowMs<=tMax)?X(nowMs):W/2;chartScrollX=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
+  else chartScrollX=Math.max(0,Math.min(W-viewW,chartScrollX));
+  cv.style.transform="translateX("+(-chartScrollX)+"px)";
   requestAnimationFrame(updateCursor);
 }
 function updateCursor(){
   const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;
-  const host=el("chartScroll"),max=g.W-g.viewW,frac=max>0?Math.max(0,Math.min(1,host.scrollLeft/max)):0;
+  const max=g.W-g.viewW,frac=max>0?Math.max(0,Math.min(1,chartScrollX/max)):0;
   const ct=g.tMin+frac*(g.tMax-g.tMin),rows=g.rows,TS=r=>new Date(r.timestamp).getTime();
   let temp=rows[0].temperature;
   for(let i=1;i<rows.length;i++){const t0=TS(rows[i-1]),t1=TS(rows[i]);if(ct>=t0&&ct<=t1){const f=t1>t0?(ct-t0)/(t1-t0):0;temp=rows[i-1].temperature+(rows[i].temperature-rows[i-1].temperature)*f;break;}if(i===rows.length-1)temp=rows[i].temperature;}
@@ -524,16 +525,29 @@ function drawAxis(lo,hi,H,padT,padB){
   for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=y1-(y1-y0)*((t-lo)/(hi-lo));axx.fillText(Math.round(t)+"°",W-3,y);}
 }
 let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(chartRows&&chartRows.length>1)drawChart(chartRows);else if(lastRows)drawChart(lastRows);if(lastUVH)drawUV(lastUVH);},150);});
-el("chartScroll").addEventListener("scroll",()=>{if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});},{passive:true});
-function recenterChart(){const g=chartGeom;if(!g)return;const host=el("chartScroll"),span=g.W-g.viewW;if(span<=0)return;
-  const nowMs=Date.now(),frac=(nowMs>=g.tMin&&nowMs<=g.tMax)?(nowMs-g.tMin)/(g.tMax-g.tMin):0.5;
-  const target=Math.max(0,Math.min(span,Math.round(frac*span)));
-  if(host.scrollTo)host.scrollTo({left:target,behavior:"smooth"});else host.scrollLeft=target;}
-(function(){const host=el("chartScroll");let tT=0,tX=0,tY=0,moved=false;
-  host.addEventListener("touchstart",e=>{const t=e.touches[0];tX=t.clientX;tY=t.clientY;moved=false;},{passive:true});
-  host.addEventListener("touchmove",e=>{const t=e.touches[0];if(Math.abs(t.clientX-tX)>8||Math.abs(t.clientY-tY)>8)moved=true;},{passive:true});
-  host.addEventListener("touchend",()=>{if(moved)return;const n=Date.now();if(n-tT<320){tT=0;recenterChart();}else tT=n;},{passive:true});
-  host.addEventListener("dblclick",recenterChart);})();
+function setScrollX(v){const g=chartGeom;const mx=g?Math.max(0,g.W-g.viewW):0;chartScrollX=Math.max(0,Math.min(mx,v));cv.style.transform="translateX("+(-chartScrollX)+"px)";if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});}
+function stopAnim(){if(_momRAF){cancelAnimationFrame(_momRAF);_momRAF=0;}}
+function animateScrollTo(target){stopAnim();const start=chartScrollX,d=target-start,t0=performance.now(),dur=340;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);setScrollX(start+d*e);_momRAF=k<1?requestAnimationFrame(step):0;};
+  _momRAF=requestAnimationFrame(step);}
+function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;if(span<=0)return;
+  const nowMs=Date.now(),frac=(nowMs>=g.tMin&&nowMs<=g.tMax)?(nowMs-g.tMin)/(g.tMax-g.tMin):0.5;animateScrollTo(Math.round(frac*span));}
+(function(){const host=el("chartScroll");let sx=0,sy=0,sScroll=0,dir=null,drag=false,tapT=0,vx=0,lastX=0,lastT=0;
+  host.addEventListener("touchstart",e=>{const t=e.touches[0];sx=lastX=t.clientX;sy=t.clientY;sScroll=chartScrollX;dir=null;drag=true;vx=0;lastT=performance.now();stopAnim();},{passive:true});
+  host.addEventListener("touchmove",e=>{if(!drag)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(dir===null&&(Math.abs(dx)>6||Math.abs(dy)>6))dir=Math.abs(dx)>Math.abs(dy)?"x":"y";
+    if(dir==="x"){e.preventDefault();const now=performance.now(),dt=now-lastT;if(dt>0)vx=(t.clientX-lastX)/dt;lastX=t.clientX;lastT=now;setScrollX(sScroll-dx);}
+  },{passive:false});
+  host.addEventListener("touchend",()=>{if(!drag)return;drag=false;
+    if(dir===null){const n=Date.now();if(n-tapT<320){tapT=0;recenterChart();}else tapT=n;}
+    else if(dir==="x"&&Math.abs(vx)>0.06)animateScrollTo(Math.round(chartScrollX-vx*170));
+    dir=null;},{passive:true});
+  host.addEventListener("dblclick",recenterChart);
+  let md=false,mx0=0,ms=0;
+  host.addEventListener("mousedown",e=>{md=true;mx0=e.clientX;ms=chartScrollX;stopAnim();});
+  window.addEventListener("mousemove",e=>{if(md)setScrollX(ms-(e.clientX-mx0));});
+  window.addEventListener("mouseup",()=>{md=false;});
+})();
 
 function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div><div class="val">${val}${unit?` <small>${unit}</small>`:""}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;}
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
