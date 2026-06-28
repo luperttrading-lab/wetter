@@ -194,7 +194,7 @@
       <div class="reload" id="refresh" role="button" aria-label="Aktualisieren">
         <svg viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </div>
-      <span class="ver">v1.32</span>
+      <span class="ver">v1.33</span>
     </div>
   </header>
 
@@ -478,9 +478,10 @@ function drawChart(rows){
   const temps=rows.map(r=>r.temperature);
   let lo=Math.floor(Math.min(...temps))-1,hi=Math.ceil(Math.max(...temps))+1;if(hi-lo<5)hi=lo+5;
   const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
-  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows};
-  // Prognose-Bereich (rechts von jetzt) leicht getönt
-  if(nowMs<tMax&&nowMs>tMin){const nx=X(nowMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
+  let obsMs=tMin;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obsMs=T(rows[i]);break;}}
+  chartGeom={tMin,tMax,lo,hi,W,viewW,y0,y1,rows,obsMs};
+  // Prognose-Bereich (rechts vom letzten Messwert) leicht getönt
+  if(obsMs<tMax&&obsMs>tMin){const nx=X(obsMs);ctx.fillStyle="rgba(120,135,160,.05)";ctx.fillRect(nx,y0,x1-nx,y1-y0);}
   // Nacht-Schattierung
   for(let i=0;i<rows.length;i++){if(isNight(rows[i].timestamp)){const a=i>0?(T(rows[i-1])+T(rows[i]))/2:T(rows[i])-1800e3,b=i<rows.length-1?(T(rows[i])+T(rows[i+1]))/2:T(rows[i])+1800e3;ctx.fillStyle="rgba(40,52,74,.05)";ctx.fillRect(X(a),y0,X(b)-X(a),y1-y0);}}
   // horizontale Gridlines (Labels auf der fixen Achse)
@@ -500,12 +501,12 @@ function drawChart(rows){
   for(let i=1;i<rows.length;i++){ctx.setLineDash(T(rows[i])>nowMs?[4,3]:[]);ctx.strokeStyle=rgb(thermal((rows[i-1].temperature+rows[i].temperature)/2));ctx.beginPath();ctx.moveTo(X(T(rows[i-1])),Y(rows[i-1].temperature));ctx.lineTo(X(T(rows[i])),Y(rows[i].temperature));ctx.stroke();}
   ctx.setLineDash([]);
   // jetzt-Linie + aktueller Punkt
-  if(nowMs>=tMin&&nowMs<=tMax){const nx=X(nowMs);ctx.strokeStyle="rgba(23,32,46,.35)";ctx.setLineDash([3,3]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(nx,y0);ctx.lineTo(nx,y1);ctx.stroke();ctx.setLineDash([]);
+  if(obsMs>=tMin&&obsMs<=tMax){const nx=X(obsMs);ctx.strokeStyle="rgba(23,32,46,.35)";ctx.setLineDash([3,3]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(nx,y0);ctx.lineTo(nx,y1);ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle="#5c6b80";ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";ctx.fillText("jetzt",nx,1);
     let obs=null;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obs=rows[i];break;}}
     if(obs){const lx=X(T(obs)),ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#fff";ctx.stroke();}}
   drawAxis(lo,hi,H,padT,padB);
-  if(!chartInit){const nx=(nowMs>=tMin&&nowMs<=tMax)?X(nowMs):W/2;chartScrollX=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
+  if(!chartInit){const nx=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):W/2;chartScrollX=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
   else chartScrollX=Math.max(0,Math.min(W-viewW,chartScrollX));
   cv.style.transform="translateX("+(-chartScrollX)+"px)";
   requestAnimationFrame(updateCursor);
@@ -537,7 +538,7 @@ function animateScrollTo(target){stopAnim();const start=chartScrollX,d=target-st
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);setScrollX(start+d*e);_momRAF=k<1?requestAnimationFrame(step):0;};
   _momRAF=requestAnimationFrame(step);}
 function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;if(span<=0)return;
-  const nowMs=Date.now(),frac=(nowMs>=g.tMin&&nowMs<=g.tMax)?(nowMs-g.tMin)/(g.tMax-g.tMin):0.5;animateScrollTo(Math.round(frac*span));}
+  const ref=g.obsMs||Date.now(),frac=(ref>=g.tMin&&ref<=g.tMax)?(ref-g.tMin)/(g.tMax-g.tMin):0.5;animateScrollTo(Math.round(frac*span));}
 (function(){const host=el("chartScroll");let sx=0,sy=0,sScroll=0,dir=null,drag=false,tapT=0,vx=0,lastX=0,lastT=0;
   host.addEventListener("touchstart",e=>{const t=e.touches[0];sx=lastX=t.clientX;sy=t.clientY;sScroll=chartScrollX;dir=null;drag=true;vx=0;lastT=performance.now();stopAnim();},{passive:true});
   host.addEventListener("touchmove",e=>{if(!drag)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
