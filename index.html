@@ -198,7 +198,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.52</span>
+      <span class="ver">v1.53</span>
     </div>
   </header>
 
@@ -849,7 +849,7 @@ function drawUV(h){
   // bei 15.68%..86.76% der Breite (aus BfS-PNG pixel-vermessen) -> Stunden fluchten mit der unteren Grafik
   const gx0=Math.round(0.1568*W),gx1=Math.round(0.8676*W),plotW=gx1-gx0;
   const scaleW=17,scaleX=Math.max(2,gx0-4-scaleW);// Farbskala direkt links am Plot (wie BfS)
-  const gy0=9,plotH=Math.round(yMax*RATIO*plotW/15),gy1=gy0+plotH,Hpx=gy1+16;
+  const gy0=12,plotH=Math.round(yMax*RATIO*plotW/15),gy1=gy0+plotH,Hpx=gy1+16;
   cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const day=new Date(tms[i0]);day.setHours(0,0,0,0);const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
@@ -857,14 +857,15 @@ function drawUV(h){
   const smooth=(arr,t)=>{for(let i=i0;i<i1;i++){if(t>=tms[i]&&t<=tms[i+1]){const p1=arr[i];if(p1==null)return null;const p2=(arr[i+1]==null)?p1:arr[i+1];const p0=(i>i0&&arr[i-1]!=null)?arr[i-1]:p1,p3=(i+2<=i1&&arr[i+2]!=null)?arr[i+2]:p2;let u=(t-tms[i])/(tms[i+1]-tms[i]),u2=u*u,u3=u2*u;return 0.5*(2*p1+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u2+(-p0+3*p1-3*p2+p3)*u3);}}return null;};
   const csAt=t=>{const v=smooth(cs,t);return v==null?0:Math.max(0,v);};
   const realAt=t=>{const v=smooth(real,t);return v==null?null:Math.max(0,v);};
-  // Farbskala links (UV 0..9) mit Zahlen drin
-  for(let yy=0;yy<=plotH;yy++){const uv=yMax*(1-yy/plotH);x.fillStyle=uvFine(uv);x.fillRect(scaleX,gy0+yy,scaleW,1.3);}
+  // Farbskala links – ragt oben über 9 und unten unter 0 hinaus (Zahlen kleben nicht am Rand)
+  const ovS=9;
+  for(let yy=-ovS;yy<=plotH+ovS;yy++){const uv=yMax*(1-yy/plotH);x.fillStyle=uvFine(uv);x.fillRect(scaleX,gy0+yy,scaleW,1.3);}
   x.font="700 9px -apple-system,system-ui,sans-serif";x.textAlign="center";x.textBaseline="middle";
-  for(let g=0;g<=yMax;g++){const yy=Y(g);x.lineWidth=2.6;x.strokeStyle="rgba(255,255,255,.9)";x.strokeText(g,scaleX+scaleW/2,yy);x.fillStyle="#1c2432";x.fillText(g,scaleX+scaleW/2,yy);}
+  for(let g=0;g<=yMax;g++){const yy=Y(g);x.lineWidth=1.5;x.strokeStyle="rgba(255,255,255,.6)";x.strokeText(g,scaleX+scaleW/2,yy);x.fillStyle="#11181f";x.fillText(g,scaleX+scaleW/2,yy);}
   // Gridlines
   x.strokeStyle="rgba(15,23,42,.05)";x.lineWidth=1;for(let g=1;g<yMax;g++){const yy=Y(g);x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();}
   // X-Achse jede Stunde 6..21
-  x.fillStyle="#9aa7b8";x.font="7.5px -apple-system,system-ui,sans-serif";x.textBaseline="top";x.textAlign="center";
+  x.fillStyle="#1c2432";x.font="700 7.5px -apple-system,system-ui,sans-serif";x.textBaseline="top";x.textAlign="center";
   for(let hh=6;hh<=21;hh++){const xx=X(day.getTime()+hh*3600e3);x.fillText(hh,xx,gy1+4);}
   // Säulen: Höhe=real bis jetzt, Farbe=Potenzial
   const now=Date.now(),step=2.4,bw=1.9;
@@ -884,6 +885,8 @@ function drawUV(h){
   x.setLineDash([4,3]);x.lineWidth=1.6;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
   cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.arc(cxp,y3,3.2,0,7);x.fillStyle=gC;x.fill();x.lineWidth=1.3;x.strokeStyle="#fff";x.stroke();});
+  // schwarze Box außen rum (Plotrahmen, wie BfS)
+  x.strokeStyle="#2a3340";x.lineWidth=1.2;x.strokeRect(gx0,gy0,plotW,plotH);
 }
 
 
