@@ -143,6 +143,16 @@
   .alert.extreme{background:#fdf2f8;border-color:#e9a8d4;color:#86166a}
   /* Nowcast */
   .nowcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:14px 15px 11px}
+  .umk-head{font-size:11px;color:var(--faint);text-align:center;font-weight:650;letter-spacing:.02em;margin-bottom:8px}
+  .umk{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+  .umk .cell{aspect-ratio:1;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+  .umk .cell .v{font-size:19px;font-weight:800;line-height:1}
+  .umk .cell .u{font-size:9px;font-weight:600;opacity:.7;margin-top:2px}
+  .umk .cell.home{outline:3px solid #e8000b;outline-offset:-3px;box-shadow:0 0 0 1px rgba(232,0,11,.25)}
+  .umk-info{text-align:center;margin-top:11px}
+  .umk-info .b{font-weight:800;color:#e8000b;font-size:15px}
+  .umk-info .r{color:var(--ink);font-weight:650;font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
+  .umk-info .e{color:var(--muted);font-size:12px;margin-top:4px}
   .nowcard .nh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
   .nowcard .nt{font-size:15.5px;font-weight:800;letter-spacing:-.01em}
   .nowcard .ns{font-size:12px;color:var(--muted);text-align:right}
@@ -198,7 +208,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.57</span>
+      <span class="ver">v1.58</span>
     </div>
   </header>
 
@@ -230,6 +240,7 @@
     <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
+    <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -804,8 +815,45 @@ function renderRadolan(){
         if(j.aktualisiert){const t=new Date(j.aktualisiert);if(!isNaN(t))stand=" \u00b7 "+t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ})+" Uhr";}
         se.textContent=(j.summe_mm>0?"DWD-Radar":"trocken \u00b7 Radar")+stand;
       }
+      renderUmkreis(j);
     })
     .catch(e=>{console.warn("radolan",e);});
+}
+
+/* --- "Regen im Umkreis": 3x3-Kacheln (1 km) um den eigenen Pixel aus radolan.json.umgebung_3x3. Erscheint nur bei Regen heute. --- */
+function renderUmkreis(j){
+  const sec=el("umkreisSec");if(!sec)return;
+  const u=j&&j.umgebung_3x3;
+  if(!Array.isArray(u)||u.length!==3||!(j.summe_mm>0)){sec.classList.add("hidden");return;}
+  const g=u.map(row=>row.map(c=>c.mm));
+  const vals=g.flat();
+  const mn=Math.min(...vals),mx=Math.max(...vals),mean=vals.reduce((a,b)=>a+b,0)/vals.length,span=mx-mn;
+  const fmt=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
+  const blue=t=>{t=Math.max(0,Math.min(1,t));const a=[219,233,248],b=[28,78,156];const c=a.map((v,i)=>Math.round(v+(b[i]-v)*t));return `rgb(${c[0]},${c[1]},${c[2]})`;};
+  let cells="",eigen=mean;
+  u.forEach(row=>row.forEach(c=>{
+    const t=span>0?(c.mm-mn)/span:0.5,dark=t>0.55,home=!!c.eigenes;
+    if(home)eigen=c.mm;
+    const col=home?(t>0.7?"#fff":"#e8000b"):(dark?"#eaf2fb":"#0b2e6b");
+    cells+=`<div class="cell${home?" home":""}" style="background:${blue(t)}"><div class="v" style="color:${col}">${fmt(c.mm)}</div><div class="u" style="color:${col}">mm</div></div>`;
+  }));
+  // Gefaelle-Richtung (nasse Seite -> trockene Seite)
+  const ns=(g[0][0]+g[0][1]+g[0][2])/3-(g[2][0]+g[2][1]+g[2][2])/3;
+  const we=(g[0][0]+g[1][0]+g[2][0])/3-(g[0][2]+g[1][2]+g[2][2])/3;
+  const ay=Math.abs(ns),ax=Math.abs(we);
+  let dir;
+  if(Math.max(ay,ax)<0.6){dir="gleichm\u00e4\u00dfig verteilt";}
+  else{const hi=(ay>=0.6?(ns>0?"N":"S"):"")+(ax>=0.6?(we>0?"W":"O"):"");
+       const lo=(ay>=0.6?(ns>0?"S":"N"):"")+(ax>=0.6?(we>0?"O":"W"):"");
+       dir="Gef\u00e4lle "+hi+"\u2192"+lo;}
+  const lage=span>Math.max(1.0,0.25*mean)?"fleckige Schauerlage":"gleichm\u00e4\u00dfiger Regen";
+  el("umkreisCard").innerHTML=
+    `<div class="umk-head">jedes Feld = 1 km\u00b2 \u00b7 \u2191 Nord</div>`+
+    `<div class="umk">${cells}</div>`+
+    `<div class="umk-info"><span class="b">dein Pixel ${fmt(eigen)} mm</span>`+
+    `<div class="r">Nachbarn ${fmt(mn)} \u2013 ${fmt(mx)} mm</div>`+
+    `<div class="e">${lage} \u00b7 ${dir}</div></div>`;
+  sec.classList.remove("hidden");
 }
 
 /* --- Render: 7-Tage --- */
