@@ -59,6 +59,7 @@
   .feel .gf b{color:#d8472f}
   .feel .hl{color:var(--muted);font-variant-numeric:tabular-nums}
   .feel .hl .up{color:#d8472f;font-weight:750}.feel .hl .dn{color:#2f86cf;font-weight:750}
+  .feel .hl .dl{color:var(--muted);font-weight:650;margin-left:10px}
   .heat{margin-top:13px;display:none;align-items:center;gap:9px;border-radius:13px;padding:9px 12px;position:relative}
   .heat.on{display:flex}
   .heat.hot{background:linear-gradient(90deg,#fff1e2,#ffe7d2);border:1px solid #f6cda3}
@@ -222,7 +223,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.66</span>
+      <span class="ver">v1.67</span>
     </div>
   </header>
 
@@ -242,7 +243,7 @@
     </div>
     <div class="feel" id="feelBox">
       <span class="gf">Gefühlt <b id="feelV">–</b></span>
-      <span class="hl">Heute bisher <span class="up" id="hiV">–</span>&nbsp;&nbsp;<span class="dn" id="loV">–</span></span>
+      <span class="hl">Heute bisher <span class="up" id="hiV">–</span>&nbsp;&nbsp;<span class="dn" id="loV">–</span><span class="dl" id="dlV"></span></span>
     </div>
     <div class="heat" id="heat"><span class="ic" id="heatIc"></span><div class="tx" id="heatTx"></div></div>
   </section>
@@ -435,13 +436,18 @@ function render(rows,all,src,demo){
   const todayRows=all.filter(r=>isToday(r.timestamp));
   const base=todayRows.length?todayRows:rows;
   const hi=Math.max(...base.map(r=>r.temperature)), lo=Math.min(...base.map(r=>r.temperature));
+  // bisher GEMESSENES Tageshoch/-tief: nur reale Messungen bis jetzt (ohne Prognose-Stunden)
+  const _nowMeas=Date.now();
+  const measRows=all.filter(r=>isToday(r.timestamp)&&!r._fc&&new Date(r.timestamp).getTime()<=_nowMeas);
+  const hiMeas=measRows.length?Math.max(...measRows.map(r=>r.temperature)):null;
+  const loMeas=measRows.length?Math.min(...measRows.map(r=>r.temperature)):null;
   const precip=sum(todayRows,"precipitation"), sunMin=sum(todayRows,"sunshine"), solar=sum(todayRows,"solar");
   // Trends
   const now=Date.now();
   const press3=valueAt(all,now-3*3600e3,"pressure_msl",1.5);
   const temp24=valueAt(all.filter(r=>!r._fc),now-24*3600e3,"temperature",2);
   const feel=feelsLike(snap.temp,snap.rh,snap.wind);
-  const der={hi,lo,precip,sunH:sunMin/60,solar,press3,temp24,feel};
+  const der={hi,lo,hiMeas,loMeas,precip,sunH:sunMin/60,solar,press3,temp24,feel};
 
   setHaze(snap.temp);
   paintHero(snap,demo,today,der);
@@ -469,7 +475,8 @@ function paintHero(s,demo,today,d){
   el("condIc").innerHTML=icon(s.icon||"cloudy",54);
   el("condLbl").textContent=LABELS[s.icon]||"—";
   const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
-  el("hiV").textContent="↑ "+fmt1(d.hi)+"°";el("loV").textContent="↓ "+fmt1(d.lo)+"°";
+  el("hiV").textContent="↑ "+(d.hiMeas!=null?fmt1(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?fmt1(d.loMeas):"–")+"°";
+  el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+fmt1(d.hiMeas-d.loMeas)+"°":"";
 
   // Hitze/Kälte-Hinweis nur bei Schwellen
   const heat=el("heat");heat.className="heat";
