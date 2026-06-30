@@ -223,7 +223,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.67</span>
+      <span class="ver">v1.68</span>
     </div>
   </header>
 
@@ -372,7 +372,7 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, stripUserScrolled=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0;
+let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, stripUserScrolled=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0, _aqi=null;
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
@@ -602,6 +602,11 @@ function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;i
 })();
 
 function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div><div class="val">${val}${unit?` <small>${unit}</small>`:""}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;}
+function aqiCellInner(){
+  if(_aqi&&_aqi.european_aqi!=null){const[ac,acol]=aqiCat(_aqi.european_aqi);
+    return `<div class="k">Luftqualität</div><div class="val">${Math.round(_aqi.european_aqi)} <small>AQI</small></div><div class="sub"><span style="color:${acol};font-weight:750">${ac}</span>${_aqi.pm2_5!=null?" · PM2.5 "+Math.round(_aqi.pm2_5):""}</div>`;}
+  return `<div class="k">Luftqualität</div><div class="val">– <small>AQI</small></div><div class="sub" style="color:#9aa7b8">lädt…</div>`;}
+function aqiCell(){return `<div class="tile" id="aqiCell">${aqiCellInner()}</div>`;}
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
   return `<svg width="30" height="30" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14.5" fill="#f4f7fb" stroke="#e3e9f1" stroke-width="2"/><line x1="18" y1="18" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2f86cf" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="18" r="2.4" fill="#5c6b80"/></svg>`;}
 /* Windrichtungs-Streuung: zirkuläre Statistik über die letzten 12 h, mit Windstärke gewichtet */
@@ -683,6 +688,7 @@ function renderTiles(s,d){
     tile("Sichtweite",s.vis!=null?(s.vis/1000).toLocaleString("de-DE",{maximumFractionDigits:0}):"–","km",visSub)+
     `<div class="tile"><div class="k">Niederschlag heute</div><div class="val"><span id="precTodayVal">${d.precip!=null?d.precip.toLocaleString("de-DE",{maximumFractionDigits:1}):"0"}</span> <small>mm</small></div><div class="sub" id="precTodaySub">${d.precip>0?"gemessen":"trocken"}</div></div>`+
     tile("Sonnenenergie heute",d.solar!=null&&d.solar>0?d.solar.toLocaleString("de-DE",{maximumFractionDigits:1}):"–","kWh/m²","Globalstrahlung gesamt")+
+    aqiCell()+
     `<div class="tile wide"><div class="k">Vergleich zu gestern</div><div class="cmp" style="margin-top:7px"><div class="big" style="color:${cmpCol}">${cmpArrow} ${dT!=null?Math.abs(dT).toFixed(0)+"°":""}</div><div class="sub" style="margin:0">${cmpTxt} um diese Uhrzeit</div></div></div>`+
     `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
       (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
@@ -997,8 +1003,7 @@ function renderAirGrid(air){
   }
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
-    const [ac,acol]=aqiCat(c.european_aqi);
-    html+=tile("Luftqualität",c.european_aqi!=null?Math.round(c.european_aqi):"–","AQI",`<span style="color:${acol};font-weight:750">${ac}</span>${c.pm2_5!=null?" · PM2.5 "+Math.round(c.pm2_5):""}`);
+    _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner();
     const types=[["Gräser",c.grass_pollen],["Birke",c.birch_pollen],["Erle",c.alder_pollen],["Beifuß",c.mugwort_pollen],["Ambrosia",c.ragweed_pollen]].filter(t=>t[1]!=null&&t[1]>=1).sort((a,b)=>b[1]-a[1]);
     const psub=types.length?types.slice(0,3).map(t=>{const[pc,pcol]=pollenCat(t[1]);return `<span style="white-space:nowrap"><span class="lvl" style="background:${pcol}"></span>${t[0]}: ${pc}</span>`;}).join("&nbsp;&nbsp; "):"kein nennenswerter Pollenflug";
     html+=`<div class="tile wide"><div class="k">Pollenflug</div><div class="sub" style="margin-top:8px;flex-wrap:wrap;gap:8px 4px">${psub}</div></div>`;
