@@ -75,13 +75,36 @@ def main():
     umgebung = [[{"pixel": [r, c], "mm": round(kranz[(r, c)], 2), "eigenes": (r, c) == HOME}
                  for c in KRANZ_COLS] for r in KRANZ_ROWS]
 
+    # --- letzten Tag mit Regen merken (vor dem Ueberschreiben altes JSON lesen) ---
+    # So bleibt die Info erhalten, auch wenn heute trocken ist und das JSON ueberschrieben wird.
+    heute_str = midnight_local.strftime("%Y-%m-%d")
+    summe     = round(total, 2)
+    letzter_regen = None
+    try:
+        with open("radolan.json", "r", encoding="utf-8") as f:
+            alt = json.load(f)
+        lr = alt.get("letzter_regen")
+        if isinstance(lr, dict) and lr.get("mm", 0) > 0 and lr.get("datum"):
+            letzter_regen = {"datum": lr["datum"], "mm": round(float(lr["mm"]), 2)}
+        # der zuletzt geschriebene Tag selbst war ein Regentag? -> Kandidat
+        if alt.get("summe_mm", 0) > 0 and alt.get("datum"):
+            kand = {"datum": alt["datum"], "mm": round(float(alt["summe_mm"]), 2)}
+            if letzter_regen is None or kand["datum"] >= letzter_regen["datum"]:
+                letzter_regen = kand
+    except (FileNotFoundError, json.JSONDecodeError, ValueError):
+        pass
+    # heutiger Regen hat Vorrang
+    if summe > 0:
+        letzter_regen = {"datum": heute_str, "mm": summe}
+
     out = {
-        "datum":            midnight_local.strftime("%Y-%m-%d"),
-        "summe_mm":         round(total, 2),
+        "datum":            heute_str,
+        "summe_mm":         summe,
         "stunden_ok":       ok,
         "stunden_erwartet": len(hours),
         "stunden":          details,
         "umgebung_3x3":     umgebung,
+        "letzter_regen":    letzter_regen,
         "aktualisiert":     now_utc.isoformat(timespec="seconds"),
         "quelle":           "DWD RADOLAN-RW (1 km, stationsgeeicht)",
         "methode":          "bilinear, Erlental 50.6480N 8.6741E",
