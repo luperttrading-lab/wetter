@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.83</span>
+      <span class="ver">v1.84</span>
     </div>
   </header>
 
@@ -1078,8 +1078,8 @@ function renderAirGrid(air){
     let vdLine="";
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button></div>`;
-    html+=`<div id="uvCardWrap"><div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · Wettenberg</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten${vdLine}</div></div></div>`;
-    html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_today.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg (heute)" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung · <b style="color:#1b3a6b">blaue Linie</b> = max. möglich (Klarsky-Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · Wettenberg</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten${vdLine}</div></div>`;
+    html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung · <b style="color:#1b3a6b">blaue Linie</b> = max. möglich (Klarsky-Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
@@ -1089,8 +1089,7 @@ function renderAirGrid(air){
     html+=`<div class="tile wide"><div class="k">Pollenflug</div><div class="sub" style="margin-top:8px;flex-wrap:wrap;gap:8px 4px">${psub}</div></div>`;
   }
   el("gridAir").innerHTML=html;
-  const _bc=el("bfsCard");if(_bc)_bc.style.display=(uvDayOffset===0?"":"none");
-  lastUVH=h;if(h&&h.uv_index_clear_sky)requestAnimationFrame(()=>{drawUV(h);if(uvDayOffset===0)drawBfsOverlay();});
+  lastUVH=h;if(h&&h.uv_index_clear_sky)requestAnimationFrame(()=>{drawUV(h);drawBfsOverlay();});
 }
 
 function drawUV(h){
@@ -1153,7 +1152,6 @@ function drawUV(h){
 const BFS_X0=0.1568, BFS_X1=0.8676;  // 6 Uhr .. 21 Uhr  (Anteil der Breite)
 const BFS_Y9=0.1034, BFS_Y0=0.8980;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Hoehe)
 function drawBfsOverlay(){
-  if(uvDayOffset!==0)return;
   const img=el("bfsUv"),cv=el("bfsOvl"),h=lastUVH;
   if(!img||!cv||!h||!h.uv_index_clear_sky||!h.time)return;
   const W=img.clientWidth,Hh=img.clientHeight;if(!W||!Hh)return;
