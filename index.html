@@ -223,7 +223,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.68</span>
+      <span class="ver">v1.69</span>
     </div>
   </header>
 
@@ -665,7 +665,7 @@ function renderTiles(s,d){
   const wsp=windSpread();
   const spreadTxt=wsp==null?"":(wsp.sig<10?", konstant":wsp.sig<25?", wechselnd":", stark wechselnd");
   const windSub2=`${s.dir!=null?"aus "+dirName(s.dir)+spreadTxt:""}${s.gust!=null?" · Böen "+Math.round(s.gust):""}`;
-  const windRoseSvg=windRose(s.dir,wsp?wsp.sig:0,58);
+  const windRoseSvg=windRose(s.dir,wsp?wsp.sig:0,70);
   const pTrend=d.press3!=null&&s.press!=null?(s.press-d.press3):null;
   const pArrow=pTrend==null?"":(pTrend>0.6?"↗ steigend":pTrend<-0.6?"↘ fallend":"→ gleichbleibend");
   const pr=pTrend!=null?Math.round(pTrend):null;
@@ -681,6 +681,7 @@ function renderTiles(s,d){
 
   g.innerHTML=
     `<div class="tile wide"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px"><div><div class="k">Wind &amp; Böen</div><div class="val" style="margin-top:7px">${s.wind!=null?Math.round(s.wind):"–"} <small>km/h</small></div>${windSub2?`<div class="sub">${windSub2}</div>`:""}</div>${windRoseSvg}</div></div>`+
+    `<div class="tile wide"><div class="k">Vergleich zu gestern</div><div class="cmp" style="margin-top:7px"><div class="big" style="color:${cmpCol}">${cmpArrow} ${dT!=null?Math.abs(dT).toFixed(0)+"°":""}</div><div class="sub" style="margin:0">${cmpTxt} um diese Uhrzeit</div></div></div>`+
     tile("Luftdruck",s.press!=null?Math.round(s.press):"–","hPa",pSub)+
     tile("Taupunkt",s.dew!=null?Math.round(s.dew)+"°":"–","",dewSub)+
     tile("Luftfeuchte",s.rh!=null?Math.round(s.rh):"–","%",s.rh!=null?(s.rh<35?"trocken":s.rh<65?"moderat":"feucht"):"")+
@@ -689,7 +690,6 @@ function renderTiles(s,d){
     `<div class="tile"><div class="k">Niederschlag heute</div><div class="val"><span id="precTodayVal">${d.precip!=null?d.precip.toLocaleString("de-DE",{maximumFractionDigits:1}):"0"}</span> <small>mm</small></div><div class="sub" id="precTodaySub">${d.precip>0?"gemessen":"trocken"}</div></div>`+
     tile("Sonnenenergie heute",d.solar!=null&&d.solar>0?d.solar.toLocaleString("de-DE",{maximumFractionDigits:1}):"–","kWh/m²","Globalstrahlung gesamt")+
     aqiCell()+
-    `<div class="tile wide"><div class="k">Vergleich zu gestern</div><div class="cmp" style="margin-top:7px"><div class="big" style="color:${cmpCol}">${cmpArrow} ${dT!=null?Math.abs(dT).toFixed(0)+"°":""}</div><div class="sub" style="margin:0">${cmpTxt} um diese Uhrzeit</div></div></div>`+
     `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
       (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
       `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
