@@ -189,8 +189,12 @@
   .uvhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .uvnow{font-size:13px;font-weight:650;color:var(--muted);margin-top:5px}
   .uvnow b{font-size:18px}
-  .uvmax{font-size:10.5px;color:var(--faint);text-align:right;line-height:1.4}
+  .uvmax{font-size:10.5px;color:var(--faint);text-align:left;line-height:1.4;margin-top:4px}
   .uvmax b{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .uvcur{text-align:right;line-height:1.1;white-space:nowrap;flex-shrink:0}
+  .uvcur b{font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;display:block}
+  .uvcur .cat{font-size:11.5px;font-weight:700;display:block;margin-top:1px}
+  .uvcur small{font-size:10px;color:var(--faint);font-variant-numeric:tabular-nums;display:block;margin-top:2px}
   .uvcard canvas{width:100%;height:280px;display:block;margin-top:6px}
   .uvleg{display:flex;gap:14px;justify-content:center;margin-top:4px;font-size:10.5px;color:var(--muted)}
   .uvleg i{display:inline-block;vertical-align:middle;margin-right:5px}
@@ -243,7 +247,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.76</span>
+      <span class="ver">v1.78</span>
     </div>
   </header>
 
@@ -464,8 +468,12 @@ function render(rows,all,src,demo){
   // bisher GEMESSENES Tageshoch/-tief: nur reale Messungen bis jetzt (ohne Prognose-Stunden)
   const _nowMeas=Date.now();
   const measRows=all.filter(r=>isToday(r.timestamp)&&!r._fc&&new Date(r.timestamp).getTime()<=_nowMeas);
-  const hiMeas=measRows.length?Math.max(...measRows.map(r=>r.temperature)):null;
-  const loMeas=measRows.length?Math.min(...measRows.map(r=>r.temperature)):null;
+  const measVals=measRows.map(r=>r.temperature);
+  // aktuellen Live-Messwert sicher einbeziehen: sein Bright-Sky-Zeitstempel kann minimal vorausliegen
+  // und fiele sonst aus dem gemessenen Tageshoch/-tief, obwohl er als "jetzt" angezeigt wird
+  if(cur&&!cur._fc&&isToday(cur.timestamp)&&Number.isFinite(cur.temperature))measVals.push(cur.temperature);
+  const hiMeas=measVals.length?Math.max(...measVals):null;
+  const loMeas=measVals.length?Math.min(...measVals):null;
   const precip=sum(todayRows,"precipitation"), sunMin=sum(todayRows,"sunshine"), solar=sum(todayRows,"solar");
   // Trends
   const now=Date.now();
@@ -1023,7 +1031,13 @@ function renderAirGrid(air){
     const pkTime=pkI>=0?new Date(h.time[pkI]).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"–";
     let uvN=0;for(let i=0;i<h.time.length-1;i++){const t0=new Date(h.time[i]).getTime(),t1=new Date(h.time[i+1]).getTime();if(nowMs>=t0&&nowMs<t1){uvN=h._real[i]!=null?h._real[i]:0;break;}}
     const [un,ucol]=uvCat(uvN);
-    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index heute</div><div class="uvnow">jetzt <b style="color:${ucol}">${fmt1(uvN)}</b> · <span style="color:${ucol};font-weight:700">${un}</span></div></div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten</div></div>`;
+    const nowTime=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    // Vitamin-D-Fenster: clear-sky steigt über UV 3 (Start) und fällt wieder darunter (Ende)
+    const _vd=[],_ut=h.time,_uc=h.uv_index_clear_sky;
+    for(let i=0;i<_uc.length-1;i++){const a=_uc[i],b=_uc[i+1];if(a==null||b==null)continue;if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}
+    let vdLine="";
+    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
+    html+=`<div class="tile wide uvcard"><div class="uvhead"><div><div class="k">UV-Index · Wettenberg</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvcur"><b style="color:${ucol}">${fmt1(uvN)}</b><span class="cat" style="color:${ucol}">${un}</span><small>${nowTime} Uhr</small></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten${vdLine}</div></div>`;
     html+=`<div class="tile wide bfscard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_today.png?ts=${Date.now()}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg (heute)" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none'" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung (kein Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -1085,6 +1099,7 @@ function drawUV(h){
   const gC="#3f9b6e",y3=Y(3);
   x.setLineDash([4,3]);x.lineWidth=1.6;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
+  x.setLineDash([3,3]);x.lineWidth=1.2;x.strokeStyle=gC;x.globalAlpha=.65;cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.moveTo(cxp,y3);x.lineTo(cxp,gy1);x.stroke();});x.globalAlpha=1;x.setLineDash([]);
   cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.arc(cxp,y3,3.2,0,7);x.fillStyle=gC;x.fill();x.lineWidth=1.3;x.strokeStyle="#fff";x.stroke();});
   // schwarze Box außen rum (Plotrahmen, wie BfS)
   x.strokeStyle="#2a3340";x.lineWidth=1.2;x.strokeRect(gx0,gy0,plotW,plotH);
