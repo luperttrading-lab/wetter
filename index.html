@@ -247,7 +247,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.79</span>
+      <span class="ver">v1.80</span>
     </div>
   </header>
 
@@ -1096,8 +1096,8 @@ function drawUV(h){
     x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign=xn>gx1-30?"right":"left";x.fillText("jetzt",xn+(xn>gx1-30?-3:3),gy0+9);}
   // Vit-D-Schwelle (UV 3)
   const TH=3,cross=[];for(let i=i0;i<i1;i++){const a=cs[i],b=cs[i+1];if(a==null||b==null)continue;if((a<TH)!==(b<TH)){const f=(TH-a)/(b-a);cross.push(tms[i]+f*(tms[i+1]-tms[i]));}}
-  const gC="#3f9b6e",y3=Y(3);
-  x.setLineDash([4,3]);x.lineWidth=1.6;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
+  const gC="#1f6b43",y3=Y(3);
+  x.setLineDash([4,3]);x.lineWidth=2;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
   x.setLineDash([4,3]);x.lineWidth=2;x.strokeStyle="#1f6b43";cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.moveTo(cxp,y3);x.lineTo(cxp,gy1);x.stroke();});x.setLineDash([]);
   cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.arc(cxp,y3,3.2,0,7);x.fillStyle=gC;x.fill();x.lineWidth=1.3;x.strokeStyle="#fff";x.stroke();});
