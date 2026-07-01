@@ -260,7 +260,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.12</span>
+      <span class="ver">v2.14</span>
     </div>
   </header>
 
@@ -298,7 +298,7 @@
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
     <div id="airSec" class="hidden"><div class="sect">UV &amp; Mond</div><div class="grid" id="gridAir"></div></div>
-    <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><canvas id="planetenCv"></canvas><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">sichtbar bei D&auml;mmerung &middot; Kurven = Nachtbahn &middot; Kugeln = Position jetzt</div></div></div>
+    <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><canvas id="planetenCv"></canvas><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">Planeten sichtbar bei D&auml;mmerung &middot; Mond ganzt&auml;gig &middot; Kugeln = Position jetzt</div></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
   </div>
 
@@ -421,8 +421,9 @@ let uvAirFull=null, uvDayOffset=0, _bfsTs=Date.now();
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
-async function load(){
-  showState("loading");el("refresh").classList.add("spin");
+async function load(silent){
+  if(!silent)showState("loading");
+  el("refresh").classList.add("spin");
   try{
     const now=new Date(), from=new Date(now-(CHART_PAST_H+2)*3600e3), to=new Date(now.getTime()+CHART_FUT_H*3600e3);
     const url=`https://api.brightsky.dev/weather?lat=${LAT}&lon=${LON}&date=${isoDate(from)}&last_date=${isoDate(to)}&tz=Europe/Berlin`;
@@ -438,8 +439,10 @@ async function load(){
     isDemo=false; fullRows=all; chartRows=sorted; chartInit=false; stripInit=false; stripUserScrolled=false;
     render(all.slice(-WINDOW_HOURS),all,obsSrc,false);
     tryCurrent(obsSrc);
+    _lastFull=_lastFast=Date.now();
     loadExtras();
-  }catch(err){console.warn("Live-Abruf:",err);el("stErrorMsg").textContent="Keine Verbindung zur Wetterstation ("+err.message+").";showState("error");}
+  }catch(err){console.warn("Live-Abruf:",err);
+    if(!silent){el("stErrorMsg").textContent="Keine Verbindung zur Wetterstation ("+err.message+").";showState("error");}}
   finally{el("refresh").classList.remove("spin");}
 }
 async function tryCurrent(obsSrc){
@@ -1382,7 +1385,7 @@ function altaz(name,jd,latDeg){
 }
 
 const P_COL={venus:'#e8c24a',merkur:'#9aa7ff',jupiter:'#e07d2e',mars:'#ef5350',saturn:'#cdbb8e',mond:'#cfd8e6'};
-const P_SIZE={mond:8,jupiter:8.5,saturn:7.5,venus:6,mars:5.5,merkur:4.5};
+const P_SIZE={mond:11,jupiter:8.5,saturn:7.5,venus:6,mars:5.5,merkur:4.5};
 const P_NAME={venus:'Venus',merkur:'Merkur',jupiter:'Jupiter',mars:'Mars',saturn:'Saturn',mond:'Mond'};
 const PL_BODIES=['saturn','mars','merkur','jupiter','venus','mond'];
 const PL_DUSK=-3; // Sonne unter -3 Grad = dunkel genug fuer Planeten
@@ -1400,10 +1403,10 @@ function drawPlaneten(){
   const dayBase=jdFromDate(now.getFullYear(),now.getMonth()+1,now.getDate());
 
   const arcs={};PL_BODIES.forEach(n=>{const arc=[];
-    for(let t=0;t<=1440;t+=6){const p=altaz(n,dayBase+t/1440,AST_LAT),su=altaz('sonne',dayBase+t/1440,AST_LAT).alt;arc.push({az:p.az,alt:p.alt,t,vis:p.alt>0&&su<PL_DUSK});}
+    for(let t=0;t<=1440;t+=6){const p=altaz(n,dayBase+t/1440,AST_LAT),su=altaz('sonne',dayBase+t/1440,AST_LAT).alt;arc.push({az:p.az,alt:p.alt,t,vis:p.alt>0&&(n==='mond'||su<PL_DUSK)});}
     arcs[n]=arc;});
   const sunNow=altaz('sonne',jdNow,AST_LAT).alt;
-  const pos={};PL_BODIES.forEach(n=>{const p=altaz(n,jdNow,AST_LAT);pos[n]={az:p.az,alt:p.alt,show:p.alt>0&&sunNow<PL_DUSK};});
+  const pos={};PL_BODIES.forEach(n=>{const p=altaz(n,jdNow,AST_LAT);pos[n]={az:p.az,alt:p.alt,show:p.alt>0&&(n==='mond'||sunNow<PL_DUSK)};});
 
   let azMin=999,azMax=-999,altMax=15;
   for(const n of PL_BODIES)for(const p of arcs[n]){if(!p.vis)continue;azMin=Math.min(azMin,p.az);azMax=Math.max(azMax,p.az);altMax=Math.max(altMax,p.alt);}
@@ -1430,7 +1433,25 @@ function drawPlaneten(){
   const pBall=(n,x,y,r)=>{const col=P_COL[n];const g=ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.1,x,y,r);g.addColorStop(0,'rgba(255,255,255,.82)');g.addColorStop(0.35,col);g.addColorStop(1,col);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=g;ctx.fill();};
   PL_BODIES.forEach(n=>{const m=pos[n];if(!m.show)return;const x=X(m.az),y=Y(m.alt),r=P_SIZE[n]||6;ctx.save();ctx.shadowColor=P_COL[n];ctx.shadowBlur=10;
     if(n==='saturn'){const rc='#d8c690';ctx.lineWidth=1.1;ctx.strokeStyle=rgba(rc,.5);ctx.beginPath();ctx.ellipse(x,y,r*2.1,r*2.1*.34,0,Math.PI,2*Math.PI);ctx.stroke();pBall(n,x,y,r);ctx.strokeStyle=rgba(rc,.85);ctx.beginPath();ctx.ellipse(x,y,r*2.1,r*2.1*.34,0,0,Math.PI);ctx.stroke();}
-    else pBall(n,x,y,r);ctx.restore();});
+    else pBall(n,x,y,r);
+    if(n==='mond'){ // echte Sichelgeometrie: Phasenwinkel + Anstrahlrichtung zur Sonne
+      const Tc=(jdNow-astTzOff(now.getFullYear(),now.getMonth()+1,now.getDate())/24-2451545)/36525,
+        peM=helio('erde',Tc),
+        lonS=norm360(Math.atan2(-peM.y,-peM.x)*R2D),
+        lonM=moonEcl(Tc*36525).lon,
+        dPh=norm360(lonM-lonS),c=Math.cos(dPh*D2R);
+      const sp=altaz('sonne',jdNow,AST_LAT);
+      let ang=Math.atan2(Y(sp.alt)-y,X(sp.az)-x);
+      if(!isFinite(ang))ang=Math.sin(dPh*D2R)>0?0:Math.PI;
+      ctx.shadowColor='transparent';ctx.shadowBlur=0;
+      ctx.translate(x,y);ctx.rotate(ang); // +x = beleuchtete Seite
+      ctx.fillStyle='rgba(7,10,18,.88)';
+      ctx.beginPath();
+      ctx.arc(0,0,r,Math.PI/2,3*Math.PI/2,false);                    // dunkler Rand
+      ctx.ellipse(0,0,Math.abs(c)*r,r,0,3*Math.PI/2,Math.PI/2,c<0);  // Terminator-Ellipse
+      ctx.closePath();ctx.fill();
+    }
+    ctx.restore();});
 
   const leg=el("planetenLeg");if(leg){
     const D16=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'],dir=az=>D16[Math.round(az/22.5)%16];
@@ -1509,6 +1530,24 @@ function drawWolken(){
 }
 
 /* --- Lader (parallel, fehlertolerant) --- */
+function loadNowcast(){
+  fetchJSON(`https://api.brightsky.dev/radar?lat=${LAT}&lon=${LON}&distance=1000&format=plain&tz=Europe/Berlin&date=${encodeURIComponent(new Date().toISOString())}`,11000).then(renderNowcast).catch(e=>{el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);});
+}
+/* --- Auto-Refresh beim Zurueckkehren in die App ---
+   Voll (>30 min alt): kompletter Neuabruf, still (bei Fehler bleibt alter Stand).
+   Schnell (>5 min alt): nur RADOLAN + Nowcast (5-Minuten-Radar) + Planeten "jetzt". */
+let _lastFull=0,_lastFast=0;
+const REFRESH_FULL_MS=30*60e3,REFRESH_FAST_MS=5*60e3;
+function refreshFast(){_lastFast=Date.now();renderRadolan();loadNowcast();drawPlaneten();}
+function maybeRefresh(){
+  if(document.visibilityState!=="visible")return;
+  const t=Date.now();
+  if(_lastFull&&t-_lastFull>REFRESH_FULL_MS)load(true);
+  else if(_lastFast&&t-_lastFast>REFRESH_FAST_MS)refreshFast();
+  else if(_lastFull)drawPlaneten(); // Planetenpositionen kosten nichts: immer aktuell
+}
+document.addEventListener("visibilitychange",maybeRefresh);
+window.addEventListener("pageshow",e=>{if(e.persisted)maybeRefresh();});
 function loadExtras(){
   renderAirGrid(null); // Mond sofort, Rest folgt
   renderPlaneten();    // Planeten am Himmel (rein berechnet, kein Fetch)
@@ -1519,7 +1558,7 @@ function loadExtras(){
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
   fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`).then(renderForecast).catch(e=>{el("fcSec").classList.add("hidden");console.warn("fc",e.message);});
   loadIss();
-  fetchJSON(`https://api.brightsky.dev/radar?lat=${LAT}&lon=${LON}&distance=1000&format=plain&tz=Europe/Berlin&date=${encodeURIComponent(new Date().toISOString())}`,11000).then(renderNowcast).catch(e=>{el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);});
+  loadNowcast();
   fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(renderAlerts).catch(e=>console.warn("alerts",e.message));
 }
 
