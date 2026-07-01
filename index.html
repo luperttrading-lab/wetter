@@ -152,10 +152,12 @@
   .pl-wheel{position:absolute;top:8px;right:8px;z-index:2;width:76px;text-align:center;background:var(--chipBg,rgba(8,14,24,.74));border:1px solid var(--chipBd,rgba(255,255,255,.16));border-radius:11px;padding:5px 0 4px;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--chipInk,#e7edf5);font-variant-numeric:tabular-nums;cursor:ns-resize;transition:background .3s,border-color .3s,color .3s}
   .pw-a{font-size:11px;color:var(--chipMut,#93a0b0);height:15px;line-height:15px;transition:color .3s}
   .pw-b{font-size:16px;font-weight:800;height:21px;line-height:21px;color:var(--chipAcc,#ffd66b);border-top:1px solid var(--chipHr,rgba(255,255,255,.2));border-bottom:1px solid var(--chipHr,rgba(255,255,255,.2));transition:color .3s,border-color .3s}
-  .pl-now{position:absolute;top:8px;left:8px;z-index:2;background:var(--chipBg,rgba(8,14,24,.74));border:1px solid var(--chipBd,rgba(255,255,255,.16));border-radius:11px;color:var(--chipInk,#e7edf5);font:700 12.5px/1 -apple-system,system-ui,sans-serif;padding:9px 12px;opacity:.5;transition:background .3s,border-color .3s,color .3s}
+  .pl-now{position:absolute;top:8px;left:8px;z-index:2;background:var(--chipBgSoft,rgba(8,14,24,.55));border:1px solid var(--chipBd,rgba(255,255,255,.16));border-radius:11px;color:var(--chipInk,#e7edf5);font:700 12.5px/1 -apple-system,system-ui,sans-serif;padding:9px 12px;opacity:.5;transition:background .3s,border-color .3s,color .3s}
   .pl-now.on{opacity:1;border-color:var(--chipAcc,#ffd66b);color:var(--chipAcc,#ffd66b)}
   .pl-leg{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;align-content:flex-start;margin-top:11px;padding:0 12px;min-height:38px}
-  .pl-item{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--plInk,#c7d0dc);font-weight:600;transition:color .3s}
+  .pl-item{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--plInk,#c7d0dc);font-weight:600;font-variant-numeric:tabular-nums;transition:color .3s}
+  .pl-alt{display:inline-block;width:1.9em;text-align:right}
+  .pl-dir{display:inline-block;width:2.6em;text-align:left}
   .pl-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 5px currentColor}
   .pl-empty{font-size:12.5px;color:var(--plMut,#8a97a5);padding:4px;transition:color .3s}
   .pl-note{margin-top:9px;padding:0 12px;text-align:center;font-size:11px;color:var(--plMut,#7a8494);transition:color .3s}
@@ -268,7 +270,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.22</span>
+      <span class="ver">v2.23</span>
     </div>
   </header>
 
@@ -1472,7 +1474,7 @@ function drawPlaneten(){
   const pos={};PL_BODIES.forEach(n=>{const p=altaz(n,jdSel,AST_LAT);
     const dusk=n==='mond'||sunSel.alt<PL_DUSK;
     pos[n]={az:p.az,alt:p.alt,
-      show:dusk&&p.alt>(n==='mond'?-3.2:-1.6),  // Toleranz: Oberrand ragt noch ueber den Horizont
+      show:dusk&&p.alt>-0.1,   // Spitze erscheint exakt zum Kalender-Aufgang (Uebergangszone unten)
       leg:dusk&&p.alt>0};});
 
   const mL=26,mR=10,mT=62,mB=22,pw=W-mL-mR,ph=H-mT-mB;
@@ -1506,7 +1508,7 @@ function drawPlaneten(){
   if(card&&card.style&&card.style.setProperty){
     card.style.background=thBot;card.style.borderColor=rgba(botInk,.22);
     const st=card.style;
-    st.setProperty('--chipBg',chipBg);st.setProperty('--chipBd',chipBd);st.setProperty('--chipInk',chipInk);
+    st.setProperty('--chipBg',chipBg);st.setProperty('--chipBgSoft',rgba(chipBase,.55));st.setProperty('--chipBd',chipBd);st.setProperty('--chipInk',chipInk);
     st.setProperty('--chipMut',chipMut);st.setProperty('--chipAcc',chipAcc);st.setProperty('--chipHr',chipHr);
     st.setProperty('--plInk',botInk);st.setProperty('--plMut',botMut);
   }
@@ -1592,7 +1594,12 @@ function drawPlaneten(){
     sh.addColorStop(0,'rgba(0,0,0,0)');sh.addColorStop(1,'rgba(5,8,16,.5)');
     ctx.fillStyle=sh;ctx.fillRect(x-r,y-r,2*r,2*r);
     ctx.restore();};
-  PL_BODIES.forEach(n=>{const m=pos[n];if(!m.show)return;const x=X(m.az),y=Y(m.alt),r=P_SIZE[n]||6;
+  const pxDeg=ph/(altMax-altMin);
+  PL_BODIES.forEach(n=>{const m=pos[n];if(!m.show)return;const x=X(m.az),r=P_SIZE[n]||6;
+    /* Auf-/Untergang: Spitze erscheint exakt zum Kalenderzeitpunkt (h0-Bedingung steckt im Kern).
+       Uebergangszone alt in [0,a1]: Scheibe wird stetig ueber den Horizont gehoben; ab a1 normale Y-Skala. */
+    const a1=r/pxDeg;
+    const y=m.alt>=a1?Y(m.alt):yHor+r-2*r*(Math.max(0,m.alt)/a1);
     ctx.save();
     ctx.beginPath();ctx.rect(mL,mT,pw,Math.max(0,yHor-mT));ctx.clip(); // unterm Horizont verschwindet alles
     ctx.shadowColor=P_COL[n];ctx.shadowBlur=10;
@@ -1628,7 +1635,7 @@ function drawPlaneten(){
   const leg=el("planetenLeg");if(leg){
     const D16=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'],dir=az=>D16[Math.round(az/22.5)%16];
     const vis=PL_BODIES.filter(n=>pos[n].leg).sort((a,b)=>pos[b].alt-pos[a].alt);
-    leg.innerHTML=vis.length?vis.map(n=>`<span class="pl-item"><span class="pl-dot" style="background:${P_COL[n]}"></span>${P_NAME[n]} ${pos[n].alt.toFixed(0)}\u00b0 ${dir(pos[n].az)}</span>`).join('')
+    leg.innerHTML=vis.length?vis.map(n=>`<span class="pl-item"><span class="pl-dot" style="background:${P_COL[n]}"></span>${P_NAME[n]}<span class="pl-alt">${pos[n].alt.toFixed(0)}\u00b0</span><span class="pl-dir">${dir(pos[n].az)}</span></span>`).join('')
       :(sunSel.alt>=PL_DUSK?'<span class="pl-empty">Zu hell &ndash; die Kurven zeigen die Nacht</span>':'<span class="pl-empty">Kein Planet \u00fcber dem Horizont</span>');
   }
 }
