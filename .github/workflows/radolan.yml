@@ -2,24 +2,31 @@ name: RADOLAN Tagesregen
 
 on:
   schedule:
-    - cron: "35 * * * *"
-  workflow_dispatch:
+    # zweimal pro Stunde (UTC), um die GitHub-Drosselung geplanter Jobs abzufedern:
+    # faellt ein Lauf aus, greift der andere. :35 holt die eben beendete Stunde
+    # (RW hat ~30 min Latenz), :05 ist der Nachzuegler-Versuch der Vorstunde.
+    - cron: "5,35 * * * *"
+  workflow_dispatch:           # erlaubt manuelles Ausloesen zum Testen
 
 permissions:
-  contents: write
+  contents: write              # noetig, damit die Action radolan.json committen darf
 
 jobs:
   radolan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: numpy installieren
         run: pip install --quiet numpy
+
       - name: RADOLAN holen und radolan.json schreiben
         run: python radolan_regen.py
+
       - name: radolan.json committen (nur bei Aenderung)
         run: |
           git config user.name  "github-actions[bot]"
