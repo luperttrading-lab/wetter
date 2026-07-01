@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.87</span>
+      <span class="ver">v1.88</span>
     </div>
   </header>
 
@@ -1165,8 +1165,8 @@ function drawUV(h){
 /* --- Klarsky-Glocke ueber das amtliche BfS-Messbild legen (gleiche Achsen wie das PNG) --- */
 // BfS-PNG-Plotgeometrie als Bruchteile der Bildflaeche. Am Geraet feinjustierbar,
 // falls die blaue Linie minimal verschoben sitzt (X pixel-verifiziert, Y aus Screenshot vermessen):
-const BFS_X0=0.1568, BFS_X1=0.8676;  // 6 Uhr .. 21 Uhr  (Anteil der Breite)
-const BFS_Y9=0.1034, BFS_Y0=0.8980;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Hoehe)
+const BFS_X0=0.1280, BFS_X1=0.8970;  // 6 Uhr .. 21 Uhr  (Anteil der Bildbreite, pixel-vermessen)
+const BFS_Y9=0.1657, BFS_Y0=0.7935;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Bildhoehe, pixel-vermessen)
 function drawBfsOverlay(){
   const img=el("bfsUv"),cv=el("bfsOvl"),h=lastUVH;
   if(!img||!cv||!h||!h.uv_index_clear_sky||!h.time)return;
