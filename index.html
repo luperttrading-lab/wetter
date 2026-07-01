@@ -202,6 +202,7 @@
   .uvleg i.bars{width:12px;height:11px;border-radius:2px;background:linear-gradient(0deg,#46a13a,#f5d800,#f15a16,#c41f3e)}
   .uvleg i.glock{width:15px;height:0;border-top:3px solid #3a4453;border-radius:2px}
   .uvnote{font-size:9.5px;color:var(--faint);text-align:center;margin-top:3px;line-height:1.3}
+  #wolkenCv{width:100%;display:block;border-radius:12px;background:#5c7450}
   .bfscard{padding:13px 14px 9px}
   .bfswrap{margin-top:8px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--line);position:relative}
   .bfsovl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -252,7 +253,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.04</span>
+      <span class="ver">v2.05</span>
     </div>
   </header>
 
@@ -285,6 +286,7 @@
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
+    <div id="wolkenSec" class="hidden"><div class="sect">Wolken im Umkreis · jetzt</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = bewölkt &#183; grün = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Modelldaten (Open-Meteo), stündlich &#8211; noch kein Satellit</div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -1274,12 +1276,65 @@ function drawBfsOverlay(){
 }
 
 
+/* --- Wolken im Umkreis: Open-Meteo cloud_cover-Gitter -> Canvas-Heatmap --- */
+const WOLK={latN:51.10,latS:50.00,lonW:7.72,lonE:9.58,nx:12,ny:12};
+const WOLK_CITIES=[
+  {n:"Marburg",la:50.81,lo:8.77,b:1},{n:"Alsfeld",la:50.75,lo:9.27},
+  {n:"Gie\u00dfen",la:50.58,lo:8.68,b:1},{n:"Wetzlar",la:50.56,lo:8.50},
+  {n:"Friedberg",la:50.34,lo:8.76},{n:"Frankfurt",la:50.11,lo:8.68,b:1}
+];
+function wolkenURL(){
+  const la=[],lo=[];
+  for(let r=0;r<WOLK.ny;r++){const y=WOLK.latN-(WOLK.latN-WOLK.latS)*r/(WOLK.ny-1);
+    for(let c=0;c<WOLK.nx;c++){la.push(y.toFixed(2));lo.push((WOLK.lonW+(WOLK.lonE-WOLK.lonW)*c/(WOLK.nx-1)).toFixed(2));}}
+  return `https://api.open-meteo.com/v1/forecast?latitude=${la.join(",")}&longitude=${lo.join(",")}&current=cloud_cover&timezone=Europe%2FBerlin`;
+}
+let _wolkGrid=null;
+function renderWolken(j){
+  const sec=el("wolkenSec");if(!sec)return;
+  const arr=Array.isArray(j)?j:(j?[j]:[]);
+  if(arr.length<WOLK.nx*WOLK.ny){sec.classList.add("hidden");return;}
+  const g=[];for(let r=0;r<WOLK.ny;r++){g[r]=[];for(let c=0;c<WOLK.nx;c++){const o=arr[r*WOLK.nx+c];g[r][c]=(o&&o.current&&o.current.cloud_cover!=null)?+o.current.cloud_cover:0;}}
+  _wolkGrid=g;sec.classList.remove("hidden");drawWolken();
+}
+function drawWolken(){
+  const cv=el("wolkenCv"),g=_wolkGrid;if(!cv||!g)return;
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  const W=Math.max(140,Math.round(cv.clientWidth||cv.parentElement.clientWidth||300)),H=Math.round(W*0.93);
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.height=H+"px";
+  const x=cv.getContext("2d");
+  const img=x.createImageData(cv.width,cv.height),d=img.data,ny=WOLK.ny,nx=WOLK.nx;
+  const GN=[92,116,80],WH=[247,250,252];
+  for(let py=0;py<cv.height;py++){
+    const v=py/(cv.height-1),gy=v*(ny-1),y0=Math.min(ny-2,Math.floor(gy)),fy=gy-y0;
+    let o=py*cv.width*4;
+    for(let px=0;px<cv.width;px++){
+      const u=px/(cv.width-1),gx=u*(nx-1),x0=Math.min(nx-2,Math.floor(gx)),fx=gx-x0;
+      const t=g[y0][x0]*(1-fx)+g[y0][x0+1]*fx, b=g[y0+1][x0]*(1-fx)+g[y0+1][x0+1]*fx;
+      let cl=(t*(1-fy)+b*fy)/100;if(cl<0)cl=0;else if(cl>1)cl=1;
+      d[o]=GN[0]+(WH[0]-GN[0])*cl;d[o+1]=GN[1]+(WH[1]-GN[1])*cl;d[o+2]=GN[2]+(WH[2]-GN[2])*cl;d[o+3]=255;o+=4;
+    }
+  }
+  x.putImageData(img,0,0);
+  x.setTransform(dpr,0,0,dpr,0,0);
+  const P=(la,lo)=>[(lo-WOLK.lonW)/(WOLK.lonE-WOLK.lonW)*W,(WOLK.latN-la)/(WOLK.latN-WOLK.latS)*H];
+  WOLK_CITIES.forEach(ci=>{const p=P(ci.la,ci.lo);if(p[0]<0||p[0]>W||p[1]<0||p[1]>H)return;
+    x.fillStyle="rgba(20,24,30,.6)";x.beginPath();x.arc(p[0],p[1],2.4,0,7);x.fill();
+    x.font=(ci.b?"700 12px":"600 11px")+" -apple-system,sans-serif";x.textAlign="left";x.textBaseline="middle";
+    x.lineWidth=3;x.strokeStyle="rgba(255,255,255,.85)";x.strokeText(ci.n,p[0]+5,p[1]);x.fillStyle="#141821";x.fillText(ci.n,p[0]+5,p[1]);});
+  const s=P(LAT,LON);
+  x.fillStyle="rgba(232,0,11,.18)";x.beginPath();x.arc(s[0],s[1],13,0,7);x.fill();
+  x.fillStyle="#e8000b";x.beginPath();x.arc(s[0],s[1],6,0,7);x.fill();
+  x.lineWidth=2;x.strokeStyle="#fff";x.stroke();
+}
+
 /* --- Lader (parallel, fehlertolerant) --- */
 function loadExtras(){
   renderAirGrid(null); // Mond sofort, Rest folgt
   const ll=`latitude=${LAT}&longitude=${LON}`;
   fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{renderRainHours(d);renderPrecipToday(d);}).catch(e=>{el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
+  fetchJSON(wolkenURL()).then(renderWolken).catch(e=>{el("wolkenSec").classList.add("hidden");console.warn("wolken",e.message);});
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
   fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`).then(renderForecast).catch(e=>{el("fcSec").classList.add("hidden");console.warn("fc",e.message);});
   loadIss();
