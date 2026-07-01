@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.97</span>
+      <span class="ver">v1.98</span>
     </div>
   </header>
 
@@ -1197,10 +1197,14 @@ function drawUV(h){
   const pxA=gx0,pxB=gx1;
   x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
   for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);if(_gf){x.moveTo(px,Y(uv));_gf=false;}else x.lineTo(px,Y(uv));}x.stroke();
-  // stuendliche Open-Meteo-Klarsky-Stuetzpunkte als duenne schwarze Treppenfunktion (Rohdaten, zentriert um jede volle Stunde)
-  x.strokeStyle="rgba(0,0,0,.6)";x.lineWidth=1;x.lineJoin="miter";x.lineCap="butt";x.beginPath();
-  for(let i=i0;i<=i1;i++){if(cs[i]==null)continue;const yv=Y(cs[i]||0),xL=Math.max(gx0,X(tms[i]-1800e3)),xR=Math.min(gx1,X(tms[i]+1800e3));if(i===i0)x.moveTo(xL,yv);else x.lineTo(xL,yv);x.lineTo(xR,yv);}
+  // stuendliche REALE Messwerte als Vorwaerts-Treppe: Messpunkt = linke Ecke, dann 1h nach rechts, dann Sprung zum naechsten.
+  // Nur so weit wie gemessen (real[i]!=null, d.h. bis jetzt) - danach ist die Bewoelkung der Zukunft unbekannt.
+  const _xNow=X(now);
+  x.strokeStyle="rgba(0,0,0,.78)";x.lineWidth=1.1;x.lineJoin="miter";x.lineCap="butt";x.beginPath();let _sf=true;
+  for(let i=i0;i<=i1;i++){if(real[i]==null){_sf=true;continue;}const xL=X(tms[i]);if(xL>_xNow+1)break;const xR=Math.min(X(tms[i]+3600e3),_xNow),yv=Y(real[i]);if(_sf){x.moveTo(xL,yv);_sf=false;}else x.lineTo(xL,yv);x.lineTo(xR,yv);}
   x.stroke();x.lineJoin="round";x.lineCap="round";
+  // Messpunkte an den Eckpunkten exakt markieren (kleiner Punkt mit weissem Rand fuer Kontrast auf den Saeulen)
+  for(let i=i0;i<=i1;i++){if(real[i]==null)continue;const xp=X(tms[i]);if(xp>_xNow+1)break;const yp=Y(real[i]);x.beginPath();x.arc(xp,yp,2.2,0,7);x.fillStyle="#111";x.fill();x.lineWidth=1;x.strokeStyle="#fff";x.stroke();}
   // jetzt-Marker
   if(now>=t6&&now<=t21){const xn=X(now);x.strokeStyle="rgba(23,32,46,.3)";x.setLineDash([2,2]);x.lineWidth=1;x.beginPath();x.moveTo(xn,gy0);x.lineTo(xn,gy1);x.stroke();x.setLineDash([]);
     const uvNow=realAt(now);if(uvNow!=null){const yn=Y(uvNow);x.beginPath();x.arc(xn,yn,4.5,0,7);x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(uvNow)))];x.fill();x.lineWidth=1.6;x.strokeStyle="#fff";x.stroke();}
