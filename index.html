@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.03</span>
+      <span class="ver">v2.04</span>
     </div>
   </header>
 
@@ -776,7 +776,10 @@ function makeSunBell(cs,tms,t6,t21,fallback){
   if(!window.satellite)return fallback;
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
   if(i0<0)return fallback;
-  const k=1.72;// Exponent fest, BfS-konform: die amtliche Klarsky-Kurve folgt UV~sin(Hoehe)^1.72 (aus BfS-Grafik vermessen, R2=0.9998); der fruehere Open-Meteo-Fit (~1.51) fiel morgens/abends zu flach ab
+  let sx=0,sy=0,sxx=0,sxy=0,n=0;
+  for(let i=i0;i<=i1;i++){const mu=_sunMu(tms[i]),cv=cs[i]||0;if(mu!=null&&mu>0.12&&cv>0.4){const lx=Math.log(mu),ly=Math.log(cv);sx+=lx;sy+=ly;sxx+=lx*lx;sxy+=lx*ly;n++;}}
+  // k an Open-Meteos Klarsky-Werte gefittet (~1,51) - MUSS zur selben Quelle passen wie die Saeulen/Treppe (Open-Meteo uv_index), sonst ragt die reale UV an den Flanken ueber die Kurve
+  let k=1.2;if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9)k=Math.max(0.6,Math.min(1.8,(n*sxy-sx*sy)/den));}
   let muMax=0;for(let m=t6;m<=t21;m+=180000){const mu=_sunMu(m);if(mu!=null&&mu>muMax)muMax=mu;}
   let csMax=0;for(let i=i0;i<=i1;i++)if((cs[i]||0)>csMax)csMax=cs[i];
   if(muMax<=0||csMax<=0)return fallback;
