@@ -147,11 +147,11 @@
   .pl-card{background:#0b1320;border:1px solid #1a2838;padding:0 0 11px;overflow:hidden;transition:background .3s,border-color .3s}
   .sec-err{font-size:12.5px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:11px 13px}
   .pl-wrap{position:relative}
-  #planetenCv{width:100%;display:block}
+  #planetenCv{width:100%;display:block;touch-action:none}
   #planetenSunCv{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:3}
   .pl-wheel{position:absolute;top:8px;right:8px;z-index:2;width:76px;text-align:center;background:var(--chipBg,rgba(8,14,24,.74));border:1px solid var(--chipBd,rgba(255,255,255,.16));border-radius:11px;padding:5px 0 4px;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--chipInk,#e7edf5);font-variant-numeric:tabular-nums;cursor:ns-resize;transition:background .3s,border-color .3s,color .3s}
   .pw-a{font-size:11px;color:var(--chipMut,#93a0b0);height:15px;line-height:15px;transition:color .3s}
-  .pw-b{font-size:16px;font-weight:800;height:21px;line-height:21px;color:var(--chipAcc,#ffd66b);transition:color .3s}
+  .pw-b{font-size:16px;font-weight:800;height:21px;line-height:21px;color:var(--chipAcc,#ffd66b);border-top:1px solid var(--chipHr,rgba(255,255,255,.2));border-bottom:1px solid var(--chipHr,rgba(255,255,255,.2));transition:color .3s,border-color .3s}
   .pl-now{position:absolute;top:8px;left:8px;z-index:2;background:var(--chipBg,rgba(8,14,24,.74));border:1px solid var(--chipBd,rgba(255,255,255,.16));border-radius:11px;color:var(--chipInk,#e7edf5);font:700 12.5px/1 -apple-system,system-ui,sans-serif;padding:9px 12px;opacity:.5;transition:background .3s,border-color .3s,color .3s}
   .pl-now.on{opacity:1;border-color:var(--chipAcc,#ffd66b);color:var(--chipAcc,#ffd66b)}
   .pl-leg{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;align-content:flex-start;margin-top:11px;padding:0 12px;min-height:38px}
@@ -268,7 +268,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.21</span>
+      <span class="ver">v2.22</span>
     </div>
   </header>
 
@@ -1421,6 +1421,11 @@ function plLerpHex(a,b,t){const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1
     g=Math.round((pa>>8&255)+((pb>>8&255)-(pa>>8&255))*t),
     bl=Math.round((pa&255)+((pb&255)-(pa&255))*t);
   return'#'+((1<<24)|(r<<16)|(g<<8)|bl).toString(16).slice(1);}
+/* Lesbarkeit per WCAG-Kontrast: Schrift kippt exakt, wenn der lokale Hintergrund die Mitte kreuzt */
+const _plLin=c=>{c/=255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);};
+function plYLum(h){const n=parseInt(h.slice(1),16);return .2126*_plLin(n>>16&255)+.7152*_plLin(n>>8&255)+.0722*_plLin(n&255);}
+function plCR(a,b){const x=plYLum(a),y=plYLum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+function plInk(bg,dark,light){return plCR(bg,dark)>=plCR(bg,light)?dark:light;}
 function skyTheme(sunAlt){
   const K=SKY_KEYS;
   if(sunAlt>=K[0][0])return K[0].slice(1);
@@ -1481,38 +1486,47 @@ function drawPlaneten(){
   ctx.fillStyle=thBot;ctx.fillRect(0,mT+ph,W,H-mT-ph);    // Boden-Rand in Himmelsfarbe
 
   /* Karte + Bedienelemente folgen dem Himmel: tags hell, nachts dunkel (App ist sonst hell).
-     Chips schalten DISKRET bei Sonne +5° (frueh vor Sonnenuntergang) — die CSS-Transition
-     blendet weich; ein kontinuierlicher Verlauf ergab unlesbares Grau-auf-Grau im Uebergang. */
-  const dk=sunSel.alt<5;
-  const chipBg=dk?'rgba(10,15,26,.80)':'rgba(255,255,255,.80)',
-    chipBd=dk?'rgba(255,255,255,.25)':'rgba(23,50,74,.25)',
-    chipInk=dk?'#e7edf5':'#17324a',
-    chipMut=dk?'#93a0b0':'#5c748c',
-    chipAcc=dk?'#ffd66b':'#8a5200';
+     Chip-Hintergrund blendet SANFT; die Schrift kippt per Kontrastrechnung gegen den
+     effektiv durchscheinenden Hintergrund (~Sonne +6°). Nie Grau-auf-Grau. */
+  const dn=Math.max(0,Math.min(1,(sunSel.alt+1)/12));
+  const chipBase=plLerpHex('#0a0f1a','#ffffff',dn),
+    chipEff=plLerpHex(chipBase,thTop,.20),                 // 80% Chip + 20% Himmel scheint durch
+    chipDarkTxt=plCR(chipEff,'#17324a')>=plCR(chipEff,'#e7edf5');
+  const chipBg=rgba(chipBase,.80),
+    chipBd=chipDarkTxt?'rgba(23,50,74,.28)':'rgba(255,255,255,.25)',
+    chipInk=chipDarkTxt?'#17324a':'#e7edf5',
+    chipMut=chipDarkTxt?'#5c748c':'#9aa7b6',
+    chipAccAmb=plInk(chipEff,'#8a5200','#ffd66b'),
+    chipAcc=plCR(chipEff,chipAccAmb)>=3.2?chipAccAmb:chipInk, // Blend-Mitte: Bernstein zu flau -> Tinte
+    chipHr=chipDarkTxt?'rgba(23,50,74,.22)':'rgba(255,255,255,.20)';
+  /* Boden-Tinte: Kontrast gegen die Horizontfarbe (Kompass, Legende, Hinweis) */
+  const botInk=plInk(thBot,'#1c2f45','#eef2f8'),botMut=plLerpHex(botInk,thBot,.32);
+  const gradAt=f=>f<.62?plLerpHex(thTop,thMid,f/.62):plLerpHex(thMid,thBot,(f-.62)/.38);
   const card=cv.parentElement?cv.parentElement.parentElement:null;
   if(card&&card.style&&card.style.setProperty){
-    card.style.background=thBot;card.style.borderColor=rgba(thInk,.20);
+    card.style.background=thBot;card.style.borderColor=rgba(botInk,.22);
     const st=card.style;
     st.setProperty('--chipBg',chipBg);st.setProperty('--chipBd',chipBd);st.setProperty('--chipInk',chipInk);
-    st.setProperty('--chipMut',chipMut);st.setProperty('--chipAcc',chipAcc);
-    st.setProperty('--plInk',thInk);st.setProperty('--plMut',plLerpHex(thInk,thBot,.42));
+    st.setProperty('--chipMut',chipMut);st.setProperty('--chipAcc',chipAcc);st.setProperty('--chipHr',chipHr);
+    st.setProperty('--plInk',botInk);st.setProperty('--plMut',botMut);
   }
 
   ctx.font='9px system-ui,sans-serif';
   for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){ctx.strokeStyle=rgba(thGrid,.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(a),mT);ctx.lineTo(X(a),mT+ph);ctx.stroke();}
-  for(let al=Math.ceil(altMin/10)*10;al<=altMax;al+=10){ctx.strokeStyle=al===0?thZero:rgba(thGrid,.55);ctx.lineWidth=al===0?2:1;ctx.beginPath();ctx.moveTo(mL,Y(al));ctx.lineTo(mL+pw,Y(al));ctx.stroke();ctx.fillStyle=thAxis;ctx.textAlign='right';ctx.fillText(al+'\u00b0',mL-4,Y(al)+3);}
+  for(let al=Math.ceil(altMin/10)*10;al<=altMax;al+=10){ctx.strokeStyle=al===0?thZero:rgba(thGrid,.55);ctx.lineWidth=al===0?2:1;ctx.beginPath();ctx.moveTo(mL,Y(al));ctx.lineTo(mL+pw,Y(al));ctx.stroke();ctx.fillStyle=plInk(gradAt(Math.min(1,Math.max(0,(Y(al)-mT)/ph))),'#1c2f45','#eef2f8');ctx.textAlign='right';ctx.fillText(al+'\u00b0',mL-4,Y(al)+3);}
   /* Zone oberhalb altMax (komprimierte Sonnenbahn): eigene Skala, gestrichelt markiert */
   {const zs=(mT-10)/(70-altMax);                    // px pro Grad in der Zone
-   const step=zs*10<13?20:10;                        // bei enger Zone nur jede 20°-Marke
+   const step=zs*10<13?20:10;                        // bei enger Zone nur jede 20\u00b0-Marke
    ctx.font='8.5px system-ui,sans-serif';ctx.textAlign='right';ctx.setLineDash([3,4]);
+   const zInk=plInk(thTop,'#1c2f45','#eef2f8');
    for(let al=70;al>altMax+step*0.35;al-=step){const yz=mT-(al-altMax)*zs;
      ctx.strokeStyle=rgba(thGrid,.45);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mL,yz);ctx.lineTo(mL+pw,yz);ctx.stroke();
-     ctx.fillStyle=rgba(thAxis,.95);ctx.fillText(al+'\u00b0',mL-4,yz+3);}
+     ctx.fillStyle=rgba(zInk,.95);ctx.fillText(al+'\u00b0',mL-4,yz+3);}
    ctx.setLineDash([]);ctx.font='9px system-ui,sans-serif';}
   const baseY=mT+ph;
   const compass={0:'N',45:'NO',90:'O',135:'SO',180:'S',225:'SW',270:'W',315:'NW',360:'N'};
   ctx.textAlign='center';
-  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){const k=norm360(a),card=compass[k];ctx.strokeStyle=card?thAxis:rgba(thGrid,.8);ctx.lineWidth=card?1.5:1;ctx.beginPath();ctx.moveTo(X(a),baseY);ctx.lineTo(X(a),baseY+(card?6:3));ctx.stroke();if(card){ctx.font='700 11px system-ui,sans-serif';ctx.fillStyle=thInk;ctx.fillText(card,X(a),baseY+17);}}
+  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){const k=norm360(a),card=compass[k];ctx.strokeStyle=card?thAxis:rgba(thGrid,.8);ctx.lineWidth=card?1.5:1;ctx.beginPath();ctx.moveTo(X(a),baseY);ctx.lineTo(X(a),baseY+(card?6:3));ctx.stroke();if(card){ctx.font='700 11px system-ui,sans-serif';ctx.fillStyle=botInk;ctx.fillText(card,X(a),baseY+17);}}
 
   PL_BODIES.forEach(n=>{const arc=arcs[n];const col=n==='mond'?thMoon:P_COL[n];
     ctx.strokeStyle=rgba(col,.82);ctx.lineWidth=2;ctx.beginPath();let pen=false,pAz=null;
@@ -1538,8 +1552,9 @@ function drawPlaneten(){
     if(sunSel.alt>altMax){ // in der Zone gilt eine andere Skala -> Gradzahl direkt an der Sonne
       sc.save();sc.font='700 10px system-ui,sans-serif';sc.textBaseline='middle';
       const left=x>238;sc.textAlign=left?'right':'left';
-      sc.fillStyle=dk?'#ffe9a8':'#17324a';
-      sc.shadowColor=dk?'rgba(0,0,0,.55)':'rgba(255,255,255,.65)';sc.shadowBlur=3;
+      const tagInk=plInk(thTop,'#17324a','#ffe9a8');
+      sc.fillStyle=tagInk;
+      sc.shadowColor=tagInk==='#17324a'?'rgba(255,255,255,.65)':'rgba(0,0,0,.55)';sc.shadowBlur=3;
       sc.fillText(Math.round(sunSel.alt)+'\u00b0',left?x-16:x+16,y);
       sc.restore();
     }
@@ -1622,6 +1637,7 @@ let _plDrag=false,_plY0=0,_plMin0=0,_plMoved=0;
 function setPlMin(m){PL_STATE.min=((Math.round(m)%1440)+1440)%1440;drawPlaneten();}
 function initPlWheel(){
   const w=el("plWheel"),nb=el("plNow");if(!w||w._init)return;w._init=true;
+  const cvv=el("planetenCv");if(cvv&&cvv.addEventListener)cvv.addEventListener("touchmove",e=>e.preventDefault(),{passive:false}); // Abrutschen vom Rad scrollt die Seite nicht
   const start=y=>{_plDrag=true;_plY0=y;_plMin0=PL_STATE.min!=null?PL_STATE.min:plQ5(plNowMin());_plMoved=0;};
   w.addEventListener("touchstart",e=>start(e.touches[0].clientY),{passive:true});
   w.addEventListener("pointerdown",e=>{if(e.pointerType!=="touch")start(e.clientY);});
