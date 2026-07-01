@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.98</span>
+      <span class="ver">v2.0</span>
     </div>
   </header>
 
@@ -288,7 +288,7 @@
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
-    <div id="airSec" class="hidden"><div class="sect">UV, Mond &amp; Pollen</div><div class="grid" id="gridAir"></div></div>
+    <div id="airSec" class="hidden"><div class="sect">UV &amp; Mond</div><div class="grid" id="gridAir"></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
   </div>
 
@@ -721,6 +721,7 @@ function renderTiles(s,d){
   g.innerHTML=
     `<div class="tile wide"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px"><div><div class="k">Wind &amp; Böen</div><div class="val" style="margin-top:7px">${s.wind!=null?Math.round(s.wind):"–"} <small>km/h</small></div>${windSub2?`<div class="sub">${windSub2}</div>`:""}</div>${windRoseSvg}</div></div>`+
     `<div class="tile wide"><div class="k">Vergleich zu gestern</div><div class="cmp" style="margin-top:7px"><div class="big" style="color:${cmpCol}">${cmpArrow} ${dT!=null?Math.abs(dT).toFixed(0)+"°":""}</div><div class="sub" style="margin:0">${cmpTxt} um diese Uhrzeit</div></div></div>`+
+    `<div class="tile wide"><div class="k">Pollenflug</div><div class="sub" id="pollenSub" style="margin-top:8px;flex-wrap:wrap;gap:8px 4px">lädt …</div></div>`+
     tile("Luftdruck",s.press!=null?Math.round(s.press):"–","hPa",pSub)+
     tile("Taupunkt",s.dew!=null?Math.round(s.dew)+"°":"–","",dewSub)+
     tile("Luftfeuchte",s.rh!=null?Math.round(s.rh):"–","%",s.rh!=null?(s.rh<35?"trocken":s.rh<65?"moderat":"feucht"):"")+
@@ -732,6 +733,7 @@ function renderTiles(s,d){
     `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
       (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
       `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
+  fillPollen();
 }
 
 /* ---------- Demo (realer Hitze-Snapshot mit allen Feldern) ---------- */
@@ -788,6 +790,8 @@ const UVSTOPS=[[0,"#006b04"],[1,"#00a014"],[2,"#5cb800"],[3,"#b6d300"],[4,"#ffe2
 function uvFine(u){if(u==null)return"#9aa7b8";if(u<=0)return UVSTOPS[0][1];if(u>=11)return UVSTOPS[10][1];for(let i=0;i<UVSTOPS.length-1;i++){if(u>=UVSTOPS[i][0]&&u<=UVSTOPS[i+1][0]){const f=(u-UVSTOPS[i][0])/(UVSTOPS[i+1][0]-UVSTOPS[i][0]),A=_hx(UVSTOPS[i][1]),B=_hx(UVSTOPS[i+1][1]);return`rgb(${Math.round(A[0]+(B[0]-A[0])*f)},${Math.round(A[1]+(B[1]-A[1])*f)},${Math.round(A[2]+(B[2]-A[2])*f)})`;}}return UVSTOPS[10][1];}
 function aqiCat(a){if(a==null)return["","#9aa7b8"];if(a<=20)return["sehr gut","#3a9d5d"];if(a<=40)return["gut","#79b51c"];if(a<=60)return["mäßig","#c79100"];if(a<=80)return["schlecht","#e07a1f"];if(a<=100)return["sehr schlecht","#d23b3b"];return["extrem schlecht","#8b3fb0"];}
 function pollenCat(v){if(v==null||v<1)return["keine","#cbd5e1"];if(v<10)return["niedrig","#79b51c"];if(v<30)return["mäßig","#c79100"];if(v<60)return["hoch","#e07a1f"];return["sehr hoch","#d23b3b"];}
+let _pollenSub=null;// Pollen-Kachel liegt jetzt im oberen Grid (renderTiles); renderAirGrid befuellt sie, sobald die Luftdaten da sind (Reihenfolge-unabhaengig)
+function fillPollen(){const e=document.getElementById("pollenSub");if(e&&_pollenSub!=null)e.innerHTML=_pollenSub;}
 function cmfUV(cc){if(cc==null)return 1;return Math.max(0.25,1-0.70*Math.pow(cc/100,2));}
 
 function moonInfo(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14)/86400000,days=d.getTime()/86400000-ref;let frac=((days/syn)%1+1)%1;const illum=Math.round((1-Math.cos(2*Math.PI*frac))/2*100);
@@ -857,6 +861,7 @@ function renderNowcast(j){
 function renderRainHours(d){
   const sec=el("rainHrSec");if(!sec)return;
   const h=d&&d.hourly;if(!h||!h.time||!h.precipitation){sec.classList.add("hidden");return;}
+  _rainHourly=h;if(_lastFcJ)renderForecast(_lastFcJ);// Stundendaten fuer die "Heute"-Restrechnung der Vorhersage bereitstellen
   const now=Date.now();
   const H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0),pop:h.precipitation_probability?h.precipitation_probability[i]:null}))
     .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);
@@ -1021,7 +1026,18 @@ function renderUmkreis(j){
 }
 
 /* --- Render: 7-Tage --- */
+let _rainHourly=null,_lastFcJ=null;
+// Fuer HEUTE nur den Rest des Tages (ab der laufenden Stunde) statt der Ganztages-Bilanz: bereits gefallener Regen wird rausgerechnet.
+function _restToday(){
+  const h=_rainHourly;if(!h||!h.time||!h.precipitation)return null;
+  const nd=new Date();nd.setMinutes(0,0,0);const nowMs=nd.getTime();
+  const yStr=nd.getFullYear()+"-"+String(nd.getMonth()+1).padStart(2,"0")+"-"+String(nd.getDate()).padStart(2,"0");
+  let pp=null,mm=0,n=0;
+  for(let i=0;i<h.time.length;i++){if((h.time[i]||"").slice(0,10)!==yStr)continue;if(new Date(h.time[i]).getTime()<nowMs)continue;n++;if(h.precipitation[i]!=null)mm+=Math.max(0,+h.precipitation[i]||0);if(h.precipitation_probability&&h.precipitation_probability[i]!=null)pp=Math.max(pp==null?0:pp,h.precipitation_probability[i]);}
+  return n?{pp,mm:Math.round(mm*10)/10}:null;
+}
 function renderForecast(j){
+  _lastFcJ=j;
   const d=j&&j.daily,sec=el("fcSec");if(!d||!d.time||!d.time.length){sec.classList.add("hidden");return;}
   // nur Tage mit echten Werten (Open-Meteo liefert den letzten Tag manchmal als null)
   const days=[];for(let i=0;i<d.time.length;i++){const hi=d.temperature_2m_max[i],lo=d.temperature_2m_min[i];
@@ -1030,13 +1046,15 @@ function renderForecast(j){
   if(!days.length){sec.classList.add("hidden");return;}
   const aMax=Math.max(...days.map(x=>x.hi)),aMin=Math.min(...days.map(x=>x.lo)),span=Math.max(1,aMax-aMin);
   const titleEl=sec.querySelector(".sect");if(titleEl)titleEl.textContent=days.length+"-Tage-Vorhersage";
+  const _rt=_restToday();
   let html="";days.forEach((x,i)=>{
     if(i===7)html+=`<div class="fc-div">Langfristtrend</div>`;
     const wd=i===0?"Heute":new Date(x.t+"T12:00:00").toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"});
     const ic=wmo(x.wc)[0],left=((x.lo-aMin)/span)*100,width=Math.max(7,((x.hi-x.lo)/span)*100);
-    const ppPct=x.pp!=null&&x.pp>=10?`${dropMini}${x.pp}%`:"";
-    const mmShow=x.mm!=null&&x.mm>=0.1;
-    const mmTxt=mmShow?`<span class="mmbar" style="height:${Math.max(2,Math.min(16,Math.round(x.mm/15*16)))}px"></span><span class="mmv">${x.mm>=10?Math.round(x.mm):fmt1(x.mm)} mm</span>`:"";
+    const _pp=(i===0&&_rt)?_rt.pp:x.pp,_mm=(i===0&&_rt)?_rt.mm:x.mm;
+    const ppPct=_pp!=null&&_pp>=10?`${dropMini}${_pp}%`:"";
+    const mmShow=_mm!=null&&_mm>=0.1;
+    const mmTxt=mmShow?`<span class="mmbar" style="height:${Math.max(2,Math.min(16,Math.round(_mm/15*16)))}px"></span><span class="mmv">${_mm>=10?Math.round(_mm):fmt1(_mm)} mm</span>`:"";
     html+=`<div class="fc-row${i>=7?" far":""}"><div class="wd">${wd}</div><div class="fi">${icon(ic,26)}</div><div class="pp">${ppPct}${mmTxt}</div><div class="rng"><div class="lo">${Math.round(x.lo)}°</div><div class="track"><div class="fill" style="left:${left}%;width:${width}%;background:linear-gradient(90deg,${rgb(thermal(x.lo))},${rgb(thermal(x.hi))})"></div></div><div class="hiT">${Math.round(x.hi)}°</div></div></div>`;
   });
   if(days.length>7)html+=`<div class="fc-note">Tag 8–${days.length} ist Langfristtrend — deutlich geringere Vorhersagegüte, eher Tendenz als genaue Werte.</div>`;
@@ -1110,8 +1128,8 @@ function renderAirGrid(air){
   if(c){
     _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner();
     const types=[["Gräser",c.grass_pollen],["Birke",c.birch_pollen],["Erle",c.alder_pollen],["Beifuß",c.mugwort_pollen],["Ambrosia",c.ragweed_pollen]].filter(t=>t[1]!=null&&t[1]>=1).sort((a,b)=>b[1]-a[1]);
-    const psub=types.length?types.slice(0,3).map(t=>{const[pc,pcol]=pollenCat(t[1]);return `<span style="white-space:nowrap"><span class="lvl" style="background:${pcol}"></span>${t[0]}: ${pc}</span>`;}).join("&nbsp;&nbsp; "):"kein nennenswerter Pollenflug";
-    html+=`<div class="tile wide"><div class="k">Pollenflug</div><div class="sub" style="margin-top:8px;flex-wrap:wrap;gap:8px 4px">${psub}</div></div>`;
+    _pollenSub=types.length?types.slice(0,3).map(t=>{const[pc,pcol]=pollenCat(t[1]);return `<span style="white-space:nowrap"><span class="lvl" style="background:${pcol}"></span>${t[0]}: ${pc}</span>`;}).join("&nbsp;&nbsp; "):"kein nennenswerter Pollenflug";
+    fillPollen();// Pollen-Kachel sitzt jetzt oben im Haupt-Grid (nach 'Vergleich zu gestern')
   }
   el("gridAir").innerHTML=html;
   lastUVH=h;if(h&&h.uv_index_clear_sky)requestAnimationFrame(()=>{drawUV(h);drawBfsOverlay();});
