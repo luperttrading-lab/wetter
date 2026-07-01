@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.89</span>
+      <span class="ver">v1.90</span>
     </div>
   </header>
 
@@ -1120,7 +1120,7 @@ function drawUV(h){
   }
   if(!W)return;
   const plotW=gx1-gx0;
-  const scaleW=17,scaleX=Math.max(2,gx0-4-scaleW);// Farbskala direkt links am Plot (wie BfS)
+  const scaleW=17,scaleX=Math.max(2,gx0-1-scaleW);// Farbskala direkt links am Plot (wie BfS)
   const gy0=12,gy1=gy0+plotH,Hpx=gy1+16;
   cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
@@ -1171,7 +1171,7 @@ function drawUV(h){
 // BfS-PNG-Plotgeometrie als Bruchteile der Bildflaeche. Am Geraet feinjustierbar,
 // falls die blaue Linie minimal verschoben sitzt (X pixel-verifiziert, Y aus Screenshot vermessen):
 const BFS_X0=0.1280, BFS_X1=0.8970;  // 6 Uhr .. 21 Uhr  (Anteil der Bildbreite, pixel-vermessen)
-const BFS_Y9=0.1657, BFS_Y0=0.7935;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Bildhoehe, pixel-vermessen)
+const BFS_Y9=0.1470, BFS_Y0=0.9110;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Bildhoehe, aus BfS-Skala-Ziffern IMG_2319 rueckgerechnet)
 function drawBfsOverlay(){
   const img=el("bfsUv"),cv=el("bfsOvl"),h=lastUVH;
   if(!img||!cv||!h||!h.uv_index_clear_sky||!h.time)return;
