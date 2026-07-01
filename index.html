@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.85</span>
+      <span class="ver">v1.86</span>
     </div>
   </header>
 
@@ -1079,7 +1079,7 @@ function renderAirGrid(air){
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
     html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · Wettenberg</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten${vdLine}</div></div>`;
-    html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung · <b style="color:#1b3a6b">blaue Linie</b> = max. möglich (Klarsky-Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung · <b style="color:#1b3a6b">blaue Linie</b> = max. möglich (Klarsky-Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
@@ -1092,17 +1092,20 @@ function renderAirGrid(air){
   lastUVH=h;if(h&&h.uv_index_clear_sky)requestAnimationFrame(()=>{drawUV(h);drawBfsOverlay();});
 }
 
+function syncUV(){if(lastUVH){drawUV(lastUVH);drawBfsOverlay();}}
 function drawUV(h){
   const cv=el("uvchart");if(!cv||!h||!h.time||!h.uv_index_clear_sky)return;
   const cs=h.uv_index_clear_sky,real=h._real||[],tms=h.time.map(t=>new Date(t).getTime());
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
   if(i0<0||i1<=i0)return;
   const dpr=Math.min(window.devicePixelRatio||1,3);
-  // Breite vom Eltern-Container (uvcard-Inhalt) messen, NICHT von cv.clientWidth:
-  // cv.width=W*dpr verfälscht die clientWidth des Canvas bei Folge-Aufrufen -> Plot würde zu breit.
-  // So liegen 6h/21h bei 15.68%/86.76% der echten Kartenbreite und fluchten mit dem BfS-Bild darunter.
-  const _hp=cv.parentElement,_pcs=_hp?getComputedStyle(_hp):null;
-  const W=_hp?Math.round(_hp.clientWidth-parseFloat(_pcs.paddingLeft)-parseFloat(_pcs.paddingRight)):cv.clientWidth;if(!W)return;
+  // Breite DIREKT vom BfS-Bild übernehmen – dieselbe Breite, die drawBfsOverlay nutzt (und die sitzt).
+  // Dann zeichnen obere Grafik und untere BfS-Grafik 6h/21h an exakt derselben Stelle -> sie fluchten.
+  // (cv.clientWidth ist unbrauchbar, weil cv.width=W*dpr sie verfälscht.) Fallback: Container-Breite.
+  const _bfs=el("bfsUv");
+  let W=(_bfs&&_bfs.clientWidth>50)?_bfs.clientWidth:0;
+  if(!W){const _hp=cv.parentElement,_pcs=_hp?getComputedStyle(_hp):null;W=_hp?Math.round(_hp.clientWidth-parseFloat(_pcs.paddingLeft)-parseFloat(_pcs.paddingRight)):cv.clientWidth;}
+  if(!W)return;
   // BfS-Layout: feste X-Achse 6..21, Y 0..9, Verhältnis UV-Einheit:Stunde = 1.29
   const RATIO=1.29,yMax=9;
   // X-Achse exakt an die BfS-PNG-Geometrie angeglichen: Plotbereich 6..21 Uhr liegt
@@ -1110,7 +1113,7 @@ function drawUV(h){
   const gx0=Math.round(0.1568*W),gx1=Math.round(0.8676*W),plotW=gx1-gx0;
   const scaleW=17,scaleX=Math.max(2,gx0-4-scaleW);// Farbskala direkt links am Plot (wie BfS)
   const gy0=12,plotH=Math.round(yMax*RATIO*plotW/15),gy1=gy0+plotH,Hpx=gy1+16;
-  cv.style.height=Hpx+"px";const H=Hpx;
+  cv.style.width=W+"px";cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const day=new Date(tms[i0]);day.setHours(0,0,0,0);const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
   const X=t=>gx0+(gx1-gx0)*((t-t6)/(t21-t6)),Y=u=>gy1-(gy1-gy0)*(Math.min(u,yMax)/yMax);
