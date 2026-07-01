@@ -253,7 +253,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.09</span>
+      <span class="ver">v2.10</span>
     </div>
   </header>
 
@@ -1282,6 +1282,7 @@ const _merY=lat=>{const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1
 const _smooth=(e0,e1,v)=>{let t=(v-e0)/(e1-e0);t=t<0?0:t>1?1:t;return t*t*(3-2*t);};
 const WOLK={latN:51.10,latS:50.00,lonW:7.72,lonE:9.58,nx:12,ny:12,z:9};
 const WOLK_TILE="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const HOME_LAT=50.6481, HOME_LON=8.6743;   // echter Standort (Wettenberg) fuer den Karten-Pin (UV/Wetter nutzen weiter LAT/LON = stationsnah)
 const WOLK_CITIES=[
   {n:"Frankenberg",la:51.06,lo:8.80},
   {n:"Biedenkopf",la:50.91,lo:8.53},
@@ -1334,7 +1335,7 @@ function drawWolken(){
   const paintOverlay=()=>{
     x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";
     x.drawImage(oc,0,0,nx,ny,0,0,W,H);
-    const s=P(LAT,LON);
+    const s=P(HOME_LAT,HOME_LON);
     const placed=[[s[0]-11,s[1]-11,s[0]+11,s[1]+11]];            // Standort-Pin-Bereich sperren
     const hit=r=>placed.some(p=>!(r[2]<p[0]||r[0]>p[2]||r[3]<p[1]||r[1]>p[3]));
     WOLK_CITIES.slice().sort((a,b)=>(b.b?1:0)-(a.b?1:0)).forEach(ci=>{      // große Städte zuerst platzieren
