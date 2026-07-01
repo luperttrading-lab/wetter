@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.88</span>
+      <span class="ver">v1.89</span>
     </div>
   </header>
 
@@ -894,6 +894,10 @@ function renderRadolan(){
 /* --- "Regen im Umkreis": 3x3-Kacheln (1 km) um den eigenen Pixel aus radolan.json.umgebung_3x3. Erscheint nur bei Regen heute. --- */
 // feste Niederschlags-Farbskala 0-50 mm (rein blau, 0 hell -> 50 dunkelblau); feine Stufung im Alltagsbereich 0-15
 const UMK_STOPS=[[0,240,247,253],[2.5,200,224,246],[5,160,200,238],[8,118,176,226],[12,72,142,208],[16,46,112,188],[22,30,86,165],[30,22,66,140],[40,15,50,115],[50,10,36,92]];
+// adaptive Kontrast-Verstaerkung der Menge-Karte: Anker = eigener Standortwert,
+// Faktor = clamp(UMK_ZIEL/Spanne, 1, UMK_KMAX). Kleine Spannen werden gedehnt,
+// grosse (Gewitter) bleiben unangetastet -> keine Ueberzeichnung. Zum Nachjustieren:
+const UMK_ZIEL=3.0, UMK_KMAX=2.5;
 function umkColor(mm){
   mm=mm>0?mm:0;
   for(let i=0;i<UMK_STOPS.length-1;i++){const a=UMK_STOPS[i],b=UMK_STOPS[i+1];
@@ -982,7 +986,8 @@ function renderUmkreis(j){
   sec.classList.remove("hidden");
 
   requestAnimationFrame(()=>{
-    umkFill(el("umkCvA"),g,umkColor,SX,SY);                                  // absolut: Menge (Blau 0-50)
+    const ank=+j.summe_mm, fkt=span>0?Math.min(Math.max(UMK_ZIEL/span,1),UMK_KMAX):1;  // Standort-Anker + adaptiver Faktor
+    umkFill(el("umkCvA"),g,mm=>umkColor(ank+(mm-ank)*fkt),SX,SY);            // Menge (Blau 0-50): Kontrast um eigenen Wert verstaerkt
     umkFill(el("umkCvB"),g,mm=>umkTeal(span>0?(mm-mn)/span:0.5),SX,SY);      // relativ: Verteilung (Tuerkis)
     const pos=[16.6667,50,83.3333];let lbls="";
     g.forEach((row,i)=>row.forEach((v,k)=>{
