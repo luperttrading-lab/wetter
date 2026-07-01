@@ -252,7 +252,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v1.86</span>
+      <span class="ver">v1.87</span>
     </div>
   </header>
 
@@ -1098,22 +1098,26 @@ function drawUV(h){
   const cs=h.uv_index_clear_sky,real=h._real||[],tms=h.time.map(t=>new Date(t).getTime());
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
   if(i0<0||i1<=i0)return;
-  const dpr=Math.min(window.devicePixelRatio||1,3);
-  // Breite DIREKT vom BfS-Bild übernehmen – dieselbe Breite, die drawBfsOverlay nutzt (und die sitzt).
-  // Dann zeichnen obere Grafik und untere BfS-Grafik 6h/21h an exakt derselben Stelle -> sie fluchten.
-  // (cv.clientWidth ist unbrauchbar, weil cv.width=W*dpr sie verfälscht.) Fallback: Container-Breite.
-  const _bfs=el("bfsUv");
-  let W=(_bfs&&_bfs.clientWidth>50)?_bfs.clientWidth:0;
-  if(!W){const _hp=cv.parentElement,_pcs=_hp?getComputedStyle(_hp):null;W=_hp?Math.round(_hp.clientWidth-parseFloat(_pcs.paddingLeft)-parseFloat(_pcs.paddingRight)):cv.clientWidth;}
+  const dpr=Math.min(window.devicePixelRatio||1,3),yMax=9;
+  // Plot pixelgenau am tatsächlich gerenderten BfS-Bild ausrichten: 6/21 Uhr UND die Plot-Höhe
+  // (UV 0..9) werden aus der echten Position & Größe des BfS-Bildes übernommen -> beide Grafiken
+  // deckungsgleich (Breite, Höhe, Glockenform). Fallback ohne Bild: Container-Breite, Verhältnis 1.29.
+  const _bfs=el("bfsUv");let W,gx0,gx1,plotH;
+  if(_bfs&&_bfs.clientWidth>50){
+    const ir=_bfs.getBoundingClientRect(),cr=cv.getBoundingClientRect(),off=ir.left-cr.left;
+    W=Math.round(cr.width);
+    gx0=Math.round(off+BFS_X0*ir.width);gx1=Math.round(off+BFS_X1*ir.width);
+    plotH=Math.round((BFS_Y0-BFS_Y9)*ir.height);
+  }else{
+    const _hp=cv.parentElement,_pcs=_hp?getComputedStyle(_hp):null;
+    W=_hp?Math.round(_hp.clientWidth-parseFloat(_pcs.paddingLeft)-parseFloat(_pcs.paddingRight)):cv.clientWidth;
+    gx0=Math.round(BFS_X0*W);gx1=Math.round(BFS_X1*W);plotH=Math.round(1.29*yMax*(gx1-gx0)/15);
+  }
   if(!W)return;
-  // BfS-Layout: feste X-Achse 6..21, Y 0..9, Verhältnis UV-Einheit:Stunde = 1.29
-  const RATIO=1.29,yMax=9;
-  // X-Achse exakt an die BfS-PNG-Geometrie angeglichen: Plotbereich 6..21 Uhr liegt
-  // bei 15.68%..86.76% der Breite (aus BfS-PNG pixel-vermessen) -> Stunden fluchten mit der unteren Grafik
-  const gx0=Math.round(0.1568*W),gx1=Math.round(0.8676*W),plotW=gx1-gx0;
+  const plotW=gx1-gx0;
   const scaleW=17,scaleX=Math.max(2,gx0-4-scaleW);// Farbskala direkt links am Plot (wie BfS)
-  const gy0=12,plotH=Math.round(yMax*RATIO*plotW/15),gy1=gy0+plotH,Hpx=gy1+16;
-  cv.style.width=W+"px";cv.style.height=Hpx+"px";const H=Hpx;
+  const gy0=12,gy1=gy0+plotH,Hpx=gy1+16;
+  cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const day=new Date(tms[i0]);day.setHours(0,0,0,0);const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
   const X=t=>gx0+(gx1-gx0)*((t-t6)/(t21-t6)),Y=u=>gy1-(gy1-gy0)*(Math.min(u,yMax)/yMax);
