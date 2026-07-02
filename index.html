@@ -270,7 +270,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.23</span>
+      <span class="ver">v2.25</span>
     </div>
   </header>
 
@@ -1478,7 +1478,8 @@ function drawPlaneten(){
       leg:dusk&&p.alt>0};});
 
   const mL=26,mR=10,mT=62,mB=22,pw=W-mL-mR,ph=H-mT-mB;
-  const X=az=>mL+(az-azMin)/(azMax-azMin)*pw,Y=al=>mT+(altMax-al)/(altMax-altMin)*ph;
+  const X=az=>mL+(az-azMin)/(azMax-azMin)*pw,Y=al=>mT+(altMax-al)/(altMax-altMin)*ph,
+    YZ=al=>al<=altMax?Y(al):(mT-(Math.min(al,70)-altMax)/(70-altMax)*(mT-10)); // Stauchzone wie bei der Sonne (70 deckt alle Koerper ab: Mond-Max 67,9 Grad)
   const rgba=(hex,al)=>{const n=parseInt(hex.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${al})`;};
 
   const [thTop,thMid,thBot,thInk,thGrid,thAxis,thZero,thMoon]=skyTheme(sunSel.alt);
@@ -1522,7 +1523,7 @@ function drawPlaneten(){
    ctx.font='8.5px system-ui,sans-serif';ctx.textAlign='right';ctx.setLineDash([3,4]);
    const zInk=plInk(thTop,'#1c2f45','#eef2f8');
    for(let al=70;al>altMax+step*0.35;al-=step){const yz=mT-(al-altMax)*zs;
-     ctx.strokeStyle=rgba(thGrid,.45);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mL,yz);ctx.lineTo(mL+pw,yz);ctx.stroke();
+     ctx.strokeStyle=rgba(zInk,.30);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mL,yz);ctx.lineTo(mL+pw,yz);ctx.stroke();
      ctx.fillStyle=rgba(zInk,.95);ctx.fillText(al+'\u00b0',mL-4,yz+3);}
    ctx.setLineDash([]);ctx.font='9px system-ui,sans-serif';}
   const baseY=mT+ph;
@@ -1532,9 +1533,9 @@ function drawPlaneten(){
 
   PL_BODIES.forEach(n=>{const arc=arcs[n];const col=n==='mond'?thMoon:P_COL[n];
     ctx.strokeStyle=rgba(col,.82);ctx.lineWidth=2;ctx.beginPath();let pen=false,pAz=null;
-    for(const p of arc){const ok=p.vis,wrap=pAz!==null&&Math.abs(p.az-pAz)>180;if(!ok||wrap)pen=false;if(ok){const x=X(p.az),y=Y(p.alt);if(!pen){ctx.moveTo(x,y);pen=true;}else ctx.lineTo(x,y);}pAz=ok?p.az:null;}
+    for(const p of arc){const ok=p.vis,wrap=pAz!==null&&Math.abs(p.az-pAz)>180;if(!ok||wrap)pen=false;if(ok){const x=X(p.az),y=YZ(p.alt);if(!pen){ctx.moveTo(x,y);pen=true;}else ctx.lineTo(x,y);}pAz=ok?p.az:null;}
     ctx.stroke();
-    ctx.fillStyle=rgba(col,.85);for(const p of arc)if(p.vis&&p.t%60===0){ctx.beginPath();ctx.arc(X(p.az),Y(p.alt),1.4,0,7);ctx.fill();}});
+    ctx.fillStyle=rgba(col,.85);for(const p of arc)if(p.vis&&p.t%60===0){ctx.beginPath();ctx.arc(X(p.az),YZ(p.alt),1.4,0,7);ctx.fill();}});
 
   /* Sonne als Marker: ueber dem Horizont voll, der Teil darunter matt.
      Steigt sie ueber den Plotrand, laeuft sie komprimiert in der Zone darueber weiter.
@@ -1599,9 +1600,9 @@ function drawPlaneten(){
     /* Auf-/Untergang: Spitze erscheint exakt zum Kalenderzeitpunkt (h0-Bedingung steckt im Kern).
        Uebergangszone alt in [0,a1]: Scheibe wird stetig ueber den Horizont gehoben; ab a1 normale Y-Skala. */
     const a1=r/pxDeg;
-    const y=m.alt>=a1?Y(m.alt):yHor+r-2*r*(Math.max(0,m.alt)/a1);
+    const y=m.alt>=a1?YZ(m.alt):yHor+r-2*r*(Math.max(0,m.alt)/a1);
     ctx.save();
-    ctx.beginPath();ctx.rect(mL,mT,pw,Math.max(0,yHor-mT));ctx.clip(); // unterm Horizont verschwindet alles
+    ctx.beginPath();ctx.rect(mL,2,pw,Math.max(0,yHor-2));ctx.clip(); // unterm Horizont verschwindet alles; oben bis in die Stauchzone offen
     ctx.shadowColor=P_COL[n];ctx.shadowBlur=10;
     if(n==='saturn'){const rc='#d8c690';ctx.lineWidth=1.1;ctx.strokeStyle=rgba(rc,.5);ctx.beginPath();ctx.ellipse(x,y,r*2.1,r*2.1*.34,0,Math.PI,2*Math.PI);ctx.stroke();plTex(n,x,y,r);ctx.strokeStyle=rgba(rc,.85);ctx.beginPath();ctx.ellipse(x,y,r*2.1,r*2.1*.34,0,0,Math.PI);ctx.stroke();}
     else if(n==='mond'){
@@ -1626,7 +1627,15 @@ function drawPlaneten(){
       ctx.ellipse(0,0,Math.abs(c)*r,r,0,3*Math.PI/2,Math.PI/2,c<0);
       ctx.closePath();ctx.fill();
     }
-    ctx.restore();});
+    ctx.restore();
+    if(m.alt>altMax){ // in der Stauchzone gilt eine andere Skala -> echte Gradzahl direkt am Koerper
+      ctx.save();ctx.font='700 10px system-ui,sans-serif';ctx.textBaseline='middle';
+      const left=x>238,off=(n==='saturn'?r*2.1:r)+6;ctx.textAlign=left?'right':'left';
+      const tIn=plInk(thTop,'#17324a','#ffe9a8');
+      ctx.fillStyle=tIn;ctx.shadowColor=tIn==='#17324a'?'rgba(255,255,255,.65)':'rgba(0,0,0,.55)';ctx.shadowBlur=3;
+      ctx.fillText(Math.round(m.alt)+'\u00b0',left?x-off:x+off,y);
+      ctx.restore();
+    }});
 
   /* Wheel + Jetzt-Button + Legende */
   const f2=v=>String(v).padStart(2,'0'),fmtMin=m=>{const mm=((m%1440)+1440)%1440;return f2(Math.floor(mm/60))+':'+f2(mm%60);};
