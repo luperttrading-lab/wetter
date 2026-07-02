@@ -271,7 +271,7 @@
       <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
         <span class="ico-refresh"></span>
       </div>
-      <span class="ver">v2.30</span>
+      <span class="ver">v2.31</span>
     </div>
   </header>
 
@@ -1302,11 +1302,10 @@ function drawBfsOverlay(){
 const _merX=lon=>(lon+180)/360;
 const _merY=lat=>{const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1-s))/(4*Math.PI);};
 const _smooth=(e0,e1,v)=>{let t=(v-e0)/(e1-e0);t=t<0?0:t>1?1:t;return t*t*(3-2*t);};
-const WOLK={latN:51.10,latS:50.00,lonW:7.72,lonE:9.58,nx:12,ny:12,z:9};
+const WOLK={latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:10,ny:10,z:9}; // 10x10 Kachelzentren (v2.31: aeusserer Kranz weg, -31% API-Last)
 const WOLK_TILE="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const HOME_LAT=50.6481, HOME_LON=8.6743;   // echter Standort (Wettenberg) fuer den Karten-Pin (UV/Wetter nutzen weiter LAT/LON = stationsnah)
 const WOLK_CITIES=[
-  {n:"Frankenberg",la:51.06,lo:8.80},
   {n:"Biedenkopf",la:50.91,lo:8.53},
   {n:"Siegen",la:50.88,lo:8.02},
   {n:"Marburg",la:50.81,lo:8.77,b:1},
@@ -1323,8 +1322,8 @@ const WOLK_CITIES=[
 ];
 function wolkenURL(){
   const la=[],lo=[];
-  for(let r=0;r<WOLK.ny;r++){const y=WOLK.latN-(WOLK.latN-WOLK.latS)*r/(WOLK.ny-1);
-    for(let c=0;c<WOLK.nx;c++){la.push(y.toFixed(2));lo.push((WOLK.lonW+(WOLK.lonE-WOLK.lonW)*c/(WOLK.nx-1)).toFixed(2));}}
+  for(let r=0;r<WOLK.ny;r++){const y=WOLK.latN-(WOLK.latN-WOLK.latS)*(r+0.5)/WOLK.ny;
+    for(let c=0;c<WOLK.nx;c++){la.push(y.toFixed(2));lo.push((WOLK.lonW+(WOLK.lonE-WOLK.lonW)*(c+0.5)/WOLK.nx).toFixed(2));}}
   return `https://api.open-meteo.com/v1/forecast?latitude=${la.join(",")}&longitude=${lo.join(",")}&current=cloud_cover&timezone=Europe%2FBerlin`;
 }
 let _wolkGrid=null;
@@ -1839,7 +1838,7 @@ function loadExtras(){
   const ll=`latitude=${LAT}&longitude=${LON}`;
   fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{renderRainHours(d);renderPrecipToday(d);}).catch(e=>{el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
-  loadCached("wolkCache",wolkenURL(),10*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
+  loadCached("wolkCache3",wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
   loadCached("fcCache",`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
   loadIss();
