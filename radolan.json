@@ -1,8 +1,8 @@
 {
-  "datum": "2026-07-08",
+  "datum": "2026-07-09",
   "summe_mm": 0.0,
-  "stunden_ok": 22,
-  "stunden_erwartet": 22,
+  "stunden_ok": 10,
+  "stunden_erwartet": 10,
   "stunden": [
     {
       "stunde": "01:00",
@@ -42,54 +42,6 @@
     },
     {
       "stunde": "10:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "11:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "12:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "13:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "14:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "15:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "16:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "17:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "18:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "19:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "20:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "21:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "22:00",
       "mm": 0.0
     }
   ],
@@ -177,7 +129,7 @@
     "datum": "2026-07-05",
     "mm": 0.01
   },
-  "aktualisiert": "2026-07-08T20:43:08+00:00",
+  "aktualisiert": "2026-07-09T08:57:03+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
