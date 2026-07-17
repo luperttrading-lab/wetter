@@ -1,8 +1,8 @@
 {
   "datum": "2026-07-17",
-  "summe_mm": 3.56,
-  "stunden_ok": 14,
-  "stunden_erwartet": 14,
+  "summe_mm": 3.67,
+  "stunden_ok": 16,
+  "stunden_erwartet": 16,
   "stunden": [
     {
       "stunde": "01:00",
@@ -59,6 +59,14 @@
     {
       "stunde": "14:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "15:00",
+      "mm": 0.11
+    },
+    {
+      "stunde": "16:00",
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -68,7 +76,7 @@
           410,
           424
         ],
-        "mm": 4.1,
+        "mm": 4.2,
         "eigenes": false
       },
       {
@@ -76,7 +84,7 @@
           410,
           425
         ],
-        "mm": 3.5,
+        "mm": 3.6,
         "eigenes": false
       },
       {
@@ -84,7 +92,7 @@
           410,
           426
         ],
-        "mm": 3.5,
+        "mm": 3.6,
         "eigenes": false
       }
     ],
@@ -94,7 +102,7 @@
           409,
           424
         ],
-        "mm": 3.5,
+        "mm": 3.6,
         "eigenes": false
       },
       {
@@ -102,7 +110,7 @@
           409,
           425
         ],
-        "mm": 3.5,
+        "mm": 3.6,
         "eigenes": true
       },
       {
@@ -110,7 +118,7 @@
           409,
           426
         ],
-        "mm": 3.7,
+        "mm": 3.8,
         "eigenes": false
       }
     ],
@@ -120,7 +128,7 @@
           408,
           424
         ],
-        "mm": 4.0,
+        "mm": 4.1,
         "eigenes": false
       },
       {
@@ -128,7 +136,7 @@
           408,
           425
         ],
-        "mm": 3.9,
+        "mm": 4.1,
         "eigenes": false
       },
       {
@@ -136,16 +144,16 @@
           408,
           426
         ],
-        "mm": 3.6,
+        "mm": 3.7,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-07-17",
-    "mm": 3.56
+    "mm": 3.67
   },
-  "aktualisiert": "2026-07-17T12:44:55+00:00",
+  "aktualisiert": "2026-07-17T14:50:40+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
