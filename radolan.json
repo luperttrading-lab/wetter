@@ -1,8 +1,8 @@
 {
-  "datum": "2026-07-22",
-  "summe_mm": 0.04,
-  "stunden_ok": 22,
-  "stunden_erwartet": 23,
+  "datum": "2026-07-23",
+  "summe_mm": 0.0,
+  "stunden_ok": 1,
+  "stunden_erwartet": 2,
   "stunden": [
     {
       "stunde": "01:00",
@@ -10,90 +10,6 @@
     },
     {
       "stunde": "02:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "03:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "04:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "05:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "06:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "07:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "08:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "09:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "10:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "11:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "12:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "13:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "14:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "15:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "16:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "17:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "18:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "19:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "20:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "21:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "22:00",
-      "mm": 0.04
-    },
-    {
-      "stunde": "23:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -105,7 +21,7 @@
           410,
           424
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       },
       {
@@ -113,7 +29,7 @@
           410,
           425
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       },
       {
@@ -121,7 +37,7 @@
           410,
           426
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       }
     ],
@@ -131,7 +47,7 @@
           409,
           424
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       },
       {
@@ -165,7 +81,7 @@
           408,
           425
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       },
       {
@@ -173,7 +89,7 @@
           408,
           426
         ],
-        "mm": 0.1,
+        "mm": 0.0,
         "eigenes": false
       }
     ]
@@ -182,7 +98,7 @@
     "datum": "2026-07-22",
     "mm": 0.04
   },
-  "aktualisiert": "2026-07-22T21:18:24+00:00",
+  "aktualisiert": "2026-07-23T00:10:36+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
