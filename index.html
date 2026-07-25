@@ -8,8 +8,8 @@
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Wetter GI">
-<title>Wetter · Gießen/Wettenberg</title>
+<meta name="apple-mobile-web-app-title" content="Wetter">
+<title>Wetter · Ort</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
   :root{
@@ -219,6 +219,15 @@
   .uvleg i{display:inline-block;vertical-align:middle;margin-right:5px}
   .uvleg i.bars{width:12px;height:11px;border-radius:2px;background:linear-gradient(0deg,#46a13a,#f5d800,#f15a16,#c41f3e)}
   .uvleg i.glock{width:15px;height:0;border-top:3px solid #3a4453;border-radius:2px}
+  .uvsimrow{text-align:center;margin-top:7px}
+  .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
+  .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
+  #metSec .met-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;font-size:14px;line-height:1.55;color:#1c2a3a}
+  .met-amp{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:12.5px;background:#eef1f6;color:#3a4453}
+  .met-amp.ok{background:#eaf7ec;color:#14532d}.met-amp.mid{background:#fff4e0;color:#8a5b00}.met-amp.bad{background:#fdeaea;color:#8a1f1f}
+  .wolkctl{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center;margin-top:10px;font-size:12.5px;color:#5b6879}
+  .wolkctl input[type=range]{width:100%;accent-color:#1c66c4}
+  .wolkctl b{font-variant-numeric:tabular-nums}
   .uvnote{font-size:9.5px;color:var(--faint);text-align:center;margin-top:3px;line-height:1.3}
   #wolkenCv{width:100%;display:block;border-radius:12px;background:#5c7450}
   .bfscard{padding:13px 14px 9px}
@@ -260,18 +269,47 @@
   .iss-h{flex:0 0 38px;font-weight:700;color:#26334a}
   .iss-row .iss-amp{flex:0 0 66px;margin:0;font-size:11.5px;color:var(--muted)}
   .iss-load,.iss-empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;background:#fff;border:1px solid var(--line);border-radius:16px}
+
+/* ===== Standort-Overlay ===== */
+.loc-ovl{position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px}
+.loc-ovl.hidden{display:none}
+.loc-box{background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(20,35,60,.35);padding:20px 18px 16px;width:100%;max-width:340px;color:#1c2a3a;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.loc-h{font-size:17px;font-weight:800;margin-bottom:12px}
+.loc-box label{display:block;font-size:12px;font-weight:700;color:#5c6b80;margin:9px 0 3px}
+.loc-box input{width:100%;box-sizing:border-box;font-size:16px;padding:9px 11px;border:1.5px solid #dbe3ee;border-radius:10px;background:#f7fafd;color:#1c2a3a;-webkit-appearance:none}
+.loc-box input:focus{outline:none;border-color:#2f86cf}
+.loc-msg{font-size:12.5px;line-height:1.45;color:#a05a10;min-height:18px;margin:9px 0 2px}
+.loc-row{display:flex;gap:8px;margin-top:9px}
+.loc-btn{flex:1;font-size:14.5px;font-weight:700;padding:11px 6px;border-radius:11px;border:1.5px solid #dbe3ee;background:#f2f6fb;color:#2b3b52;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.loc-btn:active{transform:scale(.97)}
+.loc-pri{background:#2f86cf;border-color:#2f86cf;color:#fff}
+.loc-two{display:flex;gap:8px}
+.loc-two>div{flex:1}
+.loc-hint{font-size:11.5px;color:#8a97a8;line-height:1.6;margin-top:4px}
+.loc-hint b{color:#41506a;font-size:12.5px}
+.loc-box input.loc-ok{font-weight:700;color:#14532d;border-color:#3d9a52;background:#f2faf4}
+#locFindRes{max-height:170px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.loc-hit{padding:7px 10px;margin-top:5px;border:1px solid #c8d2e0;border-radius:9px;font-size:12.5px;background:#fff;cursor:pointer;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.loc-hit b{font-size:13px}
+.loc-hit span{color:#8a97a8}
+.loc-hit:active{transform:scale(.98)}
 </style>
 </head>
 <body>
 <div id="bg"></div>
 <div id="app">
   <header>
-    <div class="place">Gießen&thinsp;/&thinsp;Wettenberg<small id="stationTxt">Live · DWD-Station</small></div>
+    <div class="place"><span id="placeName">Gießen&thinsp;/&thinsp;Wettenberg</span><small id="stationTxt">Live · DWD-Station</small></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
-      <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
-        <span class="ico-refresh"></span>
+      <div style="display:flex;gap:8px">
+        <div class="act-btn" id="locBtn" role="button" aria-label="Standort einstellen">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
+          <span class="ico-refresh"></span>
+        </div>
       </div>
-      <span class="ver">v2.32</span>
+      <span class="ver">v2.34</span>
     </div>
   </header>
 
@@ -304,13 +342,14 @@
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
-    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich</div></div></div>
+    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich</div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
     <div id="airSec" class="hidden"><div class="sect">UV &amp; Mond</div><div class="grid" id="gridAir"></div></div>
     <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><div class="pl-wrap"><canvas id="planetenCv"></canvas><div id="plDWheel" class="pl-wheel pl-dwheel"><div class="pw-a" id="pdPrev"></div><div class="pw-b" id="pdCur"></div><div class="pw-a" id="pdNext"></div></div><div id="plWheel" class="pl-wheel"><div class="pw-a" id="pwPrev"></div><div class="pw-b" id="pwCur"></div><div class="pw-a" id="pwNext"></div></div><button id="plNow" class="pl-now">Jetzt</button><canvas id="planetenSunCv"></canvas></div><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">Planeten erscheinen nach Helligkeit in der D&auml;mmerung &middot; Mond ganzt&auml;gig</div></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
+    <div id="metSec" class="hidden"><div class="sect">Meteorströme</div><div id="metBody"></div></div>
   </div>
 
   <div class="state" id="stLoading"><div class="spinner"></div><p>Messwerte werden geladen …</p></div>
@@ -323,13 +362,55 @@
   <div class="foot">Quellen: DWD über <a href="https://brightsky.dev" target="_blank" rel="noopener">Bright&nbsp;Sky</a> (Messung, Radar, Warnungen) · UV/Luft/Pollen &amp; 7-Tage über <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>/CAMS · Gefühlt, Sonne &amp; Mond berechnet · Zeiten Europe/Berlin.</div>
 </div>
 
+<div id="locOverlay" class="loc-ovl hidden" role="dialog" aria-label="Standort einstellen">
+  <div class="loc-box">
+    <div class="loc-h">Standort</div>
+    <label for="locFind">Ortsname suchen</label>
+    <div class="loc-two"><div><input id="locFind" type="text" autocomplete="off" placeholder="z.&nbsp;B. M&uuml;nchen"></div><button type="button" id="locFindBtn" class="loc-btn" style="flex:0 0 auto">Suchen</button></div>
+    <div id="locFindRes"></div>
+    <label for="locPaste" style="margin-top:10px;display:block">GPS aus Google&nbsp;Maps einf&uuml;gen</label><input id="locPaste" type="text" autocomplete="off" placeholder="(50.1109375, 8.6821875)">
+    <input id="locPaste2" type="text" autocomplete="off" placeholder="9F2C4M6J+9V" style="margin-top:8px" aria-label="Plus Code aus Google Maps einf&uuml;gen">
+    <div class="loc-hint">Koordinaten oben oder Plus&nbsp;Code darunter einf&uuml;gen &ndash; Breitengrad, L&auml;ngengrad und Ortsname f&uuml;llen sich automatisch.</div>
+    <div class="loc-two">
+      <div><label for="locLat">Breitengrad</label><input id="locLat" type="text" inputmode="decimal" autocomplete="off" placeholder="50.1109375"></div>
+      <div><label for="locLon">L&auml;ngengrad</label><input id="locLon" type="text" inputmode="decimal" autocomplete="off" placeholder="8.6821875"></div>
+    </div>
+    <label for="locName">Ortsname</label><input id="locName" type="text" autocomplete="off" maxlength="40" placeholder="Frankfurt am Main">
+    <div class="loc-msg" id="locMsg"></div>
+    <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
+    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locNdd" class="loc-btn">Norddeich</button></div>
+    <div class="loc-row"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
+  </div>
+</div>
+
 <script>
 var satellite=(()=>{var _o=Object.defineProperty;var r0=Object.getOwnPropertyDescriptor;var h0=Object.getOwnPropertyNames;var x0=Object.prototype.hasOwnProperty;var f0=(o,s)=>{for(var e in s)_o(o,e,{get:s[e],enumerable:!0})},g0=(o,s,e,c)=>{if(s&&typeof s=="object"||typeof s=="function")for(let n of h0(s))!x0.call(o,n)&&n!==e&&_o(o,n,{get:()=>s[n],enumerable:!(c=r0(s,n))||c.enumerable});return o};var M0=o=>g0(_o({},"__esModule",{value:!0}),o);var w0={};f0(w0,{degreesToRadians:()=>Qo,ecfToLookAngles:()=>o0,eciToEcf:()=>t0,eciToGeodetic:()=>Vo,gstime:()=>fo,invjday:()=>Uo,jday:()=>Xt,propagate:()=>Io,radiansToDegrees:()=>Ko,sunPos:()=>s0,twoline2satrec:()=>Jo});function ko(o,s){let e=[31,o%4===0?29:28,31,30,31,30,31,31,30,31,30,31],c=Math.floor(s),n=1,i=0;for(;c>i+e[n-1]&&n<12;)i+=e[n-1],n+=1;let r=n,x=c-i,l=(s-c)*24,f=Math.floor(l);l=(l-f)*60;let d=Math.floor(l),g=(l-d)*60;return{mon:r,day:x,hr:f,minute:d,sec:g}}function Zo(o,s,e,c,n,i,r=0){return 367*o-Math.floor(7*(o+Math.floor((s+9)/12))*.25)+Math.floor(275*s/9)+e+17210135e-1+((r/6e4+i/60+n)/60+c)/24}function Xt(o,s,e,c,n,i,r=0){if(o instanceof Date){let x=o;return Zo(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate(),x.getUTCHours(),x.getUTCMinutes(),x.getUTCSeconds(),x.getUTCMilliseconds())}return Zo(o,s,e,c,n,i,r)}function Uo(o,s){let e=o-24150195e-1,c=e/365.25,n=1900+Math.floor(c),i=Math.floor((n-1901)*.25),r=e-((n-1900)*365+i)+1e-11;r<1&&(n-=1,i=Math.floor((n-1901)*.25),r=e-((n-1900)*365+i));let x=ko(n,r),{mon:l,day:f,hr:d,minute:g}=x,A=x.sec-864e-9;return s?[n,l,f,d,g,Math.floor(A)]:new Date(Date.UTC(n,l-1,f,d,g,Math.floor(A)))}var at=Math.PI,w=at*2,It=at/180,$o=180/at,Bo=1440,u0=398600.8,At=6378.135,Bt=60/Math.sqrt(At*At*At/u0),uo=At*Bt/60,jo=1/Bt,Gt=.001082616,z0=-253881e-11,Yo=-165597e-11,Jt=z0/Gt,Kt=2/3,zo=1440/(2*at);function yo(o,s){let{e3:e,ee2:c,peo:n,pgho:i,pho:r,pinco:x,plo:l,se2:f,se3:d,sgh2:g,sgh3:A,sgh4:E,sh2:S,sh3:st,si2:I,si3:C,sl2:K,sl3:_,sl4:Z,t:R,xgh2:m,xgh3:y,xgh4:M,xh2:L,xh3:nt,xi2:U,xi3:q,xl2:mt,xl3:W,xl4:et,zmol:u,zmos:it}=o,{init:v,opsmode:Y}=s,{ep:pt,inclp:ut,nodep:b,argpp:Q,mp:$}=s,a,h,V,H,zt,B,yt,tt,ot,N,k,ct,D,O,P,T,z,G,X,j,J,ft=119459e-10,ht=.01675,rt=.00015835218,lt=.0549;J=it+ft*R,v==="y"&&(J=it),j=J+2*ht*Math.sin(J),z=Math.sin(j),N=.5*z*z-.25,k=-.5*z*Math.cos(j);let qt=f*N+d*k,wt=I*N+C*k,bt=K*N+_*k+Z*z,t=g*N+A*k+E*z,Ot=S*N+st*k;J=u+rt*R,v==="y"&&(J=u),j=J+2*lt*Math.sin(J),z=Math.sin(j),N=.5*z*z-.25,k=-.5*z*Math.cos(j);let Ct=c*N+e*k,vt=U*N+q*k,jt=mt*N+W*k+et*z,Lt=m*N+y*k+M*z,gt=L*N+nt*k;return ct=qt+Ct,P=wt+vt,T=bt+jt,D=t+Lt,O=Ot+gt,v==="n"&&(ct-=n,P-=x,T-=l,D-=i,O-=r,ut+=P,pt+=ct,H=Math.sin(ut),V=Math.cos(ut),ut>=.2?(O/=H,D-=V*O,Q+=D,b+=O,$+=T):(B=Math.sin(b),zt=Math.cos(b),a=H*B,h=H*zt,yt=O*zt+P*V*B,tt=-O*B+P*V*zt,a+=yt,h+=tt,b%=w,b<0&&Y==="a"&&(b+=w),G=$+Q+V*b,ot=T+D-P*b*H,G+=ot,X=b,b=Math.atan2(a,h),b<0&&Y==="a"&&(b+=w),Math.abs(X-b)>at&&(b<X?b+=w:b-=w),$+=T,Q=G-$-V*b)),{ep:pt,inclp:ut,nodep:b,argpp:Q,mp:$}}function Ho(o){let{epoch:s,ep:e,argpp:c,tc:n,inclp:i,nodep:r,np:x}=o,l,f,d,g,A,E,S,st,I,C,K,_,Z,R,m,y,M,L,nt,U,q,mt,W,et,u,it,v,Y,pt,ut,b,Q,$,a,h,V,H,zt,B,yt,tt,ot,N,k,ct,D,O,P,T,z,G,X,j,J,ft,ht,rt,lt,qt,wt,bt,t,Ot,Ct=.01675,vt=.0549,jt=29864797e-13,Lt=47968065e-14,gt=.39785416,Vt=.91744867,Tt=.1945905,Nt=-.98088458,St=x,xt=e,_t=Math.sin(r),Ht=Math.cos(r),kt=Math.sin(c),Dt=Math.cos(c),Zt=Math.sin(i),Rt=Math.cos(i),p=xt*xt,Ut=1-p,Ft=Math.sqrt(Ut),to=0,F=0,eo=0,ao=0,mo=0,Wt=s+18261.5+n/1440,Yt=(4.523602-.00092422029*Wt)%w,Mt=Math.sin(Yt),$t=Math.cos(Yt),co=.91375164-.03568096*$t,io=Math.sqrt(1-co*co),Pt=.089683511*Mt/io,Et=Math.sqrt(1-Pt*Pt),dt=5.8351514+.001944368*Wt,oo=.39785416*Mt/io,bo=Et*$t+.91744867*Pt*Mt;oo=Math.atan2(oo,bo),oo+=dt-Yt;let qo=Math.cos(oo),wo=Math.sin(oo);U=Tt,q=Nt,et=Vt,u=gt,mt=Ht,W=_t,K=jt;let Oo=1/St,po=0;for(;po<2;)po+=1,l=U*mt+q*et*W,d=-q*mt+U*et*W,S=-U*W+q*et*mt,st=q*u,I=q*W+U*et*mt,C=U*u,f=Rt*S+Zt*st,g=Rt*I+Zt*C,A=-Zt*S+Rt*st,E=-Zt*I+Rt*C,_=l*Dt+f*kt,Z=d*Dt+g*kt,R=-l*kt+f*Dt,m=-d*kt+g*Dt,y=A*kt,M=E*kt,L=A*Dt,nt=E*Dt,bt=12*_*_-3*R*R,t=24*_*Z-6*R*m,Ot=12*Z*Z-3*m*m,X=3*(l*l+f*f)+bt*p,j=6*(l*d+f*g)+t*p,J=3*(d*d+g*g)+Ot*p,ft=-6*l*A+p*(-24*_*L-6*R*y),ht=-6*(l*E+d*A)+p*(-24*(Z*L+_*nt)+-6*(R*M+m*y)),rt=-6*d*E+p*(-24*Z*nt-6*m*M),lt=6*f*A+p*(24*_*y-6*R*L),qt=6*(g*A+f*E)+p*(24*(Z*y+_*M)-6*(m*L+R*nt)),wt=6*g*E+p*(24*Z*M-6*m*nt),X=X+X+Ut*bt,j=j+j+Ut*t,J=J+J+Ut*Ot,O=K*Oo,D=-.5*O/Ft,P=O*Ft,ct=-15*xt*P,T=_*R+Z*m,z=Z*R+_*m,G=Z*m-_*R,po===1&&(it=ct,v=D,Y=O,pt=P,ut=T,b=z,Q=G,$=X,a=j,h=J,V=ft,H=ht,zt=rt,B=lt,yt=qt,tt=wt,ot=bt,N=t,k=Ot,U=qo,q=wo,et=co,u=io,mt=Et*Ht+Pt*_t,W=_t*Et-Ht*Pt,K=Lt);let ro=(4.7199672+(.2299715*Wt-dt))%w,To=(6.2565837+.017201977*Wt)%w,No=2*it*b,so=2*it*Q,no=2*v*H,Ro=2*v*(zt-V),Po=-2*Y*a,Eo=-2*Y*(h-$),Co=-2*Y*(-21-9*p)*Ct,lo=2*pt*N,vo=2*pt*(k-ot),Do=-18*pt*Ct,ho=-2*v*yt,Mo=-2*v*(tt-B),xo=2*ct*z,Ao=2*ct*G,Lo=2*D*ht,n0=2*D*(rt-ft),e0=-2*O*j,c0=-2*O*(J-X),i0=-2*O*(-21-9*p)*vt,l0=2*P*t,d0=2*P*(Ot-bt),a0=-18*P*vt,m0=-2*D*qt,p0=-2*D*(wt-lt);return{snodm:_t,cnodm:Ht,sinim:Zt,cosim:Rt,sinomm:kt,cosomm:Dt,day:Wt,e3:Ao,ee2:xo,em:xt,emsq:p,gam:dt,peo:to,pgho:ao,pho:mo,pinco:F,plo:eo,rtemsq:Ft,se2:No,se3:so,sgh2:lo,sgh3:vo,sgh4:Do,sh2:ho,sh3:Mo,si2:no,si3:Ro,sl2:Po,sl3:Eo,sl4:Co,s1:ct,s2:D,s3:O,s4:P,s5:T,s6:z,s7:G,ss1:it,ss2:v,ss3:Y,ss4:pt,ss5:ut,ss6:b,ss7:Q,sz1:$,sz2:a,sz3:h,sz11:V,sz12:H,sz13:zt,sz21:B,sz22:yt,sz23:tt,sz31:ot,sz32:N,sz33:k,xgh2:l0,xgh3:d0,xgh4:a0,xh2:m0,xh3:p0,xi2:Lo,xi3:n0,xl2:e0,xl3:c0,xl4:i0,nm:St,z1:X,z2:j,z3:J,z11:ft,z12:ht,z13:rt,z21:lt,z22:qt,z23:wt,z31:bt,z32:t,z33:Ot,zmol:ro,zmos:To}}function Go(o){let{cosim:s,argpo:e,s1:c,s2:n,s3:i,s4:r,s5:x,sinim:l,ss1:f,ss2:d,ss3:g,ss4:A,ss5:E,sz1:S,sz3:st,sz11:I,sz13:C,sz21:K,sz23:_,sz31:Z,sz33:R,t:m,tc:y,gsto:M,mo:L,mdot:nt,no:U,nodeo:q,nodedot:mt,xpidot:W,z1:et,z3:u,z11:it,z13:v,z21:Y,z23:pt,z31:ut,z33:b,ecco:Q,eccsq:$}=o,{emsq:a,em:h,argpm:V,inclm:H,mm:zt,nm:B,nodem:yt,irez:tt,atime:ot,d2201:N,d2211:k,d3210:ct,d3222:D,d4410:O,d4422:P,d5220:T,d5232:z,d5421:G,d5433:X,dedt:j,didt:J,dmdt:ft,dnodt:ht,domdt:rt,del1:lt,del2:qt,del3:wt,xfact:bt,xlamo:t,xli:Ot,xni:Ct}=o,vt,jt,Lt,gt,Vt,Tt,Nt,St,xt,_t,Ht,kt,Dt,Zt,Rt,p,Ut,Ft,to,F,eo,ao,mo,Wt,Yt,Mt,$t,co,io,Pt,Et,dt,oo=17891679e-13,bo=21460748e-13,qo=22123015e-14,wo=17891679e-13,Oo=73636953e-16,po=21765803e-16,ro=.0043752690880113,To=37393792e-14,No=11428639e-14,so=.00015835218,no=119459e-10;tt=0,B<.0052359877&&B>.0034906585&&(tt=1),B>=.00826&&B<=.00924&&h>=.5&&(tt=2);let Ro=f*no*E,Po=d*no*(I+C),Eo=-no*g*(S+st-14-6*a),Co=A*no*(Z+R-6),lo=-no*d*(K+_);(H<.052359877||H>at-.052359877)&&(lo=0),l!==0&&(lo/=l);let vo=Co-s*lo;j=Ro+c*so*x,J=Po+n*so*(it+v),ft=Eo-so*i*(et+u-14-6*a);let Do=r*so*(ut+b-6),ho=-so*n*(Y+pt);(H<.052359877||H>at-.052359877)&&(ho=0),rt=vo+Do,ht=lo,l!==0&&(rt-=s/l*ho,ht+=ho/l);let Mo=0,xo=(M+y*ro)%w;if(h+=j*m,H+=J*m,V+=rt*m,yt+=ht*m,zt+=ft*m,tt!==0){if(Pt=(B/Bt)**Kt,tt===2){Et=s*s;let Ao=h;h=Q;let Lo=a;a=$,dt=h*a,Zt=-.306-(h-.64)*.44,h<=.65?(Rt=3.616-13.247*h+16.29*a,Ut=-19.302+117.39*h-228.419*a+156.591*dt,Ft=-18.9068+109.7927*h-214.6334*a+146.5816*dt,to=-41.122+242.694*h-471.094*a+313.953*dt,F=-146.407+841.88*h-1629.014*a+1083.435*dt,eo=-532.114+3017.977*h-5740.032*a+3708.276*dt):(Rt=-72.099+331.819*h-508.738*a+266.724*dt,Ut=-346.844+1582.851*h-2415.925*a+1246.113*dt,Ft=-342.585+1554.908*h-2366.899*a+1215.972*dt,to=-1052.797+4758.686*h-7193.992*a+3651.957*dt,F=-3581.69+16178.11*h-24462.77*a+12422.52*dt,h>.715?eo=-5149.66+29936.92*h-54087.36*a+31324.56*dt:eo=1464.74-4664.75*h+3763.64*a),h<.7?(Wt=-919.2277+4988.61*h-9064.77*a+5542.21*dt,ao=-822.71072+4568.6173*h-8491.4146*a+5337.524*dt,mo=-853.666+4690.25*h-8624.77*a+5341.4*dt):(Wt=-37995.78+161616.52*h-229838.2*a+109377.94*dt,ao=-51752.104+218913.95*h-309468.16*a+146349.42*dt,mo=-40023.88+170470.89*h-242699.48*a+115605.82*dt),Yt=l*l,vt=.75*(1+2*s+Et),jt=1.5*Yt,gt=1.875*l*(1-2*s-3*Et),Vt=-1.875*l*(1+2*s-3*Et),Nt=35*Yt*vt,St=39.375*Yt*Yt,xt=9.84375*l*(Yt*(1-2*s-5*Et)+.33333333*(-2+4*s+6*Et)),_t=l*(4.92187512*Yt*(-2-4*s+10*Et)+6.56250012*(1+2*s-3*Et)),Ht=29.53125*l*(2-8*s+Et*(-12+8*s+10*Et)),kt=29.53125*l*(-2-8*s+Et*(12+8*s-10*Et)),co=B*B,io=Pt*Pt,$t=3*co*io,Mt=$t*wo,N=Mt*vt*Zt,k=Mt*jt*Rt,$t*=Pt,Mt=$t*To,ct=Mt*gt*Ut,D=Mt*Vt*Ft,$t*=Pt,Mt=2*$t*Oo,O=Mt*Nt*to,P=Mt*St*F,$t*=Pt,Mt=$t*No,T=Mt*xt*eo,z=Mt*_t*mo,Mt=2*$t*po,G=Mt*Ht*ao,X=Mt*kt*Wt,t=(L+q+q-(xo+xo))%w,bt=nt+ft+2*(mt+ht-ro)-U,h=Ao,a=Lo}tt===1&&(Dt=1+a*(-2.5+.8125*a),Ut=1+2*a,p=1+a*(-6+6.60937*a),vt=.75*(1+s)*(1+s),Lt=.9375*l*l*(1+3*s)-.75*(1+s),Tt=1+s,Tt*=1.875*Tt*Tt,lt=3*B*B*Pt*Pt,qt=2*lt*vt*Dt*oo,wt=3*lt*Tt*p*qo*Pt,lt=lt*Lt*Ut*bo*Pt,t=(L+q+e-xo)%w,bt=nt+W+ft+rt+ht-(U+ro)),Ot=t,Ct=U,ot=0,B=U+Mo}return{em:h,argpm:V,inclm:H,mm:zt,nm:B,nodem:yt,irez:tt,atime:ot,d2201:N,d2211:k,d3210:ct,d3222:D,d4410:O,d4422:P,d5220:T,d5232:z,d5421:G,d5433:X,dedt:j,didt:J,dmdt:ft,dndt:Mo,dnodt:ht,domdt:rt,del1:lt,del2:qt,del3:wt,xfact:bt,xlamo:t,xli:Ot,xni:Ct}}function Fo(o){let s=(o-2451545)/36525,e=-62e-7*s*s*s+.093104*s*s+(876600*3600+8640184812866e-6)*s+67310.54841;return e=e*It/240%w,e<0&&(e+=w),e}function fo(o,s,e,c,n,i,r){return o instanceof Date?Fo(Xt(o)):Fo(s!==void 0?Xt(o,s,e,c,n,i,r):o)}function So(o){let{ecco:s,epoch:e,inclo:c,opsmode:n}=o,{no:i}=o,r=s*s,x=1-r,l=Math.sqrt(x),f=Math.cos(c),d=f*f,g=(Bt/i)**Kt,A=.75*Gt*(3*d-1)/(l*x),E=A/(g*g),S=g*(1-E*E-E*(1/3+134*E*E/81));E=A/(S*S),i/=1+E;let st=(Bt/i)**Kt,I=Math.sin(c),C=st*x,K=1-5*d,_=-K-d-d,Z=1/st,R=C*C,m=st*(1-s),y="n",M;if(n==="a"){let L=e-7305,nt=Math.floor(L+1e-8),U=L-nt,q=.017202791694070362,mt=1.7321343856509375,W=5075514194322695e-30,et=q+w;M=(mt+q*nt+et*U+L*L*W)%w,M<0&&(M+=w)}else M=fo(e+24332815e-1);return{no:i,method:y,ainv:Z,ao:st,con41:_,con42:K,cosio:f,cosio2:d,eccsq:r,omeosq:x,posq:R,rp:m,rteosq:l,sinio:I,gsto:M}}function Wo(o){let{irez:s,d2201:e,d2211:c,d3210:n,d3222:i,d4410:r,d4422:x,d5220:l,d5232:f,d5421:d,d5433:g,dedt:A,del1:E,del2:S,del3:st,didt:I,dmdt:C,dnodt:K,domdt:_,argpo:Z,argpdot:R,t:m,tc:y,gsto:M,xfact:L,xlamo:nt,no:U}=o,{atime:q,em:mt,argpm:W,inclm:et,xli:u,mm:it,xni:v,nodem:Y,nm:pt}=o,ut=.13130908,b=2.8843198,Q=.37448087,$=5.7686396,a=.95240898,h=1.8014998,V=1.050833,H=4.4108898,zt=.0043752690880113,B=720,yt=-720,tt=259200,ot,N,k,ct,D,O,P,T,z=0,G=0,X=(M+y*zt)%w;if(mt+=A*m,et+=I*m,W+=_*m,Y+=K*m,it+=C*m,s!==0){(q===0||m*q<=0||Math.abs(m)<Math.abs(q))&&(q=0,v=U,u=nt),m>0?ot=B:ot=yt;let j=381;for(;j===381;)s!==2?(P=E*Math.sin(u-ut)+S*Math.sin(2*(u-b))+st*Math.sin(3*(u-Q)),D=v+L,O=E*Math.cos(u-ut)+2*S*Math.cos(2*(u-b))+3*st*Math.cos(3*(u-Q)),O*=D):(T=Z+R*q,k=T+T,N=u+u,P=e*Math.sin(k+u-$)+c*Math.sin(u-$)+n*Math.sin(T+u-a)+i*Math.sin(-T+u-a)+r*Math.sin(k+N-h)+x*Math.sin(N-h)+l*Math.sin(T+u-V)+f*Math.sin(-T+u-V)+d*Math.sin(T+N-H)+g*Math.sin(-T+N-H),D=v+L,O=e*Math.cos(k+u-$)+c*Math.cos(u-$)+n*Math.cos(T+u-a)+i*Math.cos(-T+u-a)+l*Math.cos(T+u-V)+f*Math.cos(-T+u-V)+2*(r*Math.cos(k+N-h)+x*Math.cos(N-h)+d*Math.cos(T+N-H)+g*Math.cos(-T+N-H)),O*=D),Math.abs(m-q)>=B?j=381:(G=m-q,j=0),j===381&&(u+=D*ot+P*tt,v+=P*ot+O*tt,q+=ot);pt=v+P*G+O*G*G*.5,ct=u+D*G+P*G*G*.5,s!==1?(it=ct-2*Y+2*X,z=pt-U):(it=ct-Y-W+X,z=pt-U),pt=U+z}return{atime:q,em:mt,argpm:W,inclm:et,xli:u,mm:it,xni:v,nodem:Y,dndt:z,nm:pt}}var Qt;(function(o){o[o.None=0]="None",o[o.MeanEccentricityOutOfRange=1]="MeanEccentricityOutOfRange",o[o.MeanMotionBelowZero=2]="MeanMotionBelowZero",o[o.PerturbedEccentricityOutOfRange=3]="PerturbedEccentricityOutOfRange",o[o.SemiLatusRectumBelowZero=4]="SemiLatusRectumBelowZero",o[o.Decayed=6]="Decayed"})(Qt||(Qt={}));function go(o,s){let e,c,n,i,r,x,l,f,d,g,A,E,S,st,I,C,K,_,Z,R,m,y,M,L,nt,U,q;o.t=s,o.error=Qt.None;let W=o.mo+o.mdot*o.t,et=o.argpo+o.argpdot*o.t,u=o.nodeo+o.nodedot*o.t;d=et,m=W;let it=o.t*o.t;if(M=u+o.nodecf*it,K=1-o.cc1*o.t,_=o.bstar*o.cc4*o.t,Z=o.t2cof*it,o.isimp!==1){l=o.omgcof*o.t;let xt=1+o.eta*Math.cos(W);x=o.xmcof*(xt*xt*xt-o.delmo),C=l+x,m=W+C,d=et-C,E=it*o.t,S=E*o.t,K=K-o.d2*it-o.d3*E-o.d4*S,_+=o.bstar*o.cc5*(Math.sin(m)-o.sinmao),Z=Z+o.t3cof*E+S*(o.t4cof+o.t*o.t5cof)}y=o.no;let v=o.ecco;if(R=o.inclo,o.method==="d"){st=o.t;let xt={irez:o.irez,d2201:o.d2201,d2211:o.d2211,d3210:o.d3210,d3222:o.d3222,d4410:o.d4410,d4422:o.d4422,d5220:o.d5220,d5232:o.d5232,d5421:o.d5421,d5433:o.d5433,dedt:o.dedt,del1:o.del1,del2:o.del2,del3:o.del3,didt:o.didt,dmdt:o.dmdt,dnodt:o.dnodt,domdt:o.domdt,argpo:o.argpo,argpdot:o.argpdot,t:o.t,tc:st,gsto:o.gsto,xfact:o.xfact,xlamo:o.xlamo,no:o.no,atime:o.atime,em:v,argpm:d,inclm:R,xli:o.xli,mm:m,xni:o.xni,nodem:M,nm:y};({em:v,argpm:d,inclm:R,mm:m,nodem:M,nm:y}=Wo(xt))}if(y<=0)return o.error=Qt.MeanMotionBelowZero,null;let Y=(Bt/y)**Kt*K*K;if(y=Bt/Y**1.5,v-=_,v>=1||v<-.001)return o.error=Qt.MeanEccentricityOutOfRange,null;v<1e-6&&(v=1e-6),m+=o.no*Z,nt=m+d+M,M%=w,d%=w,nt%=w,m=(nt-d-M)%w;let pt={am:Y,em:v,im:R,Om:M,om:d,mm:m,nm:y},ut=Math.sin(R),b=Math.cos(R),Q=v;if(L=R,g=d,q=M,U=m,i=ut,n=b,o.method==="d"){let xt={inclo:o.inclo,init:"n",ep:Q,inclp:L,nodep:q,argpp:g,mp:U,opsmode:o.operationmode},_t=yo(o,xt);if({ep:Q,nodep:q,argpp:g,mp:U}=_t,L=_t.inclp,L<0&&(L=-L,q+=at,g-=at),Q<0||Q>1)return o.error=Qt.PerturbedEccentricityOutOfRange,null}o.method==="d"&&(i=Math.sin(L),n=Math.cos(L),o.aycof=-.5*Jt*i,Math.abs(n+1)>15e-13?o.xlcof=-.25*Jt*i*(3+5*n)/(1+n):o.xlcof=-.25*Jt*i*(3+5*n)/15e-13);let $=Q*Math.cos(g);C=1/(Y*(1-Q*Q));let a=Q*Math.sin(g)+C*o.aycof,V=(U+g+q+C*o.xlcof*$-q)%w;f=V,I=9999.9;let H=1;for(;Math.abs(I)>=1e-12&&H<=10;)c=Math.sin(f),e=Math.cos(f),I=1-e*$-c*a,I=(V-a*e+$*c-f)/I,Math.abs(I)>=.95&&(I>0?I=.95:I=-.95),f+=I,H+=1;let zt=$*e+a*c,B=$*c-a*e,yt=$*$+a*a,tt=Y*(1-yt);if(tt<0)return o.error=Qt.SemiLatusRectumBelowZero,null;let ot=Y*(1-zt),N=Math.sqrt(Y)*B/ot,k=Math.sqrt(tt)/ot,ct=Math.sqrt(1-yt);C=B/(1+ct);let D=Y/ot*(c-a-$*C),O=Y/ot*(e-$+a*C);A=Math.atan2(D,O);let P=(O+O)*D,T=1-2*D*D;C=1/tt;let z=.5*Gt*C,G=z*C;o.method==="d"&&(r=n*n,o.con41=3*r-1,o.x1mth2=1-r,o.x7thm1=7*r-1);let X=ot*(1-1.5*G*ct*o.con41)+.5*z*o.x1mth2*T;if(X<1)return o.error=Qt.Decayed,null;A-=.25*G*o.x7thm1*P;let j=q+1.5*G*n*P,J=L+1.5*G*n*i*T,ft=N-y*z*o.x1mth2*P/Bt,ht=k+y*z*(o.x1mth2*T+1.5*o.con41)/Bt,rt=Math.sin(A),lt=Math.cos(A),qt=Math.sin(j),wt=Math.cos(j),bt=Math.sin(J),t=Math.cos(J),Ot=-qt*t,Ct=wt*t,vt=Ot*rt+wt*lt,jt=Ct*rt+qt*lt,Lt=bt*rt,gt=Ot*lt-wt*rt,Vt=Ct*lt-qt*rt,Tt=bt*lt,Nt={x:X*vt*At,y:X*jt*At,z:X*Lt*At},St={x:(ft*vt+ht*gt)*uo,y:(ft*jt+ht*Vt)*uo,z:(ft*Lt+ht*Tt)*uo};return{position:Nt,velocity:St,meanElements:pt}}function Xo(o,s){let{opsmode:e,satn:c,epoch:n,xbstar:i,xecco:r,xargpo:x,xinclo:l,xmo:f,xno:d,xnodeo:g}=s,A,E,S,st,I,C,K,_,Z,R,m,y,M,L,nt,U,q,mt,W,et,u,it,v,Y,pt,ut,b,Q,$,a,h,V,H,zt,B,yt,tt,ot,N,k,ct,D,O,P,T,z,G,X,j,J,ft,ht,rt,lt,qt,wt,bt=15e-13,t=o;t.isimp=0,t.method="n",t.aycof=0,t.con41=0,t.cc1=0,t.cc4=0,t.cc5=0,t.d2=0,t.d3=0,t.d4=0,t.delmo=0,t.eta=0,t.argpdot=0,t.omgcof=0,t.sinmao=0,t.t=0,t.t2cof=0,t.t3cof=0,t.t4cof=0,t.t5cof=0,t.x1mth2=0,t.x7thm1=0,t.mdot=0,t.nodedot=0,t.xlcof=0,t.xmcof=0,t.nodecf=0,t.irez=0,t.d2201=0,t.d2211=0,t.d3210=0,t.d3222=0,t.d4410=0,t.d4422=0,t.d5220=0,t.d5232=0,t.d5421=0,t.d5433=0,t.dedt=0,t.del1=0,t.del2=0,t.del3=0,t.didt=0,t.dmdt=0,t.dnodt=0,t.domdt=0,t.e3=0,t.ee2=0,t.peo=0,t.pgho=0,t.pho=0,t.pinco=0,t.plo=0,t.se2=0,t.se3=0,t.sgh2=0,t.sgh3=0,t.sgh4=0,t.sh2=0,t.sh3=0,t.si2=0,t.si3=0,t.sl2=0,t.sl3=0,t.sl4=0,t.gsto=0,t.xfact=0,t.xgh2=0,t.xgh3=0,t.xgh4=0,t.xh2=0,t.xh3=0,t.xi2=0,t.xi3=0,t.xl2=0,t.xl3=0,t.xl4=0,t.xlamo=0,t.zmol=0,t.zmos=0,t.atime=0,t.xli=0,t.xni=0,t.bstar=i,t.ecco=r,t.argpo=x,t.inclo=l,t.mo=f,t.no=d,t.nodeo=g,t.operationmode=e;let Ot=78/At+1,Ct=42/At,vt=Ct*Ct*Ct*Ct;t.init="y",t.t=0;let jt={satn:c,ecco:t.ecco,epoch:n,inclo:t.inclo,no:t.no,method:t.method,opsmode:t.operationmode},Lt=So(jt),{ao:gt,con42:Vt,cosio:Tt,cosio2:Nt,eccsq:St,omeosq:xt,posq:_t,rp:Ht,rteosq:kt,sinio:Dt}=Lt;if(t.no=Lt.no,t.con41=Lt.con41,t.gsto=Lt.gsto,t.a=(t.no*jo)**(-2/3),t.alta=t.a*(1+t.ecco)-1,t.altp=t.a*(1-t.ecco)-1,t.error=0,xt>=0||t.no>=0){if(t.isimp=0,Ht<220/At+1&&(t.isimp=1),b=Ot,u=vt,mt=(Ht-1)*At,mt<156){b=mt-78,mt<98&&(b=20);let Rt=(120-b)/At;u=Rt*Rt*Rt*Rt,b=b/At+1}W=1/_t,z=1/(gt-b),t.eta=gt*t.ecco*z,y=t.eta*t.eta,m=t.ecco*t.eta,et=Math.abs(1-y),C=u*z**4,K=C/et**3.5,st=K*t.no*(gt*(1+1.5*y+m*(4+y))+.375*Gt*z/et*t.con41*(8+3*y*(8+y))),t.cc1=t.bstar*st,I=0,t.ecco>1e-4&&(I=-2*C*z*Jt*t.no*Dt/t.ecco),t.x1mth2=1-Nt,t.cc4=2*t.no*K*gt*xt*(t.eta*(2+.5*y)+t.ecco*(.5+2*y)-Gt*z/(gt*et)*(-3*t.con41*(1-2*m+y*(1.5-.5*m))+.75*t.x1mth2*(2*y-m*(1+y))*Math.cos(2*t.argpo))),t.cc5=2*K*gt*xt*(1+2.75*(y+m)+m*y),_=Nt*Nt,O=1.5*Gt*W*t.no,P=.5*O*Gt*W,T=-.46875*Yo*W*W*t.no,t.mdot=t.no+.5*O*kt*t.con41+.0625*P*kt*(13-78*Nt+137*_),t.argpdot=-.5*O*Vt+.0625*P*(7-114*Nt+395*_)+T*(3-36*Nt+49*_),X=-O*Tt,t.nodedot=X+(.5*P*(4-19*Nt)+2*T*(3-7*Nt))*Tt,G=t.argpdot+t.nodedot,t.omgcof=t.bstar*I*Math.cos(t.argpo),t.xmcof=0,t.ecco>1e-4&&(t.xmcof=-Kt*C*t.bstar/m),t.nodecf=3.5*xt*X*t.cc1,t.t2cof=1.5*t.cc1,Math.abs(Tt+1)>15e-13?t.xlcof=-.25*Jt*Dt*(3+5*Tt)/(1+Tt):t.xlcof=-.25*Jt*Dt*(3+5*Tt)/bt,t.aycof=-.5*Jt*Dt;let Zt=1+t.eta*Math.cos(t.mo);if(t.delmo=Zt*Zt*Zt,t.sinmao=Math.sin(t.mo),t.x7thm1=7*Nt-1,2*at/t.no>=225){t.method="d",t.isimp=1,ct=0,nt=t.inclo;let Rt={epoch:n,ep:t.ecco,argpp:t.argpo,tc:ct,inclp:t.inclo,nodep:t.nodeo,np:t.no,e3:t.e3,ee2:t.ee2,peo:t.peo,pgho:t.pgho,pho:t.pho,pinco:t.pinco,plo:t.plo,se2:t.se2,se3:t.se3,sgh2:t.sgh2,sgh3:t.sgh3,sgh4:t.sgh4,sh2:t.sh2,sh3:t.sh3,si2:t.si2,si3:t.si3,sl2:t.sl2,sl3:t.sl3,sl4:t.sl4,xgh2:t.xgh2,xgh3:t.xgh3,xgh4:t.xgh4,xh2:t.xh2,xh3:t.xh3,xi2:t.xi2,xi3:t.xi3,xl2:t.xl2,xl3:t.xl3,xl4:t.xl4,zmol:t.zmol,zmos:t.zmos},p=Ho(Rt);t.e3=p.e3,t.ee2=p.ee2,t.peo=p.peo,t.pgho=p.pgho,t.pho=p.pho,t.pinco=p.pinco,t.plo=p.plo,t.se2=p.se2,t.se3=p.se3,t.sgh2=p.sgh2,t.sgh3=p.sgh3,t.sgh4=p.sgh4,t.sh2=p.sh2,t.sh3=p.sh3,t.si2=p.si2,t.si3=p.si3,t.sl2=p.sl2,t.sl3=p.sl3,t.sl4=p.sl4,{sinim:E,cosim:A,em:Z,emsq:R,s1:it,s2:v,s3:Y,s4:pt,s5:ut,ss1:Q,ss2:$,ss3:a,ss4:h,ss5:V,sz1:H,sz3:zt,sz11:B,sz13:yt,sz21:tt,sz23:ot,sz31:N,sz33:k}=p,t.xgh2=p.xgh2,t.xgh3=p.xgh3,t.xgh4=p.xgh4,t.xh2=p.xh2,t.xh3=p.xh3,t.xi2=p.xi2,t.xi3=p.xi3,t.xl2=p.xl2,t.xl3=p.xl3,t.xl4=p.xl4,t.zmol=p.zmol,t.zmos=p.zmos,{nm:q,z1:j,z3:J,z11:ft,z13:ht,z21:rt,z23:lt,z31:qt,z33:wt}=p;let Ut={inclo:nt,init:t.init,ep:t.ecco,inclp:t.inclo,nodep:t.nodeo,argpp:t.argpo,mp:t.mo,opsmode:t.operationmode},Ft=yo(t,Ut);t.ecco=Ft.ep,t.inclo=Ft.inclp,t.nodeo=Ft.nodep,t.argpo=Ft.argpp,t.mo=Ft.mp,M=0,L=0,U=0;let to={cosim:A,emsq:R,argpo:t.argpo,s1:it,s2:v,s3:Y,s4:pt,s5:ut,sinim:E,ss1:Q,ss2:$,ss3:a,ss4:h,ss5:V,sz1:H,sz3:zt,sz11:B,sz13:yt,sz21:tt,sz23:ot,sz31:N,sz33:k,t:t.t,tc:ct,gsto:t.gsto,mo:t.mo,mdot:t.mdot,no:t.no,nodeo:t.nodeo,nodedot:t.nodedot,xpidot:G,z1:j,z3:J,z11:ft,z13:ht,z21:rt,z23:lt,z31:qt,z33:wt,ecco:t.ecco,eccsq:St,em:Z,argpm:M,inclm:nt,mm:U,nm:q,nodem:L,irez:t.irez,atime:t.atime,d2201:t.d2201,d2211:t.d2211,d3210:t.d3210,d3222:t.d3222,d4410:t.d4410,d4422:t.d4422,d5220:t.d5220,d5232:t.d5232,d5421:t.d5421,d5433:t.d5433,dedt:t.dedt,didt:t.didt,dmdt:t.dmdt,dnodt:t.dnodt,domdt:t.domdt,del1:t.del1,del2:t.del2,del3:t.del3,xfact:t.xfact,xlamo:t.xlamo,xli:t.xli,xni:t.xni},F=Go(to);t.irez=F.irez,t.atime=F.atime,t.d2201=F.d2201,t.d2211=F.d2211,t.d3210=F.d3210,t.d3222=F.d3222,t.d4410=F.d4410,t.d4422=F.d4422,t.d5220=F.d5220,t.d5232=F.d5232,t.d5421=F.d5421,t.d5433=F.d5433,t.dedt=F.dedt,t.didt=F.didt,t.dmdt=F.dmdt,t.dnodt=F.dnodt,t.domdt=F.domdt,t.del1=F.del1,t.del2=F.del2,t.del3=F.del3,t.xfact=F.xfact,t.xlamo=F.xlamo,t.xli=F.xli,t.xni=F.xni}t.isimp!==1&&(S=t.cc1*t.cc1,t.d2=4*gt*z*S,D=t.d2*z*t.cc1/3,t.d3=(17*gt+b)*D,t.d4=.5*D*gt*z*(221*gt+31*b)*t.cc1,t.t3cof=t.d2+2*S,t.t4cof=.25*(3*t.d3+t.cc1*(12*t.d2+10*S)),t.t5cof=.2*(3*t.d4+12*t.cc1*t.d3+6*t.d2*t.d2+15*S*(2*t.d2+S)))}go(t,0),t.init="n"}function Jo(o,s){let n=o.substring(2,7),i=parseInt(o.substring(18,20),10),r=parseFloat(o.substring(20,32)),x=parseFloat(o.substring(33,43)),l=parseFloat(`${o.substring(44,45)}.${o.substring(45,50)}E${o.substring(50,52)}`),f=parseFloat(`${o.substring(53,54)}.${o.substring(54,59)}E${o.substring(59,61)}`),d=parseFloat(s.substring(8,16))*It,g=parseFloat(s.substring(17,25))*It,A=parseFloat(`.${s.substring(26,33).replace(/\s/g,"0")}`),E=parseFloat(s.substring(34,42))*It,S=parseFloat(s.substring(43,51))*It,st=parseFloat(s.substring(52,63))/zo;x/=zo*1440,l/=zo*1440*1440;let I=i<57?i+2e3:i+1900,C=ko(I,r),{mon:K,day:_,hr:Z,minute:R,sec:m}=C,y=Xt(I,K,_,Z,R,m),M={error:0,satnum:n,epochyr:i,epochdays:r,ndot:x,nddot:l,bstar:f,inclo:d,nodeo:g,ecco:A,argpo:E,mo:S,no:st,jdsatepoch:y};return Xo(M,{opsmode:"i",satn:M.satnum,epoch:M.jdsatepoch-24332815e-1,xbstar:M.bstar,xecco:M.ecco,xargpo:M.argpo,xinclo:M.inclo,xmo:M.mo,xno:M.no,xnodeo:M.nodeo}),M}function Io(o,...s){let c=(Xt(...s)-o.jdsatepoch)*Bo;return go(o,c)}function Ko(o){return o*$o}function Qo(o){return o*It}function y0({longitude:o,latitude:s,height:e}){let i=(6378.137-6356.7523142)/6378.137,r=2*i-i*i,x=6378.137/Math.sqrt(1-r*(Math.sin(s)*Math.sin(s))),l=(x+e)*Math.cos(s)*Math.cos(o),f=(x+e)*Math.cos(s)*Math.sin(o),d=(x*(1-r)+e)*Math.sin(s);return{x:l,y:f,z:d}}function Vo(o,s){let c=6356.7523142,n=Math.sqrt(o.x*o.x+o.y*o.y),i=(6378.137-c)/6378.137,r=2*i-i*i,x=((Math.atan2(o.y,o.x)-s+at)%w+w)%w-at,l=20,f=0,d=Math.atan2(o.z,Math.sqrt(o.x*o.x+o.y*o.y)),g;for(;f++<l;)g=1/Math.sqrt(1-r*(Math.sin(d)*Math.sin(d))),d=Math.atan2(o.z+6378.137*g*r*Math.sin(d),n);let A=n/Math.cos(d)-6378.137*g;return{longitude:x,latitude:d,height:A}}function t0(o,s){let e=o.x*Math.cos(s)+o.y*Math.sin(s),c=o.x*-Math.sin(s)+o.y*Math.cos(s),{z:n}=o;return{x:e,y:c,z:n}}function b0(o,s){let{longitude:e,latitude:c}=o,n=y0(o),i=s.x-n.x,r=s.y-n.y,x=s.z-n.z,l=Math.sin(c)*Math.cos(e)*i+Math.sin(c)*Math.sin(e)*r-Math.cos(c)*x,f=-Math.sin(e)*i+Math.cos(e)*r,d=Math.cos(c)*Math.cos(e)*i+Math.cos(c)*Math.sin(e)*r+Math.sin(c)*x;return{topS:l,topE:f,topZ:d}}function q0(o){let{topS:s,topE:e,topZ:c}=o,n=Math.sqrt(s*s+e*e+c*c),i=Math.asin(c/n);return{azimuth:Math.atan2(-e,s)+at,elevation:i,rangeSat:n}}function o0(o,s){let e=b0(o,s);return q0(e)}function s0(o){let s=(o-2451545)/36525,e=(280.46+36000.77*s)%360,c=(357.5277233+35999.05034*s*It)%w;c<0&&(c+=w);let n=(e+1.914666471*Math.sin(c)+.019994643*Math.sin(2*c))%360*It,i=(23.439291-.0130042*s)*It,r=1.000140612-.016708617*Math.cos(c)-139589e-9*Math.cos(2*c),x={x:r*Math.cos(n),y:r*Math.cos(i)*Math.sin(n),z:r*Math.sin(i)*Math.sin(n)},l=Math.atan(Math.cos(i)*Math.tan(n)),f=n;f<0&&(f+=w);let d=l;Math.abs(n-d)>at*.5&&(d+=.5*at*Math.round((n-l)/(.5*at)));let g=Math.asin(Math.sin(i)*Math.sin(n));return{rsun:x,rtasc:d,decl:g}}return M0(w0);})();
 
 </script>
 <script>
 "use strict";
-const LAT=50.6034, LON=8.6516, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48, CHART_VIEW_H=48;
+/* ===== Standort-Profil: URL-Parameter ?lat&lon&name > localStorage locProfile > Default Wettenberg ===== */
+const LOC_WETTENBERG={lat:50.6481,lon:8.6743,name:"Wettenberg",isWettenberg:true};
+const LOC_NORDDEICH={lat:53.6321080,lon:7.2141223,name:"Norddeich",isWettenberg:false};
+function _locSan(x){return String(x==null?"":x).replace(/[<>&"'`]/g,"").slice(0,40);}
+function loadLoc(){
+  try{
+    const u=new URLSearchParams(location.search);
+    if(u.has("lat")&&u.has("lon")){
+      const la=parseFloat(u.get("lat")),lo=parseFloat(u.get("lon"));
+      if(isFinite(la)&&isFinite(lo)&&Math.abs(la)<=89&&Math.abs(lo)<=180)
+        return {lat:la,lon:lo,name:_locSan(u.get("name"))||la.toFixed(3)+"\u00b0 / "+lo.toFixed(3)+"\u00b0",isWettenberg:false};
+    }
+    const raw=localStorage.getItem("locProfile");
+    if(raw){const p=JSON.parse(raw);
+      if(p&&isFinite(+p.lat)&&isFinite(+p.lon))return {lat:+p.lat,lon:+p.lon,name:_locSan(p.name)||"Eigener Ort",isWettenberg:!!p.isWettenberg};}
+  }catch(e){}
+  return LOC_WETTENBERG;
+}
+const LOC=loadLoc();
+const LOC_KEY="_"+LOC.lat.toFixed(2)+"_"+LOC.lon.toFixed(2); // Cache-Suffix pro Standort
+/* Wetter-Koordinaten: im Wettenberg-Profil stationsnah (DWD 01639), sonst = Standort */
+const LAT=LOC.isWettenberg?50.6034:LOC.lat, LON=LOC.isWettenberg?8.6516:LOC.lon, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48, CHART_VIEW_H=48;
 const OLD_MIN=90;
 
 /* ---------- thermische Skala (nur Zahl/Akzent) ---------- */
@@ -451,9 +532,39 @@ async function load(silent){
     tryCurrent(obsSrc);
     _lastFull=_lastFast=Date.now();
     loadExtras();
+    backfillPast();
   }catch(err){console.warn("Live-Abruf:",err);
     if(!silent){el("stErrorMsg").textContent="Keine Verbindung zur Wetterstation ("+err.message+").";showState("error");}}
   finally{el("refresh").classList.remove("spin");_loading=false;}
+}
+let _bfKey=""; // v2.28: Auslands-Stationen ohne Archiv -> Vergangenheit (72h) aus Open-Meteo-Modell nachladen
+async function backfillPast(){
+  try{
+    const key=LAT+"/"+LON;
+    if(_bfKey===key||!fullRows||!fullRows.length)return;
+    const now=Date.now(),first=new Date(fullRows[0].timestamp).getTime();
+    if((now-first)/3600e3>=24)return; // genug Historie da (deutsche Stationen)
+    _bfKey=key;
+    const j=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,pressure_msl&past_days=3&forecast_days=1&timezone=Europe%2FBerlin`,10000);
+    const h=j&&j.hourly;if(!h||!h.time)return;
+    const have=new Set(fullRows.map(r=>new Date(r.timestamp).getTime()));
+    const add=[];
+    for(let i=0;i<h.time.length;i++){
+      const t=new Date(h.time[i]).getTime();
+      if(t>=first||t>now||have.has(t)||h.temperature_2m[i]==null)continue;
+      add.push({timestamp:new Date(t).toISOString(),temperature:h.temperature_2m[i],
+        relative_humidity:h.relative_humidity_2m?h.relative_humidity_2m[i]:null,
+        dew_point:h.dew_point_2m?h.dew_point_2m[i]:null,
+        cloud_cover:h.cloud_cover?h.cloud_cover[i]:null,
+        pressure_msl:h.pressure_msl?h.pressure_msl[i]:null,_fc:false,_om:true});
+    }
+    if(!add.length)return;
+    add.sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+    fullRows=add.concat(fullRows);
+    chartRows=add.concat(chartRows||[]).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+    chartInit=false;stripInit=false;
+    render(fullRows.slice(-WINDOW_HOURS),fullRows,window._lastSrc||{},false);
+  }catch(e){console.warn("backfill",e&&e.message);}
 }
 async function tryCurrent(obsSrc){
   try{
@@ -476,14 +587,19 @@ function render(rows,all,src,demo){
   isDemo=demo; lastRows=rows; showState(null);
   const cur=rows.at(-1);
   const today=isToday(cur.timestamp);
+  window._lastSrc=src; // v2.28: fuer Backfill-Rerender; Label setzt der eine Schreiber unten
 
   // Stationszeile
   const dist=src.distance!=null?(src.distance/1000).toLocaleString("de-DE",{maximumFractionDigits:1})+" km":"";
-  el("stationTxt").textContent=(demo?"Demo":"Live")+(src.dwd_station_id?" · DWD "+src.dwd_station_id:"")+(dist?" · "+dist:"");
+  {const _ot=String((src&&src.observation_type)||"").toLowerCase();
+    const _nm=src.station_name&&!src.dwd_station_id?" · "+String(src.station_name).toLowerCase().replace(/(^|[\s\-\/])\S/g,function(m){return m.toUpperCase();}):"";
+    el("stationTxt").textContent=(demo?"Demo":(_ot==="forecast"?"MOSMIX-Prognose":"Live"))+(src.dwd_station_id?" · DWD "+src.dwd_station_id:_nm)+(dist?" · "+dist:"");} // v2.28
 
   // aktuelle Werte (Snapshot)
   const wind=cur.wind_speed!=null?cur.wind_speed:latestOf(all,"wind_speed");
-  const rh=cur.relative_humidity!=null?cur.relative_humidity:latestOf(all,"relative_humidity");
+  let rh=cur.relative_humidity!=null?cur.relative_humidity:latestOf(all,"relative_humidity");
+  if(rh==null){const _T=cur.temperature,_Td=cur.dew_point!=null?cur.dew_point:latestOf(all,"dew_point"); // v2.28: Magnus aus Taupunkt (SYNOP ohne RH)
+    if(_T!=null&&_Td!=null)rh=Math.max(1,Math.min(100,Math.round(100*Math.exp(17.62*_Td/(243.12+_Td)-17.62*_T/(243.12+_T)))));}
   snap={temp:cur.temperature,icon:cur.icon,ts:cur.timestamp,rh,wind,
     dir:cur.wind_direction!=null?cur.wind_direction:latestOf(all,"wind_direction"),
     gust:latestOf(all,"wind_gust_speed"),press:latestOf(all,"pressure_msl"),
@@ -527,7 +643,7 @@ function paintHero(s,demo,today,d){
   el("staleBox").classList.toggle("on",!today);
 
   const badge=el("badge");badge.className="badge"+(demo?" demo":(!today?" stale":""));
-  badge.textContent=demo?"Demo-Snapshot":(!today?"Veraltet":(s._live?"Live · aktuell":"Live · DWD"));
+  badge.textContent=demo?"Demo-Snapshot":(!today?"Veraltet":(s._live?"Live · aktuell":(s._fc?"Prognose":"Live · DWD")));
 
   if(!today){el("staleSub").innerHTML="Letzter Messwert: <b>"+dateWD(s.ts)+"</b>, "+timeHM(s.ts)+" Uhr ("+ageText(s.ts)+")";el("heat").classList.remove("on");return;}
 
@@ -794,6 +910,34 @@ function bfsBadgeCol(u){if(u==null)return["#9aa7b8","#fff"];const k=Math.max(0,M
 // mu = sin(Sonnenhoehe) = cos(Zenitwinkel); UV(klar) ~ A*mu^k. k per log-Regression an die Open-Meteo-
 // Stuetzpunkte gefittet, A so skaliert, dass der Scheitel exakt das Open-Meteo-Tagesmaximum trifft.
 function _sunMu(ms){const S=window.satellite;if(!S)return null;const d=new Date(ms),jd=S.jday(d),sp=S.sunPos(jd),gm=S.gstime(d),Hh=gm+LON*Math.PI/180-sp.rtasc,phi=LAT*Math.PI/180;return Math.sin(phi)*Math.sin(sp.decl)+Math.cos(phi)*Math.cos(sp.decl)*Math.cos(Hh);}
+const _O3M=[340,360,375,370,355,340,325,310,295,285,295,315]; // Monats-Ozonklimatologie Mitteleuropa (DU), TEMIS-orientiert
+function _sunE(ms){const d=new Date(ms),g=2*Math.PI*((d-new Date(d.getFullYear(),0,0))/864e5)/365.25;return 1.00011+0.034221*Math.cos(g)+0.00128*Math.sin(g)+0.000719*Math.cos(2*g)+0.000077*Math.sin(2*g);} // Sonnenabstand (Aphel Juli: ~0.967)
+function physUvAt(ms){const mu=_sunMu(ms);if(mu==null||mu<=0)return 0;return 12.5*_sunE(ms)*Math.pow(mu,2.42)*Math.pow(300/_O3M[new Date(ms).getMonth()],1.23);} // Allaart 2004 mit Abstandsfaktor E
+function uvSimSeries(t6,t21,ccAt,bellAt,cmfFn,seed,DT,wAt){ // v2.20: Sonne/Schatten-Telegraphenprozess; Zeitmittel == cmfFn per Konstruktion
+  let _s=(seed>>>0)||1;const rnd=()=>{_s=_s+0x6D2B79F5|0;let t=Math.imul(_s^_s>>>15,1|_s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  DT=DT||120000;const T0=4*60000;
+  const ts=[],vs=[],lo=[],hi=[],st=[];
+  let sun=rnd()<0.5;
+  for(let t=t6;t<=t21;t+=DT){
+    const cc=ccAt(t),bell=Math.max(0,bellAt(t));
+    if(cc==null||bell<=0.02){ts.push(t);vs.push(null);lo.push(null);hi.push(null);st.push(null);continue;}
+    let w=wAt?wAt(t):1;if(w==null||!isFinite(w))w=1;w=Math.max(0,Math.min(1,w)); // v2.24: Konvektivitaetsgewicht (Anteil tiefer Wolken); Schleier/Stratus -> kein Enhancement
+    const eps=1.25*Math.max(0,cc-0.15)*(1-cc)*w,cmf=cmfFn(cc*100); // v2.25: Struktur-Schwelle 15% - Klartage ohne Enhancement; tau via Anker steigt automatisch
+    let tau=cc>0.02?(cmf-(1-cc)*(1+eps))/cc:cmf;tau=Math.max(0.12,Math.min(0.9,tau));
+    const Ts=2*T0*(1-cc),Tc=2*T0*cc; // v2.21: P(Sonne)=Ts/(Ts+Tc)=(1-cc) exakt; Luecken bei hoher Bedeckung selten UND kurz
+    if(cc>=0.97)sun=false;else if(cc<=0.03)sun=true; // geschlossene Decke: keine Spitzen / klarer Himmel: keine Schatten
+    else if(rnd()<(sun?1-Math.exp(-DT/Math.max(Ts,1e4)):1-Math.exp(-DT/Math.max(Tc,1e4))))sun=!sun;
+    const jit=1+(rnd()-0.5)*0.06;
+    const tEff=tau+Math.max(0,1-Tc/DT)*((1+eps)-tau); // v2.25: Schatten kuerzer als Raster -> zeitanteilige Mischung (kleine Wolken, Klartage)
+    let v=bell*(sun?(1+eps*(0.75+0.5*rnd())):tEff*(0.75+0.5*rnd()))*jit;
+    if(sun)v=Math.min(v,bell*1.20); // v2.23: Broadband-Enhancement-Deckel +20% (Praxisgrenze, validiert 03.07.)
+    ts.push(t);vs.push(Math.max(0,v));st.push(sun?1:0);
+    lo.push(bell*tau*0.75);hi.push(bell*(1+eps));
+  }
+  return{ts:ts,vs:vs,lo:lo,hi:hi,st:st};
+}
+function _axGet(sl){try{return +localStorage.getItem("bfsAx_"+sl)||0}catch(e){return 0}}
+function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v))}catch(e){}}
 function makeSunBell(cs,tms,t6,t21,fallback){
   if(!window.satellite)return fallback;
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
@@ -854,10 +998,31 @@ function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.al
   // mehrere Hitze-Warnungen -> nur die höchste Stufe behalten
   let bestHeat=null;al.forEach(a=>{if(isHeat(a)&&(!bestHeat||(rank[(a.severity||"").toLowerCase()]||0)>(rank[(bestHeat.severity||"").toLowerCase()]||0)))bestHeat=a;});
   al=al.filter(a=>!isHeat(a)||a===bestHeat);
-  al.slice().sort((a,b)=>(rank[(b.severity||"").toLowerCase()]||0)-(rank[(a.severity||"").toLowerCase()]||0)).slice(0,3).forEach(a=>{
-    let sev=(a.severity||"moderate").toLowerCase();if(!rank[sev])sev="moderate";
+  /* v1.7: gleiche Ereignisse zu einer Karte verschmelzen (Zeitfenster vereinigt, hoechste Stufe gewinnt) */
+  const groups={};
+  al.forEach(a=>{const k=String(a.event_de||a.event_en||"Wetterwarnung").trim().toUpperCase();
+    const g=groups[k];
+    if(!g){groups[k]={k,a,onset:a.onset||"",expires:a.expires||""};return;}
+    if((rank[(a.severity||"").toLowerCase()]||0)>(rank[(g.a.severity||"").toLowerCase()]||0))g.a=a;
+    if(a.onset&&(!g.onset||a.onset<g.onset))g.onset=a.onset;
+    if(a.expires&&(!g.expires||a.expires>g.expires))g.expires=a.expires;});
+  let list=Object.keys(groups).map(k=>groups[k]);
+  /* v1.7: Familien-Subsumtion Wind/Gewitter: staerkere Warnung verdeckt schwaechere bei Zeitueberlappung */
+  const fam=k=>/ORKANB\u00d6EN/.test(k)?["W",4]:/ORKANARTIGE/.test(k)?["W",3]:/SCHWERE STURMB\u00d6EN/.test(k)?["W",2.5]:/STURMB\u00d6EN/.test(k)?["W",2]:/WINDB\u00d6EN/.test(k)?["W",1]:
+             /GEWITTER/.test(k)?["G",/EXTREM/.test(k)?4:/SCHWER/.test(k)?3:/STARK/.test(k)?2:1]:null;
+  const ovl=(x,y)=>{const a0=x.onset||"0",a1=x.expires||"9999",b0=y.onset||"0",b1=y.expires||"9999";return a0<=b1&&b0<=a1;};
+  list=list.filter(x=>{const fx=fam(x.k);if(!fx)return true;
+    return !list.some(y=>{if(y===x)return false;const fy=fam(y.k);return !!fy&&fy[0]===fx[0]&&fy[1]>fx[1]&&ovl(x,y);});});
+  const fmtT=iso=>{if(!iso)return"";const d=new Date(iso);if(isNaN(d))return"";
+    return ["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()]+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");};
+  list.sort((a,b)=>(rank[(b.a.severity||"").toLowerCase()]||0)-(rank[(a.a.severity||"").toLowerCase()]||0)).slice(0,3).forEach(g=>{
+    const a=g.a;let sev=(a.severity||"moderate").toLowerCase();if(!rank[sev])sev="moderate";
+    let sub="";const t0=fmtT(g.onset),t1=fmtT(g.expires);
+    if(t1)sub=(g.onset&&new Date(g.onset)>new Date()?t0+" \u2013 "+t1:"bis "+t1)+" Uhr";
+    else if(a.headline_de)sub=a.headline_de;
+    if(/VORAB/i.test(a.headline_de||""))sub="Vorabinformation"+(sub?" \u00b7 "+sub:"");
     const div=document.createElement("div");div.className="alert "+sev;
-    div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${a.headline_de?`<div class="ad">${a.headline_de}</div>`:""}</div>`;
+    div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${sub?`<div class="ad">${sub}</div>`:""}</div>`;
     box.appendChild(div);});
   if(bestHeat)el("heat").classList.remove("on");}
 
@@ -917,7 +1082,8 @@ function renderPrecipToday(d){
 
 /* --- Kachel "Niederschlag heute": geeichte DWD-Radar-Tagessumme (RADOLAN-RW, bilinear ueber 4 Pixel am Erlental) aus radolan.json. Ueberschreibt den Open-Meteo-Fallback, sobald verfuegbar und vom heutigen Tag. --- */
 function renderRadolan(){
-  fetch("radolan.json?t="+Date.now(),{cache:"no-store"})
+  if(!LOC.isWettenberg){const sec=el("umkreisSec");if(sec)sec.classList.add("hidden");return;} // Pipeline auf Wettenberg geeicht; Kachel behaelt Open-Meteo-Wert
+  fetch("https://luperttrading-lab.github.io/wetter/radolan.json?t="+Date.now(),{cache:"no-store"})   // Pipeline lebt im Repo wetter
     .then(r=>r.ok?r.json():Promise.reject("HTTP "+r.status))
     .then(j=>{
       if(!j||j.summe_mm==null){renderUmkreis(null);return;}
@@ -1036,7 +1202,7 @@ function renderUmkreis(j){
   requestAnimationFrame(()=>{
     const ank=+j.summe_mm, fkt=span>0?Math.min(Math.max(UMK_ZIEL/span,1),UMK_KMAX):1;  // Standort-Anker + adaptiver Faktor
     umkFill(el("umkCvA"),g,mm=>umkColor(ank+(mm-ank)*fkt),SX,SY);            // Menge (Blau 0-50): Kontrast um eigenen Wert verstaerkt
-    umkFill(el("umkCvB"),g,mm=>umkTeal(span>0?(mm-mn)/span:0.5),SX,SY);      // relativ: Verteilung (Tuerkis)
+    umkFill(el("umkCvB"),g,mm=>umkTeal(0.22+0.78*(span>0?(mm-mn)/span:0.5)),SX,SY);      // v2.33: relativ (Muster sichtbar), aber Rampe startet bei Hellgruen statt Weiss - Minimum heisst "weniger", nicht "trocken"
     const pos=[16.6667,50,83.3333];let lbls="";
     g.forEach((row,i)=>row.forEach((v,k)=>{
       const dunkel=v<15;                         // heller Grund (wenig Regen) -> dunkle Zahl
@@ -1107,6 +1273,61 @@ function filterUvDay(h,off){
   const pick=a=>Array.isArray(a)?idx.map(i=>a[i]):a;
   return {time:pick(h.time),uv_index_clear_sky:pick(h.uv_index_clear_sky),uv_index:pick(h.uv_index)};
 }
+/* v2.5: BfS-Tagesgrafik fuer die naechste Messstation (Slugs live verifiziert 03.07.2026, Test-Screenshots).
+   Liste waechst, sobald weitere Slugs per bfs-stationen-test.html bestaetigt sind. Deckel 70 km: UV-Messkurven
+   enthalten die LOKALE Bewoelkung der Station - weiter weg repraesentiert sie den eigenen Himmel nicht mehr. */
+const BFS_UV_STATIONS=[
+  {slug:"Andernach",name:"Andernach",la:50.439,lo:7.402},
+  {slug:"Berlin",name:"Berlin",la:52.447,lo:13.296},
+  {slug:"Bonn",name:"Bonn",la:50.7,lo:7.15},
+  {slug:"Chieming",name:"Chieming",la:47.888,lo:12.535},
+  {slug:"Dortmund",name:"Dortmund",la:51.514,lo:7.457},
+  {slug:"Eckernfoerde",name:"Eckernf\u00f6rde",la:54.472,lo:9.836},
+  {slug:"Fichtelberg",name:"Fichtelberg",la:50.428,lo:12.954},
+  {slug:"Friedrichshafen",name:"Friedrichshafen",la:47.674,lo:9.485},
+  {slug:"Genthin",name:"Genthin",la:52.404,lo:12.155},
+  {slug:"Giessen-Wettenberg",name:"Gie\u00dfen",la:50.602,lo:8.644},
+  {slug:"Goerlitz",name:"G\u00f6rlitz",la:51.153,lo:14.985},
+  {slug:"Groemitz",name:"Gr\u00f6mitz",la:54.15,lo:10.96},
+  {slug:"Hamburg",name:"Hamburg",la:53.55,lo:10},
+  {slug:"Hohenpeissenberg",name:"Hohenpei\u00dfenberg",la:47.801,lo:11.01},
+  {slug:"Kassel",name:"Kassel",la:51.312,lo:9.48},
+  {slug:"Klippeneck",name:"Klippeneck",la:48.108,lo:8.755},
+  {slug:"Kulmbach",name:"Kulmbach",la:50.106,lo:11.451},
+  {slug:"Langen",name:"Langen",la:49.99,lo:8.68},
+  {slug:"Lindenberg",name:"Lindenberg",la:52.209,lo:14.118},
+  {slug:"Lueneburg",name:"L\u00fcneburg",la:53.248,lo:10.408},
+  {slug:"Melpitz",name:"Melpitz",la:51.531,lo:12.928},
+  {slug:"Muenchen",name:"M\u00fcnchen",la:48.222,lo:11.597},
+  {slug:"Norderney",name:"Norderney",la:53.71,lo:7.15},
+  {slug:"Salzgitter",name:"Salzgitter",la:52.152,lo:10.36},
+  {slug:"Schauinsland",name:"Schauinsland",la:47.914,lo:7.909},
+  {slug:"Stuttgart",name:"Stuttgart",la:48.783,lo:9.2},
+  {slug:"Tholey",name:"Tholey",la:49.48,lo:7.04},
+  {slug:"Todendorf",name:"Todendorf",la:54.32,lo:10.7},
+  {slug:"Waldmuenchen",name:"Waldm\u00fcnchen",la:49.378,lo:12.705},
+  {slug:"Weissenburg",name:"Wei\u00dfenburg",la:49.033,lo:10.972},
+  {slug:"Zingst",name:"Zingst",la:54.437,lo:12.69},
+  {slug:"Zirchow",name:"Zirchow",la:53.847,lo:14.15},
+  {slug:"Schneefernerhaus",name:"Zugspitze (Schneefernerhaus)",la:47.417,lo:10.979},
+  {slug:"Boesel_B",name:"Bösel",la:53.006,lo:7.958},
+  {slug:"Cuxhaven_B",name:"Cuxhaven",la:53.861,lo:8.694},
+  {slug:"Duderstadt_B",name:"Duderstadt",la:51.5075,lo:10.2386},
+  {slug:"Belm-Osnabrueck",name:"Belm-Osnabrück",la:52.3169,lo:8.1689},
+  {slug:"Sankt Augustin",name:"Sankt Augustin",la:50.78,lo:7.1819},
+  {slug:"Schweinfurt_Wasserlosen",name:"Schweinfurt (Wasserlosen)",la:50.0461,lo:10.0411},
+  {slug:"Sylt_Tinnum",name:"Sylt (Tinnum)",la:54.8922,lo:8.325},
+  {slug:"Waldhof_Falkenstein",name:"Waldhof",la:52.802,lo:10.759},
+  {slug:"Wasserkuppe bei Fulda",name:"Wasserkuppe",la:50.4969,lo:9.9431},
+  {slug:"Wurmberg_B",name:"Wurmberg (Harz)",la:51.7581,lo:10.6125}
+];
+function bfsNearest(){
+  let b=null,bd=1e9;
+  for(const st of BFS_UV_STATIONS){
+    const dy=(LOC.lat-st.la)*111.32,dx=(LOC.lon-st.lo)*111.32*Math.cos((LOC.lat+st.la)/2*Math.PI/180),d=Math.hypot(dx,dy);
+    if(d<bd){bd=d;b=st;}}
+  return bd<=70?{slug:b.slug,name:b.name,dist:bd}:null;
+}
 function setUvDay(off){uvDayOffset=off;if(uvAirFull)renderAirGrid(uvAirFull);}
 
 function renderAirGrid(air){
@@ -1122,6 +1343,7 @@ function renderAirGrid(air){
     const ccMap={};if(Array.isArray(fullRows))for(const r of fullRows){if(r.cloud_cover!=null){const dd=new Date(r.timestamp);ccMap[ymd(r.timestamp)+"_"+dd.getHours()]=r.cloud_cover;}}
     const nowMs=Date.now();
     h._real=h.time.map((t,i)=>{const dt=new Date(t);if(uvDayOffset===0&&dt.getTime()>nowMs+30*60000)return null;const cc=ccMap[ymd(t)+"_"+dt.getHours()];if(cc==null)return null;return Math.round((h.uv_index_clear_sky[i]||0)*cmfUV(cc)*10)/10;});
+    h._cc=h.time.map(t=>{const cc=ccMap[ymd(t)+"_"+new Date(t).getHours()];return cc==null?null:+cc;}); // v2.20: Bewölkung für Minuten-Simulation
     let pk=-1,pkI=-1;h.uv_index_clear_sky.forEach((v,i)=>{if(v!=null&&v>pk){pk=v;pkI=i;}});
     // echter Sub-Stunden-Scheitel: clear-sky-Glocke (gleiche Catmull-Rom wie gezeichnet) fein abtasten -> Peak ~Solar-Mittag statt voller Stunde
     let pkMs=pkI>=0?new Date(h.time[pkI]).getTime():null;
@@ -1152,8 +1374,9 @@ function renderAirGrid(air){
     let vdLine="";
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
-    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · Wettenberg</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich · amtliche Messung siehe unten${vdLine}</div></div>`;
-    html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS Gießen-Wettenberg</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_Giessen-Wettenberg_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der BfS-Messstation Gießen-Wettenberg" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt, Station 203 m · echte Messung · <b style="color:#1b3a6b">blaue Linie</b> = max. möglich (Klarsky-Modell) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/_documents/giessen_node.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel<span id="atmDamp"></span> · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}${vdLine}</div></div>`;
+    const _bfsSt=bfsNearest();
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
@@ -1211,8 +1434,8 @@ function drawUV(h){
   x.fillStyle="#59657a";x.textAlign="left";x.textBaseline="middle";x.font="600 9.5px -apple-system,system-ui,sans-serif";
   x.fillText(_ds,lgX+lgW+6,lgY+lgH/2);const _dEnd=lgX+lgW+6+x.measureText(_ds).width;
   x.fillStyle="#12324f";x.textAlign="center";x.textBaseline="middle";x.font="800 11.5px -apple-system,system-ui,sans-serif";
-  const _tw=x.measureText("Gießen-Wettenberg").width;let _tc=gx0+plotW/2;if(_tc-_tw/2<_dEnd+5)_tc=_dEnd+5+_tw/2;if(_tc+_tw/2>gx1)_tc=gx1-_tw/2;
-  x.fillText("Gießen-Wettenberg",_tc,lgY+lgH/2);
+  const _hl=LOC.isWettenberg?"Gießen-Wettenberg":LOC.name,_tw=x.measureText(_hl).width;let _tc=gx0+plotW/2;if(_tc-_tw/2<_dEnd+5)_tc=_dEnd+5+_tw/2;if(_tc+_tw/2>gx1)_tc=gx1-_tw/2;
+  x.fillText(_hl,_tc,lgY+lgH/2);
   // === Farbskala: exakt UV 0..9 (deckt die Box-Höhe, kein Überhang) ===
   // diskrete UV-Farbblöcke wie BfS (Block k deckt UV k-0,5 .. k+0,5); Palette aus dem BfS-Bild
   // BFSCOL ist global definiert (identisch fuer Skala/Saeulen/Punkt/Badge)
@@ -1234,7 +1457,7 @@ function drawUV(h){
   for(let hh=6;hh<=21;hh++){const xx=X(day.getTime()+hh*3600e3);x.fillText(hh,xx,gy1+4);}
   // Säulen: Höhe=real bis jetzt; Farbe=diskreter Block der Höhe (vertikal einfarbig, wie BfS)
   const now=Date.now(),step=2.4,bw=2.9;
-  for(let px=gx0;px<gx1;px+=step){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);if(t>now)break;const rv=realAt(t);if(rv==null||rv<=0.03)continue;const top=Y(rv);x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(rv)))];x.fillRect(px,top,Math.min(bw,gx1-px),gy1-top);}
+  if(!window._uvSimOn)for(let px=gx0;px<gx1;px+=step){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);if(t>now)break;const rv=realAt(t);if(rv==null||rv<=0.03)continue;const top=Y(rv);x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(rv)))];x.fillRect(px,top,Math.min(bw,gx1-px),gy1-top);} // v2.23: im Sim-Modus ersetzen 2-min-Balken die Saeulen
   x.globalAlpha=1;
   // dicke clear-sky-Glocke – durchgehend bis 21 Uhr (gx1), auch wenn UV abends <0.05 fällt.
   // Natürlicher kubischer Spline (C2, global krümmungsminimal): erzeugt einen glatten runden Scheitel
@@ -1245,6 +1468,29 @@ function drawUV(h){
   // Physikalische Klarhimmel-Glocke (global definiert); csBell = Fallback ohne satellite-Lib
   const sunBell=makeSunBell(cs,tms,t6,t21,csBell);
   const pxA=gx0,pxB=gx1;
+  if(window.satellite){ // v2.19: Referenzkurve entfernt (bei gedaempfter Atmosphaere irrefuehrend) - Klimatologie-Info als Daempfungszahl im Kleintext
+    let _pp=0,_pk=0;
+    for(let px=pxA;px<=pxB;px+=4){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=physUvAt(t);if(u>_pp)_pp=u;const v=sunBell(t);if(v>_pk)_pk=v;}
+    const _d=document.getElementById("atmDamp");
+    if(_d)_d.textContent=(_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"";
+  }
+  const _sb=document.getElementById("uvSimBtn");
+  if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
+  if(window._uvSimOn&&h._cc){ // v2.20: Minuten-Simulation, Seed=Datum^Ort (deterministisch pro Tag)
+    const _cc=h._cc,_n=tms.length;
+    const ccAt=t=>{for(let i=0;i<_n-1;i++){if(t>=tms[i]&&t<tms[i+1]){const A=_cc[i],B=_cc[i+1];if(A==null&&B==null)return null;const va=A==null?B:A,vb=B==null?A:B;return (va+(vb-va)*(t-tms[i])/(tms[i+1]-tms[i]))/100;}}return null;};
+    const _ly=window._ccLayers;let wMap=null; // v2.24: Konvektivitaet je Stunde = tief/(tief+mittel+hoch)
+    if(_ly&&_ly.time&&_ly.cloud_cover_low){wMap={};for(let i=0;i<_ly.time.length;i++){const Lw=+_ly.cloud_cover_low[i]||0,Mw=+_ly.cloud_cover_mid[i]||0,Hw=+_ly.cloud_cover_high[i]||0;wMap[String(_ly.time[i]).slice(0,13)]=Math.max(0,Math.min(1,Lw/Math.max(Lw+Mw+Hw,15)));}}
+    const wAt=t=>{if(!wMap)return 1;const d=new Date(t);const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"T"+String(d.getHours()).padStart(2,"0");const v=wMap[k];return v==null?1:v;};
+    const d0=new Date(tms[0]);
+    const R=uvSimSeries(t6,t21,ccAt,sunBell,cmfUV,(d0.getFullYear()*10000+(d0.getMonth()+1)*100+d0.getDate())^Math.round(((typeof LAT==="number"?LAT:50))*1000),120000,wAt);
+    const XX=t=>gx0+((t-t6)/(t21-t6))*(gx1-gx0);
+    const bwS=Math.max(1,(gx1-gx0)/R.ts.length-0.35); // v2.23: BfS-Optik - Farbbalken je 2-min-Wert
+    for(let i=0;i<R.ts.length;i++){const v=R.vs[i];if(v==null||v<=0.03)continue;const yv=Y(Math.min(v,axMax));
+      x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(v)))];x.fillRect(XX(R.ts[i])-bwS/2,yv,bwS,gy1-yv);}
+    x.fillStyle="#111";
+    for(let i=0;i<R.ts.length;i++){const v=R.vs[i];if(v==null||v<=0.03)continue;x.beginPath();x.arc(XX(R.ts[i]),Y(Math.min(v,axMax)),0.9,0,6.3);x.fill();}
+  }
   x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
   for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);if(_gf){x.moveTo(px,Y(uv));_gf=false;}else x.lineTo(px,Y(uv));}x.stroke();
   // stuendliche REALE Messwerte als Vorwaerts-Treppe: Messpunkt = linke Ecke, dann 1h nach rechts, dann Sprung zum naechsten.
@@ -1275,10 +1521,13 @@ function drawUV(h){
 // falls die blaue Linie minimal verschoben sitzt (X pixel-verifiziert, Y aus Screenshot vermessen):
 const BFS_X0=0.1280, BFS_X1=0.8970;  // 6 Uhr .. 21 Uhr  (Anteil der Bildbreite, pixel-vermessen)
 const BFS_Y9=0.1470, BFS_Y0=0.9110;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Bildhoehe, aus BfS-Skala-Ziffern IMG_2319 rueckgerechnet)
-function drawBfsOverlay(){
+function drawBfsOverlay(){try{
   const img=el("bfsUv"),cv=el("bfsOvl"),h=lastUVH;
   if(!img||!cv||!h||!h.uv_index_clear_sky||!h.time)return;
-  const W=img.clientWidth,Hh=img.clientHeight;if(!W||!Hh)return;
+  const W=img.clientWidth,Hh=img.clientHeight;
+  if(!W||!Hh){if((window._bfsRt=(window._bfsRt||0)+1)<=8)setTimeout(drawBfsOverlay,300);return;} // v2.14: Layout noch 0 -> bis zu 8x nachfassen
+  window._bfsRt=0;
+  const _axSlug=(()=>{const m=String(img.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);return m?decodeURIComponent(m[1]):"";})(); // v2.15: Slug aus img.src - das Stationsobjekt ist render-lokal, hier unsichtbar
   const dpr=Math.min(window.devicePixelRatio||1,3);
   cv.width=W*dpr;cv.height=Hh*dpr;cv.style.width=W+"px";cv.style.height=Hh+"px";
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
@@ -1286,14 +1535,28 @@ function drawBfsOverlay(){
   const day=new Date(tms[0]);day.setHours(0,0,0,0);
   const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
-  const Y=u=>gy0-(gy0-gy9)*(Math.max(0,Math.min(9,u))/9);
+  let ax=(function(){const sv=_axGet(_axSlug);if(sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}return pk>=8.35?10:9;})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
+  const Y=u=>gy0-(gy0-gy9)*(Math.max(0,Math.min(ax,u))/ax);
   const _bm=(()=>{const n=cs.length,m=new Array(n).fill(0),d=new Array(Math.max(0,n-1));for(let i=0;i<n-1;i++){const hh=tms[i+1]-tms[i];d[i]=hh?((cs[i+1]||0)-(cs[i]||0))/hh:0;}if(n>=2){m[0]=d[0];m[n-1]=d[n-2];}for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0)m[i]=0;else m[i]=2*d[i-1]*d[i]/(d[i-1]+d[i]);}return m;})();
   const bell=t=>{for(let i=0;i<cs.length-1;i++){if(t>=tms[i]&&t<=tms[i+1]){const hh=tms[i+1]-tms[i],u=(t-tms[i])/hh,u2=u*u,u3=u2*u,y0=cs[i]||0,y1=cs[i+1]||0,m0=_bm[i],m1=_bm[i+1];return Math.max(0,y0*(2*u3-3*u2+1)+y1*(-2*u3+3*u2)+m0*hh*(u3-2*u2+u)+m1*hh*(u3-u2));}}return 0;};
   const sunBell=makeSunBell(cs,tms,t6,t21,bell);// physikalische Glocke (glatt); bell = Fallback ohne satellite-Lib
   const draw=()=>{let f=true;x.beginPath();for(let px=gx0;px<=gx1;px+=1.5){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const yy=Y(sunBell(t));if(f){x.moveTo(px,yy);f=false;}else x.lineTo(px,yy);}x.stroke();};
   x.lineJoin="round";x.lineCap="round";
   x.strokeStyle="rgba(255,255,255,.9)";x.lineWidth=5;draw();   // weisser Halo fuer Kontrast auf buntem Grund
-  x.strokeStyle="#1b3a6b";x.lineWidth=2.4;draw();             // Klarsky-Kurve (max. moeglich)
+  x.strokeStyle="#3a4453";x.lineWidth=2.6;draw();             // unser Modell, schwarz wie in der oberen Grafik
+  if(window.satellite){ // v2.16: Hybrid-Rot - Form mu^2,42, Scheitel CAMS-kalibriert (Ziel: deckungsgleich mit DWD-Grau)
+    let muMax=0,pkC=0;for(let t=t6;t<=t21;t+=3e5){const m=_sunMu(t);if(m>muMax)muMax=m;const v=bell(t);if(v>pkC)pkC=v;}
+    let _sn=0,_sd=0; // v2.17: Diffusanteil w an CAMS fitten (Form (1-w)*r^2.42 + w*r), geschlossene LS-Loesung
+    if(muMax>0&&pkC>0)for(let t=t6;t<=t21;t+=6e5){const m=_sunMu(t);if(m<=0)continue;const r=m/muMax,a=Math.pow(r,2.42),b=r-a,y=bell(t)/pkC-a;_sn+=y*b;_sd+=b*b;}
+    const w=Math.max(0,Math.min(0.18,_sd>0?_sn/_sd:0));
+    const redAt=t=>{const m=_sunMu(t);if(m<=0||muMax<=0)return 0;const r=m/muMax;return pkC*((1-w)*Math.pow(r,2.42)+w*r);};
+    const drawP=()=>{x.beginPath();let f=true;for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=Math.min(redAt(t),ax);if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}x.stroke();};
+    x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.4;drawP();
+    x.strokeStyle="#c62828";x.lineWidth=1.7;drawP();
+  }
+  const _ab=document.getElementById("bfsAx");
+  if(_ab){_ab.textContent="Achse 0\u2013"+ax;if(!_ab._w){_ab._w=1;_ab.onclick=()=>{const im=el("bfsUv"),m=im&&String(im.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);if(!m)return;const c=window._bfsAxCur||9;_axSet(decodeURIComponent(m[1]),c===9?10:(c===10?12:9));syncUV();};}}
+}catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
 }
 
 
@@ -1301,23 +1564,108 @@ function drawBfsOverlay(){
 const _merX=lon=>(lon+180)/360;
 const _merY=lat=>{const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1-s))/(4*Math.PI);};
 const _smooth=(e0,e1,v)=>{let t=(v-e0)/(e1-e0);t=t<0?0:t>1?1:t;return t*t*(3-2*t);};
-const WOLK={latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:10,ny:10,z:9}; // 10x10 Kachelzentren (v2.31: aeusserer Kranz weg, -31% API-Last)
+function _wolkP(k,d){try{const v=parseFloat(localStorage.getItem(k));return isFinite(v)?v:d}catch(e){return d}}
+let WOLK_E0=_wolkP("wolkE0",22),WOLK_E1=_wolkP("wolkE1",72); // v2.18: Smoothstep-Eckpunkte per Regler
+const WOLK=(function(){ // 10x10 Kachelzentren (v2.31: aeusserer Kranz weg, -31% API-Last)
+  if(LOC.isWettenberg)return {latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:10,ny:10,z:9}; // kalibriertes Original-Fenster
+  const dLon=66/(111.32*Math.cos(LOC.lat*Math.PI/180)); // halbe Breite 66 km, halbe Hoehe 0,5 Grad
+  return {latN:LOC.lat+0.5,latS:LOC.lat-0.5,lonW:LOC.lon-dLon,lonE:LOC.lon+dLon,nx:10,ny:10,z:9};
+})();
 const WOLK_TILE="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-const HOME_LAT=50.6481, HOME_LON=8.6743;   // echter Standort (Wettenberg) fuer den Karten-Pin (UV/Wetter nutzen weiter LAT/LON = stationsnah)
-const WOLK_CITIES=[
-  {n:"Biedenkopf",la:50.91,lo:8.53},
-  {n:"Siegen",la:50.88,lo:8.02},
-  {n:"Marburg",la:50.81,lo:8.77,b:1},
-  {n:"Alsfeld",la:50.75,lo:9.27},
-  {n:"Herborn",la:50.68,lo:8.30},
-  {n:"Lauterbach",la:50.64,lo:9.40},
-  {n:"Gie\u00dfen",la:50.58,lo:8.68,b:1},
-  {n:"Weilburg",la:50.48,lo:8.26},
-  {n:"Limburg",la:50.39,lo:8.06},
-  {n:"Friedberg",la:50.34,lo:8.76},
-  {n:"Hanau",la:50.13,lo:8.92},
-  {n:"Frankfurt",la:50.11,lo:8.68,b:1},
-  {n:"Wiesbaden",la:50.08,lo:8.24,b:1}
+const HOME_LAT=LOC.lat, HOME_LON=LOC.lon;   // Standort aus LOC-Profil: Karten-Pin + Astronomie (Wetter nutzt im Wettenberg-Profil stationsnahe LAT/LON)
+const WOLK_CITIES=[ /* v1.3: 30 kuratierte Orte (Vorrang) + Raster-Auswahl DE+Nachbarn (33-km-Zellen, >=15k Einw.), Duplikate <5 km entfernt */
+  {n:"Biedenkopf",la:50.91,lo:8.53},{n:"Siegen",la:50.88,lo:8.02},{n:"Marburg",la:50.81,lo:8.77,b:1},{n:"Alsfeld",la:50.75,lo:9.27},{n:"Herborn",la:50.68,lo:8.30},
+  {n:"Lauterbach",la:50.64,lo:9.40},{n:"Gie\u00dfen",la:50.58,lo:8.68,b:1},{n:"Weilburg",la:50.48,lo:8.26},{n:"Limburg",la:50.39,lo:8.06},{n:"Friedberg",la:50.34,lo:8.76},
+  {n:"Hanau",la:50.13,lo:8.92},{n:"Frankfurt",la:50.11,lo:8.68,b:1},{n:"Wiesbaden",la:50.08,lo:8.24,b:1},{n:"Borkum",la:53.59,lo:6.66},{n:"Juist",la:53.68,lo:7.00},
+  {n:"Norderney",la:53.71,lo:7.15},{n:"Baltrum",la:53.73,lo:7.37},{n:"Langeoog",la:53.75,lo:7.48},{n:"Spiekeroog",la:53.77,lo:7.70},{n:"Wangerooge",la:53.79,lo:7.90},
+  {n:"Norden",la:53.60,lo:7.20},{n:"Emden",la:53.37,lo:7.21,b:1},{n:"Aurich",la:53.47,lo:7.48},{n:"Leer",la:53.23,lo:7.45},{n:"Esens",la:53.65,lo:7.61},
+  {n:"Wittmund",la:53.58,lo:7.78},{n:"Jever",la:53.57,lo:7.90},{n:"Wilhelmshaven",la:53.52,lo:8.11,b:1},{n:"Delfzijl",la:53.33,lo:6.93},{n:"Groningen",la:53.22,lo:6.57,b:1},
+  {n:"Innsbruck",la:47.26,lo:11.39,b:1},{n:"Graz",la:47.07,lo:15.45,b:1},{n:"Wels",la:48.17,lo:14.03},{n:"Villach",la:46.61,lo:13.86},{n:"Telfs",la:47.31,lo:11.07},
+  {n:"Linz",la:48.31,lo:14.29,b:1},{n:"Sankt P\u00f6lten",la:48.20,lo:15.63},{n:"Klagenfurt am W\u00f6rthersee",la:46.62,lo:14.31,b:1},{n:"Salzburg",la:47.80,lo:13.04,b:1},{n:"Saalfelden am Steinernen Meer",la:47.43,lo:12.85},
+  {n:"Dornbirn",la:47.41,lo:9.74},{n:"Sankt Gallen",la:47.42,lo:9.37},{n:"Bregenz",la:47.50,lo:9.75},{n:"Amstetten",la:48.12,lo:14.87},{n:"Beringen",la:51.05,lo:5.23},
+  {n:"Geel",la:51.17,lo:4.99},{n:"Aachen",la:50.78,lo:6.08,b:1},{n:"Verviers",la:50.59,lo:5.86},{n:"Tilburg",la:51.56,lo:5.09,b:1},{n:"Hasselt",la:50.93,lo:5.34},
+  {n:"Tienen",la:50.81,lo:4.94},{n:"Li\u00e8ge",la:50.63,lo:5.57,b:1},{n:"Marche-en-Famenne",la:50.23,lo:5.34},{n:"Weert",la:51.25,lo:5.71},{n:"Arlon",la:49.68,lo:5.82},
+  {n:"Andenne",la:50.49,lo:5.10},{n:"Z\u00fcrich",la:47.37,lo:8.55,b:1},{n:"Yverdon-les-Bains",la:46.78,lo:6.64},{n:"Winterthur",la:47.51,lo:8.72,b:1},{n:"Konstanz",la:47.66,lo:9.18},
+  {n:"Rapperswil",la:47.23,lo:8.82},{n:"Waldshut-Tiengen",la:47.62,lo:8.22},{n:"Thun",la:46.75,lo:7.62},{n:"Solothurn",la:47.21,lo:7.54},{n:"Luzern",la:47.05,lo:8.31},
+  {n:"Aarau",la:47.39,lo:8.04},{n:"La Chaux-de-Fonds",la:47.10,lo:6.83},{n:"Basel",la:47.56,lo:7.57,b:1},{n:"Littau",la:47.05,lo:8.26},{n:"Bern",la:46.95,lo:7.45,b:1},
+  {n:"Biel/Bienne",la:47.14,lo:7.25},{n:"Fribourg",la:46.80,lo:7.15},{n:"Einsiedeln",la:47.13,lo:8.75},{n:"Chur",la:46.85,lo:9.53},{n:"Dv\u016fr Kr\u00e1lov\u00e9 nad Labem",la:50.43,lo:15.81},
+  {n:"Prague",la:50.09,lo:14.42,b:1},{n:"Havl\u00ed\u010dk\u016fv Brod",la:49.61,lo:15.58},{n:"\u017datec",la:50.33,lo:13.55},{n:"Hole\u0161ovice",la:50.10,lo:14.45},{n:"Zittau",la:50.90,lo:14.81},
+  {n:"\u00dast\u00ed nad Labem",la:50.66,lo:14.03},{n:"Trutnov",la:50.56,lo:15.91},{n:"Jihlava",la:49.40,lo:15.59},{n:"Most",la:50.50,lo:13.64},{n:"T\u00e1bor",la:49.41,lo:14.66},
+  {n:"Strakonice",la:49.26,lo:13.90},{n:"Karlovy Vary",la:50.23,lo:12.87},{n:"Kladno",la:50.15,lo:14.10},{n:"\u0158epy",la:50.07,lo:14.30},{n:"P\u0159\u00edbram",la:49.69,lo:14.01},
+  {n:"Pilsen",la:49.75,lo:13.38,b:1},{n:"P\u00edsek",la:49.31,lo:14.15},{n:"Pelh\u0159imov",la:49.43,lo:15.22},{n:"Pardubice",la:50.04,lo:15.78},{n:"Mlad\u00e1 Boleslav",la:50.41,lo:14.90},
+  {n:"Liberec",la:50.77,lo:15.06,b:1},{n:"Kutn\u00e1 Hora",la:49.95,lo:15.27},{n:"Kol\u00edn",la:50.03,lo:15.20},{n:"Klatovy",la:49.40,lo:13.30},{n:"Kada\u0148",la:50.38,lo:13.27},
+  {n:"Chomutov",la:50.46,lo:13.42},{n:"Jind\u0159ich\u016fv Hradec",la:49.14,lo:15.00},{n:"Hradec Kr\u00e1lov\u00e9",la:50.21,lo:15.83},{n:"D\u011b\u010d\u00edn",la:50.78,lo:14.21},{n:"Cheb",la:50.08,lo:12.37},
+  {n:"\u010cesk\u00e9 Bud\u011bjovice",la:48.97,lo:14.47},{n:"\u010cesk\u00e1 L\u00edpa",la:50.69,lo:14.54},{n:"Bene\u0161ov",la:49.78,lo:14.69},{n:"Zwickau",la:50.73,lo:12.49},{n:"Homburg",la:49.33,lo:7.34},
+  {n:"K\u00f6ln",la:50.93,lo:6.95,b:1},{n:"Lichterfelde",la:52.43,lo:13.31},{n:"N\u00fcrnberg",la:49.45,lo:11.08,b:1},{n:"Zerbst",la:51.97,lo:12.09},{n:"Wei\u00dfenfels",la:51.20,lo:11.97},
+  {n:"Bocholt",la:51.84,lo:6.62},{n:"Leipzig",la:51.34,lo:12.37,b:1},{n:"W\u00fcrzburg",la:49.79,lo:9.95,b:1},{n:"D\u00fcren",la:50.80,lo:6.49},{n:"Wuppertal",la:51.26,lo:7.15,b:1},
+  {n:"Garbsen",la:52.41,lo:9.59},{n:"D\u00fcsseldorf",la:51.22,lo:6.78,b:1},{n:"Karlsruhe",la:49.01,lo:8.40,b:1},{n:"Worms",la:49.63,lo:8.36},{n:"Wolfsburg",la:52.42,lo:10.78,b:1},
+  {n:"Starnberg",la:48.00,lo:11.34},{n:"Salzgitter",la:52.16,lo:10.42,b:1},{n:"Dessau",la:51.84,lo:12.25},{n:"Kassel",la:51.32,lo:9.50,b:1},{n:"Wittstock",la:53.16,lo:12.48},
+  {n:"Wittlich",la:49.99,lo:6.89},{n:"Wittenberge",la:53.01,lo:11.75},{n:"Berlin",la:52.52,lo:13.41,b:1},{n:"Dortmund",la:51.51,lo:7.47,b:1},{n:"Wismar",la:53.89,lo:11.46},
+  {n:"Hamburg",la:53.55,lo:9.99,b:1},{n:"Winsen",la:53.36,lo:10.21},{n:"Stuttgart",la:48.78,lo:9.18,b:1},{n:"M\u00f6nchengladbach",la:51.19,lo:6.44,b:1},{n:"Delmenhorst",la:53.05,lo:8.63},
+  {n:"Heidelberg",la:49.41,lo:8.69,b:1},{n:"Kreuztal",la:50.97,lo:7.99},{n:"Papenburg",la:53.08,lo:7.40},{n:"Fulda",la:50.55,lo:9.68},{n:"Wertheim",la:49.76,lo:9.51},
+  {n:"Wernigerode",la:51.84,lo:10.78},{n:"Recklinghausen",la:51.61,lo:7.20,b:1},{n:"Iserlohn",la:51.38,lo:7.70},{n:"L\u00fcdenscheid",la:51.22,lo:7.63},{n:"Potsdam",la:52.40,lo:13.07,b:1},
+  {n:"Darmstadt",la:49.87,lo:8.65,b:1},{n:"Wei\u00dfwasser",la:51.50,lo:14.64},{n:"Wei\u00dfenburg in Bayern",la:49.03,lo:10.97},{n:"Ravensburg",la:47.78,lo:9.61},{n:"Jena",la:50.93,lo:11.59,b:1},
+  {n:"Pforzheim",la:48.88,lo:8.70,b:1},{n:"Weiden",la:49.68,lo:12.16},{n:"Winschoten",la:53.14,lo:7.03},{n:"Hamburg-Nord",la:53.59,lo:9.98,b:1},{n:"Arnsberg",la:51.38,lo:8.08},
+  {n:"Warendorf",la:51.95,lo:7.99},{n:"Waren",la:53.52,lo:12.68},{n:"Oldenburg",la:53.14,lo:8.21,b:1},{n:"Warburg",la:51.49,lo:9.15},{n:"Walsrode",la:52.86,lo:9.59},
+  {n:"Osnabr\u00fcck",la:52.27,lo:8.05,b:1},{n:"Waldkraiburg",la:48.21,lo:12.40},{n:"Emmendingen",la:48.12,lo:7.85},{n:"Mannheim",la:49.49,lo:8.47,b:1},{n:"Saarlouis",la:49.31,lo:6.75},
+  {n:"Idar-Oberstein",la:49.71,lo:7.31},{n:"K\u00f6nigswinter",la:50.68,lo:7.19},{n:"Ahaus",la:52.08,lo:7.01},{n:"Saarbr\u00fccken",la:49.23,lo:7.01,b:1},{n:"Marl",la:51.66,lo:7.09},
+  {n:"Detmold",la:51.94,lo:8.87},{n:"Vilshofen",la:48.63,lo:13.19},{n:"Villingen-Schwenningen",la:48.06,lo:8.49},{n:"Bielefeld",la:52.03,lo:8.53,b:1},{n:"Achim",la:53.01,lo:9.03},
+  {n:"Essen",la:51.46,lo:7.01,b:1},{n:"Bremen",la:53.08,lo:8.81,b:1},{n:"Vechta",la:52.73,lo:8.29},{n:"Braunschweig",la:52.27,lo:10.53,b:1},{n:"Munich",la:48.14,lo:11.58,b:1},
+  {n:"Vaihingen an der Enz",la:48.94,lo:8.96},{n:"Norderstedt",la:53.70,lo:9.99},{n:"Northeim",la:51.71,lo:10.00},{n:"Germering",la:48.13,lo:11.38},{n:"Freiburg",la:48.00,lo:7.85,b:1},
+  {n:"Ulm",la:48.40,lo:9.99,b:1},{n:"Krefeld",la:51.34,lo:6.55,b:1},{n:"Uelzen",la:52.97,lo:10.56},{n:"Singen",la:47.76,lo:8.84},{n:"Tuttlingen",la:47.98,lo:8.82},
+  {n:"Reutlingen",la:48.49,lo:9.20,b:1},{n:"Bonn",la:50.73,lo:7.10,b:1},{n:"Trier",la:49.76,lo:6.64,b:1},{n:"Traunreut",la:47.96,lo:12.59},{n:"Torgau",la:51.56,lo:13.00},
+  {n:"Friedrichshafen",la:47.66,lo:9.48},{n:"Prenzlau",la:53.32,lo:13.86},{n:"Neumarkt in der Oberpfalz",la:49.28,lo:11.46},{n:"Suhl",la:50.61,lo:10.69},{n:"Strausberg",la:52.58,lo:13.89},
+  {n:"Straubing",la:48.88,lo:12.57},{n:"Stralsund",la:54.31,lo:13.08},{n:"L\u00fcbeck",la:53.87,lo:10.69,b:1},{n:"Stendal",la:52.61,lo:11.86},{n:"M\u00fcnster",la:51.96,lo:7.63,b:1},
+  {n:"Bernburg",la:51.79,lo:11.74},{n:"Minden",la:52.29,lo:8.91},{n:"Stadtallendorf",la:50.82,lo:9.01},{n:"Stade",la:53.59,lo:9.48},{n:"Staaken",la:52.54,lo:13.15},
+  {n:"Kempten (Allg\u00e4u)",la:47.73,lo:10.31},{n:"Kulmbach",la:50.10,lo:11.45},{n:"Nordhausen",la:51.50,lo:10.80},{n:"S\u00f6mmerda",la:51.16,lo:11.12},{n:"Simmerath",la:50.60,lo:6.30},
+  {n:"Albstadt",la:48.22,lo:9.03},{n:"Langenhorn",la:53.67,lo:10.02},{n:"Hoyerswerda",la:51.44,lo:14.24},{n:"Aschaffenburg",la:49.98,lo:9.15},{n:"Selb",la:50.17,lo:12.13},
+  {n:"Hannover",la:52.37,lo:9.73,b:1},{n:"Schwerin",la:53.63,lo:11.41},{n:"Schweinfurt",la:50.05,lo:10.22},{n:"Eberswalde",la:52.83,lo:13.82},{n:"Annaberg-Buchholz",la:50.58,lo:13.01},
+  {n:"Amberg",la:49.44,lo:11.86},{n:"Schw\u00e4bisch Hall",la:49.11,lo:9.74},{n:"Schw\u00e4bisch Gm\u00fcnd",la:48.80,lo:9.80},{n:"Pfaffenhofen an der Ilm",la:48.53,lo:11.51},{n:"Schramberg",la:48.22,lo:8.39},
+  {n:"Magdeburg",la:52.13,lo:11.63,b:1},{n:"Buchholz in der Nordheide",la:53.33,lo:9.87},{n:"Lennestadt",la:51.12,lo:8.07},{n:"Gotha",la:50.95,lo:10.70},{n:"Schl\u00fcchtern",la:50.35,lo:9.53},
+  {n:"Schleswig",la:54.52,lo:9.57},{n:"Halle (Saale)",la:51.48,lo:11.98,b:1},{n:"Sangerhausen",la:51.47,lo:11.30},{n:"Salzwedel",la:52.85,lo:11.15},{n:"Lippstadt",la:51.67,lo:8.34},
+  {n:"Saalfeld",la:50.65,lo:11.37},{n:"Rottenburg",la:48.48,lo:8.94},{n:"Rostock",la:54.09,lo:12.14,b:1},{n:"Rosenheim",la:47.86,lo:12.12},{n:"Riesa",la:51.31,lo:13.29},
+  {n:"Rheine",la:52.29,lo:7.44},{n:"Euskirchen",la:50.66,lo:6.79},{n:"Kiel",la:54.32,lo:10.13,b:1},{n:"Plauen",la:50.50,lo:12.14},{n:"Regensburg",la:49.02,lo:12.10,b:1},
+  {n:"Rathenow",la:52.61,lo:12.34},{n:"Baden-Baden",la:48.76,lo:8.24},{n:"Melle",la:52.20,lo:8.34},{n:"Freital",la:51.00,lo:13.65},{n:"Dresden",la:51.05,lo:13.74,b:1},
+  {n:"Aschersleben",la:51.76,lo:11.46},{n:"Eutin",la:54.14,lo:10.61},{n:"Pirna",la:50.96,lo:13.94},{n:"Pirmasens",la:49.20,lo:7.61},{n:"Passau",la:48.57,lo:13.43},
+  {n:"Parchim",la:53.43,lo:11.85},{n:"Paderborn",la:51.72,lo:8.75,b:1},{n:"Halberstadt",la:51.90,lo:11.06},{n:"Heilbronn",la:49.14,lo:9.22,b:1},{n:"Strasbourg",la:48.58,lo:7.75,b:1},
+  {n:"Hamm",la:51.68,lo:7.82,b:1},{n:"Enschede",la:52.22,lo:6.90,b:1},{n:"Freudenstadt",la:48.47,lo:8.41},{n:"N\u00f6rdlingen",la:48.85,lo:10.49},{n:"Bremerhaven",la:53.55,lo:8.58,b:1},
+  {n:"Nienburg",la:52.65,lo:9.22},{n:"Nidda",la:50.41,lo:9.01},{n:"Neuwied",la:50.43,lo:7.47},{n:"Neubrandenburg",la:53.56,lo:13.28},{n:"Neustadt in Holstein",la:54.11,lo:10.81},
+  {n:"Coburg",la:50.26,lo:10.96},{n:"Kaiserslautern",la:49.44,lo:7.77},{n:"Neustadt am R\u00fcbenberge",la:52.50,lo:9.46},{n:"Neuruppin",la:52.93,lo:12.80},{n:"Neum\u00fcnster",la:54.07,lo:9.98},
+  {n:"Neuburg an der Donau",la:48.73,lo:11.19},{n:"Naumburg",la:51.15,lo:11.81},{n:"Munster",la:52.99,lo:10.09},{n:"M\u00fchlhausen",la:51.21,lo:10.45},{n:"Burghausen",la:48.17,lo:12.83},
+  {n:"Mosbach",la:49.35,lo:9.15},{n:"Freising",la:48.40,lo:11.75},{n:"M\u00f6lln",la:53.62,lo:10.69},{n:"Chemnitz",la:50.84,lo:12.93,b:1},{n:"Michelstadt",la:49.68,lo:9.00},
+  {n:"Meppen",la:52.69,lo:7.29},{n:"Memmingen",la:47.98,lo:10.19},{n:"Mayen",la:50.33,lo:7.22},{n:"Brilon",la:51.39,lo:8.57},{n:"Kaufbeuren",la:47.88,lo:10.62},
+  {n:"Markkleeberg",la:51.28,lo:12.37},{n:"L\u00fcneburg",la:53.25,lo:10.41},{n:"Luckenwalde",la:52.09,lo:13.17},{n:"Cottbus",la:51.76,lo:14.33},{n:"Lohr am Main",la:49.99,lo:9.57},
+  {n:"G\u00f6rlitz",la:51.16,lo:14.99},{n:"Lingen",la:52.52,lo:7.32},{n:"Lilienthal",la:53.14,lo:8.90},{n:"Biberach an der Ri\u00df",la:48.09,lo:9.79},{n:"Erlangen",la:49.59,lo:11.01,b:1},
+  {n:"Landshut",la:48.53,lo:12.16},{n:"K\u00f6nigsbrunn",la:48.28,lo:10.89},{n:"Landau in der Pfalz",la:49.20,lo:8.12},{n:"Koblenz",la:50.35,lo:7.58,b:1},{n:"Bad Mergentheim",la:49.49,lo:9.77},
+  {n:"Korbach",la:51.28,lo:8.87},{n:"F\u00fcrstenwalde",la:52.36,lo:14.06},{n:"Nijmegen",la:51.84,lo:5.85,b:1},{n:"Kitzingen",la:49.74,lo:10.15},{n:"Karlstadt",la:49.96,lo:9.77},
+  {n:"Itzehoe",la:53.92,lo:9.52},{n:"Celle",la:52.62,lo:10.08},{n:"Ingolstadt",la:48.77,lo:11.42,b:1},{n:"Ilmenau",la:50.68,lo:10.92},{n:"Husum",la:54.49,lo:9.05},
+  {n:"H\u00f6xter",la:51.78,lo:9.38},{n:"Bad T\u00f6lz",la:47.76,lo:11.56},{n:"Hof",la:50.31,lo:11.91},{n:"Hildesheim",la:52.15,lo:9.95,b:1},{n:"Hameln",la:52.10,lo:9.36},
+  {n:"Herzogenaurach",la:49.57,lo:10.89},{n:"Duderstadt",la:51.51,lo:10.26},{n:"Aalen",la:48.84,lo:10.09},{n:"Heide",la:54.20,lo:9.10},{n:"Emmen",la:52.78,lo:6.91},
+  {n:"Haldensleben I",la:52.29,lo:11.41},{n:"G\u00fcstrow",la:53.80,lo:12.17},{n:"Gunzenhausen",la:49.12,lo:10.76},{n:"Eisenh\u00fcttenstadt",la:52.15,lo:14.65},{n:"Universit\u00e4ts- und Hansestadt Greifswald",la:54.09,lo:13.40},
+  {n:"Gifhorn",la:52.48,lo:10.55},{n:"Augsburg",la:48.37,lo:10.90,b:1},{n:"Gera",la:50.88,lo:12.08,b:1},{n:"Garmisch-Partenkirchen",la:47.49,lo:11.10},{n:"F\u00fcssen",la:47.57,lo:10.70},
+  {n:"Friesoythe",la:53.02,lo:7.86},{n:"Freiberg",la:50.91,lo:13.34},{n:"Frankfurt (Oder)",la:52.35,lo:14.55},{n:"Forst",la:51.74,lo:14.64},{n:"Flensburg",la:54.79,lo:9.44},
+  {n:"Finsterwalde",la:51.63,lo:13.71},{n:"Eschwege",la:51.18,lo:10.05},{n:"Erfurt",la:50.98,lo:11.03,b:1},{n:"Elmschenhagen",la:54.29,lo:10.19},{n:"Crailsheim",la:49.13,lo:10.07},
+  {n:"Eisenach",la:50.98,lo:10.32},{n:"Ehingen",la:48.28,lo:9.73},{n:"D\u00f6beln",la:51.12,lo:13.11},{n:"Dillingen an der Donau",la:48.58,lo:10.50},{n:"Diepholz",la:52.61,lo:8.37},
+  {n:"Deggendorf",la:48.84,lo:12.96},{n:"Cuxhaven",la:53.87,lo:8.70},{n:"Cloppenburg",la:52.85,lo:8.04},{n:"Clausthal-Zellerfeld",la:51.81,lo:10.34},{n:"Cham",la:49.23,lo:12.66},
+  {n:"Burg bei Magdeburg",la:52.27,lo:11.85},{n:"Brandenburg an der Havel",la:52.42,lo:12.55},{n:"Bayreuth",la:49.95,lo:11.58},{n:"Bautzen",la:51.18,lo:14.43},{n:"Baunatal",la:51.25,lo:9.41},
+  {n:"Bamberg",la:49.90,lo:10.90},{n:"Bad Kissingen",la:50.20,lo:10.08},{n:"Bad Hersfeld",la:50.87,lo:9.71},{n:"Ansbach",la:49.30,lo:10.59},{n:"Alzey",la:49.75,lo:8.12},
+  {n:"Eisleben Lutherstadt",la:51.53,lo:11.55},{n:"Wittenberg",la:51.87,lo:12.65},{n:"Kr\u00f6peliner-Tor-Vorstadt",la:54.09,lo:12.12},{n:"Vordingborg",la:55.01,lo:11.91},{n:"Copenhagen",la:55.68,lo:12.57,b:1},
+  {n:"T\u00f8nder",la:54.93,lo:8.87},{n:"Svendborg",la:55.06,lo:10.61},{n:"S\u00f8nderborg",la:54.91,lo:9.79},{n:"Slagelse",la:55.40,lo:11.35},{n:"Roskilde",la:55.64,lo:12.08},
+  {n:"Odense",la:55.40,lo:10.39,b:1},{n:"Nyk\u00f8bing Falster",la:54.77,lo:11.87},{n:"Nyborg",la:55.31,lo:10.79},{n:"Klinteby Frihed",la:55.20,lo:11.60},{n:"Kolding",la:55.49,lo:9.47},
+  {n:"Kalundborg",la:55.68,lo:11.09},{n:"Haderslev",la:55.25,lo:9.49},{n:"Esbjerg",la:55.47,lo:8.45},{n:"Mulhouse",la:47.75,lo:7.33,b:1},{n:"Nancy",la:48.68,lo:6.18,b:1},
+  {n:"Vesoul",la:47.63,lo:6.14},{n:"Verdun",la:49.16,lo:5.38},{n:"Thionville",la:49.36,lo:6.16},{n:"Colmar",la:48.08,lo:7.36},{n:"Sedan",la:49.70,lo:4.94},
+  {n:"Sarreguemines",la:49.11,lo:7.07},{n:"Saint-Dizier",la:48.64,lo:4.95},{n:"Saint-Di\u00e9-des-Vosges",la:48.28,lo:6.95},{n:"Saint-Avold",la:49.10,lo:6.70},{n:"Pontarlier",la:46.90,lo:6.36},
+  {n:"Metz",la:49.12,lo:6.17,b:1},{n:"Belfort",la:47.64,lo:6.85},{n:"Lun\u00e9ville",la:48.59,lo:6.49},{n:"Lons-le-Saunier",la:46.68,lo:5.56},{n:"Haguenau",la:48.82,lo:7.79},
+  {n:"\u00c9pinal",la:48.18,lo:6.45},{n:"Dole",la:47.09,lo:5.49},{n:"Dijon",la:47.32,lo:5.02,b:1},{n:"Chaumont",la:48.11,lo:5.14},{n:"Besan\u00e7on",la:47.25,lo:6.02,b:1},
+  {n:"Luxembourg",la:49.61,lo:6.13},{n:"Zwolle",la:52.51,lo:6.09,b:1},{n:"Arnhem",la:51.98,lo:5.91,b:1},{n:"Utrecht",la:52.09,lo:5.12,b:1},{n:"Harderwijk",la:52.34,lo:5.62},
+  {n:"Waalwijk",la:51.68,lo:5.07},{n:"Doetinchem",la:51.97,lo:6.29},{n:"Amersfoort",la:52.16,lo:5.39,b:1},{n:"'s-Hertogenbosch",la:51.70,lo:5.30,b:1},{n:"Almelo",la:52.36,lo:6.66},
+  {n:"Almere Stad",la:52.37,lo:5.21,b:1},{n:"Purmerend",la:52.51,lo:4.96},{n:"Venlo",la:51.37,lo:6.17,b:1},{n:"Eindhoven",la:51.44,lo:5.48,b:1},{n:"Lelystad",la:52.51,lo:5.47},
+  {n:"Heerenveen",la:52.96,lo:5.92},{n:"Sneek",la:53.03,lo:5.66},{n:"Apeldoorn",la:52.21,lo:5.97,b:1},{n:"Medemblik",la:52.77,lo:5.11},{n:"Leeuwarden",la:53.20,lo:5.81},
+  {n:"Drachten",la:53.11,lo:6.10},{n:"Hardenberg",la:52.58,lo:6.62},{n:"Harlingen",la:53.17,lo:5.42},{n:"Assen",la:53.00,lo:6.56},{n:"Z\u0142otoryja",la:51.13,lo:15.92},
+  {n:"Zielona G\u00f3ra",la:51.94,lo:15.51,b:1},{n:"\u017bary",la:51.64,lo:15.14},{n:"Nowa S\u00f3l",la:51.80,lo:15.72},{n:"Szczecin",la:53.43,lo:14.55,b:1},{n:"\u015awinouj\u015bcie",la:53.91,lo:14.25},
+  {n:"\u015awiebodzin",la:52.25,lo:15.53},{n:"\u015awidwin",la:53.77,lo:15.78},{n:"Stargard",la:53.34,lo:15.05},{n:"S\u0142ubice",la:52.35,lo:14.56},{n:"Gryfice",la:53.92,lo:15.20},
+  {n:"Boles\u0142awiec",la:51.26,lo:15.57},{n:"Kostrzyn nad Odr\u0105",la:52.59,lo:14.65},{n:"Ko\u0142obrzeg",la:54.18,lo:15.58},{n:"Jelenia G\u00f3ra",la:50.90,lo:15.73},{n:"Gryfino",la:53.25,lo:14.49},
+  {n:"Gorz\u00f3w Wielkopolski",la:52.74,lo:15.23,b:1},{n:"Choszczno",la:53.17,lo:15.42},{n:"Bia\u0142ogard",la:54.01,lo:15.99}
 ];
 function wolkenURL(){
   const la=[],lo=[];
@@ -1382,7 +1730,7 @@ function dateFromJD(jd){let z=Math.floor(jd+.5),f=jd+.5-z,A=z;
   return{y:year,m:month,d:Math.floor(day)};}
 function astLastSunday(y,month){const last=new Date(Date.UTC(y,month,0));return last.getUTCDate()-last.getUTCDay();}
 function astEuDST(y,m,d){if(m<3||m>10)return false;if(m>3&&m<10)return true;if(m===3)return d>=astLastSunday(y,3);return d<astLastSunday(y,10);}
-function astTzOff(y,m,d){return Math.round(AST_LON/15)+(astEuDST(y,m,d)?1:0);}
+function astTzOff(y,m,d){return 1+(astEuDST(y,m,d)?1:0);} // fest MEZ/MESZ (Geltungsbereich D); Math.round(LON/15) kippte westlich von 7,5 Grad O auf UTC+0
 function altaz(name,jd,latDeg){
   const dt0=dateFromJD(jd),jdUT=jd-astTzOff(dt0.y,dt0.m,dt0.d)/24,
     T=(jdUT-2451545.0)/36525.0,eq=geoEq(name,T),ra=eq.ra,dec=eq.dec,
@@ -1504,7 +1852,7 @@ function drawPlaneten(){
 
   const mL=26,mR=10,mT=84,mB=22,pw=W-mL-mR,ph=H-mT-mB;
   const X=az=>mL+(az-azMin)/(azMax-azMin)*pw,Y=al=>mT+(altMax-al)/(altMax-altMin)*ph,
-    YZ=al=>al<=altMax?Y(al):(mT-(Math.min(al,70)-altMax)/(70-altMax)*(mT-10)); // Stauchzone wie bei der Sonne (70 deckt alle Koerper ab: Mond-Max 67,9 Grad)
+    YZ=al=>al<=altMax?Y(al):(mT-(Math.min(al,76)-altMax)/(76-altMax)*(mT-10)); // Stauchzone wie bei der Sonne (76 deckt alle Koerper bis 47,3N: Wintermond 71,3, Venus-Extrem 75,0 Grad)
   const rgba=(hex,al)=>{const n=parseInt(hex.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${al})`;};
 
   const [thTop,thMid,thBot,thInk,thGrid,thAxis,thZero,thMoon]=skyTheme(sunSel.alt);
@@ -1543,11 +1891,11 @@ function drawPlaneten(){
   for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){ctx.strokeStyle=rgba(thGrid,.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(a),mT);ctx.lineTo(X(a),mT+ph);ctx.stroke();}
   for(let al=Math.ceil(altMin/10)*10;al<=altMax;al+=10){ctx.strokeStyle=al===0?thZero:rgba(thGrid,.55);ctx.lineWidth=al===0?2:1;ctx.beginPath();ctx.moveTo(mL,Y(al));ctx.lineTo(mL+pw,Y(al));ctx.stroke();ctx.fillStyle=plInk(gradAt(Math.min(1,Math.max(0,(Y(al)-mT)/ph))),'#1c2f45','#eef2f8');ctx.textAlign='right';ctx.fillText(al+'\u00b0',mL-4,Y(al)+3);}
   /* Zone oberhalb altMax: sanft gestauchte Fortsetzung der Achse, Linien wie unten */
-  {const zs=(mT-10)/(70-altMax);
+  {const zs=(mT-10)/(76-altMax);
    const step=zs*10<13?20:10;
    const zInk=plInk(thTop,'#1c2f45','#eef2f8');
    ctx.textAlign='right';
-   for(let al=70;al>altMax+step*0.35;al-=step){const yz=mT-(al-altMax)*zs;
+   for(let al=76;al>altMax+step*0.35;al-=step){const yz=mT-(al-altMax)*zs;
      ctx.strokeStyle=rgba(thGrid,.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mL,yz);ctx.lineTo(mL+pw,yz);ctx.stroke();
      ctx.fillStyle=zInk;ctx.fillText(al+'\u00b0',mL-4,yz+3);}}
   const baseY=mT+ph;
@@ -1568,7 +1916,7 @@ function drawPlaneten(){
   if(sunSel.alt>-4&&sunSel.az>azMin&&sunSel.az<azMax){
     const sc=sctx||ctx;
     const x=X(sunSel.az);
-    const y=sunSel.alt<=altMax?Y(sunSel.alt):(mT-(sunSel.alt-altMax)/(70-altMax)*(mT-10));
+    const y=sunSel.alt<=altMax?Y(sunSel.alt):(mT-(sunSel.alt-altMax)/(76-altMax)*(mT-10));
     const drawSun=blur=>{sc.shadowColor='#ffb14a';sc.shadowBlur=blur;
       sc.strokeStyle='#ffb14a';sc.lineWidth=2;sc.lineCap='round';
       for(let r0=0;r0<8;r0++){const a=r0*Math.PI/4;
@@ -1729,6 +2077,15 @@ function renderWolken(j){
   const tt=el("wolkenTitle");if(tt)tt.textContent="Wolken im Umkreis"+(hh?" · Stand "+hh+" Uhr":"");
   drawWolken();
 }
+(function(){const a=el("wolkE0"),b=el("wolkE1"),av=el("wolkE0v"),bv=el("wolkE1v");if(!a||!b)return;
+  a.value=WOLK_E0;b.value=WOLK_E1;if(av)av.textContent=Math.round(WOLK_E0);if(bv)bv.textContent=Math.round(WOLK_E1);
+  let raf=0;
+  const upd=src=>{let e0=+a.value,e1=+b.value;
+    if(e1-e0<5){if(src===a){e1=Math.min(100,e0+5);b.value=e1;}else{e0=Math.max(0,e1-5);a.value=e0;}}
+    WOLK_E0=e0;WOLK_E1=e1;if(av)av.textContent=e0;if(bv)bv.textContent=e1;
+    try{localStorage.setItem("wolkE0",e0);localStorage.setItem("wolkE1",e1);}catch(e){}
+    if(typeof _wolkGrid!=="undefined"&&_wolkGrid&&!raf)raf=requestAnimationFrame(()=>{raf=0;drawWolken();});};
+  a.addEventListener("input",()=>upd(a));b.addEventListener("input",()=>upd(b));})();
 let _wolkTok=0;
 function drawWolken(){
   const cv=el("wolkenCv"),g=_wolkGrid;if(!cv||!g)return;
@@ -1742,30 +2099,55 @@ function drawWolken(){
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);
   const P=(la,lo)=>[(_merX(lo)*N-wx0)*sc,(_merY(la)*N-wy0)*sc];
   // Wolken-Ebene (offscreen nx x ny, smoothstep-Alpha -> klare Lücken)
-  const nx=WOLK.nx,ny=WOLK.ny,oc=document.createElement("canvas");oc.width=nx;oc.height=ny;
-  const oq=oc.getContext("2d"),oi=oq.createImageData(nx,ny),od=oi.data;
-  for(let r=0;r<ny;r++)for(let c=0;c<nx;c++){const a=_smooth(22,72,g[r][c]);const o=(r*nx+c)*4;od[o]=255;od[o+1]=255;od[o+2]=255;od[o+3]=Math.round(a*242);}
+  const nx=WOLK.nx,ny=WOLK.ny,SS=8,ox=nx*SS,oy=ny*SS;   // v1.8: bikubisch hochrechnen statt 10x10-Direktskalierung (Kachel-/Kreuzmuster)
+  const A=[];for(let r=0;r<ny;r++){A.push([]);for(let c=0;c<nx;c++)A[r].push(_smooth(WOLK_E0,WOLK_E1,g[r][c]));}
+  const gv=(r,c)=>A[Math.min(ny-1,Math.max(0,r))][Math.min(nx-1,Math.max(0,c))];
+  const cub=(p0,p1,p2,p3,t)=>p1+0.5*t*(p2-p0+t*(2*p0-5*p1+4*p2-p3+t*(3*(p1-p2)+p3-p0)));
+  const oc=document.createElement("canvas");oc.width=ox;oc.height=oy;
+  const oq=oc.getContext("2d"),oi=oq.createImageData(ox,oy),od=oi.data;
+  for(let yq=0;yq<oy;yq++){const fy=(yq+0.5)/SS-0.5,r0=Math.floor(fy),ty=fy-r0;
+    for(let xq=0;xq<ox;xq++){const fx=(xq+0.5)/SS-0.5,c0=Math.floor(fx),tx=fx-c0;
+      const q0=cub(gv(r0-1,c0-1),gv(r0-1,c0),gv(r0-1,c0+1),gv(r0-1,c0+2),tx),
+            q1=cub(gv(r0  ,c0-1),gv(r0  ,c0),gv(r0  ,c0+1),gv(r0  ,c0+2),tx),
+            q2=cub(gv(r0+1,c0-1),gv(r0+1,c0),gv(r0+1,c0+1),gv(r0+1,c0+2),tx),
+            q3=cub(gv(r0+2,c0-1),gv(r0+2,c0),gv(r0+2,c0+1),gv(r0+2,c0+2),tx);
+      let a=cub(q0,q1,q2,q3,ty);a=a<0?0:a>1?1:a;                 // Catmull-Rom kann ueberschwingen -> klemmen
+      const o=(yq*ox+xq)*4;od[o]=255;od[o+1]=255;od[o+2]=255;od[o+3]=Math.round(a*242);}}
   oq.putImageData(oi,0,0);
   const paintOverlay=()=>{
-    x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";
-    x.drawImage(oc,0,0,nx,ny,0,0,W,H);
+    x.imageSmoothingEnabled=true;x.imageSmoothingQuality="low";   // v1.9: Wolken-Feinstufe bilinear -> Ueberschwingen (Ringing) ausgeschlossen
+    x.drawImage(oc,0,0,ox,oy,0,0,W,H);
+    x.imageSmoothingQuality="high";
     const s=P(HOME_LAT,HOME_LON);
     const placed=[[s[0]-11,s[1]-11,s[0]+11,s[1]+11]];            // Standort-Pin-Bereich sperren
     const hit=r=>placed.some(p=>!(r[2]<p[0]||r[0]>p[2]||r[3]<p[1]||r[1]>p[3]));
-    WOLK_CITIES.slice().sort((a,b)=>(b.b?1:0)-(a.b?1:0)).forEach(ci=>{      // große Städte zuerst platzieren
-      const p=P(ci.la,ci.lo);if(p[0]<-4||p[0]>W+4||p[1]<-4||p[1]>H+4)return;
-      x.fillStyle="rgba(255,255,255,.95)";x.beginPath();x.arc(p[0],p[1],2.6,0,7);x.fill();
+    const vis=[],labRects=[];
+    WOLK_CITIES.slice().sort((a,b)=>(b.b?1:0)-(a.b?1:0)).forEach(ci=>{      // Pool fuer alle Profile; Fensterfilter in der naechsten Zeile
+      const p=P(ci.la,ci.lo);if(p[0]<4||p[0]>W-4||p[1]<4||p[1]>H-4)return;   // v1.3: nur vollstaendig sichtbare Punkte
+      vis.push([ci,p]);placed.push([p[0]-4.5,p[1]-4.5,p[0]+4.5,p[1]+4.5]);});   // v1.1: ALLE Punkte zuerst sperren -> kein Label auf fremdem Punkt
+    vis.forEach(([ci,p])=>{
       const fs=ci.b?12:11;x.font=(ci.b?"700 ":"600 ")+fs+"px -apple-system,sans-serif";
       const w=x.measureText(ci.n).width,dy=fs+2;
       const cand=[[p[0]+6,p[1]],[p[0]+6,p[1]+dy],[p[0]+6,p[1]-dy],[p[0]-6-w,p[1]],[p[0]-6-w,p[1]+dy],[p[0]-6-w,p[1]-dy]];
       let put=null;
       for(const c of cand){if(c[0]<1||c[0]+w>W-1||c[1]-fs/2<0||c[1]+fs/2>H)continue;
         const r=[c[0]-1,c[1]-fs/2-1,c[0]+w+1,c[1]+fs/2+1];if(!hit(r)){put=[c[0],c[1],r];break;}}
-      if(!put)return;                                            // kein Platz -> nur Punkt, kein Label
+      if(!put)return;                                            // v1.3: kein Platz -> Ort ganz weglassen (kein Text, kein Punkt)
+      const R=[put[2][0]-18,put[2][1]-18,put[2][2]+18,put[2][3]+18]; // 18px-Umfeld (v1.4: 12->18 gegen dichte Label-Spalten an Randpunkten)
+      let nb=0;for(const q of labRects)if(!(R[2]<q[0]||R[0]>q[2]||R[3]<q[1]||R[1]>q[3]))nb++;
+      if(nb>=2)return;                                             // v1.3: Bildraum-Trio-Sperre -> Ort ganz weglassen
+      x.beginPath();x.arc(p[0],p[1],2.6,0,7);x.fillStyle="rgba(255,255,255,.95)";x.fill();x.lineWidth=1.4;x.strokeStyle="rgba(0,0,0,.55)";x.stroke(); // v1.5: dunkler Ring wie Label-Kontur
+      if(Math.abs(put[1]-p[1])>1){ // v1.8: kurzer Leader vom Punkt zum versetzten Label
+        const lx=put[0]>p[0]?put[0]-1.5:put[0]+w+1.5,vx=lx-p[0],vy=put[1]-p[1],vl=Math.hypot(vx,vy)||1;
+        const sx=p[0]+vx/vl*4.2,sy=p[1]+vy/vl*4.2;
+        x.lineCap="round";
+        x.beginPath();x.moveTo(sx,sy);x.lineTo(lx,put[1]);x.lineWidth=2.6;x.strokeStyle="rgba(0,0,0,.6)";x.stroke();
+        x.beginPath();x.moveTo(sx,sy);x.lineTo(lx,put[1]);x.lineWidth=1.1;x.strokeStyle="rgba(255,255,255,.95)";x.stroke();
+      }
       x.textAlign="left";x.textBaseline="middle";
       x.lineWidth=3.2;x.strokeStyle="rgba(0,0,0,.6)";x.strokeText(ci.n,put[0],put[1]);
       x.fillStyle="#fff";x.fillText(ci.n,put[0],put[1]);
-      placed.push(put[2]);});
+      placed.push(put[2]);labRects.push(put[2]);});
     x.fillStyle="rgba(232,0,11,.22)";x.beginPath();x.arc(s[0],s[1],12,0,7);x.fill();
     x.fillStyle="#e8000b";x.beginPath();x.arc(s[0],s[1],6,0,7);x.fill();
     x.lineWidth=2;x.strokeStyle="#fff";x.stroke();
@@ -1822,7 +2204,7 @@ function loadNowcast(){
    Schnell (>5 min alt): nur RADOLAN + Nowcast (5-Minuten-Radar) + Planeten "jetzt". */
 let _lastFull=0,_lastFast=0,_loading=false;
 const REFRESH_FULL_MS=30*60e3,REFRESH_FAST_MS=5*60e3;
-function refreshFast(){_lastFast=Date.now();renderRadolan();loadNowcast();drawPlaneten();}
+function refreshFast(){_lastFast=Date.now();renderRadolan();loadNowcast();drawPlaneten();if(window._lastSrc)tryCurrent(window._lastSrc);} // v2.34: 5-min-Pfad versucht auch frischen SYNOP (idempotent per Zeitstempel-Guard)
 function maybeRefresh(){
   if(document.visibilityState!=="visible")return;
   const t=Date.now();
@@ -1837,11 +2219,11 @@ function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{_rainHrHad=true;renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
+  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
-  loadCached("wolkCache3",wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
+  loadCached("wolkCache3"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
-  loadCached("fcCache",`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
+  loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
   loadIss();
   loadNowcast();
   fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(renderAlerts).catch(e=>console.warn("alerts",e.message));
@@ -1866,9 +2248,63 @@ function DEMO_EXTRAS(){
   renderForecast({daily:{time:days,weather_code:[0,1,2,80,95,2,1,3,61,80,2,1,0,2,3,61],temperature_2m_max:[38,37,33,27,24,28,30,29,25,24,27,29,31,30,28,26],temperature_2m_min:[21,22,20,18,16,16,17,18,17,16,16,17,18,18,17,16],precipitation_probability_max:[0,5,25,70,80,20,10,30,60,70,20,10,5,15,25,55],precipitation_sum:[0,0,0.4,6.2,14.5,1.1,0,2.3,8.0,12.0,0.8,0,0,0.6,2.1,9.4]}});
 }
 
+/* ===== Meteorstroeme (v2.26) ===== */
+const METEORS=[ // n, Aktivitaet a-b [Monat,Tag], Peak p (Nacht p -> p+1), ZHR z, Radiant ra(h)/de(Grad), v km/s
+ {n:"Quadrantiden",a:[1,1],b:[1,10],p:[1,3],z:110,ra:15.3,de:49,v:41},
+ {n:"Lyriden",a:[4,16],b:[4,25],p:[4,22],z:18,ra:18.1,de:34,v:49},
+ {n:"Eta-Aquariiden",a:[4,19],b:[5,28],p:[5,5],z:50,ra:22.5,de:-1,v:66},
+ {n:"Perseiden",a:[7,17],b:[8,24],p:[8,12],z:100,ra:3.1,de:58,v:59},
+ {n:"Orioniden",a:[10,2],b:[11,7],p:[10,21],z:20,ra:6.3,de:16,v:66},
+ {n:"Leoniden",a:[11,6],b:[11,30],p:[11,17],z:15,ra:10.1,de:22,v:71},
+ {n:"Geminiden",a:[12,4],b:[12,17],p:[12,13],z:150,ra:7.5,de:33,v:35},
+ {n:"Ursiden",a:[12,17],b:[12,26],p:[12,22],z:10,ra:14.5,de:76,v:33}
+];
+function meteorPick(d){const y=d.getFullYear(),t=new Date(y,d.getMonth(),d.getDate()).getTime();
+  const mk=(mm,dd,yy)=>new Date(yy,mm-1,dd).getTime();let act=null;
+  for(const m of METEORS){const A=mk(m.a[0],m.a[1],y),B=mk(m.b[0],m.b[1],y);
+    if(t>=A&&t<=B&&(!act||m.z>act.m.z))act={m:m,state:"aktiv",days:Math.round((mk(m.p[0],m.p[1],y)-t)/864e5)};}
+  if(act)return act;
+  let nx=null;
+  for(const m of METEORS){let A=mk(m.a[0],m.a[1],y),py=y;if(A<t){A=mk(m.a[0],m.a[1],y+1);py=y+1;}
+    if(!nx||A<nx.A)nx={m:m,A:A,py:py};}
+  return{m:nx.m,state:"n\u00e4chster",days:Math.round((mk(nx.m.p[0],nx.m.p[1],nx.py)-t)/864e5)};}
+function radAltAz(ms,raH,decD){const jd=ms/86400000+2440587.5,H=((_gmst(jd)+LON)-raH*15)*Math.PI/180,phi=LAT*Math.PI/180,de=decD*Math.PI/180;
+  const sa=Math.sin(phi)*Math.sin(de)+Math.cos(phi)*Math.cos(de)*Math.cos(H);
+  const az=(Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(de)*Math.cos(phi))*180/Math.PI+180+360)%360;
+  return{alt:Math.asin(Math.max(-1,Math.min(1,sa)))*180/Math.PI,az:az};}
+function meteorWindow(t0,t1,step,sunAltFn,radFn){let a=null,b=null,best=null,bAlt=-99,bAz=0;
+  for(let t=t0;t<=t1;t+=step){const su=sunAltFn(t);if(su==null)return null;const r=radFn(t);
+    if(su<-12&&r.alt>15){if(a==null)a=t;b=t;if(r.alt>bAlt){bAlt=r.alt;best=t;bAz=r.az;}}}
+  return a==null?null:{t0:a,t1:b,best:best,alt:bAlt,az:bAz};}
+function renderMeteors(){try{
+  const sec=document.getElementById("metSec"),bd=document.getElementById("metBody");if(!sec||!bd)return;
+  const now=new Date(),pk=meteorPick(now),m=pk.m;
+  const d0=new Date(now);d0.setHours(21,0,0,0);const t0=d0.getTime(),t1=t0+9*3600e3;
+  const sunAlt=ms=>{const mu=(window.satellite&&typeof _sunMu==="function")?_sunMu(ms):null;return mu==null?null:Math.asin(Math.max(-1,Math.min(1,mu)))*180/Math.PI;};
+  const win=meteorWindow(t0,t1,600e3,sunAlt,ms=>radAltAz(ms,m.ra,m.de));
+  let ccTxt="Bew\u00f6lkungsprognose l\u00e4dt \u2026",amp="";
+  const ly=window._ccLayers;
+  if(win&&ly&&ly.time&&ly.cloud_cover_low){let sm=0,n=0;
+    for(let i=0;i<ly.time.length;i++){const tm=new Date(ly.time[i]).getTime();
+      if(tm>=win.t0-1800e3&&tm<=win.t1+1800e3){const L=(+ly.cloud_cover_low[i]||0)/100,M=(+ly.cloud_cover_mid[i]||0)/100,Hc=(+ly.cloud_cover_high[i]||0)/100;sm+=1-(1-L)*(1-M)*(1-Hc);n++;}}
+    if(n){const p=Math.round(100*sm/n);ccTxt=(p<=30?"gute Chancen":p<=70?"durchwachsen":"schlechte Karten")+" \u00b7 \u00d8 "+p+"\u202f% bew\u00f6lkt";amp=p<=30?"ok":p<=70?"mid":"bad";}}
+  const mi=(typeof moonInfo==="function")?moonInfo(now):null;
+  const mip=(typeof moonInfo==="function"&&pk.days>0)?moonInfo(new Date(now.getFullYear(),m.p[0]-1,m.p[1])):null;
+  const fmt=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");};
+  const comp=a=>["N","NO","O","SO","S","SW","W","NW"][Math.round((((a%360)+360)%360)/45)%8];
+  const dTxt=pk.days>1?"(in "+pk.days+" Tagen)":pk.days===1?"(morgen Nacht!)":pk.days===0?"(heute Nacht!)":"(vor "+(-pk.days)+" Tagen)";
+  let h='<div class="met-box"><b>'+m.n+'</b> \u00b7 '+pk.state+' \u00b7 Aktivit\u00e4t '+m.a[1]+'.'+m.a[0]+'.\u2013'+m.b[1]+'.'+m.b[0]+'. \u00b7 Maximum: Nacht '+m.p[1]+'./'+(m.p[1]+1)+'.'+m.p[0]+'. '+dTxt+' \u00b7 ZHR ~'+m.z;
+  if(win)h+='<br>Heute Nacht: Fenster '+fmt(win.t0)+'\u2013'+fmt(win.t1)+' Uhr \u00b7 Radiant bis '+Math.round(win.alt)+'\u00b0 hoch im '+comp(win.az)+' (um '+fmt(win.best)+') \u00b7 Blick ~40\u00b0 neben den Radianten';
+  else h+='<br>Heute Nacht: kein dunkles Fenster mit ausreichend hohem Radianten';
+  h+='<br><span class="met-amp '+amp+'">'+ccTxt+'</span>';
+  if(mi&&mi.illum!=null)h+=' \u00b7 Mond heute '+mi.illum+'\u202f%';
+  if(mip&&mip.illum!=null)h+=' \u00b7 zum Maximum '+mip.illum+'\u202f%';
+  bd.innerHTML=h+'</div>';sec.classList.remove("hidden");
+}catch(e){console.warn("meteors",e&&e.message);}}
+setTimeout(renderMeteors,900);
 /* ===== ISS-Modul ===== */
 /* ===================== ISS-Überflüge (SGP4 via satellite.js) ===================== */
-const ISS_LAT=50.6479651, ISS_LON=8.6740943, ISS_ALT=0.2, ISS_AU=149597870.7, ISS_RE=6371;
+const ISS_LAT=LOC.lat, ISS_LON=LOC.lon, ISS_ALT=LOC.isWettenberg?0.2:0, ISS_AU=149597870.7, ISS_RE=6371;
 let _issSat=null, _issPasses=null, _issTimer=null, _issClouds=null;
 function _issObs(){const S=window.satellite;return {latitude:S.degreesToRadians(ISS_LAT),longitude:S.degreesToRadians(ISS_LON),height:ISS_ALT};}
 function issLook(satrec,date){
@@ -2034,6 +2470,129 @@ el("chartJump").addEventListener("click",recenterChart);
 el("stripJump").addEventListener("click",recenterStrip);
 el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;stripInit=false;stripUserScrolled=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
 load();
+
+/* ===== Standort-Overlay: Logik + Boot-Labels (LOC) ===== */
+(function(){
+  document.title="Wetter \u00b7 "+(LOC.isWettenberg?"Gie\u00dfen/Wettenberg":LOC.name);
+  if(!LOC.isWettenberg){const pn=el("placeName");if(pn)pn.textContent=LOC.name;}
+  const ov=el("locOverlay"),msg=el("locMsg"),ap=el("locApply");
+  if(!ov)return;
+  const show=()=>{el("locPaste").value="";el("locPaste2").value="";el("locFind").value="";el("locFind").classList.remove("loc-ok");el("locFindRes").innerHTML="";el("locPaste").classList.remove("loc-ok");el("locPaste2").classList.remove("loc-ok");el("locLat").value=LOC.lat;el("locLon").value=LOC.lon;el("locName").value=LOC.isWettenberg?"":LOC.name;msg.textContent="";delete ap.dataset.warned;ov.classList.remove("hidden");};
+  const hide=()=>ov.classList.add("hidden");
+  el("locBtn").onclick=show;el("locCancel").onclick=hide;
+  ov.addEventListener("click",e=>{if(e.target===ov)hide();});
+  function _olcDecode(code){ // v1.6: Plus Code (Open Location Code), Vollcodes offline; verifiziert gegen Referenz-Lib
+    const AB="23456789CFGHJMPQRVWX";
+    const m=String(code).toUpperCase().match(/([23456789CFGHJMPQRVWX]{8})\+([23456789CFGHJMPQRVWX]{2,7})/);
+    if(!m)return null;
+    const d=(m[1]+m[2]).split("");
+    let la=-90,lo=-180,rla=20,rlo=20;
+    for(let i=0;i<10;i+=2){la+=AB.indexOf(d[i])*rla;lo+=AB.indexOf(d[i+1])*rlo;if(i<8){rla/=20;rlo/=20;}}
+    for(let i=10;i<d.length;i++){rla/=5;rlo/=4;const ix=AB.indexOf(d[i]);la+=Math.floor(ix/4)*rla;lo+=(ix%4)*rlo;}
+    return {lat:la+rla/2,lon:lo+rlo/2};
+  }
+  function locSplit(id,fromPaste){ // v2.0: Google-Maps-Koordinaten ODER Plus Code erkennen -> Felder + Ortsname automatisch
+    const v=String(el(id).value);
+    const oc=_olcDecode(v);
+    let la=null,lo=null;
+    if(oc){la=+oc.lat.toFixed(7);lo=+oc.lon.toFixed(7);}
+    else{
+      if(/[23456789CFGHJMPQRVWX]{4,6}\+[23456789CFGHJMPQRVWX]{2}/i.test(v)&&!/\d{1,3}\./.test(v)){msg.textContent="Kurzer Plus Code erkannt \u2013 bitte den vollst\u00e4ndigen Code mit 8 Zeichen vor dem + verwenden (in Google Maps unter \u201ePlus Code\u201c).";return;}
+      const m=/\(?\s*(-?\d{1,3}\.\d+)\s*[,;\s]+\s*(-?\d{1,3}\.\d+)\s*\)?/.exec(v);
+      if(m){la=parseFloat(m[1]);lo=parseFloat(m[2]);}
+    }
+    if(la===null)return;
+    el("locLat").value=la;el("locLon").value=lo;
+    el("locPaste").classList.remove("loc-ok");el("locPaste2").classList.remove("loc-ok");   // v2.3
+    if(fromPaste){el(id).classList.add("loc-ok");el(id==="locPaste"?"locPaste2":"locPaste").value="";}
+    msg.textContent=(oc?"Plus Code":"Koordinaten")+" erkannt \u2013 Ortsname wird gesucht \u2026";
+    autoName(la,lo);
+  }
+  ["locLat","locLon","locName"].forEach(id=>el(id).addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";if(id!=="locName")locSplit(id,false);}));
+  el("locPaste").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste",true);});
+  el("locPaste2").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste2",true);});
+  function saveGo(p){try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
+    location.href=location.pathname;} // Query-Parameter abwerfen, damit das gespeicherte Profil greift
+  el("locWtb").onclick=()=>saveGo(LOC_WETTENBERG);
+  el("locNdd").onclick=()=>saveGo(LOC_NORDDEICH);
+  ap.onclick=()=>{
+    const la=parseFloat(String(el("locLat").value).trim().replace(",",".")),
+          lo=parseFloat(String(el("locLon").value).trim().replace(",","."));
+    if(!isFinite(la)||!isFinite(lo)||Math.abs(la)>89||Math.abs(lo)>180){msg.textContent="Bitte g\u00fcltige Dezimalgrad-Koordinaten eingeben (z.\u202fB. 53.6321 und 7.2141).";return;}
+    const inDE=la>=47&&la<=55.2&&lo>=5.5&&lo<=15.5;
+    if(!inDE&&!ap.dataset.warned){ap.dataset.warned="1";msg.textContent="Hinweis: Standort au\u00dferhalb Deutschlands \u2013 DWD-Teile (Stationsdaten, Warnungen) k\u00f6nnen entfallen, der Open-Meteo-Kern l\u00e4uft weltweit. Nochmal \u201e\u00dcbernehmen\u201c tippen zum Best\u00e4tigen.";return;}
+    const typed=_locSan(el("locName").value).trim();
+    if(typed){saveGo({lat:la,lon:lo,name:typed,isWettenberg:false});return;}
+    msg.textContent="Ortsname wird ermittelt \u2026";                    // v2.0: fehlenden Namen automatisch holen, dann speichern
+    autoName(la,lo,n=>saveGo({lat:la,lon:lo,name:n||la.toFixed(3)+"\u00b0 / "+lo.toFixed(3)+"\u00b0",isWettenberg:false}));
+  };
+  let _nmTok=0;
+  function autoName(la,lo,done){ // v2.0: Ortsname automatisch via Nominatim/OSM (interaktive Einzelabfrage, Token gegen veraltete Antworten)
+    const tok=++_nmTok;
+    const to=new Promise(res=>setTimeout(()=>res(null),9000));
+    Promise.race([
+      fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=de&lat="+la+"&lon="+lo)
+        .then(r=>r.ok?r.json():null).catch(()=>null),
+      to
+    ]).then(j=>{
+      if(tok!==_nmTok)return;
+      const a=(j&&j.address)||{};
+      const n=_locSan(a.village||a.town||a.city||a.municipality||a.county||"");
+      if(n){el("locName").value=n;msg.textContent="Ort: "+n+" \u00b7 Quelle OpenStreetMap";}
+      else msg.textContent="Kein Ortsname gefunden \u2013 bitte manuell eintragen.";
+      if(done)done(n);
+    });
+  }
+  let _nsTok=0;                                   // v2.9: Ortssuche via Nominatim (vorwaerts), Token gegen veraltete Antworten
+  function nameSearch(){
+    const q=String(el("locFind").value).trim();
+    if(q.length<2){msg.textContent="Bitte einen Ortsnamen mit mindestens 2 Zeichen eingeben.";return;}
+    const tok=++_nsTok,box=el("locFindRes");
+    box.innerHTML="";msg.textContent="Suche \u201e"+q+"\u201c \u2026";
+    const to=new Promise(res=>setTimeout(()=>res(null),9000));
+    Promise.race([
+      fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&accept-language=de&q="+encodeURIComponent(q))
+        .then(r=>r.ok?r.json():null).catch(()=>null),
+      to
+    ]).then(j=>{
+      if(tok!==_nsTok)return;
+      if(!j||!j.length){msg.textContent="Kein Ort gefunden \u2013 anders schreiben oder Region erg\u00e4nzen (z.\u202fB. \u201eNeustadt Holstein\u201c).";return;}
+      const seen={},hits=[];
+      for(const r of j){const k=(+r.lat).toFixed(2)+"/"+(+r.lon).toFixed(2);if(!seen[k]){seen[k]=1;hits.push(r);}}
+      const pick=r=>{
+        const a=r.address||{};
+        const n=_locSan(a.village||a.town||a.city||a.municipality||a.county||String(r.display_name||"").split(",")[0]).trim();
+        el("locLat").value=(+r.lat).toFixed(5);el("locLon").value=(+r.lon).toFixed(5);
+        el("locName").value=n;
+        el("locPaste").value="";el("locPaste2").value="";
+        el("locPaste").classList.remove("loc-ok");el("locPaste2").classList.remove("loc-ok");
+        el("locFind").classList.add("loc-ok");
+        box.innerHTML="";delete ap.dataset.warned;
+        msg.textContent="Ort: "+n+" \u00b7 Quelle OpenStreetMap \u2013 jetzt \u201e\u00dcbernehmen\u201c tippen.";
+      };
+      if(hits.length===1){pick(hits[0]);return;}
+      msg.textContent="";
+      const hd=document.createElement("div");hd.className="loc-hint";hd.textContent=hits.length+" Treffer \u2013 antippen:";box.appendChild(hd);
+      hits.forEach(r=>{const d=document.createElement("div");d.className="loc-hit";
+        const seg=String(r.display_name||"").split(",").map(t=>t.trim());
+        const b=document.createElement("b");b.textContent=seg[0]||"?";d.appendChild(b);
+        const sub=seg.slice(1,4).join(", ");
+        if(sub){const sp=document.createElement("span");sp.textContent=" \u00b7 "+sub;d.appendChild(sp);}
+        d.onclick=()=>pick(r);box.appendChild(d);});
+    });
+  }
+  el("locFindBtn").onclick=nameSearch;
+  el("locFind").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();nameSearch();}});
+  el("locFind").addEventListener("input",()=>{el("locFind").classList.remove("loc-ok");});
+  el("locGps").onclick=()=>{
+    if(!navigator.geolocation){msg.textContent="GPS ist auf diesem Ger\u00e4t nicht verf\u00fcgbar \u2013 Koordinaten bitte manuell eingeben.";return;}
+    msg.textContent="GPS wird abgefragt \u2026";
+    navigator.geolocation.getCurrentPosition(
+      p=>{el("locLat").value=p.coords.latitude.toFixed(5);el("locLon").value=p.coords.longitude.toFixed(5);delete ap.dataset.warned;msg.textContent="Position \u00fcbernommen \u2013 Ortsname wird gesucht \u2026";autoName(p.coords.latitude,p.coords.longitude);},
+      e=>{msg.textContent=e&&e.code===1?"GPS-Zugriff wurde abgelehnt. Koordinaten bitte manuell eingeben.":"GPS-Position nicht verf\u00fcgbar. Koordinaten bitte manuell eingeben.";},
+      {enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+  };
+})();
 </script>
 </body>
 </html>
