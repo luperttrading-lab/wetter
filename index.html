@@ -309,7 +309,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.34</span>
+      <span class="ver">v2.35</span>
     </div>
   </header>
 
@@ -2137,13 +2137,7 @@ function drawWolken(){
       let nb=0;for(const q of labRects)if(!(R[2]<q[0]||R[0]>q[2]||R[3]<q[1]||R[1]>q[3]))nb++;
       if(nb>=2)return;                                             // v1.3: Bildraum-Trio-Sperre -> Ort ganz weglassen
       x.beginPath();x.arc(p[0],p[1],2.6,0,7);x.fillStyle="rgba(255,255,255,.95)";x.fill();x.lineWidth=1.4;x.strokeStyle="rgba(0,0,0,.55)";x.stroke(); // v1.5: dunkler Ring wie Label-Kontur
-      if(Math.abs(put[1]-p[1])>1){ // v1.8: kurzer Leader vom Punkt zum versetzten Label
-        const lx=put[0]>p[0]?put[0]-1.5:put[0]+w+1.5,vx=lx-p[0],vy=put[1]-p[1],vl=Math.hypot(vx,vy)||1;
-        const sx=p[0]+vx/vl*4.2,sy=p[1]+vy/vl*4.2;
-        x.lineCap="round";
-        x.beginPath();x.moveTo(sx,sy);x.lineTo(lx,put[1]);x.lineWidth=2.6;x.strokeStyle="rgba(0,0,0,.6)";x.stroke();
-        x.beginPath();x.moveTo(sx,sy);x.lineTo(lx,put[1]);x.lineWidth=1.1;x.strokeStyle="rgba(255,255,255,.95)";x.stroke();
-      }
+      // v2.35: Leader-Striche entfernt (Wunsch Lutz) - Versetzungslogik bleibt, der Punkt markiert den Ort
       x.textAlign="left";x.textBaseline="middle";
       x.lineWidth=3.2;x.strokeStyle="rgba(0,0,0,.6)";x.strokeText(ci.n,put[0],put[1]);
       x.fillStyle="#fff";x.fillText(ci.n,put[0],put[1]);
