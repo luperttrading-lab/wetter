@@ -260,6 +260,7 @@
   .iss-amp{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12.5px}
   .iss-dot{width:9px;height:9px;border-radius:50%;flex:none}
   #issList .iss-list{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:2px 14px}
+  .iss-note{margin-top:9px;font-size:12.5px;line-height:1.45;color:#5c6b80;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 12px}
   .iss-lhead{display:flex;font-size:10.5px;color:var(--muted);font-weight:700;padding:9px 0 7px}
   .iss-lhead span:nth-child(1){flex:0 0 92px}.iss-lhead span:nth-child(2){flex:1}.iss-lhead span:nth-child(3){flex:0 0 38px}.iss-lhead span:nth-child(4){flex:0 0 66px}
   .iss-row{display:flex;align-items:center;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line)}
@@ -309,7 +310,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.39</span>
+      <span class="ver">v2.42</span>
     </div>
   </header>
 
@@ -960,6 +961,16 @@ function pollenCat(v){if(v==null||v<1)return["keine","#cbd5e1"];if(v<10)return["
 let _pollenSub=null;// Pollen-Kachel liegt jetzt im oberen Grid (renderTiles); renderAirGrid befuellt sie, sobald die Luftdaten da sind (Reihenfolge-unabhaengig)
 function fillPollen(){const e=document.getElementById("pollenSub");if(e&&_pollenSub!=null)e.innerHTML=_pollenSub;}
 function cmfUV(cc){if(cc==null)return 1;return Math.max(0.25,1-0.70*Math.pow(cc/100,2));}
+function ccDiagText(hourMs,ccD,ly,cmfFn){ // v2.40: Diagnose - welcher Bewoelkungswert treibt die Saeule (DWD-Messung vs. Open-Meteo-Modell)?
+  if(ccD==null)return"";
+  const d=new Date(hourMs),hh=String(d.getHours()).padStart(2,"0");
+  let ccM=null;
+  if(ly&&ly.time&&ly.cloud_cover){
+    const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"T"+hh;
+    for(let i=0;i<ly.time.length;i++){if(String(ly.time[i]).slice(0,13)===k){const v=ly.cloud_cover[i];if(v!=null)ccM=Math.round(+v);break;}}
+  }
+  return" \u00b7 Bew\u00f6lkung "+hh+":00 \u00b7 DWD "+Math.round(ccD)+"\u202f%"+(ccM!=null?" \u00b7 Modell "+ccM+"\u202f%":"")+" \u2192 Durchlass "+Math.round(cmfFn(ccD)*100)+"\u202f%";
+}
 
 function moonInfo(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14)/86400000,days=d.getTime()/86400000-ref;let frac=((days/syn)%1+1)%1;const illum=Math.round((1-Math.cos(2*Math.PI*frac))/2*100);
   const names=["Neumond","zunehmende Sichel","erstes Viertel","zunehmender Mond","Vollmond","abnehmender Mond","letztes Viertel","abnehmende Sichel"];
@@ -1374,7 +1385,7 @@ function renderAirGrid(air){
     let vdLine="";
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
-    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel<span id="atmDamp"></span> · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}${vdLine}</div></div>`;
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel<span id="atmDamp"></span><span id="ccDiag"></span> · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
@@ -1473,6 +1484,14 @@ function drawUV(h){
     for(let px=pxA;px<=pxB;px+=4){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=physUvAt(t);if(u>_pp)_pp=u;const v=sunBell(t);if(v>_pk)_pk=v;}
     const _d=document.getElementById("atmDamp");
     if(_d)_d.textContent=(_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"";
+  }
+  { // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
+    const _cd=document.getElementById("ccDiag");
+    if(_cd){let s="";
+      if(uvDayOffset===0&&Array.isArray(h._cc))
+        for(let i=0;i<tms.length;i++)
+          if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV);break;}
+      _cd.textContent=s;}
   }
   const _sb=document.getElementById("uvSimBtn");
   if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
@@ -2225,7 +2244,7 @@ function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
+  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
   loadCached("wolkCache3"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
@@ -2312,7 +2331,7 @@ setTimeout(renderMeteors,900);
 /* ===================== ISS-Überflüge (SGP4 via satellite.js) ===================== */
 const ISS_LAT=LOC.lat, ISS_LON=LOC.lon, ISS_ALT=LOC.isWettenberg?0.2:0, ISS_AU=149597870.7, ISS_RE=6371;
 let _issSat=null, _issPasses=null, _issTimer=null, _issClouds=null;
-function _issObs(){const S=window.satellite;return {latitude:S.degreesToRadians(ISS_LAT),longitude:S.degreesToRadians(ISS_LON),height:ISS_ALT};}
+function _issObs(){const S=window.satellite;return {latitude:S.degreesToRadians(LOC.lat),longitude:S.degreesToRadians(LOC.lon),height:LOC.isWettenberg?0.2:0};} // v2.42: LOC live lesen
 function issLook(satrec,date){
   const S=window.satellite, pv=S.propagate(satrec,date); if(!pv.position)return null;
   const gmst=S.gstime(date), ecf=S.eciToEcf(pv.position,gmst), la=S.ecfToLookAngles(_issObs(),ecf);
@@ -2333,9 +2352,17 @@ function issSunlit(eci,sp){          // ISS außerhalb des Erdschattens?
 function issMag(range){return -1.8 + 5*Math.log10(Math.max(range,1)/1000);}
 const ISS_DIRS=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 function issDir(a){return ISS_DIRS[Math.round(a/22.5)%16];}
-function issComputePasses(satrec,days,fromDate){
-  const start=fromDate?new Date(fromDate):new Date(); const passes=[]; let cur=null;
-  for(let s=0;s<days*86400;s+=10){
+let _issHorizonDays=5; // v2.41
+function issWhyInvisible(p){ // v2.41: warum ist dieser Ueberflug unsichtbar?
+  if(!p||p.visible)return"";
+  if(p.sunAlt==null)return"nicht sichtbar";
+  if(p.sunAlt>=0)return"nicht sichtbar \u2013 Tageslicht (Sonne "+Math.round(p.sunAlt)+"\u00b0 hoch)";
+  if(p.sunAlt>=-6)return"nicht sichtbar \u2013 D\u00e4mmerung noch zu hell";
+  return"nicht sichtbar \u2013 ISS im Erdschatten";
+}
+function issComputePasses(satrec,days,fromDate,step){
+  const start=fromDate?new Date(fromDate):new Date(); const passes=[]; let cur=null; const dt=step||10;
+  for(let s=0;s<days*86400;s+=dt){
     const t=new Date(start.getTime()+s*1000), r=issLook(satrec,t); if(!r)continue;
     if(r.el>10){
       if(!cur)cur={start:t,startAz:r.az,maxEl:r.el,maxAz:r.az,peakT:t,peakEci:r.eci,peakRange:r.range,end:t,endAz:r.az,track:[]};
@@ -2411,10 +2438,16 @@ function issMainHTML(p,now){
     <div class="iss-cd" id="issCd">${issCountdown(p.start,now)}</div>
     <div class="iss-l1">${issDir(p.startAz)} → ${issDir(p.endAz)} · ${Math.round(p.durSec/60)} Min</div>
     <div class="iss-l1">max. ${Math.round(p.maxEl)}° hoch · ${p.mag.toFixed(1).replace(".",",")} mag</div>
-    <div class="iss-amp"><span class="iss-dot" style="background:${acol}"></span><span style="color:${acol};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span></div></div></div>`;
+    <div class="iss-amp">${p.visible?`<span class="iss-dot" style="background:${acol}"></span><span style="color:${acol};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span>`:`<span class="iss-dot" style="background:#9aa7b8"></span><span style="color:#5c6b80;font-weight:700">${issWhyInvisible(p)}</span>`}</div></div></div>`;
 }
-function issListHTML(passes,now){
-  if(!passes.length)return `<div class="iss-empty">Keine weiteren sichtbaren Überflüge in den nächsten Tagen.</div>`;
+function issNoteHTML(upcoming,main,now){ // v2.42: erklaert, warum der naechste Ueberflug nicht in der Karte steht
+  if(!upcoming||!upcoming.length)return"";
+  const p=upcoming[0];
+  if(p===main||p.visible)return"";
+  return `<div class="iss-note">N\u00e4chster \u00dcberflug ${issWhen(p.start,now)} ${issTime(p.start)} \u00b7 ${issWhyInvisible(p)}</div>`;
+}
+function issListHTML(passes,now,mainVis){
+  if(!passes.length)return `<div class="iss-empty">Keine ${mainVis?'weiteren ':''}sichtbaren Überflüge in den nächsten ${_issHorizonDays} Tagen.</div>`;
   let h=`<div class="iss-lhead"><span>Wann</span><span>Richtung</span><span>Höhe</span><span>Sicht</span></div>`;
   for(const p of passes){
     const cloud=issCloudAt(p.start), [acol,atxt]=issAmpel(cloud), grob=(p.start-now)>3*86400000;
@@ -2429,9 +2462,9 @@ function renderIss(){
   if(!upcoming.length){sec.classList.add('hidden');return;}
   sec.classList.remove('hidden');
   const main=visible[0]||upcoming[0];
-  el('issMain').innerHTML=issMainHTML(main,now);
+  el('issMain').innerHTML=issMainHTML(main,now)+issNoteHTML(upcoming,main,now);
   const rest=visible.filter(p=>p!==main).slice(0,6);
-  el('issList').innerHTML=issListHTML(rest,now);
+  el('issList').innerHTML=issListHTML(rest,now,!!main.visible);
 }
 async function fetchIssTLE(){
   const r=await fetch('https://api.wheretheiss.at/v1/satellites/25544/tles?format=text');
@@ -2447,9 +2480,18 @@ async function loadIss(){
     el('issSec').classList.remove('hidden');
     el('issMain').innerHTML='<div class="iss-load">ISS-Bahn wird berechnet…</div>'; el('issList').innerHTML='';
     _issSat=await fetchIssTLE();
-    _issPasses=issComputePasses(_issSat,5);
+    _issPasses=issComputePasses(_issSat,5);_issHorizonDays=5;
     fetchIssClouds().then(renderIss).catch(e=>console.warn('issClouds',e.message));
     renderIss();
+    setTimeout(()=>{try{ // v2.41: kein sichtbarer Ueberflug in 5 Tagen -> grober Zweitlauf (30-s-Schritte) bis Tag 12
+      if(!_issSat||!_issPasses)return;
+      const nw=new Date();
+      if(_issPasses.some(p=>p.end>nw&&p.visible))return;
+      const lastEnd=_issPasses.length?_issPasses[_issPasses.length-1].end:0;
+      const ext=issComputePasses(_issSat,15,new Date(Date.now()+5*864e5),30).filter(p=>p.start>lastEnd); // v2.42: bis Tag 20
+      _issHorizonDays=20;if(ext.length)_issPasses=_issPasses.concat(ext);
+      renderIss();
+    }catch(e){console.warn('issExt',e&&e.message);}},1500);
     if(_issTimer)clearInterval(_issTimer);
     _issTimer=setInterval(()=>{
       const cd=el('issCd'); if(cd&&_issPasses){const now=new Date();const up=_issPasses.filter(p=>p.end>now);const vis=up.filter(p=>p.visible);const m=vis[0]||up[0];if(m){if(m.start<=now||cd.dataset.t!=String(m.start.getTime()))renderIss();else cd.textContent=issCountdown(m.start,now);}}
