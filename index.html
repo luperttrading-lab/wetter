@@ -222,6 +222,11 @@
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
+  #evtSec .evt-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;font-size:14px;line-height:1.5;color:#1c2a3a}
+  #evtSec .evt-box.soon{border-color:#f0b26a;background:#fffaf3}
+  .evt-cd{color:#7a4dd8;font-weight:700}
+  .evt-s{color:#5c6b80;font-size:13px;margin-top:5px;line-height:1.45}
+  .evt-w{color:#c62828;font-weight:700;font-size:12.5px;margin-top:7px;line-height:1.4}
   #metSec .met-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;font-size:14px;line-height:1.55;color:#1c2a3a}
   .met-amp{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:12.5px;background:#eef1f6;color:#3a4453}
   .met-amp.ok{background:#eaf7ec;color:#14532d}.met-amp.mid{background:#fff4e0;color:#8a5b00}.met-amp.bad{background:#fdeaea;color:#8a1f1f}
@@ -310,7 +315,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.42</span>
+      <span class="ver">v2.44</span>
     </div>
   </header>
 
@@ -351,6 +356,7 @@
     <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><div class="pl-wrap"><canvas id="planetenCv"></canvas><div id="plDWheel" class="pl-wheel pl-dwheel"><div class="pw-a" id="pdPrev"></div><div class="pw-b" id="pdCur"></div><div class="pw-a" id="pdNext"></div></div><div id="plWheel" class="pl-wheel"><div class="pw-a" id="pwPrev"></div><div class="pw-b" id="pwCur"></div><div class="pw-a" id="pwNext"></div></div><button id="plNow" class="pl-now">Jetzt</button><canvas id="planetenSunCv"></canvas></div><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">Planeten erscheinen nach Helligkeit in der D&auml;mmerung &middot; Mond ganzt&auml;gig</div></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
     <div id="metSec" class="hidden"><div class="sect">Meteorströme</div><div id="metBody"></div></div>
+    <div id="evtSec" class="hidden"><div class="sect">Besondere Ereignisse</div><div id="evtBody"></div></div>
   </div>
 
   <div class="state" id="stLoading"><div class="spinner"></div><p>Messwerte werden geladen …</p></div>
@@ -2273,6 +2279,47 @@ function DEMO_EXTRAS(){
   renderForecast({daily:{time:days,weather_code:[0,1,2,80,95,2,1,3,61,80,2,1,0,2,3,61],temperature_2m_max:[38,37,33,27,24,28,30,29,25,24,27,29,31,30,28,26],temperature_2m_min:[21,22,20,18,16,16,17,18,17,16,16,17,18,18,17,16],precipitation_probability_max:[0,5,25,70,80,20,10,30,60,70,20,10,5,15,25,55],precipitation_sum:[0,0,0.4,6.2,14.5,1.1,0,2.3,8.0,12.0,0.8,0,0,0.6,2.1,9.4]}});
 }
 
+/* ===== Besondere Himmelsereignisse (v2.44) - Daten geprueft: BfS, DLR, Haus der Astronomie, Wikipedia ===== */
+const SKYEVENTS=[
+ {y:2026,m:8,d:12,t:"Partielle Sonnenfinsternis",big:1,
+  s:"Beginn gegen 19:15 Uhr \u00b7 Maximum gegen 20:10 Uhr \u00b7 Bedeckung 85\u201390\u202f% (im S\u00fcdwesten am tiefsten) \u00b7 tief im Westen bis zum Sonnenuntergang. Total nur auf Island, in Nordspanien und auf den Balearen.",
+  w:"Niemals ungesch\u00fctzt in die Sonne sehen \u2013 nur mit zertifizierter Sonnenfinsternisbrille (EN\u202f1836). Auch 90\u202f% Restsonne sch\u00e4digen die Netzhaut in Sekunden."},
+ {y:2026,m:8,d:28,t:"Partielle Mondfinsternis",big:1,
+  s:"Kernschatten ab 4:34 Uhr \u00b7 Maximum 6:13 Uhr \u00b7 93\u202f% des Monddurchmessers. Bei uns nur die erste H\u00e4lfte: der Mond geht w\u00e4hrend der Finsternis tief im Westen unter.",w:""},
+ {y:2027,m:2,d:20,t:"Halbschatten-Mondfinsternis",big:0,
+  s:"Nur eine leichte Abschattung des Vollmonds \u2013 mit blo\u00dfem Auge kaum zu erkennen.",w:""},
+ {y:2027,m:8,d:2,t:"Partielle Sonnenfinsternis",big:0,
+  s:"Total \u00fcber S\u00fcdspanien, Nordafrika und \u00c4gypten (dort \u00fcber 6 Minuten) \u00b7 bei uns partiell.",
+  w:"Sonnenfinsternisbrille erforderlich."},
+ {y:2028,m:12,d:31,t:"Totale Mondfinsternis",big:1,
+  s:"Silvesternacht \u00b7 die n\u00e4chste \u00fcber Deutschland sichtbare totale Mondfinsternis \u2013 Blutmond ohne Hilfsmittel beobachtbar.",w:""}
+];
+function skyEventNext(list,nowMs,n){ // v2.44: kommende Ereignisse ab heute
+  const t0=new Date(nowMs);t0.setHours(0,0,0,0);const out=[];
+  for(const e of list){
+    const d=new Date(e.y,e.m-1,e.d),days=Math.round((d-t0)/864e5);
+    if(days<0)continue;
+    out.push({e:e,days:days,date:d});
+    if(out.length>=(n||3))break;
+  }
+  return out;
+}
+function renderSkyEvents(){try{
+  const sec=document.getElementById("evtSec"),bd=document.getElementById("evtBody");if(!sec||!bd)return;
+  const nx=skyEventNext(SKYEVENTS,Date.now(),3);
+  if(!nx.length){sec.classList.add("hidden");return;}
+  const wd=["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const fmt=d=>wd[d.getDay()]+". "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();
+  let h="";
+  for(const x of nx){
+    const cd=x.days===0?"heute!":x.days===1?"morgen":"in "+x.days+" Tagen";
+    const soon=x.days<=30&&x.e.big?" soon":"";
+    h+=`<div class="evt-box${soon}"><b>${x.e.t}</b> \u00b7 ${fmt(x.date)} \u00b7 <span class="evt-cd">${cd}</span>`
+      +`<div class="evt-s">${x.e.s}</div>`+(x.e.w?`<div class="evt-w">\u26a0 ${x.e.w}</div>`:"")+`</div>`;
+  }
+  bd.innerHTML=h;sec.classList.remove("hidden");
+}catch(e){console.warn("skyevents",e&&e.message);}}
+setTimeout(renderSkyEvents,950);
 /* ===== Meteorstroeme (v2.26) ===== */
 const METEORS=[ // n, Aktivitaet a-b [Monat,Tag], Peak p (Nacht p -> p+1), ZHR z, Radiant ra(h)/de(Grad), v km/s
  {n:"Quadrantiden",a:[1,1],b:[1,10],p:[1,3],z:110,ra:15.3,de:49,v:41},
@@ -2438,13 +2485,13 @@ function issMainHTML(p,now){
     <div class="iss-cd" id="issCd">${issCountdown(p.start,now)}</div>
     <div class="iss-l1">${issDir(p.startAz)} → ${issDir(p.endAz)} · ${Math.round(p.durSec/60)} Min</div>
     <div class="iss-l1">max. ${Math.round(p.maxEl)}° hoch · ${p.mag.toFixed(1).replace(".",",")} mag</div>
-    <div class="iss-amp">${p.visible?`<span class="iss-dot" style="background:${acol}"></span><span style="color:${acol};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span>`:`<span class="iss-dot" style="background:#9aa7b8"></span><span style="color:#5c6b80;font-weight:700">${issWhyInvisible(p)}</span>`}</div></div></div>`;
+    <div class="iss-amp">${p.visible?`<span class="iss-dot" style="background:${acol}"></span><span style="color:${acol};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span>`:`<span class="iss-dot" style="background:#c62828"></span><span style="color:#c62828;font-weight:700">${issWhyInvisible(p)}</span>`}</div></div></div>`;
 }
 function issNoteHTML(upcoming,main,now){ // v2.42: erklaert, warum der naechste Ueberflug nicht in der Karte steht
   if(!upcoming||!upcoming.length)return"";
   const p=upcoming[0];
   if(p===main||p.visible)return"";
-  return `<div class="iss-note">N\u00e4chster \u00dcberflug ${issWhen(p.start,now)} ${issTime(p.start)} \u00b7 ${issWhyInvisible(p)}</div>`;
+  return `<div class="iss-note">N\u00e4chster \u00dcberflug ${issWhen(p.start,now)} ${issTime(p.start)} \u00b7 <b style="color:#c62828">${issWhyInvisible(p)}</b></div>`;
 }
 function issListHTML(passes,now,mainVis){
   if(!passes.length)return `<div class="iss-empty">Keine ${mainVis?'weiteren ':''}sichtbaren Überflüge in den nächsten ${_issHorizonDays} Tagen.</div>`;
