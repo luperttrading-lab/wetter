@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-16",
-  "summe_mm": 0.88,
-  "stunden_ok": 3,
-  "stunden_erwartet": 3,
+  "summe_mm": 1.25,
+  "stunden_ok": 4,
+  "stunden_erwartet": 5,
   "stunden": [
     {
       "stunde": "01:00",
@@ -15,6 +15,15 @@
     {
       "stunde": "03:00",
       "mm": 0.88
+    },
+    {
+      "stunde": "04:00",
+      "mm": 0.37
+    },
+    {
+      "stunde": "05:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -24,7 +33,7 @@
           410,
           424
         ],
-        "mm": 1.1,
+        "mm": 1.3,
         "eigenes": false
       },
       {
@@ -32,7 +41,7 @@
           410,
           425
         ],
-        "mm": 1.3,
+        "mm": 1.6,
         "eigenes": false
       },
       {
@@ -40,7 +49,7 @@
           410,
           426
         ],
-        "mm": 1.1,
+        "mm": 1.4,
         "eigenes": false
       }
     ],
@@ -50,7 +59,7 @@
           409,
           424
         ],
-        "mm": 1.2,
+        "mm": 1.5,
         "eigenes": false
       },
       {
@@ -58,7 +67,7 @@
           409,
           425
         ],
-        "mm": 0.7,
+        "mm": 1.1,
         "eigenes": true
       },
       {
@@ -66,7 +75,7 @@
           409,
           426
         ],
-        "mm": 0.5,
+        "mm": 1.1,
         "eigenes": false
       }
     ],
@@ -76,7 +85,7 @@
           408,
           424
         ],
-        "mm": 1.1,
+        "mm": 1.7,
         "eigenes": false
       },
       {
@@ -84,7 +93,7 @@
           408,
           425
         ],
-        "mm": 0.6,
+        "mm": 0.9,
         "eigenes": false
       },
       {
@@ -92,16 +101,16 @@
           408,
           426
         ],
-        "mm": 0.4,
+        "mm": 0.7,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-08-16",
-    "mm": 0.88
+    "mm": 1.25
   },
-  "aktualisiert": "2026-08-16T01:53:31+00:00",
+  "aktualisiert": "2026-08-16T03:09:05+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
