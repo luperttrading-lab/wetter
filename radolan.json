@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-18",
-  "summe_mm": 6.27,
-  "stunden_ok": 13,
-  "stunden_erwartet": 13,
+  "summe_mm": 7.04,
+  "stunden_ok": 14,
+  "stunden_erwartet": 15,
   "stunden": [
     {
       "stunde": "01:00",
@@ -55,6 +55,15 @@
     {
       "stunde": "13:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "14:00",
+      "mm": 0.78
+    },
+    {
+      "stunde": "15:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -64,64 +73,12 @@
           410,
           424
         ],
-        "mm": 6.0,
+        "mm": 6.5,
         "eigenes": false
       },
       {
         "pixel": [
           410,
-          425
-        ],
-        "mm": 5.8,
-        "eigenes": false
-      },
-      {
-        "pixel": [
-          410,
-          426
-        ],
-        "mm": 5.8,
-        "eigenes": false
-      }
-    ],
-    [
-      {
-        "pixel": [
-          409,
-          424
-        ],
-        "mm": 6.1,
-        "eigenes": false
-      },
-      {
-        "pixel": [
-          409,
-          425
-        ],
-        "mm": 6.3,
-        "eigenes": true
-      },
-      {
-        "pixel": [
-          409,
-          426
-        ],
-        "mm": 6.1,
-        "eigenes": false
-      }
-    ],
-    [
-      {
-        "pixel": [
-          408,
-          424
-        ],
-        "mm": 6.6,
-        "eigenes": false
-      },
-      {
-        "pixel": [
-          408,
           425
         ],
         "mm": 6.5,
@@ -129,19 +86,71 @@
       },
       {
         "pixel": [
+          410,
+          426
+        ],
+        "mm": 6.6,
+        "eigenes": false
+      }
+    ],
+    [
+      {
+        "pixel": [
+          409,
+          424
+        ],
+        "mm": 6.8,
+        "eigenes": false
+      },
+      {
+        "pixel": [
+          409,
+          425
+        ],
+        "mm": 7.1,
+        "eigenes": true
+      },
+      {
+        "pixel": [
+          409,
+          426
+        ],
+        "mm": 7.0,
+        "eigenes": false
+      }
+    ],
+    [
+      {
+        "pixel": [
+          408,
+          424
+        ],
+        "mm": 7.4,
+        "eigenes": false
+      },
+      {
+        "pixel": [
+          408,
+          425
+        ],
+        "mm": 7.4,
+        "eigenes": false
+      },
+      {
+        "pixel": [
           408,
           426
         ],
-        "mm": 6.1,
+        "mm": 7.0,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-08-18",
-    "mm": 6.27
+    "mm": 7.04
   },
-  "aktualisiert": "2026-08-18T11:58:42+00:00",
+  "aktualisiert": "2026-08-18T13:03:11+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
