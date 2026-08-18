@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-18",
-  "summe_mm": 3.0,
-  "stunden_ok": 9,
-  "stunden_erwartet": 9,
+  "summe_mm": 5.85,
+  "stunden_ok": 10,
+  "stunden_erwartet": 10,
   "stunden": [
     {
       "stunde": "01:00",
@@ -39,6 +39,10 @@
     {
       "stunde": "09:00",
       "mm": 2.07
+    },
+    {
+      "stunde": "10:00",
+      "mm": 2.84
     }
   ],
   "umgebung_3x3": [
@@ -48,7 +52,7 @@
           410,
           424
         ],
-        "mm": 3.0,
+        "mm": 5.5,
         "eigenes": false
       },
       {
@@ -56,7 +60,7 @@
           410,
           425
         ],
-        "mm": 2.7,
+        "mm": 5.4,
         "eigenes": false
       },
       {
@@ -64,7 +68,7 @@
           410,
           426
         ],
-        "mm": 2.7,
+        "mm": 5.4,
         "eigenes": false
       }
     ],
@@ -74,7 +78,7 @@
           409,
           424
         ],
-        "mm": 2.9,
+        "mm": 5.8,
         "eigenes": false
       },
       {
@@ -82,7 +86,7 @@
           409,
           425
         ],
-        "mm": 3.0,
+        "mm": 5.8,
         "eigenes": true
       },
       {
@@ -90,7 +94,7 @@
           409,
           426
         ],
-        "mm": 2.8,
+        "mm": 5.6,
         "eigenes": false
       }
     ],
@@ -100,7 +104,7 @@
           408,
           424
         ],
-        "mm": 3.2,
+        "mm": 6.3,
         "eigenes": false
       },
       {
@@ -108,7 +112,7 @@
           408,
           425
         ],
-        "mm": 3.3,
+        "mm": 6.0,
         "eigenes": false
       },
       {
@@ -116,16 +120,16 @@
           408,
           426
         ],
-        "mm": 3.0,
+        "mm": 5.6,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-08-18",
-    "mm": 3.0
+    "mm": 5.85
   },
-  "aktualisiert": "2026-08-18T07:48:18+00:00",
+  "aktualisiert": "2026-08-18T08:49:29+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
