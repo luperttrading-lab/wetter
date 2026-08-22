@@ -1,7 +1,7 @@
 {
  "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
  "ort": "Erlental 50.6480N 8.6741E",
- "aktualisiert": "2026-08-22T10:32:18+00:00",
+ "aktualisiert": "2026-08-22T10:34:46+00:00",
  "tage": {
   "2026-07-18": {
    "mm": 0.0,
@@ -212,6 +212,11 @@
    "h": 24,
    "voll": true,
    "q": "recent"
+  },
+  "2026-08-22": {
+   "mm": 2.9,
+   "h": 12,
+   "voll": false
   }
  }
 }
