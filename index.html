@@ -222,7 +222,13 @@
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
-  #vitdCv{width:100%;height:212px;display:block;touch-action:pan-y}
+  #vitdCv{width:100%;height:196px;display:block;touch-action:pan-y;margin-top:6px}
+  .upd-bar{position:fixed;left:12px;right:12px;bottom:14px;z-index:600;background:#1c2a3a;color:#fff;border-radius:15px;padding:11px 13px 11px 15px;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 28px rgba(20,35,60,.38)}
+  .upd-bar b{color:#ffd9a8}
+  .upd-bar button{background:#f0b26a;color:#3a2200;border:0;border-radius:999px;padding:7px 14px;font-weight:800;font-size:12.5px;white-space:nowrap}
+  .upd-bar .x{background:transparent;color:#9fb0c8;padding:7px 4px;font-size:15px}
+  .vitd-btn{border:1px solid #c8d2e0;background:#fff;color:#c2410c;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;letter-spacing:0;text-transform:none}
+  .vitd-btn:active{background:#fff3e9}
   .vitd-info{margin-top:8px;text-align:center;font-size:13.5px;font-weight:700;color:#1f7a4d;min-height:19px}
   .vitd-info small{display:block;font-weight:600;color:#5c6b80;font-size:12px;margin-top:2px}
   #evtSec .evt-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;font-size:14px;line-height:1.5;color:#1c2a3a}
@@ -318,7 +324,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.47</span>
+      <span class="ver">v2.53</span>
     </div>
   </header>
 
@@ -356,7 +362,6 @@
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
     <div id="airSec" class="hidden"><div class="sect">UV &amp; Mond</div><div class="grid" id="gridAir"></div></div>
-    <div id="vitdSec" class="hidden"><div class="sect">Vitamin-D im Jahresverlauf</div><div class="nowcard"><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl&#228;che = Uhrzeiten mit UV&#8202;&#8805;&#8202;3 bei klarem Himmel &#183; Wischen zeigt einen beliebigen Tag &#183; der Versatz Ende M&#228;rz und Ende Oktober ist die Sommerzeit</div></div></div>
     <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><div class="pl-wrap"><canvas id="planetenCv"></canvas><div id="plDWheel" class="pl-wheel pl-dwheel"><div class="pw-a" id="pdPrev"></div><div class="pw-b" id="pdCur"></div><div class="pw-a" id="pdNext"></div></div><div id="plWheel" class="pl-wheel"><div class="pw-a" id="pwPrev"></div><div class="pw-b" id="pwCur"></div><div class="pw-a" id="pwNext"></div></div><button id="plNow" class="pl-now">Jetzt</button><canvas id="planetenSunCv"></canvas></div><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">Planeten erscheinen nach Helligkeit in der D&auml;mmerung &middot; Mond ganzt&auml;gig</div></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
     <div id="metSec" class="hidden"><div class="sect">Meteorströme</div><div id="metBody"></div></div>
@@ -1403,6 +1408,7 @@ function renderAirGrid(air){
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
+  html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
     _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner();
@@ -1411,6 +1417,7 @@ function renderAirGrid(air){
     fillPollen();// Pollen-Kachel sitzt jetzt oben im Haupt-Grid (nach 'Vergleich zu gestern')
   }
   el("gridAir").innerHTML=html;
+  setTimeout(drawVitD,0);   // v2.48: Kachel lebt jetzt im Grid und wird mit ihm neu aufgebaut
   lastUVH=h;if(h&&h.uv_index_clear_sky)requestAnimationFrame(()=>{drawUV(h);drawBfsOverlay();});
 }
 
@@ -2299,17 +2306,21 @@ function _vitdCross(tAus,tEin){          // tAus: unter der Schwelle, tEin: daru
   return tEin;
 }
 function vitdJahr(jahr){                 // je Tag: Beginn/Ende als Ortszeit-Stunde (dezimal)
-  const out=[],S=9e5;                    // 15-Minuten-Raster, danach Bisektion
+  // v2.48: erst das Tagesmaximum suchen, dann von dort nach aussen einschachteln.
+  // Das alte Verfahren tastete nur ein 15-Minuten-Raster ab und uebersah am
+  // Saisonrand Fenster, die nur wenige Minuten ueber der Schwelle liegen.
+  const out=[],S=9e5;
   const std=t=>{const d=new Date(t);return d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;};
   for(let i=0;i<366;i++){
     const d=new Date(jahr,0,1+i);
     if(d.getFullYear()!==jahr)break;
     const t0=new Date(jahr,d.getMonth(),d.getDate(),3,0,0).getTime();
     const t1=new Date(jahr,d.getMonth(),d.getDate(),22,0,0).getTime();
-    let ein=null,aus=null;
-    for(let t=t0;t<=t1;t+=S){if(physUvAt(t)>=VITD_SCHWELLE){if(ein===null)ein=t;aus=t;}}
-    if(ein===null){out.push({d:d,a:null,b:null});continue;}
-    out.push({d:d,a:std(_vitdCross(ein-S,ein)),b:std(_vitdCross(aus+S,aus))});
+    let tmax=t0,vmax=-1;
+    for(let t=t0;t<=t1;t+=S){const v=physUvAt(t);if(v>vmax){vmax=v;tmax=t;}}
+    const off=new Date(jahr,d.getMonth(),d.getDate(),12,0,0).getTimezoneOffset(); // v2.48: mittags ablesen
+    if(vmax<VITD_SCHWELLE){out.push({d:d,a:null,b:null,off:off});continue;}
+    out.push({d:d,a:std(_vitdCross(t0,tmax)),b:std(_vitdCross(t1,tmax)),off:off});
   }
   return out;
 }
@@ -2322,13 +2333,12 @@ function _vitdTxt(x){
   return dd+" \u00b7 "+f(x.a)+"\u2013"+f(x.b)+" Uhr<small>Dauer "+st+"\u202fh "+String(mi).padStart(2,"0")+"\u202fmin</small>";
 }
 function drawVitD(){try{
-  const sec=document.getElementById("vitdSec"),cv=document.getElementById("vitdCv"),inf=document.getElementById("vitdInfo");
-  if(!sec||!cv)return;
-  if(!window.satellite||typeof physUvAt!=="function"){sec.classList.add("hidden");return;}
+  const card=document.getElementById("vitdCard"),cv=document.getElementById("vitdCv"),inf=document.getElementById("vitdInfo");
+  if(!card||!cv)return;
+  if(!window.satellite||typeof physUvAt!=="function"){card.style.display="none";return;}
   const jahr=new Date().getFullYear(),key=jahr+"/"+LAT.toFixed(3)+"/"+LON.toFixed(3);
   if(_vitdKey!==key){_vitdBand=vitdJahr(jahr);_vitdKey=key;}
   const B=_vitdBand,N=B.length,mit=B.filter(x=>x.a!=null);
-  sec.classList.remove("hidden");   // v2.47: erst einblenden - eine versteckte Karte hat Breite 0
   const W=cv.clientWidth,H=cv.clientHeight;
   if(!W||!H){if((window._vitdRt=(window._vitdRt||0)+1)<=10)setTimeout(drawVitD,300);return;}
   window._vitdRt=0;
@@ -2336,9 +2346,10 @@ function drawVitD(){try{
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const PL=32,PR=8,PT=9,PB=19,gx0=PL,gx1=W-PR,gy0=PT,gy1=H-PB;
+  const gyBand=gy0+15;   // v2.50: unterhalb des Zeitzonen-Streifens beginnt die Kurve
   let hmin=6,hmax=19;
   if(mit.length){hmin=Math.floor(Math.min(...mit.map(v=>v.a))-0.6);hmax=Math.ceil(Math.max(...mit.map(v=>v.b))+0.6);}
-  const X=i=>gx0+(i/(N-1))*(gx1-gx0),Y=h=>gy1-((h-hmin)/(hmax-hmin))*(gy1-gy0);
+  const X=i=>gx0+(i/(N-1))*(gx1-gx0),Y=h=>gy1-((h-hmin)/(hmax-hmin))*(gy1-gyBand);
   x.fillStyle="#fbfcfd";x.fillRect(gx0,gy0,gx1-gx0,gy1-gy0);
   // Stundenraster
   x.font="9px -apple-system,system-ui,sans-serif";x.textAlign="right";x.textBaseline="middle";
@@ -2364,14 +2375,39 @@ function drawVitD(){try{
     x.beginPath();
     seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].a);k?x.lineTo(p,y):x.moveTo(p,y);});
     for(let k=seg.length-1;k>=0;k--)x.lineTo(X(seg[k]),Y(B[seg[k]].b));
-    x.closePath();x.fillStyle="rgba(31,122,77,.20)";x.fill();
-    x.strokeStyle="#1f7a4d";x.lineWidth=1.6;x.lineJoin="round";
-    x.beginPath();seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].a);k?x.lineTo(p,y):x.moveTo(p,y);});x.stroke();
-    x.beginPath();seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].b);k?x.lineTo(p,y):x.moveTo(p,y);});x.stroke();
+    x.closePath();                                  // v2.51: ein geschlossener Pfad - Huellkurve ist auch an den Enden zu
+    x.fillStyle="rgba(31,122,77,.20)";x.fill();
+    x.strokeStyle="#1f7a4d";x.lineWidth=1.6;x.lineJoin="round";x.stroke();
     seg=[];
   };
-  for(let i=0;i<N;i++){if(B[i].a!=null)seg.push(i);else male();}
+  for(let i=0;i<N;i++){                     // v2.48: an der Zeitumstellung trennen, sonst entsteht ein Knick
+    if(B[i].a==null){male();continue;}
+    if(seg.length&&B[i].off!==B[seg[seg.length-1]].off)male();
+    seg.push(i);
+  }
   male();
+  // v2.50: Streifen oben zeigt Winter-/Sommerzeit im Klartext
+  {
+    const SH=13, sy=gy0;                       // Streifenhoehe
+    const wechsel=[];
+    for(let i=1;i<N;i++)if(B[i].off!==B[i-1].off)wechsel.push(i);
+    const grenzen=[0].concat(wechsel,[N-1]);
+    for(let k=0;k<grenzen.length-1;k++){
+      const i0=grenzen[k],i1=grenzen[k+1];
+      const sommer=B[i0].off<0&&Math.abs(B[i0].off)>=120;   // Offset -120 = Sommerzeit
+      const xa=X(i0),xb=X(i1);
+      x.fillStyle=sommer?"rgba(245,190,80,.40)":"rgba(150,175,205,.35)";
+      x.fillRect(xa,sy,xb-xa,SH);
+      if(xb-xa>52){
+        x.fillStyle=sommer?"#8a5b00":"#41597a";
+        x.font="8.5px -apple-system,system-ui,sans-serif";
+        x.textAlign="center";x.textBaseline="middle";
+        x.fillText(sommer?"Sommerzeit":"Winterzeit",(xa+xb)/2,sy+SH/2+0.5);
+      }
+    }
+    x.strokeStyle="rgba(15,23,42,.10)";x.lineWidth=1;
+    for(const i of wechsel){x.beginPath();x.moveTo(X(i),sy);x.lineTo(X(i),gy1);x.stroke();}
+  }
   // Heute
   const heute=Math.round((new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())-new Date(jahr,0,1))/864e5);
   if(heute>=0&&heute<N){
@@ -2389,19 +2425,53 @@ function drawVitD(){try{
     }
   }
   if(inf)inf.innerHTML=_vitdTxt(B[hv>=0&&hv<N?hv:0]);
-  sec.classList.remove("hidden");
+  { // v2.52: Pfeil zeigt zurueck zum heutigen Tag
+    const bt=document.getElementById("vitdHeute");
+    if(bt){
+      if(_vitdHover==null||_vitdHover===heute){bt.style.display="none";}
+      else{bt.style.display="";bt.textContent=(_vitdHover>heute?"\u2190":"\u2192")+" heute";}
+      if(!bt._w){bt._w=1;bt.onclick=()=>{_vitdHover=null;drawVitD();};}
+    }
+  }
   if(!cv._w){
     cv._w=1;
     const idx=e=>{const r=cv.getBoundingClientRect();
       return Math.max(0,Math.min(N-1,Math.round(((e.clientX-r.left)-PL)/((r.width-PL-PR))*(N-1))));};
-    const auf=e=>{_vitdHover=idx(e);drawVitD();};
+    const auf=e=>{_vitdHover=idx(e);drawVitD();};       // v2.52: Marker bleibt stehen, wo losgelassen wurde
     cv.addEventListener("pointerdown",auf);
     cv.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")auf(e);});
-    cv.addEventListener("pointerup",()=>{_vitdHover=null;drawVitD();});
-    cv.addEventListener("pointerleave",()=>{_vitdHover=null;drawVitD();});
   }
 }catch(e){console.warn("vitd",e&&e.message);}}
 setTimeout(drawVitD,1100);
+
+/* ===== Versionspruefung (v2.53) =====
+   Holt die veroeffentlichte Datei ohne Cache und vergleicht die Versionsnummer
+   mit der gerade laufenden. Nur wenn dort eine hoehere steht, erscheint ein Hinweis. */
+function _verNum(v){const m=String(v).match(/(\d+)\.(\d+)/);return m?(+m[1])*1000+(+m[2]):0;}
+function checkUpdate(){
+  try{
+    const tag=document.querySelector(".ver");if(!tag)return;
+    const hier=_verNum(tag.textContent);if(!hier)return;
+    fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"})
+      .then(r=>r.ok?r.text():Promise.reject("HTTP "+r.status))
+      .then(t=>{
+        const m=t.match(/class="ver">v([\d.]+)</);
+        if(!m)return;
+        const dort=_verNum(m[1]);
+        if(dort<=hier)return;
+        const bar=document.createElement("div");
+        bar.className="upd-bar";
+        bar.innerHTML='<span>Neue Version <b>v'+m[1]+'</b> verf\u00fcgbar</span>'
+          +'<span style="display:flex;align-items:center;gap:2px"><button type="button">Neu laden</button>'
+          +'<button type="button" class="x">\u00d7</button></span>';
+        const bs=bar.querySelectorAll("button");
+        bs[0].onclick=()=>location.replace(location.pathname+"?v="+Date.now());
+        bs[1].onclick=()=>bar.remove();
+        document.body.appendChild(bar);
+      }).catch(e=>console.warn("Versionspruefung:",e));
+  }catch(e){}
+}
+setTimeout(checkUpdate,4000);
 /* ===== Besondere Himmelsereignisse (v2.44) - geprueft: BfS, DLR, Haus der Astronomie, Wikipedia ===== */
 const SKYEVENTS=[
  {y:2026,m:8,d:12,t:"Partielle Sonnenfinsternis",big:1,
