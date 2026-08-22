@@ -6,8 +6,12 @@ name: RADOLAN Archiv-Backfill
 on:
   workflow_dispatch:
     inputs:
+      jahr:
+        description: "Komplettes Jahr nachtragen, z.B. 2024 (leer lassen = Tage-Modus)"
+        required: false
+        default: ""
       tage:
-        description: "Tage rueckwaerts ab gestern (erst mit 3 testen, dann 365)"
+        description: "Tage rueckwaerts ab gestern (nur wenn Jahr leer ist)"
         required: true
         default: "3"
       force:
@@ -34,6 +38,7 @@ jobs:
 
       - name: Backfill laufen lassen
         env:
+          BACKFILL_JAHR:  ${{ github.event.inputs.jahr }}
           BACKFILL_TAGE:  ${{ github.event.inputs.tage }}
           BACKFILL_FORCE: ${{ github.event.inputs.force }}
         run: python radolan_backfill.py
