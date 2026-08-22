@@ -223,6 +223,7 @@
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
   #vitdCv{width:100%;height:196px;display:block;touch-action:pan-y;margin-top:6px}
+  .vitd-jahr{margin-top:13px;text-align:center;font-weight:650;color:#40506a}
   .upd-bar{position:fixed;left:12px;right:12px;bottom:14px;z-index:600;background:#1c2a3a;color:#fff;border-radius:15px;padding:11px 13px 11px 15px;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 28px rgba(20,35,60,.38)}
   .upd-bar b{color:#ffd9a8}
   .upd-bar button{background:#f0b26a;color:#3a2200;border:0;border-radius:999px;padding:7px 14px;font-weight:800;font-size:12.5px;white-space:nowrap}
@@ -324,7 +325,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.53</span>
+      <span class="ver">v2.58</span>
     </div>
   </header>
 
@@ -395,6 +396,7 @@
     <div class="loc-msg" id="locMsg"></div>
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
     <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locNdd" class="loc-btn">Norddeich</button></div>
+    <div class="loc-row"><button type="button" id="locMuc" class="loc-btn">M&uuml;nchen</button><button type="button" id="locKie" class="loc-btn">Kiel</button></div>
     <div class="loc-row"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
   </div>
 </div>
@@ -408,6 +410,8 @@ var satellite=(()=>{var _o=Object.defineProperty;var r0=Object.getOwnPropertyDes
 /* ===== Standort-Profil: URL-Parameter ?lat&lon&name > localStorage locProfile > Default Wettenberg ===== */
 const LOC_WETTENBERG={lat:50.6481,lon:8.6743,name:"Wettenberg",isWettenberg:true};
 const LOC_NORDDEICH={lat:53.6321080,lon:7.2141223,name:"Norddeich",isWettenberg:false};
+const LOC_MUENCHEN={lat:48.1374,lon:11.5755,name:"M\u00fcnchen",isWettenberg:false};   // v2.55
+const LOC_KIEL={lat:54.3233,lon:10.1394,name:"Kiel",isWettenberg:false};
 function _locSan(x){return String(x==null?"":x).replace(/[<>&"'`]/g,"").slice(0,40);}
 function loadLoc(){
   try{
@@ -1408,7 +1412,7 @@ function renderAirGrid(air){
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
-  html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
+  html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
     _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner();
@@ -2425,6 +2429,18 @@ function drawVitD(){try{
     }
   }
   if(inf)inf.innerHTML=_vitdTxt(B[hv>=0&&hv<N?hv:0]);
+  { // v2.54: Jahresbilanz - wie viele Tage, von wann bis wann
+    const jt=document.getElementById("vitdJahrTxt");
+    if(jt){
+      if(!mit.length)jt.innerHTML="An diesem Ort bleibt die Sonne das ganze Jahr unter UV\u202f3.";
+      else{
+        const lang=d=>d.getDate()+". "+["Januar","Februar","M\u00e4rz","April","Mai","Juni","Juli",
+          "August","September","Oktober","November","Dezember"][d.getMonth()];
+        jt.innerHTML="In "+LOC.name+" an "+mit.length+" von "+N+" Tagen im Jahr m\u00f6glich"
+          +"<br>"+lang(mit[0].d)+" \u2013 "+lang(mit[mit.length-1].d);
+      }
+    }
+  }
   { // v2.52: Pfeil zeigt zurueck zum heutigen Tag
     const bt=document.getElementById("vitdHeute");
     if(bt){
@@ -2803,6 +2819,8 @@ load();
     location.href=location.pathname;} // Query-Parameter abwerfen, damit das gespeicherte Profil greift
   el("locWtb").onclick=()=>saveGo(LOC_WETTENBERG);
   el("locNdd").onclick=()=>saveGo(LOC_NORDDEICH);
+  el("locMuc").onclick=()=>saveGo(LOC_MUENCHEN);
+  el("locKie").onclick=()=>saveGo(LOC_KIEL);
   ap.onclick=()=>{
     const la=parseFloat(String(el("locLat").value).trim().replace(",",".")),
           lo=parseFloat(String(el("locLon").value).trim().replace(",","."));
