@@ -222,6 +222,9 @@
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
+  #vitdCv{width:100%;height:212px;display:block;touch-action:pan-y}
+  .vitd-info{margin-top:8px;text-align:center;font-size:13.5px;font-weight:700;color:#1f7a4d;min-height:19px}
+  .vitd-info small{display:block;font-weight:600;color:#5c6b80;font-size:12px;margin-top:2px}
   #evtSec .evt-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;font-size:14px;line-height:1.5;color:#1c2a3a}
   #evtSec .evt-box.soon{border-color:#f0b26a;background:#fffaf3}
   .evt-cd{color:#7a4dd8;font-weight:700}
@@ -315,7 +318,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.44</span>
+      <span class="ver">v2.46</span>
     </div>
   </header>
 
@@ -353,6 +356,7 @@
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
     <div id="airSec" class="hidden"><div class="sect">UV &amp; Mond</div><div class="grid" id="gridAir"></div></div>
+    <div id="vitdSec" class="hidden"><div class="sect">Vitamin-D im Jahresverlauf</div><div class="nowcard"><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl&#228;che = Uhrzeiten mit UV&#8202;&#8805;&#8202;3 bei klarem Himmel &#183; Wischen zeigt einen beliebigen Tag &#183; der Versatz Ende M&#228;rz und Ende Oktober ist die Sommerzeit</div></div></div>
     <div id="planetenSec" class="hidden"><div class="sect">Planeten am Himmel</div><div class="nowcard pl-card"><div class="pl-wrap"><canvas id="planetenCv"></canvas><div id="plDWheel" class="pl-wheel pl-dwheel"><div class="pw-a" id="pdPrev"></div><div class="pw-b" id="pdCur"></div><div class="pw-a" id="pdNext"></div></div><div id="plWheel" class="pl-wheel"><div class="pw-a" id="pwPrev"></div><div class="pw-b" id="pwCur"></div><div class="pw-a" id="pwNext"></div></div><button id="plNow" class="pl-now">Jetzt</button><canvas id="planetenSunCv"></canvas></div><div id="planetenLeg" class="pl-leg"></div><div class="pl-note">Planeten erscheinen nach Helligkeit in der D&auml;mmerung &middot; Mond ganzt&auml;gig</div></div></div>
     <div id="issSec" class="hidden"><div class="sect">ISS-Überflüge</div><div id="issMain"></div><div id="issList"></div></div>
     <div id="metSec" class="hidden"><div class="sect">Meteorströme</div><div id="metBody"></div></div>
@@ -919,7 +923,11 @@ function bfsBadgeCol(u){if(u==null)return["#9aa7b8","#fff"];const k=Math.max(0,M
 function _sunMu(ms){const S=window.satellite;if(!S)return null;const d=new Date(ms),jd=S.jday(d),sp=S.sunPos(jd),gm=S.gstime(d),Hh=gm+LON*Math.PI/180-sp.rtasc,phi=LAT*Math.PI/180;return Math.sin(phi)*Math.sin(sp.decl)+Math.cos(phi)*Math.cos(sp.decl)*Math.cos(Hh);}
 const _O3M=[340,360,375,370,355,340,325,310,295,285,295,315]; // Monats-Ozonklimatologie Mitteleuropa (DU), TEMIS-orientiert
 function _sunE(ms){const d=new Date(ms),g=2*Math.PI*((d-new Date(d.getFullYear(),0,0))/864e5)/365.25;return 1.00011+0.034221*Math.cos(g)+0.00128*Math.sin(g)+0.000719*Math.cos(2*g)+0.000077*Math.sin(2*g);} // Sonnenabstand (Aphel Juli: ~0.967)
-function physUvAt(ms){const mu=_sunMu(ms);if(mu==null||mu<=0)return 0;return 12.5*_sunE(ms)*Math.pow(mu,2.42)*Math.pow(300/_O3M[new Date(ms).getMonth()],1.23);} // Allaart 2004 mit Abstandsfaktor E
+function _o3(ms){ // v2.46: linear zwischen den Monatsmitten - verhindert Stufen am Monatsersten
+  const d=new Date(ms),m=d.getMonth(),dim=new Date(d.getFullYear(),m+1,0).getDate(),f=(d.getDate()-0.5)/dim;
+  const m0=f<0.5?(m+11)%12:m, m1=f<0.5?m:(m+1)%12, t=f<0.5?f+0.5:f-0.5;
+  return _O3M[m0]+(_O3M[m1]-_O3M[m0])*t;}
+function physUvAt(ms){const mu=_sunMu(ms);if(mu==null||mu<=0)return 0;return 12.5*_sunE(ms)*Math.pow(mu,2.42)*Math.pow(300/_o3(ms),1.23);} // Allaart 2004 mit Abstandsfaktor E und glatter Ozonkurve
 function uvSimSeries(t6,t21,ccAt,bellAt,cmfFn,seed,DT,wAt){ // v2.20: Sonne/Schatten-Telegraphenprozess; Zeitmittel == cmfFn per Konstruktion
   let _s=(seed>>>0)||1;const rnd=()=>{_s=_s+0x6D2B79F5|0;let t=Math.imul(_s^_s>>>15,1|_s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   DT=DT||120000;const T0=4*60000;
@@ -2279,11 +2287,124 @@ function DEMO_EXTRAS(){
   renderForecast({daily:{time:days,weather_code:[0,1,2,80,95,2,1,3,61,80,2,1,0,2,3,61],temperature_2m_max:[38,37,33,27,24,28,30,29,25,24,27,29,31,30,28,26],temperature_2m_min:[21,22,20,18,16,16,17,18,17,16,16,17,18,18,17,16],precipitation_probability_max:[0,5,25,70,80,20,10,30,60,70,20,10,5,15,25,55],precipitation_sum:[0,0,0.4,6.2,14.5,1.1,0,2.3,8.0,12.0,0.8,0,0,0.6,2.1,9.4]}});
 }
 
-/* ===== Besondere Himmelsereignisse (v2.44) - Daten geprueft: BfS, DLR, Haus der Astronomie, Wikipedia ===== */
+/* ===== Vitamin-D im Jahresverlauf (v2.45) =====
+   Nutzt die physikalische Klarhimmel-Kurve (Allaart) - damit ist jeder Tag des
+   Jahres rechenbar, nicht nur die von CAMS gelieferten. Gesucht sind die beiden
+   Zeitpunkte, an denen der UV-Index die Vitamin-D-Schwelle kreuzt. */
+const VITD_SCHWELLE=3;
+let _vitdBand=null,_vitdKey="",_vitdHover=null;
+
+function _vitdCross(tAus,tEin){          // tAus: unter der Schwelle, tEin: darueber
+  for(let i=0;i<14;i++){const m=(tAus+tEin)/2;if(physUvAt(m)>=VITD_SCHWELLE)tEin=m;else tAus=m;}
+  return tEin;
+}
+function vitdJahr(jahr){                 // je Tag: Beginn/Ende als Ortszeit-Stunde (dezimal)
+  const out=[],S=9e5;                    // 15-Minuten-Raster, danach Bisektion
+  const std=t=>{const d=new Date(t);return d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;};
+  for(let i=0;i<366;i++){
+    const d=new Date(jahr,0,1+i);
+    if(d.getFullYear()!==jahr)break;
+    const t0=new Date(jahr,d.getMonth(),d.getDate(),3,0,0).getTime();
+    const t1=new Date(jahr,d.getMonth(),d.getDate(),22,0,0).getTime();
+    let ein=null,aus=null;
+    for(let t=t0;t<=t1;t+=S){if(physUvAt(t)>=VITD_SCHWELLE){if(ein===null)ein=t;aus=t;}}
+    if(ein===null){out.push({d:d,a:null,b:null});continue;}
+    out.push({d:d,a:std(_vitdCross(ein-S,ein)),b:std(_vitdCross(aus+S,aus))});
+  }
+  return out;
+}
+function _vitdTxt(x){
+  if(!x)return"";
+  const dd=x.d.getDate()+". "+["Jan","Feb","M\u00e4r","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"][x.d.getMonth()];
+  if(x.a==null)return dd+" \u00b7 kein Vitamin D<small>die Sonne bleibt den ganzen Tag unter UV\u202f3</small>";
+  const f=h=>String(Math.floor(h)).padStart(2,"0")+":"+String(Math.round((h-Math.floor(h))*60)).padStart(2,"0");
+  const dauer=x.b-x.a,st=Math.floor(dauer),mi=Math.round((dauer-st)*60);
+  return dd+" \u00b7 "+f(x.a)+"\u2013"+f(x.b)+" Uhr<small>Dauer "+st+"\u202fh "+String(mi).padStart(2,"0")+"\u202fmin</small>";
+}
+function drawVitD(){try{
+  const sec=document.getElementById("vitdSec"),cv=document.getElementById("vitdCv"),inf=document.getElementById("vitdInfo");
+  if(!sec||!cv)return;
+  if(!window.satellite||typeof physUvAt!=="function"){sec.classList.add("hidden");return;}
+  const jahr=new Date().getFullYear(),key=jahr+"/"+LAT.toFixed(3)+"/"+LON.toFixed(3);
+  if(_vitdKey!==key){_vitdBand=vitdJahr(jahr);_vitdKey=key;}
+  const B=_vitdBand,N=B.length,mit=B.filter(x=>x.a!=null);
+  const W=cv.clientWidth,H=cv.clientHeight;
+  if(!W||!H){setTimeout(drawVitD,300);return;}
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+  const PL=32,PR=8,PT=9,PB=19,gx0=PL,gx1=W-PR,gy0=PT,gy1=H-PB;
+  let hmin=6,hmax=19;
+  if(mit.length){hmin=Math.floor(Math.min(...mit.map(v=>v.a))-0.6);hmax=Math.ceil(Math.max(...mit.map(v=>v.b))+0.6);}
+  const X=i=>gx0+(i/(N-1))*(gx1-gx0),Y=h=>gy1-((h-hmin)/(hmax-hmin))*(gy1-gy0);
+  x.fillStyle="#fbfcfd";x.fillRect(gx0,gy0,gx1-gx0,gy1-gy0);
+  // Stundenraster
+  x.font="9px -apple-system,system-ui,sans-serif";x.textAlign="right";x.textBaseline="middle";
+  for(let h=Math.ceil(hmin);h<=hmax;h++){
+    if((hmax-hmin)>9&&h%2)continue;
+    const yy=Y(h);x.strokeStyle="rgba(15,23,42,.07)";x.lineWidth=1;
+    x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();
+    x.fillStyle="#9aa7b8";x.fillText(h+":00",gx0-5,yy);
+  }
+  // Monatsraster
+  const MN=["J","F","M","A","M","J","J","A","S","O","N","D"];
+  x.textAlign="center";x.textBaseline="top";
+  for(let m=0;m<12;m++){
+    const i0=B.findIndex(v=>v.d.getMonth()===m);if(i0<0)continue;
+    if(m){x.strokeStyle="rgba(15,23,42,.06)";x.beginPath();x.moveTo(X(i0),gy0);x.lineTo(X(i0),gy1);x.stroke();}
+    const i1=m===11?N-1:B.findIndex(v=>v.d.getMonth()===m+1);
+    x.fillStyle="#9aa7b8";x.fillText(MN[m],(X(i0)+X(i1))/2,gy1+4);
+  }
+  // Vitamin-D-Flaeche in zusammenhaengenden Abschnitten
+  let seg=[];
+  const male=()=>{
+    if(seg.length<2){seg=[];return;}
+    x.beginPath();
+    seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].a);k?x.lineTo(p,y):x.moveTo(p,y);});
+    for(let k=seg.length-1;k>=0;k--)x.lineTo(X(seg[k]),Y(B[seg[k]].b));
+    x.closePath();x.fillStyle="rgba(31,122,77,.20)";x.fill();
+    x.strokeStyle="#1f7a4d";x.lineWidth=1.6;x.lineJoin="round";
+    x.beginPath();seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].a);k?x.lineTo(p,y):x.moveTo(p,y);});x.stroke();
+    x.beginPath();seg.forEach((i,k)=>{const p=X(i),y=Y(B[i].b);k?x.lineTo(p,y):x.moveTo(p,y);});x.stroke();
+    seg=[];
+  };
+  for(let i=0;i<N;i++){if(B[i].a!=null)seg.push(i);else male();}
+  male();
+  // Heute
+  const heute=Math.round((new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())-new Date(jahr,0,1))/864e5);
+  if(heute>=0&&heute<N){
+    x.strokeStyle="rgba(23,32,46,.35)";x.lineWidth=1.2;x.setLineDash([3,3]);
+    x.beginPath();x.moveTo(X(heute),gy0);x.lineTo(X(heute),gy1);x.stroke();x.setLineDash([]);
+  }
+  // Wisch-Marker
+  const hv=_vitdHover==null?heute:_vitdHover;
+  if(hv>=0&&hv<N){
+    x.strokeStyle="#c2410c";x.lineWidth=1.6;
+    x.beginPath();x.moveTo(X(hv),gy0);x.lineTo(X(hv),gy1);x.stroke();
+    if(B[hv].a!=null)for(const h of [B[hv].a,B[hv].b]){
+      x.beginPath();x.arc(X(hv),Y(h),3.4,0,7);x.fillStyle="#c2410c";x.fill();
+      x.lineWidth=1.4;x.strokeStyle="#fff";x.stroke();
+    }
+  }
+  if(inf)inf.innerHTML=_vitdTxt(B[hv>=0&&hv<N?hv:0]);
+  sec.classList.remove("hidden");
+  if(!cv._w){
+    cv._w=1;
+    const idx=e=>{const r=cv.getBoundingClientRect();
+      return Math.max(0,Math.min(N-1,Math.round(((e.clientX-r.left)-PL)/((r.width-PL-PR))*(N-1))));};
+    const auf=e=>{_vitdHover=idx(e);drawVitD();};
+    cv.addEventListener("pointerdown",auf);
+    cv.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")auf(e);});
+    cv.addEventListener("pointerup",()=>{_vitdHover=null;drawVitD();});
+    cv.addEventListener("pointerleave",()=>{_vitdHover=null;drawVitD();});
+  }
+}catch(e){console.warn("vitd",e&&e.message);}}
+setTimeout(drawVitD,1100);
+/* ===== Besondere Himmelsereignisse (v2.44) - geprueft: BfS, DLR, Haus der Astronomie, Wikipedia ===== */
 const SKYEVENTS=[
  {y:2026,m:8,d:12,t:"Partielle Sonnenfinsternis",big:1,
   s:"Beginn gegen 19:15 Uhr \u00b7 Maximum gegen 20:10 Uhr \u00b7 Bedeckung 85\u201390\u202f% (im S\u00fcdwesten am tiefsten) \u00b7 tief im Westen bis zum Sonnenuntergang. Total nur auf Island, in Nordspanien und auf den Balearen.",
-  w:"Niemals ungesch\u00fctzt in die Sonne sehen \u2013 nur mit zertifizierter Sonnenfinsternisbrille (EN\u202f1836). Auch 90\u202f% Restsonne sch\u00e4digen die Netzhaut in Sekunden."},
+  w:"Niemals ungesch\u00fctzt in die Sonne sehen \u2013 nur mit zertifizierter Sonnenfinsternisbrille (EN\u202f1836). Auch 10\u202f% Restsonne sch\u00e4digen die Netzhaut in Sekunden."},
  {y:2026,m:8,d:28,t:"Partielle Mondfinsternis",big:1,
   s:"Kernschatten ab 4:34 Uhr \u00b7 Maximum 6:13 Uhr \u00b7 93\u202f% des Monddurchmessers. Bei uns nur die erste H\u00e4lfte: der Mond geht w\u00e4hrend der Finsternis tief im Westen unter.",w:""},
  {y:2027,m:2,d:20,t:"Halbschatten-Mondfinsternis",big:0,
@@ -2294,7 +2415,7 @@ const SKYEVENTS=[
  {y:2028,m:12,d:31,t:"Totale Mondfinsternis",big:1,
   s:"Silvesternacht \u00b7 die n\u00e4chste \u00fcber Deutschland sichtbare totale Mondfinsternis \u2013 Blutmond ohne Hilfsmittel beobachtbar.",w:""}
 ];
-function skyEventNext(list,nowMs,n){ // v2.44: kommende Ereignisse ab heute
+function skyEventNext(list,nowMs,n){
   const t0=new Date(nowMs);t0.setHours(0,0,0,0);const out=[];
   for(const e of list){
     const d=new Date(e.y,e.m-1,e.d),days=Math.round((d-t0)/864e5);
