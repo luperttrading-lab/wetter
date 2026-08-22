@@ -318,7 +318,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.46</span>
+      <span class="ver">v2.47</span>
     </div>
   </header>
 
@@ -2328,8 +2328,10 @@ function drawVitD(){try{
   const jahr=new Date().getFullYear(),key=jahr+"/"+LAT.toFixed(3)+"/"+LON.toFixed(3);
   if(_vitdKey!==key){_vitdBand=vitdJahr(jahr);_vitdKey=key;}
   const B=_vitdBand,N=B.length,mit=B.filter(x=>x.a!=null);
+  sec.classList.remove("hidden");   // v2.47: erst einblenden - eine versteckte Karte hat Breite 0
   const W=cv.clientWidth,H=cv.clientHeight;
-  if(!W||!H){setTimeout(drawVitD,300);return;}
+  if(!W||!H){if((window._vitdRt=(window._vitdRt||0)+1)<=10)setTimeout(drawVitD,300);return;}
+  window._vitdRt=0;
   const dpr=Math.min(window.devicePixelRatio||1,3);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
