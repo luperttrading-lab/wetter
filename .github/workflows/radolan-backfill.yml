@@ -1,0 +1,47 @@
+name: RADOLAN Archiv-Backfill
+
+# Laeuft NICHT automatisch - nur manuell ueber "Run workflow".
+# Fuellt radolan-archiv.json rueckwirkend aus dem DWD-Archiv.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tage:
+        description: "Tage rueckwaerts ab gestern (erst mit 3 testen, dann 365)"
+        required: true
+        default: "3"
+      force:
+        description: "Auch bereits vollstaendige Tage neu rechnen (1 = ja)"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330          # ein Jahr Stundenraster kann ueber eine Stunde dauern
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: numpy installieren
+        run: pip install --quiet numpy
+
+      - name: Backfill laufen lassen
+        env:
+          BACKFILL_TAGE:  ${{ github.event.inputs.tage }}
+          BACKFILL_FORCE: ${{ github.event.inputs.force }}
+        run: python radolan_backfill.py
+
+      - name: Archiv committen (nur bei Aenderung)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add radolan-archiv.json
+          git diff --staged --quiet || git commit -m "RADOLAN-Archiv per Backfill ergaenzt"
+          git push
