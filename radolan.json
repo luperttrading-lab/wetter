@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-23",
   "summe_mm": 0.0,
-  "stunden_ok": 10,
-  "stunden_erwartet": 10,
+  "stunden_ok": 11,
+  "stunden_erwartet": 11,
   "stunden": [
     {
       "stunde": "01:00",
@@ -42,6 +42,10 @@
     },
     {
       "stunde": "10:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "11:00",
       "mm": 0.0
     }
   ],
@@ -129,7 +133,7 @@
     "datum": "2026-08-22",
     "mm": 3.94
   },
-  "aktualisiert": "2026-08-23T08:43:06+00:00",
+  "aktualisiert": "2026-08-23T09:37:15+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
