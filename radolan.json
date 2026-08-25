@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-25",
-  "summe_mm": 0.0,
-  "stunden_ok": 14,
-  "stunden_erwartet": 15,
+  "summe_mm": 0.5,
+  "stunden_ok": 15,
+  "stunden_erwartet": 16,
   "stunden": [
     {
       "stunde": "01:00",
@@ -62,6 +62,10 @@
     },
     {
       "stunde": "15:00",
+      "mm": 0.5
+    },
+    {
+      "stunde": "16:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -73,7 +77,7 @@
           410,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       },
       {
@@ -81,7 +85,7 @@
           410,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       },
       {
@@ -89,7 +93,7 @@
           410,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       }
     ],
@@ -99,7 +103,7 @@
           409,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       },
       {
@@ -107,7 +111,7 @@
           409,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": true
       },
       {
@@ -115,7 +119,7 @@
           409,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.4,
         "eigenes": false
       }
     ],
@@ -125,7 +129,7 @@
           408,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       },
       {
@@ -133,7 +137,7 @@
           408,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.5,
         "eigenes": false
       },
       {
@@ -141,16 +145,16 @@
           408,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.4,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
-    "datum": "2026-08-22",
-    "mm": 3.94
+    "datum": "2026-08-25",
+    "mm": 0.5
   },
-  "aktualisiert": "2026-08-25T13:05:49+00:00",
+  "aktualisiert": "2026-08-25T14:23:44+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
