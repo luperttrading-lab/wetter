@@ -248,6 +248,9 @@
   #metSec .met-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;font-size:14px;line-height:1.55;color:#1c2a3a}
   .met-amp{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:12.5px;background:#eef1f6;color:#3a4453}
   .met-amp.ok{background:#eaf7ec;color:#14532d}.met-amp.mid{background:#fff4e0;color:#8a5b00}.met-amp.bad{background:#fdeaea;color:#8a1f1f}
+  .wolkpre{display:flex;gap:6px;justify-content:center;margin-top:11px}
+  .wpre{flex:1;max-width:110px;font-size:12px;font-weight:700;padding:6px 4px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#5c6b80;cursor:pointer}
+  .wpre.on{background:#1c66c4;border-color:#1c66c4;color:#fff}
   .wolkctl{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center;margin-top:10px;font-size:12.5px;color:#5b6879}
   .wolkctl input[type=range]{width:100%;accent-color:#1c66c4}
   .wolkctl b{font-variant-numeric:tabular-nums}
@@ -333,7 +336,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.65</span>
+      <span class="ver">v2.66</span>
     </div>
   </header>
 
@@ -367,7 +370,7 @@
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="bilanzSec" class="hidden"><div class="sect">Regenbilanz</div><div class="nowcard" id="bilanzCard"></div></div>
-    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div>
+    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -1620,7 +1623,7 @@ const _merX=lon=>(lon+180)/360;
 const _merY=lat=>{const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1-s))/(4*Math.PI);};
 const _smooth=(e0,e1,v)=>{let t=(v-e0)/(e1-e0);t=t<0?0:t>1?1:t;return t*t*(3-2*t);};
 function _wolkP(k,d){try{const v=parseFloat(localStorage.getItem(k));return isFinite(v)?v:d}catch(e){return d}}
-let WOLK_E0=_wolkP("wolkE0",22),WOLK_E1=_wolkP("wolkE1",72); // v2.18: Smoothstep-Eckpunkte per Regler
+let WOLK_E0=_wolkP("wolkE0",20),WOLK_E1=_wolkP("wolkE1",80);   // v2.66: Alltagsvorgabe // v2.18: Smoothstep-Eckpunkte per Regler
 const WOLK=(function(){ // 10x10 Kachelzentren (v2.31: aeusserer Kranz weg, -31% API-Last)
   if(LOC.isWettenberg)return {latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:10,ny:10,z:9}; // kalibriertes Original-Fenster
   const dLon=66/(111.32*Math.cos(LOC.lat*Math.PI/180)); // halbe Breite 66 km, halbe Hoehe 0,5 Grad
@@ -2154,7 +2157,16 @@ function renderWolken(j){
     WOLK_E0=e0;WOLK_E1=e1;if(av)av.textContent=e0;if(bv)bv.textContent=e1;
     try{localStorage.setItem("wolkE0",e0);localStorage.setItem("wolkE1",e1);}catch(e){}
     if(typeof _wolkGrid!=="undefined"&&_wolkGrid&&!raf)raf=requestAnimationFrame(()=>{raf=0;drawWolken();});};
-  a.addEventListener("input",()=>upd(a));b.addEventListener("input",()=>upd(b));})();
+  a.addEventListener("input",()=>upd(a));b.addEventListener("input",()=>upd(b));
+  // v2.66: Voreinstellungen - jeder Knopf hebt eine andere Wolkenart hervor
+  const knoepfe=document.querySelectorAll(".wpre");
+  const markiere=()=>knoepfe.forEach(k=>k.classList.toggle("on",
+    Math.round(WOLK_E0)===+k.dataset.a&&Math.round(WOLK_E1)===+k.dataset.b));
+  knoepfe.forEach(k=>k.addEventListener("click",()=>{
+    a.value=k.dataset.a;b.value=k.dataset.b;upd(a);markiere();}));
+  const _updAlt=upd;
+  markiere();
+  a.addEventListener("input",markiere);b.addEventListener("input",markiere);})();
 let _wolkTok=0;
 function drawWolken(){
   const cv=el("wolkenCv"),g=_wolkGrid;if(!cv||!g)return;
