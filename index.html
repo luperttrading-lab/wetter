@@ -228,7 +228,8 @@
   .bil-box .bk{font-size:9.5px;color:#7a8798;font-weight:700;letter-spacing:.02em}
   .bil-box .bv{font-size:17px;font-weight:800;color:#1c66c4;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
   .bil-box .bu{font-size:9.5px;color:#7a8798}
-  #bilCv{width:100%;height:76px;display:block}
+  #bilCv{width:100%;height:76px;display:block;touch-action:pan-y}
+  .bil-tag{text-align:center;font-size:12.5px;font-weight:700;color:#1c66c4;min-height:17px;margin-top:3px}
   .bil-note{font-size:11.5px;color:#5c6b80;text-align:center;margin-top:7px;line-height:1.4}
   .bil-dry{font-weight:700;color:#8a5b00}
   .vitd-jahr{margin-top:13px;text-align:center;font-weight:650;color:#40506a}
@@ -336,7 +337,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.66</span>
+      <span class="ver">v2.67</span>
     </div>
   </header>
 
@@ -2363,7 +2364,7 @@ function renderBilanz(){try{
       const box=(k,v,u)=>`<div class="bil-box"><div class="bk">${k}</div><div class="bv">${v}</div><div class="bu">${u}</div></div>`;
       let h=`<div class="bil-row">${box("HEUTE",f(B.heute),"mm")}${box("GESTERN",f(B.gestern),"mm")}`
            +`${box("7 TAGE",f(B.w7.mm),"mm")}${box("30 TAGE",f(B.w30.mm),"mm")}</div>`
-           +`<canvas id="bilCv"></canvas><div class="bil-note">`;
+           +`<canvas id="bilCv"></canvas><div class="bil-tag" id="bilTag"></div><div class="bil-note">`;
       h+= B.heuteNass ? "Heute hat es geregnet."
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
@@ -2374,7 +2375,7 @@ function renderBilanz(){try{
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
     }).catch(e=>console.warn("bilanz",e));
 }catch(e){console.warn("bilanz",e&&e.message);}}
-let _bilLetzte=null;
+let _bilLetzte=null,_bilHover=null;
 function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage ab morgen
   const f=window._fcTage;if(!f||!f.length)return[];
   const heute=ymd(new Date()),out=[];
@@ -2439,11 +2440,40 @@ function bilanzChart(serie,prog,rest){
   for(let i=0;i<n;i++){const v=serie[i];if(v!=null)balken(i,v,true);}
   if(rest>0)balken(n-1,rest,false,HP(serie[n-1]||0));   // heute: Erwartetes auf das Gemessene stapeln
   for(let i=0;i<prog.length;i++)balken(n+i,prog[i],false);
+  if(_bilHover!=null&&_bilHover>=0&&_bilHover<nt){   // v2.67: Zeiger
+    const px=_bilHover*bw+bw/2;
+    x.strokeStyle="#c2410c";x.lineWidth=1.4;
+    x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();
+  }
   x.font="9px -apple-system,system-ui,sans-serif";x.fillStyle="#9aa7b8";
   x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+3);
-  if(prog.length){x.textAlign="center";x.fillText("heute",n*bw,gy1+3);
+  if(prog.length){x.textAlign="center";x.fillText("heute",(n-1)*bw+bw/2,gy1+3);
     x.textAlign="right";x.fillStyle="#7ba9cf";x.fillText("Prognose",W,gy1+3);x.fillStyle="#9aa7b8";}
   else{x.textAlign="right";x.fillText("heute",W,gy1+3);}
+  // v2.67: Anzeige zum angetippten Tag
+  const tg=el("bilTag");
+  if(tg){
+    if(_bilHover==null||_bilHover<0||_bilHover>=nt)tg.textContent="";
+    else{
+      const versatz=_bilHover-(n-1);
+      const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+versatz);
+      const wd=["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()];
+      const datum=wd+" "+d.getDate()+"."+(d.getMonth()+1)+".";
+      const f1=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
+      if(versatz<0)tg.textContent=datum+" \u00b7 "+f1(serie[_bilHover]||0)+"\u202fmm gemessen";
+      else if(versatz===0)tg.textContent=datum+" \u00b7 heute "+f1(serie[n-1]||0)+"\u202fmm gefallen"
+        +(rest>0?" + "+f1(rest)+"\u202fmm erwartet":"");
+      else tg.textContent=datum+" \u00b7 "+f1(prog[versatz-1]||0)+"\u202fmm erwartet";
+    }
+  }
+  if(!cv._w){
+    cv._w=1;
+    const idx=e=>{const r=cv.getBoundingClientRect();
+      return Math.max(0,Math.min(nt-1,Math.floor((e.clientX-r.left)/(r.width/nt))));};
+    const auf=e=>{_bilHover=idx(e);if(_bilLetzte)bilanzZeichne(_bilLetzte);};
+    cv.addEventListener("pointerdown",auf);
+    cv.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")auf(e);});
+  }
   x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
 setTimeout(renderBilanz,1600);
@@ -2454,15 +2484,35 @@ setTimeout(renderBilanz,1600);
 const VITD_SCHWELLE=3;
 let _vitdBand=null,_vitdKey="",_vitdHover=null;
 
-function _vitdCross(tAus,tEin){          // tAus: unter der Schwelle, tEin: darueber
-  for(let i=0;i<14;i++){const m=(tAus+tEin)/2;if(physUvAt(m)>=VITD_SCHWELLE)tEin=m;else tAus=m;}
+function _vitdCross(tAus,tEin,K){         // tAus: unter der Schwelle, tEin: darueber
+  K=K||1;
+  for(let i=0;i<14;i++){const m=(tAus+tEin)/2;if(physUvAt(m)*K>=VITD_SCHWELLE)tEin=m;else tAus=m;}
   return tEin;
 }
-function vitdJahr(jahr){                 // je Tag: Beginn/Ende als Ortszeit-Stunde (dezimal)
+function vitdKalib(){
+  // v2.67: Die Jahreskurve nutzt die Allaart-Klimatologie, die UV-Karte den CAMS-
+  // Klarhimmelwert. Damit beide fuer heute dieselbe Zeit zeigen, wird die
+  // Klimatologie auf den heutigen CAMS-Scheitel skaliert.
+  try{
+    const h=(typeof lastUVH!=="undefined")?lastUVH:null;
+    if(!h||!h.uv_index_clear_sky||!h.time||!window.satellite)return 1;
+    const tag=ymd(new Date());let cams=0,klima=0;
+    for(let i=0;i<h.time.length;i++){
+      if(String(h.time[i]).slice(0,10)!==tag)continue;
+      const v=+h.uv_index_clear_sky[i]||0;if(v>cams)cams=v;
+      const a=physUvAt(new Date(h.time[i]).getTime());if(a>klima)klima=a;
+    }
+    if(cams<=0||klima<=0)return 1;
+    return Math.max(0.7,Math.min(1.3,cams/klima));
+  }catch(e){return 1;}
+}
+function vitdJahr(jahr,K){                 // je Tag: Beginn/Ende als Ortszeit-Stunde (dezimal)
   // v2.48: erst das Tagesmaximum suchen, dann von dort nach aussen einschachteln.
   // Das alte Verfahren tastete nur ein 15-Minuten-Raster ab und uebersah am
   // Saisonrand Fenster, die nur wenige Minuten ueber der Schwelle liegen.
+  K=K||1;
   const out=[],S=9e5;
+  const uv=t=>physUvAt(t)*K;
   const std=t=>{const d=new Date(t);return d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;};
   for(let i=0;i<366;i++){
     const d=new Date(jahr,0,1+i);
@@ -2470,10 +2520,10 @@ function vitdJahr(jahr){                 // je Tag: Beginn/Ende als Ortszeit-Stu
     const t0=new Date(jahr,d.getMonth(),d.getDate(),3,0,0).getTime();
     const t1=new Date(jahr,d.getMonth(),d.getDate(),22,0,0).getTime();
     let tmax=t0,vmax=-1;
-    for(let t=t0;t<=t1;t+=S){const v=physUvAt(t);if(v>vmax){vmax=v;tmax=t;}}
+    for(let t=t0;t<=t1;t+=S){const v=uv(t);if(v>vmax){vmax=v;tmax=t;}}
     const off=new Date(jahr,d.getMonth(),d.getDate(),12,0,0).getTimezoneOffset(); // v2.48: mittags ablesen
     if(vmax<VITD_SCHWELLE){out.push({d:d,a:null,b:null,off:off});continue;}
-    out.push({d:d,a:std(_vitdCross(t0,tmax)),b:std(_vitdCross(t1,tmax)),off:off});
+    out.push({d:d,a:std(_vitdCross(t0,tmax,K)),b:std(_vitdCross(t1,tmax,K)),off:off});
   }
   return out;
 }
@@ -2489,8 +2539,8 @@ function drawVitD(){try{
   const card=document.getElementById("vitdCard"),cv=document.getElementById("vitdCv"),inf=document.getElementById("vitdInfo");
   if(!card||!cv)return;
   if(!window.satellite||typeof physUvAt!=="function"){card.style.display="none";return;}
-  const jahr=new Date().getFullYear(),key=jahr+"/"+LAT.toFixed(3)+"/"+LON.toFixed(3);
-  if(_vitdKey!==key){_vitdBand=vitdJahr(jahr);_vitdKey=key;}
+  const K=vitdKalib(),jahr=new Date().getFullYear(),key=jahr+"/"+LAT.toFixed(3)+"/"+LON.toFixed(3)+"/"+K.toFixed(2);
+  if(_vitdKey!==key){_vitdBand=vitdJahr(jahr,K);_vitdKey=key;}
   const B=_vitdBand,N=B.length,mit=B.filter(x=>x.a!=null);
   const W=cv.clientWidth,H=cv.clientHeight;
   if(!W||!H){if((window._vitdRt=(window._vitdRt||0)+1)<=10)setTimeout(drawVitD,300);return;}
