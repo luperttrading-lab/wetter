@@ -337,7 +337,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.67</span>
+      <span class="ver">v2.68</span>
     </div>
   </header>
 
@@ -1418,8 +1418,18 @@ function renderAirGrid(air){
     }
     const [bcol,btxt]=bfsBadgeCol(uvN);
     // Vitamin-D-Fenster: clear-sky steigt über UV 3 (Start) und fällt wieder darunter (Ende)
-    const _vd=[],_ut=h.time,_uc=h.uv_index_clear_sky;
-    for(let i=0;i<_uc.length-1;i++){const a=_uc[i],b=_uc[i+1];if(a==null||b==null)continue;if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}
+    // v2.68: dieselbe Rechnung wie die Jahresgrafik. Die fruehere lineare Interpolation
+    // zwischen den CAMS-Stundenwerten lag rund 13 Minuten zu frueh, weil diese Werte
+    // nicht auf die volle Stunde zentriert sind.
+    let _vd=[];
+    {
+      const _tg=h.time&&h.time.length?new Date(h.time[0]):new Date();
+      const _w=(typeof vitdTag==="function")?vitdTag(_tg,(typeof vitdKalib==="function")?vitdKalib():1):null;
+      if(_w)_vd=[_w.a,_w.b];
+      else{const _ut=h.time,_uc=h.uv_index_clear_sky;   // Rueckfall ohne Astro-Bibliothek
+        for(let i=0;i<_uc.length-1;i++){const a=_uc[i],b=_uc[i+1];if(a==null||b==null)continue;
+          if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}}
+    }
     let vdLine="";
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
@@ -2506,6 +2516,16 @@ function vitdKalib(){
     return Math.max(0.7,Math.min(1.3,cams/klima));
   }catch(e){return 1;}
 }
+function vitdTag(d,K){   // v2.68: Vitamin-D-Fenster eines Tages, gemeinsame Quelle fuer Karte und Jahresgrafik
+  if(!window.satellite)return null;
+  K=K||1;const S=9e5;
+  const t0=new Date(d.getFullYear(),d.getMonth(),d.getDate(),3,0,0).getTime();
+  const t1=new Date(d.getFullYear(),d.getMonth(),d.getDate(),22,0,0).getTime();
+  let tmax=t0,vmax=-1;
+  for(let t=t0;t<=t1;t+=S){const v=physUvAt(t)*K;if(v>vmax){vmax=v;tmax=t;}}
+  if(vmax<VITD_SCHWELLE)return null;
+  return {a:_vitdCross(t0,tmax,K),b:_vitdCross(t1,tmax,K)};
+}
 function vitdJahr(jahr,K){                 // je Tag: Beginn/Ende als Ortszeit-Stunde (dezimal)
   // v2.48: erst das Tagesmaximum suchen, dann von dort nach aussen einschachteln.
   // Das alte Verfahren tastete nur ein 15-Minuten-Raster ab und uebersah am
@@ -2517,13 +2537,10 @@ function vitdJahr(jahr,K){                 // je Tag: Beginn/Ende als Ortszeit-S
   for(let i=0;i<366;i++){
     const d=new Date(jahr,0,1+i);
     if(d.getFullYear()!==jahr)break;
-    const t0=new Date(jahr,d.getMonth(),d.getDate(),3,0,0).getTime();
-    const t1=new Date(jahr,d.getMonth(),d.getDate(),22,0,0).getTime();
-    let tmax=t0,vmax=-1;
-    for(let t=t0;t<=t1;t+=S){const v=uv(t);if(v>vmax){vmax=v;tmax=t;}}
     const off=new Date(jahr,d.getMonth(),d.getDate(),12,0,0).getTimezoneOffset(); // v2.48: mittags ablesen
-    if(vmax<VITD_SCHWELLE){out.push({d:d,a:null,b:null,off:off});continue;}
-    out.push({d:d,a:std(_vitdCross(t0,tmax,K)),b:std(_vitdCross(t1,tmax,K)),off:off});
+    const w=vitdTag(d,K);
+    if(!w){out.push({d:d,a:null,b:null,off:off});continue;}
+    out.push({d:d,a:std(w.a),b:std(w.b),off:off});
   }
   return out;
 }
@@ -2531,7 +2548,7 @@ function _vitdTxt(x){
   if(!x)return"";
   const dd=x.d.getDate()+". "+["Jan","Feb","M\u00e4r","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"][x.d.getMonth()];
   if(x.a==null)return dd+" \u00b7 kein Vitamin D<small>die Sonne bleibt den ganzen Tag unter UV\u202f3</small>";
-  const f=h=>String(Math.floor(h)).padStart(2,"0")+":"+String(Math.round((h-Math.floor(h))*60)).padStart(2,"0");
+  const f=h=>String(Math.floor(h)).padStart(2,"0")+":"+String(Math.floor((h-Math.floor(h))*60+1e-6)).padStart(2,"0");   // v2.68: abschneiden wie die Uhrzeitanzeige der UV-Karte
   const dauer=x.b-x.a,st=Math.floor(dauer),mi=Math.round((dauer-st)*60);
   return dd+" \u00b7 "+f(x.a)+"\u2013"+f(x.b)+" Uhr<small>Dauer "+st+"\u202fh "+String(mi).padStart(2,"0")+"\u202fmin</small>";
 }
