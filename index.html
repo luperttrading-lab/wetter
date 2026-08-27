@@ -333,7 +333,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.62</span>
+      <span class="ver">v2.64</span>
     </div>
   </header>
 
@@ -2342,7 +2342,7 @@ function renderBilanz(){try{
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
       h+=`<br><span id="bilProg"></span></div>`;
-      h+=`<div class="uvnote" style="margin-top:5px">dunkelblau = bereits gefallen (Radar 1\u202fkm) \u00b7 hellblau = erwartet \u00b7 graue Fl\u00e4che heute = Tagessumme laut Prognose \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
+      h+=`<div class="uvnote" style="margin-top:5px">dunkelblau = bereits gefallen (Radar 1\u202fkm) \u00b7 hellblau = erwartet \u00b7 graue S\u00e4ule = heute \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
       el("bilanzCard").innerHTML=h;
       sec.classList.remove("hidden");
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
@@ -2355,15 +2355,33 @@ function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage a
   for(const e of f){if(e.t<=heute)continue;out.push(e.mm==null?0:e.mm);if(out.length>=tageVoraus)break;}
   return out;
 }
+function bilanzRest(){
+  // v2.64: noch ausstehender Regen heute. Die laufende Stunde zaehlt nur mit dem
+  // Anteil, der noch bevorsteht - ihr bereits gefallener Teil steckt schon im Radarwert.
+  const h=(typeof _rainHourly!=="undefined")?_rainHourly:null;
+  if(!h||!h.time||!h.precipitation)return 0;
+  const jetzt=new Date(),hStart=new Date(jetzt);hStart.setMinutes(0,0,0);
+  const anteil=1-(jetzt-hStart)/36e5;
+  const tag=ymd(jetzt);let mm=0;
+  for(let i=0;i<h.time.length;i++){
+    if(String(h.time[i]||"").slice(0,10)!==tag)continue;
+    const t=new Date(h.time[i]).getTime(),v=Math.max(0,+h.precipitation[i]||0);
+    if(t<hStart.getTime())continue;
+    mm+=(t===hStart.getTime())?v*anteil:v;
+  }
+  return Math.round(mm*10)/10;
+}
 function bilanzZeichne(B){
   const pr=bilanzProg(10);
-  const r=(typeof _restToday==="function")?_restToday():null;   // v2.61: was heute noch erwartet wird
-  const rest=(r&&r.mm>0)?r.mm:0;
+  const rest=bilanzRest();   // v2.64: laufende Stunde anteilig
   bilanzChart(B.serie,pr,rest);
   const pe=el("bilProg");
   const f1=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
   if(pe){let t="";
-    if(rest>0)t="Heute noch erwartet: <b>"+f1(rest)+"\u202fmm</b>"+(pr.length?" \u00b7 ":"");
+    const heuteMm=B.serie[B.serie.length-1]||0;
+    if(rest>0)t="Heute noch erwartet: <b>"+f1(rest)+"\u202fmm</b>";
+    else if(heuteMm>0)t="Heute kein weiterer Regen erwartet";
+    if(t&&pr.length)t+=" \u00b7 ";
     if(pr.length)t+="Prognose n\u00e4chste "+pr.length+" Tage: <b>"+f1(pr.reduce((a,b)=>a+b,0))+"\u202fmm</b>";
     pe.innerHTML=t;}
 }
@@ -2388,19 +2406,13 @@ function bilanzChart(serie,prog,rest){
                     :(v>=0.2?"#a8c8e8":"rgba(150,170,190,.22)");
     x.fillRect(i*bw+bw*0.18,y,bw*0.64,hh);
   };
-  if(rest>0){                               // v2.62: heutige Saeule grau hinterlegt = Tagessumme laut Prognose
-    const hg=HP(heuteGes);
-    x.fillStyle="rgba(120,135,158,.16)";
-    x.fillRect((n-1)*bw+bw*0.08,gy1-hg,bw*0.84,hg);
+  {                                         // v2.63: heutige Saeule ueber die volle Hoehe grau hinterlegt
+    x.fillStyle="rgba(120,135,158,.15)";
+    x.fillRect((n-1)*bw+bw*0.06,0,bw*0.88,gy1);
   }
   for(let i=0;i<n;i++){const v=serie[i];if(v!=null)balken(i,v,true);}
   if(rest>0)balken(n-1,rest,false,HP(serie[n-1]||0));   // heute: Erwartetes auf das Gemessene stapeln
   for(let i=0;i<prog.length;i++)balken(n+i,prog[i],false);
-  if(prog.length){
-    const px=n*bw;
-    x.strokeStyle="rgba(15,23,42,.22)";x.lineWidth=1;x.setLineDash([2,3]);
-    x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();x.setLineDash([]);
-  }
   x.font="9px -apple-system,system-ui,sans-serif";x.fillStyle="#9aa7b8";
   x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+3);
   if(prog.length){x.textAlign="center";x.fillText("heute",n*bw,gy1+3);
