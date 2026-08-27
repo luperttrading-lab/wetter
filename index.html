@@ -333,7 +333,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.61</span>
+      <span class="ver">v2.62</span>
     </div>
   </header>
 
@@ -2342,7 +2342,7 @@ function renderBilanz(){try{
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
       h+=`<br><span id="bilProg"></span></div>`;
-      h+=`<div class="uvnote" style="margin-top:5px">dunkle Balken = Radarmessung 1\u202fkm \u00b7 helle, umrandete Balken = Vorhersage (heute aufgesetzt) \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
+      h+=`<div class="uvnote" style="margin-top:5px">dunkelblau = bereits gefallen (Radar 1\u202fkm) \u00b7 hellblau = erwartet \u00b7 graue Fl\u00e4che heute = Tagessumme laut Prognose \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
       el("bilanzCard").innerHTML=h;
       sec.classList.remove("hidden");
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
@@ -2387,11 +2387,12 @@ function bilanzChart(serie,prog,rest){
     x.fillStyle=mess?(v>=0.2?"#2f86cf":"rgba(120,140,165,.30)")
                     :(v>=0.2?"#a8c8e8":"rgba(150,170,190,.22)");
     x.fillRect(i*bw+bw*0.18,y,bw*0.64,hh);
-    if(!mess&&v>=0.2){                      // v2.61: Prognose zusaetzlich umrandet = "noch nicht gemessen"
-      x.strokeStyle="#6f9fc9";x.lineWidth=1;x.setLineDash([2,2]);
-      x.strokeRect(i*bw+bw*0.18+.5,y+.5,bw*0.64-1,hh-1);x.setLineDash([]);
-    }
   };
+  if(rest>0){                               // v2.62: heutige Saeule grau hinterlegt = Tagessumme laut Prognose
+    const hg=HP(heuteGes);
+    x.fillStyle="rgba(120,135,158,.16)";
+    x.fillRect((n-1)*bw+bw*0.08,gy1-hg,bw*0.84,hg);
+  }
   for(let i=0;i<n;i++){const v=serie[i];if(v!=null)balken(i,v,true);}
   if(rest>0)balken(n-1,rest,false,HP(serie[n-1]||0));   // heute: Erwartetes auf das Gemessene stapeln
   for(let i=0;i<prog.length;i++)balken(n+i,prog[i],false);
@@ -2597,7 +2598,13 @@ function checkUpdate(){
       }).catch(e=>console.warn("Versionspruefung:",e));
   }catch(e){}
 }
-setTimeout(checkUpdate,4000);
+setTimeout(()=>{window._updLast=Date.now();checkUpdate();},4000);
+// v2.62: vom Home-Bildschirm bleibt die App im Speicher - beim Zurueckkehren erneut pruefen
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible")return;
+  if(Date.now()-(window._updLast||0)<6e5)return;      // hoechstens alle 10 Minuten
+  window._updLast=Date.now();setTimeout(checkUpdate,900);
+});
 /* ===== Besondere Himmelsereignisse (v2.44) - geprueft: BfS, DLR, Haus der Astronomie, Wikipedia ===== */
 const SKYEVENTS=[
  {y:2026,m:8,d:12,t:"Partielle Sonnenfinsternis",big:1,
