@@ -333,7 +333,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.59</span>
+      <span class="ver">v2.60</span>
     </div>
   </header>
 
@@ -1283,6 +1283,8 @@ function renderForecast(j){
     if(hi==null||lo==null||isNaN(hi)||isNaN(lo))continue;
     days.push({t:d.time[i],hi,lo,wc:(d.weather_code&&d.weather_code[i]!=null)?d.weather_code[i]:0,pp:d.precipitation_probability_max?d.precipitation_probability_max[i]:null,mm:d.precipitation_sum?d.precipitation_sum[i]:null});}
   if(!days.length){sec.classList.add("hidden");return;}
+  window._fcTage=days.map(x=>({t:x.t,mm:x.mm}));   // v2.60: Tagesprognose fuer die Regenbilanz
+  if(_bilLetzte)bilanzZeichne(_bilLetzte);
   const aMax=Math.max(...days.map(x=>x.hi)),aMin=Math.min(...days.map(x=>x.lo)),span=Math.max(1,aMax-aMin);
   const titleEl=sec.querySelector(".sect");if(titleEl)titleEl.textContent=days.length+"-Tage-Vorhersage";
   const _rt=_restToday();
@@ -2339,31 +2341,58 @@ function renderBilanz(){try{
       h+= B.heuteNass ? "Heute hat es geregnet."
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
-      h+=`<br>Balken = letzte 30 Tage \u00b7 Radarmessung 1\u202fkm \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
+      h+=`<br><span id="bilProg"></span></div>`;
+      h+=`<div class="uvnote" style="margin-top:5px">dunkle Balken = Radarmessung 1\u202fkm \u00b7 helle Balken = Vorhersage \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
       el("bilanzCard").innerHTML=h;
       sec.classList.remove("hidden");
-      setTimeout(()=>bilanzChart(B.serie),0);
+      _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
     }).catch(e=>console.warn("bilanz",e));
 }catch(e){console.warn("bilanz",e&&e.message);}}
-function bilanzChart(serie){
+let _bilLetzte=null;
+function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage ab morgen
+  const f=window._fcTage;if(!f||!f.length)return[];
+  const heute=ymd(new Date()),out=[];
+  for(const e of f){if(e.t<=heute)continue;out.push(e.mm==null?0:e.mm);if(out.length>=tageVoraus)break;}
+  return out;
+}
+function bilanzZeichne(B){
+  const pr=bilanzProg(10);
+  bilanzChart(B.serie,pr);
+  const pe=el("bilProg");
+  if(pe)pe.innerHTML=pr.length
+    ? "Prognose n\u00e4chste "+pr.length+" Tage: <b>"+pr.reduce((a,b)=>a+b,0).toLocaleString("de-DE",{maximumFractionDigits:1})+"\u202fmm</b>"
+    : "";
+}
+function bilanzChart(serie,prog){
   const cv=el("bilCv");if(!cv)return;
-  const W=cv.clientWidth,H=cv.clientHeight;if(!W||!H){setTimeout(()=>bilanzChart(serie),300);return;}
+  const W=cv.clientWidth,H=cv.clientHeight;if(!W||!H){setTimeout(()=>bilanzChart(serie,prog),300);return;}
   const dpr=Math.min(window.devicePixelRatio||1,3);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
-  const n=serie.length,mx=Math.max(1,...serie.filter(v=>v!=null));
-  const PB=13,gy1=H-PB,bw=W/n;
+  prog=prog||[];
+  const n=serie.length,nt=n+prog.length;
+  const mx=Math.max(1,...serie.filter(v=>v!=null).concat(prog));
+  const PB=13,gy1=H-PB,bw=W/nt;
   x.strokeStyle="rgba(15,23,42,.12)";x.lineWidth=1;
   x.beginPath();x.moveTo(0,gy1+.5);x.lineTo(W,gy1+.5);x.stroke();
-  for(let i=0;i<n;i++){
-    const v=serie[i];if(v==null)continue;
+  const balken=(i,v,mess)=>{
     const hh=v<=0?0:Math.max(1.5,(v/mx)*(gy1-4));
-    x.fillStyle=v>=0.2?"#2f86cf":"rgba(120,140,165,.30)";
+    x.fillStyle=mess?(v>=0.2?"#2f86cf":"rgba(120,140,165,.30)")
+                    :(v>=0.2?"#8ec4e8":"rgba(150,170,190,.22)");
     x.fillRect(i*bw+bw*0.18,gy1-hh,bw*0.64,hh);
+  };
+  for(let i=0;i<n;i++){const v=serie[i];if(v!=null)balken(i,v,true);}
+  for(let i=0;i<prog.length;i++)balken(n+i,prog[i],false);
+  if(prog.length){
+    const px=n*bw;
+    x.strokeStyle="rgba(15,23,42,.22)";x.lineWidth=1;x.setLineDash([2,3]);
+    x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();x.setLineDash([]);
   }
   x.font="9px -apple-system,system-ui,sans-serif";x.fillStyle="#9aa7b8";
   x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+3);
-  x.textAlign="right";x.fillText("heute",W,gy1+3);
+  if(prog.length){x.textAlign="center";x.fillText("heute",n*bw,gy1+3);
+    x.textAlign="right";x.fillStyle="#7ba9cf";x.fillText("Prognose",W,gy1+3);x.fillStyle="#9aa7b8";}
+  else{x.textAlign="right";x.fillText("heute",W,gy1+3);}
   x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
 setTimeout(renderBilanz,1600);
