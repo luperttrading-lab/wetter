@@ -337,7 +337,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.68</span>
+      <span class="ver">v2.70</span>
     </div>
   </header>
 
@@ -1424,7 +1424,7 @@ function renderAirGrid(air){
     let _vd=[];
     {
       const _tg=h.time&&h.time.length?new Date(h.time[0]):new Date();
-      const _w=(typeof vitdTag==="function")?vitdTag(_tg,(typeof vitdKalib==="function")?vitdKalib():1):null;
+      const _w=(typeof vitdTag==="function")?vitdTag(_tg,(typeof vitdKalib==="function")?vitdKalib(h):1):null;
       if(_w)_vd=[_w.a,_w.b];
       else{const _ut=h.time,_uc=h.uv_index_clear_sky;   // Rueckfall ohne Astro-Bibliothek
         for(let i=0;i<_uc.length-1;i++){const a=_uc[i],b=_uc[i+1];if(a==null||b==null)continue;
@@ -2385,7 +2385,7 @@ function renderBilanz(){try{
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
     }).catch(e=>console.warn("bilanz",e));
 }catch(e){console.warn("bilanz",e&&e.message);}}
-let _bilLetzte=null,_bilHover=null;
+let _bilLetzte=null,_bilHover=0;   // v2.70: Zeiger startet ganz links
 function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage ab morgen
   const f=window._fcTage;if(!f||!f.length)return[];
   const heute=ymd(new Date()),out=[];
@@ -2433,6 +2433,7 @@ function bilanzChart(serie,prog,rest){
   const heuteGes=(serie[n-1]||0)+rest;
   const mx=Math.max(1,...serie.filter(v=>v!=null).concat(prog),heuteGes);
   const PB=13,gy1=H-PB,bw=W/nt;
+  cv._nt=nt;   // v2.70: aktuelle Balkenzahl fuer die Zeigersteuerung
   x.strokeStyle="rgba(15,23,42,.12)";x.lineWidth=1;
   x.beginPath();x.moveTo(0,gy1+.5);x.lineTo(W,gy1+.5);x.stroke();
   const HP=v=>v<=0?0:Math.max(1.5,(v/mx)*(gy1-4));
@@ -2477,12 +2478,24 @@ function bilanzChart(serie,prog,rest){
     }
   }
   if(!cv._w){
+    // v2.70: Zeiger folgt dem Finger ueber die ganze Flaeche. Der Zeigerfang haelt
+    // die Bewegung fest, auch wenn der Finger kurz aus dem Feld geraet; das Neuzeichnen
+    // laeuft ueber requestAnimationFrame, damit nichts stockt.
     cv._w=1;
-    const idx=e=>{const r=cv.getBoundingClientRect();
-      return Math.max(0,Math.min(nt-1,Math.floor((e.clientX-r.left)/(r.width/nt))));};
-    const auf=e=>{_bilHover=idx(e);if(_bilLetzte)bilanzZeichne(_bilLetzte);};
-    cv.addEventListener("pointerdown",auf);
-    cv.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")auf(e);});
+    let raf=0,letzter=-1;
+    const anzahl=()=>cv._nt||40;
+    const idx=e=>{const r=cv.getBoundingClientRect(),n=anzahl();
+      return Math.max(0,Math.min(n-1,Math.floor((e.clientX-r.left)/(r.width/n))));};
+    const zeichne=()=>{raf=0;if(_bilLetzte)bilanzZeichne(_bilLetzte);};
+    const auf=e=>{const i=idx(e);if(i===letzter)return;letzter=i;_bilHover=i;if(!raf)raf=requestAnimationFrame(zeichne);};
+    cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}letzter=-1;auf(e);});
+    cv.addEventListener("pointermove",e=>{
+      if(!(e.buttons||e.pointerType==="touch"))return;
+      if(e.cancelable)e.preventDefault();
+      auf(e);
+    },{passive:false});
+    cv.addEventListener("pointerup",e=>{try{cv.releasePointerCapture(e.pointerId);}catch(_){}});
+    cv.addEventListener("pointercancel",e=>{try{cv.releasePointerCapture(e.pointerId);}catch(_){}});
   }
   x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
@@ -2499,16 +2512,16 @@ function _vitdCross(tAus,tEin,K){         // tAus: unter der Schwelle, tEin: dar
   for(let i=0;i<14;i++){const m=(tAus+tEin)/2;if(physUvAt(m)*K>=VITD_SCHWELLE)tEin=m;else tAus=m;}
   return tEin;
 }
-function vitdKalib(){
-  // v2.67: Die Jahreskurve nutzt die Allaart-Klimatologie, die UV-Karte den CAMS-
-  // Klarhimmelwert. Damit beide fuer heute dieselbe Zeit zeigen, wird die
-  // Klimatologie auf den heutigen CAMS-Scheitel skaliert.
+function vitdKalib(h){
+  // v2.69: Die Reihe wird uebergeben. Vorher las die Funktion die globale Variable
+  // lastUVH - die aber erst AM ENDE des Kartenaufbaus gesetzt wird. Dadurch rechnete
+  // die UV-Karte mit Faktor 1, die Jahresgrafik mit dem echten Faktor: neun Minuten
+  // Unterschied auf jeder Seite.
   try{
-    const h=(typeof lastUVH!=="undefined")?lastUVH:null;
-    if(!h||!h.uv_index_clear_sky||!h.time||!window.satellite)return 1;
-    const tag=ymd(new Date());let cams=0,klima=0;
+    h=h||((typeof lastUVH!=="undefined")?lastUVH:null);
+    if(!h||!h.uv_index_clear_sky||!h.time||!h.time.length||!window.satellite)return 1;
+    let cams=0,klima=0;
     for(let i=0;i<h.time.length;i++){
-      if(String(h.time[i]).slice(0,10)!==tag)continue;
       const v=+h.uv_index_clear_sky[i]||0;if(v>cams)cams=v;
       const a=physUvAt(new Date(h.time[i]).getTime());if(a>klima)klima=a;
     }
