@@ -333,7 +333,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.64</span>
+      <span class="ver">v2.65</span>
     </div>
   </header>
 
@@ -367,7 +367,7 @@
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="bilanzSec" class="hidden"><div class="sect">Regenbilanz</div><div class="nowcard" id="bilanzCard"></div></div>
-    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich</div></div></div>
+    <div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
     <div class="sect">Details</div>
     <div class="grid" id="grid"></div>
@@ -1726,7 +1726,7 @@ function wolkenURL(){
   const la=[],lo=[];
   for(let r=0;r<WOLK.ny;r++){const y=WOLK.latN-(WOLK.latN-WOLK.latS)*(r+0.5)/WOLK.ny;
     for(let c=0;c<WOLK.nx;c++){la.push(y.toFixed(2));lo.push((WOLK.lonW+(WOLK.lonE-WOLK.lonW)*(c+0.5)/WOLK.nx).toFixed(2));}}
-  return `https://api.open-meteo.com/v1/forecast?latitude=${la.join(",")}&longitude=${lo.join(",")}&current=cloud_cover&timezone=Europe%2FBerlin`;
+  return `https://api.open-meteo.com/v1/forecast?latitude=${la.join(",")}&longitude=${lo.join(",")}&current=cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&timezone=Europe%2FBerlin`;
 }
 let _wolkGrid=null;
 /* ===================== PLANETEN AM HIMMEL (Stufe 1: Positionen jetzt) =====================
@@ -2126,7 +2126,21 @@ function renderWolken(j){
   const sec=el("wolkenSec");if(!sec)return;
   const arr=Array.isArray(j)?j:(j?[j]:[]);
   if(arr.length<WOLK.nx*WOLK.ny){sec.classList.add("hidden");return;}
-  const g=[];for(let r=0;r<WOLK.ny;r++){g[r]=[];for(let c=0;c<WOLK.nx;c++){const o=arr[r*WOLK.nx+c];g[r][c]=(o&&o.current&&o.current.cloud_cover!=null)?+o.current.cloud_cover:0;}}
+  // v2.65: wirksame Bewoelkung statt Gesamtbedeckung. Ein Cirrus-Schleier deckt
+  // den Himmel zu 100 %, laesst aber das meiste Licht durch - deshalb zaehlen
+  // hohe Wolken nur zu einem Drittel, mittlere zu zwei Dritteln.
+  const W_LOW=1, W_MID=0.65, W_HIGH=0.32;
+  const g=[];
+  for(let r=0;r<WOLK.ny;r++){g[r]=[];for(let c=0;c<WOLK.nx;c++){
+    const o=arr[r*WOLK.nx+c],cu=o&&o.current;
+    if(!cu){g[r][c]=0;continue;}
+    if(cu.cloud_cover_low==null&&cu.cloud_cover_mid==null&&cu.cloud_cover_high==null){
+      g[r][c]=cu.cloud_cover!=null?+cu.cloud_cover:0;   // Rueckfall auf die Gesamtbedeckung
+    }else{
+      const L=+cu.cloud_cover_low||0,M=+cu.cloud_cover_mid||0,H=+cu.cloud_cover_high||0;
+      g[r][c]=100*(1-(1-W_LOW*L/100)*(1-W_MID*M/100)*(1-W_HIGH*H/100));
+    }
+  }}
   _wolkGrid=g;sec.classList.remove("hidden");
   const tm=(arr[0]&&arr[0].current&&arr[0].current.time)||"";const hh=tm.length>=16?tm.slice(11,16):"";
   const tt=el("wolkenTitle");if(tt)tt.textContent="Wolken im Umkreis"+(hh?" · Stand "+hh+" Uhr":"");
@@ -2282,7 +2296,7 @@ function loadExtras(){
   const ll=`latitude=${LAT}&longitude=${LON}`;
   fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=Europe%2FBerlin`).then(d=>{_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
-  loadCached("wolkCache3"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
+  loadCached("wolkCache4"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=1&timezone=Europe%2FBerlin`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
   loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=Europe%2FBerlin`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
   loadIss();
