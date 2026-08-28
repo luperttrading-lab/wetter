@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.83</span>
+      <span class="ver">v2.84</span>
     </div>
   </header>
 
@@ -1602,7 +1602,14 @@ function drawUV(h){
   const cs=h.uv_index_clear_sky,real=h._real||[],tms=h.time.map(t=>new Date(t).getTime());
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
   if(i0<0||i1<=i0)return;
-  const dpr=Math.min(window.devicePixelRatio||1,3),yMax=9;
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  // v2.84: Beide Grafiken sollen dieselbe Skala haben. Die untere gehoert dem
+  // BfS-Bild und ist nicht aenderbar, also folgt die obere ihr. Sicherung:
+  // nie kleiner als der Tagesscheitel, sonst wuerde die Glocke abgeschnitten.
+  const _bfsAx=(typeof window._bfsAxCur==="number"&&window._bfsAxCur>=8)?window._bfsAxCur:9;
+  let _pk9=0;for(let i=0;i<cs.length;i++){const v=+cs[i]||0;if(v>_pk9)_pk9=v;}
+  const yMax=Math.max(_bfsAx,Math.ceil(_pk9),1);
+  window._uvAxOben=yMax; window._uvPk=_pk9; window._uvLastH=h;
   // Plot pixelgenau am tatsächlich gerenderten BfS-Bild ausrichten: 6/21 Uhr UND die Plot-Höhe
   // (UV 0..9) werden aus der echten Position & Größe des BfS-Bildes übernommen -> beide Grafiken
   // deckungsgleich (Breite, Höhe, Glockenform). Fallback ohne Bild: Container-Breite, Verhältnis 1.29.
@@ -1620,7 +1627,7 @@ function drawUV(h){
   if(!W)return;
   const plotW=gx1-gx0;
   const scaleW=17,scaleX=Math.max(2,gx0-scaleW);// Farbskala direkt an der Box-Kante; Striche gehen nach innen
-  const axMax=9.5,_seg=plotH/9,plotHb=Math.round(_seg*axMax);// Achse/Box oben bis 9,5 (Luft ueber der 9, wie BfS); plotH bleibt UV0..UV9 (Kalibrierung)
+  const axMax=yMax+0.5,_seg=plotH/yMax,plotHb=Math.round(_seg*axMax);// Box eine halbe Stufe ueber der obersten Ziffer, wie beim BfS
   const hdH=20;const gy0=hdH+2,gy1=gy0+plotHb,Hpx=gy1+18;// Kopf einzeilig, dicht ueber der Achse
   cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
@@ -1649,7 +1656,7 @@ function drawUV(h){
   // === Farbskala: exakt UV 0..9 (deckt die Box-Höhe, kein Überhang) ===
   // diskrete UV-Farbblöcke wie BfS (Block k deckt UV k-0,5 .. k+0,5); Palette aus dem BfS-Bild
   // BFSCOL ist global definiert (identisch fuer Skala/Saeulen/Punkt/Badge)
-  for(let k=0;k<=9;k++){const yt=Y(Math.min(k+0.5,axMax)),yb=Y(Math.max(k-0.5,0));x.fillStyle=BFSCOL[k];x.fillRect(scaleX,yt,scaleW,yb-yt);}
+  for(let k=0;k<=yMax;k++){const yt=Y(Math.min(k+0.5,axMax)),yb=Y(Math.max(k-0.5,0));x.fillStyle=BFSCOL[Math.min(k,BFSCOL.length-1)];x.fillRect(scaleX,yt,scaleW,yb-yt);}
   // kleine Markierungsstriche nach innen an allen vier Achsen (wie BfS): links+rechts je halbe UV-Stufe, oben+unten je volle Stunde
   x.strokeStyle="rgba(0,0,0,.55)";x.lineWidth=1;
   for(let tk=0;tk<=axMax+0.01;tk+=0.5){const yy=Math.round(Y(Math.min(tk,axMax)))+.5;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx0+3,yy);x.moveTo(gx1,yy);x.lineTo(gx1-3,yy);x.stroke();}
@@ -1786,6 +1793,15 @@ function drawBfsOverlay(){try{
     x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.4;drawP();
     x.strokeStyle="#c62828";x.lineWidth=1.7;drawP();
   }
+  // v2.84: Die obere Grafik hat vor dem Overlay gezeichnet und kannte die
+  // BfS-Achse noch nicht. Weicht sie ab, genau einmal nachziehen — der Zaehler
+  // verhindert, dass sich die beiden gegenseitig endlos neu anstossen.
+  if(window._uvAxOben!=null&&window._uvAxOben!==ax&&ax>=Math.ceil(window._uvPk||0)){
+    if((window._axSyncN=(window._axSyncN||0)+1)<=2){
+      window._bfsAxCur=ax;
+      try{if(window._uvLastH)drawUV(window._uvLastH);}catch(e){console.warn("axSync",e&&e.message);}
+    }
+  } else { window._axSyncN=0; }
   const _ab=document.getElementById("bfsAx");
   if(_ab){_ab.textContent="Achse 0\u2013"+ax;if(!_ab._w){_ab._w=1;_ab.onclick=()=>{const im=el("bfsUv"),m=im&&String(im.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);if(!m)return;const c=window._bfsAxCur||9;_axSet(decodeURIComponent(m[1]),c===8?9:(c===9?10:(c===10?12:8)));syncUV();};}}
 }catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
