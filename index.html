@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.81</span>
+      <span class="ver">v2.82</span>
     </div>
   </header>
 
@@ -1107,7 +1107,11 @@ function fillPollen(){const e=document.getElementById("pollenSub");if(e&&_pollen
 function cmfUV(cc){if(cc==null)return 1;return Math.max(0.25,1-0.70*Math.pow(cc/100,2));}
 function ccDiagText(hourMs,ccD,ly,cmfFn){ // v2.40: Diagnose - welcher Bewoelkungswert treibt die Saeule (DWD-Messung vs. Open-Meteo-Modell)?
   if(ccD==null)return"";
-  const hh=String(ortsStunde(hourMs)).padStart(2,"0");
+  // v2.82: Beim Zeitzonen-Umbau war "const d=new Date(hourMs)" entfallen, der
+  // Schluessel k weiter unten braucht es aber weiter -> ReferenceError, der
+  // drawUV mittendrin abbrach (Glocke, Vit-D-Linie und Treppe fehlten).
+  const d=ortsDatum(hourMs);
+  const hh=String(d.getHours()).padStart(2,"0");
   let ccM=null;
   if(ly&&ly.time&&ly.cloud_cover){
     const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"T"+hh;
@@ -1680,17 +1684,18 @@ function drawUV(h){
     const _d=document.getElementById("atmDamp");
     if(_d)_d.textContent=(_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"";
   }
-  { // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
+  try{ // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
+       // v2.82: gekapselt - eine kaputte Nebenzeile darf die Kurve nicht kosten
     const _cd=document.getElementById("ccDiag");
     if(_cd){let s="";
       if(uvDayOffset===0&&Array.isArray(h._cc))
         for(let i=0;i<tms.length;i++)
           if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV);break;}
       _cd.textContent=s;}
-  }
+  }catch(e){console.warn("ccDiag",e&&e.message);}
   const _sb=document.getElementById("uvSimBtn");
   if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
-  if(window._uvSimOn&&h._cc){ // v2.20: Minuten-Simulation, Seed=Datum^Ort (deterministisch pro Tag)
+  try{ if(window._uvSimOn&&h._cc){ // v2.20: Minuten-Simulation, Seed=Datum^Ort (deterministisch pro Tag)
     const _cc=h._cc,_n=tms.length;
     const ccAt=t=>{for(let i=0;i<_n-1;i++){if(t>=tms[i]&&t<tms[i+1]){const A=_cc[i],B=_cc[i+1];if(A==null&&B==null)return null;const va=A==null?B:A,vb=B==null?A:B;return (va+(vb-va)*(t-tms[i])/(tms[i+1]-tms[i]))/100;}}return null;};
     const _ly=window._ccLayers;let wMap=null; // v2.24: Konvektivitaet je Stunde = tief/(tief+mittel+hoch)
@@ -1704,7 +1709,7 @@ function drawUV(h){
       x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(v)))];x.fillRect(XX(R.ts[i])-bwS/2,yv,bwS,gy1-yv);}
     x.fillStyle="#111";
     for(let i=0;i<R.ts.length;i++){const v=R.vs[i];if(v==null||v<=0.03)continue;x.beginPath();x.arc(XX(R.ts[i]),Y(Math.min(v,axMax)),0.9,0,6.3);x.fill();}
-  }
+  } }catch(e){console.warn("uvSim",e&&e.message);}
   x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
   let _gN=0,_gMax=0,_gBad=0;   // v2.81: Selbstkontrolle der Glocke
   for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);
