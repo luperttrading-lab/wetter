@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.84</span>
+      <span class="ver">v2.85</span>
     </div>
   </header>
 
@@ -1090,7 +1090,13 @@ function makeSunBell(cs,tms,t6,t21,fallback){
   let sx=0,sy=0,sxx=0,sxy=0,n=0;
   for(let i=i0;i<=i1;i++){const mu=_sunMu(tms[i]),cv=cs[i]||0;if(mu!=null&&mu>0.12&&cv>0.4){const lx=Math.log(mu),ly=Math.log(cv);sx+=lx;sy+=ly;sxx+=lx*lx;sxy+=lx*ly;n++;}}
   // k an Open-Meteos Klarsky-Werte gefittet (~1,51) - MUSS zur selben Quelle passen wie die Saeulen/Treppe (Open-Meteo uv_index), sonst ragt die reale UV an den Flanken ueber die Kurve
-  let k=1.2;if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9)k=Math.max(0.6,Math.min(1.8,(n*sxy-sx*sy)/den));}
+  // v2.85: Der freie Regressionswert wird mitgefuehrt. Bisher war unsichtbar,
+  // ob die Klemme ueberhaupt bindet — sie tut es regelmaessig, und dann ist die
+  // gezeichnete Glocke flacher als die Daten. Ohne diese Zahl laesst sich die
+  // k-Frage nicht ueber mehrere Tage beurteilen.
+  let kFrei=null,k=1.2;
+  if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9){kFrei=(n*sxy-sx*sy)/den;k=Math.max(0.6,Math.min(1.8,kFrei));}}
+  window._uvFit={kFrei:kFrei,k:k,n:n,geklemmt:kFrei!=null&&Math.abs(kFrei-k)>1e-6};
   let muMax=0;for(let m=t6;m<=t21;m+=180000){const mu=_sunMu(m);if(mu!=null&&mu>muMax)muMax=mu;}
   let csMax=0;for(let i=i0;i<=i1;i++)if((cs[i]||0)>csMax)csMax=cs[i];
   if(muMax<=0||csMax<=0)return fallback;
@@ -1689,7 +1695,11 @@ function drawUV(h){
     let _pp=0,_pk=0;
     for(let px=pxA;px<=pxB;px+=4){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=physUvAt(t);if(u>_pp)_pp=u;const v=sunBell(t);if(v>_pk)_pk=v;}
     const _d=document.getElementById("atmDamp");
-    if(_d)_d.textContent=(_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"";
+    let _kTxt="";
+    const _f=window._uvFit;
+    if(_f&&_f.geklemmt&&_f.kFrei!=null)
+      _kTxt=" \u00b7 Kurvenexponent k auf "+_f.k.toFixed(2).replace(".",",")+" begrenzt (Regression: "+_f.kFrei.toFixed(2).replace(".",",")+", Physik: 2,42)";
+    if(_d)_d.textContent=((_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"")+_kTxt;
   }
   try{ // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
        // v2.82: gekapselt - eine kaputte Nebenzeile darf die Kurve nicht kosten
