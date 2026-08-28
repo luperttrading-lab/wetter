@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.80</span>
+      <span class="ver">v2.81</span>
     </div>
   </header>
 
@@ -552,6 +552,13 @@ let TZ=LOC.tz||GERAETE_TZ;
 
 /* Zerlegt einen echten Zeitstempel in die Kalenderfelder der Zone z. */
 function tzTeile(ms,z){
+  // Intl.formatToParts wirft bei ungueltigem Datum RangeError. Der alte Code
+  // (new Date(x).setHours(0,0,0,0)) lieferte hier still NaN und lief weiter —
+  // ohne diesen Riegel wuerde ein einzelner kaputter Zeitstempel die ganze
+  // Zeichenfunktion abbrechen.
+  if(ms==null||!isFinite(ms)){const d=new Date();
+    return{year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),
+           hour:d.getHours(),minute:d.getMinutes(),second:d.getSeconds()};}
   const f=new Intl.DateTimeFormat("en-US",{timeZone:z||TZ,hour12:false,
     year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"});
   const o={};for(const p of f.formatToParts(new Date(ms)))if(p.type!=="literal")o[p.type]=+p.value;
@@ -1613,7 +1620,9 @@ function drawUV(h){
   const hdH=20;const gy0=hdH+2,gy1=gy0+plotHb,Hpx=gy1+18;// Kopf einzeilig, dicht ueber der Achse
   cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
-  const dayMs=ortsMitternacht(tms[i0]);const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;   // v2.71: Ortszeit
+  // i0 bleibt -1, wenn kein Klarhimmelwert ueber 0,05 liegt; tms[-1] waere undefined
+  const _basis=(i0>=0&&isFinite(tms[i0]))?tms[i0]:(isFinite(tms[0])?tms[0]:Date.now());
+  const dayMs=ortsMitternacht(_basis);const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;   // v2.71: Ortszeit
   const X=t=>gx0+(gx1-gx0)*((t-t6)/(t21-t6)),Y=u=>gy1-(gy1-gy0)*(Math.min(u,axMax)/axMax);
   const smooth=(arr,t)=>{for(let i=i0;i<i1;i++){if(t>=tms[i]&&t<=tms[i+1]){const p1=arr[i];if(p1==null)return null;const p2=(arr[i+1]==null)?p1:arr[i+1];const p0=(i>i0&&arr[i-1]!=null)?arr[i-1]:p1,p3=(i+2<=i1&&arr[i+2]!=null)?arr[i+2]:p2;let u=(t-tms[i])/(tms[i+1]-tms[i]),u2=u*u,u3=u2*u;return 0.5*(2*p1+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u2+(-p0+3*p1-3*p2+p3)*u3);}}return null;};
   const csAt=t=>{const v=smooth(cs,t);return v==null?0:Math.max(0,v);};
@@ -1697,7 +1706,20 @@ function drawUV(h){
     for(let i=0;i<R.ts.length;i++){const v=R.vs[i];if(v==null||v<=0.03)continue;x.beginPath();x.arc(XX(R.ts[i]),Y(Math.min(v,axMax)),0.9,0,6.3);x.fill();}
   }
   x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
-  for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);if(_gf){x.moveTo(px,Y(uv));_gf=false;}else x.lineTo(px,Y(uv));}x.stroke();
+  let _gN=0,_gMax=0,_gBad=0;   // v2.81: Selbstkontrolle der Glocke
+  for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);
+    const yy=Y(uv);
+    if(!isFinite(yy)||!isFinite(uv)){_gBad++;continue;}
+    if(uv>_gMax)_gMax=uv; _gN++;
+    if(_gf){x.moveTo(px,yy);_gf=false;}else x.lineTo(px,yy);}
+  x.stroke();
+  window._uvGlocke={punkte:_gN,ungueltig:_gBad,scheitel:Math.round(_gMax*100)/100,
+    satellite:!!window.satellite,dayMs:dayMs,t6:t6,t21:t21,i0:i0,i1:i1,
+    tag:(function(){try{return new Date(dayMs).toISOString().slice(0,16);}catch(e){return String(dayMs);}})()};
+  if(_gN<10||_gMax<=0){
+    const _d=document.getElementById("atmDamp");
+    if(_d)_d.textContent+=" \u00b7 Glocke fehlt ("+_gN+" Punkte, Scheitel "+_gMax.toFixed(2)+", "+_gBad+" ungueltig)";
+  }
   // stuendliche REALE Messwerte als Vorwaerts-Treppe: Messpunkt = linke Ecke, dann 1h nach rechts, dann Sprung zum naechsten.
   // Nur so weit wie gemessen (real[i]!=null, d.h. bis jetzt) - danach ist die Bewoelkung der Zukunft unbekannt.
   const _xNow=X(now);
@@ -1737,7 +1759,7 @@ function drawBfsOverlay(){try{
   cv.width=W*dpr;cv.height=Hh*dpr;cv.style.width=W+"px";cv.style.height=Hh+"px";
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
   const cs=h.uv_index_clear_sky,tms=h.time.map(t=>new Date(t).getTime());
-  const dayMs=ortsMitternacht(tms[0]);                                                 // v2.71: Ortszeit
+  const dayMs=ortsMitternacht(isFinite(tms[0])?tms[0]:Date.now());                     // v2.71: Ortszeit
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
   let ax=(function(){const sv=_axGet(_axSlug);if(sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}return pk>=8.35?10:9;})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
