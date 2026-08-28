@@ -337,7 +337,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.71</span>
+      <span class="ver">v2.72</span>
     </div>
   </header>
 
@@ -527,6 +527,20 @@ function ortsDatum(ms,z){
   return new Date(t.year,t.month-1,t.day,t.hour,t.minute,t.second);
 }
 function ortsStunde(ms,z){const t=tzTeile(ms,z);return t.hour;}
+/* Umkehrung von tzTeile: welcher echte Zeitpunkt ist in der Zone z der
+   angegebene Kalendermoment? Zwei Durchlaeufe, weil der Versatz selbst vom
+   Ergebnis abhaengt (Sommerzeitgrenze). */
+function ortsMs(jahr,monat,tag,std,min,z){
+  const soll=Date.UTC(jahr,monat,tag,std||0,min||0,0);
+  let t=soll;
+  for(let i=0;i<2;i++)t=soll-tzVersatzMin(t,z||TZ)*60000;
+  return t;
+}
+/* Mitternacht der ORTSZEIT des Tages, in dem ms liegt. */
+function ortsMitternacht(ms,z){
+  const t=tzTeile(ms,z);
+  return ortsMs(t.year,t.month-1,t.day,0,0,z);
+}
 function ortsStundeDez(ms,z){const t=tzTeile(ms,z);return t.hour+t.minute/60+t.second/3600;}
 /* Versatz der Zone gegenueber UTC in Minuten, fuer diesen Zeitpunkt (DST-genau) */
 function tzVersatzMin(ms,z){
@@ -1167,6 +1181,19 @@ function renderRainHours(d){
 }
 
 /* --- Kachel "Niederschlag heute": bisher gefallene Tagessumme aus Open-Meteo (Bright-Sky-Stationsmessung unterschätzt lokale Schauer) --- */
+let _omHeute=null;   // zuletzt aus Open-Meteo gerechnete Tagessumme
+/* Wie alt darf radolan.json sein, damit es den Open-Meteo-Wert ueberschreiben
+   darf? Die Pipeline laeuft :05 und :35, RW hat rund 30 min Latenz. Ein
+   gesunder Stand ist damit selten aelter als eine Stunde; 100 Minuten lassen
+   einen ausgefallenen Lauf zu, fangen aber echten Stillstand ab. */
+const RADOLAN_MAX_ALTER_MIN=100;
+function altStr(min){
+  if(min==null)return "unbekannt";
+  if(min<90)return min+" min";
+  const h=Math.round(min/60);
+  return h<48?h+" h":Math.round(h/24)+" Tage";
+}
+let _radAlt=null;   // Alter in Minuten, wenn die Radarquelle veraltet ist
 function renderPrecipToday(d){
   const h=d&&d.hourly;if(!h||!h.time||!h.precipitation)return;
   const ve=el("precTodayVal");if(!ve)return;
@@ -1174,6 +1201,7 @@ function renderPrecipToday(d){
   let sum=0;
   for(let i=0;i<h.time.length;i++){const t=new Date(h.time[i]).getTime();if(t>now)break;if(ymd(h.time[i])!==today)continue;const v=+h.precipitation[i];if(v>0)sum+=v;}
   ve.textContent=sum.toLocaleString("de-DE",{maximumFractionDigits:1});
+  _omHeute=sum;   // v2.71: Rueckfallwert, falls die Radar-Pipeline steht
   const se=el("precTodaySub");if(se)se.textContent=sum>0?"gemessen":"trocken";
 }
 
@@ -1185,7 +1213,15 @@ function renderRadolan(){
     .then(j=>{
       if(!j||j.summe_mm==null){renderUmkreis(null);return;}
       const istHeute=!j.datum||j.datum===ymd(new Date());
-      if(istHeute){
+      // v2.71: Bisher entschied allein das Datum. Ein sieben Stunden alter
+      // Stand von heute frueh galt damit als gueltig und ueberschrieb den
+      // aktuellen Open-Meteo-Wert mit 0 mm — die App behauptete "trocken",
+      // waehrend es geregnet hatte. Jetzt zaehlt auch das Alter.
+      const altMin=j.aktualisiert&&!isNaN(new Date(j.aktualisiert))
+        ? Math.round((Date.now()-new Date(j.aktualisiert).getTime())/60000) : null;
+      const frisch=altMin==null||altMin<=RADOLAN_MAX_ALTER_MIN;
+      _radAlt=(istHeute&&!frisch)?altMin:null;
+      if(istHeute&&frisch){
         const ve=el("precTodayVal");
         if(ve)ve.textContent=(+j.summe_mm).toLocaleString("de-DE",{maximumFractionDigits:1});
         const se=el("precTodaySub");
@@ -1194,6 +1230,13 @@ function renderRadolan(){
           if(j.aktualisiert){const t=new Date(j.aktualisiert);if(!isNaN(t))stand=" \u00b7 "+t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ})+" Uhr";}
           se.textContent=(j.summe_mm>0?"DWD-Radar":"trocken \u00b7 Radar")+stand;
         }
+      } else if(istHeute&&!frisch){
+        // Radarquelle steht: Open-Meteo-Wert zurueckholen und das offen sagen.
+        const ve=el("precTodayVal");
+        if(ve&&_omHeute!=null)ve.textContent=_omHeute.toLocaleString("de-DE",{maximumFractionDigits:1});
+        const se=el("precTodaySub");
+        if(se)se.textContent="Modellwert \u00b7 Radar "+altStr(altMin)+" alt";
+        console.warn("radolan.json ist",altMin,"min alt \u2013 Kachel: Fallback Open-Meteo");
       } else {
         console.info("radolan.json von",j.datum,"\u2013 Kachel: Fallback Open-Meteo");
       }
@@ -1269,6 +1312,10 @@ function umkTrockenHTML(j,heuteIso){
   else if(j&&j.datum&&j.datum!==heuteIso&&j.summe_mm>0) letzter={datum:j.datum,mm:j.summe_mm};
   const drop=`<svg class="umk-dry-ic" viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M24 8 C16 20 11 27 11 33 a13 13 0 0 0 26 0 C37 27 32 20 24 8 Z" fill="none" stroke="#9fb3cc" stroke-width="2.2"/><line x1="13" y1="11" x2="35" y2="40" stroke="#9fb3cc" stroke-width="2.2" stroke-linecap="round"/></svg>`;
   const lr=letzter?`<div class="umk-dry-last">Letzter Regen: ${relTag(letzter.datum,heuteIso)} \u00b7 ${(+letzter.mm).toLocaleString("de-DE",{maximumFractionDigits:1})} mm</div>`:"";
+  // v2.71: Bei stehender Pipeline ist "trocken" eine Behauptung ueber Daten,
+  // die es nicht gibt. Dann wird der Zustand benannt statt beschoenigt.
+  if(_radAlt!=null)
+    return `<div class="umk-dry">${drop}<div class="umk-dry-t">Radardaten fehlen</div><div class="umk-dry-s">Letzter Stand vor ${altStr(_radAlt)} \u00b7 seitdem keine Messung.</div>${lr}</div>`;
   return `<div class="umk-dry">${drop}<div class="umk-dry-t">Heute noch trocken</div><div class="umk-dry-s">Die Karte erscheint, sobald es regnet.</div>${lr}</div>`;
 }
 function renderUmkreis(j){
@@ -1458,11 +1505,11 @@ function renderAirGrid(air){
       }
       pk=_bV;pkMs=_bT;
     }
-    const pkTime=pkMs!=null?new Date(pkMs).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"–";
+    const pkTime=pkMs!=null?new Date(pkMs).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"}):"–";
     let uvN=0,nowTime;
     if(uvDayOffset===0){
       for(let i=0;i<h.time.length-1;i++){const t0=new Date(h.time[i]).getTime(),t1=new Date(h.time[i+1]).getTime();if(nowMs>=t0&&nowMs<t1){uvN=h._real[i]!=null?h._real[i]:0;break;}}
-      nowTime=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+      nowTime=new Date().toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
     }else{
       const _rv=h._real.filter(v=>v!=null);uvN=_rv.length?Math.max(..._rv):0;nowTime="Max";
     }
@@ -1481,7 +1528,7 @@ function renderAirGrid(air){
           if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}}
     }
     let vdLine="";
-    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
+    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
     html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel<span id="atmDamp"></span><span id="ccDiag"></span> · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
@@ -1528,15 +1575,16 @@ function drawUV(h){
   const hdH=20;const gy0=hdH+2,gy1=gy0+plotHb,Hpx=gy1+18;// Kopf einzeilig, dicht ueber der Achse
   cv.style.height=Hpx+"px";const H=Hpx;
   cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
-  const day=new Date(tms[i0]);day.setHours(0,0,0,0);const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
+  const dayMs=ortsMitternacht(tms[i0]);const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;   // v2.71: Ortszeit
   const X=t=>gx0+(gx1-gx0)*((t-t6)/(t21-t6)),Y=u=>gy1-(gy1-gy0)*(Math.min(u,axMax)/axMax);
   const smooth=(arr,t)=>{for(let i=i0;i<i1;i++){if(t>=tms[i]&&t<=tms[i+1]){const p1=arr[i];if(p1==null)return null;const p2=(arr[i+1]==null)?p1:arr[i+1];const p0=(i>i0&&arr[i-1]!=null)?arr[i-1]:p1,p3=(i+2<=i1&&arr[i+2]!=null)?arr[i+2]:p2;let u=(t-tms[i])/(tms[i+1]-tms[i]),u2=u*u,u3=u2*u;return 0.5*(2*p1+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u2+(-p0+3*p1-3*p2+p3)*u3);}}return null;};
   const csAt=t=>{const v=smooth(cs,t);return v==null?0:Math.max(0,v);};
   const realAt=t=>{const v=smooth(real,t);return v==null?null:Math.max(0,v);};
   // === Kopf wie BfS: UV-Logo (blau, so breit wie die Skala) + Datum + Titel in EINER Zeile ===
   const rr=(px,py,pw,ph,r)=>{x.beginPath();x.moveTo(px+r,py);x.arcTo(px+pw,py,px+pw,py+ph,r);x.arcTo(px+pw,py+ph,px,py+ph,r);x.arcTo(px,py+ph,px,py,r);x.arcTo(px,py,px+pw,py,r);x.closePath();};
-  const _wd=["So","Mo","Di","Mi","Do","Fr","Sa"][day.getDay()];
-  const _ds=_wd+". "+String(day.getDate()).padStart(2,"0")+"."+String(day.getMonth()+1).padStart(2,"0")+"."+day.getFullYear();
+  const _dO=ortsDatum(dayMs);   // v2.71: day gibt es hier nicht mehr, Datum in Ortszeit
+  const _wd=["So","Mo","Di","Mi","Do","Fr","Sa"][_dO.getDay()];
+  const _ds=_wd+". "+String(_dO.getDate()).padStart(2,"0")+"."+String(_dO.getMonth()+1).padStart(2,"0")+"."+_dO.getFullYear();
   const lgW=scaleW,lgH=17,lgX=scaleX,lgY=2;
   x.fillStyle="#1b3a6b";rr(lgX,lgY,lgW,lgH,2.5);x.fill();
   x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";
@@ -1554,18 +1602,18 @@ function drawUV(h){
   // kleine Markierungsstriche nach innen an allen vier Achsen (wie BfS): links+rechts je halbe UV-Stufe, oben+unten je volle Stunde
   x.strokeStyle="rgba(0,0,0,.55)";x.lineWidth=1;
   for(let tk=0;tk<=axMax+0.01;tk+=0.5){const yy=Math.round(Y(Math.min(tk,axMax)))+.5;x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx0+3,yy);x.moveTo(gx1,yy);x.lineTo(gx1-3,yy);x.stroke();}
-  for(let hh3=6;hh3<=21;hh3++){const xx3=Math.round(X(day.getTime()+hh3*3600e3))+.5;x.beginPath();x.moveTo(xx3,gy1);x.lineTo(xx3,gy1-3);x.moveTo(xx3,gy0);x.lineTo(xx3,gy0+3);x.stroke();}
+  for(let hh3=6;hh3<=21;hh3++){const xx3=Math.round(X(dayMs+hh3*3600e3))+.5;x.beginPath();x.moveTo(xx3,gy1);x.lineTo(xx3,gy1-3);x.moveTo(xx3,gy0);x.lineTo(xx3,gy0+3);x.stroke();}
   // Zahlen mittig im Block, ohne weißen Rand; die 0 ganz unten knapp über der X-Achse
   x.font="800 9.5px -apple-system,system-ui,sans-serif";x.textAlign="center";x.fillStyle="#000";
   for(let g=0;g<=yMax;g++){const yy=g===0?Y(0):Y(g);x.textBaseline=g===0?"bottom":"middle";x.fillText(g,scaleX+scaleW/2,yy);}
   // === gepunktete Gitterlinien: horizontal je UV-Stufe, vertikal je Stunde (wie BfS) ===
   x.strokeStyle="rgba(15,23,42,.15)";x.lineWidth=1;x.setLineDash([1,3]);
   for(let g=0;g<=yMax;g++){const yy=Y(g);x.beginPath();x.moveTo(gx0,yy);x.lineTo(gx1,yy);x.stroke();}
-  for(let hh2=6;hh2<=21;hh2++){const xx2=X(day.getTime()+hh2*3600e3);x.beginPath();x.moveTo(xx2,gy0);x.lineTo(xx2,gy1);x.stroke();}
+  for(let hh2=6;hh2<=21;hh2++){const xx2=X(dayMs+hh2*3600e3);x.beginPath();x.moveTo(xx2,gy0);x.lineTo(xx2,gy1);x.stroke();}
   x.setLineDash([]);
   // X-Achse jede Stunde 6..21
   x.fillStyle="#1c2432";x.font="700 7.5px -apple-system,system-ui,sans-serif";x.textBaseline="top";x.textAlign="center";
-  for(let hh=6;hh<=21;hh++){const xx=X(day.getTime()+hh*3600e3);x.fillText(hh,xx,gy1+4);}
+  for(let hh=6;hh<=21;hh++){const xx=X(dayMs+hh*3600e3);x.fillText(hh,xx,gy1+4);}
   // Säulen: Höhe=real bis jetzt; Farbe=diskreter Block der Höhe (vertikal einfarbig, wie BfS)
   const now=Date.now(),step=2.4,bw=2.9;
   if(!window._uvSimOn)for(let px=gx0;px<gx1;px+=step){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);if(t>now)break;const rv=realAt(t);if(rv==null||rv<=0.03)continue;const top=Y(rv);x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(rv)))];x.fillRect(px,top,Math.min(bw,gx1-px),gy1-top);} // v2.23: im Sim-Modus ersetzen 2-min-Balken die Saeulen
@@ -1651,8 +1699,8 @@ function drawBfsOverlay(){try{
   cv.width=W*dpr;cv.height=Hh*dpr;cv.style.width=W+"px";cv.style.height=Hh+"px";
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
   const cs=h.uv_index_clear_sky,tms=h.time.map(t=>new Date(t).getTime());
-  const day=new Date(tms[0]);day.setHours(0,0,0,0);
-  const t6=day.getTime()+6*3600e3,t21=day.getTime()+21*3600e3;
+  const dayMs=ortsMitternacht(tms[0]);                                                 // v2.71: Ortszeit
+  const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
   let ax=(function(){const sv=_axGet(_axSlug);if(sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}return pk>=8.35?10:9;})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
   const Y=u=>gy0-(gy0-gy9)*(Math.max(0,Math.min(ax,u))/ax);
@@ -2440,8 +2488,17 @@ function bilanzRechne(tage,heuteStr){
   if(!heuteNass)for(let i=1;i<400;i++){const e=holen(i);if(!e)break;if(e.mm>=0.2)break;trocken++;}
   const serie=[];
   for(let i=29;i>=0;i--){const e=holen(i);serie.push(e?e.mm:null);}
+  // v2.71: Der heutige Eintrag traegt "h" (erfasste Stunden) und "voll".
+  // Bisher wurde nur .mm gelesen — ein Tag mit einer von neun Stunden zaehlte
+  // damit als belastbare Null. Jetzt wird die Luecke nach oben gereicht.
+  let heuteLuecke=null;
+  if(h&&h.voll===false&&typeof h.h==="number"){
+    const soll=ortsStunde(Date.now());
+    if(soll-h.h>=2)heuteLuecke={hat:h.h,soll:soll};
+  }
   return{heute:h?h.mm:null,gestern:g?g.mm:null,w7:summe(7),w30:summe(30),
-         trocken:trocken,heuteNass:heuteNass,serie:serie,tage:Object.keys(tage).length};
+         trocken:trocken,heuteNass:heuteNass,serie:serie,tage:Object.keys(tage).length,
+         heuteLuecke:heuteLuecke};
 }
 function renderBilanz(){try{
   const sec=el("bilanzSec");if(!sec)return;
@@ -2456,7 +2513,8 @@ function renderBilanz(){try{
       let h=`<div class="bil-row">${box("HEUTE",f(B.heute),"mm")}${box("GESTERN",f(B.gestern),"mm")}`
            +`${box("7 TAGE",f(B.w7.mm),"mm")}${box("30 TAGE",f(B.w30.mm),"mm")}</div>`
            +`<canvas id="bilCv"></canvas><div class="bil-tag" id="bilTag"></div><div class="bil-note">`;
-      h+= B.heuteNass ? "Heute hat es geregnet."
+      h+= B.heuteLuecke ? `<span class="bil-dry">Heute erst ${B.heuteLuecke.hat} von ${B.heuteLuecke.soll} Stunden im Radar-Archiv \u2013 der Tageswert ist unvollst\u00e4ndig.</span>`
+        : B.heuteNass ? "Heute hat es geregnet."
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
       h+=`<br><span id="bilProg"></span></div>`;
@@ -2613,8 +2671,11 @@ function vitdKalib(h){
 function vitdTag(d,K){   // v2.68: Vitamin-D-Fenster eines Tages, gemeinsame Quelle fuer Karte und Jahresgrafik
   if(!window.satellite)return null;
   K=K||1;const S=9e5;
-  const t0=new Date(d.getFullYear(),d.getMonth(),d.getDate(),3,0,0).getTime();
-  const t1=new Date(d.getFullYear(),d.getMonth(),d.getDate(),22,0,0).getTime();
+  // v2.71: Fenster in ORTSZEIT. Vorher waren es 03:00-22:00 Geraetezeit — in
+  // New York endete die Suche damit um 16:00 und die Jahresflaeche bekam oben
+  // eine schnurgerade Kante.
+  const t0=ortsMs(d.getFullYear(),d.getMonth(),d.getDate(),3,0);
+  const t1=ortsMs(d.getFullYear(),d.getMonth(),d.getDate(),22,0);
   let tmax=t0,vmax=-1;
   for(let t=t0;t<=t1;t+=S){const v=physUvAt(t)*K;if(v>vmax){vmax=v;tmax=t;}}
   if(vmax<VITD_SCHWELLE)return null;
@@ -2703,12 +2764,18 @@ function drawVitD(){try{
   // v2.50: Streifen oben zeigt Winter-/Sommerzeit im Klartext
   {
     const SH=13, sy=gy0;                       // Streifenhoehe
+    let _offMin=Infinity,_offMax=-Infinity;
+    for(let i=0;i<N;i++){const o=B[i].off;if(o<_offMin)_offMin=o;if(o>_offMax)_offMax=o;}
     const wechsel=[];
     for(let i=1;i<N;i++)if(B[i].off!==B[i-1].off)wechsel.push(i);
     const grenzen=[0].concat(wechsel,[N-1]);
     for(let k=0;k<grenzen.length-1;k++){
       const i0=grenzen[k],i1=grenzen[k+1];
-      const sommer=B[i0].off<0&&Math.abs(B[i0].off)>=120;   // Offset -120 = Sommerzeit
+      // v2.71: Sommerzeit ist der Abschnitt mit dem KLEINEREN off (= groesserer
+      // Versatz nach Osten). Die alte Pruefung (off<0 und >=120) galt nur fuer
+      // Mitteleuropa; in New York war sie nie wahr, dort stand ganzjaehrig
+      // "Winterzeit". Zonen ohne Umstellung bekommen gar keine Beschriftung.
+      const sommer=_offMin!==_offMax&&B[i0].off===_offMin;
       const xa=X(i0),xb=X(i1);
       x.fillStyle=sommer?"rgba(245,190,80,.40)":"rgba(150,175,205,.35)";
       x.fillRect(xa,sy,xb-xa,SH);
@@ -2716,7 +2783,7 @@ function drawVitD(){try{
         x.fillStyle=sommer?"#8a5b00":"#41597a";
         x.font="8.5px -apple-system,system-ui,sans-serif";
         x.textAlign="center";x.textBaseline="middle";
-        x.fillText(sommer?"Sommerzeit":"Winterzeit",(xa+xb)/2,sy+SH/2+0.5);
+        x.fillText(_offMin===_offMax?"Ortszeit":(sommer?"Sommerzeit":"Winterzeit"),(xa+xb)/2,sy+SH/2+0.5);
       }
     }
     x.strokeStyle="rgba(15,23,42,.10)";x.lineWidth=1;
