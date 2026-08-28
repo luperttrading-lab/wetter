@@ -22,6 +22,10 @@
     --bg-haze:rgba(255,193,120,.55);
   }
   html,body{margin:0;background:#eef2f7}
+  /* v2.78: Langdruck oeffnete ueberall Lupe und Auswahlmenue. Eine Wetteransicht
+     wird gescrollt und getippt, nicht markiert — Eingabefelder ausgenommen. */
+  body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
   body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;color:var(--ink);min-height:100dvh}
   #bg{position:fixed;inset:0;z-index:0;background:
     radial-gradient(120% 80% at 78% -8%, var(--bg-haze) 0%, rgba(255,193,120,0) 46%),
@@ -43,10 +47,14 @@
     -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     border-radius:999px;box-shadow:0 8px 26px rgba(16,24,40,.26);
     padding:10px 17px;display:flex;gap:9px;align-items:center;cursor:pointer;
-    transform:translate(-50%,190%);transition:transform .42s cubic-bezier(.22,.9,.3,1);
+    /* v2.78: 190 % der Pillenhoehe sind rund 76 px — sie sitzt aber gut 90 px
+       ueber der Bildkante und blieb deshalb sichtbar stehen. Jetzt ein fester
+       Weg plus Deckkraft, damit sie unabhaengig von Hoehe und Geraet verschwindet. */
+    transform:translate(-50%,calc(100% + 120px));opacity:0;
+    transition:transform .42s cubic-bezier(.22,.9,.3,1),opacity .30s ease;
     -webkit-tap-highlight-color:transparent}
-  #evtToast.an{transform:translate(-50%,0)}
-  #evtToast:active{transform:translate(-50%,0) scale(.97)}
+  #evtToast.an{transform:translate(-50%,0);opacity:1}
+  #evtToast.an:active{transform:translate(-50%,0) scale(.97)}
   #evtToast .ico{flex:none;width:17px;height:17px;color:#f3c778}
   #evtToast .tt{font-size:13.5px;font-weight:700;color:#fff;line-height:1.3;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -367,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.77</span>
+      <span class="ver">v2.80</span>
     </div>
   </header>
 
@@ -2910,7 +2918,7 @@ const SKYEVENTS=[
   s:"Kernschatten ab 4:34 Uhr \u00b7 Maximum 6:13 Uhr \u00b7 93\u202f% des Monddurchmessers. Bei uns nur die erste H\u00e4lfte: der Mond geht w\u00e4hrend der Finsternis tief im Westen unter.",w:""},
  {y:2027,m:2,d:20,t:"Halbschatten-Mondfinsternis",big:0,
   s:"Nur eine leichte Abschattung des Vollmonds \u2013 mit blo\u00dfem Auge kaum zu erkennen.",w:""},
- {y:2027,m:8,d:2,t:"Partielle Sonnenfinsternis",big:0,
+ {y:2027,m:8,d:2,t:"Partielle Sonnenfinsternis",big:1,
   s:"Total \u00fcber S\u00fcdspanien, Nordafrika und \u00c4gypten (dort \u00fcber 6 Minuten) \u00b7 bei uns partiell.",
   w:"Sonnenfinsternisbrille erforderlich."},
  {y:2028,m:12,d:31,t:"Totale Mondfinsternis",big:1,
@@ -2928,7 +2936,8 @@ function skyEventNext(list,nowMs,n){
 }
 function renderSkyEvents(){try{
   const sec=document.getElementById("evtSec"),bd=document.getElementById("evtBody");if(!sec||!bd)return;
-  const nx=skyEventNext(SKYEVENTS,Date.now(),3);
+  const nx=skyEventNext(SKYEVENTS,Date.now(),5);   // v2.79: vorher 3 — das
+  // naechste banner-faehige Ereignis fiel dadurch aus der Liste heraus.
   if(!nx.length){sec.classList.add("hidden");return;}
   const wd=["So","Mo","Di","Mi","Do","Fr","Sa"];
   const fmt=d=>wd[d.getDay()]+". "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();
@@ -2938,7 +2947,8 @@ function renderSkyEvents(){try{
     const soon=x.days<=30&&x.e.big?" soon":"";
     // v2.75: Was innerhalb des Banner-Vorlaufs liegt, wird auch in der Karte
     // hervorgehoben — sonst tippt man auf den Hinweis und findet unten nichts.
-    const nah=x.e.big&&x.days<=EVT_TOAST_TAGE&&!evtVorbei(x);
+    const istVorschau=_evtVorschauId===(x.e.y+"-"+x.e.m+"-"+x.e.d);
+    const nah=(x.e.big&&x.days<=EVT_TOAST_TAGE&&!evtVorbei(x))||istVorschau;
     h+=`<div class="evt-box${soon}${nah?" jetzt":""}">`
       +(nah?`<div class="evt-chip">${cd}</div>`:"")
       +`<b>${x.e.t}</b> \u00b7 ${fmt(x.date)}`+(nah?"":` \u00b7 <span class="evt-cd">${cd}</span>`)
@@ -3017,27 +3027,33 @@ setTimeout(evtToastZeigen,1400);   // nach renderSkyEvents, damit das Ziel exist
    Die Einmal-pro-Tag-Sperre gilt hier nicht, sonst laesst es sich nicht
    wiederholt ansehen. Im Normalbetrieb aendert sich nichts.
 ============================================================================== */
+/* Vorschau. Gezeigt wird das naechste Ereignis, das auch im Ernstfall ein
+   Banner ausloesen wuerde (also mit big), mit seiner ECHTEN Tageszahl — sonst
+   widerspricht die Pille der Karte darunter. Weil dieses Ereignis weit weg sein
+   kann und die Karte nur nahe Termine hervorhebt, markiert die Vorschau es dort
+   zusaetzlich; sonst tippt man auf die Pille und findet unten nichts wieder.
+   Mit ?evtdemo=N laesst sich die Tageszahl setzen, um die Optik bei einem nahen
+   Termin zu beurteilen. */
+let _evtVorschauId=null;
 function evtToastVorschau(tage){
   try{
-    const n=Math.max(0,Math.min(365,parseInt(tage,10)||7));
-    // Das naechste tatsaechlich bevorstehende bedeutende Ereignis — nicht das
-    // erste der Liste, das laengst vorbei sein kann.
     const kommend=skyEventNext(SKYEVENTS,Date.now(),8).filter(x=>x.e.big&&!evtVorbei(x));
-    const kandidat=(kommend[0]&&kommend[0].e)||SKYEVENTS.filter(e=>e.big).slice(-1)[0];
-    if(!kandidat)return;
-    const d=new Date(kandidat.y,kandidat.m-1,kandidat.d);
-    evtToastAnzeigen({e:kandidat,days:n,date:d},true);
+    const x=kommend[0]; if(!x)return;
+    const n=(tage==null||tage==="")?x.days:Math.max(0,Math.min(3650,parseInt(tage,10)));
+    _evtVorschauId=x.e.y+"-"+x.e.m+"-"+x.e.d;
+    try{renderSkyEvents();}catch(e){}
+    evtToastAnzeigen({e:x.e,days:isFinite(n)?n:x.days,date:x.date},true);
   }catch(e){console.warn("evtVorschau",e&&e.message);}
 }
 (function(){
   try{
     const n=new URLSearchParams(location.search).get("evtdemo");
-    if(n!==null)setTimeout(()=>evtToastVorschau(n),1500);
+    if(n!==null)setTimeout(()=>evtToastVorschau(n===""?null:n),1500);
   }catch(e){}
   const v=document.querySelector(".ver");
   if(!v)return;
   let t=null;
-  const los=()=>{t=setTimeout(()=>{t=null;v.classList.remove("halten");evtToastVorschau(7);},900);
+  const los=()=>{t=setTimeout(()=>{t=null;v.classList.remove("halten");evtToastVorschau(null);},900);
                  v.classList.add("halten");};
   const stop=()=>{if(t){clearTimeout(t);t=null;}v.classList.remove("halten");};
   v.addEventListener("touchstart",los,{passive:true});
