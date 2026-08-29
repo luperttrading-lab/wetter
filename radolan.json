@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-29",
-  "summe_mm": 0.0,
-  "stunden_ok": 17,
-  "stunden_erwartet": 17,
+  "summe_mm": 0.23,
+  "stunden_ok": 20,
+  "stunden_erwartet": 21,
   "stunden": [
     {
       "stunde": "01:00",
@@ -71,6 +71,23 @@
     {
       "stunde": "17:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "18:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
+      "mm": 0.23
+    },
+    {
+      "stunde": "20:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "21:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -80,7 +97,7 @@
           410,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       },
       {
@@ -88,7 +105,7 @@
           410,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       },
       {
@@ -96,7 +113,7 @@
           410,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       }
     ],
@@ -106,7 +123,7 @@
           409,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.3,
         "eigenes": false
       },
       {
@@ -114,7 +131,7 @@
           409,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": true
       },
       {
@@ -122,7 +139,7 @@
           409,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       }
     ],
@@ -132,7 +149,7 @@
           408,
           424
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       },
       {
@@ -140,7 +157,7 @@
           408,
           425
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       },
       {
@@ -148,16 +165,16 @@
           408,
           426
         ],
-        "mm": 0.0,
+        "mm": 0.2,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
-    "datum": "2026-08-28",
-    "mm": 4.24
+    "datum": "2026-08-29",
+    "mm": 0.23
   },
-  "aktualisiert": "2026-08-29T15:44:44+00:00",
+  "aktualisiert": "2026-08-29T19:22:27+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, Erlental 50.6480N 8.6741E"
 }
