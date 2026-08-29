@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.86</span>
+      <span class="ver">v2.87</span>
     </div>
   </header>
 
@@ -1795,7 +1795,12 @@ function drawBfsOverlay(){try{
   const dayMs=ortsMitternacht(isFinite(tms[0])?tms[0]:Date.now());                     // v2.71: Ortszeit
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
-  let ax=(function(){const sv=_axGet(_axSlug);if(sv===8||sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}return pk>=8.35?10:9;})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
+  let ax=(function(){const sv=_axGet(_axSlug);if(sv===8||sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}// v2.87: Bisher konnte die Heuristik nur 9 oder 10 waehlen. Das BfS-Bild fuer
+  // Giessen zeigt aber 0-8, und ohne gespeicherten Wert landete die App immer
+  // auf 9 - die Kurven lagen dadurch rund eine halbe Einheit zu tief.
+  // Die Schwellen sind aus den beobachteten Bildern abgeleitet, nicht belegt;
+  // ein einmal getippter Wert hat immer Vorrang.
+  return pk>=8.35?10:(pk>=7.2?9:8);})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
   const Y=u=>gy0-(gy0-gy9)*(Math.max(0,Math.min(ax,u))/ax);
   const _bm=(()=>{const n=cs.length,m=new Array(n).fill(0),d=new Array(Math.max(0,n-1));for(let i=0;i<n-1;i++){const hh=tms[i+1]-tms[i];d[i]=hh?((cs[i+1]||0)-(cs[i]||0))/hh:0;}if(n>=2){m[0]=d[0];m[n-1]=d[n-2];}for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0)m[i]=0;else m[i]=2*d[i-1]*d[i]/(d[i-1]+d[i]);}return m;})();
   const bell=t=>{for(let i=0;i<cs.length-1;i++){if(t>=tms[i]&&t<=tms[i+1]){const hh=tms[i+1]-tms[i],u=(t-tms[i])/hh,u2=u*u,u3=u2*u,y0=cs[i]||0,y1=cs[i+1]||0,m0=_bm[i],m1=_bm[i+1];return Math.max(0,y0*(2*u3-3*u2+1)+y1*(-2*u3+3*u2)+m0*hh*(u3-2*u2+u)+m1*hh*(u3-u2));}}return 0;};
