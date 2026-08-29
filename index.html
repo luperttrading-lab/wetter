@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.85</span>
+      <span class="ver">v2.86</span>
     </div>
   </header>
 
@@ -1081,8 +1081,10 @@ function uvSimSeries(t6,t21,ccAt,bellAt,cmfFn,seed,DT,wAt){ // v2.20: Sonne/Scha
   }
   return{ts:ts,vs:vs,lo:lo,hi:hi,st:st};
 }
-function _axGet(sl){try{return +localStorage.getItem("bfsAx_"+sl)||0}catch(e){return 0}}
-function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v))}catch(e){}}
+function _axGet(sl){try{const v=+localStorage.getItem("bfsAx_"+sl)||0;if(v)return v;
+  // Fallback: war der Slug beim Speichern noch leer, steht der Wert nur hier
+  return +localStorage.getItem("bfsAx_zuletzt")||0;}catch(e){return 0}}
+function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v));if(sl)localStorage.setItem("bfsAx_zuletzt",String(v));}catch(e){}}
 function makeSunBell(cs,tms,t6,t21,fallback){
   if(!window.satellite)return fallback;
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
@@ -1605,6 +1607,7 @@ function renderAirGrid(air){
 function syncUV(){if(lastUVH){drawUV(lastUVH);drawBfsOverlay();}}
 function drawUV(h){
   const cv=el("uvchart");if(!cv||!h||!h.time||!h.uv_index_clear_sky)return;
+  if(!window._axSyncLauf)window._axSyncN=0;   // v2.86: Zaehler galt sonst fuer immer
   const cs=h.uv_index_clear_sky,real=h._real||[],tms=h.time.map(t=>new Date(t).getTime());
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
   if(i0<0||i1<=i0)return;
@@ -1612,7 +1615,15 @@ function drawUV(h){
   // v2.84: Beide Grafiken sollen dieselbe Skala haben. Die untere gehoert dem
   // BfS-Bild und ist nicht aenderbar, also folgt die obere ihr. Sicherung:
   // nie kleiner als der Tagesscheitel, sonst wuerde die Glocke abgeschnitten.
-  const _bfsAx=(typeof window._bfsAxCur==="number"&&window._bfsAxCur>=8)?window._bfsAxCur:9;
+  // v2.86: Den gespeicherten Wert direkt lesen. Vorher hing es an
+  // window._bfsAxCur, das erst drawBfsOverlay setzt — lief die obere Grafik
+  // zuerst, blieb sie auf 9 stehen.
+  const _bfsAx=(function(){
+    try{const im=el("bfsUv"),m=im&&String(im.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);
+      if(m){const sv=_axGet(decodeURIComponent(m[1]));if(sv===8||sv===9||sv===10||sv===12)return sv;}
+    }catch(e){}
+    return (typeof window._bfsAxCur==="number"&&window._bfsAxCur>=8)?window._bfsAxCur:9;
+  })();
   let _pk9=0;for(let i=0;i<cs.length;i++){const v=+cs[i]||0;if(v>_pk9)_pk9=v;}
   const yMax=Math.max(_bfsAx,Math.ceil(_pk9),1);
   window._uvAxOben=yMax; window._uvPk=_pk9; window._uvLastH=h;
@@ -1809,7 +1820,9 @@ function drawBfsOverlay(){try{
   if(window._uvAxOben!=null&&window._uvAxOben!==ax&&ax>=Math.ceil(window._uvPk||0)){
     if((window._axSyncN=(window._axSyncN||0)+1)<=2){
       window._bfsAxCur=ax;
+      window._axSyncLauf=true;
       try{if(window._uvLastH)drawUV(window._uvLastH);}catch(e){console.warn("axSync",e&&e.message);}
+      window._axSyncLauf=false;
     }
   } else { window._axSyncN=0; }
   const _ab=document.getElementById("bfsAx");
