@@ -411,7 +411,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.07</span>
+      <span class="ver">v3.08</span>
     </div>
   </header>
 
@@ -867,6 +867,34 @@ function sonnenMoeglich(tsMs){
 }
 /* v3.06: Handwert fuer den Kurvenexponenten. null = Automatik. Gilt pro
    Standort, damit ein Versuch in Wettenberg nicht still auch Norden verstellt. */
+/* v3.08: Zuschlag der Huellkurve in Prozent. Standard ist der Deckel der
+   Minuten-Simulation (+20 %); die Formel selbst erreicht ihr Maximum bei rund
+   60 % Bewoelkung mit +22 %. Verstellbar, weil der Wert an einem einzigen Tag
+   kalibriert wurde und die BfS-Messung direkt darunter zum Vergleich steht. */
+const HUELL_STD=0.20;
+function huellZuschlag(){
+  try{const v=localStorage.getItem("huellEps"+LOC_KEY);
+    if(v==null||v==="")return HUELL_STD;
+    const z=parseFloat(v);
+    return (isFinite(z)&&z>=0&&z<=0.6)?z:HUELL_STD;
+  }catch(e){return HUELL_STD;}
+}
+function huellSetzen(v){
+  try{
+    if(v==null)localStorage.removeItem("huellEps"+LOC_KEY);
+    else localStorage.setItem("huellEps"+LOC_KEY,String(v));
+  }catch(e){}
+  try{if(typeof lastUVH!=="undefined"&&lastUVH){drawUV(lastUVH);drawBfsOverlay();}}catch(e){}
+  huellAnzeigen();
+}
+function huellAnzeigen(){
+  const sl=el("hSlider"),tx=el("hWert");
+  if(!sl||!tx)return;
+  const e=huellZuschlag();
+  sl.value=Math.round(e*100);
+  tx.innerHTML='Spitzen <b>+'+Math.round(e*100)+'\u202f%</b>'
+    +(Math.abs(e-HUELL_STD)<1e-9?' <small>Standard</small>':' <small>von Hand</small>');
+}
 function kManuell(){
   try{const v=localStorage.getItem("kHand"+LOC_KEY);
     if(v==null||v==="")return null;
@@ -1794,7 +1822,9 @@ function renderAirGrid(air){
     window._uvJetzt=uvN;   // v2.98: fuer die Globalstrahlungs-Diagnose
     html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span><span><i class="ghuel"></i>Spitzen möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button>
       <div class="krow"><input type="range" id="kSlider" min="0.60" max="3.00" step="0.01" aria-label="Kurvenexponent k">
-        <div class="kinfo"><span id="kWert"></span><button type="button" id="kAuto" class="kbtn" title="zurueck zur Regression">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
+        <div class="kinfo"><span id="kWert"></span><button type="button" id="kAuto" class="kbtn" title="zurueck zur Regression">auto</button></div></div>
+      <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
+        <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
@@ -1983,7 +2013,15 @@ function drawUV(h){
      _sl.addEventListener("change",()=>kManuellSetzen(+_sl.value));
    }
    if(_ka&&!_ka._w){_ka._w=1;_ka.addEventListener("click",()=>kManuellSetzen(null));}
-   kReglerAnzeigen();}
+   kReglerAnzeigen();
+   const _hs=document.getElementById("hSlider"),_ha=document.getElementById("hAuto");
+   if(_hs&&!_hs._w){_hs._w=1;
+     _hs.addEventListener("input",()=>{const t=el("hWert");
+       if(t)t.innerHTML='Spitzen <b>+'+_hs.value+'\u202f%</b> <small>von Hand</small>';});
+     _hs.addEventListener("change",()=>huellSetzen(+_hs.value/100));
+   }
+   if(_ha&&!_ha._w){_ha._w=1;_ha.addEventListener("click",()=>huellSetzen(null));}
+   huellAnzeigen();}
   const _sb=document.getElementById("uvSimBtn");
   if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
   try{ if(window._uvSimOn&&h._cc){ // v2.20: Minuten-Simulation, Seed=Datum^Ort (deterministisch pro Tag)
@@ -2014,33 +2052,28 @@ function drawUV(h){
   // Minuten-Simulation, w=1 als Obergrenze, Deckel +20 %. Bei klarem Himmel und
   // bei geschlossener Decke faellt sie mit der Glocke zusammen; dazwischen liegt
   // sie bis zu einem Fuenftel darueber. Keine Vorhersage, sondern die Decke.
-  if(Array.isArray(h._cc)){
-    const _ccAt=t=>{
-      for(let i=i0;i<i1;i++){
-        if(t>=tms[i]&&t<=tms[i+1]){
-          const a=h._cc[i],b=h._cc[i+1];
-          if(a==null)return null;
-          const f=(t-tms[i])/Math.max(1,tms[i+1]-tms[i]);
-          return (b==null?a:a+(b-a)*f)/100;
-        }
-      }
-      return null;
-    };
+  {
+    // v3.08: Fester Maximalzuschlag statt der tagesaktuellen Bewoelkung. Vorher
+    // folgte die Kurve dem Wetterverlauf und war deshalb unsymmetrisch — sie
+    // beantwortete "was heute moeglich war". Jetzt beantwortet sie "was ueberhaupt
+    // moeglich ist": die Bewoelkung, die den groessten Zuschlag ergibt (rund 60 %),
+    // unabhaengig vom Tag. Damit ist sie eine echte Decke fuer die Messspitzen —
+    // und verliert im Gegenzug jede Wetteraussage.
+    const eps=huellZuschlag();
     x.lineJoin="round";x.lineCap="round";x.lineWidth=1.6;
     x.strokeStyle="rgba(194,65,12,.55)";x.setLineDash([4,3]);
     x.beginPath();let _ef=true,_eN=0,_eMax=0;
     for(let px=pxA;px<=pxB;px+=1){
       const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);
-      const uv=sunBell(t),cc=_ccAt(t);
-      if(!isFinite(uv)||cc==null){_ef=true;continue;}
-      const eps=Math.min(0.20,1.25*Math.max(0,cc-0.15)*(1-cc));
+      const uv=sunBell(t);
+      if(!isFinite(uv)){_ef=true;continue;}
       const v=uv*(1+eps);
       const yy=Y(v); if(!isFinite(yy)){_ef=true;continue;}
       if(v>_eMax)_eMax=v; _eN++;
       if(_ef){x.moveTo(px,yy);_ef=false;}else x.lineTo(px,yy);
     }
     x.stroke();x.setLineDash([]);
-    window._uvHuell={punkte:_eN,scheitel:Math.round(_eMax*100)/100};
+    window._uvHuell={punkte:_eN,scheitel:Math.round(_eMax*100)/100,eps:eps};
   }
   window._uvGlocke={punkte:_gN,ungueltig:_gBad,scheitel:Math.round(_gMax*100)/100,
     satellite:!!window.satellite,dayMs:dayMs,t6:t6,t21:t21,i0:i0,i1:i1,
