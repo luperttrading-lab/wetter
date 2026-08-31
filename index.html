@@ -295,8 +295,11 @@
      weiss, wo es hinschauen muss. */
   .uvdiag{font-size:11px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.55}
   .uvdiag b{color:var(--ink);font-weight:700}
-  .uvdiag .dg{display:inline-block;white-space:nowrap;margin:0 2px}
-  .uvdiag .dg+.dg::before{content:"\u00b7";color:var(--faint);margin-right:6px}
+  /* v2.97: kein nowrap — die Bausteine liefen sonst aus der Kachel heraus.
+     Der Trenner braucht CSS-Schreibweise (\00b7), nicht die von JavaScript. */
+  .uvdiag .dg{display:inline;margin:0 2px}
+  .uvdiag .dg+.dg::before{content:"\00b7";color:var(--faint);margin-right:5px}
+  .uvdiag{overflow-wrap:break-word;word-break:normal;padding:0 4px}
   .uvnote{font-size:9px;color:var(--faint);text-align:center;margin-top:5px;line-height:1.3;opacity:.75}
   .uvvd{text-align:center;margin-top:4px;font-size:9.5px}
   #wolkenCv{width:100%;display:block;border-radius:12px;background:#5c7450}
@@ -384,7 +387,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.96</span>
+      <span class="ver">v2.97</span>
     </div>
   </header>
 
