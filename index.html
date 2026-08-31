@@ -128,7 +128,12 @@
   .col.night{background:rgba(40,52,74,.05)}
   .col.night.now{background:rgba(247,183,51,.2);box-shadow:inset 0 0 0 1px rgba(224,122,31,.25)}
   .col .ic{width:28px;height:28px;margin:7px 0}
-  .col .v{font-size:14px;font-weight:780;font-variant-numeric:tabular-nums;margin-top:8px;white-space:nowrap}
+  .col .v{font-size:14px;font-weight:780;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap}
+  /* v2.98: Sonnenminuten der Stunde als schmale Leiste, Boee als Zahl */
+  .col .ssbar{height:3px;margin:5px 7px 0;background:rgba(15,23,42,.07);border-radius:2px;overflow:hidden}
+  .col .ssbar i{display:block;height:100%;background:var(--sun);border-radius:2px}
+  .col.fc .ssbar i{opacity:.5}
+  .col .xtra{font-size:9px;color:var(--faint);margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
@@ -387,7 +392,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.97</span>
+      <span class="ver">v2.98</span>
     </div>
   </header>
 
@@ -742,6 +747,7 @@ function render(rows,all,src,demo){
 
   // Stationszeile
   const dist=src.distance!=null?(src.distance/1000).toLocaleString("de-DE",{maximumFractionDigits:1})+" km":"";
+  try{hoeheStation(src,src.distance!=null?src.distance/1000:null);}catch(e){}   // v2.98: vermessene Stationshoehe
   {const _ot=String((src&&src.observation_type)||"").toLowerCase();
     const _nm=src.station_name&&!src.dwd_station_id?" · "+String(src.station_name).toLowerCase().replace(/(^|[\s\-\/])\S/g,function(m){return m.toUpperCase();}):"";
     {const st=el("stationTxt");
@@ -830,7 +836,17 @@ function renderStrip(rows){
     const isNow=i===nowIdx, night=isNight(r.timestamp);
     const cell=document.createElement("div");
     cell.className="col"+(isNow?" now":"")+(r._fc?" fc":"")+(night?" night":"");
-    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(r.icon||"cloudy",28)}</div><div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>`;
+    // v2.98: Sonnenminuten als Leiste (0..60 min, DWD-Messung ueber die
+    // 120-W/m2-Schwelle) und Boee darunter. Beide Felder liefert Bright Sky
+    // ohnehin mit; sie wurden bisher verworfen.
+    const _ss=(typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
+    const _bo=(typeof r.wind_gust_speed==="number"&&isFinite(r.wind_gust_speed))?Math.round(r.wind_gust_speed):null;
+    const _ssBar=_ss==null?'<div class="ssbar"></div>'
+      :`<div class="ssbar"><i style="width:${Math.round(_ss/60*100)}%"></i></div>`;
+    const _unten=(_ss!=null||_bo!=null)
+      ? `<div class="xtra">${_ss!=null?Math.round(_ss)+"\u202fmin":""}${(_ss!=null&&_bo!=null)?" \u00b7 ":""}${_bo!=null?"\u2197\u202f"+_bo:""}</div>`
+      : "";
+    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(r.icon||"cloudy",28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
@@ -937,6 +953,25 @@ function aqiCellInner(){
     return `<div class="k">Luftqualität</div><div class="val">${Math.round(_aqi.european_aqi)} <small>AQI</small></div><div class="sub"><span style="color:${acol};font-weight:750">${ac}</span>${_aqi.pm2_5!=null?" · PM2.5 "+Math.round(_aqi.pm2_5):""}</div>`;}
   return `<div class="k">Luftqualität</div><div class="val">– <small>AQI</small></div><div class="sub" style="color:#9aa7b8">lädt…</div>`;}
 function aqiCell(){return `<div class="tile" id="aqiCell">${aqiCellInner()}</div>`;}
+/* v2.98: Ozon, NO2 und Feinstaub PM10 wurden bisher mit abgerufen und
+   weggeworfen. Die Kacheln entstehen wie die AQI-Kachel mit fester Kennung und
+   werden nachgefuellt, sobald die Luftdaten da sind — renderTiles laeuft davor.
+   Schwellen in Anlehnung an den europaeischen Luftqualitaetsindex. */
+const LUFT_STOFFE=[
+  {id:"cellO3",   k:"Ozon O\u2083",              f:"ozone",            g:[100,130]},
+  {id:"cellNO2",  k:"Stickstoffdioxid NO\u2082", f:"nitrogen_dioxide", g:[40,90]},
+  {id:"cellPM10", k:"Feinstaub PM10",             f:"pm10",             g:[20,40]}
+];
+function luftInner(st){
+  const a=_aqi,v=a?a[st.f]:null;
+  const z=v==null?"\u2013":(+v).toLocaleString("de-DE",{maximumFractionDigits:0});
+  let t="l\u00e4dt\u2026",c="#9aa7b8";
+  if(v!=null){if(v<=st.g[0]){t="gut";c="#3a9d5d";}else if(v<=st.g[1]){t="m\u00e4\u00dfig";c="#d79636";}else{t="schlecht";c="#c62828";}}
+  return `<div class="k">${st.k}</div><div class="val">${z} <small>\u00b5g/m\u00b3</small></div>`
+       + `<div class="sub"><span style="color:${c};font-weight:700">${t}</span></div>`;
+}
+function luftCells(){return LUFT_STOFFE.map(st=>`<div class="tile" id="${st.id}">${luftInner(st)}</div>`).join("");}
+function luftFill(){for(const st of LUFT_STOFFE){const e=el(st.id);if(e)e.innerHTML=luftInner(st);}}
 function compass(deg){if(deg==null)return"";const r=deg*Math.PI/180,x=18+Math.sin(r)*10.5,y=18-Math.cos(r)*10.5;
   return `<svg width="30" height="30" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14.5" fill="#f4f7fb" stroke="#e3e9f1" stroke-width="2"/><line x1="18" y1="18" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2f86cf" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="18" r="2.4" fill="#5c6b80"/></svg>`;}
 /* Windrichtungs-Streuung: zirkuläre Statistik über die letzten 12 h, mit Windstärke gewichtet */
@@ -1020,7 +1055,7 @@ function renderTiles(s,d){
     tile("Sichtweite",s.vis!=null?(s.vis/1000).toLocaleString("de-DE",{maximumFractionDigits:0}):"–","km",visSub)+
     `<div class="tile"><div class="k">Niederschlag heute</div><div class="val"><span id="precTodayVal">${d.precip!=null?d.precip.toLocaleString("de-DE",{maximumFractionDigits:1}):"0"}</span> <small>mm</small></div><div class="sub" id="precTodaySub">${d.precip>0?"gemessen":"trocken"}</div></div>`+
     tile("Sonnenenergie heute",d.solar!=null&&d.solar>0?d.solar.toLocaleString("de-DE",{maximumFractionDigits:1}):"–","kWh/m²","Globalstrahlung gesamt")+
-    aqiCell()+
+    aqiCell()+luftCells()+
     `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
       (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
       `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
@@ -1597,7 +1632,7 @@ function renderAirGrid(air){
       pk=_bV;pkMs=_bT;
     }
     const pkTime=pkMs!=null?new Date(pkMs).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"}):"–";
-    let uvN=0,nowTime;
+    let uvN=0,nowTime;   // v2.98: wird unten fuer die Globalstrahlungs-Diagnose gebraucht
     if(uvDayOffset===0){
       for(let i=0;i<h.time.length-1;i++){const t0=new Date(h.time[i]).getTime(),t1=new Date(h.time[i+1]).getTime();if(nowMs>=t0&&nowMs<t1){uvN=h._real[i]!=null?h._real[i]:0;break;}}
       nowTime=new Date().toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
@@ -1621,6 +1656,7 @@ function renderAirGrid(air){
     let vdLine="";
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
+    window._uvJetzt=uvN;   // v2.98: fuer die Globalstrahlungs-Diagnose
     html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
@@ -1628,7 +1664,7 @@ function renderAirGrid(air){
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
   if(c){
-    _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner();
+    _aqi=c; const _ac=el("aqiCell"); if(_ac)_ac.innerHTML=aqiCellInner(); luftFill();
     const types=[["Gräser",c.grass_pollen],["Birke",c.birch_pollen],["Erle",c.alder_pollen],["Beifuß",c.mugwort_pollen],["Ambrosia",c.ragweed_pollen]].filter(t=>t[1]!=null&&t[1]>=1).sort((a,b)=>b[1]-a[1]);
     _pollenSub=types.length?types.slice(0,3).map(t=>{const[pc,pcol]=pollenCat(t[1]);return `<span style="white-space:nowrap"><span class="lvl" style="background:${pcol}"></span>${t[0]}: ${pc}</span>`;}).join("&nbsp;&nbsp; "):"kein nennenswerter Pollenflug";
     fillPollen();// Pollen-Kachel sitzt jetzt oben im Haupt-Grid (nach 'Vergleich zu gestern')
@@ -1768,11 +1804,31 @@ function drawUV(h){
     for(let px=pxA;px<=pxB;px+=4){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=physUvAt(t);if(u>_pp)_pp=u;const v=sunBell(t);if(v>_pk)_pk=v;}
     const _d=document.getElementById("atmDamp");
     // v2.96: zwei Bausteine mit festem Platz — Daempfung, dann k.
+    // v2.98: Globalstrahlung der laufenden Stunde (Bright Sky "solar", kWh/m2).
+    // Zusammen mit dem UV-Wert ergibt das eine von CAMS und BfS unabhaengige
+    // Pruefgroesse: bei klarem Himmel ist UV/Globalstrahlung nahezu konstant.
+    let _solTxt="";
+    try{
+      if(Array.isArray(fullRows)&&fullRows.length){
+        const jetztStd=ortsStunde(Date.now());
+        for(let i=fullRows.length-1;i>=0;i--){
+          const r=fullRows[i];
+          if(ortsStunde(new Date(r.timestamp).getTime())!==jetztStd)continue;
+          if(ymd(r.timestamp)!==ymd(new Date()))break;
+          if(typeof r.solar==="number"&&isFinite(r.solar)&&r.solar>0){
+            const uvJ=(typeof window._uvJetzt==="number"&&window._uvJetzt>0)?window._uvJetzt:null;
+            _solTxt='<span class="dg">Globalstrahlung <b>'+r.solar.toFixed(2).replace(".",",")+'\u202fkWh/m\u00b2</b>'
+              +(uvJ!=null?' \u00b7 UV je kWh <b>'+(uvJ/r.solar).toFixed(1).replace(".",",")+'</b>':'')+'</span>';
+          }
+          break;
+        }
+      }
+    }catch(e){}
     let _kTxt="";
     const _f=window._uvFit;
     if(_f&&_f.geklemmt&&_f.kFrei!=null)
       _kTxt='<span class="dg">k <b>'+_f.k.toFixed(2).replace(".",",")+'</b> begrenzt \u00b7 Regression <b>'+_f.kFrei.toFixed(2).replace(".",",")+'</b> \u00b7 Physik 2,42</span>';
-    if(_d)_d.innerHTML=((_pp>0&&_pk>0)?'<span class="dg">D\u00e4mpfung <b>\u2212'+Math.max(0,Math.round(100*(1-_pk/_pp)))+'\u202f%</b> (CAMS)</span>':"")+_kTxt;
+    if(_d)_d.innerHTML=((_pp>0&&_pk>0)?'<span class="dg">D\u00e4mpfung <b>\u2212'+Math.max(0,Math.round(100*(1-_pk/_pp)))+'\u202f%</b> (CAMS)</span>':"")+_solTxt+_kTxt;
   }
   try{ // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
        // v2.82: gekapselt - eine kaputte Nebenzeile darf die Kurve nicht kosten
@@ -2620,12 +2676,26 @@ function tzNachtragen(){
    mit — es ist die Hoehe des Modellgitterpunkts aus einem Gelaendemodell, nicht
    die vermessene Hoehe der Adresse. In flachem Gelaende deckt sich das nahezu,
    am Hang kann es um einige Meter abweichen. */
-let _hoehe=null;
+let _hoehe=null,_hoeheQ=null;
+/* v2.98: Die DWD-Station meldet ihre vermessene Hoehe. Sie ist genauer als der
+   Modellgitterpunkt von Open-Meteo — aber nur brauchbar, solange die Station
+   nahe genug liegt; sonst beschreibt sie einen anderen Ort. */
+function hoeheStation(src,distKm){
+  try{
+    const v=src&&src.height;
+    if(typeof v!=="number"||!isFinite(v))return;
+    if(distKm!=null&&distKm>3)return;      // zu weit weg
+    _hoehe=Math.round(v); _hoeheQ="Station";
+    try{localStorage.setItem("hoehe"+LOC_KEY,String(_hoehe));}catch(e){}
+    zeitzoneAnzeigen();
+  }catch(e){}
+}
 function hoeheMerken(j){
   try{
     const v=j&&(typeof j.elevation==="number"?j.elevation:(Array.isArray(j.elevation)?j.elevation[0]:null));
     if(typeof v!=="number"||!isFinite(v))return;
     const neu=Math.round(v);
+    if(_hoeheQ==="Station")return;   // Stationswert schlaegt den Modellwert
     if(neu===_hoehe)return;
     _hoehe=neu;
     try{localStorage.setItem("hoehe"+LOC_KEY,String(neu));}catch(e){}
