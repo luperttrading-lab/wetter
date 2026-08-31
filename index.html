@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.92</span>
+      <span class="ver">v2.95</span>
     </div>
   </header>
 
@@ -446,7 +446,7 @@
     <label for="locName">Ortsname</label><input id="locName" type="text" autocomplete="off" maxlength="40" placeholder="Frankfurt am Main">
     <div class="loc-msg" id="locMsg"></div>
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
-    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locNdd" class="loc-btn">Norddeich</button></div>
+    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locNdd" class="loc-btn">Norden</button></div>
     <div class="loc-row"><button type="button" id="locMuc" class="loc-btn">M&uuml;nchen</button><button type="button" id="locKie" class="loc-btn">Kiel</button></div>
     <div class="loc-row"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
   </div>
@@ -460,7 +460,7 @@ var satellite=(()=>{var _o=Object.defineProperty;var r0=Object.getOwnPropertyDes
 "use strict";
 /* ===== Standort-Profil: URL-Parameter ?lat&lon&name > localStorage locProfile > Default Wettenberg ===== */
 const LOC_WETTENBERG={lat:50.6481,lon:8.6743,name:"Wettenberg",isWettenberg:true,tz:"Europe/Berlin"};
-const LOC_NORDDEICH={lat:53.6321080,lon:7.2141223,name:"Norddeich",isWettenberg:false,tz:"Europe/Berlin"};
+const LOC_NORDDEICH={lat:53.5941,lon:7.2066,name:"Norden",isWettenberg:false,tz:"Europe/Berlin"};   // v2.93: Stadt Norden statt des Ortsteils Norddeich (OSM 53°35′38,76″N / 7°12′23,76″O)
 const LOC_MUENCHEN={lat:48.1374,lon:11.5755,name:"M\u00fcnchen",isWettenberg:false,tz:"Europe/Berlin"};   // v2.55
 const LOC_KIEL={lat:54.3233,lon:10.1394,name:"Kiel",isWettenberg:false,tz:"Europe/Berlin"};
 function _locSan(x){return String(x==null?"":x).replace(/[<>&"'`]/g,"").slice(0,40);}
@@ -734,7 +734,7 @@ function render(rows,all,src,demo){
     const _nm=src.station_name&&!src.dwd_station_id?" · "+String(src.station_name).toLowerCase().replace(/(^|[\s\-\/])\S/g,function(m){return m.toUpperCase();}):"";
     {const st=el("stationTxt");
      st.dataset.basis=(demo?"Demo":(_ot==="forecast"?"MOSMIX-Prognose":"Live"))+(src.dwd_station_id?" · DWD "+src.dwd_station_id:_nm)+(dist?" · "+dist:"");
-     st.textContent=st.dataset.basis+tzSuffix();}} // v2.28 / v2.71 Ortszeit-Hinweis
+     st.textContent=st.dataset.basis+hoeheSuffix()+tzSuffix();}} // v2.28 / v2.71 Ortszeit / v2.94 Hoehe
 
   // aktuelle Werte (Snapshot)
   const wind=cur.wind_speed!=null?cur.wind_speed:latestOf(all,"wind_speed");
@@ -1122,7 +1122,7 @@ function pollenCat(v){if(v==null||v<1)return["keine","#cbd5e1"];if(v<10)return["
 let _pollenSub=null;// Pollen-Kachel liegt jetzt im oberen Grid (renderTiles); renderAirGrid befuellt sie, sobald die Luftdaten da sind (Reihenfolge-unabhaengig)
 function fillPollen(){const e=document.getElementById("pollenSub");if(e&&_pollenSub!=null)e.innerHTML=_pollenSub;}
 function cmfUV(cc){if(cc==null)return 1;return Math.max(0.25,1-0.70*Math.pow(cc/100,2));}
-function ccDiagText(hourMs,ccD,ly,cmfFn){ // v2.40: Diagnose - welcher Bewoelkungswert treibt die Saeule (DWD-Messung vs. Open-Meteo-Modell)?
+function ccDiagText(hourMs,ccD,ly,cmfFn,ssMin){ // v2.40: Diagnose - welcher Bewoelkungswert treibt die Saeule (DWD-Messung vs. Open-Meteo-Modell) / v2.95: + Sonnenscheinminuten
   if(ccD==null)return"";
   // v2.82: Beim Zeitzonen-Umbau war "const d=new Date(hourMs)" entfallen, der
   // Schluessel k weiter unten braucht es aber weiter -> ReferenceError, der
@@ -1134,7 +1134,11 @@ function ccDiagText(hourMs,ccD,ly,cmfFn){ // v2.40: Diagnose - welcher Bewoelkun
     const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"T"+hh;
     for(let i=0;i<ly.time.length;i++){if(String(ly.time[i]).slice(0,13)===k){const v=ly.cloud_cover[i];if(v!=null)ccM=Math.round(+v);break;}}
   }
-  return" \u00b7 Bew\u00f6lkung "+hh+":00 \u00b7 DWD "+Math.round(ccD)+"\u202f%"+(ccM!=null?" \u00b7 Modell "+ccM+"\u202f%":"")+" \u2192 Durchlass "+Math.round(cmfFn(ccD)*100)+"\u202f%";
+  // Sonnenschein: gemessene Minuten der Stunde. Steht neben der Bewoelkung,
+  // weil beide dasselbe beschreiben — nur einmal als Bedeckung, einmal als
+  // Ergebnis. 50 % bedeckt kann 30 Minuten Sonne heissen oder 5.
+  const ss=(typeof ssMin==="number"&&isFinite(ssMin))?" \u00b7 Sonne "+Math.round(ssMin)+"\u202fmin":"";
+  return" \u00b7 Bew\u00f6lkung "+hh+":00 \u00b7 DWD "+Math.round(ccD)+"\u202f%"+(ccM!=null?" \u00b7 Modell "+ccM+"\u202f%":"")+ss+" \u2192 Durchlass "+Math.round(cmfFn(ccD)*100)+"\u202f%";
 }
 
 function moonInfo(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14)/86400000,days=d.getTime()/86400000-ref;let frac=((days/syn)%1+1)%1;const illum=Math.round((1-Math.cos(2*Math.PI*frac))/2*100);
@@ -1552,10 +1556,19 @@ function renderAirGrid(air){
   // UV-Kurve (max. möglich = clear-sky, plus realisiert-bisher aus gemessener Bewölkung)
   if(h&&h.uv_index_clear_sky){
     // realisierte UV bis jetzt: clear-sky × gemessene Bewölkung (DWD-Station)
-    const ccMap={};if(Array.isArray(fullRows))for(const r of fullRows){if(r.cloud_cover!=null){const dd=new Date(r.timestamp);ccMap[ymd(r.timestamp)+"_"+dd.getHours()]=r.cloud_cover;}}
+    // v2.95: Schluessel in Ortszeit — vorher Geraetezeit beim Schreiben, Ortszeit
+    // beim Lesen (Rest aus dem Zeitzonen-Umbau). Dazu die Sonnenscheindauer der
+    // Stunde (Bright Sky "sunshine", Minuten 0..60): eine DWD-Messung, kein Modell.
+    const ccMap={},ssMap={};
+    if(Array.isArray(fullRows))for(const r of fullRows){
+      const k=ymd(r.timestamp)+"_"+ortsStunde(new Date(r.timestamp).getTime());
+      if(r.cloud_cover!=null)ccMap[k]=r.cloud_cover;
+      if(r.sunshine!=null&&isFinite(+r.sunshine))ssMap[k]=+r.sunshine;
+    }
     const nowMs=Date.now();
     h._real=h.time.map((t,i)=>{const dt=new Date(t);if(uvDayOffset===0&&dt.getTime()>nowMs+30*60000)return null;const cc=ccMap[ymd(t)+"_"+ortsStunde(dt.getTime())];if(cc==null)return null;return Math.round((h.uv_index_clear_sky[i]||0)*cmfUV(cc)*10)/10;});
     h._cc=h.time.map(t=>{const cc=ccMap[ymd(t)+"_"+ortsStunde(new Date(t).getTime())];return cc==null?null:+cc;}); // v2.20: Bewölkung für Minuten-Simulation
+    h._ss=h.time.map(t=>{const v=ssMap[ymd(t)+"_"+ortsStunde(new Date(t).getTime())];return v==null?null:v;});     // v2.95: Sonnenscheinminuten je Stunde
     let pk=-1,pkI=-1;h.uv_index_clear_sky.forEach((v,i)=>{if(v!=null&&v>pk){pk=v;pkI=i;}});
     // echter Sub-Stunden-Scheitel: clear-sky-Glocke (gleiche Catmull-Rom wie gezeichnet) fein abtasten -> Peak ~Solar-Mittag statt voller Stunde
     let pkMs=pkI>=0?new Date(h.time[pkI]).getTime():null;
@@ -1754,7 +1767,7 @@ function drawUV(h){
     if(_cd){let s="";
       if(uvDayOffset===0&&Array.isArray(h._cc))
         for(let i=0;i<tms.length;i++)
-          if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV);break;}
+          if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV,h._ss?h._ss[i]:null);break;}
       _cd.textContent=s;}
   }catch(e){console.warn("ccDiag",e&&e.message);}
   const _sb=document.getElementById("uvSimBtn");
@@ -2590,6 +2603,26 @@ function tzNachtragen(){
 
 /* Zusatz im Kopf, der sagt: die Uhrzeiten sind NICHT die des Telefons.
    Ohne ihn liest man 19:00 und haelt es fuer die eigene Zeit. */
+/* v2.94: Meereshoehe. Open-Meteo liefert sie in jeder Antwort als "elevation"
+   mit — es ist die Hoehe des Modellgitterpunkts aus einem Gelaendemodell, nicht
+   die vermessene Hoehe der Adresse. In flachem Gelaende deckt sich das nahezu,
+   am Hang kann es um einige Meter abweichen. */
+let _hoehe=null;
+function hoeheMerken(j){
+  try{
+    const v=j&&(typeof j.elevation==="number"?j.elevation:(Array.isArray(j.elevation)?j.elevation[0]:null));
+    if(typeof v!=="number"||!isFinite(v))return;
+    const neu=Math.round(v);
+    if(neu===_hoehe)return;
+    _hoehe=neu;
+    try{localStorage.setItem("hoehe"+LOC_KEY,String(neu));}catch(e){}
+    zeitzoneAnzeigen();   // schreibt die Kopfzeile neu
+  }catch(e){}
+}
+function hoeheSuffix(){
+  if(_hoehe==null)return "";
+  return " \u00b7 "+_hoehe.toLocaleString("de-DE")+"\u202fm \u00fc.\u202fNN";
+}
 function tzSuffix(){
   const d=tzUnterschiedMin(); if(!d)return "";
   const h=d/60, vz=h>0?"+":"\u2212";
@@ -2598,14 +2631,14 @@ function tzSuffix(){
 }
 function zeitzoneAnzeigen(){
   const st=el("stationTxt"); if(!st)return;
-  const b=st.dataset.basis; if(b!=null)st.textContent=b+tzSuffix();
+  const b=st.dataset.basis; if(b!=null)st.textContent=b+hoeheSuffix()+tzSuffix();
 }
 
 function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
+  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(window._uvSimOn&&typeof syncUV==="function")syncUV();if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   tzNachtragen();  // v2.71: echte Zeitzone des Ortes nachziehen
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
   loadCached("wolkCache4"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
@@ -2684,7 +2717,7 @@ function renderBilanz(){try{
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
     }).catch(e=>console.warn("bilanz",e));
 }catch(e){console.warn("bilanz",e&&e.message);}}
-let _bilLetzte=null,_bilHover=0;   // v2.70: Zeiger startet ganz links
+let _bilLetzte=null,_bilHover=null;   // v2.93: null = noch nicht gewischt -> steht auf heute
 function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage ab morgen
   const f=window._fcTage;if(!f||!f.length)return[];
   const heute=ymd(new Date()),out=[];
@@ -2750,10 +2783,20 @@ function bilanzChart(serie,prog,rest){
   for(let i=0;i<n;i++){const v=serie[i];if(v!=null)balken(i,v,true);}
   if(rest>0)balken(n-1,rest,false,HP(serie[n-1]||0));   // heute: Erwartetes auf das Gemessene stapeln
   for(let i=0;i<prog.length;i++)balken(n+i,prog[i],false);
-  if(_bilHover!=null&&_bilHover>=0&&_bilHover<nt){   // v2.67: Zeiger
-    const px=_bilHover*bw+bw/2;
-    x.strokeStyle="#c2410c";x.lineWidth=1.4;
-    x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();
+  // v2.93: Aus dem durchgehenden Strich wird ein Punkt auf der Achse. Der Strich
+  // lief quer durchs Bild und wirkte wie eine Datenlinie; ausserdem sprang er
+  // frueher bei jeder Beruehrung um. Ohne eigenes Wischen steht der Punkt auf heute.
+  const _zi=(_bilHover==null)?n-1:_bilHover;
+  if(_zi>=0&&_zi<nt){
+    const px=_zi*bw+bw/2;
+    if(_bilHover!=null){   // waehrend/nach dem Wischen zusaetzlich eine zarte Fuehrung
+      x.strokeStyle="rgba(194,65,12,.28)";x.lineWidth=1;
+      x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();
+    }
+    x.fillStyle="#c2410c";
+    x.beginPath();x.arc(px,gy1,3.6,0,7);x.fill();
+    x.strokeStyle="#fff";x.lineWidth=1.4;
+    x.beginPath();x.arc(px,gy1,3.6,0,7);x.stroke();
   }
   x.font="9px -apple-system,system-ui,sans-serif";x.fillStyle="#9aa7b8";
   x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+3);
@@ -2763,14 +2806,14 @@ function bilanzChart(serie,prog,rest){
   // v2.67: Anzeige zum angetippten Tag
   const tg=el("bilTag");
   if(tg){
-    if(_bilHover==null||_bilHover<0||_bilHover>=nt)tg.textContent="";
+    if(_zi<0||_zi>=nt)tg.textContent="";
     else{
-      const versatz=_bilHover-(n-1);
+      const versatz=_zi-(n-1);
       const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+versatz);
       const wd=["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()];
       const datum=wd+" "+d.getDate()+"."+(d.getMonth()+1)+".";
       const f1=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
-      if(versatz<0)tg.textContent=datum+" \u00b7 "+f1(serie[_bilHover]||0)+"\u202fmm gemessen";
+      if(versatz<0)tg.textContent=datum+" \u00b7 "+f1(serie[_zi]||0)+"\u202fmm gemessen";
       else if(versatz===0)tg.textContent=datum+" \u00b7 heute "+f1(serie[n-1]||0)+"\u202fmm gefallen"
         +(rest>0?" + "+f1(rest)+"\u202fmm erwartet":"");
       else tg.textContent=datum+" \u00b7 "+f1(prog[versatz-1]||0)+"\u202fmm erwartet";
@@ -2781,20 +2824,30 @@ function bilanzChart(serie,prog,rest){
     // die Bewegung fest, auch wenn der Finger kurz aus dem Feld geraet; das Neuzeichnen
     // laeuft ueber requestAnimationFrame, damit nichts stockt.
     cv._w=1;
-    let raf=0,letzter=-1;
+    let raf=0,letzter=-1,startX=0,zieht=false;
+    const SCHWELLE=8;   // px, ab hier gilt es als Wischen und nicht als Antippen
     const anzahl=()=>cv._nt||40;
     const idx=e=>{const r=cv.getBoundingClientRect(),n=anzahl();
       return Math.max(0,Math.min(n-1,Math.floor((e.clientX-r.left)/(r.width/n))));};
     const zeichne=()=>{raf=0;if(_bilLetzte)bilanzZeichne(_bilLetzte);};
     const auf=e=>{const i=idx(e);if(i===letzter)return;letzter=i;_bilHover=i;if(!raf)raf=requestAnimationFrame(zeichne);};
-    cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}letzter=-1;auf(e);});
+    // v2.93: Beruehren allein bewegt nichts mehr. Auf dem Telefon ist ein Tipp
+    // meist der Beginn eines Scrollversuchs — frueher sprang der Zeiger dabei
+    // an eine zufaellige Stelle und die Zeile darunter zeigte einen fremden Tag.
+    cv.addEventListener("pointerdown",e=>{startX=e.clientX;zieht=false;letzter=-1;});
     cv.addEventListener("pointermove",e=>{
       if(!(e.buttons||e.pointerType==="touch"))return;
+      if(!zieht){
+        if(Math.abs(e.clientX-startX)<SCHWELLE)return;   // noch kein Wischen
+        zieht=true;
+        try{cv.setPointerCapture(e.pointerId);}catch(_){}
+      }
       if(e.cancelable)e.preventDefault();
       auf(e);
     },{passive:false});
-    cv.addEventListener("pointerup",e=>{try{cv.releasePointerCapture(e.pointerId);}catch(_){}});
-    cv.addEventListener("pointercancel",e=>{try{cv.releasePointerCapture(e.pointerId);}catch(_){}});
+    const los=e=>{if(zieht){try{cv.releasePointerCapture(e.pointerId);}catch(_){}}zieht=false;};
+    cv.addEventListener("pointerup",los);
+    cv.addEventListener("pointercancel",los);
   }
   x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
@@ -3438,6 +3491,7 @@ load();
 (function(){
   document.title="Wetter \u00b7 "+(LOC.isWettenberg?"Gie\u00dfen/Wettenberg":LOC.name);
   if(!LOC.isWettenberg){const pn=el("placeName");if(pn)pn.textContent=LOC.name;}
+  try{const gz=localStorage.getItem("hoehe"+LOC_KEY);if(gz!=null&&gz!=="")_hoehe=+gz;}catch(e){}
   {const st=el("stationTxt");if(st&&st.dataset.basis==null){st.dataset.basis=st.textContent;zeitzoneAnzeigen();}}
   const ov=el("locOverlay"),msg=el("locMsg"),ap=el("locApply");
   if(!ov)return;
