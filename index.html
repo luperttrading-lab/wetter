@@ -375,7 +375,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.88</span>
+      <span class="ver">v2.91</span>
     </div>
   </header>
 
@@ -1644,7 +1644,12 @@ function drawUV(h){
     W=Math.round(cr.width);
     gx0=Math.round(off+BFS_X0*ir.width);gx1=Math.round(off+BFS_X1*ir.width);
     plotH=Math.round((BFS_Y0-BFS_Y9)*ir.height);
-  }else{
+  }
+  // v2.90: Die Hoehe stammte allein aus dem BfS-Bild. Laedt es nicht — offline,
+  // in einer Dateivorschau oder bei einer Stoerung beim BfS —, ist ir.height 0
+  // und das ganze Diagramm faellt auf eine Linie zusammen. Dann den normalen
+  // Weg nehmen statt eine flache Grafik zu zeichnen.
+  if(!(plotH>20)||!(gx1-gx0>40)){
     const _hp=cv.parentElement,_pcs=_hp?getComputedStyle(_hp):null;
     W=_hp?Math.round(_hp.clientWidth-parseFloat(_pcs.paddingLeft)-parseFloat(_pcs.paddingRight)):cv.clientWidth;
     gx0=Math.round(BFS_X0*W);gx1=Math.round(BFS_X1*W);plotH=Math.round(1.29*yMax*(gx1-gx0)/15);
@@ -1767,11 +1772,11 @@ function drawUV(h){
     for(let i=0;i<R.ts.length;i++){const v=R.vs[i];if(v==null||v<=0.03)continue;x.beginPath();x.arc(XX(R.ts[i]),Y(Math.min(v,axMax)),0.9,0,6.3);x.fill();}
   } }catch(e){console.warn("uvSim",e&&e.message);}
   x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
-  let _gN=0,_gMax=0,_gBad=0;   // v2.81: Selbstkontrolle der Glocke
+  let _gN=0,_gMax=0,_gBad=0,_gPx=null;   // v2.81: Selbstkontrolle der Glocke
   for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);
     const yy=Y(uv);
     if(!isFinite(yy)||!isFinite(uv)){_gBad++;continue;}
-    if(uv>_gMax)_gMax=uv; _gN++;
+    if(uv>_gMax){_gMax=uv;_gPx=px;} _gN++;
     if(_gf){x.moveTo(px,yy);_gf=false;}else x.lineTo(px,yy);}
   x.stroke();
   window._uvGlocke={punkte:_gN,ungueltig:_gBad,scheitel:Math.round(_gMax*100)/100,
@@ -1792,7 +1797,13 @@ function drawUV(h){
   // jetzt-Marker
   if(now>=t6&&now<=t21){const xn=X(now);x.strokeStyle="rgba(23,32,46,.3)";x.setLineDash([2,2]);x.lineWidth=1;x.beginPath();x.moveTo(xn,gy0);x.lineTo(xn,gy1);x.stroke();x.setLineDash([]);
     const uvNow=realAt(now);if(uvNow!=null){const yn=Y(uvNow);x.beginPath();x.arc(xn,yn,4.5,0,7);x.fillStyle=BFSCOL[Math.max(0,Math.min(9,Math.round(uvNow)))];x.fill();x.lineWidth=1.6;x.strokeStyle="#fff";x.stroke();}
-    x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign=xn>gx1-30?"right":"left";x.fillText("jetzt",xn+(xn>gx1-30?-3:3),gy0+22);}
+    // v2.91: Hinter "jetzt" steht, was zu dieser Minute bei klarem Himmel
+    // moeglich waere — nicht das Tagesmaximum. Das ist der Wert, an dem sich
+    // die aktuell gemessene Saeule messen lassen muss.
+    const _mNow=sunBell(now);
+    const _txt="jetzt"+(isFinite(_mNow)&&_mNow>0.05?"   max. "+_mNow.toFixed(1).replace(".",","):"");
+    x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";
+    x.textAlign=xn>gx1-30?"right":"left";x.fillText(_txt,xn+(xn>gx1-30?-3:3),gy0+22);}
   // Vit-D-Schwelle (UV 3)
   const TH=3,cross=[];for(let i=i0;i<i1;i++){const a=cs[i],b=cs[i+1];if(a==null||b==null)continue;if((a<TH)!==(b<TH)){const f=(TH-a)/(b-a);cross.push(tms[i]+f*(tms[i+1]-tms[i]));}}
   const gC="#1f6b43",y3=Y(3);
@@ -1814,6 +1825,15 @@ function drawBfsOverlay(){try{
   if(!img||!cv||!h||!h.uv_index_clear_sky||!h.time)return;
   const W=img.clientWidth,Hh=img.clientHeight;
   if(!W||!Hh){if((window._bfsRt=(window._bfsRt||0)+1)<=8)setTimeout(drawBfsOverlay,300);return;} // v2.14: Layout noch 0 -> bis zu 8x nachfassen
+  // v2.91: Ein nicht geladenes Bild hat trotzdem eine Hoehe — die des
+  // Ersatztextes. Die Kalibrierung BFS_Y0/Y9 bezieht sich aber auf das echte
+  // Bild, also wurden die Kurven auf Textzeilenhoehe zusammengedrueckt.
+  // Ohne geladenes Bild gibt es nichts zu ueberlagern.
+  if(!(img.complete&&img.naturalWidth>0)){
+    try{const c2=cv.getContext("2d");c2.clearRect(0,0,cv.width,cv.height);}catch(e){}
+    if((window._bfsRt=(window._bfsRt||0)+1)<=8)setTimeout(drawBfsOverlay,300);
+    return;
+  }
   window._bfsRt=0;
   const _axSlug=(()=>{const m=String(img.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);return m?decodeURIComponent(m[1]):"";})(); // v2.15: Slug aus img.src - das Stationsobjekt ist render-lokal, hier unsichtbar
   const dpr=Math.min(window.devicePixelRatio||1,3);
