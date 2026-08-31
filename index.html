@@ -130,10 +130,16 @@
   .col .ic{width:28px;height:28px;margin:7px 0}
   .col .v{font-size:14px;font-weight:780;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap}
   /* v2.98: Sonnenminuten der Stunde als schmale Leiste, Boee als Zahl */
-  .col .ssbar{height:3px;margin:5px 7px 0;background:rgba(15,23,42,.07);border-radius:2px;overflow:hidden}
+  .col .ssbar{height:5px;margin:6px 6px 0;background:rgba(15,23,42,.07);border-radius:3px;overflow:hidden}
   .col .ssbar i{display:block;height:100%;background:var(--sun);border-radius:2px}
   .col.fc .ssbar i{opacity:.5}
-  .col .xtra{font-size:9px;color:var(--faint);margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  /* v3.00: 9px war zu klein zum Ablesen, das Textzeichen der Sonne kaum zu
+     erkennen. Jetzt 11,5px und ein gezeichnetes Sonnensymbol. */
+  .col .xtra{margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.35}
+  .col .xtra span{display:flex;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .col .xtra .sx{color:#c79100}
+  .col .xtra .bx{color:var(--muted);font-weight:500}
+  .col .xtra svg{flex:none;display:block}
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
@@ -392,7 +398,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.98</span>
+      <span class="ver">v3.00</span>
     </div>
   </header>
 
@@ -843,8 +849,11 @@ function renderStrip(rows){
     const _bo=(typeof r.wind_gust_speed==="number"&&isFinite(r.wind_gust_speed))?Math.round(r.wind_gust_speed):null;
     const _ssBar=_ss==null?'<div class="ssbar"></div>'
       :`<div class="ssbar"><i style="width:${Math.round(_ss/60*100)}%"></i></div>`;
+    // v2.99: Zwei kurze Zeilen statt einer langen. Die Zellen sind gut halb so
+    // breit wie im Entwurf, "58 min \u00b7 \u2197 20" lief ineinander. Symbole
+    // statt Woerter: Sonne = Minuten, Pfeil = Boee in km/h.
     const _unten=(_ss!=null||_bo!=null)
-      ? `<div class="xtra">${_ss!=null?Math.round(_ss)+"\u202fmin":""}${(_ss!=null&&_bo!=null)?" \u00b7 ":""}${_bo!=null?"\u2197\u202f"+_bo:""}</div>`
+      ? `<div class="xtra">${_ss!=null?'<span class="sx">'+SVG_SONNE+Math.round(_ss)+'</span>':""}${_bo!=null?'<span class="bx">'+SVG_BOE+_bo+'</span>':""}</div>`
       : "";
     cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(r.icon||"cloudy",28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
@@ -947,6 +956,10 @@ function recenterChart(){const g=chartGeom;if(!g)return;const span=g.W-g.viewW;i
   window.addEventListener("mouseup",()=>{md=false;});
 })();
 
+/* v3.00: gezeichnete Symbole statt Textzeichen — die Unicode-Sonne wird von
+   iOS sehr klein und je nach Schrift unterschiedlich dargestellt. */
+const SVG_SONNE='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none"/><path d="M12 1.6v2.6M12 19.8v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M1.6 12h2.6M19.8 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9"/></svg>';
+const SVG_BOE='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M18 6h-7M18 6v7"/></svg>';
 function tile(k,val,unit,sub){return `<div class="tile"><div class="k">${k}</div><div class="val">${val}${unit?` <small>${unit}</small>`:""}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;}
 function aqiCellInner(){
   if(_aqi&&_aqi.european_aqi!=null){const[ac,acol]=aqiCat(_aqi.european_aqi);
