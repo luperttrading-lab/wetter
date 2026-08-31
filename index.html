@@ -400,7 +400,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.03</span>
+      <span class="ver">v3.04</span>
     </div>
   </header>
 
@@ -848,13 +848,17 @@ function renderStrip(rows){
     // v2.98: Sonnenminuten als Leiste (0..60 min, DWD-Messung ueber die
     // 120-W/m2-Schwelle) und Boee darunter. Beide Felder liefert Bright Sky
     // ohnehin mit; sie wurden bisher verworfen.
-    // v3.03: Nachts keine Sonnenminuten. Eine Stunde, in der die Sonne
-    // durchgehend unter dem Horizont stand, kann keine haben — die "0" war
-    // kein Messwert, sondern eine Selbstverstaendlichkeit.
+    // v3.04: Massstab ist die STUNDENMITTE, nicht der Rand. Der Stundenwert
+    // bezieht sich auf die vorangegangene Stunde (DWD-Konvention), die Mitte
+    // liegt also 30 min vor dem Zeitstempel. Vorher galt die 21-Uhr-Stunde noch
+    // als Tag, weil die Sonne um 20:15 unterging — und zeigte eine sinnlose 0.
+    // Ein echter Nullwert bei Tageslicht bleibt stehen: er sagt "durchgehend
+    // bedeckt" und ist damit eine Aussage.
     const _tMs=new Date(r.timestamp).getTime();
     let _tag=true;
-    try{const a=_sunMu(_tMs),b=_sunMu(_tMs-3600e3);_tag=(a!=null&&a>0)||(b!=null&&b>0);}catch(e){}
-    const _ss=(_tag&&typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
+    try{const m=_sunMu(_tMs-1800e3);_tag=(m!=null&&m>0);}catch(e){}
+    const _ssRoh=(typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
+    const _ss=(_ssRoh==null)?null:((_ssRoh>0||_tag)?_ssRoh:null);
     const _bo=(typeof r.wind_gust_speed==="number"&&isFinite(r.wind_gust_speed))?Math.round(r.wind_gust_speed):null;
     const _ssBar=_ss==null?'<div class="ssbar"></div>'
       :`<div class="ssbar"><i style="width:${Math.round(_ss/60*100)}%"></i></div>`;
