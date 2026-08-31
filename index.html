@@ -140,6 +140,7 @@
   .col .xtra .sx{color:#c79100}
   .col .xtra .bx{color:var(--muted);font-weight:500}
   .col .xtra svg{flex:none;display:block}
+  .col .xtra .sx small{font-size:9px;font-weight:500;opacity:.65;margin-left:1px}
   .col .xtra .leer{visibility:hidden}
   .col .xtra .leer::after{content:"0"}   /* haelt die Zeilenhoehe */
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
@@ -268,6 +269,15 @@
   .uvleg i.glock{width:15px;height:0;border-top:3px solid #3a4453;border-radius:2px}
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
+  /* v3.06: Regler fuer den Kurvenexponenten */
+  .krow{margin:9px auto 0;max-width:290px;padding:0 6px}
+  .krow input[type=range]{width:100%;accent-color:#c2410c;height:22px}
+  .kinfo{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1px;
+    font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .kinfo b{color:var(--ink)}
+  .kinfo small{opacity:.7}
+  .kbtn{font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid var(--btn-line);
+    background:var(--btn-bg);color:var(--btn-ink);cursor:pointer}
   .uvsimbtn.on{background:#7a4dd8;border-color:#7a4dd8;color:#fff}
   #vitdCv{width:100%;height:196px;display:block;touch-action:pan-y;margin-top:6px}
   .bil-row{display:flex;gap:7px;margin-bottom:11px}
@@ -400,7 +410,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.04</span>
+      <span class="ver">v3.06</span>
     </div>
   </header>
 
@@ -834,6 +844,56 @@ const now=()=>Date.now();
 function warnIc(col){return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>`;}
 function sunSmall(){return `<svg viewBox="0 0 24 24" width="18" height="18">${icon("clear-day",18).replace(/^<svg[^>]*>|<\/svg>$/g,"")}</svg>`;}
 
+/* v3.05: Wie viele Minuten der Stunde VOR tsMs stand die Sonne ueber dem
+   Horizont? Ueber Auf- und Untergang gerechnet, nicht in Minutenschritten
+   abgetastet — das waere bei 120 Zellen zu teuer. Ergebnis 0..60. */
+const _moeglCache={};
+function sonnenMoeglich(tsMs){
+  const von=tsMs-3600e3;
+  const k=Math.floor(von/3600e3);
+  if(_moeglCache[k]!=null)return _moeglCache[k];
+  // Minutenweise abgetastet. Erst ueber Auf-/Untergangszeiten gerechnet — das
+  // war eleganter, lieferte aber keine brauchbaren Werte, und ein catch hat den
+  // Fehler still auf 60 gesetzt. Abtasten ist plumper und nachweislich richtig;
+  // dank Cache faellt es pro Stunde nur einmal an.
+  let n=0;
+  for(let i=0;i<60;i++){
+    const mu=_sunMu(von+i*60000);
+    if(mu!=null&&mu>0)n++;
+  }
+  _moeglCache[k]=n;
+  return n;
+}
+/* v3.06: Handwert fuer den Kurvenexponenten. null = Automatik. Gilt pro
+   Standort, damit ein Versuch in Wettenberg nicht still auch Norden verstellt. */
+function kManuell(){
+  try{const v=localStorage.getItem("kHand"+LOC_KEY);
+    if(v==null||v==="")return null;
+    const z=parseFloat(v);
+    return (isFinite(z)&&z>=0.6&&z<=3.0)?z:null;
+  }catch(e){return null;}
+}
+function kManuellSetzen(v){
+  try{
+    if(v==null)localStorage.removeItem("kHand"+LOC_KEY);
+    else localStorage.setItem("kHand"+LOC_KEY,String(v));
+  }catch(e){}
+  try{if(typeof lastUVH!=="undefined"&&lastUVH){drawUV(lastUVH);drawBfsOverlay();}}catch(e){}
+  kReglerAnzeigen();
+}
+function kReglerAnzeigen(){
+  const sl=el("kSlider"),tx=el("kWert"),bt=el("kAuto");
+  if(!sl||!tx)return;
+  const f=window._uvFit||{};
+  const hand=kManuell();
+  const wert=(hand!=null)?hand:(f.kAuto!=null?f.kAuto:1.8);
+  sl.value=wert.toFixed(2);
+  tx.innerHTML='k <b>'+wert.toFixed(2).replace(".",",")+'</b>'
+    +(hand==null?' <small>automatisch</small>':' <small>von Hand</small>')
+    +(f.kFrei!=null?' \u00b7 <small>Regression '+f.kFrei.toFixed(2).replace(".",",")+'</small>':'')
+    +' \u00b7 <small>Physik 2,42</small>';
+  if(bt)bt.style.opacity=hand==null?".35":"1";
+}
 function renderStrip(rows){
   const h=el("strip");h.innerHTML="";let prev=null,nowEl=null;
   const nowMs=Date.now();let nowIdx=-1;for(let i=rows.length-1;i>=0;i--){if(new Date(rows[i].timestamp).getTime()<=nowMs){nowIdx=i;break;}}
@@ -848,20 +908,19 @@ function renderStrip(rows){
     // v2.98: Sonnenminuten als Leiste (0..60 min, DWD-Messung ueber die
     // 120-W/m2-Schwelle) und Boee darunter. Beide Felder liefert Bright Sky
     // ohnehin mit; sie wurden bisher verworfen.
-    // v3.04: Massstab ist die STUNDENMITTE, nicht der Rand. Der Stundenwert
-    // bezieht sich auf die vorangegangene Stunde (DWD-Konvention), die Mitte
-    // liegt also 30 min vor dem Zeitstempel. Vorher galt die 21-Uhr-Stunde noch
-    // als Tag, weil die Sonne um 20:15 unterging — und zeigte eine sinnlose 0.
-    // Ein echter Nullwert bei Tageslicht bleibt stehen: er sagt "durchgehend
-    // bedeckt" und ist damit eine Aussage.
+    // v3.05: Bezugsgroesse ist die MOEGLICHE Sonnenscheindauer der Stunde, nicht
+    // starr 60 Minuten. Der DWD zaehlt absolut (Minuten mit Direktstrahlung ueber
+    // 120 W/m2) — in der Auf- und Untergangsstunde sind aber nur so viele Minuten
+    // erreichbar, wie die Sonne ueberhaupt am Himmel steht. Eine Leiste gegen 60
+    // haette dort wolkenlose Stunden als ein Drittel gezeichnet.
     const _tMs=new Date(r.timestamp).getTime();
-    let _tag=true;
-    try{const m=_sunMu(_tMs-1800e3);_tag=(m!=null&&m>0);}catch(e){}
+    const _moegl=sonnenMoeglich(_tMs);       // 0..60
     const _ssRoh=(typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
-    const _ss=(_ssRoh==null)?null:((_ssRoh>0||_tag)?_ssRoh:null);
+    // Steht die Sonne in dieser Stunde gar nicht ueber dem Horizont, sagt der Wert nichts.
+    const _ss=(_ssRoh==null||_moegl<1)?null:Math.min(_ssRoh,_moegl);
     const _bo=(typeof r.wind_gust_speed==="number"&&isFinite(r.wind_gust_speed))?Math.round(r.wind_gust_speed):null;
     const _ssBar=_ss==null?'<div class="ssbar"></div>'
-      :`<div class="ssbar"><i style="width:${Math.round(_ss/60*100)}%"></i></div>`;
+      :`<div class="ssbar"><i style="width:${Math.round(_ss/Math.max(1,_moegl)*100)}%"></i></div>`;
     // v2.99: Zwei kurze Zeilen statt einer langen. Die Zellen sind gut halb so
     // breit wie im Entwurf, "58 min \u00b7 \u2197 20" lief ineinander. Symbole
     // statt Woerter: Sonne = Minuten, Pfeil = Boee in km/h.
@@ -869,7 +928,7 @@ function renderStrip(rows){
     // sonst rutscht die Boee nach oben und man vergleicht Zeilen, die nicht
     // dasselbe zeigen.
     const _unten=`<div class="xtra">`
-      +(_ss!=null?'<span class="sx">'+SVG_SONNE+Math.round(_ss)+'</span>':'<span class="sx leer"></span>')
+      +(_ss!=null?'<span class="sx">'+SVG_SONNE+Math.round(_ss)+(_moegl<58?'<small>/'+_moegl+'</small>':'')+'</span>':'<span class="sx leer"></span>')
       +(_bo!=null?'<span class="bx">'+SVG_BOE+_bo+'</span>':'<span class="bx leer"></span>')
       +`</div>`;
     cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(r.icon||"cloudy",28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
@@ -1184,7 +1243,14 @@ function makeSunBell(cs,tms,t6,t21,fallback){
   // k-Frage nicht ueber mehrere Tage beurteilen.
   let kFrei=null,k=1.2;
   if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9){kFrei=(n*sxy-sx*sy)/den;k=Math.max(0.6,Math.min(1.8,kFrei));}}
-  window._uvFit={kFrei:kFrei,k:k,n:n,geklemmt:kFrei!=null&&Math.abs(kFrei-k)>1e-6};
+  // v3.06: Von Hand gesetztes k schlaegt Regression und Klemme. Die Vitamin-D-
+  // Punkte rechnen weiter mit physUvAt (2,42) — sie liegen also genau dann auf
+  // der Kurve, wenn hier 2,42 eingestellt ist.
+  const kHand=kManuell();
+  const kBenutzt=(kHand!=null)?kHand:k;
+  window._uvFit={kFrei:kFrei,k:kBenutzt,kAuto:k,n:n,hand:kHand,
+                 geklemmt:kHand==null&&kFrei!=null&&Math.abs(kFrei-k)>1e-6};
+  k=kBenutzt;
   let muMax=0;for(let m=t6;m<=t21;m+=180000){const mu=_sunMu(m);if(mu!=null&&mu>muMax)muMax=mu;}
   let csMax=0;for(let i=i0;i<=i1;i++)if((cs[i]||0)>csMax)csMax=cs[i];
   if(muMax<=0||csMax<=0)return fallback;
@@ -1725,7 +1791,9 @@ function renderAirGrid(air){
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
     window._uvJetzt=uvN;   // v2.98: fuer die Globalstrahlungs-Diagnose
-    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button>
+      <div class="krow"><input type="range" id="kSlider" min="0.60" max="3.00" step="0.01" aria-label="Kurvenexponent k">
+        <div class="kinfo"><span id="kWert"></span><button type="button" id="kAuto" class="kbtn" title="zurueck zur Regression">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
@@ -1907,6 +1975,14 @@ function drawUV(h){
           if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV,h._ss?h._ss[i]:null);break;}
       _cd.innerHTML=s;}
   }catch(e){console.warn("ccDiag",e&&e.message);}
+  {const _sl=document.getElementById("kSlider"),_ka=document.getElementById("kAuto");
+   if(_sl&&!_sl._w){_sl._w=1;
+     _sl.addEventListener("input",()=>{const t=el("kWert");
+       if(t)t.innerHTML='k <b>'+(+_sl.value).toFixed(2).replace(".",",")+'</b> <small>von Hand</small>';});
+     _sl.addEventListener("change",()=>kManuellSetzen(+_sl.value));
+   }
+   if(_ka&&!_ka._w){_ka._w=1;_ka.addEventListener("click",()=>kManuellSetzen(null));}
+   kReglerAnzeigen();}
   const _sb=document.getElementById("uvSimBtn");
   if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
   try{ if(window._uvSimOn&&h._cc){ // v2.20: Minuten-Simulation, Seed=Datum^Ort (deterministisch pro Tag)
