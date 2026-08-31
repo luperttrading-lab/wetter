@@ -289,7 +289,16 @@
   .wolkctl{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center;margin-top:10px;font-size:12.5px;color:#5b6879}
   .wolkctl input[type=range]{width:100%;accent-color:#1c66c4}
   .wolkctl b{font-variant-numeric:tabular-nums}
-  .uvnote{font-size:9.5px;color:var(--faint);text-align:center;margin-top:3px;line-height:1.3}
+  /* v2.96: Diagnose (aendert sich stuendlich) und Legende (aendert sich nie)
+     getrennt. Vorher stand beides in einem Block, und jede neue Zahl ging in
+     der Erklaerung unter. Reihenfolge der Diagnose ist fest, damit das Auge
+     weiss, wo es hinschauen muss. */
+  .uvdiag{font-size:11px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.55}
+  .uvdiag b{color:var(--ink);font-weight:700}
+  .uvdiag .dg{display:inline-block;white-space:nowrap;margin:0 2px}
+  .uvdiag .dg+.dg::before{content:"\u00b7";color:var(--faint);margin-right:6px}
+  .uvnote{font-size:9px;color:var(--faint);text-align:center;margin-top:5px;line-height:1.3;opacity:.75}
+  .uvvd{text-align:center;margin-top:4px;font-size:9.5px}
   #wolkenCv{width:100%;display:block;border-radius:12px;background:#5c7450}
   .bfscard{padding:13px 14px 9px}
   .bfswrap{margin-top:8px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--line);position:relative}
@@ -375,7 +384,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v2.95</span>
+      <span class="ver">v2.96</span>
     </div>
   </header>
 
@@ -1137,8 +1146,8 @@ function ccDiagText(hourMs,ccD,ly,cmfFn,ssMin){ // v2.40: Diagnose - welcher Bew
   // Sonnenschein: gemessene Minuten der Stunde. Steht neben der Bewoelkung,
   // weil beide dasselbe beschreiben — nur einmal als Bedeckung, einmal als
   // Ergebnis. 50 % bedeckt kann 30 Minuten Sonne heissen oder 5.
-  const ss=(typeof ssMin==="number"&&isFinite(ssMin))?" \u00b7 Sonne "+Math.round(ssMin)+"\u202fmin":"";
-  return" \u00b7 Bew\u00f6lkung "+hh+":00 \u00b7 DWD "+Math.round(ccD)+"\u202f%"+(ccM!=null?" \u00b7 Modell "+ccM+"\u202f%":"")+ss+" \u2192 Durchlass "+Math.round(cmfFn(ccD)*100)+"\u202f%";
+  const ss=(typeof ssMin==="number"&&isFinite(ssMin))?' \u00b7 Sonne <b>'+Math.round(ssMin)+'\u202fmin</b>':"";
+  return'<span class="dg">Bew\u00f6lkung '+hh+':00 \u00b7 DWD <b>'+Math.round(ccD)+'\u202f%</b>'+(ccM!=null?' \u00b7 Modell <b>'+ccM+'\u202f%</b>':'')+ss+' \u2192 Durchlass <b>'+Math.round(cmfFn(ccD)*100)+'\u202f%</b></span>';
 }
 
 function moonInfo(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14)/86400000,days=d.getTime()/86400000-ref;let frac=((days/syn)%1+1)%1;const illum=Math.round((1-Math.cos(2*Math.PI*frac))/2*100);
@@ -1607,9 +1616,9 @@ function renderAirGrid(air){
           if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}}
     }
     let vdLine="";
-    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<br><b style="color:#3f9b6e">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
+    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
-    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel<span id="atmDamp"></span><span id="ccDiag"></span> · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}${vdLine}</div></div>`;
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
     if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
@@ -1755,11 +1764,12 @@ function drawUV(h){
     let _pp=0,_pk=0;
     for(let px=pxA;px<=pxB;px+=4){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=physUvAt(t);if(u>_pp)_pp=u;const v=sunBell(t);if(v>_pk)_pk=v;}
     const _d=document.getElementById("atmDamp");
+    // v2.96: zwei Bausteine mit festem Platz — Daempfung, dann k.
     let _kTxt="";
     const _f=window._uvFit;
     if(_f&&_f.geklemmt&&_f.kFrei!=null)
-      _kTxt=" \u00b7 Kurvenexponent k auf "+_f.k.toFixed(2).replace(".",",")+" begrenzt (Regression: "+_f.kFrei.toFixed(2).replace(".",",")+", Physik: 2,42)";
-    if(_d)_d.textContent=((_pp>0&&_pk>0)?" \u00b7 Atmosph\u00e4ren-D\u00e4mpfung heute \u2212"+Math.max(0,Math.round(100*(1-_pk/_pp)))+"\u202f% (CAMS vs. Klimatologie)":"")+_kTxt;
+      _kTxt='<span class="dg">k <b>'+_f.k.toFixed(2).replace(".",",")+'</b> begrenzt \u00b7 Regression <b>'+_f.kFrei.toFixed(2).replace(".",",")+'</b> \u00b7 Physik 2,42</span>';
+    if(_d)_d.innerHTML=((_pp>0&&_pk>0)?'<span class="dg">D\u00e4mpfung <b>\u2212'+Math.max(0,Math.round(100*(1-_pk/_pp)))+'\u202f%</b> (CAMS)</span>':"")+_kTxt;
   }
   try{ // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
        // v2.82: gekapselt - eine kaputte Nebenzeile darf die Kurve nicht kosten
@@ -1768,7 +1778,7 @@ function drawUV(h){
       if(uvDayOffset===0&&Array.isArray(h._cc))
         for(let i=0;i<tms.length;i++)
           if(tms[i]<=now&&(i+1>=tms.length||tms[i+1]>now)){if(h._cc[i]!=null)s=ccDiagText(tms[i],h._cc[i],window._ccLayers,cmfUV,h._ss?h._ss[i]:null);break;}
-      _cd.textContent=s;}
+      _cd.innerHTML=s;}
   }catch(e){console.warn("ccDiag",e&&e.message);}
   const _sb=document.getElementById("uvSimBtn");
   if(_sb){_sb.classList.toggle("on",!!window._uvSimOn);_sb.textContent=window._uvSimOn?"\u26a1 Simulation aktiv \u00b7 2-min":"\u26a1 Minuten-Simulation";if(!_sb._w){_sb._w=1;_sb.onclick=()=>{window._uvSimOn=!window._uvSimOn;syncUV();};}}
@@ -1800,7 +1810,7 @@ function drawUV(h){
     tag:(function(){try{return new Date(dayMs).toISOString().slice(0,16);}catch(e){return String(dayMs);}})()};
   if(_gN<10||_gMax<=0){
     const _d=document.getElementById("atmDamp");
-    if(_d)_d.textContent+=" \u00b7 Glocke fehlt ("+_gN+" Punkte, Scheitel "+_gMax.toFixed(2)+", "+_gBad+" ungueltig)";
+    if(_d)_d.innerHTML+='<span class="dg">Glocke fehlt ('+_gN+' Punkte, Scheitel '+_gMax.toFixed(2)+', '+_gBad+' ungueltig)</span>';
   }
   // stuendliche REALE Messwerte als Vorwaerts-Treppe: Messpunkt = linke Ecke, dann 1h nach rechts, dann Sprung zum naechsten.
   // Nur so weit wie gemessen (real[i]!=null, d.h. bis jetzt) - danach ist die Bewoelkung der Zukunft unbekannt.
