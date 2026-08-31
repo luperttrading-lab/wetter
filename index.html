@@ -398,7 +398,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.01</span>
+      <span class="ver">v3.02</span>
     </div>
   </header>
 
@@ -1318,6 +1318,38 @@ let _omHeute=null;   // zuletzt aus Open-Meteo gerechnete Tagessumme
    gesunder Stand ist damit selten aelter als eine Stunde; 100 Minuten lassen
    einen ausgefallenen Lauf zu, fangen aber echten Stillstand ab. */
 const RADOLAN_MAX_ALTER_MIN=100;
+/* v3.02: Die Pipeline rechnet seit v2.0 mehrere Standorte. radolan.json traegt
+   den Hauptort weiterhin auf oberster Ebene (damit aeltere App-Fassungen
+   weiterlaufen) und zusaetzlich einen Block "orte". Gesucht wird ueber die
+   Koordinaten, nicht ueber einen Namen — so bleibt die Zuordnung auch dann
+   richtig, wenn ein Ort in der App anders heisst als in der Pipeline. */
+const RADOLAN_MAX_KM=2.5;        // weiter entfernt ist es ein anderer Regen
+function _kmAbstand(la1,lo1,la2,lo2){
+  const R=6371,t=Math.PI/180;
+  const dla=(la2-la1)*t,dlo=(lo2-lo1)*t;
+  const a=Math.sin(dla/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dlo/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(a)));
+}
+/* Liefert {daten, id, km} oder null. daten hat dieselbe Form wie frueher die
+   oberste Ebene, der Rest der Zeichenroutinen bleibt also unveraendert. */
+function radolanOrt(j){
+  if(!j)return null;
+  const orte=j.orte;
+  if(orte&&typeof orte==="object"){
+    let best=null;
+    for(const id in orte){
+      const o=orte[id];
+      if(!o||typeof o.lat!=="number"||typeof o.lon!=="number")continue;
+      const km=_kmAbstand(LOC.lat,LOC.lon,o.lat,o.lon);
+      if(!best||km<best.km)best={daten:o,id:id,km:km};
+    }
+    if(best&&best.km<=RADOLAN_MAX_KM)return best;
+    if(best)console.info("RADOLAN: naechster Ort",best.id,best.km.toFixed(1),"km entfernt \u2013 zu weit");
+    return null;
+  }
+  // altes Format ohne "orte": galt ausschliesslich fuer Wettenberg
+  return LOC.isWettenberg?{daten:j,id:"wettenberg",km:0}:null;
+}
 function altStr(min){
   if(min==null)return "unbekannt";
   if(min<90)return min+" min";
@@ -1338,11 +1370,17 @@ function renderPrecipToday(d){
 
 /* --- Kachel "Niederschlag heute": geeichte DWD-Radar-Tagessumme (RADOLAN-RW, bilinear ueber 4 Pixel am Erlental) aus radolan.json. Ueberschreibt den Open-Meteo-Fallback, sobald verfuegbar und vom heutigen Tag. --- */
 function renderRadolan(){
-  if(!LOC.isWettenberg){const sec=el("umkreisSec");if(sec)sec.classList.add("hidden");return;} // Pipeline auf Wettenberg geeicht; Kachel behaelt Open-Meteo-Wert
+  // v3.02: Nicht mehr an Wettenberg gebunden — es zaehlt, ob die Pipeline fuer
+  // diesen Standort rechnet. Fuer Orte ohne eigenen Pixel bleibt die Kachel aus,
+  // sonst zeigte sie fremden Regen.
   fetch("https://luperttrading-lab.github.io/wetter/radolan.json?t="+Date.now(),{cache:"no-store"})   // Pipeline lebt im Repo wetter
     .then(r=>r.ok?r.json():Promise.reject("HTTP "+r.status))
     .then(j=>{
       if(!j||j.summe_mm==null){renderUmkreis(null);return;}
+      const _ro=radolanOrt(j);
+      if(!_ro){const sec=el("umkreisSec");if(sec)sec.classList.add("hidden");
+        console.info("RADOLAN: kein Pixel fuer",LOC.name,"\u2013 Kachel: Open-Meteo");return;}
+      j=Object.assign({},j,_ro.daten,{aktualisiert:j.aktualisiert});
       const istHeute=!j.datum||j.datum===ymd(new Date());
       // v2.71: Bisher entschied allein das Datum. Ein sieben Stunden alter
       // Stand von heute frueh galt damit als gueltig und ueberschrieb den
@@ -2792,11 +2830,24 @@ function bilanzRechne(tage,heuteStr){
 }
 function renderBilanz(){try{
   const sec=el("bilanzSec");if(!sec)return;
-  if(!LOC.isWettenberg){sec.classList.add("hidden");return;}
+  // v3.02: siehe renderRadolan — Sperre haengt jetzt an den Daten, nicht am Ort
   fetch("https://luperttrading-lab.github.io/wetter/radolan-archiv.json?t="+Date.now(),{cache:"no-store"})
     .then(r=>r.ok?r.json():Promise.reject("HTTP "+r.status))
     .then(j=>{
-      const tage=j&&j.tage;if(!tage||!Object.keys(tage).length)return;
+      // v3.02: Ortsarchiv bevorzugen, sonst das alte Feld "tage" (nur Wettenberg)
+      let tage=null;
+      if(j&&j.orte&&typeof j.orte==="object"){
+        const liste=Array.isArray(j.ort_liste)?j.ort_liste:[];
+        let best=null;
+        for(const e of liste){
+          if(typeof e.lat!=="number"||typeof e.lon!=="number")continue;
+          const km=_kmAbstand(LOC.lat,LOC.lon,e.lat,e.lon);
+          if(!best||km<best.km)best={id:e.id,km:km};
+        }
+        if(best&&best.km<=RADOLAN_MAX_KM&&j.orte[best.id])tage=j.orte[best.id];
+      }
+      if(!tage&&LOC.isWettenberg)tage=j&&j.tage;
+      if(!tage||!Object.keys(tage).length){sec.classList.add("hidden");return;}
       const B=bilanzRechne(tage,ymd(new Date()));
       const f=v=>v==null?"\u2013":v.toLocaleString("de-DE",{maximumFractionDigits:1});
       const box=(k,v,u)=>`<div class="bil-box"><div class="bk">${k}</div><div class="bv">${v}</div><div class="bu">${u}</div></div>`;

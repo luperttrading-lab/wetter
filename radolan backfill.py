@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""Einmaliger Rueckwaerts-Backfill des RADOLAN-Tagesarchivs (v1.0).
+"""Rueckwaerts-Backfill des RADOLAN-Tagesarchivs (v2.0, mehrere Orte).
 
 Fuellt radolan-archiv.json mit vergangenen Tagessummen. Zwei Quellen:
   1. historical/bin/JJJJ/  - monatsweise Tar-Archive, reicht Jahre zurueck
-  2. recent/bin/           - Einzeldateien der letzten ~30 Tage (Luecken-Fueller)
+  2. recent/bin/           - Einzeldateien der letzten ~35 Tage (Luecken-Fueller)
 
-Pixelgewichte, Parser und Archivformat werden aus radolan_regen importiert,
-damit Backfill und Live-Pipeline garantiert denselben Punkt berechnen.
+v2.0: rechnet in einem Durchgang alle Orte aus radolan_regen.ORTE. Jede RW-Datei
+wird weiterhin nur einmal gelesen und ausgepackt — der Mehraufwand fuer weitere
+Standorte ist damit vernachlaessigbar, es kommen nur vier Multiplikationen je
+Ort und Stunde dazu. Die Laufzeit bestimmt der Download, nicht die Rechnung.
+
+Projektion, Parser und Archivformat kommen aus radolan_regen, damit Backfill und
+Live-Pipeline garantiert dieselben Punkte berechnen.
 
 Steuerung ueber Umgebungsvariablen:
   BACKFILL_JAHR   z.B. "2024" -> genau dieses Kalenderjahr nachtragen
@@ -20,18 +25,14 @@ enthalten - fuer die letzten ~35 Tage springt recent/bin ein.
 import gzip, os, re, tarfile, tempfile, urllib.request
 from datetime import datetime, timedelta, timezone, date
 
-from radolan_regen import (PIXELS, TZ, UA, parse_mm, val,
-                           archiv_laden, archiv_schreiben, tagessumme)
+from radolan_regen import (ORTE, HAUPT, TZ, UA, parse_mm, punktwert,
+                           archiv_laden, archiv_laden_orte, archiv_schreiben,
+                           tagessumme_alle)
 
 HIST = ("https://opendata.dwd.de/climate_environment/CDC/grids_germany/"
         "hourly/radolan/historical/bin/")
 TS = re.compile(r"raa01-rw_10000-(\d{10})-dwd")
 RECENT_TAGE = 35          # so weit reicht recent/bin erfahrungsgemaess zurueck
-
-
-def punktwert(mm):
-    """Bilinear gewichteter Wert am Hausstandort - identisch zur Live-Pipeline."""
-    return sum(w * val(mm, r, c) for r, c, w in PIXELS)
 
 
 def lokaler_tag(dt_utc):
@@ -60,7 +61,8 @@ def monatsdatei(jahr, monat):
 
 
 def monat_aus_tar(url, roh):
-    """Monatsarchiv streamen und die Stundenwerte auf lokale Tage summieren."""
+    """Monatsarchiv streamen und die Stundenwerte auf lokale Tage summieren.
+    roh[ort_id][datum] = {"mm": float, "h": int}"""
     with tempfile.NamedTemporaryFile(suffix=".tar") as tmp:
         with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=600) as r:
             while True:
@@ -82,12 +84,14 @@ def monat_aus_tar(url, roh):
                 if data[:2] == b"\x1f\x8b":          # manche Jahrgaenge sind zusaetzlich gezippt
                     data = gzip.decompress(data)
                 try:
-                    v = punktwert(parse_mm(data))
+                    mm = parse_mm(data)
                 except Exception:
                     continue
-                e = roh.setdefault(lokaler_tag(dt), {"mm": 0.0, "h": 0})
-                e["mm"] += v
-                e["h"] += 1
+                ds = lokaler_tag(dt)
+                for o in ORTE:                       # eine Datei, alle Orte
+                    e = roh.setdefault(o["id"], {}).setdefault(ds, {"mm": 0.0, "h": 0})
+                    e["mm"] += punktwert(mm, o["pixels"])
+                    e["h"] += 1
                 n += 1
         return n
 
@@ -109,10 +113,27 @@ def main():
         tage_zurueck = int(os.environ.get("BACKFILL_TAGE", "365"))
         ziel = [heute - timedelta(days=i) for i in range(1, tage_zurueck + 1)]
 
-    archiv = archiv_laden()
-    offen = [d for d in ziel if force or not archiv.get(d.isoformat(), {}).get("voll")]
+    print("Orte: " + ", ".join(f"{o['id']} ({o['lat']:.4f}N {o['lon']:.4f}E)" for o in ORTE))
+
+    archiv = archiv_laden()            # Hauptort, altes Feld
+    a_orte = archiv_laden_orte()       # je Ort
+    for o in ORTE:
+        a_orte.setdefault(o["id"], {})
+
+    def fehlt(ds):
+        """Offen, sobald EIN Ort den Tag noch nicht vollstaendig hat — sonst
+        blieben neu hinzugefuegte Orte fuer immer leer, weil der Hauptort
+        laengst gefuellt ist."""
+        if force:
+            return True
+        for o in ORTE:
+            if not a_orte[o["id"]].get(ds, {}).get("voll"):
+                return True
+        return not archiv.get(ds, {}).get("voll")
+
+    offen = [d for d in ziel if fehlt(d.isoformat())]
     if not offen:
-        print("Nichts zu tun - alle Zieltage sind bereits vollstaendig.")
+        print("Nichts zu tun - alle Zieltage sind fuer alle Orte vollstaendig.")
         return
     print(f"{len(offen)} von {len(ziel)} Tagen offen ({offen[-1]} bis {offen[0]}).")
     rest = {d.isoformat() for d in offen}
@@ -131,12 +152,19 @@ def main():
         except Exception as e:
             print(f"    Fehler: {str(e)[:80]} -> ggf. ueber recent/")
 
-    for ds, e in roh.items():
-        if ds in rest:
-            archiv[ds] = {"mm": round(e["mm"], 2), "h": e["h"],
-                          "voll": e["h"] >= 24, "q": "hist"}
-            if e["h"] >= 24:
-                rest.discard(ds)
+    haupt_roh = roh.get(HAUPT["id"], {})
+    for ds, e in haupt_roh.items():
+        if ds not in rest:
+            continue
+        for o in ORTE:
+            eo = roh.get(o["id"], {}).get(ds)
+            if eo:
+                a_orte[o["id"]][ds] = {"mm": round(eo["mm"], 2), "h": eo["h"],
+                                       "voll": eo["h"] >= 24, "q": "hist"}
+        archiv[ds] = {"mm": round(e["mm"], 2), "h": e["h"],
+                      "voll": e["h"] >= 24, "q": "hist"}
+        if e["h"] >= 24:
+            rest.discard(ds)
 
     # --- 2) Luecken aus recent/ (nur im erreichbaren Fenster) --------------
     grenze = heute - timedelta(days=RECENT_TAGE)
@@ -145,16 +173,22 @@ def main():
         if d < grenze:
             print(f"  {ds}: weder Monatsarchiv noch recent/ - uebersprungen")
             continue
-        mm, ok = tagessumme(datetime(d.year, d.month, d.day, tzinfo=TZ))
+        summen, ok = tagessumme_alle(datetime(d.year, d.month, d.day, tzinfo=TZ))
         if ok > 0:
-            archiv[ds] = {"mm": mm, "h": ok, "voll": ok >= 24, "q": "recent"}
-            print(f"  {ds}: {mm} mm aus recent/ ({ok}/24 Stunden)")
+            for o in ORTE:
+                a_orte[o["id"]][ds] = {"mm": summen[o["id"]], "h": ok,
+                                       "voll": ok >= 24, "q": "recent"}
+            archiv[ds] = {"mm": summen[HAUPT["id"]], "h": ok, "voll": ok >= 24, "q": "recent"}
+            print(f"  {ds}: {summen[HAUPT['id']]} mm aus recent/ ({ok}/24 Stunden)")
         else:
             print(f"  {ds}: keine Daten verfuegbar")
 
-    archiv_schreiben(archiv, datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    archiv_schreiben(archiv, datetime.now(timezone.utc).isoformat(timespec="seconds"), a_orte)
     voll = sum(1 for v in archiv.values() if v.get("voll"))
     print(f"Archiv: {len(archiv)} Tage gespeichert, davon {voll} vollstaendig.")
+    for o in ORTE:
+        vo = sum(1 for v in a_orte[o["id"]].values() if v.get("voll"))
+        print(f"   {o['id']:<12} {len(a_orte[o['id']]):>4} Tage, davon {vo} vollstaendig")
 
 
 if __name__ == "__main__":
