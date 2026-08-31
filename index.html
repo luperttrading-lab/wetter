@@ -398,7 +398,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.00</span>
+      <span class="ver">v3.01</span>
     </div>
   </header>
 
@@ -469,7 +469,7 @@
     <label for="locName">Ortsname</label><input id="locName" type="text" autocomplete="off" maxlength="40" placeholder="Frankfurt am Main">
     <div class="loc-msg" id="locMsg"></div>
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
-    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locNdd" class="loc-btn">Norden</button></div>
+    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn">Wettenberg</button><button type="button" id="locHtb" class="loc-btn">Hüttenberg</button><button type="button" id="locNdd" class="loc-btn">Norden</button></div>
     <div class="loc-row"><button type="button" id="locMuc" class="loc-btn">M&uuml;nchen</button><button type="button" id="locKie" class="loc-btn">Kiel</button></div>
     <div class="loc-row"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
   </div>
@@ -486,6 +486,7 @@ const LOC_WETTENBERG={lat:50.6481,lon:8.6743,name:"Wettenberg",isWettenberg:true
 const LOC_NORDDEICH={lat:53.5941,lon:7.2066,name:"Norden",isWettenberg:false,tz:"Europe/Berlin"};   // v2.93: Stadt Norden statt des Ortsteils Norddeich (OSM 53°35′38,76″N / 7°12′23,76″O)
 const LOC_MUENCHEN={lat:48.1374,lon:11.5755,name:"M\u00fcnchen",isWettenberg:false,tz:"Europe/Berlin"};   // v2.55
 const LOC_KIEL={lat:54.3233,lon:10.1394,name:"Kiel",isWettenberg:false,tz:"Europe/Berlin"};
+const LOC_HUETTENBERG={lat:50.5055647,lon:8.6226918,name:"H\u00fcttenberg",isWettenberg:false,tz:"Europe/Berlin"};   // v3.01: Punkt von Lutz vorgegeben
 function _locSan(x){return String(x==null?"":x).replace(/[<>&"'`]/g,"").slice(0,40);}
 /* Zeitzonenname nur uebernehmen, wenn Intl ihn wirklich kennt — sonst wirft
    jedes spaetere toLocaleString einen RangeError und die App steht. */
@@ -3642,6 +3643,7 @@ load();
     ]).then(j=>{const t=_tzSan(j&&j.timezone);if(t)p.tz=t;}).catch(()=>{}).then(fertig);
   }
   el("locWtb").onclick=()=>saveGo(LOC_WETTENBERG);
+  el("locHtb").onclick=()=>saveGo(LOC_HUETTENBERG);
   el("locNdd").onclick=()=>saveGo(LOC_NORDDEICH);
   el("locMuc").onclick=()=>saveGo(LOC_MUENCHEN);
   el("locKie").onclick=()=>saveGo(LOC_KIEL);
