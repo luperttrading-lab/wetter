@@ -267,6 +267,7 @@
   .uvleg i{display:inline-block;vertical-align:middle;margin-right:5px}
   .uvleg i.bars{width:12px;height:11px;border-radius:2px;background:linear-gradient(0deg,#46a13a,#f5d800,#f15a16,#c41f3e)}
   .uvleg i.glock{width:15px;height:0;border-top:3px solid #3a4453;border-radius:2px}
+  .uvleg i.ghuel{width:15px;height:0;border-top:2px dashed #c2410c;opacity:.7;border-radius:2px}
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   /* v3.06: Regler fuer den Kurvenexponenten */
@@ -410,7 +411,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.06</span>
+      <span class="ver">v3.07</span>
     </div>
   </header>
 
@@ -1791,7 +1792,7 @@ function renderAirGrid(air){
     if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
     window._uvJetzt=uvN;   // v2.98: fuer die Globalstrahlungs-Diagnose
-    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button>
+    html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span><span><i class="ghuel"></i>Spitzen möglich</span></div><div class="uvsimrow"><button type="button" id="uvSimBtn" class="uvsimbtn" title="synthetischer 2-Minuten-Verlauf aus der Stundenbewölkung">⚡ Minuten-Simulation</button>
       <div class="krow"><input type="range" id="kSlider" min="0.60" max="3.00" step="0.01" aria-label="Kurvenexponent k">
         <div class="kinfo"><span id="kWert"></span><button type="button" id="kAuto" class="kbtn" title="zurueck zur Regression">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
@@ -2008,6 +2009,39 @@ function drawUV(h){
     if(uv>_gMax){_gMax=uv;_gPx=px;} _gN++;
     if(_gf){x.moveTo(px,yy);_gf=false;}else x.lineTo(px,yy);}
   x.stroke();
+  // v3.07: Obere Einhuellende — was bei der gemessenen Bewoelkung in Spitzen
+  // moeglich ist. Klarhimmel mal (1+eps), dieselbe Wolkenrand-Formel wie die
+  // Minuten-Simulation, w=1 als Obergrenze, Deckel +20 %. Bei klarem Himmel und
+  // bei geschlossener Decke faellt sie mit der Glocke zusammen; dazwischen liegt
+  // sie bis zu einem Fuenftel darueber. Keine Vorhersage, sondern die Decke.
+  if(Array.isArray(h._cc)){
+    const _ccAt=t=>{
+      for(let i=i0;i<i1;i++){
+        if(t>=tms[i]&&t<=tms[i+1]){
+          const a=h._cc[i],b=h._cc[i+1];
+          if(a==null)return null;
+          const f=(t-tms[i])/Math.max(1,tms[i+1]-tms[i]);
+          return (b==null?a:a+(b-a)*f)/100;
+        }
+      }
+      return null;
+    };
+    x.lineJoin="round";x.lineCap="round";x.lineWidth=1.6;
+    x.strokeStyle="rgba(194,65,12,.55)";x.setLineDash([4,3]);
+    x.beginPath();let _ef=true,_eN=0,_eMax=0;
+    for(let px=pxA;px<=pxB;px+=1){
+      const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);
+      const uv=sunBell(t),cc=_ccAt(t);
+      if(!isFinite(uv)||cc==null){_ef=true;continue;}
+      const eps=Math.min(0.20,1.25*Math.max(0,cc-0.15)*(1-cc));
+      const v=uv*(1+eps);
+      const yy=Y(v); if(!isFinite(yy)){_ef=true;continue;}
+      if(v>_eMax)_eMax=v; _eN++;
+      if(_ef){x.moveTo(px,yy);_ef=false;}else x.lineTo(px,yy);
+    }
+    x.stroke();x.setLineDash([]);
+    window._uvHuell={punkte:_eN,scheitel:Math.round(_eMax*100)/100};
+  }
   window._uvGlocke={punkte:_gN,ungueltig:_gBad,scheitel:Math.round(_gMax*100)/100,
     satellite:!!window.satellite,dayMs:dayMs,t6:t6,t21:t21,i0:i0,i1:i1,
     tag:(function(){try{return new Date(dayMs).toISOString().slice(0,16);}catch(e){return String(dayMs);}})()};
