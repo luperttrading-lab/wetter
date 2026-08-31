@@ -140,6 +140,8 @@
   .col .xtra .sx{color:#c79100}
   .col .xtra .bx{color:var(--muted);font-weight:500}
   .col .xtra svg{flex:none;display:block}
+  .col .xtra .leer{visibility:hidden}
+  .col .xtra .leer::after{content:"0"}   /* haelt die Zeilenhoehe */
   .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
@@ -398,7 +400,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.02</span>
+      <span class="ver">v3.03</span>
     </div>
   </header>
 
@@ -846,16 +848,26 @@ function renderStrip(rows){
     // v2.98: Sonnenminuten als Leiste (0..60 min, DWD-Messung ueber die
     // 120-W/m2-Schwelle) und Boee darunter. Beide Felder liefert Bright Sky
     // ohnehin mit; sie wurden bisher verworfen.
-    const _ss=(typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
+    // v3.03: Nachts keine Sonnenminuten. Eine Stunde, in der die Sonne
+    // durchgehend unter dem Horizont stand, kann keine haben — die "0" war
+    // kein Messwert, sondern eine Selbstverstaendlichkeit.
+    const _tMs=new Date(r.timestamp).getTime();
+    let _tag=true;
+    try{const a=_sunMu(_tMs),b=_sunMu(_tMs-3600e3);_tag=(a!=null&&a>0)||(b!=null&&b>0);}catch(e){}
+    const _ss=(_tag&&typeof r.sunshine==="number"&&isFinite(r.sunshine))?Math.max(0,Math.min(60,r.sunshine)):null;
     const _bo=(typeof r.wind_gust_speed==="number"&&isFinite(r.wind_gust_speed))?Math.round(r.wind_gust_speed):null;
     const _ssBar=_ss==null?'<div class="ssbar"></div>'
       :`<div class="ssbar"><i style="width:${Math.round(_ss/60*100)}%"></i></div>`;
     // v2.99: Zwei kurze Zeilen statt einer langen. Die Zellen sind gut halb so
     // breit wie im Entwurf, "58 min \u00b7 \u2197 20" lief ineinander. Symbole
     // statt Woerter: Sonne = Minuten, Pfeil = Boee in km/h.
-    const _unten=(_ss!=null||_bo!=null)
-      ? `<div class="xtra">${_ss!=null?'<span class="sx">'+SVG_SONNE+Math.round(_ss)+'</span>':""}${_bo!=null?'<span class="bx">'+SVG_BOE+_bo+'</span>':""}</div>`
-      : "";
+    // v3.03: Feste Plaetze. Fehlt ein Wert, bleibt seine Zeile leer stehen —
+    // sonst rutscht die Boee nach oben und man vergleicht Zeilen, die nicht
+    // dasselbe zeigen.
+    const _unten=`<div class="xtra">`
+      +(_ss!=null?'<span class="sx">'+SVG_SONNE+Math.round(_ss)+'</span>':'<span class="sx leer"></span>')
+      +(_bo!=null?'<span class="bx">'+SVG_BOE+_bo+'</span>':'<span class="bx leer"></span>')
+      +`</div>`;
     cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(r.icon||"cloudy",28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
