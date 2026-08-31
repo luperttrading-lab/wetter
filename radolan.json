@@ -1,8 +1,8 @@
 {
   "datum": "2026-08-31",
-  "summe_mm": 13.11,
-  "stunden_ok": 16,
-  "stunden_erwartet": 17,
+  "summe_mm": 18.67,
+  "stunden_ok": 19,
+  "stunden_erwartet": 20,
   "stunden": [
     {
       "stunde": "01:00",
@@ -70,6 +70,18 @@
     },
     {
       "stunde": "17:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "18:00",
+      "mm": 0.36
+    },
+    {
+      "stunde": "19:00",
+      "mm": 5.2
+    },
+    {
+      "stunde": "20:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -81,7 +93,7 @@
           410,
           424
         ],
-        "mm": 11.4,
+        "mm": 15.9,
         "eigenes": false
       },
       {
@@ -89,7 +101,7 @@
           410,
           425
         ],
-        "mm": 12.3,
+        "mm": 17.1,
         "eigenes": false
       },
       {
@@ -97,7 +109,7 @@
           410,
           426
         ],
-        "mm": 12.8,
+        "mm": 17.6,
         "eigenes": false
       }
     ],
@@ -107,7 +119,7 @@
           409,
           424
         ],
-        "mm": 12.4,
+        "mm": 17.0,
         "eigenes": false
       },
       {
@@ -115,7 +127,7 @@
           409,
           425
         ],
-        "mm": 13.5,
+        "mm": 19.7,
         "eigenes": true
       },
       {
@@ -123,7 +135,7 @@
           409,
           426
         ],
-        "mm": 13.3,
+        "mm": 18.8,
         "eigenes": false
       }
     ],
@@ -133,7 +145,7 @@
           408,
           424
         ],
-        "mm": 12.6,
+        "mm": 17.1,
         "eigenes": false
       },
       {
@@ -141,7 +153,7 @@
           408,
           425
         ],
-        "mm": 13.8,
+        "mm": 19.9,
         "eigenes": false
       },
       {
@@ -149,16 +161,569 @@
           408,
           426
         ],
-        "mm": 13.8,
+        "mm": 19.3,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-08-31",
-    "mm": 13.11
+    "mm": 18.67
   },
-  "aktualisiert": "2026-08-31T15:25:49+00:00",
+  "aktualisiert": "2026-08-31T18:26:02+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
-  "methode": "bilinear, Erlental 50.6480N 8.6741E"
+  "methode": "bilinear, 50.6480N 8.6741E",
+  "orte": {
+    "wettenberg": {
+      "name": "Erlental, Wettenberg",
+      "lat": 50.6479651,
+      "lon": 8.6740943,
+      "datum": "2026-08-31",
+      "summe_mm": 18.67,
+      "stunden_ok": 19,
+      "stunden_erwartet": 20,
+      "stunden": [
+        {
+          "stunde": "01:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "02:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "03:00",
+          "mm": 2.82
+        },
+        {
+          "stunde": "04:00",
+          "mm": 1.28
+        },
+        {
+          "stunde": "05:00",
+          "mm": 4.03
+        },
+        {
+          "stunde": "06:00",
+          "mm": 1.79
+        },
+        {
+          "stunde": "07:00",
+          "mm": 3.17
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.01
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.36
+        },
+        {
+          "stunde": "19:00",
+          "mm": 5.2
+        },
+        {
+          "stunde": "20:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
+        }
+      ],
+      "umgebung_3x3": [
+        [
+          {
+            "pixel": [
+              410,
+              424
+            ],
+            "mm": 15.9,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              410,
+              425
+            ],
+            "mm": 17.1,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              410,
+              426
+            ],
+            "mm": 17.6,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              409,
+              424
+            ],
+            "mm": 17.0,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              409,
+              425
+            ],
+            "mm": 19.7,
+            "eigenes": true
+          },
+          {
+            "pixel": [
+              409,
+              426
+            ],
+            "mm": 18.8,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              408,
+              424
+            ],
+            "mm": 17.1,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              408,
+              425
+            ],
+            "mm": 19.9,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              408,
+              426
+            ],
+            "mm": 19.3,
+            "eigenes": false
+          }
+        ]
+      ],
+      "letzter_regen": {
+        "datum": "2026-08-31",
+        "mm": 18.67
+      },
+      "methode": "bilinear, 50.6480N 8.6741E"
+    },
+    "huettenberg": {
+      "name": "Hüttenberg",
+      "lat": 50.5055647,
+      "lon": 8.6226918,
+      "datum": "2026-08-31",
+      "summe_mm": 13.49,
+      "stunden_ok": 19,
+      "stunden_erwartet": 20,
+      "stunden": [
+        {
+          "stunde": "01:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "02:00",
+          "mm": 1.76
+        },
+        {
+          "stunde": "03:00",
+          "mm": 3.87
+        },
+        {
+          "stunde": "04:00",
+          "mm": 2.85
+        },
+        {
+          "stunde": "05:00",
+          "mm": 3.37
+        },
+        {
+          "stunde": "06:00",
+          "mm": 0.22
+        },
+        {
+          "stunde": "07:00",
+          "mm": 0.83
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.59
+        },
+        {
+          "stunde": "20:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
+        }
+      ],
+      "umgebung_3x3": [
+        [
+          {
+            "pixel": [
+              393,
+              419
+            ],
+            "mm": 13.7,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              393,
+              420
+            ],
+            "mm": 14.6,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              393,
+              421
+            ],
+            "mm": 13.4,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              392,
+              419
+            ],
+            "mm": 13.2,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              392,
+              420
+            ],
+            "mm": 12.7,
+            "eigenes": true
+          },
+          {
+            "pixel": [
+              392,
+              421
+            ],
+            "mm": 14.0,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              391,
+              419
+            ],
+            "mm": 12.6,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              391,
+              420
+            ],
+            "mm": 12.9,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              391,
+              421
+            ],
+            "mm": 14.2,
+            "eigenes": false
+          }
+        ]
+      ],
+      "letzter_regen": {
+        "datum": "2026-08-31",
+        "mm": 13.49
+      },
+      "methode": "bilinear, 50.5056N 8.6227E"
+    },
+    "norden": {
+      "name": "Norden",
+      "lat": 53.5941,
+      "lon": 7.2066,
+      "datum": "2026-08-31",
+      "summe_mm": 2.31,
+      "stunden_ok": 19,
+      "stunden_erwartet": 20,
+      "stunden": [
+        {
+          "stunde": "01:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "02:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "03:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "04:00",
+          "mm": 0.25
+        },
+        {
+          "stunde": "05:00",
+          "mm": 0.05
+        },
+        {
+          "stunde": "06:00",
+          "mm": 0.05
+        },
+        {
+          "stunde": "07:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.1
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.41
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.2
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.99
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.25
+        },
+        {
+          "stunde": "20:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
+        }
+      ],
+      "umgebung_3x3": [
+        [
+          {
+            "pixel": [
+              755,
+              331
+            ],
+            "mm": 3.6,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              755,
+              332
+            ],
+            "mm": 3.6,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              755,
+              333
+            ],
+            "mm": 2.7,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              754,
+              331
+            ],
+            "mm": 3.3,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              754,
+              332
+            ],
+            "mm": 2.4,
+            "eigenes": true
+          },
+          {
+            "pixel": [
+              754,
+              333
+            ],
+            "mm": 2.2,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              753,
+              331
+            ],
+            "mm": 2.5,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              753,
+              332
+            ],
+            "mm": 2.5,
+            "eigenes": false
+          },
+          {
+            "pixel": [
+              753,
+              333
+            ],
+            "mm": 2.2,
+            "eigenes": false
+          }
+        ]
+      ],
+      "letzter_regen": {
+        "datum": "2026-08-31",
+        "mm": 2.31
+      },
+      "methode": "bilinear, 53.5941N 7.2066E"
+    }
+  },
+  "ort_liste": [
+    {
+      "id": "wettenberg",
+      "name": "Erlental, Wettenberg",
+      "lat": 50.6479651,
+      "lon": 8.6740943
+    },
+    {
+      "id": "huettenberg",
+      "name": "Hüttenberg",
+      "lat": 50.5055647,
+      "lon": 8.6226918
+    },
+    {
+      "id": "norden",
+      "name": "Norden",
+      "lat": 53.5941,
+      "lon": 7.2066
+    }
+  ]
 }

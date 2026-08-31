@@ -1,7 +1,7 @@
 {
  "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
- "ort": "Erlental 50.6480N 8.6741E",
- "aktualisiert": "2026-08-31T15:25:49+00:00",
+ "ort": "Erlental, Wettenberg 50.6480N 8.6741E",
+ "aktualisiert": "2026-08-31T18:26:02+00:00",
  "tage": {
   "2026-07-18": {
    "mm": 0.0,
@@ -268,9 +268,52 @@
    "v": 1
   },
   "2026-08-31": {
-   "mm": 13.11,
-   "h": 16,
+   "mm": 18.67,
+   "h": 19,
    "voll": false
   }
- }
+ },
+ "orte": {
+  "wettenberg": {
+   "2026-08-31": {
+    "mm": 18.67,
+    "h": 19,
+    "voll": false
+   }
+  },
+  "huettenberg": {
+   "2026-08-31": {
+    "mm": 13.49,
+    "h": 19,
+    "voll": false
+   }
+  },
+  "norden": {
+   "2026-08-31": {
+    "mm": 2.31,
+    "h": 19,
+    "voll": false
+   }
+  }
+ },
+ "ort_liste": [
+  {
+   "id": "wettenberg",
+   "name": "Erlental, Wettenberg",
+   "lat": 50.6479651,
+   "lon": 8.6740943
+  },
+  {
+   "id": "huettenberg",
+   "name": "Hüttenberg",
+   "lat": 50.5055647,
+   "lon": 8.6226918
+  },
+  {
+   "id": "norden",
+   "name": "Norden",
+   "lat": 53.5941,
+   "lon": 7.2066
+  }
+ ]
 }
