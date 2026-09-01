@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.19</span>
+      <span class="ver">v3.20</span>
     </div>
   </header>
 
@@ -1895,9 +1895,13 @@ function drawUV(h){
      dasselbe zeigen sollen. Eingestellt wird an einer Stelle, unter dem
      Messbild; oben folgt. */
   const _bfsAx=(function(){
-    if(typeof window._bfsAxCur==="number"&&UV_ACHSEN.indexOf(window._bfsAxCur)>=0)
-      return window._bfsAxCur;
-    const gesp=_axGet(uvAxSlug());
+    // v3.20: Der zuletzt unten gezeichnete Wert gilt nur, wenn er zu DIESEM Ort
+    // und Tag gehoert. Sonst uebernimmt die obere Grafik die Skala des vorigen.
+    const _sl=uvAxSlug();
+    if(window._bfsAxCur&&window._bfsAxCur.slug===_sl&&UV_ACHSEN.indexOf(window._bfsAxCur.wert)>=0)
+      return window._bfsAxCur.wert;
+    if(UV_ACHSEN.indexOf(_bfsAxMess[_sl])>=0)return _bfsAxMess[_sl];
+    const gesp=_axGet(_sl);
     if(UV_ACHSEN.indexOf(gesp)>=0)return gesp;
     const _p=_pk9>0?_pk9:6;
     let _b=6,_bd=1e9;
@@ -2190,13 +2194,18 @@ function drawUV(h){
    Das setzt voraus, dass der BfS-Server den Bildzugriff fuer fremde Seiten
    freigibt (CORS). Tut er das nicht, wirft getImageData, und es bleibt bei der
    Gerade-Stufen-Regel — die Messung ist eine Verbesserung, keine Bedingung.
-   Das Ergebnis steht in window._bfsAxGemessen; ist es null, war kein Zugriff
+   Das Ergebnis liegt in _bfsAxMess[slug]; fehlt es, war kein Zugriff
    moeglich. */
 const BFS_BAR_X=0.055;          // Mitte der Farbleiste, Anteil der Bildbreite
 function _farbAbstand(r,g,b,hex){
   const R=parseInt(hex.slice(1,3),16),G=parseInt(hex.slice(3,5),16),B=parseInt(hex.slice(5,7),16);
   return (r-R)*(r-R)+(g-G)*(g-G)+(b-B)*(b-B);
 }
+/* v3.20: Gemessene Achsen liegen pro Slug (Station + Datum). Bis v3.19 gab es
+   eine einzige globale Variable — beim Wechsel nach Norden oder auf "gestern"
+   galt dort noch der Wert des vorigen Ortes, bis die neue Messung durch war.
+   Scheiterte sie, blieb der fremde Wert dauerhaft stehen. */
+const _bfsAxMess={};
 function bfsAchseMessen(cb){
   const im=document.getElementById("bfsUv");
   if(!im||!im.src){cb(null,"kein Bild");return;}
@@ -2260,9 +2269,8 @@ function drawBfsOverlay(){try{
   let ax=(function(){
     const sv=_axGet(_axSlug);
     if(UV_ACHSEN.indexOf(sv)>=0)return sv;
-    // v3.18: gemessener Wert aus dem Bild schlaegt die Regel
-    if(typeof window._bfsAxGemessen==="number"&&UV_ACHSEN.indexOf(window._bfsAxGemessen)>=0)
-      return window._bfsAxGemessen;
+    // v3.18: gemessener Wert aus dem Bild schlaegt die Regel (v3.20: pro Slug)
+    if(UV_ACHSEN.indexOf(_bfsAxMess[_axSlug])>=0)return _bfsAxMess[_axSlug];
     /* v3.15: Das BfS verwendet GERADE Skalen (4, 6, 8, 10, 12) und waehlt die,
        die dem Klarhimmel-Scheitel des Tages am naechsten liegt. Belegt an zwei
        Tagen: 31.08. Scheitel 8,3 -> Achse 8 (nicht 10), 01.09. Scheitel 5,2 ->
@@ -2276,7 +2284,7 @@ function drawBfsOverlay(){try{
     let best=6,bd=1e9;
     for(const stufe of [4,6,8,10,12]){const d=Math.abs(stufe-pk);if(d<bd){bd=d;best=stufe;}}
     return best;
-  })();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
+  })();window._bfsAxCur={slug:_axSlug,wert:ax}; // v2.13: Heuristik, per Tipp umschaltbar
   // v3.10: Kein Math.min(ax,...) mehr. Die Klemmung hat jede Kurve, die ueber
   // den Achsenrand lief, oben abgeflacht — sie wirkte unsymmetrisch und aenderte
   // beim Umschalten der Achse ihre Form statt nur ihre Lage. Werte duerfen jetzt
@@ -2337,17 +2345,22 @@ function drawBfsOverlay(){try{
   }catch(e){}
   // v3.18: einmal je Tag und Station messen, dann neu zeichnen
   try{
-    const _mk="mess:"+_axSlug;
-    if(window._bfsMess!==_mk){
-      window._bfsMess=_mk;
+    // v3.20: je Slug einmal messen. Der Merker wird erst NACH dem Ergebnis
+    // gesetzt — vorher blockierte ein gescheiterter Versuch jede Wiederholung.
+    window._bfsMessLauf=window._bfsMessLauf||{};
+    if(!window._bfsMessLauf[_axSlug]&&_bfsAxMess[_axSlug]==null){
+      window._bfsMessLauf[_axSlug]=1;
+      const _slugFest=_axSlug;
       bfsAchseMessen(function(stufe,grund){
-        window._bfsAxQuelle=grund;
-        if(stufe!=null&&stufe!==window._bfsAxGemessen){
-          window._bfsAxGemessen=stufe;
+        window._bfsMessLauf[_slugFest]=0;
+        if(stufe!=null){
+          _bfsAxMess[_slugFest]=stufe;
           try{drawBfsOverlay();}catch(e){}
         }
-        const _q=el("axQuelle");
-        if(_q)_q.textContent=(stufe!=null)?"aus dem Bild gelesen":grund;
+        if(uvAxSlug()===_slugFest){
+          const _q=el("axQuelle");
+          if(_q)_q.textContent=(stufe!=null)?"aus dem Bild gelesen":grund;
+        }
       });
     }
   }catch(e){}
@@ -2371,6 +2384,7 @@ function drawBfsOverlay(){try{
      _aa.addEventListener("click",()=>{
        // v3.16: Beide Achsen auf Automatik — die obere folgt dann wieder der unteren.
        try{localStorage.removeItem("bfsAx_"+uvAxSlug());}catch(e){}
+       try{delete _bfsAxMess[uvAxSlug()];}catch(e){}
        try{delete window._bfsAxCur;}catch(e){window._bfsAxCur=undefined;}
        syncUV();
      });}
