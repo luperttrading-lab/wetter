@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.15</span>
+      <span class="ver">v3.17</span>
     </div>
   </header>
 
@@ -1855,7 +1855,7 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
         <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><input type="range" id="axSlider" min="4" max="12" step="1" aria-label="Achsenobergrenze"><div class="kinfo"><span id="axWert"></span><small>Skala des BfS-Bildes</small></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><input type="range" id="axSlider" min="4" max="12" step="1" aria-label="Achsenobergrenze"><div class="kinfo"><span id="axWert"></span><button type="button" id="axAuto" class="kbtn" title="obere Grafik wieder an die BfS-Skala koppeln">auto</button></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -1888,12 +1888,17 @@ function drawUV(h){
      sondern eine Tatsache, die getroffen werden muss. Wer oben die Skala aendert,
      verschob damit die Kurven im Messbild — sie sassen dann nachweislich falsch. */
   let _pk9=0;for(let i=0;i<cs.length;i++){const v=+cs[i]||0;if(v>_pk9)_pk9=v;}
+  /* v3.17: Die obere Achse hat KEINEN eigenen Wert mehr. Sie uebernimmt immer
+     die untere, weil dort die Skala des BfS-Bildes gilt — eine Vorgabe, keine
+     Wahl. Zwei getrennt einstellbare Achsen waren nur eine Fehlerquelle: eine
+     oben gesetzte 7 liess die Grafiken unterschiedlich dastehen, obwohl sie
+     dasselbe zeigen sollen. Eingestellt wird an einer Stelle, unter dem
+     Messbild; oben folgt. */
   const _bfsAx=(function(){
-    const sv=_axGet("oben:"+uvAxSlug());
-    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
-    // v3.15: dieselbe Regel wie unten — naechste GERADE Stufe zum Tagesscheitel.
-    // So starten beide Grafiken mit derselben Skala, und der Vergleich stimmt
-    // ohne Zutun. Wer oben eine andere Achse will, stellt sie weiterhin ein.
+    if(typeof window._bfsAxCur==="number"&&UV_ACHSEN.indexOf(window._bfsAxCur)>=0)
+      return window._bfsAxCur;
+    const gesp=_axGet(uvAxSlug());
+    if(UV_ACHSEN.indexOf(gesp)>=0)return gesp;
     const _p=_pk9>0?_pk9:6;
     let _b=6,_bd=1e9;
     for(const st of [4,6,8,10,12]){const d=Math.abs(st-_p);if(d<_bd){_bd=d;_b=st;}}
@@ -1979,10 +1984,10 @@ function drawUV(h){
       ev.stopPropagation();
       // Den gespeicherten Wert lesen, nicht die zuletzt gezeichnete Achse:
       // sonst dreht der Rundlauf im Kreis, wenn das Neuzeichnen ausbleibt.
-      const sl="oben:"+uvAxSlug();
+      const sl=uvAxSlug();   // v3.17: die eine gemeinsame Achse
       const jetzt=_axGet(sl)||((typeof window._uvAxOben==="number")?window._uvAxOben:9);
       const neu=uvAxWeiter(jetzt);
-      _axSet(sl,neu);   // v3.13: nur die obere Achse; die untere folgt dem BfS-Bild
+      _axSet(sl,neu); window._bfsAxCur=neu;   // v3.17: eine Achse fuer beide Grafiken
       try{syncUV();}catch(e){try{drawUV(window._uvLastH);}catch(_){}}
     });
   }
@@ -2276,6 +2281,13 @@ function drawBfsOverlay(){try{
     }
   } else { window._axSyncN=0; }
   const _ab=document.getElementById("bfsAx");
+  // v3.16: Weicht die obere Achse ab und ist dort nichts von Hand gesetzt,
+  // die obere Grafik mit der neuen Skala neu zeichnen.
+  try{
+    if(window._uvAxOben!==ax&&typeof lastUVH!=="undefined"&&lastUVH&&!window._uvAxSync){
+      window._uvAxSync=1; try{drawUV(lastUVH);}finally{window._uvAxSync=0;}
+    }
+  }catch(e){}
   if(_ab){
     _ab.textContent="Achse 0\u2013"+ax;
     if(!_ab._w){_ab._w=1;_ab.onclick=()=>{const c=window._bfsAxCur||9;_axSet(uvAxSlug(),uvAxWeiter(c));syncUV();};}
@@ -2290,7 +2302,16 @@ function drawBfsOverlay(){try{
        _as.addEventListener("input",()=>{if(_at)_at.innerHTML='Achse 0\u2013<b>'+_as.value+'</b>';});
        _as.addEventListener("change",()=>{_axSet(uvAxSlug(),+_as.value);syncUV();});
      }
-   }}
+   }
+   const _aa=el("axAuto");
+   if(_aa&&!_aa._w){_aa._w=1;
+     _aa.addEventListener("click",()=>{
+       // v3.16: Beide Achsen auf Automatik — die obere folgt dann wieder der unteren.
+       try{localStorage.removeItem("bfsAx_"+uvAxSlug());}catch(e){}
+       try{delete window._bfsAxCur;}catch(e){window._bfsAxCur=undefined;}
+       syncUV();
+     });}
+  }
 }catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
 }
 
