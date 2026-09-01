@@ -31,12 +31,15 @@ RE_DETAIL = re.compile(r'href="([^"]*aktuelle-tagesverlaeufe/_documents/[^"]+_no
 # Umlaute), anders als die kryptischen Bild-Slugs ("Boesel_B"). Deshalb wird die
 # Liste hier gefuehrt und jede Seite direkt geholt; den Slug liefert dann die
 # Seite selbst. Fehlende Seiten werden uebersprungen.
+# Die Namen sind von Lutz aus der BfS-Karte uebernommen — "st-augustin" heisst
+# dort so, nicht "sankt-augustin", und "giessen" nicht "giessen-wettenberg"
+# (das ist nur der Bild-Slug).
 SEITEN = [
     "andernach", "berlin", "bonn", "boesel", "chieming", "cuxhaven", "dortmund",
     "duderstadt", "eckernfoerde", "fichtelberg", "friedrichshafen", "genthin",
     "giessen", "goerlitz", "groemitz", "hamburg", "hohenpeissenberg", "kassel",
     "klippeneck", "kulmbach", "langen", "lindenberg", "lueneburg", "melpitz",
-    "muenchen", "norderney", "osnabrueck", "salzgitter", "sankt-augustin",
+    "muenchen", "norderney", "osnabrueck", "salzgitter", "st-augustin",
     "schauinsland", "schweinfurt", "stuttgart", "sylt", "tholey", "todendorf",
     "waldhof", "waldmuenchen", "wasserkuppe", "weissenburg", "wurmberg",
     "zingst", "zirchow", "zugspitze",
