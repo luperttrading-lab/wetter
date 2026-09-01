@@ -51,8 +51,11 @@ BFSCOL = ["#006300", "#00a014", "#81c600", "#fff800", "#ffd100",
           "#ffa600", "#ff7200", "#ff4a00", "#ff0000", "#ff0078"]
 FARBEN = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in BFSCOL]
 
-# Spalte in der Farbleiste (Anteil der Bildbreite) — identisch mit BFS_BAR_X
-BAR_X = 0.055
+# Spalten, in denen die Farbleiste gesucht wird (Anteil der Bildbreite).
+# Am Screenshot nachgemessen liegt sie bei etwa 6,5 bis 12 %; die erste Fassung
+# tastete bei 5,5 % ab und traf das Weiss links daneben — 68 von 68 Bildern
+# "Leiste nicht gefunden". Mehrere Spalten fangen Layout-Unterschiede ab.
+BAR_XS = (0.09, 0.08, 0.10, 0.07, 0.11, 0.06, 0.12)
 # Abtastbereich (Anteil der Bildhoehe): oberhalb der Legende bis Mitte
 Y_VON, Y_BIS, Y_SCHRITT = 0.08, 0.55, 0.004
 # maximaler quadratischer Farbabstand, der noch als Treffer gilt
@@ -80,21 +83,30 @@ def achse_aus_uv(uv_index):
 
 
 def achse_lesen(png_bytes):
-    """Liefert (achse, grund). achse ist None, wenn nichts Eindeutiges gefunden wurde."""
+    """Liefert (achse, grund). achse ist None, wenn nichts Eindeutiges gefunden wurde.
+    Der Grund enthaelt bei Misserfolg die Bildmasse und eine Farbprobe, damit man
+    ohne das Bild sieht, wo die Abtastung hinschaut."""
     im = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
     w, h = im.size
-    px = int(round(BAR_X * w))
-    f = Y_VON
-    while f <= Y_BIS:
-        py = int(round(f * h))
-        if 0 <= py < h:
-            r, g, b, a = im.getpixel((px, py))
-            if a >= 200:
-                idx, dist = naechste_farbe((r, g, b))
-                if dist <= TOLERANZ:
-                    return achse_aus_uv(idx), f"Leistenfarbe {BFSCOL[idx]} bei y={py}"
-        f += Y_SCHRITT
-    return None, "Leiste nicht gefunden"
+    for bx in BAR_XS:
+        px = int(round(bx * w))
+        f = Y_VON
+        while f <= Y_BIS:
+            py = int(round(f * h))
+            if 0 <= py < h:
+                r, g, b, a = im.getpixel((px, py))
+                if a >= 200:
+                    idx, dist = naechste_farbe((r, g, b))
+                    if dist <= TOLERANZ:
+                        return achse_aus_uv(idx), f"Leistenfarbe {BFSCOL[idx]} bei x={px} y={py} ({w}x{h})"
+            f += Y_SCHRITT
+    # Diagnose: Farbprobe in der Mitte des Suchbereichs
+    proben = []
+    for bx in (0.06, 0.09, 0.12):
+        px = int(round(bx * w)); py = int(round(0.30 * h))
+        r, g, b, a = im.getpixel((min(px, w-1), min(py, h-1)))
+        proben.append(f"x{px}:#{r:02x}{g:02x}{b:02x}")
+    return None, f"Leiste nicht gefunden ({w}x{h}; Proben bei y=30%: {' '.join(proben)})"
 
 
 def bild_holen(slug, tag):
