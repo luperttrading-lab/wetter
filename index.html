@@ -272,6 +272,8 @@
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   /* v3.06: Regler fuer den Kurvenexponenten */
   .krow{margin:9px auto 0;max-width:290px;padding:0 6px}
+  .axrow{margin:7px auto 2px;max-width:250px;padding:0 6px}
+  .axrow input[type=range]{width:100%;accent-color:#3a4453;height:20px}
   .krow input[type=range]{width:100%;accent-color:#c2410c;height:22px}
   .kinfo{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1px;
     font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -287,6 +289,9 @@
   .bil-box .bv{font-size:17px;font-weight:800;color:#1c66c4;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
   .bil-box .bu{font-size:9.5px;color:#7a8798}
   #bilCv{width:100%;height:76px;display:block;touch-action:pan-y}
+  /* v3.12: Gewischt wird auf der ganzen Karte. Ohne pan-y wuerde der Browser das
+     waagerechte Ziehen als Seitenwechsel abfangen; senkrecht bleibt Scrollen. */
+  #bilanzCard{touch-action:pan-y}
   .bil-tag{text-align:center;font-size:12.5px;font-weight:700;color:#1c66c4;min-height:17px;margin-top:3px}
   .bil-note{font-size:11.5px;color:#5c6b80;text-align:center;margin-top:7px;line-height:1.4}
   .bil-dry{font-weight:700;color:#8a5b00}
@@ -411,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.09</span>
+      <span class="ver">v3.12</span>
     </div>
   </header>
 
@@ -1263,7 +1268,12 @@ function uvAxSlug(){
   return "ort:"+(typeof LOC!=="undefined"&&LOC&&LOC.name?LOC.name:"standard");
 }
 /* Naechster Wert im Rundlauf 8 -> 9 -> 10 -> 12 -> 8 */
-function uvAxWeiter(c){return c===8?9:(c===9?10:(c===10?12:8));}
+/* v3.11: Achse als Schieber von 4 bis 12 statt Durchtippen. Das BfS schaltet je
+   nach Tag zwischen 0-6 und 0-12 um; mit sechs Stufen brauchte das Antippen bis
+   zu fuenf Versuche, um von 6 auf 12 zu kommen. */
+const UV_AX_MIN=4, UV_AX_MAX=12;
+const UV_ACHSEN=(function(){const a=[];for(let i=UV_AX_MIN;i<=UV_AX_MAX;i++)a.push(i);return a;})();
+function uvAxWeiter(c){return c>=UV_AX_MAX?UV_AX_MIN:c+1;}   // Rueckfall, falls doch getippt wird
 function makeSunBell(cs,tms,t6,t21,fallback){
   if(!window.satellite)return fallback;
   let i0=-1,i1=-1;for(let i=0;i<cs.length;i++){if((cs[i]||0)>0.05){if(i0<0)i0=i;i1=i;}}
@@ -1831,7 +1841,7 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
         <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><input type="range" id="axSlider" min="4" max="12" step="1" aria-label="Achsenobergrenze"><div class="kinfo"><span id="axWert"></span><small>Skala des BfS-Bildes</small></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -1862,11 +1872,16 @@ function drawUV(h){
   // die Skala auch dort verstellbar bleibt, wo keine BfS-Station existiert.
   const _bfsAx=(function(){
     const sv=_axGet(uvAxSlug());
-    if(sv===8||sv===9||sv===10||sv===12)return sv;
+    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
     return (typeof window._bfsAxCur==="number"&&window._bfsAxCur>=8)?window._bfsAxCur:9;
   })();
   let _pk9=0;for(let i=0;i<cs.length;i++){const v=+cs[i]||0;if(v>_pk9)_pk9=v;}
-  const yMax=Math.max(_bfsAx,Math.ceil(_pk9),1);
+  // v3.11: Die Sicherung "nie kleiner als der Tagesscheitel" ist raus. Sie sollte
+  // verhindern, dass die Glocke abgeschnitten wird — hat aber dazu gefuehrt, dass
+  // eine eingestellte 6 stillschweigend als 9 gezeichnet wurde, wenn der Scheitel
+  // hoeher lag. Jetzt gilt die eingestellte Achse, und die Kurven werden am
+  // Rahmen beschnitten statt geklemmt.
+  const yMax=Math.max(_bfsAx,1);
   window._uvAxOben=yMax; window._uvPk=_pk9; window._uvLastH=h;
   // Plot pixelgenau am tatsächlich gerenderten BfS-Bild ausrichten: 6/21 Uhr UND die Plot-Höhe
   // (UV 0..9) werden aus der echten Position & Größe des BfS-Bildes übernommen -> beide Grafiken
@@ -1947,6 +1962,9 @@ function drawUV(h){
       try{syncUV();}catch(e){try{drawUV(window._uvLastH);}catch(_){}}
     });
   }
+  // v3.11: Ab hier wird auf den Diagrammrahmen beschnitten — bei kleiner Achse
+  // laufen Glocke und Spitzenkurve sonst ueber den Rand ins uebrige Bild.
+  x.save(); x.beginPath(); x.rect(gx0-1,gy0-1,gx1-gx0+2,gy1-gy0+2); x.clip();
   // === gepunktete Gitterlinien: horizontal je UV-Stufe, vertikal je Stunde (wie BfS) ===
   x.strokeStyle="rgba(15,23,42,.15)";x.lineWidth=1;x.setLineDash([1,3]);
   // v2.92: Auch bei den halben Stufen, wie in der BfS-Grafik. Zuvor gab es
@@ -2130,6 +2148,7 @@ function drawUV(h){
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
   x.setLineDash([4,3]);x.lineWidth=2;x.strokeStyle="#1f6b43";cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.moveTo(cxp,y3);x.lineTo(cxp,gy1);x.stroke();});x.setLineDash([]);
   cross.forEach(t=>{const cxp=X(t);if(cxp<gx0||cxp>gx1)return;x.beginPath();x.arc(cxp,y3,3.2,0,7);x.fillStyle=gC;x.fill();x.lineWidth=1.3;x.strokeStyle="#fff";x.stroke();});
+  x.restore();   // v3.11: Beschnitt aufheben, der Rahmen selbst wird ungeschnitten gezeichnet
   // schwarze Box außen rum (Plotrahmen, wie BfS)
   x.strokeStyle="#2a3340";x.lineWidth=1.2;x.strokeRect(gx0,gy0,plotW,plotHb);
 }
@@ -2154,7 +2173,10 @@ function drawBfsOverlay(){try{
     return;
   }
   window._bfsRt=0;
-  const _axSlug=(()=>{const m=String(img.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);return m?decodeURIComponent(m[1]):"";})(); // v2.15: Slug aus img.src - das Stationsobjekt ist render-lokal, hier unsichtbar
+  const _axSlug=uvAxSlug();   // v3.11: dieselbe Funktion wie der Schieber. Vorher stand
+  // hier eine zweite Kopie derselben Regex — ohne passenden Bildpfad lieferte sie
+  // einen leeren Schluessel, waehrend der Schieber unter "ort:Name" speicherte.
+  // Der eingestellte Wert kam dann nie an.
   const dpr=Math.min(window.devicePixelRatio||1,3);
   cv.width=W*dpr;cv.height=Hh*dpr;cv.style.width=W+"px";cv.style.height=Hh+"px";
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
@@ -2162,17 +2184,25 @@ function drawBfsOverlay(){try{
   const dayMs=ortsMitternacht(isFinite(tms[0])?tms[0]:Date.now());                     // v2.71: Ortszeit
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
-  let ax=(function(){const sv=_axGet(_axSlug);if(sv===8||sv===9||sv===10||sv===12)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}// v2.87: Bisher konnte die Heuristik nur 9 oder 10 waehlen. Das BfS-Bild fuer
+  let ax=(function(){const sv=_axGet(_axSlug);if(UV_ACHSEN.indexOf(sv)>=0)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}// v2.87: Bisher konnte die Heuristik nur 9 oder 10 waehlen. Das BfS-Bild fuer
   // Giessen zeigt aber 0-8, und ohne gespeicherten Wert landete die App immer
   // auf 9 - die Kurven lagen dadurch rund eine halbe Einheit zu tief.
   // Die Schwellen sind aus den beobachteten Bildern abgeleitet, nicht belegt;
   // ein einmal getippter Wert hat immer Vorrang.
   return pk>=8.35?10:(pk>=7.2?9:8);})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
-  const Y=u=>gy0-(gy0-gy9)*(Math.max(0,Math.min(ax,u))/ax);
+  // v3.10: Kein Math.min(ax,...) mehr. Die Klemmung hat jede Kurve, die ueber
+  // den Achsenrand lief, oben abgeflacht — sie wirkte unsymmetrisch und aenderte
+  // beim Umschalten der Achse ihre Form statt nur ihre Lage. Werte duerfen jetzt
+  // negativ werden; gezeichnet wird innerhalb eines Beschnitts.
+  const Y=u=>gy0-(gy0-gy9)*(Math.max(0,u)/ax);
   const _bm=(()=>{const n=cs.length,m=new Array(n).fill(0),d=new Array(Math.max(0,n-1));for(let i=0;i<n-1;i++){const hh=tms[i+1]-tms[i];d[i]=hh?((cs[i+1]||0)-(cs[i]||0))/hh:0;}if(n>=2){m[0]=d[0];m[n-1]=d[n-2];}for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0)m[i]=0;else m[i]=2*d[i-1]*d[i]/(d[i-1]+d[i]);}return m;})();
   const bell=t=>{for(let i=0;i<cs.length-1;i++){if(t>=tms[i]&&t<=tms[i+1]){const hh=tms[i+1]-tms[i],u=(t-tms[i])/hh,u2=u*u,u3=u2*u,y0=cs[i]||0,y1=cs[i+1]||0,m0=_bm[i],m1=_bm[i+1];return Math.max(0,y0*(2*u3-3*u2+1)+y1*(-2*u3+3*u2)+m0*hh*(u3-2*u2+u)+m1*hh*(u3-u2));}}return 0;};
   const sunBell=makeSunBell(cs,tms,t6,t21,bell);// physikalische Glocke (glatt); bell = Fallback ohne satellite-Lib
-  const draw=()=>{let f=true;x.beginPath();for(let px=gx0;px<=gx1;px+=1.5){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const yy=Y(sunBell(t));if(f){x.moveTo(px,yy);f=false;}else x.lineTo(px,yy);}x.stroke();};
+  const draw=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-2,gx1-gx0,Math.abs(gy0-gy9)+4);x.clip();
+    let f=true;x.beginPath();
+    for(let px=gx0;px<=gx1;px+=1.5){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const yy=Y(sunBell(t));
+      if(f){x.moveTo(px,yy);f=false;}else x.lineTo(px,yy);}
+    x.stroke();x.restore();};
   x.lineJoin="round";x.lineCap="round";
   x.strokeStyle="rgba(255,255,255,.9)";x.lineWidth=5;draw();   // weisser Halo fuer Kontrast auf buntem Grund
   x.strokeStyle="#3a4453";x.lineWidth=2.6;draw();             // unser Modell, schwarz wie in der oberen Grafik
@@ -2186,7 +2216,16 @@ function drawBfsOverlay(){try{
     // Stelle die Spitzenkurve aus dem oberen Diagramm: Glocke mal Zuschlag, als
     // Decke fuer die BfS-Messspitzen direkt im Messbild.
     const eps=(typeof huellZuschlag==="function")?huellZuschlag():0.20;
-    const drawH=()=>{x.beginPath();let f=true;for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=Math.min(bell(t)*(1+eps),ax);if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}x.stroke();};
+    // v3.10: Nicht mehr auf die Achse klemmen. Math.min(...,ax) hat die Kurve
+    // oben abgeflacht, sobald sie ueber den Rand lief — sie sah dann unsymmetrisch
+    // aus und aenderte ihre FORM, wenn man die Achse umstellte. Jetzt wird der
+    // Zeichenbereich beschnitten: die Kurve behaelt ihre Gestalt und verlaesst
+    // das Bild sichtbar nach oben.
+    const drawH=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-2,gx1-gx0,Math.abs(gy0-gy9)+4);x.clip();
+      x.beginPath();let f=true;
+      for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=sunBell(t)*(1+eps);
+        if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}
+      x.stroke();x.restore();};
     x.setLineDash([]);x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.2;drawH();
     x.setLineDash([4,3]);x.strokeStyle="#c2410c";x.lineWidth=1.7;drawH();x.setLineDash([]);
   }
@@ -2202,7 +2241,21 @@ function drawBfsOverlay(){try{
     }
   } else { window._axSyncN=0; }
   const _ab=document.getElementById("bfsAx");
-  if(_ab){_ab.textContent="Achse 0\u2013"+ax;if(!_ab._w){_ab._w=1;_ab.onclick=()=>{const c=window._bfsAxCur||9;_axSet(uvAxSlug(),uvAxWeiter(c));syncUV();};}}
+  if(_ab){
+    _ab.textContent="Achse 0\u2013"+ax;
+    if(!_ab._w){_ab._w=1;_ab.onclick=()=>{const c=window._bfsAxCur||9;_axSet(uvAxSlug(),uvAxWeiter(c));syncUV();};}
+  }
+  // v3.11: Schieber unter der BfS-Kachel. Gilt fuer beide Grafiken, weil sie
+  // sich dieselbe Skala teilen.
+  {const _as=el("axSlider"),_at=el("axWert");
+   if(_as){
+     _as.min=UV_AX_MIN;_as.max=UV_AX_MAX;_as.step=1;_as.value=ax;
+     if(_at)_at.innerHTML='Achse 0\u2013<b>'+ax+'</b>';
+     if(!_as._w){_as._w=1;
+       _as.addEventListener("input",()=>{if(_at)_at.innerHTML='Achse 0\u2013<b>'+_as.value+'</b>';});
+       _as.addEventListener("change",()=>{_axSet(uvAxSlug(),+_as.value);syncUV();});
+     }
+   }}
 }catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
 }
 
@@ -3158,6 +3211,12 @@ function bilanzChart(serie,prog,rest){
     // die Bewegung fest, auch wenn der Finger kurz aus dem Feld geraet; das Neuzeichnen
     // laeuft ueber requestAnimationFrame, damit nichts stockt.
     cv._w=1;
+    // v3.12: Gewischt wird auf der ganzen Kachel, nicht nur auf der Grafik.
+    // Beim Wischen ueber der Grafik verdeckt der Finger genau die Stelle, die man
+    // ablesen will. Die Position wird weiterhin gegen die Grafik gerechnet, der
+    // Finger darf also darunter oder darueber liegen.
+    const flaeche=document.getElementById("bilanzCard")||cv.parentElement||cv;
+    flaeche.dataset.wisch="1";   // v3.12: markiert, welches Element die Wischgesten annimmt
     let raf=0,letzter=-1,startX=0,zieht=false;
     const SCHWELLE=8;   // px, ab hier gilt es als Wischen und nicht als Antippen
     const anzahl=()=>cv._nt||40;
@@ -3168,20 +3227,20 @@ function bilanzChart(serie,prog,rest){
     // v2.93: Beruehren allein bewegt nichts mehr. Auf dem Telefon ist ein Tipp
     // meist der Beginn eines Scrollversuchs — frueher sprang der Zeiger dabei
     // an eine zufaellige Stelle und die Zeile darunter zeigte einen fremden Tag.
-    cv.addEventListener("pointerdown",e=>{startX=e.clientX;zieht=false;letzter=-1;});
-    cv.addEventListener("pointermove",e=>{
+    flaeche.addEventListener("pointerdown",e=>{startX=e.clientX;zieht=false;letzter=-1;});
+    flaeche.addEventListener("pointermove",e=>{
       if(!(e.buttons||e.pointerType==="touch"))return;
       if(!zieht){
         if(Math.abs(e.clientX-startX)<SCHWELLE)return;   // noch kein Wischen
         zieht=true;
-        try{cv.setPointerCapture(e.pointerId);}catch(_){}
+        try{flaeche.setPointerCapture(e.pointerId);}catch(_){}
       }
       if(e.cancelable)e.preventDefault();
       auf(e);
     },{passive:false});
-    const los=e=>{if(zieht){try{cv.releasePointerCapture(e.pointerId);}catch(_){}}zieht=false;};
-    cv.addEventListener("pointerup",los);
-    cv.addEventListener("pointercancel",los);
+    const los=e=>{if(zieht){try{flaeche.releasePointerCapture(e.pointerId);}catch(_){}}zieht=false;};
+    flaeche.addEventListener("pointerup",los);
+    flaeche.addEventListener("pointercancel",los);
   }
   x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
