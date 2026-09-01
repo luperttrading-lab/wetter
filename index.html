@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.12</span>
+      <span class="ver">v3.13</span>
     </div>
   </header>
 
@@ -1867,15 +1867,20 @@ function drawUV(h){
   // v2.84: Beide Grafiken sollen dieselbe Skala haben. Die untere gehoert dem
   // BfS-Bild und ist nicht aenderbar, also folgt die obere ihr. Sicherung:
   // nie kleiner als der Tagesscheitel, sonst wuerde die Glocke abgeschnitten.
-  // v2.88: Beide Grafiken teilen sich denselben gespeicherten Wert. Der
-  // Schluessel kommt vom BfS-Bild, wenn es eins gibt — sonst vom Ort, damit
-  // die Skala auch dort verstellbar bleibt, wo keine BfS-Station existiert.
-  const _bfsAx=(function(){
-    const sv=_axGet(uvAxSlug());
-    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
-    return (typeof window._bfsAxCur==="number"&&window._bfsAxCur>=8)?window._bfsAxCur:9;
-  })();
+  /* v3.13: Obere und untere Achse getrennt. Bis v3.12 teilten sie sich einen
+     Wert — das war ein Denkfehler: Oben zeichnen wir selbst, die Skala ist frei
+     waehlbar. Unten liegt ein FREMDES Bild, dessen Skala das BfS festlegt (am
+     31.08. noch 0-8, am 01.09. dann 0-6). Dort ist die Achse keine Einstellung,
+     sondern eine Tatsache, die getroffen werden muss. Wer oben die Skala aendert,
+     verschob damit die Kurven im Messbild — sie sassen dann nachweislich falsch. */
   let _pk9=0;for(let i=0;i<cs.length;i++){const v=+cs[i]||0;if(v>_pk9)_pk9=v;}
+  const _bfsAx=(function(){
+    const sv=_axGet("oben:"+uvAxSlug());
+    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
+    // Automatik: knapp ueber den Tagesscheitel, mindestens 6
+    return Math.max(6,Math.min(12,Math.ceil(_pk9>0?_pk9:6)));
+  })();
+
   // v3.11: Die Sicherung "nie kleiner als der Tagesscheitel" ist raus. Sie sollte
   // verhindern, dass die Glocke abgeschnitten wird — hat aber dazu gefuehrt, dass
   // eine eingestellte 6 stillschweigend als 9 gezeichnet wurde, wenn der Scheitel
@@ -1955,10 +1960,10 @@ function drawUV(h){
       ev.stopPropagation();
       // Den gespeicherten Wert lesen, nicht die zuletzt gezeichnete Achse:
       // sonst dreht der Rundlauf im Kreis, wenn das Neuzeichnen ausbleibt.
-      const sl=uvAxSlug();
+      const sl="oben:"+uvAxSlug();
       const jetzt=_axGet(sl)||((typeof window._uvAxOben==="number")?window._uvAxOben:9);
       const neu=uvAxWeiter(jetzt);
-      _axSet(sl,neu); window._bfsAxCur=neu;
+      _axSet(sl,neu);   // v3.13: nur die obere Achse; die untere folgt dem BfS-Bild
       try{syncUV();}catch(e){try{drawUV(window._uvLastH);}catch(_){}}
     });
   }
