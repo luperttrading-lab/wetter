@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.13</span>
+      <span class="ver">v3.14</span>
     </div>
   </header>
 
@@ -1261,11 +1261,25 @@ function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v))}catch(e){}
 /* Schluessel fuer die Achseneinstellung: bevorzugt der BfS-Stationsslug, damit
    Bild und eigene Grafik dieselbe Skala benutzen. Fehlt die Kachel, tritt der
    Ortsname an seine Stelle — sonst waere die Skala dort nicht einstellbar. */
+/* v3.14: Der Schluessel traegt jetzt das DATUM des gezeigten Bildes. Das BfS
+   waehlt seine Skala je Tag neu — am 31.08. noch 0-8, am 01.09. dann 0-6.
+   Bisher teilten sich "heute" und "gestern" einen Wert: die fuer heute passende
+   6 verschob beim Zurueckblaettern die Kurven im Gestern-Bild. Mit dem Datum im
+   Schluessel bleibt jede Einstellung an ihrem Tag, auch wenn das heutige Bild
+   morgen zum Gestern-Bild wird. */
+function uvAxTag(){
+  try{
+    const d=new Date();
+    if(typeof uvDayOffset!=="undefined"&&uvDayOffset)d.setDate(d.getDate()-uvDayOffset);
+    return (typeof ymd==="function")?ymd(d):d.toISOString().slice(0,10);
+  }catch(e){return "";}
+}
 function uvAxSlug(){
+  let basis="ort:"+(typeof LOC!=="undefined"&&LOC&&LOC.name?LOC.name:"standard");
   try{const im=document.getElementById("bfsUv"),
         m=im&&String(im.src||"").match(/EEr_(.+)_(?:today|yesterday)\.png/);
-      if(m)return decodeURIComponent(m[1]);}catch(e){}
-  return "ort:"+(typeof LOC!=="undefined"&&LOC&&LOC.name?LOC.name:"standard");
+      if(m)basis=decodeURIComponent(m[1]);}catch(e){}
+  return basis+"|"+uvAxTag();
 }
 /* Naechster Wert im Rundlauf 8 -> 9 -> 10 -> 12 -> 8 */
 /* v3.11: Achse als Schieber von 4 bis 12 statt Durchtippen. Das BfS schaltet je
