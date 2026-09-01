@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.21</span>
+      <span class="ver">v3.22</span>
     </div>
   </header>
 
@@ -1272,6 +1272,42 @@ function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v))}catch(e){}
    Die obere Grafik verglich darauf und fand keine Uebereinstimmung, solange das
    Bild noch unterwegs war — in Wettenberg lag es im Zwischenspeicher, in Norden
    nicht. Ort und Tag aendern sich waehrend des Ladens nicht. */
+/* v3.22: Eine einzige Stelle bestimmt die Achse — vorher gab es zwei Codepfade
+   mit derselben Absicht, und sie konnten auseinanderlaufen (Norden: oben 5,
+   unten 6). Reihenfolge: gemessene Leistenfarbe aus dem BfS-Bild, sonst die
+   naechste gerade Stufe zum Klarhimmel-Scheitel.
+   Gespeicherte Handwerte werden NICHT mehr gelesen: seit der Schieber weg ist,
+   koennen keine neuen entstehen, aber alte lagen weiter im Speicher und
+   verstellten die Skala dauerhaft (in Norden eine 5, die keine Regel je waehlt).
+   Sie werden beim ersten Lauf entfernt. */
+function uvAchseBestimmen(scheitel){
+  const sl=uvAxSlug();
+  if(UV_ACHSEN.indexOf(_bfsAxMess[sl])>=0)return _bfsAxMess[sl];
+  let p=scheitel;
+  if(!(p>0)){
+    try{ if(window.satellite){
+      const d=ortsMitternacht(Date.now());
+      for(let t=d+6*3600e3;t<=d+21*3600e3;t+=300e3){const u=physUvAt(t);if(u>p)p=u;}
+    }}catch(e){}
+  }
+  if(!(p>0))p=6;
+  let best=6,bd=1e9;
+  for(const st of [4,6,8,10,12]){const d=Math.abs(st-p);if(d<bd){bd=d;best=st;}}
+  return best;
+}
+/* Einmalig: alte Handwerte aus der Zeit des Schiebers entfernen. */
+(function(){
+  try{
+    if(localStorage.getItem("axAufraeumen3_22"))return;
+    const weg=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.indexOf("bfsAx_")===0)weg.push(k);
+    }
+    weg.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    localStorage.setItem("axAufraeumen3_22","1");
+  }catch(e){}
+})();
 function uvAxOrtTag(){
   const o=(typeof LOC!=="undefined"&&LOC&&LOC.name)?LOC.name:"standard";
   return o+"|"+uvAxTag();
@@ -1904,26 +1940,10 @@ function drawUV(h){
      dasselbe zeigen sollen. Eingestellt wird an einer Stelle, unter dem
      Messbild; oben folgt. */
   const _bfsAx=(function(){
-    // v3.20: Der zuletzt unten gezeichnete Wert gilt nur, wenn er zu DIESEM Ort
-    // und Tag gehoert. Sonst uebernimmt die obere Grafik die Skala des vorigen.
-    const _sl=uvAxSlug(), _ot=uvAxOrtTag();
+    const _ot=uvAxOrtTag();
     if(window._bfsAxCur&&window._bfsAxCur.ortTag===_ot&&UV_ACHSEN.indexOf(window._bfsAxCur.wert)>=0)
       return window._bfsAxCur.wert;
-    if(UV_ACHSEN.indexOf(_bfsAxMess[_sl])>=0)return _bfsAxMess[_sl];
-    const gesp=_axGet(_sl);
-    if(UV_ACHSEN.indexOf(gesp)>=0)return gesp;
-    /* v3.21: Ohne BfS-Kachel entscheidet die Regel — und zwar auf DERSELBEN
-       Groesse wie unten. Bis v3.20 rechnete oben mit den Open-Meteo-Werten und
-       unten mit physUvAt; die konnten in verschiedene Stufen fallen, und die
-       Grafiken standen unterschiedlich da, ohne dass man den Grund sah. */
-    let _p=0;
-    try{
-      if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>_p)_p=u;}
-    }catch(e){}
-    if(!(_p>0))_p=_pk9>0?_pk9:6;
-    let _b=6,_bd=1e9;
-    for(const st of [4,6,8,10,12]){const d=Math.abs(st-_p);if(d<_bd){_bd=d;_b=st;}}
-    return _b;
+    return uvAchseBestimmen(_pk9);
   })();
 
   // v3.11: Die Sicherung "nie kleiner als der Tagesscheitel" ist raus. Sie sollte
@@ -2284,23 +2304,9 @@ function drawBfsOverlay(){try{
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
   let ax=(function(){
-    const sv=_axGet(_axSlug);
-    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
-    // v3.18: gemessener Wert aus dem Bild schlaegt die Regel (v3.20: pro Slug)
-    if(UV_ACHSEN.indexOf(_bfsAxMess[_axSlug])>=0)return _bfsAxMess[_axSlug];
-    /* v3.15: Das BfS verwendet GERADE Skalen (4, 6, 8, 10, 12) und waehlt die,
-       die dem Klarhimmel-Scheitel des Tages am naechsten liegt. Belegt an zwei
-       Tagen: 31.08. Scheitel 8,3 -> Achse 8 (nicht 10), 01.09. Scheitel 5,2 ->
-       Achse 6 (nicht 4). Die vorherige Regel (>=8,35 -> 10, >=7,2 -> 9, sonst 8)
-       verfehlte beide.
-       ACHTUNG: zwei Datenpunkte sind kein Beleg, sondern eine Vermutung. Ein von
-       Hand gestellter Wert hat weiter Vorrang und gilt pro Tag. */
     let pk=0;
     if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}
-    if(!(pk>0))return 8;
-    let best=6,bd=1e9;
-    for(const stufe of [4,6,8,10,12]){const d=Math.abs(stufe-pk);if(d<bd){bd=d;best=stufe;}}
-    return best;
+    return uvAchseBestimmen(pk);
   })();window._bfsAxCur={ortTag:uvAxOrtTag(),slug:_axSlug,wert:ax}; // v2.13: Heuristik, per Tipp umschaltbar
   // v3.10: Kein Math.min(ax,...) mehr. Die Klemmung hat jede Kurve, die ueber
   // den Achsenrand lief, oben abgeflacht — sie wirkte unsymmetrisch und aenderte
