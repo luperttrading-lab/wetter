@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.25</span>
+      <span class="ver">v3.26</span>
     </div>
   </header>
 
@@ -1310,14 +1310,20 @@ function uvAchseBestimmen(){
     localStorage.setItem("axAufraeumen3_22","1");
   }catch(e){}
 })();
+/* Nach dem Umschalten heute/gestern und beim Ortswechsel erneut laden — die
+   JSON liegt dann meist schon im Speicher, der Aufruf kostet nichts. */
 function uvAxOrtTag(){
   const o=(typeof LOC!=="undefined"&&LOC&&LOC.name)?LOC.name:"standard";
   return o+"|"+uvAxTag();
 }
 function uvAxTag(){
   try{
+    /* v3.26: uvDayOffset ist NEGATIV fuer gestern (setUvDay(-1)). Das Minus
+       rechnete deshalb einen Tag vorwaerts — der Schluessel lautete
+       "Norderney|2026-09-02", ein Datum, das die Pipeline nie schreibt.
+       Deshalb blieb die Achse fuer gestern immer auf dem Wert der Regel. */
     const d=new Date();
-    if(typeof uvDayOffset!=="undefined"&&uvDayOffset)d.setDate(d.getDate()-uvDayOffset);
+    if(typeof uvDayOffset!=="undefined"&&uvDayOffset)d.setDate(d.getDate()+uvDayOffset);
     return (typeof ymd==="function")?ymd(d):d.toISOString().slice(0,10);
   }catch(e){return "";}
 }
@@ -1830,7 +1836,8 @@ function bfsNearest(){
     if(d<bd){bd=d;b=st;}}
   return bd<=70?{slug:b.slug,name:b.name,dist:bd}:null;
 }
-function setUvDay(off){uvDayOffset=off;if(uvAirFull)renderAirGrid(uvAirFull);}
+function setUvDay(off){uvDayOffset=off;if(uvAirFull)renderAirGrid(uvAirFull);
+  try{bfsAchsenStart();}catch(e){}}   // v3.26: Achse des neuen Tages anwenden
 
 function renderAirGrid(air){
   el("airSec").classList.remove("hidden");
@@ -2251,6 +2258,19 @@ const _bfsAxMess={};
    schreibt bfs-achse.json: { achsen: { Slug: { Datum: Achse } } }.
    Prioritaet: dieser Wert, sonst die Gerade-Stufen-Regel als Notbehelf. */
 let _bfsAxJson=null,_bfsAxJsonZeit=0;
+/* v3.26: Beim Start laden, nicht erst in drawBfsOverlay. Dort stand der Aufruf
+   90 Zeilen hinter drei Ausstiegen — unter anderem dem, der greift, solange das
+   BfS-Bild noch laedt. In Norden kam es deshalb nie zum Laden, und die Achse
+   blieb auf dem Wert der Regel (6 statt 8). */
+function bfsAchsenStart(){
+  try{
+    bfsAchsenLaden(function(){
+      try{delete window._bfsAxCur;}catch(e){window._bfsAxCur=undefined;}
+      try{if(typeof lastUVH!=="undefined"&&lastUVH)drawUV(lastUVH);}catch(e){}
+      try{drawBfsOverlay();}catch(e){}
+    });
+  }catch(e){}
+}
 function bfsAchsenLaden(cb){
   if(_bfsAxJson&&Date.now()-_bfsAxJsonZeit<15*60e3){cb(_bfsAxJson);return;}
   fetch("https://luperttrading-lab.github.io/wetter/bfs-achse.json?t="+Math.floor(Date.now()/600e3),{cache:"no-store"})
@@ -2396,22 +2416,6 @@ function drawBfsOverlay(){try{
   try{
     // v3.20: je Slug einmal messen. Der Merker wird erst NACH dem Ergebnis
     // gesetzt — vorher blockierte ein gescheiterter Versuch jede Wiederholung.
-    // v3.24: Achse aus der Pipeline holen; kam ein neuer Wert, neu zeichnen.
-    if(_bfsAxMess[_axSlug]==null){
-      const _slugFest=_axSlug,_vorher=ax;
-      bfsAchsenLaden(function(){
-        const neu=_bfsAxMess[_slugFest];
-        if(UV_ACHSEN.indexOf(neu)>=0&&neu!==_vorher){
-          /* v3.25: BEIDE Grafiken neu zeichnen. Bis v3.24 wurde nur die untere
-             erneuert — die obere behielt die Achse, die vor dem Laden galt
-             (Norden gestern: oben 6, unten 8). Den zwischengespeicherten Wert
-             vorher verwerfen, sonst liest die obere Grafik ihn erneut. */
-          try{delete window._bfsAxCur;}catch(e){window._bfsAxCur=undefined;}
-          try{drawBfsOverlay();}catch(e){}
-          try{if(typeof lastUVH!=="undefined"&&lastUVH)drawUV(lastUVH);}catch(e){}
-        }
-      });
-    }
   }catch(e){}
   if(_ab){
     _ab.textContent="Achse 0\u2013"+ax;
@@ -4189,6 +4193,12 @@ load();
       {enableHighAccuracy:true,timeout:10000,maximumAge:60000});
   };
 })();
+
+/* v3.26: Achsen der BfS-Bilder gleich beim Start holen. */
+try{
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(bfsAchsenStart,600));
+  else setTimeout(bfsAchsenStart,600);
+}catch(e){}
 </script>
 </body>
 </html>
