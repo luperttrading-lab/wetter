@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.23</span>
+      <span class="ver">v3.24</span>
     </div>
   </header>
 
@@ -1902,7 +1902,7 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
         <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><div class="kinfo"><span id="axWert"></span><small id="axQuelle"></small></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -2245,6 +2245,27 @@ function _farbAbstand(r,g,b,hex){
    galt dort noch der Wert des vorigen Ortes, bis die neue Messung durch war.
    Scheiterte sie, blieb der fremde Wert dauerhaft stehen. */
 const _bfsAxMess={};
+/* v3.24: Die Achse kommt aus der Pipeline. bfs_achse.py liest die Farbleiste
+   der BfS-Bilder serverseitig aus — im Browser ist das unmoeglich, der
+   BfS-Server sperrt den Bildzugriff (CORS: "Zugriff verweigert"). Die Action
+   schreibt bfs-achse.json: { achsen: { Slug: { Datum: Achse } } }.
+   Prioritaet: dieser Wert, sonst die Gerade-Stufen-Regel als Notbehelf. */
+let _bfsAxJson=null,_bfsAxJsonZeit=0;
+function bfsAchsenLaden(cb){
+  if(_bfsAxJson&&Date.now()-_bfsAxJsonZeit<15*60e3){cb(_bfsAxJson);return;}
+  fetch("https://luperttrading-lab.github.io/wetter/bfs-achse.json?t="+Math.floor(Date.now()/600e3),{cache:"no-store"})
+    .then(r=>r.ok?r.json():Promise.reject("HTTP "+r.status))
+    .then(j=>{
+      if(j&&j.achsen&&typeof j.achsen==="object"){
+        _bfsAxJson=j.achsen;_bfsAxJsonZeit=Date.now();
+        // in den Messspeicher uebernehmen: Schluessel "Slug|Datum"
+        for(const slug in j.achsen){const t=j.achsen[slug];if(!t)continue;
+          for(const d in t){const v=+t[d];if(UV_ACHSEN.indexOf(v)>=0)_bfsAxMess[slug+"|"+d]=v;}}
+      }
+      cb(_bfsAxJson);
+    })
+    .catch(e=>{console.info("bfs-achse.json:",e);cb(null);});
+}
 function bfsAchseMessen(cb){
   const im=document.getElementById("bfsUv");
   if(!im||!im.src){cb(null,"kein Bild");return;}
@@ -2375,19 +2396,13 @@ function drawBfsOverlay(){try{
   try{
     // v3.20: je Slug einmal messen. Der Merker wird erst NACH dem Ergebnis
     // gesetzt — vorher blockierte ein gescheiterter Versuch jede Wiederholung.
-    window._bfsMessLauf=window._bfsMessLauf||{};
-    if(!window._bfsMessLauf[_axSlug]&&_bfsAxMess[_axSlug]==null){
-      window._bfsMessLauf[_axSlug]=1;
-      const _slugFest=_axSlug;
-      bfsAchseMessen(function(stufe,grund){
-        window._bfsMessLauf[_slugFest]=0;
-        if(stufe!=null){
-          _bfsAxMess[_slugFest]=stufe;
+    // v3.24: Achse aus der Pipeline holen; kam ein neuer Wert, neu zeichnen.
+    if(_bfsAxMess[_axSlug]==null){
+      const _slugFest=_axSlug,_vorher=ax;
+      bfsAchsenLaden(function(){
+        const neu=_bfsAxMess[_slugFest];
+        if(UV_ACHSEN.indexOf(neu)>=0&&neu!==_vorher){
           try{drawBfsOverlay();}catch(e){}
-        }
-        if(uvAxSlug()===_slugFest){
-          const _q=el("axQuelle");
-          if(_q)_q.textContent=(stufe!=null)?"aus dem Bild gelesen":grund;
         }
       });
     }
@@ -2403,11 +2418,6 @@ function drawBfsOverlay(){try{
      aus dem Klarhimmel-Scheitel. Eine Handeinstellung konnte dem nur
      widersprechen; angezeigt wird jetzt nur noch, welcher Wert gilt und woher
      er stammt. */
-  {const _at=el("axWert");
-   if(_at)_at.innerHTML='Achse 0\u2013<b>'+ax+'</b>';
-   const _q=el("axQuelle");
-   if(_q&&!_q.textContent)_q.textContent=(UV_ACHSEN.indexOf(_bfsAxMess[_axSlug])>=0)
-     ?"aus dem Bild gelesen":"berechnet \u2013 Bild nicht lesbar";}
 }catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
 }
 
