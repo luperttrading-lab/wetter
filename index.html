@@ -411,7 +411,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.08</span>
+      <span class="ver">v3.09</span>
     </div>
   </header>
 
@@ -1222,7 +1222,12 @@ function _o3(ms){ // v2.46: linear zwischen den Monatsmitten - verhindert Stufen
   const d=new Date(ms),m=d.getMonth(),dim=new Date(d.getFullYear(),m+1,0).getDate(),f=(d.getDate()-0.5)/dim;
   const m0=f<0.5?(m+11)%12:m, m1=f<0.5?m:(m+1)%12, t=f<0.5?f+0.5:f-0.5;
   return _O3M[m0]+(_O3M[m1]-_O3M[m0])*t;}
-function physUvAt(ms){const mu=_sunMu(ms);if(mu==null||mu<=0)return 0;return 12.5*_sunE(ms)*Math.pow(mu,2.42)*Math.pow(300/_o3(ms),1.23);} // Allaart 2004 mit Abstandsfaktor E und glatter Ozonkurve
+/* v3.09: Exponent folgt dem k-Regler, sonst Physik 2,42. Damit rechnen
+   Jahresgrafik und Glocke mit demselben Wert, sobald von Hand gesetzt.
+   Bei Automatik bleibt die Physik — die Regression gibt es nur fuer Tage mit
+   Open-Meteo-Daten, das ganze Jahr hat sie nicht. */
+function kPhys(){const h=(typeof kManuell==="function")?kManuell():null;return h!=null?h:2.42;}
+function physUvAt(ms){const mu=_sunMu(ms);if(mu==null||mu<=0)return 0;return 12.5*_sunE(ms)*Math.pow(mu,kPhys())*Math.pow(300/_o3(ms),1.23);} // Allaart 2004 mit Abstandsfaktor E und glatter Ozonkurve
 function uvSimSeries(t6,t21,ccAt,bellAt,cmfFn,seed,DT,wAt){ // v2.20: Sonne/Schatten-Telegraphenprozess; Zeitmittel == cmfFn per Konstruktion
   let _s=(seed>>>0)||1;const rnd=()=>{_s=_s+0x6D2B79F5|0;let t=Math.imul(_s^_s>>>15,1|_s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   DT=DT||120000;const T0=4*60000;
@@ -1824,9 +1829,9 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="kSlider" min="0.60" max="3.00" step="0.01" aria-label="Kurvenexponent k">
         <div class="kinfo"><span id="kWert"></span><button type="button" id="kAuto" class="kbtn" title="zurueck zur Regression">auto</button></div></div>
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
-        <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd">${vdLine}</div></div>`;
+        <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c62828">rot</b> = Allaart-Form + Diffusanteil, CAMS-kalibriert · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="color:#1c66c4;text-decoration:underline;cursor:pointer">Achse 0–9</span> (antippen, falls Skala abweicht) · Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -2101,7 +2106,25 @@ function drawUV(h){
     x.fillStyle="#5c6b80";x.font="9px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";
     x.textAlign=xn>gx1-30?"right":"left";x.fillText(_txt,xn+(xn>gx1-30?-3:3),gy0+22);}
   // Vit-D-Schwelle (UV 3)
-  const TH=3,cross=[];for(let i=i0;i<i1;i++){const a=cs[i],b=cs[i+1];if(a==null||b==null)continue;if((a<TH)!==(b<TH)){const f=(TH-a)/(b-a);cross.push(tms[i]+f*(tms[i+1]-tms[i]));}}
+  // v3.09: Die Punkte sitzen dort, wo die GEZEICHNETE Glocke UV 3 schneidet.
+  // Vorher wurden sie linear zwischen den rohen Stundenwerten interpoliert —
+  // eine dritte Rechnung neben Glocke und Textzeile. Eine gerade Linie zwischen
+  // zwei Stuetzstellen einer gekruemmten Kurve trifft je nach Lage der Schwelle
+  // im Stundenraster mal gut, mal 20 Minuten daneben; deshalb lag oft ein Punkt
+  // auf der Kurve und der andere nicht. Jetzt liegen sie per Konstruktion drauf.
+  const TH=3,cross=[];
+  {let vor=null,tv=null;
+   for(let t=t6;t<=t21;t+=60000){const v=sunBell(t);
+     if(vor!=null&&(vor<TH)!==(v<TH)){const f=(TH-vor)/(v-vor);cross.push(tv+f*(t-tv));}
+     vor=v;tv=t;}}
+  window._vdCross=cross.slice();
+  // Textzeile aus derselben Quelle nachziehen
+  try{const _e=el("vdZeile");if(_e&&cross.length>=2){
+    const vs=new Date(cross[0]),ve=new Date(cross[cross.length-1]);
+    const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;
+    const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
+    _e.innerHTML='<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit '+f2(vs)+'\u2013'+f2(ve)+' Uhr \u00b7 Dauer '+vh+'h '+String(vmin).padStart(2,"0")+'min</b>';
+  }else if(_e&&cross.length<2){_e.innerHTML='<span style="color:#9aa7b8;font-size:11px">heute kein UV \u2265 3 \u2013 keine Vitamin-D-Zeit</span>';}}catch(e){}
   const gC="#1f6b43",y3=Y(3);
   x.setLineDash([4,3]);x.lineWidth=2;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
@@ -2158,10 +2181,14 @@ function drawBfsOverlay(){try{
     let _sn=0,_sd=0; // v2.17: Diffusanteil w an CAMS fitten (Form (1-w)*r^2.42 + w*r), geschlossene LS-Loesung
     if(muMax>0&&pkC>0)for(let t=t6;t<=t21;t+=6e5){const m=_sunMu(t);if(m<=0)continue;const r=m/muMax,a=Math.pow(r,2.42),b=r-a,y=bell(t)/pkC-a;_sn+=y*b;_sd+=b*b;}
     const w=Math.max(0,Math.min(0.18,_sd>0?_sn/_sd:0));
-    const redAt=t=>{const m=_sunMu(t);if(m<=0||muMax<=0)return 0;const r=m/muMax;return pkC*((1-w)*Math.pow(r,2.42)+w*r);};
-    const drawP=()=>{x.beginPath();let f=true;for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=Math.min(redAt(t),ax);if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}x.stroke();};
-    x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.4;drawP();
-    x.strokeStyle="#c62828";x.lineWidth=1.7;drawP();
+    // v3.09: Die rote Allaart-Kurve ist raus — sie war eine zweite Klarhimmel-
+    // rechnung neben der schwarzen und brachte keine neue Aussage. An ihrer
+    // Stelle die Spitzenkurve aus dem oberen Diagramm: Glocke mal Zuschlag, als
+    // Decke fuer die BfS-Messspitzen direkt im Messbild.
+    const eps=(typeof huellZuschlag==="function")?huellZuschlag():0.20;
+    const drawH=()=>{x.beginPath();let f=true;for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=Math.min(bell(t)*(1+eps),ax);if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}x.stroke();};
+    x.setLineDash([]);x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.2;drawH();
+    x.setLineDash([4,3]);x.strokeStyle="#c2410c";x.lineWidth=1.7;drawH();x.setLineDash([]);
   }
   // v2.84: Die obere Grafik hat vor dem Overlay gezeichnet und kannte die
   // BfS-Achse noch nicht. Weicht sie ab, genau einmal nachziehen — der Zaehler
