@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.17</span>
+      <span class="ver">v3.18</span>
     </div>
   </header>
 
@@ -1855,7 +1855,7 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
         <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulenhöhe &amp; Farbe = reale UV (max. möglich × gemessene Bewölkung) bis jetzt · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><input type="range" id="axSlider" min="4" max="12" step="1" aria-label="Achsenobergrenze"><div class="kinfo"><span id="axWert"></span><button type="button" id="axAuto" class="kbtn" title="obere Grafik wieder an die BfS-Skala koppeln">auto</button></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b style="color:#3a4453">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="axrow"><input type="range" id="axSlider" min="4" max="12" step="1" aria-label="Achsenobergrenze"><div class="kinfo"><span id="axWert"></span><small id="axQuelle"></small><button type="button" id="axAuto" class="kbtn" title="zurueck zur Automatik">auto</button></div></div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">Fl\u00e4che = Uhrzeiten mit UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
   html+=moonTile(moonInfo(new Date()),moonPhys(new Date()));
@@ -1982,13 +1982,9 @@ function drawUV(h){
       const r=cv.getBoundingClientRect(),px=ev.clientX-r.left,py=ev.clientY-r.top;
       if(px<z.x0||px>z.x1||py<z.y0||py>z.y1)return;
       ev.stopPropagation();
-      // Den gespeicherten Wert lesen, nicht die zuletzt gezeichnete Achse:
-      // sonst dreht der Rundlauf im Kreis, wenn das Neuzeichnen ausbleibt.
-      const sl=uvAxSlug();   // v3.17: die eine gemeinsame Achse
-      const jetzt=_axGet(sl)||((typeof window._uvAxOben==="number")?window._uvAxOben:9);
-      const neu=uvAxWeiter(jetzt);
-      _axSet(sl,neu); window._bfsAxCur=neu;   // v3.17: eine Achse fuer beide Grafiken
-      try{syncUV();}catch(e){try{drawUV(window._uvLastH);}catch(_){}}
+      // v3.18: Das Antippen der Farbleiste stellte die Achse um. Es gibt jetzt
+      // nur noch eine Achse, und die richtet sich nach dem BfS-Bild — ein
+      // versehentlicher Tipp beim Scrollen verstellte sie sonst still.
     });
   }
   // v3.11: Ab hier wird auf den Diagrammrahmen beschnitten — bei kleiner Achse
@@ -2185,6 +2181,52 @@ function drawUV(h){
 /* --- Klarsky-Glocke ueber das amtliche BfS-Messbild legen (gleiche Achsen wie das PNG) --- */
 // BfS-PNG-Plotgeometrie als Bruchteile der Bildflaeche. Am Geraet feinjustierbar,
 // falls die blaue Linie minimal verschoben sitzt (X pixel-verifiziert, Y aus Screenshot vermessen):
+/* v3.18: Achse aus dem Bild MESSEN statt raten. Die Farbleiste am linken Rand
+   des BfS-Bildes reicht von UV 0 unten bis zum Achsenmaximum oben — ihre
+   oberste Farbe verraet also die Skala. Gelesen wird ein einzelner Pixel knapp
+   unter der Oberkante und gegen die BfS-Farbtabelle gehalten.
+   Das setzt voraus, dass der BfS-Server den Bildzugriff fuer fremde Seiten
+   freigibt (CORS). Tut er das nicht, wirft getImageData, und es bleibt bei der
+   Gerade-Stufen-Regel — die Messung ist eine Verbesserung, keine Bedingung.
+   Das Ergebnis steht in window._bfsAxGemessen; ist es null, war kein Zugriff
+   moeglich. */
+const BFS_BAR_X=0.055;          // Mitte der Farbleiste, Anteil der Bildbreite
+function _farbAbstand(r,g,b,hex){
+  const R=parseInt(hex.slice(1,3),16),G=parseInt(hex.slice(3,5),16),B=parseInt(hex.slice(5,7),16);
+  return (r-R)*(r-R)+(g-G)*(g-G)+(b-B)*(b-B);
+}
+function bfsAchseMessen(cb){
+  const im=document.getElementById("bfsUv");
+  if(!im||!im.src){cb(null,"kein Bild");return;}
+  const p=new Image();
+  p.crossOrigin="anonymous";
+  p.onerror=()=>cb(null,"Zugriff verweigert");
+  p.onload=()=>{
+    try{
+      const c=document.createElement("canvas");
+      c.width=p.naturalWidth; c.height=p.naturalHeight;
+      const x=c.getContext("2d");
+      x.drawImage(p,0,0);
+      const px=Math.round(BFS_BAR_X*c.width);
+      const py=Math.round((BFS_Y9+0.012)*c.height);   // knapp unter der Oberkante
+      const d=x.getImageData(px,py,1,1).data;
+      let best=-1,bd=1e9;
+      for(let i=0;i<BFSCOL.length;i++){
+        const dd=_farbAbstand(d[0],d[1],d[2],BFSCOL[i]);
+        if(dd<bd){bd=dd;best=i;}
+      }
+      // Nur uebernehmen, wenn die Farbe eindeutig getroffen ist
+      if(bd>2400){cb(null,"Farbe nicht eindeutig");return;}
+      // BFSCOL[i] ist die Farbe fuer UV-Index i. Die oberste Leistenfarbe zeigt
+      // also den hoechsten dargestellten UV-Wert; die Achse ist die naechste
+      // gerade Stufe ab diesem Wert.
+      let stufe=4;
+      for(const st of [4,6,8,10,12]){ if(st>=best){ stufe=st; break; } stufe=12; }
+      cb(stufe,"gemessen (Leistenfarbe "+BFSCOL[best]+")");
+    }catch(e){ cb(null,"gesperrt: "+(e&&e.name||"Fehler")); }
+  };
+  p.src=im.src;
+}
 const BFS_X0=0.1280, BFS_X1=0.8970;  // 6 Uhr .. 21 Uhr  (Anteil der Bildbreite, pixel-vermessen)
 const BFS_Y9=0.1470, BFS_Y0=0.9110;  // UV 9 (oben) .. UV 0 (unten)  (Anteil der Bildhoehe, aus BfS-Skala-Ziffern IMG_2319 rueckgerechnet)
 function drawBfsOverlay(){try{
@@ -2216,6 +2258,9 @@ function drawBfsOverlay(){try{
   let ax=(function(){
     const sv=_axGet(_axSlug);
     if(UV_ACHSEN.indexOf(sv)>=0)return sv;
+    // v3.18: gemessener Wert aus dem Bild schlaegt die Regel
+    if(typeof window._bfsAxGemessen==="number"&&UV_ACHSEN.indexOf(window._bfsAxGemessen)>=0)
+      return window._bfsAxGemessen;
     /* v3.15: Das BfS verwendet GERADE Skalen (4, 6, 8, 10, 12) und waehlt die,
        die dem Klarhimmel-Scheitel des Tages am naechsten liegt. Belegt an zwei
        Tagen: 31.08. Scheitel 8,3 -> Achse 8 (nicht 10), 01.09. Scheitel 5,2 ->
@@ -2286,6 +2331,22 @@ function drawBfsOverlay(){try{
   try{
     if(window._uvAxOben!==ax&&typeof lastUVH!=="undefined"&&lastUVH&&!window._uvAxSync){
       window._uvAxSync=1; try{drawUV(lastUVH);}finally{window._uvAxSync=0;}
+    }
+  }catch(e){}
+  // v3.18: einmal je Tag und Station messen, dann neu zeichnen
+  try{
+    const _mk="mess:"+_axSlug;
+    if(window._bfsMess!==_mk){
+      window._bfsMess=_mk;
+      bfsAchseMessen(function(stufe,grund){
+        window._bfsAxQuelle=grund;
+        if(stufe!=null&&stufe!==window._bfsAxGemessen){
+          window._bfsAxGemessen=stufe;
+          try{drawBfsOverlay();}catch(e){}
+        }
+        const _q=el("axQuelle");
+        if(_q)_q.textContent=(stufe!=null)?"aus dem Bild gelesen":grund;
+      });
     }
   }catch(e){}
   if(_ab){
