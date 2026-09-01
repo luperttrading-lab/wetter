@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.14</span>
+      <span class="ver">v3.15</span>
     </div>
   </header>
 
@@ -1891,8 +1891,13 @@ function drawUV(h){
   const _bfsAx=(function(){
     const sv=_axGet("oben:"+uvAxSlug());
     if(UV_ACHSEN.indexOf(sv)>=0)return sv;
-    // Automatik: knapp ueber den Tagesscheitel, mindestens 6
-    return Math.max(6,Math.min(12,Math.ceil(_pk9>0?_pk9:6)));
+    // v3.15: dieselbe Regel wie unten — naechste GERADE Stufe zum Tagesscheitel.
+    // So starten beide Grafiken mit derselben Skala, und der Vergleich stimmt
+    // ohne Zutun. Wer oben eine andere Achse will, stellt sie weiterhin ein.
+    const _p=_pk9>0?_pk9:6;
+    let _b=6,_bd=1e9;
+    for(const st of [4,6,8,10,12]){const d=Math.abs(st-_p);if(d<_bd){_bd=d;_b=st;}}
+    return _b;
   })();
 
   // v3.11: Die Sicherung "nie kleiner als der Tagesscheitel" ist raus. Sie sollte
@@ -2203,12 +2208,23 @@ function drawBfsOverlay(){try{
   const dayMs=ortsMitternacht(isFinite(tms[0])?tms[0]:Date.now());                     // v2.71: Ortszeit
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
-  let ax=(function(){const sv=_axGet(_axSlug);if(UV_ACHSEN.indexOf(sv)>=0)return sv;let pk=0;if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}// v2.87: Bisher konnte die Heuristik nur 9 oder 10 waehlen. Das BfS-Bild fuer
-  // Giessen zeigt aber 0-8, und ohne gespeicherten Wert landete die App immer
-  // auf 9 - die Kurven lagen dadurch rund eine halbe Einheit zu tief.
-  // Die Schwellen sind aus den beobachteten Bildern abgeleitet, nicht belegt;
-  // ein einmal getippter Wert hat immer Vorrang.
-  return pk>=8.35?10:(pk>=7.2?9:8);})();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
+  let ax=(function(){
+    const sv=_axGet(_axSlug);
+    if(UV_ACHSEN.indexOf(sv)>=0)return sv;
+    /* v3.15: Das BfS verwendet GERADE Skalen (4, 6, 8, 10, 12) und waehlt die,
+       die dem Klarhimmel-Scheitel des Tages am naechsten liegt. Belegt an zwei
+       Tagen: 31.08. Scheitel 8,3 -> Achse 8 (nicht 10), 01.09. Scheitel 5,2 ->
+       Achse 6 (nicht 4). Die vorherige Regel (>=8,35 -> 10, >=7,2 -> 9, sonst 8)
+       verfehlte beide.
+       ACHTUNG: zwei Datenpunkte sind kein Beleg, sondern eine Vermutung. Ein von
+       Hand gestellter Wert hat weiter Vorrang und gilt pro Tag. */
+    let pk=0;
+    if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}
+    if(!(pk>0))return 8;
+    let best=6,bd=1e9;
+    for(const stufe of [4,6,8,10,12]){const d=Math.abs(stufe-pk);if(d<bd){bd=d;best=stufe;}}
+    return best;
+  })();window._bfsAxCur=ax; // v2.13: Heuristik, per Tipp umschaltbar
   // v3.10: Kein Math.min(ax,...) mehr. Die Klemmung hat jede Kurve, die ueber
   // den Achsenrand lief, oben abgeflacht — sie wirkte unsymmetrisch und aenderte
   // beim Umschalten der Achse ihre Form statt nur ihre Lage. Werte duerfen jetzt
