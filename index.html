@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.24</span>
+      <span class="ver">v3.25</span>
     </div>
   </header>
 
@@ -2402,7 +2402,13 @@ function drawBfsOverlay(){try{
       bfsAchsenLaden(function(){
         const neu=_bfsAxMess[_slugFest];
         if(UV_ACHSEN.indexOf(neu)>=0&&neu!==_vorher){
+          /* v3.25: BEIDE Grafiken neu zeichnen. Bis v3.24 wurde nur die untere
+             erneuert — die obere behielt die Achse, die vor dem Laden galt
+             (Norden gestern: oben 6, unten 8). Den zwischengespeicherten Wert
+             vorher verwerfen, sonst liest die obere Grafik ihn erneut. */
+          try{delete window._bfsAxCur;}catch(e){window._bfsAxCur=undefined;}
           try{drawBfsOverlay();}catch(e){}
+          try{if(typeof lastUVH!=="undefined"&&lastUVH)drawUV(lastUVH);}catch(e){}
         }
       });
     }
