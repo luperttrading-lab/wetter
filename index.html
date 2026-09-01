@@ -416,7 +416,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.22</span>
+      <span class="ver">v3.23</span>
     </div>
   </header>
 
@@ -1280,16 +1280,18 @@ function _axSet(sl,v){try{localStorage.setItem("bfsAx_"+sl,String(v))}catch(e){}
    koennen keine neuen entstehen, aber alte lagen weiter im Speicher und
    verstellten die Skala dauerhaft (in Norden eine 5, die keine Regel je waehlt).
    Sie werden beim ersten Lauf entfernt. */
-function uvAchseBestimmen(scheitel){
+/* v3.23: Der Scheitel wird HIER bestimmt, nicht uebergeben. In v3.22 rief die
+   obere Grafik dieselbe Funktion mit den Open-Meteo-Werten auf (in Norden 4,1),
+   die untere mit physUvAt (hoeher) — eine gemeinsame Funktion nuetzt nichts,
+   wenn man sie verschieden fuettert. Ergebnis waren 4 oben und 6 unten. */
+function uvAchseBestimmen(){
   const sl=uvAxSlug();
   if(UV_ACHSEN.indexOf(_bfsAxMess[sl])>=0)return _bfsAxMess[sl];
-  let p=scheitel;
-  if(!(p>0)){
-    try{ if(window.satellite){
-      const d=ortsMitternacht(Date.now());
-      for(let t=d+6*3600e3;t<=d+21*3600e3;t+=300e3){const u=physUvAt(t);if(u>p)p=u;}
-    }}catch(e){}
-  }
+  let p=0;
+  try{ if(window.satellite){
+    const d=ortsMitternacht(Date.now()-(typeof uvDayOffset!=="undefined"?uvDayOffset:0)*86400e3);
+    for(let t=d+6*3600e3;t<=d+21*3600e3;t+=300e3){const u=physUvAt(t);if(u>p)p=u;}
+  }}catch(e){}
   if(!(p>0))p=6;
   let best=6,bd=1e9;
   for(const st of [4,6,8,10,12]){const d=Math.abs(st-p);if(d<bd){bd=d;best=st;}}
@@ -1943,7 +1945,7 @@ function drawUV(h){
     const _ot=uvAxOrtTag();
     if(window._bfsAxCur&&window._bfsAxCur.ortTag===_ot&&UV_ACHSEN.indexOf(window._bfsAxCur.wert)>=0)
       return window._bfsAxCur.wert;
-    return uvAchseBestimmen(_pk9);
+    return uvAchseBestimmen();
   })();
 
   // v3.11: Die Sicherung "nie kleiner als der Tagesscheitel" ist raus. Sie sollte
@@ -2255,19 +2257,26 @@ function bfsAchseMessen(cb){
       c.width=p.naturalWidth; c.height=p.naturalHeight;
       const x=c.getContext("2d");
       x.drawImage(p,0,0);
+      /* v3.23: Die Leiste von oben nach unten abtasten, statt einen festen
+         Punkt zu treffen. Das Norderney-Bild hat eine zweizeilige Legende und
+         damit einen tiefer beginnenden Plot — ein fest gesetzter Pixel landete
+         dort ueber der Leiste im Weiss. Gesucht wird der erste Punkt, dessen
+         Farbe eindeutig zur BfS-Tabelle gehoert. */
       const px=Math.round(BFS_BAR_X*c.width);
-      const py=Math.round((BFS_Y9+0.012)*c.height);   // knapp unter der Oberkante
-      const d=x.getImageData(px,py,1,1).data;
-      let best=-1,bd=1e9;
-      for(let i=0;i<BFSCOL.length;i++){
-        const dd=_farbAbstand(d[0],d[1],d[2],BFSCOL[i]);
-        if(dd<bd){bd=dd;best=i;}
+      let best=-1;
+      for(let f=0.08; f<=0.55; f+=0.004){
+        const py=Math.round(f*c.height);
+        if(py<0||py>=c.height)continue;
+        const d=x.getImageData(px,py,1,1).data;
+        if(d[3]<200)continue;
+        let b=-1,bd=1e9;
+        for(let i2=0;i2<BFSCOL.length;i2++){
+          const dd=_farbAbstand(d[0],d[1],d[2],BFSCOL[i2]);
+          if(dd<bd){bd=dd;b=i2;}
+        }
+        if(bd<=1200){best=b;break;}     // eindeutig genug
       }
-      // Nur uebernehmen, wenn die Farbe eindeutig getroffen ist
-      if(bd>2400){cb(null,"Farbe nicht eindeutig");return;}
-      // BFSCOL[i] ist die Farbe fuer UV-Index i. Die oberste Leistenfarbe zeigt
-      // also den hoechsten dargestellten UV-Wert; die Achse ist die naechste
-      // gerade Stufe ab diesem Wert.
+      if(best<0){cb(null,"Leiste nicht gefunden");return;}
       let stufe=4;
       for(const st of [4,6,8,10,12]){ if(st>=best){ stufe=st; break; } stufe=12; }
       cb(stufe,"gemessen (Leistenfarbe "+BFSCOL[best]+")");
@@ -2303,11 +2312,7 @@ function drawBfsOverlay(){try{
   const dayMs=ortsMitternacht(isFinite(tms[0])?tms[0]:Date.now());                     // v2.71: Ortszeit
   const t6=dayMs+6*3600e3,t21=dayMs+21*3600e3;
   const gx0=BFS_X0*W,gx1=BFS_X1*W,gy9=BFS_Y9*Hh,gy0=BFS_Y0*Hh;
-  let ax=(function(){
-    let pk=0;
-    if(window.satellite)for(let t=t6;t<=t21;t+=300e3){const u=physUvAt(t);if(u>pk)pk=u;}
-    return uvAchseBestimmen(pk);
-  })();window._bfsAxCur={ortTag:uvAxOrtTag(),slug:_axSlug,wert:ax}; // v2.13: Heuristik, per Tipp umschaltbar
+  let ax=uvAchseBestimmen();window._bfsAxCur={ortTag:uvAxOrtTag(),slug:_axSlug,wert:ax}; // v2.13: Heuristik, per Tipp umschaltbar
   // v3.10: Kein Math.min(ax,...) mehr. Die Klemmung hat jede Kurve, die ueber
   // den Achsenrand lief, oben abgeflacht — sie wirkte unsymmetrisch und aenderte
   // beim Umschalten der Achse ihre Form statt nur ihre Lage. Werte duerfen jetzt
@@ -2399,7 +2404,10 @@ function drawBfsOverlay(){try{
      widersprechen; angezeigt wird jetzt nur noch, welcher Wert gilt und woher
      er stammt. */
   {const _at=el("axWert");
-   if(_at)_at.innerHTML='Achse 0\u2013<b>'+ax+'</b>';}
+   if(_at)_at.innerHTML='Achse 0\u2013<b>'+ax+'</b>';
+   const _q=el("axQuelle");
+   if(_q&&!_q.textContent)_q.textContent=(UV_ACHSEN.indexOf(_bfsAxMess[_axSlug])>=0)
+     ?"aus dem Bild gelesen":"berechnet \u2013 Bild nicht lesbar";}
 }catch(e){const _b=document.getElementById("bfsAx");if(_b)_b.textContent="\u26a0 Overlay: "+(e&&e.message?e.message:e);}
 }
 
