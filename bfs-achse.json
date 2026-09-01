@@ -1,112 +1,145 @@
 {
- "stand": "2026-09-01T15:00:23+00:00",
+ "stand": "2026-09-01T15:06:43+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
-  "Andernach": {},
-  "Belm-Osnabrueck": {},
-  "Berlin": {},
-  "Bonn": {},
-  "Chieming": {},
-  "Dortmund": {},
-  "Eckernfoerde": {},
-  "Fichtelberg": {},
-  "Friedrichshafen": {},
-  "Genthin": {},
-  "Giessen-Wettenberg": {},
-  "Goerlitz": {},
-  "Groemitz": {},
-  "Hamburg": {},
-  "Hohenpeissenberg": {},
-  "Kassel": {},
-  "Klippeneck": {},
-  "Kulmbach": {},
-  "Langen": {},
-  "Lindenberg": {},
-  "Lueneburg": {},
-  "Melpitz": {},
-  "Muenchen": {},
-  "Norderney": {},
-  "Salzgitter": {},
-  "Schauinsland": {},
-  "Schneefernerhaus": {},
-  "Stuttgart": {},
-  "Tholey": {},
-  "Todendorf": {},
-  "Waldmuenchen": {},
-  "Weissenburg": {},
-  "Zingst": {},
-  "Zirchow": {}
+  "Andernach": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Belm-Osnabrueck": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Berlin": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Bonn": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Chieming": {
+   "2026-09-01": 8,
+   "2026-08-31": 10
+  },
+  "Dortmund": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Eckernfoerde": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Fichtelberg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Friedrichshafen": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Genthin": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Giessen-Wettenberg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Goerlitz": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Groemitz": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Hamburg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Hohenpeissenberg": {
+   "2026-09-01": 8,
+   "2026-08-31": 10
+  },
+  "Kassel": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Klippeneck": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Kulmbach": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Langen": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Lindenberg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Lueneburg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Melpitz": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Muenchen": {
+   "2026-09-01": 8,
+   "2026-08-31": 10
+  },
+  "Norderney": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Salzgitter": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Schauinsland": {
+   "2026-09-01": 8,
+   "2026-08-31": 10
+  },
+  "Schneefernerhaus": {
+   "2026-09-01": 10,
+   "2026-08-31": 10
+  },
+  "Stuttgart": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Tholey": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Todendorf": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Waldmuenchen": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Weissenburg": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Zingst": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  },
+  "Zirchow": {
+   "2026-09-01": 6,
+   "2026-08-31": 8
+  }
  },
- "gelesen": 0,
- "nicht_lesbar": 68,
- "gruende": {
-  "Andernach|2026-09-01": "Leiste nicht gefunden",
-  "Andernach|2026-08-31": "Leiste nicht gefunden",
-  "Belm-Osnabrueck|2026-09-01": "Leiste nicht gefunden",
-  "Belm-Osnabrueck|2026-08-31": "Leiste nicht gefunden",
-  "Berlin|2026-09-01": "Leiste nicht gefunden",
-  "Berlin|2026-08-31": "Leiste nicht gefunden",
-  "Bonn|2026-09-01": "Leiste nicht gefunden",
-  "Bonn|2026-08-31": "Leiste nicht gefunden",
-  "Chieming|2026-09-01": "Leiste nicht gefunden",
-  "Chieming|2026-08-31": "Leiste nicht gefunden",
-  "Dortmund|2026-09-01": "Leiste nicht gefunden",
-  "Dortmund|2026-08-31": "Leiste nicht gefunden",
-  "Eckernfoerde|2026-09-01": "Leiste nicht gefunden",
-  "Eckernfoerde|2026-08-31": "Leiste nicht gefunden",
-  "Fichtelberg|2026-09-01": "Leiste nicht gefunden",
-  "Fichtelberg|2026-08-31": "Leiste nicht gefunden",
-  "Friedrichshafen|2026-09-01": "Leiste nicht gefunden",
-  "Friedrichshafen|2026-08-31": "Leiste nicht gefunden",
-  "Genthin|2026-09-01": "Leiste nicht gefunden",
-  "Genthin|2026-08-31": "Leiste nicht gefunden",
-  "Giessen-Wettenberg|2026-09-01": "Leiste nicht gefunden",
-  "Giessen-Wettenberg|2026-08-31": "Leiste nicht gefunden",
-  "Goerlitz|2026-09-01": "Leiste nicht gefunden",
-  "Goerlitz|2026-08-31": "Leiste nicht gefunden",
-  "Groemitz|2026-09-01": "Leiste nicht gefunden",
-  "Groemitz|2026-08-31": "Leiste nicht gefunden",
-  "Hamburg|2026-09-01": "Leiste nicht gefunden",
-  "Hamburg|2026-08-31": "Leiste nicht gefunden",
-  "Hohenpeissenberg|2026-09-01": "Leiste nicht gefunden",
-  "Hohenpeissenberg|2026-08-31": "Leiste nicht gefunden",
-  "Kassel|2026-09-01": "Leiste nicht gefunden",
-  "Kassel|2026-08-31": "Leiste nicht gefunden",
-  "Klippeneck|2026-09-01": "Leiste nicht gefunden",
-  "Klippeneck|2026-08-31": "Leiste nicht gefunden",
-  "Kulmbach|2026-09-01": "Leiste nicht gefunden",
-  "Kulmbach|2026-08-31": "Leiste nicht gefunden",
-  "Langen|2026-09-01": "Leiste nicht gefunden",
-  "Langen|2026-08-31": "Leiste nicht gefunden",
-  "Lindenberg|2026-09-01": "Leiste nicht gefunden",
-  "Lindenberg|2026-08-31": "Leiste nicht gefunden",
-  "Lueneburg|2026-09-01": "Leiste nicht gefunden",
-  "Lueneburg|2026-08-31": "Leiste nicht gefunden",
-  "Melpitz|2026-09-01": "Leiste nicht gefunden",
-  "Melpitz|2026-08-31": "Leiste nicht gefunden",
-  "Muenchen|2026-09-01": "Leiste nicht gefunden",
-  "Muenchen|2026-08-31": "Leiste nicht gefunden",
-  "Norderney|2026-09-01": "Leiste nicht gefunden",
-  "Norderney|2026-08-31": "Leiste nicht gefunden",
-  "Salzgitter|2026-09-01": "Leiste nicht gefunden",
-  "Salzgitter|2026-08-31": "Leiste nicht gefunden",
-  "Schauinsland|2026-09-01": "Leiste nicht gefunden",
-  "Schauinsland|2026-08-31": "Leiste nicht gefunden",
-  "Schneefernerhaus|2026-09-01": "Leiste nicht gefunden",
-  "Schneefernerhaus|2026-08-31": "Leiste nicht gefunden",
-  "Stuttgart|2026-09-01": "Leiste nicht gefunden",
-  "Stuttgart|2026-08-31": "Leiste nicht gefunden",
-  "Tholey|2026-09-01": "Leiste nicht gefunden",
-  "Tholey|2026-08-31": "Leiste nicht gefunden",
-  "Todendorf|2026-09-01": "Leiste nicht gefunden",
-  "Todendorf|2026-08-31": "Leiste nicht gefunden",
-  "Waldmuenchen|2026-09-01": "Leiste nicht gefunden",
-  "Waldmuenchen|2026-08-31": "Leiste nicht gefunden",
-  "Weissenburg|2026-09-01": "Leiste nicht gefunden",
-  "Weissenburg|2026-08-31": "Leiste nicht gefunden",
-  "Zingst|2026-09-01": "Leiste nicht gefunden",
-  "Zingst|2026-08-31": "Leiste nicht gefunden",
-  "Zirchow|2026-09-01": "Leiste nicht gefunden",
-  "Zirchow|2026-08-31": "Leiste nicht gefunden"
- }
+ "gelesen": 68,
+ "nicht_lesbar": 0,
+ "gruende": {}
 }
