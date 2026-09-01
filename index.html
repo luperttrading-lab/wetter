@@ -271,7 +271,11 @@
   .uvsimrow{text-align:center;margin-top:7px}
   .uvsimbtn{font-size:11.5px;padding:5px 13px;border-radius:999px;border:1px solid #c8d2e0;background:#fff;color:#3a4453;cursor:pointer}
   /* v3.06: Regler fuer den Kurvenexponenten */
-  .krow{margin:9px auto 0;max-width:290px;padding:0 6px}
+  /* v3.28: Die Regler sind Werkzeug fuer die k-Studie, kein Bedienelement.
+     Im Alltag laufen k und Zuschlag automatisch; sichtbar werden sie erst nach
+     langem Druck auf die Versionsnummer. */
+  .krow{margin:9px auto 0;max-width:290px;padding:0 6px;display:none}
+  body.laborsicht .krow{display:block}
   .axrow{margin:7px auto 2px;max-width:250px;padding:0 6px}
   .axrow input[type=range]{width:100%;accent-color:#3a4453;height:20px}
   .krow input[type=range]{width:100%;accent-color:#c2410c;height:22px}
@@ -416,7 +420,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.26</span>
+      <span class="ver">v3.29</span>
     </div>
   </header>
 
@@ -877,18 +881,13 @@ function sonnenMoeglich(tsMs){
    60 % Bewoelkung mit +22 %. Verstellbar, weil der Wert an einem einzigen Tag
    kalibriert wurde und die BfS-Messung direkt darunter zum Vergleich steht. */
 const HUELL_STD=0.20;
+let _huellSitzung=null;   // v3.29: ebenfalls nur fuer die laufende Sitzung
 function huellZuschlag(){
-  try{const v=localStorage.getItem("huellEps"+LOC_KEY);
-    if(v==null||v==="")return HUELL_STD;
-    const z=parseFloat(v);
-    return (isFinite(z)&&z>=0&&z<=0.6)?z:HUELL_STD;
-  }catch(e){return HUELL_STD;}
+  const z=_huellSitzung;
+  return (typeof z==="number"&&isFinite(z)&&z>=0&&z<=0.6)?z:HUELL_STD;
 }
 function huellSetzen(v){
-  try{
-    if(v==null)localStorage.removeItem("huellEps"+LOC_KEY);
-    else localStorage.setItem("huellEps"+LOC_KEY,String(v));
-  }catch(e){}
+  _huellSitzung=(v==null)?null:v;
   try{if(typeof lastUVH!=="undefined"&&lastUVH){drawUV(lastUVH);drawBfsOverlay();}}catch(e){}
   huellAnzeigen();
 }
@@ -900,18 +899,19 @@ function huellAnzeigen(){
   tx.innerHTML='Spitzen <b>+'+Math.round(e*100)+'\u202f%</b>'
     +(Math.abs(e-HUELL_STD)<1e-9?' <small>Standard</small>':' <small>von Hand</small>');
 }
+/* v3.29: Die Regler wirken nur in der laufenden Sitzung. Sie sind Werkzeug fuer
+   die k-Studie und hinter dem Langdruck versteckt — was dort ausprobiert wird,
+   darf nicht dauerhaft haengenbleiben. Ein alter Handwert liess sich sonst nie
+   wieder finden, wenn man den Regler nicht mehr sieht (in Norden stand so eine
+   5 in der Achse, bis wir sie gesucht haben). Nach dem Neustart gilt wieder die
+   Automatik. */
+let _kHandSitzung=null;
 function kManuell(){
-  try{const v=localStorage.getItem("kHand"+LOC_KEY);
-    if(v==null||v==="")return null;
-    const z=parseFloat(v);
-    return (isFinite(z)&&z>=0.6&&z<=3.0)?z:null;
-  }catch(e){return null;}
+  const z=_kHandSitzung;
+  return (typeof z==="number"&&isFinite(z)&&z>=0.6&&z<=3.0)?z:null;
 }
 function kManuellSetzen(v){
-  try{
-    if(v==null)localStorage.removeItem("kHand"+LOC_KEY);
-    else localStorage.setItem("kHand"+LOC_KEY,String(v));
-  }catch(e){}
+  _kHandSitzung=(v==null)?null:v;
   try{if(typeof lastUVH!=="undefined"&&lastUVH){drawUV(lastUVH);drawBfsOverlay();}}catch(e){}
   kReglerAnzeigen();
 }
@@ -1300,14 +1300,16 @@ function uvAchseBestimmen(){
 /* Einmalig: alte Handwerte aus der Zeit des Schiebers entfernen. */
 (function(){
   try{
-    if(localStorage.getItem("axAufraeumen3_22"))return;
+    if(localStorage.getItem("axAufraeumen3_29"))return;
     const weg=[];
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
-      if(k&&k.indexOf("bfsAx_")===0)weg.push(k);
+      if(!k)continue;
+      // v3.29: auch alte k- und Zuschlagswerte raeumen, die noch gespeichert sind
+      if(k.indexOf("bfsAx_")===0||k.indexOf("kHand")===0||k.indexOf("huellEps")===0)weg.push(k);
     }
     weg.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-    localStorage.setItem("axAufraeumen3_22","1");
+    localStorage.setItem("axAufraeumen3_29","1");
   }catch(e){}
 })();
 /* Nach dem Umschalten heute/gestern und beim Ortswechsel erneut laden — die
@@ -1352,15 +1354,28 @@ function makeSunBell(cs,tms,t6,t21,fallback){
   // ob die Klemme ueberhaupt bindet — sie tut es regelmaessig, und dann ist die
   // gezeichnete Glocke flacher als die Daten. Ohne diese Zahl laesst sich die
   // k-Frage nicht ueber mehrere Tage beurteilen.
-  let kFrei=null,k=1.2;
-  if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9){kFrei=(n*sxy-sx*sy)/den;k=Math.max(0.6,Math.min(1.8,kFrei));}}
+  /* v3.28: Die Klemme auf 1,80 ist raus. Sie stammte aus einer Zeit, in der die
+     Regression rund 1,51 lieferte; heute liegt sie stabil zwischen 2,30 und
+     2,42 und wurde von der Klemme abgeschnitten. Jetzt gilt der Regressionswert
+     selbst — er beschreibt, wie Open-Meteo die Atmosphaere des TAGES modelliert,
+     und stammt damit aus derselben Quelle wie die Saeulen und die Treppe. Ein
+     fremder Festwert wuerde die Kurve gegen ihre eigenen Daten stellen.
+     Rueckfall auf die Allaart-Physik (2,42), wenn zu wenige Stuetzstellen da
+     sind oder das Ergebnis ausserhalb eines physikalisch sinnvollen Bereichs
+     liegt — dann ist die Regression selbst der Fehler, nicht die Physik. */
+  let kFrei=null,k=2.42;
+  if(n>=3){const den=n*sxx-sx*sx;if(Math.abs(den)>1e-9){
+    kFrei=(n*sxy-sx*sy)/den;
+    k=(kFrei>=1.5&&kFrei<=3.2)?kFrei:2.42;
+  }}
   // v3.06: Von Hand gesetztes k schlaegt Regression und Klemme. Die Vitamin-D-
   // Punkte rechnen weiter mit physUvAt (2,42) — sie liegen also genau dann auf
   // der Kurve, wenn hier 2,42 eingestellt ist.
   const kHand=kManuell();
   const kBenutzt=(kHand!=null)?kHand:k;
   window._uvFit={kFrei:kFrei,k:kBenutzt,kAuto:k,n:n,hand:kHand,
-                 geklemmt:kHand==null&&kFrei!=null&&Math.abs(kFrei-k)>1e-6};
+                 verworfen:kHand==null&&kFrei!=null&&Math.abs(kFrei-k)>1e-6,
+                 geklemmt:false};
   k=kBenutzt;
   let muMax=0;for(let m=t6;m<=t21;m+=180000){const mu=_sunMu(m);if(mu!=null&&mu>muMax)muMax=mu;}
   let csMax=0;for(let i=i0;i<=i1;i++)if((cs[i]||0)>csMax)csMax=cs[i];
@@ -2093,8 +2108,8 @@ function drawUV(h){
     }catch(e){}
     let _kTxt="";
     const _f=window._uvFit;
-    if(_f&&_f.geklemmt&&_f.kFrei!=null)
-      _kTxt='<span class="dg">k <b>'+_f.k.toFixed(2).replace(".",",")+'</b> begrenzt \u00b7 Regression <b>'+_f.kFrei.toFixed(2).replace(".",",")+'</b> \u00b7 Physik 2,42</span>';
+    if(_f&&_f.verworfen&&_f.kFrei!=null)
+      _kTxt='<span class="dg">k <b>2,42</b> (Physik) \u00b7 Regression <b>'+_f.kFrei.toFixed(2).replace(".",",")+'</b> verworfen</span>';
     if(_d)_d.innerHTML=((_pp>0&&_pk>0)?'<span class="dg">D\u00e4mpfung <b>\u2212'+Math.max(0,Math.round(100*(1-_pk/_pp)))+'\u202f%</b> (CAMS)</span>':"")+_solTxt+_kTxt;
   }
   try{ // v2.40: Diagnosezeile - Quelle vs. Formel unterscheidbar machen
@@ -2362,7 +2377,7 @@ function drawBfsOverlay(){try{
   const _bm=(()=>{const n=cs.length,m=new Array(n).fill(0),d=new Array(Math.max(0,n-1));for(let i=0;i<n-1;i++){const hh=tms[i+1]-tms[i];d[i]=hh?((cs[i+1]||0)-(cs[i]||0))/hh:0;}if(n>=2){m[0]=d[0];m[n-1]=d[n-2];}for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0)m[i]=0;else m[i]=2*d[i-1]*d[i]/(d[i-1]+d[i]);}return m;})();
   const bell=t=>{for(let i=0;i<cs.length-1;i++){if(t>=tms[i]&&t<=tms[i+1]){const hh=tms[i+1]-tms[i],u=(t-tms[i])/hh,u2=u*u,u3=u2*u,y0=cs[i]||0,y1=cs[i+1]||0,m0=_bm[i],m1=_bm[i+1];return Math.max(0,y0*(2*u3-3*u2+1)+y1*(-2*u3+3*u2)+m0*hh*(u3-2*u2+u)+m1*hh*(u3-u2));}}return 0;};
   const sunBell=makeSunBell(cs,tms,t6,t21,bell);// physikalische Glocke (glatt); bell = Fallback ohne satellite-Lib
-  const draw=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-2,gx1-gx0,Math.abs(gy0-gy9)+2);x.clip();
+  const draw=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-3,gx1-gx0,Math.abs(gy0-gy9)+3);x.clip();
     let f=true;x.beginPath();
     for(let px=gx0;px<=gx1;px+=1.5){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const yy=Y(sunBell(t));
       if(f){x.moveTo(px,yy);f=false;}else x.lineTo(px,yy);}
@@ -2385,9 +2400,14 @@ function drawBfsOverlay(){try{
     // aus und aenderte ihre FORM, wenn man die Achse umstellte. Jetzt wird der
     // Zeichenbereich beschnitten: die Kurve behaelt ihre Gestalt und verlaesst
     // das Bild sichtbar nach oben.
-    const drawH=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-2,gx1-gx0,Math.abs(gy0-gy9)+2);x.clip();
+    const drawH=()=>{x.save();x.beginPath();x.rect(gx0,Math.min(gy9,gy0)-3,gx1-gx0,Math.abs(gy0-gy9)+3);x.clip();
       x.beginPath();let f=true;
       for(let px=gx0;px<=gx1;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const u=sunBell(t)*(1+eps);
+        /* v3.27: Unter UV 0,04 nicht mehr zeichnen. Die Linie ist 1,7 px breit
+           und wird mittig gesetzt — liegt sie auf der Nulllinie, ragt ihre
+           untere Haelfte in die Stundenzahlen. Der Beschnitt half nicht, weil
+           er genau auf der Achse endet. Dort zeigt die Kurve ohnehin nichts. */
+        if(!(u>0.04)){f=true;continue;}
         if(f){x.moveTo(px,Y(u));f=false;}else x.lineTo(px,Y(u));}
       x.stroke();x.restore();};
     x.setLineDash([]);x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=3.2;drawH();
@@ -3793,7 +3813,11 @@ function evtToastVorschau(tage){
   const v=document.querySelector(".ver");
   if(!v)return;
   let t=null;
-  const los=()=>{t=setTimeout(()=>{t=null;v.classList.remove("halten");evtToastVorschau(null);},900);
+  const los=()=>{t=setTimeout(()=>{t=null;v.classList.remove("halten");
+                   // v3.28: Langdruck zeigt zusaetzlich die Regler fuer k und
+                   // Spitzen — einmal ein, noch einmal aus.
+                   try{document.body.classList.toggle("laborsicht");}catch(e){}
+                   evtToastVorschau(null);},900);
                  v.classList.add("halten");};
   const stop=()=>{if(t){clearTimeout(t);t=null;}v.classList.remove("halten");};
   v.addEventListener("touchstart",los,{passive:true});
