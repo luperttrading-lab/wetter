@@ -25,6 +25,24 @@ BASIS = "https://www.bfs.de"
 AUSGABE = "bfs-stationen.json"
 
 RE_DETAIL = re.compile(r'href="([^"]*aktuelle-tagesverlaeufe/_documents/[^"]+_node\.html)"')
+
+# Die Uebersichtsseite laedt ihre Links per JavaScript nach — ein erster Lauf
+# fand null Seiten. Die SEITENNAMEN sind aber ableitbar (kleingeschrieben, ohne
+# Umlaute), anders als die kryptischen Bild-Slugs ("Boesel_B"). Deshalb wird die
+# Liste hier gefuehrt und jede Seite direkt geholt; den Slug liefert dann die
+# Seite selbst. Fehlende Seiten werden uebersprungen.
+SEITEN = [
+    "andernach", "berlin", "bonn", "boesel", "chieming", "cuxhaven", "dortmund",
+    "duderstadt", "eckernfoerde", "fichtelberg", "friedrichshafen", "genthin",
+    "giessen", "goerlitz", "groemitz", "hamburg", "hohenpeissenberg", "kassel",
+    "klippeneck", "kulmbach", "langen", "lindenberg", "lueneburg", "melpitz",
+    "muenchen", "norderney", "osnabrueck", "salzgitter", "sankt-augustin",
+    "schauinsland", "schweinfurt", "stuttgart", "sylt", "tholey", "todendorf",
+    "waldhof", "waldmuenchen", "wasserkuppe", "weissenburg", "wurmberg",
+    "zingst", "zirchow", "zugspitze",
+]
+DETAIL_URL = ("https://www.bfs.de/DE/themen/opt/uv/uv-index/"
+              "aktuelle-tagesverlaeufe/_documents/{name}_node.html")
 RE_SLUG   = re.compile(r'uvi\.bfs\.de/Tagesgrafiken/EEr_([^_]+(?:_[A-Za-z0-9]+)*?)_today\.png')
 RE_NAME   = re.compile(r'<title>[^<]*Messwerte für ([^<]+?)\s*</title>')
 RE_KOORD  = re.compile(r'(\d{1,2})°(\d{1,2})\'(\d{1,2})"\s*Nord\s*(\d{1,3})°(\d{1,2})\'(\d{1,2})"\s*Ost')
@@ -42,25 +60,30 @@ def grad(g, m, s):
 
 
 def main():
+    # Zuerst die Uebersichtsseite versuchen — findet sie Links, sind sie
+    # verlaesslicher als die gefuehrte Liste (neue Stationen kommen mit).
+    seiten = []
     try:
         html = hole(UEBERSICHT)
+        for pfad in RE_DETAIL.findall(html):
+            url = pfad if pfad.startswith("http") else BASIS + pfad
+            if url not in seiten:
+                seiten.append(url)
     except Exception as e:
-        print("Uebersichtsseite nicht erreichbar:", e, file=sys.stderr)
-        sys.exit(1)
-
-    seiten = []
-    for pfad in RE_DETAIL.findall(html):
-        url = pfad if pfad.startswith("http") else BASIS + pfad
-        if url not in seiten:
-            seiten.append(url)
-    print(f"{len(seiten)} Stationsseiten gefunden.\n")
+        print("Uebersichtsseite nicht lesbar:", str(e)[:60])
+    if seiten:
+        print(f"{len(seiten)} Seiten aus der Uebersicht.\n")
+    else:
+        seiten = [DETAIL_URL.format(name=n) for n in SEITEN]
+        print(f"Uebersicht ohne Links — gefuehrte Liste mit {len(seiten)} Seiten.\n")
 
     stationen = []
     for url in seiten:
         try:
             seite = hole(url)
         except Exception as e:
-            print(f"  {url.rsplit('/',1)[-1]:<34} nicht lesbar: {str(e)[:40]}")
+            kurz = url.rsplit('/', 1)[-1].replace("_node.html", "")
+            print(f"  {kurz:<24} nicht erreichbar ({str(e)[:30]})")
             continue
         m_slug = RE_SLUG.search(seite)
         if not m_slug:
