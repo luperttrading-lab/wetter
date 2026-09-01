@@ -29,7 +29,9 @@ except ImportError:
     sys.exit(1)
 
 TZ = ZoneInfo("Europe/Berlin")
-UA = {"User-Agent": "wetter-giessen-bfsachse/1.0 (GitHub Action)"}
+UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+      "Referer": "https://www.bfs.de/",
+      "Accept": "image/png,image/*;q=0.8,*/*;q=0.5"}
 BASIS = "https://uvi.bfs.de/Tagesgrafiken/EEr_{slug}_{tag}.png"
 AUSGABE = "bfs-achse.json"
 
@@ -99,7 +101,11 @@ def bild_holen(slug, tag):
     url = BASIS.format(slug=slug, tag=tag)
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read()
+        daten = r.read()
+        ct = r.headers.get("Content-Type", "")
+        if daten[:8] != b"\x89PNG\r\n\x1a\n":
+            raise ValueError(f"kein PNG (Content-Type {ct}, {len(daten)} Bytes)")
+        return daten
 
 
 def main():
@@ -114,6 +120,7 @@ def main():
     achsen = {k: dict(v) for k, v in alt.items() if isinstance(v, dict)}
 
     ok = fehl = 0
+    gruende = {}
     for slug in STATIONEN:
         achsen.setdefault(slug, {})
         for tag, datum in (("today", heute), ("yesterday", gestern)):
@@ -131,6 +138,7 @@ def main():
                 print(f"{slug:<20} {ds}  Achse {achse:>2}   ({grund})")
             else:
                 fehl += 1
+                gruende[f"{slug}|{ds}"] = grund
                 print(f"{slug:<20} {ds}  --        ({grund})")
 
     # nur die letzten 45 Tage je Station behalten
@@ -141,7 +149,9 @@ def main():
     with open(AUSGABE, "w", encoding="utf-8") as fh:
         json.dump({"stand": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                    "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
-                   "achsen": dict(sorted(achsen.items()))}, fh, ensure_ascii=False, indent=1)
+                   "achsen": dict(sorted(achsen.items())),
+                   "gelesen": ok, "nicht_lesbar": fehl,
+                   "gruende": gruende}, fh, ensure_ascii=False, indent=1)
     print(f"\n{ok} gelesen, {fehl} nicht lesbar. Geschrieben: {AUSGABE}")
 
 
