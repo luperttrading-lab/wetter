@@ -18,7 +18,7 @@ Schreibt bfs-achse.json:
 
 Laeuft per GitHub-Action; Stationen sind die, die die App kennt.
 """
-import io, json, sys, urllib.request, urllib.error
+import io, json, sys, urllib.parse, urllib.request, urllib.error
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -44,7 +44,22 @@ STATIONEN = [
     "Melpitz", "Muenchen", "Norderney", "Salzgitter", "Schauinsland",
     "Schneefernerhaus", "Stuttgart", "Tholey", "Todendorf", "Waldmuenchen",
     "Weissenburg", "Zingst", "Zirchow",
+    # v1.1: die neun bis dahin fehlenden Stationen der BfS-Karte. Die Slugs
+    # folgen keinem Muster — mal mit "_B", mal mit Leerzeichen, mal mit
+    # Ortsteil. Sie wurden einzeln aus den BfS-Seiten abgelesen, weil weder
+    # Raten noch automatisches Auslesen ging: bfs.de sperrt Zugriffe aus
+    # Rechenzentren, und damit auch den GitHub-Runner.
+    "Boesel_B",                # Boesel
+    "Cuxhaven_B",              # Cuxhaven
+    "Duderstadt_B",            # Duderstadt
+    "Sankt Augustin",          # Sankt Augustin (Leerzeichen!)
+    "Schweinfurt_Wasserlosen", # Schweinfurt
+    "Sylt_Tinnum",             # Sylt (Westerland)
+    "Waldhof_Falkenstein",     # Waldhof
+    "Wasserkuppe bei Fulda",   # Wasserkuppe (Leerzeichen!)
+    "Wurmberg_B",              # Wurmberg
 ]
+
 
 # BfS-Farbtabelle: Index = UV-Wert (identisch mit BFSCOL in der App)
 BFSCOL = ["#006300", "#00a014", "#81c600", "#fff800", "#ffd100",
@@ -110,7 +125,8 @@ def achse_lesen(png_bytes):
 
 
 def bild_holen(slug, tag):
-    url = BASIS.format(slug=slug, tag=tag)
+    # v1.1: Leerzeichen im Slug ("Sankt Augustin") muessen als %20 in die URL.
+    url = BASIS.format(slug=urllib.parse.quote(slug), tag=tag)
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as r:
         daten = r.read()
