@@ -94,6 +94,9 @@
   .feel .hl{color:var(--muted);font-variant-numeric:tabular-nums}
   .feel .hl .up{color:#d8472f;font-weight:750}.feel .hl .dn{color:#2f86cf;font-weight:750}
   .feel .hl .dl{color:var(--muted);font-weight:650;margin-left:10px}
+  .ydiff{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:14px;flex-wrap:wrap}
+  .ydiff b{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ydiff .ys{color:var(--muted);font-weight:600}
   .heat{margin-top:13px;display:none;align-items:center;gap:9px;border-radius:13px;padding:9px 12px;position:relative}
   .heat.on{display:flex}
   .heat.hot{background:linear-gradient(90deg,#fff1e2,#ffe7d2);border:1px solid #f6cda3}
@@ -442,6 +445,7 @@
       <span class="gf">Gefühlt <b id="feelV">–</b></span>
       <span class="hl">Heute bisher <span class="up" id="hiV">–</span>&nbsp;&nbsp;<span class="dn" id="loV">–</span><span class="dl" id="dlV"></span></span>
     </div>
+    <div class="ydiff" id="ydiffBox"><b id="ydiffV">–</b><span class="ys" id="ydiffS">–</span></div>
     <div class="heat" id="heat"><span class="ic" id="heatIc"></span><div class="tx" id="heatTx"></div></div>
   </section>
 
@@ -828,6 +832,7 @@ function paintHero(s,demo,today,d){
 
   el("mainBox").classList.toggle("hidden",!today);
   el("feelBox").classList.toggle("hidden",!today);
+  el("ydiffBox").classList.toggle("hidden",!today);
   el("staleBox").classList.toggle("on",!today);
 
   const badge=el("badge");badge.className="badge"+(demo?" demo":(!today?" stale":""));
@@ -842,6 +847,17 @@ function paintHero(s,demo,today,d){
   const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
   el("hiV").textContent="↑ "+(d.hiMeas!=null?fmt1(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?fmt1(d.loMeas):"–")+"°";
   el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+fmt1(d.hiMeas-d.loMeas)+"°":"";
+
+  /* Temperaturdifferenz zu gestern — gleiche Datenbasis wie die Kachel
+     "Vergleich zu gestern" weiter unten (temp24 = Messwert vor 24 h),
+     hier nur feiner aufgeloest (0,1° wie die Hero-Temperatur selbst). */
+  const dT=d.temp24!=null&&Number.isFinite(s.temp)?(s.temp-d.temp24):null;
+  const yV=el("ydiffV"),yS=el("ydiffS");
+  if(dT==null){yV.textContent="\u2013";yV.style.color="#9aa7b8";yS.textContent="keine Vergleichsdaten von gestern";}
+  else{const near=Math.abs(dT)<0.5;
+    yV.textContent=(dT>0.5?"\u2191":dT<-0.5?"\u2193":"\u2248")+" "+fmt1(Math.abs(dT))+"°";
+    yV.style.color=dT>0.5?"#d8472f":dT<-0.5?"#2f86cf":"#5c6b80";
+    yS.textContent=(near?"genauso warm wie gestern":(dT>0?"wärmer":"kälter")+" als gestern")+" um diese Uhrzeit";}
 
   // Hitze/Kälte-Hinweis nur bei Schwellen
   const heat=el("heat");heat.className="heat";
