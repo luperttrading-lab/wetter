@@ -848,15 +848,16 @@ function paintHero(s,demo,today,d){
   el("hiV").textContent="↑ "+(d.hiMeas!=null?fmt1(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?fmt1(d.loMeas):"–")+"°";
   el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+fmt1(d.hiMeas-d.loMeas)+"°":"";
 
-  /* Temperaturdifferenz zu gestern — gleiche Datenbasis wie die Kachel
-     "Vergleich zu gestern" weiter unten (temp24 = Messwert vor 24 h),
-     hier nur feiner aufgeloest (0,1° wie die Hero-Temperatur selbst). */
+  /* Temperaturdifferenz zu gestern — gleiche Datenbasis und gleiche Rundung
+     (ganze Grad) wie die Kachel "Vergleich zu gestern" weiter unten,
+     temp24 = Messwert vor 24 h. Pfeil, Farbe und Text haengen an derselben
+     0,5-K-Schwelle, damit "genauso warm" nie neben einem Pfeil steht. */
   const dT=d.temp24!=null&&Number.isFinite(s.temp)?(s.temp-d.temp24):null;
   const yV=el("ydiffV"),yS=el("ydiffS");
   if(dT==null){yV.textContent="\u2013";yV.style.color="#9aa7b8";yS.textContent="keine Vergleichsdaten von gestern";}
   else{const near=Math.abs(dT)<0.5;
-    yV.textContent=(dT>0.5?"\u2191":dT<-0.5?"\u2193":"\u2248")+" "+fmt1(Math.abs(dT))+"°";
-    yV.style.color=dT>0.5?"#d8472f":dT<-0.5?"#2f86cf":"#5c6b80";
+    yV.textContent=(near?"\u2248":dT>0?"\u2191":"\u2193")+" "+Math.abs(dT).toFixed(0)+"°";
+    yV.style.color=near?"#5c6b80":dT>0?"#d8472f":"#2f86cf";
     yS.textContent=(near?"genauso warm wie gestern":(dT>0?"wärmer":"kälter")+" als gestern")+" um diese Uhrzeit";}
 
   // Hitze/Kälte-Hinweis nur bei Schwellen
