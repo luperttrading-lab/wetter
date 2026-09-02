@@ -1,8 +1,8 @@
 {
-  "datum": "2026-09-01",
+  "datum": "2026-09-02",
   "summe_mm": 0.0,
-  "stunden_ok": 23,
-  "stunden_erwartet": 23,
+  "stunden_ok": 1,
+  "stunden_erwartet": 2,
   "stunden": [
     {
       "stunde": "01:00",
@@ -10,91 +10,8 @@
     },
     {
       "stunde": "02:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "03:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "04:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "05:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "06:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "07:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "08:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "09:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "10:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "11:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "12:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "13:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "14:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "15:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "16:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "17:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "18:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "19:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "20:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "21:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "22:00",
-      "mm": 0.0
-    },
-    {
-      "stunde": "23:00",
-      "mm": 0.0
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -181,7 +98,7 @@
     "datum": "2026-08-31",
     "mm": 18.67
   },
-  "aktualisiert": "2026-09-01T21:43:12+00:00",
+  "aktualisiert": "2026-09-02T00:02:28+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -189,10 +106,10 @@
       "name": "Erlental, Wettenberg",
       "lat": 50.6479651,
       "lon": 8.6740943,
-      "datum": "2026-09-01",
+      "datum": "2026-09-02",
       "summe_mm": 0.0,
-      "stunden_ok": 23,
-      "stunden_erwartet": 23,
+      "stunden_ok": 1,
+      "stunden_erwartet": 2,
       "stunden": [
         {
           "stunde": "01:00",
@@ -200,91 +117,8 @@
         },
         {
           "stunde": "02:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "03:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "04:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "05:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "06:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "07:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "08:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "09:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "10:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "11:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "12:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "13:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "14:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "15:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "16:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "17:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "18:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "19:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "20:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "21:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "22:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "23:00",
-          "mm": 0.0
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -377,10 +211,10 @@
       "name": "Hüttenberg",
       "lat": 50.5055647,
       "lon": 8.6226918,
-      "datum": "2026-09-01",
+      "datum": "2026-09-02",
       "summe_mm": 0.0,
-      "stunden_ok": 23,
-      "stunden_erwartet": 23,
+      "stunden_ok": 1,
+      "stunden_erwartet": 2,
       "stunden": [
         {
           "stunde": "01:00",
@@ -388,91 +222,8 @@
         },
         {
           "stunde": "02:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "03:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "04:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "05:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "06:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "07:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "08:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "09:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "10:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "11:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "12:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "13:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "14:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "15:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "16:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "17:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "18:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "19:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "20:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "21:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "22:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "23:00",
-          "mm": 0.0
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -565,10 +316,10 @@
       "name": "Norden",
       "lat": 53.5941,
       "lon": 7.2066,
-      "datum": "2026-09-01",
-      "summe_mm": 1.71,
-      "stunden_ok": 23,
-      "stunden_erwartet": 23,
+      "datum": "2026-09-02",
+      "summe_mm": 0.0,
+      "stunden_ok": 1,
+      "stunden_erwartet": 2,
       "stunden": [
         {
           "stunde": "01:00",
@@ -576,91 +327,8 @@
         },
         {
           "stunde": "02:00",
-          "mm": 0.15
-        },
-        {
-          "stunde": "03:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "04:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "05:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "06:00",
-          "mm": 0.25
-        },
-        {
-          "stunde": "07:00",
-          "mm": 0.15
-        },
-        {
-          "stunde": "08:00",
-          "mm": 0.14
-        },
-        {
-          "stunde": "09:00",
-          "mm": 0.1
-        },
-        {
-          "stunde": "10:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "11:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "12:00",
-          "mm": 0.3
-        },
-        {
-          "stunde": "13:00",
-          "mm": 0.61
-        },
-        {
-          "stunde": "14:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "15:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "16:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "17:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "18:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "19:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "20:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "21:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "22:00",
-          "mm": 0.0
-        },
-        {
-          "stunde": "23:00",
-          "mm": 0.0
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -670,7 +338,7 @@
               755,
               331
             ],
-            "mm": 1.2,
+            "mm": 0.0,
             "eigenes": false
           },
           {
@@ -678,7 +346,7 @@
               755,
               332
             ],
-            "mm": 1.3,
+            "mm": 0.0,
             "eigenes": false
           },
           {
@@ -686,7 +354,7 @@
               755,
               333
             ],
-            "mm": 0.8,
+            "mm": 0.0,
             "eigenes": false
           }
         ],
@@ -696,7 +364,7 @@
               754,
               331
             ],
-            "mm": 1.9,
+            "mm": 0.0,
             "eigenes": false
           },
           {
@@ -704,7 +372,7 @@
               754,
               332
             ],
-            "mm": 1.7,
+            "mm": 0.0,
             "eigenes": true
           },
           {
@@ -712,7 +380,7 @@
               754,
               333
             ],
-            "mm": 1.7,
+            "mm": 0.0,
             "eigenes": false
           }
         ],
@@ -722,7 +390,7 @@
               753,
               331
             ],
-            "mm": 1.7,
+            "mm": 0.0,
             "eigenes": false
           },
           {
@@ -730,7 +398,7 @@
               753,
               332
             ],
-            "mm": 2.1,
+            "mm": 0.0,
             "eigenes": false
           },
           {
@@ -738,7 +406,7 @@
               753,
               333
             ],
-            "mm": 2.1,
+            "mm": 0.0,
             "eigenes": false
           }
         ]
