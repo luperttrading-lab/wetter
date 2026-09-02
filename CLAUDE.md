@@ -46,6 +46,17 @@ Die Versionierung oben gilt fuer Aenderungen an `index.html`. Reine
 Pipeline- oder Doku-Aenderungen (Python-Skripte, Workflows, diese Datei)
 brauchen keine neue Versionsnummer.
 
+## Datenpipelines
+
+- RADOLAN, BfS-Achse, BfS-Stationen: Actions committen ihre JSON-Dateien
+  auf `main` (kleine Dateien, seltene Laeufe).
+- **Solar 10-Minuten** (`solar10.py`, alle 15 min, ~60 Stationen): schreibt
+  nach Branch `daten` **ohne Historie** (jeder Lauf ersetzt den einzigen
+  Commit per force-push). Die App liest
+  `https://raw.githubusercontent.com/luperttrading-lab/wetter/daten/solar10/`.
+  Nie `daten` nach `main` mergen und nie Daten dieser Pipeline auf `main`
+  committen - sonst waechst das Repo um etwa 1 GB im Jahr.
+
 ## Pruefen vor dem Commit
 
 `index.html` ist eine einzelne Datei mit zwei Inline-Scripts. Syntaxcheck:
