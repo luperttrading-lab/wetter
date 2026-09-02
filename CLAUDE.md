@@ -31,6 +31,21 @@ Versionsnummer; steht online eine hoehere, erscheint der Balken „Neue Version
 verfuegbar". Die Versionsdateien sind das Archiv daneben — eine alte Fassung
 laesst sich direkt im Browser oeffnen, ohne Git.
 
+## Veroeffentlichen (immer sofort)
+
+GitHub Pages liefert den Branch `main` aus. Eine fertige Version wird
+**sofort** veroeffentlicht, ohne Rueckfrage:
+
+1. Auf dem Arbeitsbranch committen und pushen.
+2. Nach `main` mergen (`git merge --no-ff`), `main` pushen.
+3. Pruefen, dass die Live-URL die neue Versionsnummer liefert:
+   `curl -s https://luperttrading-lab.github.io/wetter/ | grep -o 'class="ver">v[0-9.]*'`
+   (Pages braucht 1-2 Minuten).
+
+Die Versionierung oben gilt fuer Aenderungen an `index.html`. Reine
+Pipeline- oder Doku-Aenderungen (Python-Skripte, Workflows, diese Datei)
+brauchen keine neue Versionsnummer.
+
 ## Pruefen vor dem Commit
 
 `index.html` ist eine einzelne Datei mit zwei Inline-Scripts. Syntaxcheck:
