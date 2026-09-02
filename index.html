@@ -1179,10 +1179,14 @@ function renderTiles(s,d){
   const dewSub=s.dew==null?"":(s.dew<10?"angenehm trocken":s.dew<16?"behaglich":s.dew<19?"leicht schwül":"schwül");
   const cloudSub=s.cloud==null?"":(s.cloud<15?"klar":s.cloud<50?"aufgelockert":s.cloud<85?"stark bewölkt":"bedeckt");
   const visSub=s.vis==null?"":(s.vis>=30000?"sehr klar":s.vis>=10000?"klar":s.vis>=4000?"diesig":"Nebel");
-  const dT=d.temp24!=null?(s.temp-d.temp24):null;
-  const cmpTxt=dT==null?"keine Vergleichsdaten":(Math.abs(dT)<0.5?"genauso warm wie gestern":`${Math.abs(dT).toFixed(0)}° ${dT>0?"wärmer":"kälter"} als gestern`);
-  const cmpArrow=dT==null?"–":(dT>0.5?"↑":dT<-0.5?"↓":"≈");
-  const cmpCol=dT==null?"#9aa7b8":(dT>0.5?"#d8472f":dT<-0.5?"#2f86cf":"#5c6b80");
+  /* Pfeil, Farbe und Text an derselben 0,5-K-Schwelle wie in der Hero-Kachel:
+     vorher konnte bei genau +0,5 K der Pfeil "≈" neben dem Text "1° wärmer"
+     stehen, weil die Schwellen (>0.5 vs. <0.5) sich nicht deckten. */
+  const dT=d.temp24!=null&&Number.isFinite(s.temp)?(s.temp-d.temp24):null;
+  const cmpNear=dT!=null&&Math.abs(dT)<0.5;
+  const cmpTxt=dT==null?"keine Vergleichsdaten":(cmpNear?"genauso warm wie gestern":`${Math.abs(dT).toFixed(0)}° ${dT>0?"wärmer":"kälter"} als gestern`);
+  const cmpArrow=dT==null?"–":(cmpNear?"≈":dT>0?"↑":"↓");
+  const cmpCol=dT==null?"#9aa7b8":(cmpNear?"#5c6b80":dT>0?"#d8472f":"#2f86cf");
 
   g.innerHTML=
     `<div class="tile wide"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px"><div><div class="k">Wind &amp; Böen</div><div class="val" style="margin-top:7px">${s.wind!=null?Math.round(s.wind):"–"} <small>km/h</small></div>${windSub2?`<div class="sub">${windSub2}</div>`:""}</div>${windRoseSvg}</div></div>`+
