@@ -23,7 +23,8 @@ Format der Textdatei: STATIONS_ID;MESS_DATUM;QN;DS_10;GS_10;SD_10;LS_10;eor
   SD_10 in Stunden -> Minuten: * 60 ; -999 = fehlend
 
 Ausgabe (OUT/):
-  stationen.json  { aktualisiert, stationen: [ {id,name,lat,lon,hoehe,letzter} ] }
+  stationen.json  { aktualisiert, stationen: [ {id,name,lat,lon,hoehe,letzter,
+                    gs: misst Globalstrahlung, sd: misst Sonnenschein} ] }
   <id>.json       { id, t0: ISO-UTC des ersten Stempels, dt_min: 10, letzter,
                     gs: [W/m2|null], ds: [...], sd: [Minuten|null] }   lueckenlos ab t0
 Aufruf: solar10.py [--alt VERZEICHNIS_MIT_ALTEM_STAND] [--out VERZEICHNIS]
@@ -144,7 +145,12 @@ def main():
                 continue
             with open(os.path.join(OUT, st["id"] + ".json"), "w", encoding="utf-8") as f:
                 json.dump(daten, f, ensure_ascii=False, separators=(",", ":"))
-            ok.append(dict(st, letzter=daten["letzter"]))
+            # Nicht jede Station der Sonnenschein-Liste misst Strahlung (Muenchen-Stadt,
+            # Ostenfeld, Grosser Arber liefern nur SD_10). Die App braucht das VOR dem
+            # Laden der Datei, um die passende Station zu waehlen.
+            ok.append(dict(st, letzter=daten["letzter"],
+                           gs=sum(1 for v in daten["gs"] if v is not None) > 30,
+                           sd=sum(1 for v in daten["sd"] if v is not None) > 30))
     if not ok:
         print("keine Station geladen - nichts geschrieben", file=sys.stderr)
         return 1
