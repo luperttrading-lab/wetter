@@ -1,0 +1,40 @@
+name: DWD Solar 10-Minuten
+
+# Holt die 10-Minuten-Strahlungswerte (Globalstrahlung, Diffusstrahlung,
+# Sonnenschein) der Stationen Giessen/Wettenberg und Norderney und schreibt
+# solar10.json. Die UV-Grafik der App zeichnet daraus sechs gemessene Saeulen
+# je Stunde statt einer Stundentreppe. Der DWD aktualisiert die now-Datei
+# etwa alle 30 Minuten mit rund 25 Minuten Latenz; ein Lauf alle 15 Minuten
+# faengt jede Aktualisierung zeitnah. Nachts (UV = 0) laeuft nichts.
+# Minuten versetzt zu RADOLAN (:05/:35) und BfS-Achse (:12/:42), damit sich
+# die Pushes nicht in die Quere kommen.
+
+on:
+  schedule:
+    - cron: "8,23,38,53 4-20 * * *"   # UTC = 06-22 Uhr MESZ
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  solar10:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 10-Minuten-Werte holen
+        run: python solar10.py
+
+      - name: solar10.json committen (nur bei Aenderung)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add solar10.json
+          git diff --staged --quiet || git commit -m "Solar 10-min aktualisiert"
+          git pull --rebase --autostash origin main || true
+          git push || (git pull --rebase --autostash origin main && git push)
