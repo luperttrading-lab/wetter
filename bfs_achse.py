@@ -88,13 +88,22 @@ def naechste_farbe(rgb):
 
 
 def achse_aus_uv(uv_index):
-    """Oberste Leistenfarbe = UV i -> Achse ist die naechste gerade Stufe ab i.
-    Grenze: bei Achse 10 und 12 ist die oberste Farbe dieselbe (Tabelle endet
-    bei 9); geliefert wird dann 10."""
-    for st in (4, 6, 8, 10, 12):
-        if st >= uv_index:
-            return st
-    return 12
+    """Oberste Leistenfarbe = UV i -> Achse ist genau i.
+
+    Bis September 2026 rundete diese Funktion auf die naechste GERADE Stufe
+    (4, 6, 8, 10, 12) - in der Annahme, das BfS skaliere nur gerade. Das
+    stimmt nicht: Muenchen hatte am 03.09.2026 eine Achse 0-7, die oberste
+    Leistenfarbe war #ff4a00 (UV 7), geschrieben wurde 8. Die App zeichnete
+    ihre Kurven dadurch mit dem Nenner 8,5 statt 7,5, also rund 12 Prozent zu
+    flach - genau das war am Bild zu sehen.
+    In 172 gespeicherten Messungen kam deshalb nie eine 7 oder 9 vor,
+    sondern nur 6 (148x), 8 (20x) und 10 (4x).
+
+    Grenze nach oben: die Farbtabelle endet bei UV 9. Ist die oberste Farbe
+    die neunte, kann die Achse 9 oder hoeher sein - dann wird 10 geliefert,
+    weil eine zu kleine Achse die Kurven abschneiden wuerde, eine etwas zu
+    grosse sie nur staucht."""
+    return 10 if uv_index >= 9 else uv_index
 
 
 def achse_lesen(png_bytes):
