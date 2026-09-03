@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-03",
-  "summe_mm": 0.11,
-  "stunden_ok": 12,
-  "stunden_erwartet": 13,
+  "summe_mm": 1.29,
+  "stunden_ok": 16,
+  "stunden_erwartet": 17,
   "stunden": [
     {
       "stunde": "01:00",
@@ -54,6 +54,22 @@
     },
     {
       "stunde": "13:00",
+      "mm": 0.73
+    },
+    {
+      "stunde": "14:00",
+      "mm": 0.46
+    },
+    {
+      "stunde": "15:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "16:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "17:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -65,7 +81,7 @@
           410,
           424
         ],
-        "mm": 0.2,
+        "mm": 1.7,
         "eigenes": false
       },
       {
@@ -73,7 +89,7 @@
           410,
           425
         ],
-        "mm": 0.0,
+        "mm": 1.6,
         "eigenes": false
       },
       {
@@ -81,7 +97,7 @@
           410,
           426
         ],
-        "mm": 0.0,
+        "mm": 1.9,
         "eigenes": false
       }
     ],
@@ -91,7 +107,7 @@
           409,
           424
         ],
-        "mm": 0.1,
+        "mm": 1.3,
         "eigenes": false
       },
       {
@@ -99,7 +115,7 @@
           409,
           425
         ],
-        "mm": 0.1,
+        "mm": 1.3,
         "eigenes": true
       },
       {
@@ -107,7 +123,7 @@
           409,
           426
         ],
-        "mm": 0.0,
+        "mm": 1.5,
         "eigenes": false
       }
     ],
@@ -117,7 +133,7 @@
           408,
           424
         ],
-        "mm": 0.2,
+        "mm": 1.3,
         "eigenes": false
       },
       {
@@ -125,7 +141,7 @@
           408,
           425
         ],
-        "mm": 0.1,
+        "mm": 1.2,
         "eigenes": false
       },
       {
@@ -133,16 +149,16 @@
           408,
           426
         ],
-        "mm": 0.2,
+        "mm": 1.3,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-09-03",
-    "mm": 0.11
+    "mm": 1.29
   },
-  "aktualisiert": "2026-09-03T11:06:31+00:00",
+  "aktualisiert": "2026-09-03T15:08:53+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -151,9 +167,9 @@
       "lat": 50.6479651,
       "lon": 8.6740943,
       "datum": "2026-09-03",
-      "summe_mm": 0.11,
-      "stunden_ok": 12,
-      "stunden_erwartet": 13,
+      "summe_mm": 1.29,
+      "stunden_ok": 16,
+      "stunden_erwartet": 17,
       "stunden": [
         {
           "stunde": "01:00",
@@ -205,6 +221,22 @@
         },
         {
           "stunde": "13:00",
+          "mm": 0.73
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.46
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -216,7 +248,7 @@
               410,
               424
             ],
-            "mm": 0.2,
+            "mm": 1.7,
             "eigenes": false
           },
           {
@@ -224,7 +256,7 @@
               410,
               425
             ],
-            "mm": 0.0,
+            "mm": 1.6,
             "eigenes": false
           },
           {
@@ -232,7 +264,7 @@
               410,
               426
             ],
-            "mm": 0.0,
+            "mm": 1.9,
             "eigenes": false
           }
         ],
@@ -242,7 +274,7 @@
               409,
               424
             ],
-            "mm": 0.1,
+            "mm": 1.3,
             "eigenes": false
           },
           {
@@ -250,7 +282,7 @@
               409,
               425
             ],
-            "mm": 0.1,
+            "mm": 1.3,
             "eigenes": true
           },
           {
@@ -258,7 +290,7 @@
               409,
               426
             ],
-            "mm": 0.0,
+            "mm": 1.5,
             "eigenes": false
           }
         ],
@@ -268,7 +300,7 @@
               408,
               424
             ],
-            "mm": 0.2,
+            "mm": 1.3,
             "eigenes": false
           },
           {
@@ -276,7 +308,7 @@
               408,
               425
             ],
-            "mm": 0.1,
+            "mm": 1.2,
             "eigenes": false
           },
           {
@@ -284,14 +316,14 @@
               408,
               426
             ],
-            "mm": 0.2,
+            "mm": 1.3,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-09-03",
-        "mm": 0.11
+        "mm": 1.29
       },
       "methode": "bilinear, 50.6480N 8.6741E"
     },
@@ -301,8 +333,8 @@
       "lon": 8.6226918,
       "datum": "2026-09-03",
       "summe_mm": 0.0,
-      "stunden_ok": 12,
-      "stunden_erwartet": 13,
+      "stunden_ok": 16,
+      "stunden_erwartet": 17,
       "stunden": [
         {
           "stunde": "01:00",
@@ -354,6 +386,22 @@
         },
         {
           "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -450,8 +498,8 @@
       "lon": 7.2066,
       "datum": "2026-09-03",
       "summe_mm": 0.15,
-      "stunden_ok": 12,
-      "stunden_erwartet": 13,
+      "stunden_ok": 16,
+      "stunden_erwartet": 17,
       "stunden": [
         {
           "stunde": "01:00",
@@ -503,6 +551,22 @@
         },
         {
           "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
