@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-03T20:57:18+00:00",
+ "stand": "2026-09-03T21:02:37+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
   "Andernach": {
@@ -7,7 +7,8 @@
    "2026-09-02": 6
   },
   "Belm-Osnabrueck": {
-   "2026-09-02": 6
+   "2026-09-02": 6,
+   "2026-09-03": 6
   },
   "Berlin": {
    "2026-09-03": 6,
@@ -26,14 +27,16 @@
    "2026-09-02": 7
   },
   "Cuxhaven_B": {
-   "2026-09-03": 6
+   "2026-09-03": 6,
+   "2026-09-02": 6
   },
   "Dortmund": {
    "2026-09-03": 6,
    "2026-09-02": 6
   },
   "Duderstadt_B": {
-   "2026-09-02": 6
+   "2026-09-02": 6,
+   "2026-09-03": 6
   },
   "Eckernfoerde": {
    "2026-09-03": 6,
@@ -100,7 +103,8 @@
    "2026-09-02": 6
   },
   "Muenchen": {
-   "2026-09-03": 7
+   "2026-09-03": 7,
+   "2026-09-02": 7
   },
   "Norderney": {
    "2026-09-03": 6,
@@ -171,12 +175,7 @@
    "2026-09-02": 6
   }
  },
- "gelesen": 82,
- "nicht_lesbar": 4,
- "gruende": {
-  "Belm-Osnabrueck|2026-09-03": "<urlopen error [Errno 104] Connection reset by peer>",
-  "Muenchen|2026-09-02": "<urlopen error _ssl.c:999: The handshake operation timed out",
-  "Cuxhaven_B|2026-09-02": "<urlopen error _ssl.c:999: The handshake operation timed out",
-  "Duderstadt_B|2026-09-03": "<urlopen error _ssl.c:999: The handshake operation timed out"
- }
+ "gelesen": 86,
+ "nicht_lesbar": 0,
+ "gruende": {}
 }
