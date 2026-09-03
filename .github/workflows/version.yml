@@ -1,0 +1,36 @@
+name: version.json aktualisieren
+
+# Die App prueft alle zehn Minuten, ob eine neue Fassung online steht. Dafuer
+# die ganze index.html zu laden waere Verschwendung: 174 KB gzip, nur um eine
+# Zahl abzulesen - bei sechs Pruefungen pro Stunde 16 MB am Tag.
+# Dieser Lauf schreibt die Versionsnummer in version.json (rund 20 Bytes).
+# Er haengt an "push", nicht an "schedule", und wird deshalb nicht gedrosselt.
+# Commits mit GITHUB_TOKEN loesen keine weiteren Laeufe aus - keine Schleife.
+
+on:
+  push:
+    branches: [main]
+    paths: ["index.html"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Versionsnummer aus index.html lesen und schreiben
+        run: |
+          V=$(grep -o 'class="ver">v[0-9.]*' index.html | head -1 | sed 's/.*>v//')
+          if [ -z "$V" ]; then echo "keine Versionsnummer gefunden"; exit 1; fi
+          echo "Version: $V"
+          printf '{"version":"%s"}\n' "$V" > version.json
+          if git diff --quiet version.json; then echo "unveraendert"; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -q -m "version.json auf v$V"
+          git push

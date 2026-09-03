@@ -24,6 +24,18 @@ Bei jeder Aenderung, die gepusht wird:
   damit *unter* `v3.29` (3029) — der Update-Hinweis bliebe aus.
 - Nach `.99` auf die naechste Major wechseln (`v3.99` -> `v4.00`).
 
+### version.json braucht keine Pflege
+
+`checkUpdate()` fragt `version.json` (rund 20 Bytes) statt der ganzen
+`index.html` (174 KB gzip) - die App prueft alle zehn Minuten, das waeren
+sonst 16 MB am Tag. Die Datei schreibt der Workflow `version.yml` bei jedem
+Push auf `main`, der `index.html` anfasst. Nicht von Hand aendern; wenn sie
+fehlt oder veraltet ist, faellt die App auf den alten Weg zurueck und liest
+die Versionsnummer aus der Seite selbst.
+
+Der Workflow committet `version.json` auf `main`. Vor dem naechsten
+`main`-Push also `git fetch origin main` - wie bei RADOLAN.
+
 ### Wozu die Kopie
 
 `checkUpdate()` in `index.html` laedt die eigene URL neu und vergleicht die
