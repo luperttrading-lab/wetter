@@ -58,6 +58,14 @@ Die Versionierung oben gilt fuer Aenderungen an `index.html`. Reine
 Pipeline- oder Doku-Aenderungen (Python-Skripte, Workflows, diese Datei)
 brauchen keine neue Versionsnummer.
 
+## Im Chat immer die Version nennen
+
+Jede Antwort, die eine Aenderung abschliesst, endet mit der Versionsnummer,
+die gerade live ist - sonst ist unklar, ob das Beschriebene schon beim Nutzer
+angekommen ist. Sieht der Nutzer eine Aenderung nicht, ist die erste Frage:
+welche Fassung hat er geladen? Der Update-Balken nennt die Version, die
+ONLINE liegt, nicht die geladene.
+
 ## Datenpipelines
 
 - RADOLAN, BfS-Achse, BfS-Stationen: Actions committen ihre JSON-Dateien
