@@ -5,15 +5,31 @@ name: DWD Solar 10-Minuten
 # jeder Lauf ersetzt den einzigen Commit dort. Die App liest die Dateien ueber
 # raw.githubusercontent.com (CORS offen, 5 Minuten Cache) und sucht sich beim
 # Ortswechsel die naechste Station.
-# Der DWD aktualisiert die now-Dateien etwa alle 30 Minuten mit rund 25 Minuten
-# Latenz; ein Lauf alle 15 Minuten faengt jede Aktualisierung zeitnah. Nachts
-# (UV = 0) laeuft nichts. Minuten versetzt zu RADOLAN (:05/:35) und BfS-Achse
-# (:12/:42).
+#
+# Warum der Job eine eigene Schleife hat statt sich auf den Zeitplan zu
+# verlassen: GitHub fuehrt "schedule" ausdruecklich nur nach bestem Bemuehen
+# aus und verwirft Termine bei Last. Gemessen am 03.09.2026: von 68 taeglich
+# angemeldeten Terminen sind zwei gelaufen (22:42 und 08:53 UTC), Trefferquote
+# rund 5 %. Die App zeigte deshalb um 13:16 Uhr einen UV-Wert von 10:20 Uhr,
+# ohne dass das irgendwo sichtbar war.
+# Ein Lauf holt jetzt selbst alle 10 Minuten neu und haelt das bis zu 5,5
+# Stunden durch. Damit reicht EIN greifender Termin pro halbem Tag, um die
+# Luecken zu schliessen; greifen mehrere, loest der neue den alten ab
+# (concurrency). Das Repo ist oeffentlich, Laufzeit kostet also nichts.
+#
+# Der DWD aktualisiert die now-Dateien etwa alle 30 Minuten mit rund 25
+# Minuten Latenz. Nachts (UV = 0) laeuft nichts.
 
 on:
   schedule:
-    - cron: "8,23,38,53 4-20 * * *"   # UTC = 06-22 Uhr MESZ
+    - cron: "8,38 4-20 * * *"   # UTC = 06-22 Uhr MESZ, halbstuendlich angemeldet
   workflow_dispatch:
+
+# Es soll immer genau ein Sammler laufen. Ein neu gestarteter Termin loest den
+# laufenden ab - der Datenstand ist danach derselbe, es geht nichts verloren.
+concurrency:
+  group: solar10
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -21,6 +37,7 @@ permissions:
 jobs:
   solar10:
     runs-on: ubuntu-latest
+    timeout-minutes: 355        # GitHub erlaubt hoechstens 360 pro Job
     steps:
       - uses: actions/checkout@v4
 
@@ -38,17 +55,46 @@ jobs:
             echo "noch kein Branch daten"
           fi
 
-      - name: 10-Minuten-Werte holen
-        run: python solar10.py --alt alt/solar10 --out daten/solar10
-
-      - name: In Branch daten veroeffentlichen (ohne Historie)
+      - name: Alle 10 Minuten holen und veroeffentlichen
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd daten
-          git init -q -b daten
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Solar 10-min $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push --force -q "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" daten
+          set -u
+          ENDE=$(( $(date -u +%s) + 330*60 ))   # 5,5 h, mit Puffer zum Job-Limit
+          RUNDE=0
+          while : ; do
+            RUNDE=$(( RUNDE + 1 ))
+            echo "::group::Runde $RUNDE - $(date -u +%H:%M)Z"
+            rm -rf daten
+            python solar10.py --alt alt/solar10 --out daten/solar10 || echo "Abruf fehlgeschlagen"
+
+            # Nur veroeffentlichen, wenn genug Stationen da sind UND sich etwas
+            # geaendert hat. Der DWD liefert nur alle 30 Minuten neu, zwei von
+            # drei Runden bringen also nichts Neues.
+            ANZ=$(ls daten/solar10/*.json 2>/dev/null | wc -l)
+            if [ "$ANZ" -lt 20 ]; then
+              echo "nur $ANZ Dateien - kein Push"
+            elif diff -rq alt/solar10 daten/solar10 >/dev/null 2>&1; then
+              echo "unveraendert - kein Push"
+            else
+              (
+                cd daten
+                git init -q -b daten
+                git config user.name  "github-actions[bot]"
+                git config user.email "github-actions[bot]@users.noreply.github.com"
+                git add -A
+                git commit -q -m "Solar 10-min $(date -u +%Y-%m-%dT%H:%MZ)"
+                git push --force -q "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" daten
+              )
+              rm -rf alt/solar10
+              mkdir -p alt
+              cp -r daten/solar10 alt/solar10
+              echo "veroeffentlicht ($ANZ Stationen)"
+            fi
+            echo "::endgroup::"
+
+            STD=$(date -u +%H); STD=${STD#0}
+            if [ "${STD:-0}" -ge 21 ]; then echo "Nacht erreicht - Ende"; break; fi
+            if [ "$(date -u +%s)" -ge "$ENDE" ]; then echo "Laufzeit erreicht - Ende"; break; fi
+            sleep 600
+          done
