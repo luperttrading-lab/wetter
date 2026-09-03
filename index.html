@@ -404,10 +404,12 @@
   .pvflweg{appearance:none;border:0;background:none;color:var(--faint);font-family:inherit;
     font-size:11px;font-weight:650;cursor:pointer;padding:2px 4px}
   .pvflweg:hover{color:#c62828}
-  .pvform{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:5px 8px;align-items:end;margin-top:7px}
+  .pvform{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:5px 8px;align-items:start;margin-top:7px}
   .pvform label{font-size:10.5px;color:var(--muted);line-height:1.3;display:block}
   .pvform input,.pvform select{font-family:inherit;font-size:14px;padding:6px 7px;border-radius:9px;
     border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;box-sizing:border-box}
+  .pvazname{font-size:10px;color:var(--faint);margin-top:3px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
   .pvplus{appearance:none;border:1px dashed var(--line);background:none;color:var(--muted);
     font-family:inherit;font-size:12.5px;font-weight:650;padding:8px;border-radius:10px;
     cursor:pointer;width:100%;margin-top:11px}
@@ -2159,13 +2161,18 @@ function pvReihe(dayMs,bisMs,k){
   return out.length?out:null;
 }
 
-const PV_RICHTUNG=[["Norden",0],["Nordosten",45],["Osten",90],["Südosten",135],
-                   ["Süden",180],["Südwesten",225],["Westen",270],["Nordwesten",315]];
+/* v3.65: Die Ausrichtung wird in Grad eingetragen, nicht aus acht
+   Himmelsrichtungen gewaehlt. Ein Dach zeigt selten genau nach Sueden - bei
+   250 Grad ("etwas weniger als West") laege die naechste Achtel-Richtung
+   20 Grad daneben, und 20 Grad kosten je nach Tageszeit sichtbar Ertrag.
+   Der Name dient nur der Orientierung und folgt dem 16-teiligen Kompass,
+   damit auch Zwischenwerte benannt sind. */
+const PV_AZ16=["Norden","Nord-Nordost","Nordosten","Ost-Nordost","Osten","Ost-Südost",
+               "Südosten","Süd-Südost","Süden","Süd-Südwest","Südwesten","West-Südwest",
+               "Westen","West-Nordwest","Nordwesten","Nord-Nordwest"];
 function pvRichtungName(az){
-  let b=PV_RICHTUNG[0];
-  for(const r of PV_RICHTUNG){const d=Math.abs(((r[1]-az+540)%360)-180);
-    if(d<Math.abs(((b[1]-az+540)%360)-180))b=r;}
-  return b[0];
+  const a=((+az%360)+360)%360;
+  return PV_AZ16[Math.round(a/22.5)%16];
 }
 function pvKachelInner(){
   const k=pvKonfig();
@@ -2182,7 +2189,7 @@ function pvKachelInner(){
     +`<button type="button" class="pvbtn" id="pvEin">ändern</button></div>`;
   const anlage=k.kwp.toLocaleString("de-DE",{maximumFractionDigits:1})+"\u202fkWp ("
     +k.flaechen.map(f=>(k.flaechen.length>1?f.kwp.toLocaleString("de-DE",{maximumFractionDigits:1})+"\u202fkWp ":"")
-      +pvRichtungName(f.az)+" "+f.neig+"°").join(", ")+")";
+      +pvRichtungName(f.az)+" "+f.az+"°, Neigung "+f.neig+"°").join(" · ")+")";
   if(!reihe){
     const si=_solar10Info;
     return kopf+`<div class="pvnote" style="font-size:12.5px;color:var(--muted);margin-top:9px">`
@@ -2270,9 +2277,9 @@ function pvFlaecheHtml(f,i,anzahl){
     + `</div><div class="pvform">`
     + `<div><label for="pvKwp${i}">kWp</label>`
     +   `<input type="number" id="pvKwp${i}" data-f="${i}" data-k="kwp" min="0.1" max="1000" step="0.1" value="${f.kwp}" inputmode="decimal"></div>`
-    + `<div><label for="pvAz${i}">Ausrichtung</label><select id="pvAz${i}" data-f="${i}" data-k="az">`
-    +   PV_RICHTUNG.map(r=>`<option value="${r[1]}"${r[1]===f.az?" selected":""}>${r[0]}</option>`).join("")
-    + `</select></div>`
+    + `<div><label for="pvAz${i}">Ausrichtung °</label>`
+    +   `<input type="number" id="pvAz${i}" data-f="${i}" data-k="az" min="0" max="359" step="5" value="${f.az}" inputmode="numeric">`
+    +   `<div class="pvazname" id="pvAzN${i}">${pvRichtungName(f.az)}</div></div>`
     + `<div><label for="pvNeig${i}">Neigung °</label>`
     +   `<input type="number" id="pvNeig${i}" data-f="${i}" data-k="neig" min="0" max="90" step="1" value="${f.neig}" inputmode="numeric"></div>`
     + `</div></div>`;
@@ -2287,9 +2294,10 @@ function pvFormular(){
     + `<div class="pvformzeile" style="margin-top:11px"><button type="button" id="pvAbbr">Abbrechen</button>`
     + `<button type="button" class="primary" id="pvSpeichern">Speichern</button></div>`
     + `<div class="pvnote">Zusammen ${ges.toLocaleString("de-DE",{maximumFractionDigits:1})}\u202fkWp. `
-    + `Die Nennleistung steht auf der Rechnung oder am Wechselrichter. Dachneigung: `
-    + `Satteldach meist 30 bis 45 Grad, Flachdach-Aufständerung 10 bis 15. `
-    + `Ein Ost-West-Dach trägst du als zwei Flächen ein.</div>`;
+    + `Ausrichtung in Grad: 90 Osten, 180 Süden, 270 Westen — Zwischenwerte sind erwünscht, `
+    + `ein Dach zeigt selten genau in eine Himmelsrichtung. Dachneigung: Satteldach meist `
+    + `30 bis 45 Grad, Flachdach-Aufständerung 10 bis 15. Die Nennleistung steht auf der `
+    + `Rechnung oder am Wechselrichter. Ein Ost-West-Dach trägst du als zwei Flächen ein.</div>`;
 }
 function pvEntwurfLesen(){
   for(const e of document.querySelectorAll("#pvCard [data-f]")){
@@ -2312,11 +2320,17 @@ function pvBinden(){
   const plus=document.getElementById("pvPlus");
   if(plus)plus.onclick=()=>{pvEntwurfLesen();
     const l=_pvEntwurf[_pvEntwurf.length-1];
-    /* Vorschlag fuer die zweite Flaeche: gegenueberliegende Seite, gleiche
-       Neigung - das ist der haeufigste Fall (Ost-West-Dach, Satteldach). */
+    /* Vorschlag fuer die zweite Flaeche: genau gegenueber, gleiche Neigung -
+       das ist der haeufigste Fall (Satteldach, Ost-West-Anlage). Auch das
+       laesst sich danach gradweise nachziehen. */
     _pvEntwurf.push({kwp:l.kwp,az:(l.az+180)%360,neig:l.neig});neu();};
   for(const b of document.querySelectorAll("#pvCard [data-weg]"))
     b.onclick=()=>{pvEntwurfLesen();_pvEntwurf.splice(+b.getAttribute("data-weg"),1);neu();};
+  /* Name der Ausrichtung beim Tippen mitziehen */
+  for(const e of document.querySelectorAll('#pvCard [data-k="az"]'))
+    e.oninput=()=>{const i=e.getAttribute("data-f"),n=document.getElementById("pvAzN"+i);
+      const v=parseFloat(String(e.value).replace(",","."));
+      if(n)n.textContent=isFinite(v)?pvRichtungName(v):"";};
   /* Die kWp-Summe unter dem Formular soll beim Tippen mitlaufen */
   for(const e of document.querySelectorAll("#pvCard [data-f]"))
     e.onchange=()=>{pvEntwurfLesen();
