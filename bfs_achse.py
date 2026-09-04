@@ -99,11 +99,66 @@ def achse_aus_uv(uv_index):
     In 172 gespeicherten Messungen kam deshalb nie eine 7 oder 9 vor,
     sondern nur 6 (148x), 8 (20x) und 10 (4x).
 
-    Grenze nach oben: die Farbtabelle endet bei UV 9. Ist die oberste Farbe
-    die neunte, kann die Achse 9 oder hoeher sein - dann wird 10 geliefert,
-    weil eine zu kleine Achse die Kurven abschneiden wuerde, eine etwas zu
-    grosse sie nur staucht."""
-    return 10 if uv_index >= 9 else uv_index
+    v1.4 (04.09.2026): Die Farbtabelle endet bei UV 9, und bis hierher wurde
+    eine oberste 9 auf 10 gehoben - "kann 9 oder hoeher sein, lieber zu gross".
+    Das war falsch: Schneefernerhaus zeigte am 02.-04.09. eine Achse 0-9,
+    geschrieben wurde 10, die App zeichnete auf der falschen Skala. Ob ueber
+    dem 9er-Feld noch Felder liegen, laesst sich am Bild pruefen - das macht
+    felder_oberhalb(); hier kommt nur noch die Stufe selbst zurueck."""
+    return uv_index
+
+
+def felder_oberhalb(im, px, py):
+    """Wie viele Felder liegen ueber dem Feld, das bei (px, py) getroffen wurde?
+
+    Die Felder der Leiste sind gleich hoch. Gemessen wird in einer Spalte
+    links der eingedruckten Ziffern: die Hoehe des getroffenen Feldes
+    (abwaerts bis zum Farbwechsel) und die Oberkante der Leiste. Der Abstand
+    Oberkante -> Treffer, geteilt durch die Feldhoehe, ist die Zahl der
+    Felder darueber. Bei einer 0-9-Achse ist das getroffene 9er-Feld das
+    oberste: 0. Bei 0-12 stehen drei Violett-Felder darueber, die nicht in
+    der Farbtabelle sind und beim Abtasten von oben uebersprungen wurden: 3.
+    Ueber der Leiste sitzt das BfS-Logo, durch fuenf weisse Zeilen getrennt;
+    die Oberkante wird deshalb von der Trefferzeile aus nach oben gesucht,
+    nicht von oben nach unten."""
+    w, h = im.size
+    sp = int(round(0.075 * w))
+
+    def satt(y):
+        r, g, b, a = im.getpixel((sp, y))
+        return a >= 200 and max(r, g, b) >= 90 and max(r, g, b) - min(r, g, b) >= 70
+
+    # Oberkante der Leiste: von der Trefferzeile aufwaerts, solange es
+    # gesaettigt bleibt. Die Felder stossen ohne Rand aneinander (im Bild vom
+    # 04.09. folgt auf Zeile 88 in Rosa direkt Zeile 89 in Rot); zwei Zeilen
+    # Toleranz fangen einen Kantenrand ab, die fuenf weissen Zeilen unter dem
+    # Logo beenden die Suche.
+    def logo(y):
+        r, g, b, a = im.getpixel((sp, y))
+        return b > r + 40 and b > g + 20 and r < 90           # BfS-Logo, dunkelblau
+
+    oben, y, loch = py, py, 0
+    while y > 0:
+        y -= 1
+        if logo(y):
+            break
+        if satt(y):
+            oben, loch = y, 0
+        else:
+            loch += 1
+            if loch > 2:
+                break
+    r0, g0, b0, _ = im.getpixel((sp, py))
+    y = py
+    while y < h - 1:
+        r, g, b, _ = im.getpixel((sp, y))
+        if (r - r0) ** 2 + (g - g0) ** 2 + (b - b0) ** 2 > TOLERANZ:
+            break
+        y += 1
+    hoehe = y - py
+    if hoehe < 6:
+        return 0
+    return max(0, int(round((py - oben) / hoehe)))
 
 
 def achse_lesen(png_bytes):
@@ -122,7 +177,13 @@ def achse_lesen(png_bytes):
                 if a >= 200:
                     idx, dist = naechste_farbe((r, g, b))
                     if dist <= TOLERANZ:
-                        return achse_aus_uv(idx), f"Leistenfarbe {BFSCOL[idx]} bei x={px} y={py} ({w}x{h})"
+                        ax = achse_aus_uv(idx)
+                        grund = f"Leistenfarbe {BFSCOL[idx]} bei x={px} y={py} ({w}x{h})"
+                        if idx == len(BFSCOL) - 1:
+                            n = felder_oberhalb(im, px, py)
+                            ax += n
+                            grund += f", {n} Felder darueber"
+                        return ax, grund
             f += Y_SCHRITT
     # Diagnose: Farbprobe in der Mitte des Suchbereichs
     proben = []
