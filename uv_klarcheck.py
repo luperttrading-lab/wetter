@@ -227,11 +227,13 @@ def cams_scheitel(stationen, datum):
            "&longitude=" + lon +
            "&hourly=uv_index_clear_sky&past_days=5&forecast_days=1"
            "&timezone=Europe%2FBerlin")
-    r = subprocess.run(["curl", "-s", "--max-time", "120", url],
-                       capture_output=True, text=True)
+    # v1.2: ueber hole() statt curl - dieselbe Verbindung wie die Bilder
+    # (Proxy und Zertifikat aus der Umgebung). Mit curl ohne CA-Bundle kam
+    # in der Sandbox nichts zurueck, und die Auswertung teilte durch null.
     try:
-        d = json.loads(r.stdout)
-    except Exception:
+        d = json.loads(hole(url).decode("utf-8"))
+    except Exception as e:
+        print("CAMS nicht erreichbar:", str(e)[:80])
         return {}
     if not isinstance(d, list):
         d = [d]
@@ -299,6 +301,9 @@ def main():
     zeilen = [t for t in klar if t["slug"] in cams]
     for t in zeilen:
         t["cams"] = cams[t["slug"]]
+    if not zeilen:
+        print("Klarer Tag, aber keine CAMS-Werte - Auswertung entfaellt.")
+        return 1
 
     print("\n=== KLARER TAG - Auswertung ===\n")
     print("%-24s %6s %7s %7s %7s" % ("Station", "Breite", "Messung", "DWD", "CAMS"))
