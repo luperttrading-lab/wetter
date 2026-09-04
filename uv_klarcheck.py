@@ -230,10 +230,17 @@ def cams_scheitel(stationen, datum):
     # v1.2: ueber hole() statt curl - dieselbe Verbindung wie die Bilder
     # (Proxy und Zertifikat aus der Umgebung). Mit curl ohne CA-Bundle kam
     # in der Sandbox nichts zurueck, und die Auswertung teilte durch null.
+    # hole() nimmt nur PNG an; JSON holt curl direkt - mit dem CA-Bundle des
+    # Proxys, wenn eines in der Umgebung liegt (Sandbox), sonst ohne (Action).
+    cmd = ["curl", "-sS", "--max-time", "120"]
+    ca = os.environ.get("CURL_CA_BUNDLE") or "/root/.ccr/ca-bundle.crt"
+    if os.path.exists(ca):
+        cmd += ["--cacert", ca]
+    r = subprocess.run(cmd + [url], capture_output=True, text=True)
     try:
-        d = json.loads(hole(url).decode("utf-8"))
-    except Exception as e:
-        print("CAMS nicht erreichbar:", str(e)[:80])
+        d = json.loads(r.stdout)
+    except Exception:
+        print("CAMS nicht erreichbar:", (r.stderr or r.stdout)[:80])
         return {}
     if not isinstance(d, list):
         d = [d]
