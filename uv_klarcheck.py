@@ -112,7 +112,14 @@ def achse_lesen(im):
                 if d < bd:
                     bd, best = d, i
             if bd <= 1200:
-                return 10 if best >= 9 else best
+                # v1.1: Die Farbtabelle endet bei 9; ob darueber noch Felder
+                # liegen (Achse 10 oder 12), zaehlt bfs_achse.felder_oberhalb.
+                # Vorher wurde jede oberste 9 zur 10 - Schneefernerhaus hatte
+                # am 02.-04.09.2026 eine 0-9-Achse.
+                if best == len(FARBEN) - 1:
+                    import bfs_achse
+                    best += bfs_achse.felder_oberhalb(im.convert("RGBA"), px, py)
+                return best
             f += 0.004
     return None
 
