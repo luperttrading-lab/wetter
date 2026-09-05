@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-05",
   "summe_mm": 0.03,
-  "stunden_ok": 16,
-  "stunden_erwartet": 17,
+  "stunden_ok": 19,
+  "stunden_erwartet": 19,
   "stunden": [
     {
       "stunde": "01:00",
@@ -70,8 +70,15 @@
     },
     {
       "stunde": "17:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.0
+    },
+    {
+      "stunde": "18:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -158,7 +165,7 @@
     "datum": "2026-09-05",
     "mm": 0.03
   },
-  "aktualisiert": "2026-09-05T15:06:50+00:00",
+  "aktualisiert": "2026-09-05T17:33:19+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -168,8 +175,8 @@
       "lon": 8.6740943,
       "datum": "2026-09-05",
       "summe_mm": 0.03,
-      "stunden_ok": 16,
-      "stunden_erwartet": 17,
+      "stunden_ok": 19,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -237,8 +244,15 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -333,8 +347,8 @@
       "lon": 8.6226918,
       "datum": "2026-09-05",
       "summe_mm": 0.46,
-      "stunden_ok": 16,
-      "stunden_erwartet": 17,
+      "stunden_ok": 19,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -402,8 +416,15 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -498,8 +519,8 @@
       "lon": 7.2066,
       "datum": "2026-09-05",
       "summe_mm": 0.31,
-      "stunden_ok": 16,
-      "stunden_erwartet": 17,
+      "stunden_ok": 19,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -567,8 +588,15 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
