@@ -223,7 +223,10 @@ def cams_scheitel(stationen, datum):
     """uv_index_clear_sky je Ort am Datum, ein einziger Abruf."""
     lat = ",".join("%.4f" % s["la"] for s in stationen)
     lon = ",".join("%.4f" % s["lo"] for s in stationen)
-    url = ("https://api.open-meteo.com/v1/forecast?latitude=" + lat +
+    # v1.3: Air-Quality-API statt Forecast-API - das ist die Quelle, aus der
+    # die App uv_index_clear_sky liest. Die Forecast-API liefert ein anderes
+    # Klarhimmel-Produkt (Zugspitze 04.09.: 5,95 statt 6,50).
+    url = ("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + lat +
            "&longitude=" + lon +
            "&hourly=uv_index_clear_sky&past_days=5&forecast_days=1"
            "&timezone=Europe%2FBerlin")
