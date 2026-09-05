@@ -18,7 +18,15 @@ name: DWD Solar 10-Minuten
 # (concurrency). Das Repo ist oeffentlich, Laufzeit kostet also nichts.
 #
 # Der DWD aktualisiert die now-Dateien etwa alle 30 Minuten mit rund 25
-# Minuten Latenz. Nachts (UV = 0) laeuft nichts.
+# Minuten Latenz. Nachts (21-04 UTC) wird nicht abgerufen, nur gewartet.
+#
+# v2 (05.09.2026): Der Laeufer startet am Ende seinen eigenen Nachfolger
+# (workflow_dispatch ueber die API - das ist mit GITHUB_TOKEN erlaubt, im
+# Gegensatz zu push-ausgeloesten Laeufen). Damit haengt die Kette nicht mehr
+# am Zeitplan: am 04.09. griff der erste Termin um 08:46 UTC, am 05.09. bis
+# 07:35 UTC gar keiner - jeden Morgen fehlten drei bis vier Stunden Messung.
+# Der Zeitplan bleibt als Rueckfall, falls die Kette reisst; die concurrency-
+# Gruppe sorgt dafuer, dass nie zwei Laeufer nebeneinander arbeiten.
 
 on:
   schedule:
@@ -33,6 +41,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: write            # v2: eigenen Nachfolger starten
 
 jobs:
   solar10:
@@ -93,8 +102,28 @@ jobs:
             fi
             echo "::endgroup::"
 
-            STD=$(date -u +%H); STD=${STD#0}
-            if [ "${STD:-0}" -ge 21 ]; then echo "Nacht erreicht - Ende"; break; fi
             if [ "$(date -u +%s)" -ge "$ENDE" ]; then echo "Laufzeit erreicht - Ende"; break; fi
             sleep 600
+            # Nachts nur warten: kein Abruf, kein Push, aber die Kette bleibt.
+            while : ; do
+              STD=$(date -u +%H); STD=${STD#0}; STD=${STD:-0}
+              if [ "$STD" -ge 4 ] && [ "$STD" -lt 21 ]; then break; fi
+              if [ "$(date -u +%s)" -ge "$ENDE" ]; then break; fi
+              sleep 600
+            done
           done
+
+      # Nur nach regulaerem Ende (success). Mit always() wuerde auch ein vom
+      # Zeitplan abgeloester (gecancelter) Lauf einen Nachfolger starten, der
+      # den Abloeser cancelt, der wieder ... - eine Kette von Sofortstarts.
+      - name: Nachfolger starten
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Mindestens 5,5 h nach dem eigenen Start - sonst koennte ein frueh
+          # scheiternder Lauf eine Kette von Sofortstarts ausloesen.
+          curl -sS -o /dev/null -w "Nachfolger: HTTP %{http_code}\n" -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/solar10.yml/dispatches" \
+            -d '{"ref":"main"}'
