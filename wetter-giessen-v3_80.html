@@ -328,7 +328,7 @@
   .bil-box .bk{font-size:9.5px;color:#7a8798;font-weight:700;letter-spacing:.02em}
   .bil-box .bv{font-size:17px;font-weight:800;color:#1c66c4;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
   .bil-box .bu{font-size:9.5px;color:#7a8798}
-  #bilCv{width:100%;height:76px;display:block;touch-action:pan-y}
+  #bilCv{width:100%;height:83px;display:block;touch-action:pan-y}
   /* v3.12: Gewischt wird auf der ganzen Karte. Ohne pan-y wuerde der Browser das
      waagerechte Ziehen als Seitenwechsel abfangen; senkrecht bleibt Scrollen. */
   #bilanzCard{touch-action:pan-y}
@@ -676,7 +676,7 @@
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v3.79</span>
+      <span class="ver">v3.80</span>
     </div>
   </header>
 
@@ -5038,7 +5038,10 @@ function bilanzChart(serie,prog,rest){
   const n=serie.length,nt=n+prog.length;
   const heuteGes=(serie[n-1]||0)+rest;
   const mx=Math.max(1,...serie.filter(v=>v!=null).concat(prog),heuteGes);
-  const PB=13,gy1=H-PB,bw=W/nt;
+  /* v3.80: Unterrand 20 statt 13 - der Zeigerpunkt sitzt jetzt UNTER der
+     Achse, nicht mit seinem Mittelpunkt darauf. So deckte er 1 bis 2 mm des
+     heutigen Tages zu (ohne Wischen steht er genau dort). */
+  const PB=20,gy1=H-PB,bw=W/nt;
   cv._nt=nt;   // v2.70: aktuelle Balkenzahl fuer die Zeigersteuerung
   x.strokeStyle=CO.gitter12;x.lineWidth=1;
   x.beginPath();x.moveTo(0,gy1+.5);x.lineTo(W,gy1+.5);x.stroke();
@@ -5067,16 +5070,17 @@ function bilanzChart(serie,prog,rest){
       x.strokeStyle="rgba(194,65,12,.28)";x.lineWidth=1;
       x.beginPath();x.moveTo(px,0);x.lineTo(px,gy1);x.stroke();
     }
+    const pyZ=gy1+5;                 // Oberkante des Punkts knapp unter der Achse
     x.fillStyle="#c2410c";
-    x.beginPath();x.arc(px,gy1,3.6,0,7);x.fill();
+    x.beginPath();x.arc(px,pyZ,3.6,0,7);x.fill();
     x.strokeStyle=CO.karte;x.lineWidth=1.4;
-    x.beginPath();x.arc(px,gy1,3.6,0,7);x.stroke();
+    x.beginPath();x.arc(px,pyZ,3.6,0,7);x.stroke();
   }
   x.font="9px -apple-system,system-ui,sans-serif";x.fillStyle=CO.faint;
-  x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+3);
-  if(prog.length){x.textAlign="center";x.fillText("heute",(n-1)*bw+bw/2,gy1+3);
-    x.textAlign="right";x.fillStyle="#7ba9cf";x.fillText("Prognose",W,gy1+3);x.fillStyle=CO.faint;}
-  else{x.textAlign="right";x.fillText("heute",W,gy1+3);}
+  x.textBaseline="top";x.textAlign="left";x.fillText("vor 30 Tagen",0,gy1+10);
+  if(prog.length){x.textAlign="center";x.fillText("heute",(n-1)*bw+bw/2,gy1+10);
+    x.textAlign="right";x.fillStyle="#7ba9cf";x.fillText("Prognose",W,gy1+10);x.fillStyle=CO.faint;}
+  else{x.textAlign="right";x.fillText("heute",W,gy1+10);}
   // v2.67: Anzeige zum angetippten Tag
   const tg=el("bilTag");
   if(tg){
