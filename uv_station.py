@@ -23,14 +23,19 @@ Median statt Mittel: ein einzelner Tag mit Wolkenverstaerkung (Messung ueber
 Klarhimmel) soll den Faktor nicht verschieben.
 
 Ab dem ERSTEN Tag wird ein Faktor geschrieben, aber zur 1 hin gedaempft:
-    faktor = 1 + (median - 1) * n / (n + 1)
-Ein Tag zaehlt also zur Haelfte, zwei zu zwei Dritteln, drei zu drei
-Vierteln, zehn zu 91 %. Das ist die uebliche Schrumpfung zum neutralen Wert
-mit einer Pseudo-Beobachtung als Prior: ein einzelner Tag mit
-Wolkenverstaerkung verschiebt die Kurve dann nur halb so weit, und der
-Faktor waechst von selbst in seinen wahren Wert hinein, statt an einer
-willkuerlichen Schwelle zu springen. Unter MIN_SICHER Tagen gilt er als
-vorlaeufig; die App schreibt das dazu.
+    faktor = 1 + (median - 1) * n / (n + PRIOR)
+Das ist die uebliche Schrumpfung zum neutralen Wert; PRIOR ist das Gewicht
+der Pseudo-Beobachtung "kein Fehler". Mit PRIOR = 0,43 zaehlt ein Tag zu
+70 %, zwei zu 82 %, drei zu 87 %, fuenf zu 92 %, zehn zu 96 %.
+
+Warum nicht PRIOR = 1 (ein Tag zu 50 %), die vorsichtigere Wahl: Die App
+hat genau einen Nutzer, der die amtliche BfS-Grafik direkt darunter sieht.
+Ein zu grosser Faktor faellt binnen eines Tages auf und ist am naechsten
+Lauf korrigiert - die Richtung frueher zu sehen ist mehr wert als die
+halbe Vorsicht. Bei mehreren Nutzern waere PRIOR = 1 die richtige Wahl.
+
+Unter MIN_SICHER Tagen gilt der Faktor als vorlaeufig; die App schreibt
+das dazu.
 
 Grenzen: Faktor auf [MIN_F, MAX_F] geklemmt.
 """
@@ -41,6 +46,7 @@ LOG = "uv_klarlog.json"
 AUS = "uv-station.json"
 MIN_SONNE = 0.70      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag zaehlt
 MIN_SICHER = 3        # ab so vielen Tagen gilt der Faktor nicht mehr als vorlaeufig
+PRIOR = 0.43          # Gewicht der Pseudo-Beobachtung: ein Tag zaehlt zu 70 %
 MIN_F, MAX_F = 0.80, 1.25
 ABWEICHUNG = 0.05     # kleinere Abweichungen bleiben unkorrigiert
 
@@ -71,7 +77,7 @@ def main():
         werte = [t["v"] for t in e["tage"]]
         n = len(werte)
         m = median(werte)
-        f = max(MIN_F, min(MAX_F, 1 + (m - 1) * n / (n + 1)))   # Schrumpfung zur 1
+        f = max(MIN_F, min(MAX_F, 1 + (m - 1) * n / (n + PRIOR)))   # Schrumpfung zur 1
         if abs(f - 1) < ABWEICHUNG:
             continue
         sd = math.sqrt(sum((v - m) ** 2 for v in werte) / (n - 1)) if n > 1 else 0
@@ -84,10 +90,11 @@ def main():
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None,
                    "regel": "Median(Messung/Modell) an Tagen mit >=%d %% Sonne, "
-                            "zur 1 gedaempft mit n/(n+1), geklemmt auf %.2f-%.2f, "
-                            "unter %.0f %% Abweichung kein Faktor, unter %d Tagen "
-                            "vorlaeufig"
-                            % (100 * MIN_SONNE, MIN_F, MAX_F, 100 * ABWEICHUNG, MIN_SICHER),
+                            "zur 1 gedaempft mit n/(n+%.2f) - ein Tag zaehlt zu "
+                            "%.0f %%, geklemmt auf %.2f-%.2f, unter %.0f %% "
+                            "Abweichung kein Faktor, unter %d Tagen vorlaeufig"
+                            % (100 * MIN_SONNE, PRIOR, 100 / (1 + PRIOR),
+                               MIN_F, MAX_F, 100 * ABWEICHUNG, MIN_SICHER),
                    "stationen": out}, fh, ensure_ascii=False, indent=1)
 
     print("uv-station.json: %d Stationen mit Faktor (von %d mit Daten)"
