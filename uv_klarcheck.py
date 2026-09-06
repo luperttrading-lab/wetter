@@ -92,8 +92,13 @@ def stationen_aus_app(pfad="index.html"):
         la = re.search(r"\bla\s*:\s*(-?[\d.]+)", e)
         lo = re.search(r"\blo\s*:\s*(-?[\d.]+)", e)
         if sl and la and lo:
+            name = nm.group(1) if nm else sl.group(1)
+            try:                                   # "Gie\u00dfen" aus dem JS-Quelltext
+                name = name.encode("latin-1", "backslashreplace").decode("unicode_escape")
+            except Exception:
+                pass
             out.append({"slug": sl.group(1),
-                        "name": nm.group(1) if nm else sl.group(1),
+                        "name": name,
                         "la": float(la.group(1)), "lo": float(lo.group(1))})
     return out
 
@@ -312,7 +317,7 @@ def cams_faktor(la, h):
 
 def sonnenschein(stationen, datum):
     """Anteil Sonnenschein 11-15 Uhr Ortszeit an der naechsten DWD-Station
-    mit Sonnenscheindauer (<= 30 km). None, wenn keine da ist."""
+    mit Sonnenscheindauer (<= 50 km). None, wenn keine da ist."""
     liste = _curl_json(SOLAR10 + "stationen.json?t=%d" % int(time.time()))
     if not liste or not isinstance(liste.get("stationen"), list):
         return {}
@@ -327,7 +332,7 @@ def sonnenschein(stationen, datum):
                             (s["lo"] - d["lon"]) * 111.32 * math.cos(math.radians(s["la"])))
             if km < bd:
                 bd, best = km, d
-        if not best or bd > 30:
+        if not best or bd > 50:
             out[s["slug"]] = None
             continue
         if best["id"] not in cache:
@@ -372,7 +377,7 @@ def modellpruefung(stationen, datum, endung, gelesen):
                        "klar": bool(so and so[0] >= SONNE_KLAR)})
     gruppe = [z for z in zeilen if abs(z["la"] - GIESSEN_LA) <= GRUPPE_GRAD]
     print("\n=== Modellpruefung %s: Messspitze gegen die schwarze Kurve der App ===" % datum)
-    print("Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 30 km)\n")
+    print("Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 50 km)\n")
     print("%-22s %6s %5s %6s | %7s %6s %6s" % ("Giessen-Gruppe", "Breite", "Hoehe", "Sonne", "schwarz", "Mess", "Verh."))
     for z in sorted(gruppe, key=lambda z: abs(z["la"] - GIESSEN_LA)):
         print("%-22s %6.2f %5s %6s | %7.2f %6.2f %6s%s" % (
