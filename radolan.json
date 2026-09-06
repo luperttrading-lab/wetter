@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-06",
   "summe_mm": 0.0,
-  "stunden_ok": 6,
-  "stunden_erwartet": 6,
+  "stunden_ok": 10,
+  "stunden_erwartet": 10,
   "stunden": [
     {
       "stunde": "01:00",
@@ -26,6 +26,22 @@
     },
     {
       "stunde": "06:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "07:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "08:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "09:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "10:00",
       "mm": 0.0
     }
   ],
@@ -113,7 +129,7 @@
     "datum": "2026-09-05",
     "mm": 0.03
   },
-  "aktualisiert": "2026-09-06T04:27:26+00:00",
+  "aktualisiert": "2026-09-06T08:51:08+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -123,8 +139,8 @@
       "lon": 8.6740943,
       "datum": "2026-09-06",
       "summe_mm": 0.0,
-      "stunden_ok": 6,
-      "stunden_erwartet": 6,
+      "stunden_ok": 10,
+      "stunden_erwartet": 10,
       "stunden": [
         {
           "stunde": "01:00",
@@ -148,6 +164,22 @@
         },
         {
           "stunde": "06:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "07:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
           "mm": 0.0
         }
       ],
@@ -243,8 +275,8 @@
       "lon": 8.6226918,
       "datum": "2026-09-06",
       "summe_mm": 0.0,
-      "stunden_ok": 6,
-      "stunden_erwartet": 6,
+      "stunden_ok": 10,
+      "stunden_erwartet": 10,
       "stunden": [
         {
           "stunde": "01:00",
@@ -268,6 +300,22 @@
         },
         {
           "stunde": "06:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "07:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
           "mm": 0.0
         }
       ],
@@ -363,8 +411,8 @@
       "lon": 7.2066,
       "datum": "2026-09-06",
       "summe_mm": 0.0,
-      "stunden_ok": 6,
-      "stunden_erwartet": 6,
+      "stunden_ok": 10,
+      "stunden_erwartet": 10,
       "stunden": [
         {
           "stunde": "01:00",
@@ -388,6 +436,22 @@
         },
         {
           "stunde": "06:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "07:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "08:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "09:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
           "mm": 0.0
         }
       ],
