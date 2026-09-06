@@ -502,9 +502,9 @@
    "mess": 5.23,
    "schwarz": 4.76,
    "verh": 1.098,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Berlin": {
    "slug": "Berlin",
@@ -514,7 +514,7 @@
    "mess": 4.91,
    "schwarz": 3.98,
    "verh": 1.235,
-   "sonne": null,
+   "sonne": 0.367,
    "dwd_station": null,
    "klar": false
   },
@@ -526,9 +526,9 @@
    "mess": 4.38,
    "schwarz": 4.55,
    "verh": 0.963,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Chieming": {
    "slug": "Chieming",
@@ -538,9 +538,9 @@
    "mess": 5.98,
    "schwarz": 5.76,
    "verh": 1.038,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Dortmund": {
    "slug": "Dortmund",
@@ -550,9 +550,9 @@
    "mess": 4.81,
    "schwarz": 4.21,
    "verh": 1.143,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Eckernfoerde": {
    "slug": "Eckernfoerde",
@@ -562,7 +562,7 @@
    "mess": 4.86,
    "schwarz": 3.57,
    "verh": 1.36,
-   "sonne": null,
+   "sonne": 0.527,
    "dwd_station": null,
    "klar": false
   },
@@ -574,9 +574,9 @@
    "mess": 4.4,
    "schwarz": 5.24,
    "verh": 0.84,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Friedrichshafen": {
    "slug": "Friedrichshafen",
@@ -586,9 +586,9 @@
    "mess": 5.52,
    "schwarz": 6.0,
    "verh": 0.92,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Genthin": {
    "slug": "Genthin",
@@ -610,9 +610,9 @@
    "mess": 5.21,
    "schwarz": 4.6,
    "verh": 1.134,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Goerlitz": {
    "slug": "Goerlitz",
@@ -622,7 +622,7 @@
    "mess": 4.76,
    "schwarz": 4.45,
    "verh": 1.068,
-   "sonne": null,
+   "sonne": 0.52,
    "dwd_station": null,
    "klar": false
   },
@@ -634,9 +634,9 @@
    "mess": 4.67,
    "schwarz": 3.64,
    "verh": 1.283,
-   "sonne": null,
+   "sonne": 0.894,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Hamburg": {
    "slug": "Hamburg",
@@ -646,7 +646,7 @@
    "mess": 4.16,
    "schwarz": 3.74,
    "verh": 1.113,
-   "sonne": null,
+   "sonne": 0.427,
    "dwd_station": null,
    "klar": false
   },
@@ -658,9 +658,9 @@
    "mess": 6.13,
    "schwarz": 6.07,
    "verh": 1.011,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Kassel": {
    "slug": "Kassel",
@@ -682,9 +682,9 @@
    "mess": 4.93,
    "schwarz": 6.07,
    "verh": 0.812,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Kulmbach": {
    "slug": "Kulmbach",
@@ -694,9 +694,9 @@
    "mess": 4.79,
    "schwarz": 5.01,
    "verh": 0.956,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Langen": {
    "slug": "Langen",
@@ -706,9 +706,9 @@
    "mess": 4.89,
    "schwarz": 4.88,
    "verh": 1.003,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Lindenberg": {
    "slug": "Lindenberg",
@@ -718,7 +718,7 @@
    "mess": 5.18,
    "schwarz": 3.96,
    "verh": 1.307,
-   "sonne": null,
+   "sonne": 0.573,
    "dwd_station": null,
    "klar": false
   },
@@ -742,7 +742,7 @@
    "mess": 4.77,
    "schwarz": 4.29,
    "verh": 1.112,
-   "sonne": null,
+   "sonne": 0.52,
    "dwd_station": null,
    "klar": false
   },
@@ -754,9 +754,9 @@
    "mess": 5.7,
    "schwarz": 5.66,
    "verh": 1.007,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Norderney": {
    "slug": "Norderney",
@@ -766,9 +766,9 @@
    "mess": 4.03,
    "schwarz": 3.68,
    "verh": 1.095,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Salzgitter": {
    "slug": "Salzgitter",
@@ -778,9 +778,9 @@
    "mess": 4.49,
    "schwarz": 4.24,
    "verh": 1.059,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Schauinsland": {
    "slug": "Schauinsland",
@@ -790,9 +790,9 @@
    "mess": 6.15,
    "schwarz": 6.13,
    "verh": 1.004,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Stuttgart": {
    "slug": "Stuttgart",
@@ -802,9 +802,9 @@
    "mess": 5.04,
    "schwarz": 5.49,
    "verh": 0.919,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Tholey": {
    "slug": "Tholey",
@@ -814,9 +814,9 @@
    "mess": 4.99,
    "schwarz": 5.19,
    "verh": 0.962,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Todendorf": {
    "slug": "Todendorf",
@@ -826,7 +826,7 @@
    "mess": 4.05,
    "schwarz": 3.54,
    "verh": 1.143,
-   "sonne": null,
+   "sonne": 0.527,
    "dwd_station": null,
    "klar": false
   },
@@ -838,9 +838,9 @@
    "mess": 5.28,
    "schwarz": 5.39,
    "verh": 0.98,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Weissenburg": {
    "slug": "Weissenburg",
@@ -862,9 +862,9 @@
    "mess": 3.81,
    "schwarz": 3.45,
    "verh": 1.105,
-   "sonne": null,
+   "sonne": 0.875,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Zirchow": {
    "slug": "Zirchow",
@@ -874,7 +874,7 @@
    "mess": 4.54,
    "schwarz": 3.49,
    "verh": 1.299,
-   "sonne": null,
+   "sonne": 0.587,
    "dwd_station": null,
    "klar": false
   },
@@ -886,9 +886,9 @@
    "mess": 6.65,
    "schwarz": 6.99,
    "verh": 0.952,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Boesel_B": {
    "slug": "Boesel_B",
@@ -910,9 +910,9 @@
    "mess": 4.18,
    "schwarz": 3.67,
    "verh": 1.141,
-   "sonne": null,
+   "sonne": 0.993,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Duderstadt_B": {
    "slug": "Duderstadt_B",
@@ -922,9 +922,9 @@
    "mess": 4.47,
    "schwarz": 4.41,
    "verh": 1.013,
-   "sonne": null,
+   "sonne": 0.933,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Belm-Osnabrueck": {
    "slug": "Belm-Osnabrueck",
@@ -934,7 +934,7 @@
    "mess": 4.3,
    "schwarz": 4.0,
    "verh": 1.075,
-   "sonne": null,
+   "sonne": 0.693,
    "dwd_station": null,
    "klar": false
   },
@@ -946,9 +946,9 @@
    "mess": 4.64,
    "schwarz": 4.91,
    "verh": 0.945,
-   "sonne": null,
+   "sonne": 1.0,
    "dwd_station": null,
-   "klar": false
+   "klar": true
   },
   "Sylt_Tinnum": {
    "slug": "Sylt_Tinnum",
@@ -982,9 +982,462 @@
    "mess": 5.47,
    "schwarz": 4.59,
    "verh": 1.191,
-   "sonne": null,
+   "sonne": 0.933,
    "dwd_station": null,
-   "klar": false
+   "klar": true
+  }
+ },
+ "2026-09-04": {
+  "Andernach": {
+   "slug": "Andernach",
+   "name": "Andernach",
+   "la": 50.439,
+   "h": 71.0,
+   "sonne": 0.558,
+   "klar": false,
+   "mess": 6.04,
+   "schwarz": 5.19,
+   "verh": 1.165
+  },
+  "Berlin": {
+   "slug": "Berlin",
+   "name": "Berlin",
+   "la": 52.447,
+   "h": 57.0,
+   "sonne": 0.017,
+   "klar": false,
+   "mess": 3.42,
+   "schwarz": 4.29,
+   "verh": 0.797
+  },
+  "Bonn": {
+   "slug": "Bonn",
+   "name": "Bonn",
+   "la": 50.7,
+   "h": 67.0,
+   "sonne": 0.367,
+   "klar": false,
+   "mess": 5.04,
+   "schwarz": 5.02,
+   "verh": 1.006
+  },
+  "Chieming": {
+   "slug": "Chieming",
+   "name": "Chieming",
+   "la": 47.888,
+   "h": 523.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 6.45,
+   "schwarz": 6.26,
+   "verh": 1.029
+  },
+  "Dortmund": {
+   "slug": "Dortmund",
+   "name": "Dortmund",
+   "la": 51.514,
+   "h": 95.0,
+   "sonne": 0.163,
+   "klar": false,
+   "mess": 5.16,
+   "schwarz": 4.71,
+   "verh": 1.097
+  },
+  "Eckernfoerde": {
+   "slug": "Eckernfoerde",
+   "name": "Eckernfoerde",
+   "la": 54.472,
+   "h": 7.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 2.64,
+   "schwarz": 3.95,
+   "verh": 0.668
+  },
+  "Fichtelberg": {
+   "slug": "Fichtelberg",
+   "name": "Fichtelberg",
+   "la": 50.428,
+   "h": 1212.0,
+   "sonne": 0.113,
+   "klar": false,
+   "mess": 3.5,
+   "schwarz": 5.59,
+   "verh": 0.627
+  },
+  "Friedrichshafen": {
+   "slug": "Friedrichshafen",
+   "name": "Friedrichshafen",
+   "la": 47.674,
+   "h": 416.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 5.94,
+   "schwarz": 6.4,
+   "verh": 0.928
+  },
+  "Genthin": {
+   "slug": "Genthin",
+   "name": "Genthin",
+   "la": 52.404,
+   "h": 37.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 3.25,
+   "schwarz": 4.24,
+   "verh": 0.766
+  },
+  "Giessen-Wettenberg": {
+   "slug": "Giessen-Wettenberg",
+   "name": "Giessen-Wettenberg",
+   "la": 50.602,
+   "h": 203.0,
+   "sonne": 0.421,
+   "klar": false,
+   "mess": 5.87,
+   "schwarz": 5.11,
+   "verh": 1.148
+  },
+  "Goerlitz": {
+   "slug": "Goerlitz",
+   "name": "Goerlitz",
+   "la": 51.153,
+   "h": 212.0,
+   "sonne": 0.204,
+   "klar": false,
+   "mess": 4.6,
+   "schwarz": 4.83,
+   "verh": 0.954
+  },
+  "Groemitz": {
+   "slug": "Groemitz",
+   "name": "Groemitz",
+   "la": 54.15,
+   "h": 10.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 2.23,
+   "schwarz": 4.11,
+   "verh": 0.543
+  },
+  "Hamburg": {
+   "slug": "Hamburg",
+   "name": "Hamburg",
+   "la": 53.55,
+   "h": 27.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 2.39,
+   "schwarz": 4.13,
+   "verh": 0.578
+  },
+  "Hohenpeissenberg": {
+   "slug": "Hohenpeissenberg",
+   "name": "Hohenpeissenberg",
+   "la": 47.801,
+   "h": 972.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 6.48,
+   "schwarz": 6.48,
+   "verh": 1.0
+  },
+  "Kassel": {
+   "slug": "Kassel",
+   "name": "Kassel",
+   "la": 51.312,
+   "h": 174.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 4.11,
+   "schwarz": 4.89,
+   "verh": 0.841
+  },
+  "Klippeneck": {
+   "slug": "Klippeneck",
+   "name": "Klippeneck",
+   "la": 48.108,
+   "h": 929.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 5.16,
+   "schwarz": 6.43,
+   "verh": 0.803
+  },
+  "Kulmbach": {
+   "slug": "Kulmbach",
+   "name": "Kulmbach",
+   "la": 50.106,
+   "h": 308.0,
+   "sonne": 0.192,
+   "klar": false,
+   "mess": 5.54,
+   "schwarz": 5.39,
+   "verh": 1.027
+  },
+  "Langen": {
+   "slug": "Langen",
+   "name": "Langen",
+   "la": 49.99,
+   "h": 141.0,
+   "sonne": 0.725,
+   "klar": true,
+   "mess": 5.28,
+   "schwarz": 5.35,
+   "verh": 0.987
+  },
+  "Lindenberg": {
+   "slug": "Lindenberg",
+   "name": "Lindenberg",
+   "la": 52.209,
+   "h": 104.0,
+   "sonne": 0.171,
+   "klar": false,
+   "mess": 4.13,
+   "schwarz": 4.32,
+   "verh": 0.955
+  },
+  "Lueneburg": {
+   "slug": "Lueneburg",
+   "name": "Lueneburg",
+   "la": 53.248,
+   "h": 24.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 2.98,
+   "schwarz": 3.98,
+   "verh": 0.748
+  },
+  "Melpitz": {
+   "slug": "Melpitz",
+   "name": "Melpitz",
+   "la": 51.531,
+   "h": 86.0,
+   "sonne": 0.287,
+   "klar": false,
+   "mess": 4.35,
+   "schwarz": 4.66,
+   "verh": 0.934
+  },
+  "Muenchen": {
+   "slug": "Muenchen",
+   "name": "Muenchen",
+   "la": 48.222,
+   "h": 492.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 6.02,
+   "schwarz": 6.11,
+   "verh": 0.984
+  },
+  "Norderney": {
+   "slug": "Norderney",
+   "name": "Norderney",
+   "la": 53.71,
+   "h": 6.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 1.81,
+   "schwarz": 4.15,
+   "verh": 0.436
+  },
+  "Salzgitter": {
+   "slug": "Salzgitter",
+   "name": "Salzgitter",
+   "la": 52.152,
+   "h": 95.0,
+   "sonne": 0.062,
+   "klar": false,
+   "mess": 3.71,
+   "schwarz": 4.51,
+   "verh": 0.822
+  },
+  "Schauinsland": {
+   "slug": "Schauinsland",
+   "name": "Schauinsland",
+   "la": 47.914,
+   "h": 1200.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 6.33,
+   "schwarz": 6.55,
+   "verh": 0.966
+  },
+  "Stuttgart": {
+   "slug": "Stuttgart",
+   "name": "Stuttgart",
+   "la": 48.783,
+   "h": 299.0,
+   "sonne": 1.0,
+   "klar": true,
+   "mess": 5.47,
+   "schwarz": 5.88,
+   "verh": 0.93
+  },
+  "Tholey": {
+   "slug": "Tholey",
+   "name": "Tholey",
+   "la": 49.48,
+   "h": 381.0,
+   "sonne": 0.967,
+   "klar": true,
+   "mess": 5.57,
+   "schwarz": 5.63,
+   "verh": 0.989
+  },
+  "Todendorf": {
+   "slug": "Todendorf",
+   "name": "Todendorf",
+   "la": 54.32,
+   "h": 0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 2.3,
+   "schwarz": 3.97,
+   "verh": 0.58
+  },
+  "Waldmuenchen": {
+   "slug": "Waldmuenchen",
+   "name": "Waldmuenchen",
+   "la": 49.378,
+   "h": 509.0,
+   "sonne": 0.829,
+   "klar": true,
+   "mess": 6.06,
+   "schwarz": 5.78,
+   "verh": 1.048
+  },
+  "Weissenburg": {
+   "slug": "Weissenburg",
+   "name": "Weissenburg",
+   "la": 49.033,
+   "h": 426.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 5.79,
+   "schwarz": 5.79,
+   "verh": 0.999
+  },
+  "Zingst": {
+   "slug": "Zingst",
+   "name": "Zingst",
+   "la": 54.437,
+   "h": 3.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 1.85,
+   "schwarz": 3.96,
+   "verh": 0.466
+  },
+  "Zirchow": {
+   "slug": "Zirchow",
+   "name": "Zirchow",
+   "la": 53.847,
+   "h": 0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 1.68,
+   "schwarz": 4.05,
+   "verh": 0.413
+  },
+  "Schneefernerhaus": {
+   "slug": "Schneefernerhaus",
+   "name": "Schneefernerhaus",
+   "la": 47.417,
+   "h": 2764.0,
+   "sonne": 0.996,
+   "klar": true,
+   "mess": 7.03,
+   "schwarz": 7.45,
+   "verh": 0.944
+  },
+  "Boesel_B": {
+   "slug": "Boesel_B",
+   "name": "Boesel_B",
+   "la": 53.006,
+   "h": 18.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 2.35,
+   "schwarz": 4.18,
+   "verh": 0.563
+  },
+  "Cuxhaven_B": {
+   "slug": "Cuxhaven_B",
+   "name": "Cuxhaven_B",
+   "la": 53.861,
+   "h": 5.0,
+   "sonne": 0.0,
+   "klar": false,
+   "mess": 1.74,
+   "schwarz": 4.14,
+   "verh": 0.421
+  },
+  "Duderstadt_B": {
+   "slug": "Duderstadt_B",
+   "name": "Duderstadt_B",
+   "la": 51.5075,
+   "h": 185.0,
+   "sonne": 0.2,
+   "klar": false,
+   "mess": 4.33,
+   "schwarz": 4.78,
+   "verh": 0.906
+  },
+  "Belm-Osnabrueck": {
+   "slug": "Belm-Osnabrueck",
+   "name": "Belm-Osnabrueck",
+   "la": 52.3169,
+   "h": 102.0,
+   "sonne": 0.033,
+   "klar": false,
+   "mess": 4.05,
+   "schwarz": 4.27,
+   "verh": 0.948
+  },
+  "Schweinfurt_Wasserlosen": {
+   "slug": "Schweinfurt_Wasserlosen",
+   "name": "Schweinfurt_Wasserlosen",
+   "la": 50.0461,
+   "h": 274.0,
+   "sonne": 0.942,
+   "klar": true,
+   "mess": 5.48,
+   "schwarz": 5.39,
+   "verh": 1.018
+  },
+  "Sylt_Tinnum": {
+   "slug": "Sylt_Tinnum",
+   "name": "Sylt_Tinnum",
+   "la": 54.8922,
+   "h": 1.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 1.85,
+   "schwarz": 3.58,
+   "verh": 0.516
+  },
+  "Waldhof_Falkenstein": {
+   "slug": "Waldhof_Falkenstein",
+   "name": "Waldhof_Falkenstein",
+   "la": 52.802,
+   "h": 89.0,
+   "sonne": null,
+   "klar": false,
+   "mess": 5.48,
+   "schwarz": 4.13,
+   "verh": 1.328
+  },
+  "Wurmberg_B": {
+   "slug": "Wurmberg_B",
+   "name": "Wurmberg_B",
+   "la": 51.7581,
+   "h": 941.0,
+   "sonne": 0.2,
+   "klar": false,
+   "mess": 4.02,
+   "schwarz": 4.98,
+   "verh": 0.809
   }
  }
 }

@@ -1,0 +1,20 @@
+{
+ "stand": "2026-09-06",
+ "regel": "Median(Messung/Modell) an Tagen mit >=70 % Sonne, ab 3 Tagen, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor",
+ "stationen": {
+  "Klippeneck": {
+   "faktor": 0.812,
+   "tage": 3,
+   "streuung": 0.011,
+   "von": "2026-09-04",
+   "bis": "2026-09-06"
+  },
+  "Stuttgart": {
+   "faktor": 0.93,
+   "tage": 3,
+   "streuung": 0.008,
+   "von": "2026-09-04",
+   "bis": "2026-09-06"
+  }
+ }
+}
