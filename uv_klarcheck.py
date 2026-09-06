@@ -43,6 +43,7 @@ Ohne Datum wird der gestrige Tag geprueft (die Bilder heissen dann
 import json
 import math
 import io
+import time
 import os
 import re
 import sys
@@ -257,6 +258,162 @@ def cams_scheitel(stationen, datum):
     return out
 
 
+# ---------------------------------------------------------------------------
+# Teil 2 (06.09.2026): Modellpruefung an ALLEN Stationen, Schwerpunkt Giessen.
+#
+# Die App zeichnet ihre schwarze "max. moeglich"-Kurve aus Open-Meteos
+# uv_index_clear_sky der AIR-QUALITY-API, korrigiert nach Breite und Hoehe
+# (index.html uvCamsFaktor, v3.82). Ob das an Giessens Breite stimmt, laesst
+# sich am Giessen-Bild nicht pruefen - das BfS zeichnet dort keine DWD-Kurve.
+# Deshalb: an jedem Tag fuer jede Station die Messspitze gegen die schwarze
+# Kurve stellen, und "klar" nicht aus dem Modell ableiten (das waere
+# zirkulaer), sondern aus der DWD-Sonnenscheindauer der naechsten
+# 10-Minuten-Station (Branch daten, Pipeline solar10). Ergebnisse werden in
+# uv_klarlog.json fortgeschrieben, damit sich ueber Wochen ein Bild ergibt.
+# ---------------------------------------------------------------------------
+GIESSEN_LA = 50.60
+GRUPPE_GRAD = 1.0          # +-1 Grad Breite um Giessen = Vergleichsgruppe
+SONNE_KLAR = 0.90          # Anteil Sonnenschein 11-15 Uhr, ab dem "klar" gilt
+SOLAR10 = "https://raw.githubusercontent.com/luperttrading-lab/wetter/daten/solar10/"
+LOG = "uv_klarlog.json"
+
+
+def _curl_json(url):
+    cmd = ["curl", "-sS", "--max-time", "120"]
+    ca = os.environ.get("CURL_CA_BUNDLE") or "/root/.ccr/ca-bundle.crt"
+    if os.path.exists(ca):
+        cmd += ["--cacert", ca]
+    for _ in range(4):
+        r = subprocess.run(cmd + [url], capture_output=True, text=True)
+        try:
+            return json.loads(r.stdout)
+        except Exception:
+            time.sleep(3)
+    return None
+
+
+def hoehen(stationen):
+    """Modellhoehe je Station (Open-Meteo), wie sie die App fuer den Ort sieht."""
+    lat = ",".join("%.4f" % s["la"] for s in stationen)
+    lon = ",".join("%.4f" % s["lo"] for s in stationen)
+    d = _curl_json("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s"
+                   "&current=temperature_2m" % (lat, lon)) or []
+    if isinstance(d, dict):
+        d = [d]
+    return {s["slug"]: (o.get("elevation") if isinstance(o, dict) else None)
+            for s, o in zip(stationen, d)}
+
+
+def cams_faktor(la, h):
+    """Wie index.html uvCamsFaktor (v3.82): DWD/CAMS an 16 Stationen gefittet."""
+    f = 0.939 - 0.0199 * (la - 50) + 0.0561 * (h or 0) / 1000
+    return max(0.7, min(1.4, f))
+
+
+def sonnenschein(stationen, datum):
+    """Anteil Sonnenschein 11-15 Uhr Ortszeit an der naechsten DWD-Station
+    mit Sonnenscheindauer (<= 30 km). None, wenn keine da ist."""
+    liste = _curl_json(SOLAR10 + "stationen.json?t=%d" % int(time.time()))
+    if not liste or not isinstance(liste.get("stationen"), list):
+        return {}
+    dwd = [s for s in liste["stationen"] if s.get("sd") is not False]
+    from zoneinfo import ZoneInfo
+    tz = ZoneInfo("Europe/Berlin")
+    cache, out = {}, {}
+    for s in stationen:
+        best, bd = None, 1e9
+        for d in dwd:
+            km = math.hypot((s["la"] - d["lat"]) * 111.32,
+                            (s["lo"] - d["lon"]) * 111.32 * math.cos(math.radians(s["la"])))
+            if km < bd:
+                bd, best = km, d
+        if not best or bd > 30:
+            out[s["slug"]] = None
+            continue
+        if best["id"] not in cache:
+            j = _curl_json(SOLAR10 + best["id"] + ".json?t=%d" % int(time.time()))
+            cache[best["id"]] = j if j and isinstance(j.get("sd"), list) else None
+        j = cache[best["id"]]
+        if not j:
+            out[s["slug"]] = None
+            continue
+        t0 = datetime.datetime.strptime(j["t0"], "%Y-%m-%dT%H:%MZ").replace(tzinfo=datetime.timezone.utc)
+        summe, minuten = 0.0, 0
+        for i, v in enumerate(j["sd"]):
+            loc = (t0 + datetime.timedelta(minutes=10 * i)).astimezone(tz)
+            if loc.strftime("%Y-%m-%d") != datum or not (11 <= loc.hour < 15):
+                continue
+            minuten += 10
+            if v is not None:
+                summe += v
+        out[s["slug"]] = (summe / minuten, best["name"], bd) if minuten >= 180 else None
+    return out
+
+
+def modellpruefung(stationen, datum, endung, gelesen):
+    """gelesen: {slug: (ax, mess)} aus dem ersten Teil (Bilder schon geladen)."""
+    hoehe = hoehen(stationen)
+    cams = cams_scheitel(stationen, datum)
+    sonne = sonnenschein(stationen, datum)
+    zeilen = []
+    for s in stationen:
+        g = gelesen.get(s["slug"])
+        if not g or s["slug"] not in cams:
+            continue
+        ax, mess = g
+        h = hoehe.get(s["slug"])
+        schwarz = cams[s["slug"]] * cams_faktor(s["la"], h)
+        so = sonne.get(s["slug"])
+        zeilen.append({"slug": s["slug"], "name": s["name"], "la": s["la"], "h": h,
+                       "mess": round(mess, 2), "schwarz": round(schwarz, 2),
+                       "verh": round(mess / schwarz, 3) if schwarz > 0 else None,
+                       "sonne": round(so[0], 2) if so else None,
+                       "dwd_station": so[1] if so else None,
+                       "klar": bool(so and so[0] >= SONNE_KLAR)})
+    gruppe = [z for z in zeilen if abs(z["la"] - GIESSEN_LA) <= GRUPPE_GRAD]
+    print("\n=== Modellpruefung %s: Messspitze gegen die schwarze Kurve der App ===" % datum)
+    print("Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 30 km)\n")
+    print("%-22s %6s %5s %6s | %7s %6s %6s" % ("Giessen-Gruppe", "Breite", "Hoehe", "Sonne", "schwarz", "Mess", "Verh."))
+    for z in sorted(gruppe, key=lambda z: abs(z["la"] - GIESSEN_LA)):
+        print("%-22s %6.2f %5s %6s | %7.2f %6.2f %6s%s" % (
+            z["name"][:22], z["la"], ("%d" % z["h"]) if z["h"] is not None else "-",
+            ("%3.0f %%" % (100 * z["sonne"])) if z["sonne"] is not None else "  -  ",
+            z["schwarz"], z["mess"], ("%+4.0f %%" % (100 * (z["verh"] - 1))) if z["verh"] else "-",
+            "  klar" if z["klar"] else ""))
+    klar_g = [z for z in gruppe if z["klar"] and z["verh"]]
+    if klar_g:
+        m = sum(z["verh"] for z in klar_g) / len(klar_g)
+        print("\nKlare Stationen der Gruppe heute: %d, Messung/schwarz im Mittel %+.1f %%"
+              % (len(klar_g), 100 * (m - 1)))
+    gi = next((z for z in zeilen if z["slug"] == "Giessen-Wettenberg"), None)
+    giessen_klar = bool(gi and gi["klar"])
+    if giessen_klar:
+        print("=== GIESSEN KLAR === Sonne %.0f %%, Messung %.2f, schwarz %.2f (%+.0f %%)"
+              % (100 * gi["sonne"], gi["mess"], gi["schwarz"], 100 * (gi["verh"] - 1)))
+    # Protokoll fortschreiben und ueber alle Tage auswerten
+    try:
+        with open(LOG, "r", encoding="utf-8") as fh:
+            log = json.load(fh)
+    except Exception:
+        log = {}
+    log[datum] = {z["slug"]: z for z in zeilen}
+    with open(LOG, "w", encoding="utf-8") as fh:
+        json.dump(log, fh, ensure_ascii=False, indent=1)
+    alle = [z for tag in log.values() for z in tag.values()
+            if z.get("klar") and z.get("verh") and abs(z["la"] - GIESSEN_LA) <= GRUPPE_GRAD]
+    if alle:
+        m = sum(z["verh"] for z in alle) / len(alle)
+        sd = math.sqrt(sum((z["verh"] - m) ** 2 for z in alle) / (len(alle) - 1)) if len(alle) > 1 else 0
+        print("\nProtokoll seit %s: %d klare Stationstage in der Giessen-Gruppe, "
+              "Messung/schwarz %+.1f %% (Streuung %.1f Pp)" % (min(log), len(alle), 100 * (m - 1), 100 * sd))
+        gi_alle = [z for tag in log.values() for z in tag.values()
+                   if z["slug"] == "Giessen-Wettenberg" and z.get("klar") and z.get("verh")]
+        if gi_alle:
+            print("  Giessen selbst an %d klaren Tagen: %+.1f %%" %
+                  (len(gi_alle), 100 * (sum(z["verh"] for z in gi_alle) / len(gi_alle) - 1)))
+    return giessen_klar
+
+
 def main():
     datum = sys.argv[1] if len(sys.argv) > 1 else \
         (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
@@ -269,6 +426,7 @@ def main():
 
     print("UV-Klarhimmel-Pruefung fuer %s (%d Stationen)\n" % (datum, len(st)))
     treffer = []
+    gelesen = {}
     for s in st:
         png = hole("https://uvi.bfs.de/Tagesgrafiken/EEr_%s_%s.png" % (s["slug"], endung))
         if not png:
@@ -277,6 +435,7 @@ def main():
         ax = achse_lesen(im)
         if ax is None:
             continue
+        gelesen[s["slug"]] = (ax, mess_scheitel(im, ax))
         cs = clearsky_kurve(im, ax)
         if len(cs) < 80:
             continue                       # Bild ohne DWD-Kurve
@@ -288,6 +447,12 @@ def main():
                         "lo": s["lo"], "ax": ax, "dwd": sch[1],
                         "uhr": sch[0], "mess": mess,
                         "klarheit": mess / sch[1] if sch[1] > 0 else 0})
+
+    giessen_klar = False
+    try:
+        giessen_klar = modellpruefung(st, datum, endung, gelesen)
+    except Exception as e:
+        print("Modellpruefung fehlgeschlagen:", str(e)[:120])
 
     if not treffer:
         print("Keine Station mit DWD-Klarhimmelkurve lesbar.")
