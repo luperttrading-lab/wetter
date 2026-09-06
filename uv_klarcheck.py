@@ -416,6 +416,14 @@ def modellpruefung(stationen, datum, endung, gelesen):
         if gi_alle:
             print("  Giessen selbst an %d klaren Tagen: %+.1f %%" %
                   (len(gi_alle), 100 * (sum(z["verh"] for z in gi_alle) / len(gi_alle) - 1)))
+    # v1.2: Aus dem Protokoll die Stationsfaktoren neu schreiben (uv-station.json),
+    # die die App fuer ihre schwarze Kurve liest.
+    try:
+        import subprocess
+        r = subprocess.run([sys.executable, "uv_station.py"], capture_output=True, text=True)
+        print("\n" + (r.stdout or r.stderr).rstrip())
+    except Exception as e:
+        print("\nuv_station.py nicht gelaufen:", str(e)[:80])
     return giessen_klar
 
 
