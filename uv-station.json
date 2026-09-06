@@ -1,19 +1,104 @@
 {
  "stand": "2026-09-06",
- "regel": "Median(Messung/Modell) an Tagen mit >=70 % Sonne, ab 3 Tagen, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor",
+ "regel": "Median(Messung/Modell) an Tagen mit >=70 % Sonne, zur 1 gedaempft mit n/(n+1), geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
+  "Andernach": {
+   "faktor": 1.093,
+   "roh": 1.139,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.058,
+   "von": "2026-09-05",
+   "bis": "2026-09-06"
+  },
+  "Cuxhaven_B": {
+   "faktor": 1.071,
+   "roh": 1.141,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0,
+   "von": "2026-09-06",
+   "bis": "2026-09-06"
+  },
+  "Dortmund": {
+   "faktor": 1.071,
+   "roh": 1.143,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0,
+   "von": "2026-09-06",
+   "bis": "2026-09-06"
+  },
+  "Fichtelberg": {
+   "faktor": 0.899,
+   "roh": 0.849,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.013,
+   "von": "2026-09-05",
+   "bis": "2026-09-06"
+  },
+  "Friedrichshafen": {
+   "faktor": 0.949,
+   "roh": 0.924,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.006,
+   "von": "2026-09-04",
+   "bis": "2026-09-06"
+  },
+  "Giessen-Wettenberg": {
+   "faktor": 1.085,
+   "roh": 1.127,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.01,
+   "von": "2026-09-05",
+   "bis": "2026-09-06"
+  },
+  "Groemitz": {
+   "faktor": 1.141,
+   "roh": 1.283,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0,
+   "von": "2026-09-06",
+   "bis": "2026-09-06"
+  },
   "Klippeneck": {
-   "faktor": 0.812,
+   "faktor": 0.859,
+   "roh": 0.812,
    "tage": 3,
+   "vorlaeufig": false,
    "streuung": 0.011,
    "von": "2026-09-04",
    "bis": "2026-09-06"
   },
   "Stuttgart": {
-   "faktor": 0.93,
+   "faktor": 0.948,
+   "roh": 0.93,
    "tage": 3,
+   "vorlaeufig": false,
    "streuung": 0.008,
    "von": "2026-09-04",
+   "bis": "2026-09-06"
+  },
+  "Wurmberg_B": {
+   "faktor": 1.1,
+   "roh": 1.15,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.059,
+   "von": "2026-09-05",
+   "bis": "2026-09-06"
+  },
+  "Zingst": {
+   "faktor": 1.052,
+   "roh": 1.105,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0,
+   "von": "2026-09-06",
    "bis": "2026-09-06"
   }
  }

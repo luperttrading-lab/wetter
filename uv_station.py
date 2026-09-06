@@ -22,7 +22,17 @@ ihre schwarze Kurve, wenn der Ort nahe genug an der Station liegt.
 Median statt Mittel: ein einzelner Tag mit Wolkenverstaerkung (Messung ueber
 Klarhimmel) soll den Faktor nicht verschieben.
 
-Grenzen: mindestens MIN_TAGE Tage, Faktor auf [MIN_F, MAX_F] geklemmt.
+Ab dem ERSTEN Tag wird ein Faktor geschrieben, aber zur 1 hin gedaempft:
+    faktor = 1 + (median - 1) * n / (n + 1)
+Ein Tag zaehlt also zur Haelfte, zwei zu zwei Dritteln, drei zu drei
+Vierteln, zehn zu 91 %. Das ist die uebliche Schrumpfung zum neutralen Wert
+mit einer Pseudo-Beobachtung als Prior: ein einzelner Tag mit
+Wolkenverstaerkung verschiebt die Kurve dann nur halb so weit, und der
+Faktor waechst von selbst in seinen wahren Wert hinein, statt an einer
+willkuerlichen Schwelle zu springen. Unter MIN_SICHER Tagen gilt er als
+vorlaeufig; die App schreibt das dazu.
+
+Grenzen: Faktor auf [MIN_F, MAX_F] geklemmt.
 """
 import json
 import math
@@ -30,7 +40,7 @@ import math
 LOG = "uv_klarlog.json"
 AUS = "uv-station.json"
 MIN_SONNE = 0.70      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag zaehlt
-MIN_TAGE = 3          # so viele Tage braucht eine Station fuer einen Faktor
+MIN_SICHER = 3        # ab so vielen Tagen gilt der Faktor nicht mehr als vorlaeufig
 MIN_F, MAX_F = 0.80, 1.25
 ABWEICHUNG = 0.05     # kleinere Abweichungen bleiben unkorrigiert
 
@@ -59,14 +69,14 @@ def main():
     out = {}
     for slug, e in sorted(je_station.items()):
         werte = [t["v"] for t in e["tage"]]
-        if len(werte) < MIN_TAGE:
-            continue
+        n = len(werte)
         m = median(werte)
-        if abs(m - 1) < ABWEICHUNG:
+        f = max(MIN_F, min(MAX_F, 1 + (m - 1) * n / (n + 1)))   # Schrumpfung zur 1
+        if abs(f - 1) < ABWEICHUNG:
             continue
-        f = max(MIN_F, min(MAX_F, m))
-        sd = math.sqrt(sum((v - m) ** 2 for v in werte) / (len(werte) - 1)) if len(werte) > 1 else 0
-        out[slug] = {"faktor": round(f, 3), "tage": len(werte),
+        sd = math.sqrt(sum((v - m) ** 2 for v in werte) / (n - 1)) if n > 1 else 0
+        out[slug] = {"faktor": round(f, 3), "roh": round(m, 3), "tage": n,
+                     "vorlaeufig": n < MIN_SICHER,
                      "streuung": round(sd, 3),
                      "von": min(t["d"] for t in e["tage"]),
                      "bis": max(t["d"] for t in e["tage"])}
@@ -74,20 +84,21 @@ def main():
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None,
                    "regel": "Median(Messung/Modell) an Tagen mit >=%d %% Sonne, "
-                            "ab %d Tagen, geklemmt auf %.2f-%.2f, unter %.0f %% "
-                            "Abweichung kein Faktor"
-                            % (100 * MIN_SONNE, MIN_TAGE, MIN_F, MAX_F, 100 * ABWEICHUNG),
+                            "zur 1 gedaempft mit n/(n+1), geklemmt auf %.2f-%.2f, "
+                            "unter %.0f %% Abweichung kein Faktor, unter %d Tagen "
+                            "vorlaeufig"
+                            % (100 * MIN_SONNE, MIN_F, MAX_F, 100 * ABWEICHUNG, MIN_SICHER),
                    "stationen": out}, fh, ensure_ascii=False, indent=1)
 
     print("uv-station.json: %d Stationen mit Faktor (von %d mit Daten)"
           % (len(out), len(je_station)))
     for slug, z in sorted(out.items(), key=lambda kv: -abs(kv[1]["faktor"] - 1)):
-        print("  %-24s x%.3f  (%d Tage, Streuung %.3f)"
-              % (slug[:24], z["faktor"], z["tage"], z["streuung"]))
-    ohne = [(s, len(e["tage"])) for s, e in je_station.items() if len(e["tage"]) < MIN_TAGE]
-    if ohne:
-        print("  noch zu wenige Tage: %d Stationen (%s ...)"
-              % (len(ohne), ", ".join("%s %d" % o for o in sorted(ohne)[:4])))
+        print("  %-24s x%.3f  (roh %.3f, %d Tage%s, Streuung %.3f)"
+              % (slug[:24], z["faktor"], z["roh"], z["tage"],
+                 ", vorlaeufig" if z["vorlaeufig"] else "", z["streuung"]))
+    neutral = len(je_station) - len(out)
+    if neutral:
+        print("  ohne Faktor (Abweichung unter %.0f %%): %d Stationen" % (100 * ABWEICHUNG, neutral))
     return 0
 
 
