@@ -424,6 +424,15 @@ def modellpruefung(stationen, datum, endung, gelesen):
         print("\n" + (r.stdout or r.stderr).rstrip())
     except Exception as e:
         print("\nuv_station.py nicht gelaufen:", str(e)[:80])
+    # v1.3: Wolkendurchlass-Paare sammeln (Exponent p, siehe uv_durchlass.py)
+    try:
+        import subprocess
+        r = subprocess.run([sys.executable, "uv_durchlass.py", datum],
+                           capture_output=True, text=True, timeout=1500)
+        aus = (r.stdout or r.stderr).rstrip().splitlines()
+        print("\n" + "\n".join(aus[-8:]))
+    except Exception as e:
+        print("\nuv_durchlass.py nicht gelaufen:", str(e)[:80])
     return giessen_klar
 
 
