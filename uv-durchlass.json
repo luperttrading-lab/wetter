@@ -1,0 +1,30 @@
+{
+ "stand": "2026-09-07",
+ "tage": 1,
+ "p": {
+  "voll": {
+   "punkte": 312,
+   "p": null,
+   "p_roh": 1.397,
+   "r2": 0.143,
+   "fehler": 0.194,
+   "dl_mittel": 0.876
+  },
+  "teils": {
+   "punkte": 207,
+   "p": null,
+   "p_roh": 0.465,
+   "r2": 0.113,
+   "fehler": 0.091,
+   "dl_mittel": 0.653
+  },
+  "keine": {
+   "punkte": 299,
+   "p": null,
+   "p_roh": 0.38,
+   "r2": 0.296,
+   "fehler": 0.034,
+   "dl_mittel": 0.381
+  }
+ }
+}
