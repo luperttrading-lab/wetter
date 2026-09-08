@@ -1,6 +1,6 @@
 {
- "stand": "2026-09-07",
- "tage": 1,
+ "stand": "2026-09-08",
+ "tage": 2,
  "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; Regression ln(q)=p*ln(dl), ab 40 Punkten und r2 0.30",
  "klassen": {
   "voll": {
@@ -18,58 +18,58 @@
  },
  "p": {
   "voll": {
-   "punkte": 313,
-   "p": 0.674,
-   "p_roh": 0.674,
-   "r2": 0.365,
-   "fehler": 0.05,
-   "dl_mittel": 0.876
+   "punkte": 575,
+   "p": null,
+   "p_roh": 0.607,
+   "r2": 0.266,
+   "fehler": 0.042,
+   "dl_mittel": 0.896
   },
   "teils": {
-   "punkte": 208,
-   "p": 0.612,
-   "p_roh": 0.612,
-   "r2": 0.631,
-   "fehler": 0.033,
-   "dl_mittel": 0.654
+   "punkte": 430,
+   "p": 0.616,
+   "p_roh": 0.616,
+   "r2": 0.627,
+   "fehler": 0.023,
+   "dl_mittel": 0.667
   },
   "keine": {
-   "punkte": 297,
-   "p": 0.738,
-   "p_roh": 0.738,
-   "r2": 0.892,
-   "fehler": 0.015,
-   "dl_mittel": 0.385
+   "punkte": 528,
+   "p": 0.674,
+   "p_roh": 0.674,
+   "r2": 0.853,
+   "fehler": 0.012,
+   "dl_mittel": 0.358
   }
  },
  "tagesgang": {
-  "punkte": 274,
-  "stationen": 15,
-  "steigung": -0.0064,
-  "fehler": 0.0026,
-  "mitte": 1.0009,
-  "r2": 0.022,
-  "vormittags": 1.02,
-  "nachmittags": 0.982
+  "punkte": 642,
+  "stationen": 20,
+  "steigung": -0.0102,
+  "fehler": 0.0015,
+  "mitte": 0.9991,
+  "r2": 0.064,
+  "vormittags": 1.03,
+  "nachmittags": 0.969
  },
  "spitzen": {
   "voll": {
-   "punkte": 457,
-   "spitze": 1.043,
-   "p90": 1.127,
+   "punkte": 914,
+   "spitze": 1.035,
+   "p90": 1.122,
    "max": 1.375
   },
   "teils": {
-   "punkte": 211,
-   "spitze": 1.074,
-   "p90": 1.233,
-   "max": 1.494
+   "punkte": 435,
+   "spitze": 1.094,
+   "p90": 1.295,
+   "max": 1.519
   },
   "keine": {
-   "punkte": 299,
-   "spitze": 1.073,
-   "p90": 1.217,
-   "max": 1.871
+   "punkte": 534,
+   "spitze": 1.089,
+   "p90": 1.251,
+   "max": 1.899
   }
  }
 }
