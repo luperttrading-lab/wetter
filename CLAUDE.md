@@ -114,8 +114,10 @@ offen sagen statt eine Zahl zu erfinden.
 Es liest das Sitzungsprotokoll `~/.claude/projects/<cwd mit - statt />/*.jsonl`
 und bewertet jede Assistenz-Nachricht mit den API-Listenpreisen **ihres eigenen
 Modells** (Modellwechsel mitten im Chat werden also korrekt getrennt).
-`-v` gibt zusaetzlich Summen je Tag und je Modell aus, `--ttl5` rechnet mit dem
-5-Minuten-Cachepreis statt der Stunde.
+`-v` gibt zusaetzlich Summen je Tag und je Modell aus. Die Cache-TTL wird nicht
+geraten: das Protokoll nennt sie je Nachricht selbst
+(`usage.cache_creation.ephemeral_1h_input_tokens` bzw. `..._5m_...`), danach wird
+gerechnet. `--ttl5` greift nur noch bei alten Protokollen ohne diese Aufteilung.
 
 Drei Stolpersteine, die im Skript bereits geloest sind:
 

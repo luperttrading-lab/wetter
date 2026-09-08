@@ -46,10 +46,17 @@ for line in open(f):
 
 def cost(model, u):
     p = PREISE.get(model, STD)
-    cw = p[3] if TTL5 else p[2]
+    # Das Protokoll nennt die Cache-TTL selbst (usage.cache_creation.ephemeral_*).
+    # Danach wird gerechnet; --ttl5 ueberschreibt das nur, wenn die Aufteilung fehlt.
+    cc = u.get('cache_creation') or {}
+    w1 = cc.get('ephemeral_1h_input_tokens', 0) or 0
+    w5 = cc.get('ephemeral_5m_input_tokens', 0) or 0
+    if not (w1 or w5):                          # aeltere Protokolle ohne Aufteilung
+        rest = u.get('cache_creation_input_tokens', 0) or 0
+        w5, w1 = (rest, 0) if TTL5 else (0, rest)
     return ((u.get('input_tokens', 0) or 0) * p[0]
             + (u.get('output_tokens', 0) or 0) * p[1]
-            + (u.get('cache_creation_input_tokens', 0) or 0) * cw
+            + w1 * p[2] + w5 * p[3]
             + (u.get('cache_read_input_tokens', 0) or 0) * p[4]) / 1e6
 
 jetzt = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=TZ)
