@@ -109,6 +109,25 @@ Die Zeile sieht so aus:
 Laeuft das Skript nicht (kein Sitzungsprotokoll, anderes Werkzeug), das
 offen sagen statt eine Zahl zu erfinden.
 
+### Preisstand
+
+Die Preistabelle wurde am **08.09.2026** gegen
+<https://platform.claude.com/docs/en/about-claude/pricing> geprueft. Das Skript
+haelt je Modell nur noch **Eingabe- und Ausgabepreis**; die Cachepreise leitet es
+aus den dokumentierten Faktoren ab (5 min = 1,25x Eingabe, 1 h = 2x Eingabe,
+Lesen = 0,1x Eingabe, bei Fable/Mythos 5.1 = 0,025x). Zwei Zahlen je Modell
+statt fuenf, die veralten koennen.
+
+Mitgerechnet werden ausserdem: **Fast Mode** (`speed: "fast"`, nur Opus 5 und
+Opus 4.8, doppelter Preis 10/50 $ je Mio.), **US-Datenresidenz**
+(`inference_geo: "us"`, Faktor 1,1 auf alles) und **Websuchen**
+(0,01 $ je Suche). Alle drei stehen im Protokoll und wurden vorher stillschweigend
+mit 0 bzw. dem Standardpreis bewertet.
+
+Modell-IDs werden per **laengstem Praefix** aufgeloest, weil im Protokoll oft ein
+Datum anhaengt (`claude-haiku-4-5-20251001`). Ohne das greift der Rueckfall auf
+Opus-Preise und Haiku waere um Faktor 5 zu teuer.
+
 ### Was das Skript rechnet
 
 Es liest das Sitzungsprotokoll `~/.claude/projects/<cwd mit - statt />/*.jsonl`
