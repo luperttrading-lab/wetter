@@ -1,6 +1,6 @@
 {
- "stand": "2026-09-08",
- "tage": 2,
+ "stand": "2026-09-07",
+ "tage": 1,
  "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; Regression ln(q)=p*ln(dl), ab 40 Punkten und r2 0.30",
  "klassen": {
   "voll": {
@@ -18,58 +18,100 @@
  },
  "p": {
   "voll": {
-   "punkte": 575,
+   "punkte": 309,
    "p": null,
-   "p_roh": 0.607,
-   "r2": 0.266,
-   "fehler": 0.042,
-   "dl_mittel": 0.896
+   "p_roh": 1.628,
+   "r2": 0.184,
+   "fehler": 0.195,
+   "dl_mittel": 0.876
   },
   "teils": {
-   "punkte": 430,
-   "p": 0.616,
-   "p_roh": 0.616,
-   "r2": 0.627,
-   "fehler": 0.023,
-   "dl_mittel": 0.667
+   "punkte": 207,
+   "p": 0.459,
+   "p_roh": 0.459,
+   "r2": 0.311,
+   "fehler": 0.048,
+   "dl_mittel": 0.652
   },
   "keine": {
-   "punkte": 528,
-   "p": 0.674,
-   "p_roh": 0.674,
-   "r2": 0.853,
-   "fehler": 0.012,
-   "dl_mittel": 0.358
+   "punkte": 301,
+   "p": null,
+   "p_roh": 0.134,
+   "r2": 0.186,
+   "fehler": 0.016,
+   "dl_mittel": 0.381
   }
  },
  "tagesgang": {
-  "punkte": 642,
-  "stationen": 20,
-  "steigung": -0.0102,
-  "fehler": 0.0015,
-  "mitte": 0.9991,
-  "r2": 0.064,
-  "vormittags": 1.03,
-  "nachmittags": 0.969
+  "punkte": 197,
+  "stationen": 13,
+  "steigung": 0.0022,
+  "fehler": 0.0043,
+  "mitte": 0.9992,
+  "r2": 0.001,
+  "vormittags": 0.993,
+  "nachmittags": 1.006
  },
  "spitzen": {
   "voll": {
-   "punkte": 914,
-   "spitze": 1.035,
-   "p90": 1.122,
-   "max": 1.375
+   "punkte": 450,
+   "spitze": 1.066,
+   "p90": 1.248,
+   "max": 1.899
   },
   "teils": {
-   "punkte": 435,
-   "spitze": 1.094,
-   "p90": 1.295,
-   "max": 1.519
+   "punkte": 211,
+   "spitze": 1.055,
+   "p90": 1.26,
+   "max": 1.785
   },
   "keine": {
-   "punkte": 534,
-   "spitze": 1.089,
+   "punkte": 305,
+   "spitze": 1.043,
+   "p90": 1.21,
+   "max": 1.47
+  }
+ },
+ "wolkenart": {
+  "klar": {
+   "punkte": 75,
+   "spitze": 1.069,
+   "p90": 1.244,
+   "q": 0.695,
+   "dl": 0.965,
+   "sonne": 10.0
+  },
+  "hoch": {
+   "punkte": 80,
+   "spitze": 1.066,
+   "p90": 1.212,
+   "q": 0.824,
+   "dl": 0.895,
+   "sonne": 10.0
+  },
+  "mittel": {
+   "punkte": 630,
+   "spitze": 1.052,
+   "p90": 1.245,
+   "q": 0.884,
+   "dl": 0.627,
+   "sonne": 6.0
+  },
+  "tief": {
+   "punkte": 62,
+   "spitze": 1.065,
    "p90": 1.251,
-   "max": 1.899
+   "q": 0.96,
+   "dl": 0.646,
+   "sonne": 6.5
+  },
+  "gemischt": {
+   "punkte": 95,
+   "spitze": 1.066,
+   "p90": 1.254,
+   "q": 0.873,
+   "dl": 0.919,
+   "sonne": 10.0
   }
  }
 }

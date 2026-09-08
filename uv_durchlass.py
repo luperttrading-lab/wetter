@@ -79,6 +79,10 @@ SOLAR = "https://raw.githubusercontent.com/luperttrading-lab/wetter/daten/solar1
 BFS = "https://uvi.bfs.de/Tagesgrafiken/EEr_{slug}_{tag}.png"
 CAMS = ("https://air-quality-api.open-meteo.com/v1/air-quality?latitude={la}&longitude={lo}"
         "&hourly=uv_index_clear_sky&past_days={pd}&forecast_days=1&timezone=Europe%2FBerlin")
+# Wolkenschichten je Stunde: tief, mittel, hoch (Open-Meteo, ICON)
+WOLKEN = ("https://api.open-meteo.com/v1/forecast?latitude={la}&longitude={lo}"
+          "&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high"
+          "&past_days={pd}&forecast_days=1&timezone=Europe%2FBerlin")
 
 MAX_KM = 25          # so nah muss die Strahlungsstation am BfS-Standort stehen
 MIN_PUNKTE = 40      # so viele Paare braucht eine Klasse fuer einen Exponenten
@@ -234,6 +238,19 @@ def sammeln(datum):
         c = hole_json(CAMS.format(la=b["la"], lo=b["lo"], pd=pd))
         if not j or not c:
             continue
+        # Wolkenschichten der Stunde - fuer die Frage, ob hohe duenne Wolken
+        # andere Spitzen machen als tiefe Quellwolken (Regel 6 aus dem
+        # Vorgaenger-Chat: "hoch und duenn heisst kein Rand, kein Zuschlag")
+        wo = hole_json(WOLKEN.format(la=b["la"], lo=b["lo"], pd=pd)) or {}
+        wolk = {}
+        try:
+            hh = wo["hourly"]
+            for t, l, m, hi in zip(hh["time"], hh["cloud_cover_low"],
+                                   hh["cloud_cover_mid"], hh["cloud_cover_high"]):
+                if t.startswith(datum):
+                    wolk[int(t[11:13])] = (l, m, hi)
+        except Exception:
+            pass
         csw = [v for t, v in zip(c["hourly"]["time"], c["hourly"]["uv_index_clear_sky"])
                if t.startswith(datum) and v is not None]
         if not csw:
@@ -269,10 +286,13 @@ def sammeln(datum):
             if glocke < 0.8 or uvm < 0.3:
                 continue
             sd = j["sd"][i] if j.get("sd") and j["sd"][i] is not None else None
+            wl = wolk.get(loc.hour)
             paare.append({"st": b["slug"], "dl": round(dl, 4),
                           "q": round(uvm / glocke, 4), "sd": sd,
                           "h": round(hz, 2), "mu": round(m, 4),
-                          "sp": round(spitze, 3) if spitze else None})
+                          "sp": round(spitze, 3) if spitze else None,
+                          "wl": wl[0] if wl else None, "wm": wl[1] if wl else None,
+                          "wh": wl[2] if wl else None})
         if len(paare) > n0:
             print("  %-24s %3d Paare (Strahlung: %s, %.0f km)"
                   % (b["slug"][:24], len(paare) - n0, nah["name"][:16], d))
@@ -335,6 +355,42 @@ def spitzen(log):
         out[name] = {"punkte": len(w), "spitze": round(median(w), 3),
                      "p90": round(w[int(0.90 * (len(w) - 1))], 3),
                      "max": round(w[-1], 3)}
+    return out
+
+
+# Wolkenart-Klassen aus den drei Schichten (Bedeckung in %)
+def wolkenart(p):
+    l, m, h = p.get("wl"), p.get("wm"), p.get("wh")
+    if l is None or m is None or h is None:
+        return None
+    if l < 15 and m < 15 and h < 15:
+        return "klar"
+    if h >= 30 and l < 15 and m < 15:
+        return "hoch"          # nur hohe Wolken (Cirrus, Schleier)
+    if m >= 30 and l < 15:
+        return "mittel"
+    if l >= 30:
+        return "tief"          # Quell- und Schichtwolken mit Raendern
+    return "gemischt"
+
+
+WOLKENARTEN = ("klar", "hoch", "mittel", "tief", "gemischt")
+
+
+def spitzen_nach_wolkenart(log):
+    """Spitze/Mittel und Messung/Klarhimmel je Wolkenart."""
+    out = {}
+    for art in WOLKENARTEN:
+        w = [p for tag in log.values() for p in tag if wolkenart(p) == art and p.get("sp")]
+        if len(w) < 20:
+            out[art] = {"punkte": len(w)}
+            continue
+        sp = sorted(p["sp"] for p in w)
+        out[art] = {"punkte": len(w), "spitze": round(median(sp), 3),
+                    "p90": round(sp[int(0.90 * (len(sp) - 1))], 3),
+                    "q": round(median([p["q"] for p in w]), 3),
+                    "dl": round(median([p["dl"] for p in w]), 3),
+                    "sonne": round(median([p["sd"] for p in w if p.get("sd") is not None] or [0]), 1)}
     return out
 
 
@@ -418,13 +474,25 @@ def main():
                  ("%.3f" % e["p90"]) if e.get("p90") else "  -  ",
                  ("%.3f" % e["max"]) if e.get("max") else "  -  "))
 
+    wa = spitzen_nach_wolkenart(log)
+    print("\nSpitzen nach Wolkenart (Open-Meteo-Schichten der Stunde):")
+    print("  %-9s %7s %7s %7s %8s %7s %6s" % ("Art", "Punkte", "Spitze", "90 %", "Mess/Kl", "Durchl", "Sonne"))
+    for art in WOLKENARTEN:
+        e = wa[art]
+        if e.get("spitze"):
+            print("  %-9s %7d %7.3f %7.3f %8.3f %6.0f%% %6.1f"
+                  % (art, e["punkte"], e["spitze"], e["p90"], e["q"], 100 * e["dl"], e["sonne"]))
+        else:
+            print("  %-9s %7d   (zu wenige)" % (art, e["punkte"]))
+
     fertig = sum(1 for e in erg.values() if e["p"])
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None, "tage": len(log),
                    "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; "
                             "Regression ln(q)=p*ln(dl), ab %d Punkten und r2 %.2f" % (MIN_PUNKTE, MIN_R2),
                    "klassen": {n: {"von": lo, "bis": hi} for n, lo, hi in KLASSEN},
-                   "p": erg, "tagesgang": tg, "spitzen": sp}, fh, ensure_ascii=False, indent=1)
+                   "p": erg, "tagesgang": tg, "spitzen": sp,
+                   "wolkenart": wa}, fh, ensure_ascii=False, indent=1)
     print("\n%s geschrieben (%d von %d Klassen belegt, %d Tage im Log)"
           % (AUS, fertig, len(KLASSEN), len(log)))
     if fertig < len(KLASSEN):
