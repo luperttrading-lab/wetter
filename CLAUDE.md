@@ -90,3 +90,49 @@ io.open('/tmp/app.js','w',encoding='utf-8').write("\n;\n".join(b))
 PY
 node --check /tmp/app.js
 ```
+
+## Kostenzeile unter jeder Antwort
+
+Jede Antwort im Chat endet mit einer Kostenzeile. Ablauf, ohne Ausnahme,
+auch bei kurzen Antworten:
+
+1. `python3 tools/kosten.py` ausfuehren.
+2. Die Ausgabe **woertlich** als letzte Zeile der Antwort setzen.
+3. Nichts dahinter, nicht umformatieren, nicht schaetzen.
+
+Die Zeile sieht so aus:
+
+```
+<sub>08.09. 19:11 Uhr · Frage 0,25 · heute 18,85 · ges. 229,16 $</sub>
+```
+
+Laeuft das Skript nicht (kein Sitzungsprotokoll, anderes Werkzeug), das
+offen sagen statt eine Zahl zu erfinden.
+
+### Was das Skript rechnet
+
+Es liest das Sitzungsprotokoll `~/.claude/projects/<cwd mit - statt />/*.jsonl`
+und bewertet jede Assistenz-Nachricht mit den API-Listenpreisen **ihres eigenen
+Modells** (Modellwechsel mitten im Chat werden also korrekt getrennt).
+`-v` gibt zusaetzlich Summen je Tag und je Modell aus, `--ttl5` rechnet mit dem
+5-Minuten-Cachepreis statt der Stunde.
+
+Drei Stolpersteine, die im Skript bereits geloest sind:
+
+- **Entdopplung nach `message.id`** — im Protokoll steht dieselbe Nachricht beim
+  Streaming mehrfach; ohne das kommt etwa das Dreifache heraus.
+- **„Letzte Frage" = ab dem letzten echten Nutzerbeitrag** — Werkzeugergebnisse
+  stehen ebenfalls als `user` im Protokoll, zaehlen aber nicht als Frage.
+- **Tagesgrenze in Ortszeit** — `TZ = 2` im Skript (Sommerzeit); im Winter auf `1`
+  aendern, sonst ist zwischen 22 und 24 Uhr das „heute" falsch.
+
+### Grenzen
+
+- Die Zeile entsteht, **bevor** die Antwort geschrieben ist. Die Token der Antwort
+  selbst fehlen und tauchen erst in der naechsten Zeile auf (bei „Frage" 10-50 Cent).
+- Nur die eine Sitzung wird gezaehlt, andere Chats zum selben Projekt haben eigene
+  Protokolle.
+- API-Listenpreise, keine Rechnung. Mit Abo zahlt man den Pauschalpreis.
+- Der Cache-Schreibpreis ist die groesste Stellschraube: Nach jedem Modellwechsel und
+  nach jeder Pause laenger als die Cache-Gueltigkeit kostet die naechste Frage 3-10 $,
+  weil der ganze Verlauf neu in den Cache geschrieben wird. Sonst 10-30 Cent.
