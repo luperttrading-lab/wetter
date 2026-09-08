@@ -128,6 +128,20 @@ Modell-IDs werden per **laengstem Praefix** aufgeloest, weil im Protokoll oft ei
 Datum anhaengt (`claude-haiku-4-5-20251001`). Ohne das greift der Rueckfall auf
 Opus-Preise und Haiku waere um Faktor 5 zu teuer.
 
+### Was die drei Zahlen bedeuten
+
+- **Frage** — alle Antworten seit dem letzten echten Nutzerbeitrag, diese Sitzung.
+- **heute** — Summe des lokalen Tages ueber **alle Projekte**, nicht nur diese
+  Sitzung. Sonst waere die Zahl in einem eintaegigen Chat identisch mit „ges."
+  und truege keine eigene Information. `-v` nennt die beteiligten Projekte.
+- **ges.** — die gesamte laufende Sitzung.
+
+Ein Claude-Code-Protokoll haengt am **Arbeitsverzeichnis**, nicht am Repository:
+der Ordner `~/.claude/projects/-home-user-wetter/` ist der cwd `/home/user/wetter`
+mit `-` statt `/`. Zwei Clones desselben Repos an verschiedenen Pfaden ergeben also
+zwei getrennte Protokollordner. Deshalb kann „ges." nie ueber Repos hinweg zaehlen,
+„heute" dagegen schon.
+
 ### Was das Skript rechnet
 
 Es liest das Sitzungsprotokoll `~/.claude/projects/<cwd mit - statt />/*.jsonl`

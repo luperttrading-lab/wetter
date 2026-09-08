@@ -75,19 +75,28 @@ if not files:
     sys.exit('Kein Sitzungsprotokoll gefunden - keine Kostenzeile.')
 f = max(files, key=os.path.getmtime)
 
-seen, last_user = {}, None
-for line in open(f):
-    try: d = json.loads(line)
-    except: continue
-    t, m = d.get('type'), d.get('message', {})
-    if t == 'user':                             # nur echte Nutzerfragen, keine Werkzeugergebnisse
-        c = m.get('content')
-        if isinstance(c, str) or (isinstance(c, list)
-                and any(b.get('type') == 'text' for b in c if isinstance(b, dict))
-                and not any(b.get('type') == 'tool_result' for b in c if isinstance(b, dict))):
-            last_user = d.get('timestamp')
-    if t == 'assistant' and m.get('usage'):     # je Nachricht nur die letzte Fassung zaehlen
-        seen[m.get('id') or d.get('uuid')] = (d.get('timestamp', ''), m.get('model'), m['usage'])
+def lies(pfad):
+    """-> ({message_id: (timestamp, modell, usage)}, letzte echte Nutzerfrage)"""
+    treffer, letzte = {}, None
+    try: zeilen = open(pfad)
+    except OSError: return treffer, letzte
+    for line in zeilen:
+        try: d = json.loads(line)
+        except: continue
+        t, m = d.get('type'), d.get('message', {})
+        if not isinstance(m, dict): continue
+        if t == 'user':                         # nur echte Nutzerfragen, keine Werkzeugergebnisse
+            c = m.get('content')
+            if isinstance(c, str) or (isinstance(c, list)
+                    and any(b.get('type') == 'text' for b in c if isinstance(b, dict))
+                    and not any(b.get('type') == 'tool_result' for b in c if isinstance(b, dict))):
+                letzte = d.get('timestamp')
+        if t == 'assistant' and m.get('usage'): # je Nachricht nur die letzte Fassung zaehlen
+            treffer[m.get('id') or d.get('uuid')] = (d.get('timestamp', ''), m.get('model'),
+                                                     m['usage'])
+    return treffer, letzte
+
+seen, last_user = lies(f)
 
 def preis(model, u):
     """Basispreise fuer diese Nachricht: laengster Praefix, Fast-Mode, Datenresidenz."""
@@ -123,8 +132,25 @@ def lokal(ts):
                  + datetime.timedelta(hours=TZ)).strftime('%Y-%m-%d')
     except: return ''
 
+# "heute" zaehlt ueber ALLE Projekte, nicht nur diese Sitzung - sonst waere die Zahl in
+# einem eintaegigen Chat identisch mit "ges." und truege keine eigene Information.
+# Dateien, die vor der lokalen Mitternacht zuletzt geschrieben wurden, koennen nichts
+# von heute enthalten und werden gar nicht erst geoeffnet.
+schwelle = (jetzt.replace(hour=0, minute=0, second=0, microsecond=0)
+            - datetime.timedelta(hours=TZ)).timestamp()
+alle, projekte = {}, set()
+for p in glob.glob(f'{base}/*/*.jsonl'):
+    try:
+        if os.path.getmtime(p) < schwelle: continue
+    except OSError: continue
+    tr, _ = lies(p)
+    if any(lokal(ts) == heute_lokal for ts, _, _ in tr.values()):
+        projekte.add(os.path.basename(os.path.dirname(p)))
+    alle.update(tr)                             # message.id ist global eindeutig
+alle.update(seen)                               # eigene Sitzung sicher enthalten
+
 tot   = sum(cost(mo, u) for _, mo, u in seen.values())
-heute = sum(cost(mo, u) for ts, mo, u in seen.values() if lokal(ts) == heute_lokal)
+heute = sum(cost(mo, u) for ts, mo, u in alle.values() if lokal(ts) == heute_lokal)
 frage = sum(cost(mo, u) for ts, mo, u in seen.values() if last_user and ts >= last_user)
 de = lambda x: f'{x:.2f}'.replace('.', ',')
 print(f"<sub>{jetzt.strftime('%d.%m. %H:%M')} Uhr · Frage {de(frage)} · heute {de(heute)} · ges. {de(tot)} $</sub>")
@@ -141,5 +167,6 @@ if '-v' in sys.argv:
     print('Datei:  ', f, f'({len(seen)} Nachrichten,'
           f' {lokal(stempel[0])} bis {lokal(stempel[-1])})' if stempel else '')
     if len(files) > 1:
-        print('Hinweis:', len(files), 'Sitzungen in diesem Projekt, gezaehlt wird nur die'
+        print('Hinweis:', len(files), 'Sitzungen in diesem Projekt; "ges." zaehlt nur die'
               ' zuletzt geaenderte.')
+    print('heute:  ', f'{len(projekte)} Projekt(e):', ', '.join(sorted(projekte)) or '-')
