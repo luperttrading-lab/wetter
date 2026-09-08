@@ -386,8 +386,14 @@ def spitzen_nach_wolkenart(log):
             out[art] = {"punkte": len(w)}
             continue
         sp = sorted(p["sp"] for p in w)
+        # nur sonnige Fenster (>= 8 von 10 Minuten Sonne): trennt die Wolkenart
+        # vom Nenner-Effekt, dass Spitze/Mittel bei wenig Sonne immer groesser ist
+        sonnig = sorted(p["sp"] for p in w if (p.get("sd") or 0) >= 8)
         out[art] = {"punkte": len(w), "spitze": round(median(sp), 3),
                     "p90": round(sp[int(0.90 * (len(sp) - 1))], 3),
+                    "sonnig_n": len(sonnig),
+                    "sonnig_spitze": round(median(sonnig), 3) if len(sonnig) >= 15 else None,
+                    "sonnig_p90": round(sonnig[int(0.90 * (len(sonnig) - 1))], 3) if len(sonnig) >= 15 else None,
                     "q": round(median([p["q"] for p in w]), 3),
                     "dl": round(median([p["dl"] for p in w]), 3),
                     "sonne": round(median([p["sd"] for p in w if p.get("sd") is not None] or [0]), 1)}
@@ -476,12 +482,15 @@ def main():
 
     wa = spitzen_nach_wolkenart(log)
     print("\nSpitzen nach Wolkenart (Open-Meteo-Schichten der Stunde):")
-    print("  %-9s %7s %7s %7s %8s %7s %6s" % ("Art", "Punkte", "Spitze", "90 %", "Mess/Kl", "Durchl", "Sonne"))
+    print("  %-9s %7s %7s %7s %8s %7s %6s | %s" % ("Art", "Punkte", "Spitze", "90 %", "Mess/Kl", "Durchl", "Sonne", "sonnige Fenster: n  Spitze  90 %"))
     for art in WOLKENARTEN:
         e = wa[art]
         if e.get("spitze"):
-            print("  %-9s %7d %7.3f %7.3f %8.3f %6.0f%% %6.1f"
-                  % (art, e["punkte"], e["spitze"], e["p90"], e["q"], 100 * e["dl"], e["sonne"]))
+            print("  %-9s %7d %7.3f %7.3f %8.3f %6.0f%% %6.1f | %4d  %6s  %6s"
+                  % (art, e["punkte"], e["spitze"], e["p90"], e["q"], 100 * e["dl"], e["sonne"],
+                     e["sonnig_n"],
+                     ("%.3f" % e["sonnig_spitze"]) if e.get("sonnig_spitze") else "  -  ",
+                     ("%.3f" % e["sonnig_p90"]) if e.get("sonnig_p90") else "  -  "))
         else:
             print("  %-9s %7d   (zu wenige)" % (art, e["punkte"]))
 
