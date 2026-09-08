@@ -1,14 +1,14 @@
 {
  "stand": "2026-09-06",
- "regel": "Median(Messung/Modell) an Tagen mit >=70 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
+ "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
-   "faktor": 1.114,
-   "roh": 1.139,
-   "tage": 2,
+   "faktor": 1.069,
+   "roh": 1.098,
+   "tage": 1,
    "vorlaeufig": true,
-   "streuung": 0.058,
-   "von": "2026-09-05",
+   "streuung": 0,
+   "von": "2026-09-06",
    "bis": "2026-09-06"
   },
   "Cuxhaven_B": {
@@ -30,12 +30,12 @@
    "bis": "2026-09-06"
   },
   "Fichtelberg": {
-   "faktor": 0.876,
-   "roh": 0.849,
-   "tage": 2,
+   "faktor": 0.888,
+   "roh": 0.84,
+   "tage": 1,
    "vorlaeufig": true,
-   "streuung": 0.013,
-   "von": "2026-09-05",
+   "streuung": 0,
+   "von": "2026-09-06",
    "bis": "2026-09-06"
   },
   "Friedrichshafen": {
@@ -48,17 +48,8 @@
    "bis": "2026-09-06"
   },
   "Giessen-Wettenberg": {
-   "faktor": 1.105,
-   "roh": 1.127,
-   "tage": 2,
-   "vorlaeufig": true,
-   "streuung": 0.01,
-   "von": "2026-09-05",
-   "bis": "2026-09-06"
-  },
-  "Groemitz": {
-   "faktor": 1.198,
-   "roh": 1.283,
+   "faktor": 1.094,
+   "roh": 1.134,
    "tage": 1,
    "vorlaeufig": true,
    "streuung": 0,
@@ -93,17 +84,8 @@
    "bis": "2026-09-06"
   },
   "Wurmberg_B": {
-   "faktor": 1.123,
-   "roh": 1.15,
-   "tage": 2,
-   "vorlaeufig": true,
-   "streuung": 0.059,
-   "von": "2026-09-05",
-   "bis": "2026-09-06"
-  },
-  "Zingst": {
-   "faktor": 1.073,
-   "roh": 1.105,
+   "faktor": 1.134,
+   "roh": 1.191,
    "tage": 1,
    "vorlaeufig": true,
    "streuung": 0,

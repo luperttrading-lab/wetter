@@ -38,13 +38,33 @@ Unter MIN_SICHER Tagen gilt der Faktor als vorlaeufig; die App schreibt
 das dazu.
 
 Grenzen: Faktor auf [MIN_F, MAX_F] geklemmt.
+
+WARUM MIN_SONNE = 0,90 UND NICHT 0,70
+Das Tagesmaximum der Messung allein ist an durchbrochenen Tagen wertlos:
+es ist dann ein Wolkenrand-Ausreisser und liegt UEBER dem Klarhimmelwert.
+An 102 Stationstagen (05.-07.09.2026) nachgemessen, Median von
+Messung/Modell nach Sonnenanteil der Mittagsstunden:
+
+    unter 50 % Sonne   36 Tage   Median 0,944   Streuung 0,251
+    50 bis 70 %        16 Tage   Median 1,209   Streuung 0,122
+    70 bis 90 %        14 Tage   Median 1,036   Streuung 0,106
+    ueber 90 %         36 Tage   Median 0,982   Streuung 0,089
+
+Die Klasse 50-70 % ist der Ausreisser-Bereich: 9 von 16 Tagen ueber 1,15.
+Genau dort greift eine Schwelle von 0,70 noch mit. Ab 90 % Sonne sinkt die
+Streuung auf ein Drittel. Der frueher benutzte Wert 0,70 liess die
+Wolkenrand-Tage teilweise durch.
+
+Jeder Stationstag wird in uv-station-protokoll.json festgehalten -
+genommen oder verworfen, mit Grund, zum Nachpruefen.
 """
 import json
 import math
 
 LOG = "uv_klarlog.json"
 AUS = "uv-station.json"
-MIN_SONNE = 0.70      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag zaehlt
+MIN_SONNE = 0.90      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag zaehlt
+PROTOKOLL = "uv-station-protokoll.json"   # jeder Stationstag mit Grund
 MIN_SICHER = 3        # ab so vielen Tagen gilt der Faktor nicht mehr als vorlaeufig
 PRIOR = 0.43          # Gewicht der Pseudo-Beobachtung: ein Tag zaehlt zu 70 %
 MIN_F, MAX_F = 0.80, 1.25
@@ -62,12 +82,27 @@ def main():
         log = json.load(fh)
 
     je_station = {}
+    prot = []
     for datum, tag in sorted(log.items()):
-        for slug, z in tag.items():
+        for slug, z in sorted(tag.items()):
+            so = z.get("sonne")
             if not z.get("verh"):
+                prot.append({"d": datum, "st": slug, "genommen": False,
+                             "grund": "kein Verhaeltnis (Messung oder Modell fehlt)"})
                 continue
-            if (z.get("sonne") or 0) < MIN_SONNE:
+            if so is None:
+                prot.append({"d": datum, "st": slug, "genommen": False,
+                             "grund": "keine Sonnenscheindauer in Reichweite"})
                 continue
+            if so < MIN_SONNE:
+                prot.append({"d": datum, "st": slug, "genommen": False,
+                             "sonne": round(so, 2), "verh": z["verh"],
+                             "grund": "nur %.0f %% Sonne 11-15 Uhr (Schwelle %.0f %%) - "
+                                      "Maximum waere ein Wolkenrand-Ausreisser"
+                                      % (100 * so, 100 * MIN_SONNE)})
+                continue
+            prot.append({"d": datum, "st": slug, "genommen": True,
+                         "sonne": round(so, 2), "verh": z["verh"], "grund": "klar"})
             je_station.setdefault(slug, {"tage": [], "la": z.get("la"),
                                          "h": z.get("h"), "name": z.get("name", slug)})
             je_station[slug]["tage"].append({"d": datum, "v": z["verh"]})
@@ -97,6 +132,12 @@ def main():
                                MIN_F, MAX_F, 100 * ABWEICHUNG, MIN_SICHER),
                    "stationen": out}, fh, ensure_ascii=False, indent=1)
 
+    with open(PROTOKOLL, "w", encoding="utf-8") as fh:
+        json.dump({"regel": "MIN_SONNE = %.0f %% Sonnenschein 11-15 Uhr" % (100 * MIN_SONNE),
+                   "stationstage": prot}, fh, ensure_ascii=False, indent=1)
+    gen = sum(1 for p in prot if p["genommen"])
+    print("Protokoll: %d Stationstage, %d genommen, %d verworfen (%s)"
+          % (len(prot), gen, len(prot) - gen, PROTOKOLL))
     print("uv-station.json: %d Stationen mit Faktor (von %d mit Daten)"
           % (len(out), len(je_station)))
     for slug, z in sorted(out.items(), key=lambda kv: -abs(kv[1]["faktor"] - 1)):
