@@ -147,12 +147,32 @@ Drei Stolpersteine, die im Skript bereits geloest sind:
 - **Tagesgrenze in Ortszeit** — `TZ = 2` im Skript (Sommerzeit); im Winter auf `1`
   aendern, sonst ist zwischen 22 und 24 Uhr das „heute" falsch.
 
+### Lange Sitzungen ueber mehrere Tage
+
+Pausen aendern an der Abrechnung nichts: jede Nachricht traegt ihre eigenen,
+gemessenen Token-Zahlen. Eine lange Pause laesst den Cache ablaufen, der naechste
+Aufruf schreibt den ganzen Verlauf neu - das steht dann als grosser
+`cache_creation_input_tokens`-Wert im Protokoll und wird zum Schreibpreis
+bewertet. Genau richtig, ohne dass etwas geschaetzt werden muesste.
+
+`-v` zeigt bei langen Sitzungen zusaetzlich die gelesene Datei, die Anzahl der
+Nachrichten und die abgedeckte Zeitspanne - damit laesst sich pruefen, ob wirklich
+die richtige Sitzung gezaehlt wurde.
+
+Die Protokolldatei wird ueber den Pfad gesucht: erst das aktuelle Verzeichnis,
+dann aufwaerts durch die Elternordner. Erst wenn das nichts findet, faellt das
+Skript auf das zuletzt geaenderte Protokoll **irgendeines** Projekts zurueck und
+warnt dabei auf stderr. Ohne diese Warnung liefert ein Aufruf aus dem falschen
+Ordner eine plausible, aber fremde Zahl.
+
 ### Grenzen
 
 - Die Zeile entsteht, **bevor** die Antwort geschrieben ist. Die Token der Antwort
   selbst fehlen und tauchen erst in der naechsten Zeile auf (bei „Frage" 10-50 Cent).
 - Nur die eine Sitzung wird gezaehlt, andere Chats zum selben Projekt haben eigene
-  Protokolle.
+  Protokolle. Gezaehlt wird die zuletzt geaenderte; `-v` weist auf weitere hin.
+- Winterzeit: `TZ = 2` im Skript auf `1` setzen. Faellt eine Zeitumstellung mitten in
+  eine lange Sitzung, sind die Tagesgrenzen davor um eine Stunde verschoben.
 - API-Listenpreise, keine Rechnung. Mit Abo zahlt man den Pauschalpreis.
 - Der Cache-Schreibpreis ist die groesste Stellschraube: Nach jedem Modellwechsel und
   nach jeder Pause laenger als die Cache-Gueltigkeit kostet die naechste Frage 3-10 $,

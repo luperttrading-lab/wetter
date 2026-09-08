@@ -48,8 +48,29 @@ TZ = 2                                          # Stunden Abstand zu UTC (Sommer
 TTL5 = '--ttl5' in sys.argv
 
 base = os.path.expanduser('~/.claude/projects')
-slug = os.getcwd().replace('/', '-')
-files = glob.glob(f'{base}/{slug}/*.jsonl') or glob.glob(f'{base}/*/*.jsonl')
+
+def protokolle():
+    """Protokolle des aktuellen Projekts: cwd, sonst aufwaerts durch die Elternordner.
+
+    Der Rueckfall auf *alle* Projekte bleibt, warnt aber auf stderr - sonst liefert
+    ein Aufruf aus dem falschen Ordner stillschweigend die Zahlen eines fremden
+    Projekts, und die Zeile sieht trotzdem richtig aus.
+    """
+    d = os.path.abspath(os.getcwd())
+    while True:
+        g = glob.glob(f"{base}/{d.replace('/', '-')}/*.jsonl")
+        if g: return g
+        eltern = os.path.dirname(d)
+        if eltern == d: break
+        d = eltern
+    g = glob.glob(f'{base}/*/*.jsonl')
+    if g:
+        print(f'Warnung: kein Protokoll fuer {os.getcwd()}; nehme '
+              f'{os.path.basename(os.path.dirname(max(g, key=os.path.getmtime)))}',
+              file=sys.stderr)
+    return g
+
+files = protokolle()
 if not files:
     sys.exit('Kein Sitzungsprotokoll gefunden - keine Kostenzeile.')
 f = max(files, key=os.path.getmtime)
@@ -116,3 +137,9 @@ if '-v' in sys.argv:
     print('Modelle:', {m: round(c, 2) for m, c in mods.items()})
     print('Suchen: ', sum((u.get('server_tool_use') or {}).get('web_search_requests', 0) or 0
                           for _, _, u in seen.values()))
+    stempel = sorted(ts for ts, _, _ in seen.values() if ts)
+    print('Datei:  ', f, f'({len(seen)} Nachrichten,'
+          f' {lokal(stempel[0])} bis {lokal(stempel[-1])})' if stempel else '')
+    if len(files) > 1:
+        print('Hinweis:', len(files), 'Sitzungen in diesem Projekt, gezaehlt wird nur die'
+              ' zuletzt geaenderte.')
