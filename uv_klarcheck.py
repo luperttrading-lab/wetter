@@ -440,6 +440,8 @@ def main():
     datum = sys.argv[1] if len(sys.argv) > 1 else \
         (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
     gestern = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
+    if datum not in (gestern, datetime.date.today().isoformat()):
+        sys.exit("BfS liefert nur die Bilder von heute und gestern - %s ist nicht nachholbar" % datum)
     endung = "yesterday" if datum == gestern else "today"
 
     st = stationen_aus_app()
