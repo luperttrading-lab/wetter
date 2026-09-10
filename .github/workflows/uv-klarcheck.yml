@@ -1,0 +1,61 @@
+name: UV-Klarcheck
+
+# Taegliche Pruefung des UV-Modells gegen die amtlichen BfS-Tagesgrafiken
+# von GESTERN (das BfS haelt nur "today" und "yesterday" vor, aeltere Tage
+# sind nicht nachholbar). uv_klarcheck.py macht vier Dinge (Kopf im Skript):
+#   1. wolkenfreier Tag? -> DWD/CAMS-Klarhimmel gegen Messung
+#   2. Modellpruefung aller Stationen, Giessen-Gruppe, uv_klarlog.json
+#   3. uv_station.py: Stationsfaktoren -> uv-station.json (liest die App)
+#   4. uv_durchlass.py: Wolkendurchlass-Paare, Tagesgang, Aufhellungsspitzen
+# Die Konsolenausgabe landet in uv_klarcheck.log; die Claude-Routine um
+# 10:00 Uhr morgens liest sie von main und meldet nur, was auffaellig ist.
+# Sie selbst darf nicht pushen - deshalb laeuft das Rechnen hier.
+
+on:
+  schedule:
+    - cron: "30 6 * * *"     # 08:30 deutsche Sommerzeit, 07:30 Winterzeit
+  workflow_dispatch:
+    inputs:
+      datum:
+        description: "Tag (YYYY-MM-DD), nur heute oder gestern; leer = gestern"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uv-klarcheck
+  cancel-in-progress: false
+
+jobs:
+  klarcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pillow installieren
+        run: pip install --quiet pillow
+
+      - name: Klarcheck rechnen (Teil 1-4)
+        env:
+          DATUM: ${{ inputs.datum }}
+        run: |
+          set -o pipefail
+          python uv_klarcheck.py $DATUM 2>&1 | tee uv_klarcheck.log
+
+      - name: Ergebnisse committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add uv_klarcheck.log uv_klarlog.json uv-station.json uv-station-protokoll.json \
+                  uv_klarcheck_*.json uv_durchlasslog.json uv-durchlass.json
+          stand=$(python -c "import json;d=json.load(open('uv-durchlass.json'));print(d.get('stand') or '')")
+          git diff --staged --quiet || git commit -m "UV-Klarcheck ${stand:-$(date -u +%F)}"
+          git pull --rebase --autostash origin main || true
+          git push || (git pull --rebase --autostash origin main && git push)

@@ -205,6 +205,8 @@ def sammeln(datum):
     """Paare (Durchlass, UV/Klarhimmel, Sonnenminuten) fuer alle Stationen."""
     heute = dt.date.today().isoformat()
     gestern = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+    if datum not in (gestern, heute):
+        sys.exit("BfS liefert nur die Bilder von heute und gestern - %s ist nicht nachholbar" % datum)
     tag = "yesterday" if datum == gestern else "today"
     pd = 2 if datum != heute else 0
 
