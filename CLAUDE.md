@@ -77,6 +77,13 @@ ONLINE liegt, nicht die geladene.
   Nie `daten` nach `main` mergen und nie Daten dieser Pipeline auf `main`
   committen - sonst waechst das Repo um etwa 1 GB im Jahr.
 
+## Datenquellen und Lizenzen
+
+Welche Quelle was liefert, was sie heute kostet (nichts) und was bei einer
+kommerziellen Nutzung zu klaeren waere, steht in `LIZENZEN.md`. Kurzfassung:
+Esri-Satellitenkacheln und Open-Meteo waeren die Knackpunkte, DWD und
+Bright Sky sind auch kommerziell frei.
+
 ## Pruefen vor dem Commit
 
 `index.html` ist eine einzelne Datei mit zwei Inline-Scripts. Syntaxcheck:
