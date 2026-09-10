@@ -1,0 +1,78 @@
+UV-Klarhimmel-Pruefung fuer 2026-09-09 (43 Stationen)
+
+
+=== Modellpruefung 2026-09-09: Messspitze gegen die schwarze Kurve der App ===
+Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 50 km)
+
+Giessen-Gruppe         Breite Hoehe  Sonne | schwarz   Mess  Verh.
+Gießen                  50.60   203   83 % |    4.18   4.65  +12 %
+Bonn                    50.70    67   33 % |    3.90   4.25   +9 %
+Andernach               50.44    71   35 % |    4.11   4.38   +7 %
+Fichtelberg             50.43  1212    1 % |    5.19   2.12  -59 %
+Kulmbach                50.11   308   28 % |    4.96   3.94  -20 %
+Görlitz                 51.15   212   48 % |    4.41   4.88  +11 %
+Schweinfurt (Wasserlos  50.05   274    7 % |    4.72   3.11  -34 %
+Langen                  49.99   141   62 % |    4.45   4.23   -5 %
+Kassel                  51.31   174    -   |    4.11   4.74  +15 %
+Duderstadt              51.51   185   46 % |    4.09   3.84   -6 %
+Dortmund                51.51    95   25 % |    3.66   3.94   +8 %
+Melpitz                 51.53    86   32 % |    4.29   3.22  -25 %
+
+Protokoll seit 2026-09-04: 11 klare Stationstage in der Giessen-Gruppe, Messung/schwarz +0.9 % (Streuung 8.9 Pp)
+  Giessen selbst an 1 klaren Tagen: +13.4 %
+
+Protokoll: 164 Stationstage, 36 genommen, 128 verworfen (uv-station-protokoll.json)
+uv-station.json: 10 Stationen mit Faktor (von 23 mit Daten)
+  Klippeneck               x0.836  (roh 0.812, 3 Tage, Streuung 0.011)
+  Wurmberg_B               x1.134  (roh 1.191, 1 Tage, vorlaeufig, Streuung 0.000)
+  Fichtelberg              x0.888  (roh 0.840, 1 Tage, vorlaeufig, Streuung 0.000)
+  Dortmund                 x1.100  (roh 1.143, 1 Tage, vorlaeufig, Streuung 0.000)
+  Cuxhaven_B               x1.099  (roh 1.141, 1 Tage, vorlaeufig, Streuung 0.000)
+  Giessen-Wettenberg       x1.094  (roh 1.134, 1 Tage, vorlaeufig, Streuung 0.000)
+  Andernach                x1.069  (roh 1.098, 1 Tage, vorlaeufig, Streuung 0.000)
+  Norderney                x1.066  (roh 1.095, 1 Tage, vorlaeufig, Streuung 0.000)
+  Friedrichshafen          x0.937  (roh 0.924, 2 Tage, vorlaeufig, Streuung 0.006)
+  Stuttgart                x0.939  (roh 0.930, 3 Tage, Streuung 0.008)
+  ohne Faktor (Abweichung unter 5 %): 13 Stationen
+
+  klar          352   1.038   1.207    0.898     96%   10.0 |  302   1.034   1.137
+  hoch          221   1.045   1.245    0.867     92%   10.0 |  167   1.037   1.206
+  mittel        843   1.056   1.243    0.861     64%    6.0 |  368   1.058   1.217
+  tief         1054   1.125   1.341    0.561     44%    0.0 |  270   1.094   1.261
+  gemischt      229   1.065   1.245    0.836     84%   10.0 |  143   1.043   1.245
+
+uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 3 Tage im Log)
+Solange eine Klasse leer ist, rechnet die App mit 0,5 weiter.
+Station                     DWD Messung Verhaeltnis
+Berlin                     4.18   4.91     1.17  klar
+Lindenberg                 4.21   4.43     1.05  klar
+Dortmund                   3.79   3.94     1.04  klar
+Salzgitter                 3.99   4.05     1.01  klar
+Lüneburg                   3.64   3.64     1.00  klar
+Langen                     4.43   4.23     0.95  klar
+Kulmbach                   4.62   3.94     0.85
+Melpitz                    4.33   3.22     0.74
+Schauinsland               5.51   2.95     0.54
+München                    5.53   2.11     0.38
+Zugspitze (Schneefernerh   6.75   2.33     0.34
+Sylt (Tinnum)              3.10   0.00     0.00
+
+6 von 12 Stationen klar (Schwelle 0.92)
+
+=== KLARER TAG - Auswertung ===
+
+Station                  Breite Messung     DWD    CAMS
+Langen                    49.99    4.23    4.43    4.70
+Dortmund                  51.51    3.94    3.79    4.00
+Salzgitter                52.15    4.05    3.99    4.30
+Lindenberg                52.21    4.43    4.21    4.55
+Berlin                    52.45    4.91    4.18    4.45
+Lüneburg                  53.25    3.64    3.64    3.85
+
+Abweichung vom gemessenen Scheitel (6 Stationen):
+  DWD    gegen Messung:   -3.4 % (Streuung 6.6 Pp) | Breite: r=-0.472, -2.82 Pp je Grad
+  CAMS   gegen Messung:   +3.0 % (Streuung 6.9 Pp) | Breite: r=-0.449, -2.81 Pp je Grad
+
+Die Quelle mit der kleineren Abweichung und der flacheren Breitenabhaengigkeit trifft die Realitaet besser.
+
+Rohdaten: uv_klarcheck_2026-09-09.json

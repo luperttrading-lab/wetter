@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-06",
+ "stand": "2026-09-09",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
