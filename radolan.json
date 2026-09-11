@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-11",
   "summe_mm": 0.0,
-  "stunden_ok": 19,
-  "stunden_erwartet": 19,
+  "stunden_ok": 22,
+  "stunden_erwartet": 22,
   "stunden": [
     {
       "stunde": "01:00",
@@ -78,6 +78,18 @@
     },
     {
       "stunde": "19:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "20:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "21:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "22:00",
       "mm": 0.0
     }
   ],
@@ -165,7 +177,7 @@
     "datum": "2026-09-07",
     "mm": 0.62
   },
-  "aktualisiert": "2026-09-11T17:52:25+00:00",
+  "aktualisiert": "2026-09-11T20:54:01+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -175,8 +187,8 @@
       "lon": 8.6740943,
       "datum": "2026-09-11",
       "summe_mm": 0.0,
-      "stunden_ok": 19,
-      "stunden_erwartet": 19,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -252,6 +264,18 @@
         },
         {
           "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "21:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
           "mm": 0.0
         }
       ],
@@ -347,8 +371,8 @@
       "lon": 8.6226918,
       "datum": "2026-09-11",
       "summe_mm": 0.0,
-      "stunden_ok": 19,
-      "stunden_erwartet": 19,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -424,6 +448,18 @@
         },
         {
           "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "21:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
           "mm": 0.0
         }
       ],
@@ -519,8 +555,8 @@
       "lon": 7.2066,
       "datum": "2026-09-11",
       "summe_mm": 1.17,
-      "stunden_ok": 19,
-      "stunden_erwartet": 19,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -596,6 +632,18 @@
         },
         {
           "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "21:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
           "mm": 0.0
         }
       ],
