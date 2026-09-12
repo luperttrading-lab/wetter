@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-12",
   "summe_mm": 0.0,
-  "stunden_ok": 15,
-  "stunden_erwartet": 16,
+  "stunden_ok": 18,
+  "stunden_erwartet": 19,
   "stunden": [
     {
       "stunde": "01:00",
@@ -66,6 +66,18 @@
     },
     {
       "stunde": "16:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "17:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "18:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -154,7 +166,7 @@
     "datum": "2026-09-07",
     "mm": 0.62
   },
-  "aktualisiert": "2026-09-12T14:20:35+00:00",
+  "aktualisiert": "2026-09-12T17:25:31+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -164,8 +176,8 @@
       "lon": 8.6740943,
       "datum": "2026-09-12",
       "summe_mm": 0.0,
-      "stunden_ok": 15,
-      "stunden_erwartet": 16,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -229,6 +241,18 @@
         },
         {
           "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -325,8 +349,8 @@
       "lon": 8.6226918,
       "datum": "2026-09-12",
       "summe_mm": 0.0,
-      "stunden_ok": 15,
-      "stunden_erwartet": 16,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -390,6 +414,18 @@
         },
         {
           "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -486,8 +522,8 @@
       "lon": 7.2066,
       "datum": "2026-09-12",
       "summe_mm": 0.0,
-      "stunden_ok": 15,
-      "stunden_erwartet": 16,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -551,6 +587,18 @@
         },
         {
           "stunde": "16:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "17:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
