@@ -1,8 +1,8 @@
 {
   "datum": "2026-09-14",
   "summe_mm": 0.0,
-  "stunden_ok": 8,
-  "stunden_erwartet": 9,
+  "stunden_ok": 15,
+  "stunden_erwartet": 15,
   "stunden": [
     {
       "stunde": "01:00",
@@ -38,8 +38,31 @@
     },
     {
       "stunde": "09:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.0
+    },
+    {
+      "stunde": "10:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "11:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "12:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "13:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "14:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "15:00",
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -126,7 +149,7 @@
     "datum": "2026-09-13",
     "mm": 14.02
   },
-  "aktualisiert": "2026-09-14T07:03:43+00:00",
+  "aktualisiert": "2026-09-14T13:58:41+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -136,8 +159,8 @@
       "lon": 8.6740943,
       "datum": "2026-09-14",
       "summe_mm": 0.0,
-      "stunden_ok": 8,
-      "stunden_erwartet": 9,
+      "stunden_ok": 15,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -173,8 +196,31 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -268,9 +314,9 @@
       "lat": 50.5055647,
       "lon": 8.6226918,
       "datum": "2026-09-14",
-      "summe_mm": 0.0,
-      "stunden_ok": 8,
-      "stunden_erwartet": 9,
+      "summe_mm": 0.11,
+      "stunden_ok": 15,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -306,8 +352,31 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.11
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -317,7 +386,7 @@
               393,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.1,
             "eigenes": false
           },
           {
@@ -325,7 +394,7 @@
               393,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.1,
             "eigenes": false
           },
           {
@@ -333,7 +402,7 @@
               393,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           }
         ],
@@ -341,32 +410,6 @@
           {
             "pixel": [
               392,
-              419
-            ],
-            "mm": 0.0,
-            "eigenes": false
-          },
-          {
-            "pixel": [
-              392,
-              420
-            ],
-            "mm": 0.0,
-            "eigenes": true
-          },
-          {
-            "pixel": [
-              392,
-              421
-            ],
-            "mm": 0.0,
-            "eigenes": false
-          }
-        ],
-        [
-          {
-            "pixel": [
-              391,
               419
             ],
             "mm": 0.1,
@@ -374,10 +417,36 @@
           },
           {
             "pixel": [
+              392,
+              420
+            ],
+            "mm": 0.1,
+            "eigenes": true
+          },
+          {
+            "pixel": [
+              392,
+              421
+            ],
+            "mm": 0.1,
+            "eigenes": false
+          }
+        ],
+        [
+          {
+            "pixel": [
+              391,
+              419
+            ],
+            "mm": 0.2,
+            "eigenes": false
+          },
+          {
+            "pixel": [
               391,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.1,
             "eigenes": false
           },
           {
@@ -385,14 +454,14 @@
               391,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.1,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
-        "datum": "2026-09-13",
-        "mm": 16.42
+        "datum": "2026-09-14",
+        "mm": 0.11
       },
       "methode": "bilinear, 50.5056N 8.6227E"
     },
@@ -402,8 +471,8 @@
       "lon": 7.2066,
       "datum": "2026-09-14",
       "summe_mm": 0.0,
-      "stunden_ok": 8,
-      "stunden_erwartet": 9,
+      "stunden_ok": 15,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -439,8 +508,31 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "10:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
