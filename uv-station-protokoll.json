@@ -2512,6 +2512,320 @@
    "sonne": 0.13,
    "verh": 1.383,
    "grund": "nur 13 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Andernach",
+   "genommen": false,
+   "sonne": 0.28,
+   "verh": 1.192,
+   "grund": "nur 28 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Belm-Osnabrueck",
+   "genommen": false,
+   "sonne": 0.57,
+   "verh": 0.874,
+   "grund": "nur 57 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Berlin",
+   "genommen": false,
+   "sonne": 0.65,
+   "verh": 1.166,
+   "grund": "nur 65 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Boesel_B",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Bonn",
+   "genommen": false,
+   "sonne": 0.34,
+   "verh": 1.029,
+   "grund": "nur 34 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Chieming",
+   "genommen": false,
+   "sonne": 0.05,
+   "verh": 0.781,
+   "grund": "nur 5 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Cuxhaven_B",
+   "genommen": false,
+   "sonne": 0.43,
+   "verh": 1.21,
+   "grund": "nur 43 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Dortmund",
+   "genommen": false,
+   "sonne": 0.88,
+   "verh": 1.059,
+   "grund": "nur 88 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Duderstadt_B",
+   "genommen": false,
+   "sonne": 0.07,
+   "verh": 0.811,
+   "grund": "nur 7 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Eckernfoerde",
+   "genommen": false,
+   "sonne": 0.35,
+   "verh": 1.486,
+   "grund": "nur 35 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Fichtelberg",
+   "genommen": false,
+   "sonne": 0.41,
+   "verh": 0.878,
+   "grund": "nur 41 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Friedrichshafen",
+   "genommen": false,
+   "sonne": 0.61,
+   "verh": 0.93,
+   "grund": "nur 61 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Genthin",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Giessen-Wettenberg",
+   "genommen": false,
+   "sonne": 0.34,
+   "verh": 1.122,
+   "grund": "nur 34 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Goerlitz",
+   "genommen": false,
+   "sonne": 0.57,
+   "verh": 1.039,
+   "grund": "nur 57 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Groemitz",
+   "genommen": false,
+   "sonne": 0.61,
+   "verh": 1.109,
+   "grund": "nur 61 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Hamburg",
+   "genommen": false,
+   "sonne": 0.57,
+   "verh": 1.215,
+   "grund": "nur 57 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Hohenpeissenberg",
+   "genommen": false,
+   "sonne": 0.38,
+   "verh": 1.048,
+   "grund": "nur 38 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Kassel",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Klippeneck",
+   "genommen": false,
+   "sonne": 0.6,
+   "verh": 0.902,
+   "grund": "nur 60 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Kulmbach",
+   "genommen": false,
+   "sonne": 0.01,
+   "verh": 0.932,
+   "grund": "nur 1 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Langen",
+   "genommen": false,
+   "sonne": 0.55,
+   "verh": 1.107,
+   "grund": "nur 55 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Lindenberg",
+   "genommen": false,
+   "sonne": 0.52,
+   "verh": 1.303,
+   "grund": "nur 52 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Lueneburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Melpitz",
+   "genommen": false,
+   "sonne": 0.37,
+   "verh": 1.117,
+   "grund": "nur 37 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Muenchen",
+   "genommen": false,
+   "sonne": 0.4,
+   "verh": 0.853,
+   "grund": "nur 40 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Norderney",
+   "genommen": true,
+   "sonne": 1.0,
+   "verh": 1.195,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Salzgitter",
+   "genommen": true,
+   "sonne": 0.97,
+   "verh": 0.998,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Schauinsland",
+   "genommen": false,
+   "sonne": 0.41,
+   "verh": 1.083,
+   "grund": "nur 41 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Schneefernerhaus",
+   "genommen": false,
+   "sonne": 0.33,
+   "verh": 1.105,
+   "grund": "nur 33 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Schweinfurt_Wasserlosen",
+   "genommen": false,
+   "sonne": 0.07,
+   "verh": 0.868,
+   "grund": "nur 7 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Stuttgart",
+   "genommen": false,
+   "sonne": 0.6,
+   "verh": 0.957,
+   "grund": "nur 60 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Sylt_Tinnum",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Tholey",
+   "genommen": false,
+   "sonne": 0.3,
+   "verh": 0.802,
+   "grund": "nur 30 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Todendorf",
+   "genommen": false,
+   "sonne": 0.15,
+   "verh": 0.989,
+   "grund": "nur 15 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Waldhof_Falkenstein",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Waldmuenchen",
+   "genommen": false,
+   "sonne": 0.46,
+   "verh": 1.011,
+   "grund": "nur 46 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Weissenburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Wurmberg_B",
+   "genommen": false,
+   "sonne": 0.07,
+   "verh": 1.011,
+   "grund": "nur 7 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Zingst",
+   "genommen": false,
+   "sonne": 0.78,
+   "verh": 1.078,
+   "grund": "nur 78 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-09-14",
+   "st": "Zirchow",
+   "genommen": false,
+   "sonne": 0.6,
+   "verh": 1.133,
+   "grund": "nur 60 % Sonne 11-15 Uhr (Schwelle 90 %) - Maximum waere ein Wolkenrand-Ausreisser"
   }
  ]
 }
