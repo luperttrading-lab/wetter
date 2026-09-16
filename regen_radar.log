@@ -1,31 +1,31 @@
-Radar-Eichung an den Bodenmessern, 16.09.2026 08:27 UTC
-  Giessen/Wettenberg        3 Paare  (GIESSEN)
-  Frankfurt/Main            2 Paare  (FRANKFURT/M)
-  Kassel                    3 Paare  (SCHAUENBURG-ELGERSH.)
-  Koeln/Bonn                3 Paare  (KOELN/BONN)
-  Dortmund                  3 Paare  (WALTROP-ABDINGHOF)
-  Muenster/Osnabrueck       2 Paare  (MUENSTER/OSNABR.)
-  Hamburg-Fuhlsbuettel      2 Paare  (HAMBURG-FU.)
-  Bremen                    0 Paare  (BREMEN)
+Radar-Eichung an den Bodenmessern, 16.09.2026 17:43 UTC
+  Giessen/Wettenberg        2 Paare  (GIESSEN)
+  Frankfurt/Main            0 Paare  (FRANKFURT/M)
+  Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
+  Koeln/Bonn                1 Paare  (KOELN/BONN)
+  Dortmund                  2 Paare  (WALTROP-ABDINGHOF)
+  Muenster/Osnabrueck       1 Paare  (MUENSTER/OSNABR.)
+  Hamburg-Fuhlsbuettel      3 Paare  (HAMBURG-FU.)
+  Bremen                    3 Paare  (BREMEN)
   Hannover                  3 Paare  (HANNOVER)
-  Berlin-Tegel              0 Paare  (BERLIN-TEGEL)
-  Leipzig/Halle             0 Paare  (LEIPZIG/SCHKEUDITZ)
-  Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
-  Erfurt-Weimar             0 Paare  (ERFURT)
-  Nuernberg                 0 Paare  (NUERNBERG)
-  Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
-  Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
+  Berlin-Tegel              1 Paare  (BERLIN-TEGEL)
+  Leipzig/Halle             3 Paare  (LEIPZIG/SCHKEUDITZ)
+  Dresden-Klotzsche         3 Paare  (DRESDEN/FLUGHAFEN)
+  Erfurt-Weimar             1 Paare  (ERFURT)
+  Nuernberg                 3 Paare  (NUERNBERG)
+  Muenchen-Flughafen        2 Paare  (MUENCHEN-FL.)
+  Stuttgart-Echterdingen    2 Paare  (STUTTGART-ECHT.)
   Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
   Trier-Petrisberg          0 Paare  (TRIER)
   Saarbruecken              0 Paare  (SAARBRUECKEN)
-  Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 21 Paare
+  Freiburg                  2 Paare  (FREIBURG)
+gesammelt: 32 Paare
 
 Klasse     Paare   Faktor      25 %      75 %     Messung       Radar
-niesel        19      -         -         -           -           -  
-leicht         5      -         -         -           -           -  
-regen          2      -         -         -           -           -  
+niesel        40     0.19       -        2.12     0.05 mm     0.08 mm
+leicht        13      -         -         -           -           -  
+regen          4      -         -         -           -           -  
 
-Radar sah nichts, Station mass etwas: 0 von 26 Paaren
-regen-radar.json geschrieben (0 von 3 Klassen belegt, 1 Tage, 26 Paare)
+Radar sah nichts, Station mass etwas: 1 von 58 Paaren (Median 1.30 mm)
+regen-radar.json geschrieben (1 von 3 Klassen belegt, 1 Tage, 58 Paare)
 Solange eine Klasse leer ist, rechnet die App ohne Korrektur weiter.
