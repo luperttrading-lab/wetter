@@ -1,0 +1,49 @@
+name: Radar-Eichung
+
+# Vergleicht die Radarsumme mit dem, was die Niederschlagsmesser am Boden
+# in derselben Stunde auffangen. Hintergrund: Das Radar unterschaetzt
+# Niesel, weil die Reflektivitaet mit der sechsten Potenz des
+# Tropfendurchmessers geht - feine Tropfen sind fuer das Radar fast
+# unsichtbar. Die App zeigt seit v3.88 die Radarrate als Zustand an, und
+# eine zu niedrige Rate schiebt echten Leichtregen in die Nieselklasse.
+#
+# Alle sechs Stunden, weil das Radararchiv von Bright Sky nur rund acht
+# Stunden zurueckreicht (geprueft am 16.09.2026: 8 h ja, 10 h nein). Ein
+# taeglicher Lauf wuerde den groessten Teil des Tages verpassen.
+
+on:
+  schedule:
+    - cron: "40 1,7,13,19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regen-radar
+  cancel-in-progress: false
+
+jobs:
+  eichung:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Paare sammeln und auswerten
+        run: |
+          set -o pipefail
+          python regen_radar.py 2>&1 | tee regen_radar.log
+
+      - name: Ergebnisse committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add regen_radarlog.json regen-radar.json regen_radar.log
+          git diff --staged --quiet || git commit -m "Radar-Eichung $(date -u +%F\ %H:%M)"
+          git pull --rebase --autostash origin main || true
+          git push || (git pull --rebase --autostash origin main && git push)
