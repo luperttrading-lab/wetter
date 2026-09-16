@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-14",
+ "stand": "2026-09-15",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
@@ -21,13 +21,13 @@
    "bis": "2026-09-12"
   },
   "Dortmund": {
-   "faktor": 1.1,
-   "roh": 1.143,
-   "tage": 1,
+   "faktor": 1.066,
+   "roh": 1.081,
+   "tage": 2,
    "vorlaeufig": true,
-   "streuung": 0,
+   "streuung": 0.088,
    "von": "2026-09-06",
-   "bis": "2026-09-06"
+   "bis": "2026-09-15"
   },
   "Fichtelberg": {
    "faktor": 0.888,
@@ -39,13 +39,13 @@
    "bis": "2026-09-06"
   },
   "Friedrichshafen": {
-   "faktor": 0.934,
-   "roh": 0.928,
-   "tage": 5,
+   "faktor": 0.931,
+   "roh": 0.927,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.029,
+   "streuung": 0.034,
    "von": "2026-09-04",
-   "bis": "2026-09-13"
+   "bis": "2026-09-15"
   },
   "Giessen-Wettenberg": {
    "faktor": 1.094,
@@ -58,12 +58,21 @@
   },
   "Klippeneck": {
    "faktor": 0.836,
-   "roh": 0.812,
-   "tage": 3,
+   "roh": 0.819,
+   "tage": 4,
    "vorlaeufig": false,
-   "streuung": 0.011,
+   "streuung": 0.012,
    "von": "2026-09-04",
-   "bis": "2026-09-06"
+   "bis": "2026-09-15"
+  },
+  "Lindenberg": {
+   "faktor": 1.154,
+   "roh": 1.22,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0,
+   "von": "2026-09-15",
+   "bis": "2026-09-15"
   },
   "Norderney": {
    "faktor": 1.119,
@@ -75,22 +84,22 @@
    "bis": "2026-09-14"
   },
   "Stuttgart": {
-   "faktor": 0.936,
-   "roh": 0.93,
-   "tage": 5,
+   "faktor": 0.93,
+   "roh": 0.925,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.018,
+   "streuung": 0.019,
    "von": "2026-09-04",
-   "bis": "2026-09-12"
+   "bis": "2026-09-15"
   },
   "Wurmberg_B": {
-   "faktor": 1.134,
-   "roh": 1.191,
-   "tage": 1,
+   "faktor": 1.179,
+   "roh": 1.217,
+   "tage": 2,
    "vorlaeufig": true,
-   "streuung": 0,
+   "streuung": 0.037,
    "von": "2026-09-06",
-   "bis": "2026-09-06"
+   "bis": "2026-09-15"
   }
  }
 }
