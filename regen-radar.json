@@ -1,7 +1,7 @@
 {
  "stand": "2026-09-16",
  "tage": 1,
- "paare": 58,
+ "paare": 83,
  "regel": "Faktor = Median(Stationssumme / Radarsumme) je Stunde, Klasse nach der Radarrate, ab 30 Paaren",
  "klassen": {
   "niesel": {
@@ -19,15 +19,15 @@
  },
  "faktor": {
   "niesel": {
-   "paare": 40,
-   "faktor": 0.19,
+   "paare": 58,
+   "faktor": 0.0,
    "q25": 0.0,
-   "q75": 2.12,
-   "mess_median": 0.05,
-   "radar_median": 0.08
+   "q75": 1.82,
+   "mess_median": 0.0,
+   "radar_median": 0.07
   },
   "leicht": {
-   "paare": 13,
+   "paare": 19,
    "faktor": null
   },
   "regen": {
@@ -35,9 +35,9 @@
    "faktor": null
   },
   "_radar_blind": {
-   "faelle": 1,
-   "von": 58,
-   "mm_median": 1.3
+   "faelle": 2,
+   "von": 83,
+   "mm_median": 0.75
   }
  }
 }
