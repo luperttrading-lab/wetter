@@ -1,13 +1,13 @@
-Radar-Eichung an den Bodenmessern, 17.09.2026 12:45 UTC
+Radar-Eichung an den Bodenmessern, 17.09.2026 17:43 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            0 Paare  (FRANKFURT/M)
   Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
   Koeln/Bonn                0 Paare  (KOELN/BONN)
   Dortmund                  0 Paare  (WALTROP-ABDINGHOF)
   Muenster/Osnabrueck       0 Paare  (MUENSTER/OSNABR.)
-  Hamburg-Fuhlsbuettel      0 Paare  (HAMBURG-FU.)
-  Bremen                    0 Paare  (BREMEN)
-  Hannover                  1 Paare  (HANNOVER)
+  Hamburg-Fuhlsbuettel      2 Paare  (HAMBURG-FU.)
+  Bremen                    1 Paare  (BREMEN)
+  Hannover                  3 Paare  (HANNOVER)
   Berlin-Tegel              0 Paare  (BERLIN-TEGEL)
   Leipzig/Halle             0 Paare  (LEIPZIG/SCHKEUDITZ)
   Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
@@ -19,13 +19,13 @@ Radar-Eichung an den Bodenmessern, 17.09.2026 12:45 UTC
   Trier-Petrisberg          0 Paare  (TRIER)
   Saarbruecken              0 Paare  (SAARBRUECKEN)
   Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 1 Paare
+gesammelt: 6 Paare
 
 Klasse     Paare   Faktor      25 %      75 %     Messung       Radar
-niesel        62      -         -        1.43         -       0.06 mm
+niesel        68      -         -        1.25         -       0.06 mm
 leicht        19      -         -         -           -           -  
 regen          4      -         -         -           -           -  
 
-Radar sah nichts, Station mass etwas: 2 von 87 Paaren (Median 0.75 mm)
-regen-radar.json geschrieben (0 von 3 Klassen belegt, 2 Tage, 87 Paare)
+Radar sah nichts, Station mass etwas: 2 von 93 Paaren (Median 0.75 mm)
+regen-radar.json geschrieben (0 von 3 Klassen belegt, 2 Tage, 93 Paare)
 Solange eine Klasse leer ist, rechnet die App ohne Korrektur weiter.
