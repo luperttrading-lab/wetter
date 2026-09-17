@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-15",
+ "stand": "2026-09-16",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
@@ -75,13 +75,13 @@
    "bis": "2026-09-15"
   },
   "Norderney": {
-   "faktor": 1.119,
-   "roh": 1.145,
-   "tage": 2,
-   "vorlaeufig": true,
-   "streuung": 0.071,
+   "faktor": 1.136,
+   "roh": 1.155,
+   "tage": 3,
+   "vorlaeufig": false,
+   "streuung": 0.051,
    "von": "2026-09-06",
-   "bis": "2026-09-14"
+   "bis": "2026-09-16"
   },
   "Stuttgart": {
    "faktor": 0.93,
