@@ -83,6 +83,11 @@ body.pause .kz .ki{animation-play-state:paused}
 unterschiedlich an den Grafikchip übergeben. Im Video vom 18.09. sprang die Kachel auf dem iPhone
 rund 15-mal je Sekunde zwischen den Endlagen hin und her. Welche von J bis N gleitet bei dir
 <b>ruhig und ohne Zittern</b>? Sag mir den Buchstaben. Die alten Varianten A bis I stehen darunter.</div>
+<div id="rmbox" style="display:none;border-radius:14px;padding:11px 13px;margin-bottom:12px;
+  background:#fff4e0;border:1px solid #e3c08a;color:#6b4a12;font-size:13.5px">
+  <b>Achtung:</b> Auf diesem Gerät ist „Bewegung reduzieren“ eingeschaltet
+  (Einstellungen &gt; Bedienungshilfen &gt; Bewegung). Diese Seite zeigt die Varianten trotzdem,
+  die Wetter-App schaltet Animationen dabei aber ab. Das ist der Grund, warum dort nichts wackelt.</div>
 <div id="liste"></div>
 <div class="stopp"><button id="pause">Alle anhalten</button></div>
 <script>
@@ -113,6 +118,8 @@ document.getElementById('liste').innerHTML=VARIANTEN.map(([b,name,technik])=>
  `<div class="kz v${b}">`+KACHELN.map(([l,v,s])=>
    `<div class="k"><span class="kzmin">−</span><div class="ki"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`).join('')+
  `</div></div>`).join('');
+if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  document.getElementById('rmbox').style.display='block';
 const btn=document.getElementById('pause');
 btn.addEventListener('click',()=>{const p=document.body.classList.toggle('pause');
   btn.textContent=p?'Weiterlaufen lassen':'Alle anhalten';btn.classList.toggle('aus',p);});
