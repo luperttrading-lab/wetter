@@ -84,6 +84,26 @@ kommerziellen Nutzung zu klaeren waere, steht in `LIZENZEN.md`. Kurzfassung:
 Esri-Satellitenkacheln und Open-Meteo waeren die Knackpunkte, DWD und
 Bright Sky sind auch kommerziell frei.
 
+## Knifflige Einstellungen: nicht raten, waehlen lassen
+
+Wenn ein Wert nur am Geraet zu beurteilen ist - Geschwindigkeiten, Abstaende,
+Farben, Schwellen -, nicht schaetzen und auch nicht die App mehrfach umbauen.
+Zwei Wege, beide haben sich bewaehrt:
+
+1. **Regler in die App**, sichtbar nur dort, wo es gebraucht wird, mit
+   Zahlenanzeige und Speicherung im Geraet. Der Nutzer stellt ein, nennt den
+   Wert, der wird Voreinstellung. So entstand die Kachelbewegung (v3.97:
+   Ausschlag und Dauer, gewaehlt 1,0 Grad / 0,6 s).
+2. **Eine eigene HTML-Seite mit mehreren Varianten nebeneinander**, im Repo
+   und ueber GitHub Pages erreichbar, zum Vergleichen am Telefon. So entstand
+   `wackeltest.html` mit neun Wackelvarianten.
+
+Der Umweg spart am Ende Zeit: Beim Wackeln kosteten fuenf Runden Raten
+(v3.89 bis v3.93) mehr als der Regler, der die Frage in einem Zug geklaert hat.
+Bei Bewegungen zusaetzlich immer pruefen, ob die Bedienungshilfe "Bewegung
+reduzieren" aktiv ist - sie hat monatelang wie ein Programmierfehler ausgesehen
+(siehe v3.94).
+
 ## Pruefen vor dem Commit
 
 `index.html` ist eine einzelne Datei mit zwei Inline-Scripts. Syntaxcheck:
