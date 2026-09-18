@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Wackeln — Varianten zum Vergleich</title>
+<title>Wackeln — Flimmertest</title>
 <style>
 :root{--line:#e7dfd4;--muted:#5c6b80;--bg:#fbf6ee;--karte:#fff;--kachel:#fdfaf5;--text:#1f2937;--min:#6b7280;--minT:#fff}
 *{box-sizing:border-box}
@@ -49,6 +49,23 @@ h1{font-size:19px;margin:2px 0 4px}
 .vG .k:nth-child(2n) .ki{animation-delay:-1.1s}.vG .k:nth-child(3n) .ki{animation-delay:-.75s}
 .vH .ki{animation:schweb 2.2s ease-in-out infinite}
 .vH .k:nth-child(2n) .ki{animation-delay:-1.1s}.vH .k:nth-child(3n) .ki{animation-delay:-.75s}
+/* J-M: Flimmertest. Gleiche Bewegung wie in der App (v3.93), unterschiedlich
+   an den Grafikchip uebergeben. Auf dem iPhone sprang die Kachel im Video
+   vom 18.09.2026 rund 15-mal je Sekunde zwischen den beiden Endlagen hin
+   und her, statt in 2,4 s ruhig hinueberzugleiten. */
+@keyframes app93{0%{transform:rotate(-1.8deg) translateY(-.8px)}50%{transform:rotate(1.8deg) translateY(.8px)}100%{transform:rotate(-1.8deg) translateY(-.8px)}}
+@keyframes app93z{0%{transform:translateZ(0) rotate(-1.8deg) translateY(-.8px)}50%{transform:translateZ(0) rotate(1.8deg) translateY(.8px)}100%{transform:translateZ(0) rotate(-1.8deg) translateY(-.8px)}}
+@keyframes nurdreh{0%{transform:rotate(-1.8deg)}50%{transform:rotate(1.8deg)}100%{transform:rotate(-1.8deg)}}
+.vJ .ki{animation:app93 2.4s ease-in-out infinite}
+.vJ .k:nth-child(2n) .ki{animation-delay:-1.2s}.vJ .k:nth-child(3n) .ki{animation-delay:-.8s}
+.vK .ki{animation:app93 2.4s ease-in-out infinite;will-change:transform}
+.vK .k:nth-child(2n) .ki{animation-delay:-1.2s}.vK .k:nth-child(3n) .ki{animation-delay:-.8s}
+.vL .ki{animation:app93z 2.4s ease-in-out infinite;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.vL .k:nth-child(2n) .ki{animation-delay:-1.2s}.vL .k:nth-child(3n) .ki{animation-delay:-.8s}
+.vM .ki{animation:nurdreh 2.4s ease-in-out infinite;will-change:transform}
+.vM .k:nth-child(2n) .ki{animation-delay:-1.2s}.vM .k:nth-child(3n) .ki{animation-delay:-.8s}
+.vN .ki{animation:app93 2.4s linear infinite;will-change:transform}
+.vN .k:nth-child(2n) .ki{animation-delay:-1.2s}.vN .k:nth-child(3n) .ki{animation-delay:-.8s}
 /* I: gar keine Bewegung */
 body.pause .kz .ki{animation-play-state:paused}
 .stopp{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));margin-top:8px}
@@ -61,10 +78,11 @@ body.pause .kz .ki{animation-play-state:paused}
 </style>
 </head>
 <body>
-<h1>Wackeln — welche Variante?</h1>
-<div class="hint">Alle neun laufen gleichzeitig, so lassen sie sich direkt vergleichen.
-Achte auf die Minus-Zeichen: Sie sitzen in der Ecke und legen deshalb den weitesten Weg zurück.
-Hier stehen sie überall still, nur die Kacheln selbst bewegen sich. Sag mir einfach den Buchstaben.</div>
+<h1>Wackeln — Flimmertest</h1>
+<div class="hint"><b>Neu: J bis N</b> bewegen sich alle genau wie die App (±1,8°, 2,4 s), werden aber
+unterschiedlich an den Grafikchip übergeben. Im Video vom 18.09. sprang die Kachel auf dem iPhone
+rund 15-mal je Sekunde zwischen den Endlagen hin und her. Welche von J bis N gleitet bei dir
+<b>ruhig und ohne Zittern</b>? Sag mir den Buchstaben. Die alten Varianten A bis I stehen darunter.</div>
 <div id="liste"></div>
 <div class="stopp"><button id="pause">Alle anhalten</button></div>
 <script>
@@ -76,7 +94,12 @@ const KACHELN=[
  ['Wind','16 km/h','Böen 26 · SW'],
  ['Sonne','bis 19:34','noch 53 Min']];
 const VARIANTEN=[
- ['A','wie jetzt live','Drehen ±0,8° · 0,7 s · 2,9 Wechsel/s'],
+ ['J','wie die App v3.93','Drehen ±1,8° + Auf/Ab · 2,4 s'],
+ ['K','dazu will-change','eigene Grafikebene'],
+ ['L','dazu translateZ + backface','Grafikebene erzwungen'],
+ ['M','nur Drehen, will-change','ohne Auf/Ab'],
+ ['N','linear statt ease','gleichmäßiges Tempo'],
+ ['A','alter Stand v3.91','Drehen ±0,8° · 0,7 s · 2,9 Wechsel/s'],
  ['B','halb so schnell','Drehen ±0,8° · 1,4 s · 1,4 Wechsel/s'],
  ['C','ein Drittel so schnell','Drehen ±0,8° · 2,1 s · 1,0 Wechsel/s'],
  ['D','langsam und flach','Drehen ±0,45° · 1,8 s · 1,1 Wechsel/s'],
