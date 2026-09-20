@@ -1,0 +1,277 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Heute-Markierung im Vergleich</title>
+<style>
+:root{--bg:#f6f7f9;--karte:#fff;--tx:#1d2733;--mu:#6b7889;--fa:#95a1b1;--li:#e6eaf0;
+      --mond:#2a78d6;--sonne:#eb6834}
+html.dunkel{--bg:#0f141b;--karte:#161d26;--tx:#eef2f7;--mu:#93a1b3;--fa:#7d8a9b;--li:#26303c;
+      --mond:#3987e5;--sonne:#d95926}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+     background:var(--bg);color:var(--tx);padding:14px 14px 60px;-webkit-text-size-adjust:100%}
+h1{font-size:19px;margin:6px 0 4px}
+.hin{color:var(--mu);font-size:13.5px;margin:0 0 12px}
+.leiste{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px;
+        display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--li);margin-bottom:14px}
+button{font:inherit;font-size:14px;padding:7px 13px;border-radius:999px;border:1px solid var(--li);
+       background:var(--karte);color:var(--tx);cursor:pointer}
+button.an{background:#2f6fd0;border-color:#2f6fd0;color:#fff}
+.var{background:var(--karte);border:1px solid var(--li);border-radius:16px;padding:12px;margin-bottom:15px}
+.vk{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.vk b{font-size:16px}.vk span{color:var(--mu);font-size:13px}
+.vb{color:var(--mu);font-size:12.5px;margin:0 0 10px;line-height:1.4}
+.fall{font-size:11px;color:var(--fa);margin:9px 0 2px;letter-spacing:.03em;text-transform:uppercase}
+canvas{width:100%;display:block}
+.kopf{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.kopf .m{color:var(--mond)}.kopf .s{color:var(--sonne)}
+</style></head><body>
+
+<h1>Heute-Markierung: f&uuml;nf Entw&uuml;rfe</h1>
+<p class="hin">Jeder Entwurf zweimal: einmal an einem gew&ouml;hnlichen Tag (die beiden Dauern liegen
+weit auseinander) und einmal am 13.01.2026, wo Mond und Sonne fast gleich lang stehen &ndash;
+acht Stunden sechs Minuten gegen acht Stunden vierundzwanzig, vier Pixel Abstand.
+Genau dort entscheidet sich, ob ein Entwurf taugt.</p>
+
+<div class="leiste"><button id="bTheme">Dunkel</button></div>
+<div id="raus"></div>
+
+<script>
+const LAT=50.5069, LON=8.5736, TZ="Europe/Berlin";
+var _mjCache={};   // mjRechnen merkt sich seine Ergebnisse darin
+function dayOfYear(d){return Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);}
+function moonPos(jd){const T=(jd-2451545)/36525,r=Math.PI/180;
+  const Lp=218.3164477+481267.88123421*T,D=297.8501921+445267.1114034*T,M=357.5291092+35999.0502909*T,Mp=134.9633964+477198.8675055*T,F=93.2720950+483202.0175233*T;
+  const lon=Lp+6.288774*Math.sin(Mp*r)+1.274027*Math.sin((2*D-Mp)*r)+0.658314*Math.sin(2*D*r)+0.213618*Math.sin(2*Mp*r)-0.185116*Math.sin(M*r)-0.114332*Math.sin(2*F*r)+0.058793*Math.sin((2*D-2*Mp)*r)+0.057066*Math.sin((2*D-M-Mp)*r)+0.053322*Math.sin((2*D+Mp)*r)+0.045758*Math.sin((2*D-M)*r)-0.040923*Math.sin((M-Mp)*r)-0.034720*Math.sin(D*r)-0.030383*Math.sin((M+Mp)*r);
+  const lat=5.128122*Math.sin(F*r)+0.280602*Math.sin((Mp+F)*r)+0.277693*Math.sin((Mp-F)*r)+0.173237*Math.sin((2*D-F)*r)+0.055413*Math.sin((2*D-Mp+F)*r)+0.046271*Math.sin((2*D-Mp-F)*r)+0.032573*Math.sin((2*D+F)*r)+0.017198*Math.sin((2*Mp+F)*r);
+  const dist=385000.56-20905.355*Math.cos(Mp*r)-3699.111*Math.cos((2*D-Mp)*r)-2955.968*Math.cos(2*D*r)-569.925*Math.cos(2*Mp*r)+246.158*Math.cos((2*D-2*Mp)*r)-152.138*Math.cos((2*D-M-Mp)*r)-170.733*Math.cos((2*D+Mp)*r)-204.586*Math.cos((2*D-M)*r)-129.620*Math.cos(M*r)+108.743*Math.cos(D*r)+104.755*Math.cos((2*D+Mp)*r);
+  const eps=(23.439291-0.0130042*T)*r,l=lon*r,b=lat*r;
+  return {ra:Math.atan2(Math.sin(l)*Math.cos(eps)-Math.tan(b)*Math.sin(eps),Math.cos(l)),dec:Math.asin(Math.sin(b)*Math.cos(eps)+Math.cos(b)*Math.sin(eps)*Math.sin(l)),dist,lon,lat};}
+function _gmst(jd){const T=(jd-2451545)/36525;return ((280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T)%360+360)%360;}
+function _moonAlt(ms){const jd=ms/86400000+2440587.5,p=moonPos(jd),H=(_gmst(jd)+LON)*Math.PI/180-p.ra,phi=LAT*Math.PI/180;return Math.asin(Math.sin(phi)*Math.sin(p.dec)+Math.cos(phi)*Math.cos(p.dec)*Math.cos(H))/(Math.PI/180);}
+function moonInfo(d){const jd=d.getTime()/86400000+2440587.5,r=Math.PI/180;
+  const m=moonPos(jd),s=sunEcl(jd);
+  const dl=(((m.lon-s.lon)%360)+360)%360, frac=dl/360;
+  const psi=Math.acos(Math.max(-1,Math.min(1,Math.cos(m.lat*r)*Math.cos(dl*r))));
+  const i=Math.atan2(s.dist*Math.sin(psi), m.dist-s.dist*Math.cos(psi));
+  const illum=Math.round((1+Math.cos(i))/2*100);
+  const names=["Neumond","zunehmende Sichel","erstes Viertel","zunehmender Mond","Vollmond","abnehmender Mond","letztes Viertel","abnehmende Sichel"];
+  return {name:names[Math.floor(frac*8+0.5)%8],illum,frac};}
+function sunEcl(jd){const T=(jd-2451545)/36525,r=Math.PI/180;
+  const L=280.46646+36000.76983*T, g=(357.52911+35999.05029*T)*r, e=0.016708634-0.000042037*T;
+  const c=1.914602*Math.sin(g)+0.019993*Math.sin(2*g)+0.000289*Math.sin(3*g), v=g+c*r;
+  return {lon:L+c, dist:149597870.7*1.000001018*(1-e*e)/(1+e*Math.cos(v))};}
+function mjSonnenstunden(y,m,d){           // Tageslaenge in Stunden, NOAA-Naeherung
+  const rad=Math.PI/180,deg=180/Math.PI;
+  const N=dayOfYear(new Date(y,m,d)), t=N+(6-LON/15)/24, M=0.9856*t-3.289;
+  let L=M+1.916*Math.sin(M*rad)+0.020*Math.sin(2*M*rad)+282.634;L=(L+360)%360;
+  const sinDec=0.39782*Math.sin(L*rad), cosDec=Math.cos(Math.asin(sinDec));
+  const cosH=(Math.cos(90.833*rad)-sinDec*Math.sin(LAT*rad))/(cosDec*Math.cos(LAT*rad));
+  if(cosH>1)return 0; if(cosH<-1)return 24;
+  return 2*deg*Math.acos(cosH)/15;
+}
+function mjNull(a,b,ha,hb){
+  for(let k=0;k<6;k++){
+    const m=(a+b)/2, hm=_moonAlt(m)-0.125;
+    if((ha<0)===(hm<0)){a=m;ha=hm;}else{b=m;hb=hm;}
+  }
+  return a+ha/(ha-hb)*(b-a);
+}
+function mjRechnen(jahr){
+  const key=jahr+"|"+LAT.toFixed(3)+"|"+LON.toFixed(3);
+  if(_mjCache[key])return _mjCache[key];
+  const t0=Date.UTC(jahr,0,1)-12*3600e3, t1=Date.UTC(jahr+1,0,1)+12*3600e3, step=600000;
+  const mond=[]; let prev=_moonAlt(t0)-0.125, auf=null;
+  for(let t=t0+step;t<=t1;t+=step){
+    const cur=_moonAlt(t)-0.125;
+    if(prev<0&&cur>=0)auf=mjNull(t-step,t,prev,cur);
+    else if(auf!=null&&prev>0&&cur<=0){
+      const unter=mjNull(t-step,t,prev,cur), mitte=(auf+unter)/2;
+      // nur Durchgaenge, deren Mitte im Jahr liegt - sonst haengen die Raender doppelt
+      if(mitte>=Date.UTC(jahr,0,1)&&mitte<Date.UTC(jahr+1,0,1)){
+        const mo=moonInfo(new Date(mitte));
+        mond.push({m:mitte,h:(unter-auf)/3600000,frac:mo.frac,illum:mo.illum});
+      }
+      auf=null;
+    }
+    prev=cur;
+  }
+  const sonne=[], tage=(jahr%4===0&&(jahr%100!==0||jahr%400===0))?366:365;
+  for(let i=0;i<tage;i++){
+    const d=new Date(jahr,0,1+i);
+    sonne.push({m:d.getTime()+12*3600e3,h:mjSonnenstunden(d.getFullYear(),d.getMonth(),d.getDate())});
+  }
+  // Voll- und Neumonde: der Durchgang, dessen Phase dem Ziel am naechsten kommt
+  const mark=(ziel)=>{const w=[];
+    for(let i=1;i<mond.length-1;i++){
+      const ab=x=>Math.abs(((x-ziel+0.5)%1+1)%1-0.5);
+      if(ab(mond[i].frac)<=ab(mond[i-1].frac)&&ab(mond[i].frac)<ab(mond[i+1].frac)&&ab(mond[i].frac)<0.055)w.push(i);
+    } return w;};
+  const erg={mond,sonne,voll:mark(0.5),neu:mark(0)};
+  _mjCache[key]=erg; return erg;
+}
+/* ---------- Zeichnen: Grundbild, dann je Entwurf die Marke ---------- */
+function grund(g,W,H,D,jahr,dunkel){
+  const L=30,R=6,T=8,B=20,pw=W-L-R,ph=H-T-B;
+  const x0=Date.UTC(jahr,0,1),x1=Date.UTC(jahr+1,0,1);
+  const X=ms=>L+(ms-x0)/(x1-x0)*pw, Y=h=>T+ph-(h-5.5)/(19.5-5.5)*ph;
+  const GITTER=dunkel?"#2b3542":"#e8e7e2", TEXT=dunkel?"#93a1b3":"#6b7889",
+        FLAECHE=dunkel?"#161d26":"#ffffff",
+        MOND=dunkel?"#3987e5":"#2a78d6", SONNE=dunkel?"#d95926":"#eb6834";
+  g.clearRect(0,0,W,H);
+  for(let h=6;h<=18;h+=3){
+    g.strokeStyle=GITTER;g.lineWidth=1;g.beginPath();
+    g.moveTo(L,Math.round(Y(h))+.5);g.lineTo(W-R,Math.round(Y(h))+.5);g.stroke();
+    g.fillStyle=TEXT;g.font="600 9px -apple-system,system-ui,sans-serif";
+    g.textAlign="right";g.textBaseline="middle";g.fillText(h+" h",L-5,Y(h));
+  }
+  g.font="600 9px -apple-system,system-ui,sans-serif";g.textAlign="center";g.textBaseline="top";
+  const MON=["J","F","M","A","M","J","J","A","S","O","N","D"];
+  for(let m=0;m<12;m++){g.fillStyle=TEXT;g.fillText(MON[m],X(Date.UTC(jahr,m,16)),H-B+4);}
+  g.save();g.beginPath();g.rect(L,T-2,pw,ph+4);g.clip();
+  const linie=(p,f,d,a)=>{g.globalAlpha=a;g.strokeStyle=f;g.lineWidth=d;g.lineJoin="round";
+    g.lineCap="round";g.beginPath();p.forEach((q,i)=>{const x=X(q.m),y=Y(q.h);i?g.lineTo(x,y):g.moveTo(x,y);});
+    g.stroke();g.globalAlpha=1;};
+  linie(D.mond,MOND,1,.5); linie(D.sonne,SONNE,2,1);
+  const pk=(i,voll)=>{const p=D.mond[i];if(!p)return;g.beginPath();g.arc(X(p.m),Y(p.h),voll?3.4:3.1,0,7);
+    if(voll){g.fillStyle=MOND;g.fill();g.lineWidth=1.6;g.strokeStyle=FLAECHE;g.stroke();}
+    else{g.fillStyle=FLAECHE;g.fill();g.lineWidth=1.5;g.strokeStyle=MOND;g.stroke();}};
+  D.neu.forEach(i=>pk(i,false)); D.voll.forEach(i=>pk(i,true));
+  g.restore();
+  return {L,R,T,B,pw,ph,X,Y,W,H,MOND,SONNE,TEXT,FLAECHE};
+}
+const dauerTxt=v=>{const s=Math.floor(v);return s+" h "+String(Math.round((v-s)*60)).padStart(2,"0")+" min";};
+function sonneIcon(g,x,y,r,f){
+  g.save();g.translate(x,y);
+  g.strokeStyle=f;g.lineWidth=1.5;g.lineCap="round";
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;
+    g.beginPath();g.moveTo(Math.cos(a)*(r+2),Math.sin(a)*(r+2));
+    g.lineTo(Math.cos(a)*(r+4.4),Math.sin(a)*(r+4.4));g.stroke();}
+  g.beginPath();g.arc(0,0,r,0,7);g.fillStyle=f;g.fill();
+  g.restore();
+}
+function mondIcon(g,x,y,r,f,flaeche){
+  g.save();g.translate(x,y);
+  g.beginPath();g.arc(0,0,r,0,7);g.fillStyle=f;g.fill();
+  g.globalCompositeOperation="destination-out";
+  g.beginPath();g.arc(r*0.62,-r*0.32,r*0.92,0,7);g.fill();
+  g.restore();
+}
+function senkrechte(g,K,px){
+  g.strokeStyle=K.TEXT;g.globalAlpha=.5;g.lineWidth=1;g.setLineDash([3,3]);
+  g.beginPath();g.moveTo(px,K.T);g.lineTo(px,K.T+K.ph);g.stroke();
+  g.setLineDash([]);g.globalAlpha=1;
+}
+function fahne(g,K,px,py,txt,farbe,rechtsErzwungen){
+  g.font="800 10.5px -apple-system,system-ui,sans-serif";
+  const bw=g.measureText(txt).width;
+  const rechts=rechtsErzwungen!=null?rechtsErzwungen:(px+9+bw<=K.W-K.R);
+  g.fillStyle=K.FLAECHE;g.globalAlpha=.88;
+  g.fillRect(rechts?px+6:px-9-bw, py-8, bw+6, 16);
+  g.globalAlpha=1;g.fillStyle=farbe;
+  g.textAlign=rechts?"left":"right";g.textBaseline="middle";
+  g.fillText(txt, rechts?px+9:px-9, py);
+}
+
+/* ================= die f&uuml;nf Entw&uuml;rfe ================= */
+const ENTWUERFE=[
+ ["A","wie jetzt &ndash; Rauten","Eine Raute je Kurve, die Zahl daneben. Bei Ann&auml;herung weichen die Zahlen aus, die Mondraute liegt oben.",
+  (g,K,px,hm,hs)=>{
+    const raute=(x,y,f)=>{const r=5;g.beginPath();g.moveTo(x,y-r);g.lineTo(x+r,y);g.lineTo(x,y+r);
+      g.lineTo(x-r,y);g.closePath();g.fillStyle=f;g.fill();g.lineWidth=2;g.strokeStyle=K.FLAECHE;g.stroke();};
+    raute(px,K.Y(hs.h),K.SONNE); raute(px,K.Y(hm.h),K.MOND);
+    const m=[{y:K.Y(hm.h),t:dauerTxt(hm.h),f:K.MOND},{y:K.Y(hs.h),t:dauerTxt(hs.h),f:K.SONNE}];
+    m.sort((a,b)=>a.y-b.y);
+    if(m[1].y-m[0].y<19){const mi=(m[0].y+m[1].y)/2;m[0].ty=mi-10;m[1].ty=mi+10;}
+    else m.forEach(q=>q.ty=q.y);
+    m.forEach(q=>fahne(g,K,px,q.ty,q.t,q.f));
+  }],
+ ["B","Sonne und Mond auf der Linie","Statt Rauten die Zeichen selbst. Gut erkennbar &ndash; aber sie sind gr&ouml;&szlig;er als Rauten und decken sich beim Schnittpunkt st&auml;rker.",
+  (g,K,px,hm,hs)=>{
+    sonneIcon(g,px,K.Y(hs.h),4,K.SONNE);
+    mondIcon(g,px,K.Y(hm.h),6,K.MOND,K.FLAECHE);
+    const m=[{y:K.Y(hm.h),t:dauerTxt(hm.h),f:K.MOND},{y:K.Y(hs.h),t:dauerTxt(hs.h),f:K.SONNE}];
+    m.sort((a,b)=>a.y-b.y);
+    if(m[1].y-m[0].y<21){const mi=(m[0].y+m[1].y)/2;m[0].ty=mi-11;m[1].ty=mi+11;}
+    else m.forEach(q=>q.ty=q.y);
+    m.forEach(q=>fahne(g,K,px,q.ty,q.t,q.f));
+  }],
+ ["C","feste Pl&auml;tze mit F&uuml;hrungslinie","Mond immer oben, Sonne immer unten &ndash; unabh&auml;ngig davon, wo die Kurven liegen. Eine d&uuml;nne Linie f&uuml;hrt zum Punkt. Der Schnittpunkt kann nicht mehr st&ouml;ren.",
+  (g,K,px,hm,hs)=>{
+    const oben=K.T+11, unten=K.T+K.ph-11;
+    [[hm,K.MOND,oben,true],[hs,K.SONNE,unten,false]].forEach(([p,f,ty,istMond])=>{
+      const py=K.Y(p.h);
+      g.strokeStyle=f;g.globalAlpha=.45;g.lineWidth=1;g.setLineDash([2,3]);
+      g.beginPath();g.moveTo(px,py);g.lineTo(px,ty);g.stroke();g.setLineDash([]);g.globalAlpha=1;
+      g.beginPath();g.arc(px,py,3.6,0,7);g.fillStyle=f;g.fill();
+      g.lineWidth=1.8;g.strokeStyle=K.FLAECHE;g.stroke();
+      if(istMond)mondIcon(g,px,ty,6,f,K.FLAECHE); else sonneIcon(g,px,ty,4,f);
+      fahne(g,K,px+4,ty,dauerTxt(p.h),f);
+    });
+  }],
+ ["D","Zahlen aus der Grafik heraus","In der Grafik nur die beiden Zeichen auf ihrer Kurve, die Werte stehen als Zeile dar&uuml;ber. Ruhigstes Bild, nichts kann &uuml;berlappen &ndash; man muss den Blick aber heben.",
+  (g,K,px,hm,hs)=>{
+    sonneIcon(g,px,K.Y(hs.h),4,K.SONNE);
+    mondIcon(g,px,K.Y(hm.h),6,K.MOND,K.FLAECHE);
+  }, true],
+ ["E","Kasten am oberen Rand","Beide Zeichen mit ihren Zahlen in einem K&auml;stchen oben an der Senkrechten, auf den Kurven nur kleine Punkte. Alles beieinander, unabh&auml;ngig vom Kurvenverlauf.",
+  (g,K,px,hm,hs)=>{
+    [[hm,K.MOND],[hs,K.SONNE]].forEach(([p,f])=>{
+      g.beginPath();g.arc(px,K.Y(p.h),3.4,0,7);g.fillStyle=f;g.fill();
+      g.lineWidth=1.8;g.strokeStyle=K.FLAECHE;g.stroke();});
+    g.font="800 10px -apple-system,system-ui,sans-serif";
+    const t1=dauerTxt(hm.h), t2=dauerTxt(hs.h);
+    const bw=Math.max(g.measureText(t1).width,g.measureText(t2).width)+30;
+    const links=Math.max(K.L+1,Math.min(px-bw/2,K.W-K.R-bw-1));
+    const oy=K.T+2, hh=32;
+    g.fillStyle=K.FLAECHE;g.globalAlpha=.94;
+    g.beginPath();g.roundRect(links,oy,bw,hh,7);g.fill();g.globalAlpha=1;
+    g.strokeStyle=K.TEXT;g.globalAlpha=.25;g.lineWidth=1;g.stroke();g.globalAlpha=1;
+    mondIcon(g,links+11,oy+9,5,K.MOND,K.FLAECHE);
+    sonneIcon(g,links+11,oy+23,3.4,K.SONNE);
+    g.textAlign="left";g.textBaseline="middle";
+    g.fillStyle=K.MOND;g.fillText(t1,links+21,oy+9);
+    g.fillStyle=K.SONNE;g.fillText(t2,links+21,oy+23);
+  }]
+];
+
+const FAELLE=[["gew&ouml;hnlicher Tag","2026-09-20"],["Schnittpunkt &ndash; 13.01.2026","2026-01-13"]];
+let DATEN=null;
+
+function heuteWerte(iso){
+  const now=new Date(iso+"T13:00:00Z").getTime();
+  const hs=DATEN.sonne.reduce((a,p)=>Math.abs(p.m-now)<Math.abs(a.m-now)?p:a);
+  const hm=DATEN.mond.reduce((a,p)=>Math.abs(p.m-now)<Math.abs(a.m-now)?p:a);
+  return {now,hm,hs};
+}
+function bauen(){
+  const dunkel=document.documentElement.classList.contains("dunkel");
+  document.getElementById("raus").innerHTML=ENTWUERFE.map(([k,t,b,fn,kopfZeile])=>
+    `<div class="var"><div class="vk"><b>${k}</b><span>${t}</span></div><p class="vb">${b}</p>`
+    + FAELLE.map(([ft,iso],i)=>`<div class="fall">${ft}</div>`
+        +(kopfZeile?`<div class="kopf" id="kopf-${k}-${i}"></div>`:"")
+        +`<canvas id="cv-${k}-${i}"></canvas>`).join("")
+    + `</div>`).join("");
+  ENTWUERFE.forEach(([k,t,b,fn,kopfZeile])=>FAELLE.forEach(([ft,iso],i)=>{
+    const cv=document.getElementById(`cv-${k}-${i}`);
+    const dpr=Math.min(window.devicePixelRatio||1,3);
+    const W=cv.clientWidth||330, H=Math.max(150,Math.min(215,Math.round(W*0.56)));
+    cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.height=H+"px";
+    const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    const K=grund(g,W,H,DATEN,2026,dunkel);
+    const {now,hm,hs}=heuteWerte(iso);
+    const px=K.X(now);
+    senkrechte(g,K,px);
+    fn(g,K,px,hm,hs);
+    if(kopfZeile)document.getElementById(`kopf-${k}-${i}`).innerHTML=
+      `heute: <span class="m">&#9789; ${dauerTxt(hm.h)}</span> &nbsp;<span class="s">&#9728; ${dauerTxt(hs.h)}</span>`;
+  }));
+}
+DATEN=mjRechnen(2026);
+bauen();
+document.getElementById("bTheme").onclick=e=>{
+  const d=document.documentElement.classList.toggle("dunkel");
+  e.target.textContent=d?"Hell":"Dunkel";e.target.classList.toggle("an",d);bauen();
+};
+window.addEventListener("resize",bauen);
+</script></body></html>
