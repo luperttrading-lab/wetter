@@ -1,36 +1,36 @@
-Radar-Eichung an den Bodenmessern, 20.09.2026 12:35 UTC
-  Giessen/Wettenberg        2 Paare  (GIESSEN)
-  Frankfurt/Main            2 Paare  (FRANKFURT/M)
+Radar-Eichung an den Bodenmessern, 20.09.2026 16:56 UTC
+  Giessen/Wettenberg        3 Paare  (GIESSEN)
+  Frankfurt/Main            3 Paare  (FRANKFURT/M)
   Kassel                    3 Paare  (SCHAUENBURG-ELGERSH.)
-  Koeln/Bonn                3 Paare  (KOELN/BONN)
-  Dortmund                  3 Paare  (WALTROP-ABDINGHOF)
-  Muenster/Osnabrueck       1 Paare  (MUENSTER/OSNABR.)
-  Hamburg-Fuhlsbuettel      1 Paare  (HAMBURG-FU.)
-  Bremen                    1 Paare  (BREMEN)
-  Hannover                  0 Paare  (HANNOVER)
+  Koeln/Bonn                2 Paare  (KOELN/BONN)
+  Dortmund                  2 Paare  (WALTROP-ABDINGHOF)
+  Muenster/Osnabrueck       0 Paare  (MUENSTER/OSNABR.)
+  Hamburg-Fuhlsbuettel      3 Paare  (HAMBURG-FU.)
+  Bremen                    2 Paare  (BREMEN)
+  Hannover                  2 Paare  (HANNOVER)
   Berlin-Tegel              1 Paare  (BERLIN-TEGEL)
   Leipzig/Halle             3 Paare  (LEIPZIG/SCHKEUDITZ)
   Dresden-Klotzsche         3 Paare  (DRESDEN/FLUGHAFEN)
-  Erfurt-Weimar             2 Paare  (ERFURT)
-  Nuernberg                 0 Paare  (NUERNBERG)
+  Erfurt-Weimar             3 Paare  (ERFURT)
+  Nuernberg                 1 Paare  (NUERNBERG)
   Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
   Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
   Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
-  Trier-Petrisberg          1 Paare  (TRIER)
+  Trier-Petrisberg          3 Paare  (TRIER)
   Saarbruecken              0 Paare  (SAARBRUECKEN)
   Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 26 Paare
+gesammelt: 34 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel        27    243      -         -         -           -           -  
-leicht        21     24      -         -         -           -           -  
+niesel        31    264     2.57      1.25      4.55     0.40 mm     0.22 mm
+leicht        34     37     0.83      0.56      1.10     1.00 mm     1.17 mm
 regen          4      4      -         -         -           -           -  
 
-Radar sah nichts, Station mass etwas: 2 von 273 Paaren (Median 0.75 mm)
+Radar sah nichts, Station mass etwas: 2 von 307 Paaren (Median 0.75 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      169 Stunden, davon 150 trocken (89 %)
-  Radarsumme 0 1 bis  0 25  48 Stunden, davon  35 trocken (73 %)
-  Radarsumme 0 25 bis  0 5  26 Stunden, davon  10 trocken (38 %)
-  Radarsumme ab 0 5         28 Stunden, davon   2 trocken (7 %)
-regen-radar.json geschrieben (0 von 3 Klassen belegt, 5 Tage, 273 Paare)
+  Radarsumme bis  0 1      181 Stunden, davon 161 trocken (89 %)
+  Radarsumme 0 1 bis  0 25  55 Stunden, davon  38 trocken (69 %)
+  Radarsumme 0 25 bis  0 5  28 Stunden, davon  10 trocken (36 %)
+  Radarsumme ab 0 5         41 Stunden, davon   2 trocken (5 %)
+regen-radar.json geschrieben (2 von 3 Klassen belegt, 5 Tage, 307 Paare)
 Solange eine Klasse leer ist, rechnet die App ohne Korrektur weiter.
