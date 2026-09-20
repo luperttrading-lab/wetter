@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-20T17:41:04+00:00",
+ "stand": "2026-09-20T19:48:01+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
   "Andernach": {
@@ -906,7 +906,9 @@
    "2026-09-20": 6
   }
  },
- "gelesen": 86,
- "nicht_lesbar": 0,
- "gruende": {}
+ "gelesen": 85,
+ "nicht_lesbar": 1,
+ "gruende": {
+  "Salzgitter|2026-09-20": "Leiste nicht gefunden (640x480; Proben bei y=30%: x38:#ffffff x58:#ffffff x77:#ffffff)"
+ }
 }
