@@ -126,11 +126,6 @@
 .kz .kzmondzeile>svg{width:46px;height:46px;flex:0 0 auto}
 .kz .kzmondtext{min-width:0;flex:1}
 .kz .kzmondtext .v{margin-top:0}
-/* Gleiche Spezifitaet wie ".kz .ki .s", aber weiter unten in der Datei -
-   das genuegte nicht: die allgemeine Regel steht dort noch weiter unten und
-   gewann. Darum ".ki" mit aufnehmen, das sind vier Klassen gegen drei. */
-.kz .ki .kzmondtext .s{font-size:12px;font-weight:800;color:#5a6779;font-variant-numeric:tabular-nums;margin-top:2px}
-html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 .kz .kzmondp{font-weight:650;color:var(--muted)}
 .kz .k{position:relative;min-width:0;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;cursor:pointer}
 .kz .ki{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:13px;padding:8px 9px 7px;min-width:0}
@@ -774,7 +769,7 @@ html.dunkel .kzfoot .fertig{background:#e6e9ef;color:#111}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v4.09</span>
+      <span class="ver">v4.08</span>
     </div>
   </header>
 
@@ -3263,29 +3258,10 @@ function moonPos(jd){const T=(jd-2451545)/36525,r=Math.PI/180;
   return {ra:Math.atan2(Math.sin(l)*Math.cos(eps)-Math.tan(b)*Math.sin(eps),Math.cos(l)),dec:Math.asin(Math.sin(b)*Math.cos(eps)+Math.cos(b)*Math.sin(eps)*Math.sin(l)),dist,lon,lat};}
 function _gmst(jd){const T=(jd-2451545)/36525;return ((280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T)%360+360)%360;}
 function _moonAlt(ms){const jd=ms/86400000+2440587.5,p=moonPos(jd),H=(_gmst(jd)+LON)*Math.PI/180-p.ra,phi=LAT*Math.PI/180;return Math.asin(Math.sin(phi)*Math.sin(p.dec)+Math.cos(phi)*Math.cos(p.dec)*Math.cos(H))/(Math.PI/180);}
-/* v4.09: Auf- und Untergang notfalls im Folgetag suchen.
-   Der Mondtag dauert rund 24 Stunden und 50 Minuten, beide Zeiten wandern
-   also taeglich um etwa eine Dreiviertelstunde nach hinten. Damit faellt in
-   jedem Monat an ungefaehr einem Tag der Aufgang und an einem anderen der
-   Untergang ueber Mitternacht hinaus - in Norden zum Beispiel am 22.09.2026
-   der Untergang (00:59 des 23.) und am 05.10. der Aufgang (00:00 des 06.).
-   Die Kachel zeigte dann nur eine Zeit. Nachgezaehlt ueber 30 Tage: 2 Tage
-   mit fehlender Angabe, und es trifft gerade die Naechte, in denen der Mond
-   am laengsten steht.
-   Deshalb wird das Fenster auf 48 Stunden verlaengert und, was im ersten Tag
-   fehlt, aus dem zweiten genommen. Die Felder rise und set bleiben, was sie
-   waren; neu ist nur riseTag / setTag - 0 fuer heute, 1 fuer morgen. */
 function moonPhys(date){const dist=moonPos(date.getTime()/86400000+2440587.5).dist;
-  const start=new Date(date);start.setHours(0,0,0,0);const s=start.getTime(),h0=0.125,step=120000;
-  let prev=_moonAlt(s)-h0,rise=null,set=null;
-  for(let t=s+step;t<=s+2*86400000;t+=step){const cur=_moonAlt(t)-h0;
-    if(prev<0&&cur>=0&&rise==null)rise=t-step+prev/(prev-cur)*step;
-    if(prev>0&&cur<=0&&set==null)set=t-step+prev/(prev-cur)*step;
-    prev=cur;
-    if(rise!=null&&set!=null&&t>s+86400000)break;}
-  return {dist:Math.round(dist),rise,set,
-          riseTag:rise!=null&&rise>=s+86400000?1:0,
-          setTag:set!=null&&set>=s+86400000?1:0};}
+  const start=new Date(date);start.setHours(0,0,0,0);const s=start.getTime(),h0=0.125,step=120000;let prev=_moonAlt(s)-h0,rise=null,set=null;
+  for(let t=s+step;t<=s+86400000;t+=step){const cur=_moonAlt(t)-h0;if(prev<0&&cur>=0&&rise==null)rise=t-step+prev/(prev-cur)*step;if(prev>0&&cur<=0&&set==null)set=t-step+prev/(prev-cur)*step;prev=cur;}
+  return {dist:Math.round(dist),rise,set};}
 function moonSvg(mo){const R=18,cx=20,cy=20,frac=mo.frac,rx=Math.abs(Math.cos(2*Math.PI*frac))*R;
   const wax=frac<0.5, leftNight=wax, rightNight=!wax, ellNight=wax?(frac<0.25):(frac>=0.75), W="#fff",B="#000", id="mn"+(gid++);
   const nm=`<rect x="${cx-R-1}" y="${cy-R}" width="${R+1}" height="${2*R}" fill="${leftNight?W:B}"/><rect x="${cx}" y="${cy-R}" width="${R+1}" height="${2*R}" fill="${rightNight?W:B}"/><ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(2)}" ry="${R}" fill="${ellNight?W:B}"/>`;
