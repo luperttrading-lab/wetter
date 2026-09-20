@@ -36,6 +36,18 @@ import datetime as dt, json, math, os, subprocess, sys
 LOG = "regen_radarlog.json"
 AUS = "regen-radar.json"
 MIN_PAARE = 30            # darunter ist der Median Rauschen
+# Der DWD-Niederschlagsmesser ist eine Kippwaage und loest 0,1 mm auf: alles
+# darunter steht als 0,0 in den Daten. Fuer den Quotienten Messung/Radar ist
+# das toedlich, denn der Zaehler kann bei kleinen Mengen nur 0,0 oder 0,1
+# sein - der Quotient springt entsprechend. Nachgerechnet am Log vom
+# 20.09.2026: von 207 Paaren der Nieselklasse hatten 165, also 80 Prozent,
+# eine Stationssumme von exakt 0,0. Der Median darueber war 0,0 und damit der
+# "Faktor" ebenfalls 0,0 - haette die App ihn uebernommen, waere jeder
+# Radarwert mit null multipliziert worden. Dass das nicht geschah, lag allein
+# daran, dass 0.0 in Python falsy ist und die Ausgabe deshalb "-" schrieb.
+# Ein Zufall, keine Absicherung.
+# Darum zaehlen fuer den Faktor nur Stunden mit mindestens zwei Kippungen.
+MIN_MESS = 0.2
 TAGE_IM_LOG = 60          # aeltere Tage fallen raus, damit main nicht waechst
 STUNDEN_ZURUECK = 7       # Archivgrenze des Radars liegt bei rund 8 h;
                           # geholt wird die Stunde DAVOR, also eine mehr
@@ -184,23 +196,44 @@ def auswerten(log):
     alle = [p for tag in log.values() for p in tag]
     out = {}
     for name, lo, hi in KLASSEN:
-        # nur Paare, in denen das Radar ueberhaupt etwas gesehen hat -
-        # sonst ist das Verhaeltnis nicht definiert
-        w = [p for p in alle if lo <= p["radar"] < hi and p["radar"] > 0]
+        # Das Radar muss etwas gesehen haben (sonst ist das Verhaeltnis nicht
+        # definiert) und die Station genug, dass ihre Zahl etwas aussagt.
+        w = [p for p in alle
+             if lo <= p["radar"] < hi and p["radar"] > 0 and p["mess"] >= MIN_MESS]
+        roh = sum(1 for p in alle if lo <= p["radar"] < hi and p["radar"] > 0)
         if len(w) < MIN_PAARE:
-            out[name] = {"paare": len(w), "faktor": None}
+            out[name] = {"paare": len(w), "roh": roh, "faktor": None}
             continue
-        v = [p["mess"] / p["radar"] for p in w]
+        v = sorted(p["mess"] / p["radar"] for p in w)
         m = median(v)
-        s = sorted(v)
-        out[name] = {"paare": len(w), "faktor": round(m, 2),
-                     "q25": round(s[len(s) // 4], 2), "q75": round(s[3 * len(s) // 4], 2),
+        # Ein Faktor von null oder nahe null kann nur ein Rechenfehler sein -
+        # er wuerde die Anzeige stumm schalten. Lieber keine Korrektur.
+        if not (0.2 <= m <= 10):
+            out[name] = {"paare": len(w), "roh": roh, "faktor": None,
+                         "verworfen": round(m, 3)}
+            continue
+        out[name] = {"paare": len(w), "roh": roh, "faktor": round(m, 2),
+                     "q25": round(v[len(v) // 4], 2), "q75": round(v[3 * len(v) // 4], 2),
                      "mess_median": round(median([p["mess"] for p in w]), 2),
                      "radar_median": round(median([p["radar"] for p in w]), 2)}
     # Wie oft sieht die Station Regen, den das Radar ganz verpasst?
     verpasst = [p for p in alle if p["radar"] == 0 and p["mess"] > 0]
     out["_radar_blind"] = {"faelle": len(verpasst), "von": len(alle),
                            "mm_median": round(median([p["mess"] for p in verpasst]), 2) if verpasst else None}
+    # Und umgekehrt: Wie oft sieht das Radar etwas, wo am Boden nichts
+    # ankommt? Das ist die Zahl, an der die Schwelle der App haengt (v4.07,
+    # 0,25 mm/h fuer "es regnet jetzt"). Aufgeschluesselt nach der Radarrate,
+    # damit man sieht, ab wo das Signal traegt. Ein Treffer heisst dabei nur
+    # "die Station mass mindestens 0,1 mm" - weniger kann sie nicht.
+    leer = {}
+    for lo, hi, nm in ((0.0, 0.1, "bis_0_1"), (0.1, 0.25, "0_1_bis_0_25"),
+                       (0.25, 0.5, "0_25_bis_0_5"), (0.5, 1e9, "ab_0_5")):
+        w = [p for p in alle if lo <= p["radar"] < hi and p["radar"] > 0]
+        if w:
+            leer[nm] = {"stunden": len(w),
+                        "boden_trocken": sum(1 for p in w if p["mess"] == 0),
+                        "anteil": round(sum(1 for p in w if p["mess"] == 0) / len(w), 2)}
+    out["_boden_trocken"] = leer
     return out
 
 
@@ -230,12 +263,12 @@ def main():
         json.dump(log, fh, ensure_ascii=False)
 
     erg = auswerten(log)
-    print("\n%-8s %7s %8s %9s %9s %11s %11s"
-          % ("Klasse", "Paare", "Faktor", "25 %", "75 %", "Messung", "Radar"))
+    print("\n%-8s %7s %6s %8s %9s %9s %11s %11s"
+          % ("Klasse", "Paare", "roh", "Faktor", "25 %", "75 %", "Messung", "Radar"))
     for name, lo, hi in KLASSEN:
         e = erg[name]
-        print("%-8s %7d %8s %9s %9s %11s %11s"
-              % (name, e["paare"],
+        print("%-8s %7d %6d %8s %9s %9s %11s %11s"
+              % (name, e["paare"], e.get("roh", 0),
                  ("%.2f" % e["faktor"]) if e.get("faktor") else "  -  ",
                  ("%.2f" % e["q25"]) if e.get("q25") else "  -  ",
                  ("%.2f" % e["q75"]) if e.get("q75") else "  -  ",
@@ -244,12 +277,22 @@ def main():
     b = erg["_radar_blind"]
     print("\nRadar sah nichts, Station mass etwas: %d von %d Paaren%s"
           % (b["faelle"], b["von"], (" (Median %.2f mm)" % b["mm_median"]) if b["mm_median"] else ""))
+    print("Umgekehrt - Radar sah etwas, am Boden kam nichts an:")
+    for nm, e in erg["_boden_trocken"].items():
+        print("  Radarsumme %-13s %3d Stunden, davon %3d trocken (%.0f %%)"
+              % (nm.replace("_", " ").replace("bis", "bis "), e["stunden"],
+                 e["boden_trocken"], 100 * e["anteil"]))
 
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None, "tage": len(log),
                    "paare": sum(len(v) for v in log.values()),
                    "regel": "Faktor = Median(Stationssumme / Radarsumme) je Stunde, "
-                            "Klasse nach der Radarrate, ab %d Paaren" % MIN_PAARE,
+                            "Klasse nach der Radarrate, ab %d Paaren; gezaehlt "
+                            "werden nur Stunden mit mindestens %.1f mm an der "
+                            "Station - darunter loest die Kippwaage nicht auf "
+                            "und der Quotient waere Quantisierungsrauschen "
+                            "(Feld \"roh\": Paare ohne diese Bedingung)"
+                            % (MIN_PAARE, MIN_MESS),
                    "klassen": {n: {"von": lo, "bis": (None if hi > 1e8 else hi)} for n, lo, hi in KLASSEN},
                    "faktor": erg}, fh, ensure_ascii=False, indent=1)
     fertig = sum(1 for n, _, _ in KLASSEN if erg[n].get("faktor"))
