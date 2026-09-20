@@ -1,0 +1,245 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wettersymbole im Vergleich</title>
+<style>
+:root{--bg:#f6f7f9;--karte:#fff;--tx:#1d2733;--mu:#6b7889;--li:#e6eaf0}
+html.dunkel{--bg:#0f141b;--karte:#161d26;--tx:#eef2f7;--mu:#93a1b3;--li:#26303c}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+     background:var(--bg);color:var(--tx);padding:14px 14px 60px;-webkit-text-size-adjust:100%}
+h1{font-size:19px;margin:6px 0 4px}
+.hin{color:var(--mu);font-size:13.5px;margin:0 0 14px}
+.leiste{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px;
+        display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--li);margin-bottom:14px}
+button{font:inherit;font-size:14px;padding:7px 13px;border-radius:999px;border:1px solid var(--li);
+       background:var(--karte);color:var(--tx);cursor:pointer}
+button.an{background:#2f6fd0;border-color:#2f6fd0;color:#fff}
+.var{background:var(--karte);border:1px solid var(--li);border-radius:16px;padding:13px;margin-bottom:16px}
+.vk{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.vk b{font-size:16px}.vk span{color:var(--mu);font-size:13px}
+.vb{color:var(--mu);font-size:13px;margin:0 0 11px}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:4px}
+.ik{text-align:center;padding:7px 2px 9px;border-radius:11px}
+.ik:hover{background:var(--bg)}
+.ik .n{font-size:11px;color:var(--mu);margin-top:3px;line-height:1.2}
+.gross{display:flex;align-items:center;gap:15px;padding:11px 3px;border-top:1px solid var(--li);margin-top:9px}
+.gross .t{font-size:27px;font-weight:750}
+.gross .l{font-size:16px;font-weight:650;color:var(--mu)}
+.klein{display:flex;gap:13px;align-items:center;padding-top:9px;border-top:1px solid var(--li);margin-top:2px}
+.klein div{text-align:center}.klein .n{font-size:10.5px;color:var(--mu)}
+</style></head><body>
+
+<h1>Wettersymbole im Vergleich</h1>
+<p class="hin">Vier Entwuerfe, jeder mit allen zwoelf Symbolen — eine Familie beurteilt man als Ganzes,
+nicht an einem Zeichen. Oben in Anzeigegroesse (54&nbsp;px) wie im Kopf der App, unten klein (22&nbsp;px)
+wie in der Stundenleiste. Bitte auch im Dunkelmodus und im Sonnenlicht ansehen.</p>
+
+<div class="leiste">
+  <button id="bTheme">Dunkel</button>
+  <button id="bBg" class="an">Auf Weiss</button>
+</div>
+
+<div id="raus"></div>
+
+<script>
+const NAMEN=["clear-day","partly-cloudy-day","cloudy","rain","sleet","snow","hail","thunderstorm","fog","wind","clear-night","partly-cloudy-night"];
+const LABELS={"clear-day":"Klar","clear-night":"Klar (Nacht)","partly-cloudy-day":"Teils bewölkt","partly-cloudy-night":"Teils bew. (Nacht)","cloudy":"Bewölkt","fog":"Nebel","wind":"Windig","rain":"Regen","sleet":"Schneeregen","snow":"Schnee","hail":"Hagel","thunderstorm":"Gewitter"};
+let gid=0;
+
+/* ================= A — wie jetzt in der App (Referenz) ================= */
+function ikA(name,size){gid++;const id="a"+gid;
+  const sunDefs=`<radialGradient id="${id}s" cx="42%" cy="38%" r="65%"><stop offset="0" stop-color="#fff4c8"/><stop offset="55%" stop-color="#ffd23f"/><stop offset="100%" stop-color="#f6a91f"/></radialGradient>`;
+  const sun=(cx,cy,r,rays)=>`${rays?[...Array(12)].map((_,i)=>`<rect x="${cx-1.5}" y="${cy-r-6}" width="3" height="5.5" rx="1.5" fill="#ffc23a" transform="rotate(${i*30} ${cx} ${cy})"/>`).join(""):""}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)"/>`;
+  const moon=`<path d="M16.6 13.6A6.2 6.2 0 1 1 10.8 5.6 4.9 4.9 0 0 0 16.6 13.6Z" fill="#f3e3a8"/>`;
+  const cloudDefs=`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe7ef"/></linearGradient>
+    <filter id="${id}f" x="-30%" y="-30%" width="160%" height="175%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.3" flood-color="#1c2b40" flood-opacity="0.15"/></filter>`;
+  const darkDefs=`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9c2cf"/><stop offset="1" stop-color="#8d99a9"/></linearGradient>`;
+  const cloud=(x,y,s,fill)=>`<g filter="url(#${id}f)"><path d="M${x+5} ${y+15}h${13*s}a${4.2*s} ${4.2*s} 0 0 0 .3-${8.4*s} ${5.6*s} ${5.6*s} 0 0 0-${10.8*s}-${1.6*s}A${4.4*s} ${4.4*s} 0 0 0 ${x+5} ${y+15}Z" fill="${fill||`url(#${id}c)`}"/></g>`;
+  const drops=[9,12.5,16].map((x,i)=>`<line x1="${x}" y1="${18+(i%2)*1.2}" x2="${x-1.3}" y2="${21.4+(i%2)*1.2}" stroke="#2f86cf" stroke-width="2" stroke-linecap="round"/>`).join("");
+  const flakes=[9,12.5,16].map(x=>`<circle cx="${x}" cy="19.6" r="1.15" fill="#9cc4e8"/>`).join("");
+  const bolt=`<path d="M12.8 16.5l-3.2 4.8h2.3L10.8 25l4.2-5.2h-2.4l1.4-3.3z" fill="#f5a623"/>`;
+  let defs="",body="";
+  switch(name){
+    case "clear-day": defs=sunDefs; body=sun(12,12,7,true); break;
+    case "clear-night": body=moon; break;
+    case "partly-cloudy-day": defs=sunDefs+cloudDefs; body=`<g transform="translate(3.5,-2.5)">${sun(11,9,5.5,true)}</g>`+cloud(2,3,.92); break;
+    case "partly-cloudy-night": defs=cloudDefs; body=`<g transform="translate(3,-3) scale(.8)">${moon}</g>`+cloud(2,3,.92); break;
+    case "cloudy": defs=cloudDefs; body=cloud(1.5,2.5,1); break;
+    case "fog": defs=cloudDefs; body=cloud(1.5,0,.95)+[19.5,21.6].map(y=>`<line x1="5" y1="${y}" x2="19" y2="${y}" stroke="#aab6c4" stroke-width="1.7" stroke-linecap="round"/>`).join(""); break;
+    case "rain": defs=cloudDefs; body=cloud(1.5,0.5,1)+drops; break;
+    case "sleet": defs=cloudDefs; body=cloud(1.5,0.5,1)+drops+flakes; break;
+    case "snow": defs=cloudDefs; body=cloud(1.5,0.5,1)+flakes; break;
+    case "hail": defs=cloudDefs; body=cloud(1.5,0.5,1)+[9,12.5,16].map(x=>`<circle cx="${x}" cy="19.6" r="1.3" fill="#8fb6d6"/>`).join(""); break;
+    case "thunderstorm": defs=cloudDefs+darkDefs; body=cloud(1.5,0.5,1,`url(#${id}d)`)+bolt; break;
+    case "wind": body=[10,13.5,17].map((y,i)=>`<path d="M4 ${y}h${9+i*1.4}a2 2 0 1 0-2-2" fill="none" stroke="#9aa7b8" stroke-width="2" stroke-linecap="round"/>`).join(""); break;
+    default: defs=cloudDefs; body=cloud(1.5,2.5,1);
+  }
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}"><defs>${defs}</defs>${body}</svg>`;
+}
+
+/* ============ B — plastisch: alles in der Sprache der Wolke ============
+   Die Grundkoerper (Sonne, Wolke, Mond) hatten schon Verlauf und Schatten,
+   die Zutaten (Wind, Nebel, Tropfen, Flocken) nicht. Hier bekommen sie
+   dieselbe Behandlung: Verlauf statt Vollton, weiche Kanten, eigener
+   Schatten. Die Windbaender laufen nach hinten aus - das zeichnet die
+   Richtung, ohne einen Pfeil zu brauchen. */
+function ikB(name,size){gid++;const id="b"+gid;
+  const defsSun=`<radialGradient id="${id}s" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fffbe8"/><stop offset="46%" stop-color="#ffd447"/><stop offset="100%" stop-color="#f4a01c"/></radialGradient>
+    <filter id="${id}gs" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#c47a00" flood-opacity="0.3"/></filter>`;
+  const defsCloud=`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e2ec"/></linearGradient>
+    <filter id="${id}f" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.25" flood-color="#1c2b40" flood-opacity="0.16"/></filter>`;
+  const defsDark=`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c2cbd8"/><stop offset="1" stop-color="#7f8c9e"/></linearGradient>`;
+  const defsDrop=`<linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fb4ea"/><stop offset="1" stop-color="#2f74c0"/></linearGradient>`;
+  const defsWind=`<linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="22" y2="0"><stop offset="0" stop-color="#9fb2c8" stop-opacity="0"/><stop offset="38%" stop-color="#8aa2bd"/><stop offset="100%" stop-color="#6d88a8"/></linearGradient>
+    <filter id="${id}wf" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy=".9" stdDeviation=".7" flood-color="#25384f" flood-opacity="0.18"/></filter>`;
+  const defsMoon=`<linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6cf"/><stop offset="100%" stop-color="#e8cf82"/></linearGradient>`;
+  const sun=(cx,cy,r,rays)=>`<g filter="url(#${id}gs)">${rays?[...Array(8)].map((_,i)=>
+      `<path d="M${cx} ${cy-r-6.6} l1.5 4.2 h-3 z" fill="#ffc528" transform="rotate(${i*45} ${cx} ${cy})"/>`).join(""):""}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)"/></g>`;
+  const moon=`<path d="M16.6 13.6A6.2 6.2 0 1 1 10.8 5.6 4.9 4.9 0 0 0 16.6 13.6Z" fill="url(#${id}m)"/>`;
+  const cloud=(x,y,sc,fill)=>`<g filter="url(#${id}f)"><path d="M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z" fill="${fill||`url(#${id}c)`}"/></g>`;
+  // echte Tropfenform statt Strich
+  const drop=(x,y,sc)=>`<path d="M${x} ${y} c${1.9*sc} ${2.4*sc} ${2.7*sc} ${3.4*sc} ${2.7*sc} ${4.5*sc} a${2.7*sc} ${2.7*sc} 0 0 1 ${-5.4*sc} 0 c0 ${-1.1*sc} ${.8*sc} ${-2.1*sc} ${2.7*sc} ${-4.5*sc}z" fill="url(#${id}r)"/>`;
+  const drops=[[8.4,16.6],[12.4,17.9],[16.4,16.6]].map(([x,y],i)=>drop(x,y,.62+(i%2)*.06)).join("");
+  const flake=(x,y,r)=>[0,60,120].map(a=>`<line x1="${x-r}" y1="${y}" x2="${x+r}" y2="${y}" stroke="#a9cdeb" stroke-width="1.15" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+  const flakes=[[8.1,19.4],[12.5,20.7],[16.9,19.4]].map(([x,y])=>flake(x,y,1.55)).join("");
+  const bolt=`<path d="M13.2 15.4l-3.4 4.9h2.4l-1.4 3.9 4.4-5.5h-2.6l1.4-3.3z" fill="#f7a81b" stroke="#e08c00" stroke-width=".35" stroke-linejoin="round"/>`;
+  const band=(y,len,w)=>`<path d="M${13.6-len} ${y}h${len-2.4}a${w} ${w} 0 1 0 ${-w} ${-w}" fill="none" stroke="url(#${id}w)" stroke-width="2.25" stroke-linecap="round"/>`;
+  let defs="",body="";
+  switch(name){
+    case "clear-day": defs=defsSun; body=sun(12,12,6.6,true); break;
+    case "clear-night": defs=defsMoon; body=moon; break;
+    case "partly-cloudy-day": defs=defsSun+defsCloud; body=`<g transform="translate(3.6,-2.6)">${sun(11,9,5.2,true)}</g>`+cloud(2,3,.92); break;
+    case "partly-cloudy-night": defs=defsCloud+defsMoon; body=`<g transform="translate(3,-3) scale(.8)">${moon}</g>`+cloud(2,3,.92); break;
+    case "cloudy": defs=defsCloud; body=cloud(1.5,2.5,1); break;
+    case "fog": defs=defsCloud+defsWind; body=cloud(1.5,-1.4,.95)
+      +[[18.6,15.2],[21.8,11.2]].map(([y,len])=>
+        `<path d="M${19.2-len} ${y}h${len}" fill="none" stroke="url(#${id}w)" stroke-width="2.1" stroke-linecap="round"/>`).join(""); break;
+    case "rain": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)+drops; break;
+    case "sleet": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)+drop(8.6,16.4,.6)+drop(16.4,16.4,.6)+flake(12.5,19.9,1.6); break;
+    case "snow": defs=defsCloud; body=cloud(1.5,0,1)+flakes; break;
+    case "hail": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)
+      +[[8.6,19.4],[12.5,20.4],[16.4,19.4]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.5" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".5"/>`).join(""); break;
+    case "thunderstorm": defs=defsCloud+defsDark; body=cloud(1.5,0,1,`url(#${id}d)`)+bolt; break;
+    case "wind": defs=defsWind; body=`<g filter="url(#${id}wf)">`+band(8.9,13.2,2.2)+band(13,16.4,2.45)+band(17.1,11.4,2)+`</g>`; break;
+    default: defs=defsCloud; body=cloud(1.5,2.5,1);
+  }
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}"><defs>${defs}</defs>${body}</svg>`;
+}
+
+/* ============ C — kraeftig: fuer den Blick im Sonnenlicht =============
+   Dieselbe Bauweise, aber satter und groesser. Auf dem Telefon draussen
+   verschwinden zarte Pastelltoene; hier sind die Formen dicker, die Farben
+   naeher am Vollton und der Kontrast zum Hintergrund hoeher. Der Preis ist
+   ein lauteres Bild. */
+function ikC(name,size){gid++;const id="c"+gid;
+  const defsSun=`<radialGradient id="${id}s" cx="36%" cy="30%" r="74%"><stop offset="0" stop-color="#ffe680"/><stop offset="55%" stop-color="#ffb400"/><stop offset="100%" stop-color="#ef8b00"/></radialGradient>`;
+  const defsCloud=`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f8fc"/><stop offset="1" stop-color="#bccbdb"/></linearGradient>`;
+  const defsDark=`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b98aa"/><stop offset="1" stop-color="#5c6a7d"/></linearGradient>`;
+  const defsMoon=`<linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffefae"/><stop offset="100%" stop-color="#e0c164"/></linearGradient>`;
+  const BL="#1f74c4", WIND="#52738f";
+  const sun=(cx,cy,r,rays)=>`${rays?[...Array(8)].map((_,i)=>
+      `<rect x="${cx-1.35}" y="${cy-r-6.2}" width="2.7" height="4.6" rx="1.35" fill="#ffab00" transform="rotate(${i*45} ${cx} ${cy})"/>`).join(""):""}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)"/>`;
+  const moon=`<path d="M17 13.9A6.6 6.6 0 1 1 10.7 5.2 5.2 5.2 0 0 0 17 13.9Z" fill="url(#${id}m)"/>`;
+  const cloud=(x,y,sc,fill)=>`<path d="M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z" fill="${fill||`url(#${id}c)`}"/>`;
+  const drops=[[8.6,16.8],[12.5,18.1],[16.4,16.8]].map(([x,y])=>
+      `<path d="M${x} ${y} c1.3 1.7 1.9 2.4 1.9 3.2a1.9 1.9 0 0 1-3.8 0c0-.8.6-1.5 1.9-3.2z" fill="${BL}"/>`).join("");
+  const flake=(x,y,r)=>[0,60,120].map(a=>`<line x1="${x-r}" y1="${y}" x2="${x+r}" y2="${y}" stroke="#5aa3dd" stroke-width="1.5" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+  const flakes=[[8.0,19.5],[12.5,20.8],[17.0,19.5]].map(([x,y])=>flake(x,y,1.7)).join("");
+  const bolt=`<path d="M13.3 15.2l-3.6 5.2h2.6l-1.5 3.9 4.6-5.8h-2.8l1.5-3.3z" fill="#ffab00"/>`;
+  const band=(y,len,w)=>`<path d="M${13.8-len} ${y}h${len-2.6}a${w} ${w} 0 1 0 ${-w} ${-w}" fill="none" stroke="${WIND}" stroke-width="2.7" stroke-linecap="round"/>`;
+  let defs="",body="";
+  switch(name){
+    case "clear-day": defs=defsSun; body=sun(12,12,7,true); break;
+    case "clear-night": defs=defsMoon; body=moon; break;
+    case "partly-cloudy-day": defs=defsSun+defsCloud; body=`<g transform="translate(3.6,-2.6)">${sun(11,9,5.6,true)}</g>`+cloud(2,3,.92); break;
+    case "partly-cloudy-night": defs=defsCloud+defsMoon; body=`<g transform="translate(3,-3) scale(.8)">${moon}</g>`+cloud(2,3,.92); break;
+    case "cloudy": defs=defsCloud; body=cloud(1.5,2.5,1); break;
+    case "fog": defs=defsCloud; body=cloud(1.5,-1.4,.95)+[[18.6,15.2],[21.8,11.2]].map(([y,len])=>
+        `<path d="M${19.2-len} ${y}h${len}" fill="none" stroke="${WIND}" stroke-width="2.2" stroke-linecap="round"/>`).join(""); break;
+    case "rain": defs=defsCloud; body=cloud(1.5,0,1)+drops; break;
+    case "sleet": defs=defsCloud; body=cloud(1.5,0,1)
+      +`<path d="M8.6 16.5c1.3 1.7 1.9 2.4 1.9 3.2a1.9 1.9 0 0 1-3.8 0c0-.8.6-1.5 1.9-3.2z" fill="${BL}"/>`
+      +`<path d="M16.4 16.5c1.3 1.7 1.9 2.4 1.9 3.2a1.9 1.9 0 0 1-3.8 0c0-.8.6-1.5 1.9-3.2z" fill="${BL}"/>`
+      +flake(12.5,20.1,1.7); break;
+    case "snow": defs=defsCloud; body=cloud(1.5,0,1)+flakes; break;
+    case "hail": defs=defsCloud; body=cloud(1.5,0,1)
+      +[[8.6,19.6],[12.5,20.6],[16.4,19.6]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.7" fill="#8fc0e6" stroke="#4f8cc0" stroke-width=".7"/>`).join(""); break;
+    case "thunderstorm": defs=defsCloud+defsDark; body=cloud(1.5,0,1,`url(#${id}d)`)+bolt; break;
+    case "wind": body=band(8.8,13.4,2.3)+band(13,16.6,2.55)+band(17.2,11.6,2.1); break;
+    default: defs=defsCloud; body=cloud(1.5,2.5,1);
+  }
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}"><defs>${defs}</defs>${body}</svg>`;
+}
+
+/* ============ D — linear: eine Strichstaerke, kein Volumen =============
+   Die andere Art, es einheitlich zu machen: statt allem Volumen zu geben,
+   nimmt man es allem weg. Eine Strichstaerke, runde Enden, Farbe nur dort,
+   wo sie etwas bedeutet (Sonne gelb, Nass blau). Ruhig und zeitlos, aber
+   auf kleinen Groessen weniger gut unterscheidbar als ein Vollkoerper. */
+function ikD(name,size){gid++;
+  const S=1.7, G="#6b7889", GE="#f0a92b", BL="#3b8ed6";
+  const st=(d,c)=>`<path d="${d}" fill="none" stroke="${c||G}" stroke-width="${S}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const sun=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${GE}" stroke-width="${S}"/>`
+    +[...Array(8)].map((_,i)=>`<line x1="${cx}" y1="${cy-r-2.1}" x2="${cx}" y2="${cy-r-4.3}" stroke="${GE}" stroke-width="${S}" stroke-linecap="round" transform="rotate(${i*45} ${cx} ${cy})"/>`).join("");
+  const moon=st("M17.2 14.1A6.7 6.7 0 1 1 10.6 5 5.3 5.3 0 0 0 17.2 14.1Z",GE);
+  const cloudD=(x,y,sc)=>`M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z`;
+  const cloud=(x,y,sc,c)=>st(cloudD(x,y,sc),c);
+  const drops=[[9,17.3],[12.5,18.6],[16,17.3]].map(([x,y])=>st(`M${x} ${y}v2.6`,BL)).join("");
+  const flakes=[[8.1,19.5],[12.5,20.8],[16.9,19.5]].map(([x,y])=>
+      [0,60,120].map(a=>`<line x1="${x-1.45}" y1="${y}" x2="${x+1.45}" y2="${y}" stroke="${BL}" stroke-width="${S-.35}" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("")).join("");
+  let body="";
+  switch(name){
+    case "clear-day": body=sun(12,12,4.6); break;
+    case "clear-night": body=moon; break;
+    case "partly-cloudy-day": body=`<g transform="translate(4,-2.4)">${sun(10.5,8.6,3.5)}</g>`+cloud(2,3.4,.92); break;
+    case "partly-cloudy-night": body=`<g transform="translate(3.4,-3.4) scale(.78)">${moon}</g>`+cloud(2,3.4,.92); break;
+    case "cloudy": body=cloud(1.5,2.5,1); break;
+    case "fog": body=cloud(1.5,-.4,.95)+st("M5 18.9h13.4")+st("M8 21.6h10.4"); break;
+    case "rain": body=cloud(1.5,0,1)+drops; break;
+    case "sleet": body=cloud(1.5,0,1)+st("M8.5 17.2v2.5",BL)+st("M16.5 17.2v2.5",BL)
+      +[0,60,120].map(a=>`<line x1="11.1" y1="20.3" x2="13.9" y2="20.3" stroke="${BL}" stroke-width="${S-.35}" stroke-linecap="round" transform="rotate(${a} 12.5 20.3)"/>`).join(""); break;
+    case "snow": body=cloud(1.5,0,1)+flakes; break;
+    case "hail": body=cloud(1.5,0,1)+[[8.8,19.6],[12.5,20.6],[16.2,19.6]].map(([x,y])=>
+      `<circle cx="${x}" cy="${y}" r="1.4" fill="none" stroke="${BL}" stroke-width="${S-.3}"/>`).join(""); break;
+    case "thunderstorm": body=cloud(1.5,0,1)+st("M13.1 15.6l-3.2 4.7h2.5l-1.3 3.6 4.2-5.2h-2.6z",GE); break;
+    case "wind": body=st("M3.4 9.2h8.9a2.3 2.3 0 1 0-2.3-2.3")+st("M3.4 13.2h11.3a2.5 2.5 0 1 1-2.5 2.5")+st("M3.4 17.4h6.4a2.1 2.1 0 1 0-2.1-2.1"); break;
+    default: body=cloud(1.5,2.5,1);
+  }
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}">${body}</svg>`;
+}
+
+const VARIANTEN=[
+  ["A","wie jetzt in der App","Grundkoerper plastisch, Zutaten flach - genau der Bruch, um den es geht."],
+  ["B","plastisch durchgezogen","Wind, Nebel, Tropfen und Flocken bekommen Verlauf und Schatten wie die Wolke. Windbaender laufen nach hinten aus."],
+  ["C","kraeftig","Dieselbe Bauweise, satter und dicker - gedacht fuer den Blick aufs Telefon im Freien."],
+  ["D","linear","Alles auf eine Strichstaerke, Farbe nur wo sie etwas bedeutet. Ruhig, aber im Kleinen schwerer zu unterscheiden."]
+];
+const FN={A:ikA,B:ikB,C:ikC,D:ikD};
+
+function bauen(){
+  document.getElementById("raus").innerHTML = VARIANTEN.map(([k,titel,text])=>{
+    const f=FN[k];
+    const gitter=NAMEN.map(n=>`<div class="ik">${f(n,44)}<div class="n">${LABELS[n]}</div></div>`).join("");
+    const gross=`<div class="gross">${f("wind",54)}<div><div class="t">17,0&thinsp;°C</div></div><div class="l">Windig</div></div>`
+               +`<div class="gross" style="border-top:0;padding-top:0">${f("clear-day",54)}<div><div class="t">22,4&thinsp;°C</div></div><div class="l">Klar</div></div>`;
+    const klein=`<div class="klein">`+["clear-day","partly-cloudy-day","cloudy","rain","wind","fog","snow"].map(n=>
+        `<div>${f(n,22)}<div class="n">${n==="partly-cloudy-day"?"teils":LABELS[n].split(" ")[0]}</div></div>`).join("")+`</div>`;
+    return `<div class="var"><div class="vk"><b>${k}</b><span>${titel}</span></div><p class="vb">${text}</p>
+            <div class="gr">${gitter}</div>${gross}${klein}</div>`;
+  }).join("");
+}
+bauen();
+
+document.getElementById("bTheme").onclick=e=>{
+  const d=document.documentElement.classList.toggle("dunkel");
+  e.target.textContent=d?"Hell":"Dunkel"; e.target.classList.toggle("an",d);
+};
+document.getElementById("bBg").onclick=e=>{
+  const an=e.target.classList.toggle("an");
+  document.querySelectorAll(".var").forEach(v=>v.style.background=an?"":"transparent");
+  e.target.textContent=an?"Auf Weiss":"Ohne Karte";
+};
+
+</script>
+</body></html>
