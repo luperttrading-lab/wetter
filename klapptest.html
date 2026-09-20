@@ -1,0 +1,148 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Abschnitte auf- und zuklappen</title>
+<style>
+:root{
+  --ink:#17202e;--muted:#5c6b80;--faint:#9aa7b8;
+  --card:#ffffff;--line:#e7dfd4;
+  --shadow-s:0 1px 2px rgba(16,24,40,.05),0 6px 16px rgba(16,24,40,.05);
+  --radius:20px;--bg-a:#f6ede2;--bg-b:#eef2f7;--stufe:#f2f6fb;
+}
+html.dunkel{
+  --ink:#eef2f7;--muted:#93a1b3;--faint:#7d8a9b;
+  --card:#161d26;--line:#26303c;
+  --shadow-s:0 1px 2px rgba(0,0,0,.3),0 6px 16px rgba(0,0,0,.25);
+  --bg-a:#131a23;--bg-b:#0f141b;--stufe:#1d2631;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+  color:var(--ink);background:linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 42%) fixed;
+  min-height:100dvh;padding:14px 16px 60px;-webkit-text-size-adjust:100%}
+h1{font-size:19px;margin:6px 0 4px}
+.hin{color:var(--muted);font-size:13.5px;margin:0 0 12px;line-height:1.45}
+.leiste{position:sticky;top:0;z-index:5;padding:8px 0 10px;margin-bottom:10px;
+  background:var(--bg-b);border-bottom:1px solid var(--line);display:flex;gap:8px}
+.leiste button{font:inherit;font-size:14px;padding:7px 13px;border-radius:999px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.leiste button.an{background:#2f6fd0;border-color:#2f6fd0;color:#fff}
+
+/* --- Grundgeruest wie in der App --- */
+.sect{font-size:12px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);margin:22px 6px 9px}
+.nowcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow-s);padding:14px 15px 11px}
+.inhalt{height:96px;border-radius:12px;
+  background:repeating-linear-gradient(135deg,var(--stufe) 0 9px,transparent 9px 18px);
+  display:grid;place-items:center;color:var(--faint);font-size:12px}
+.vb{color:var(--muted);font-size:12.5px;margin:2px 6px 0;line-height:1.4}
+.zwei{display:grid;gap:4px}
+
+/* ===================== A: Chevron am Zeilenende ===================== */
+.kA{display:flex;align-items:center;gap:8px;cursor:pointer;
+  margin:22px 6px 9px;user-select:none}
+.kA .sect{margin:0;flex:1}
+.kA .pf{width:9px;height:9px;border-right:2px solid var(--faint);
+  border-bottom:2px solid var(--faint);transform:rotate(-135deg);transition:transform .18s}
+.kA.zu .pf{transform:rotate(45deg) translate(-1px,-1px)}
+
+/* ===================== B: Linie fuellt die Zeile ==================== */
+.kB{display:flex;align-items:center;gap:10px;cursor:pointer;
+  margin:22px 6px 9px;user-select:none}
+.kB .sect{margin:0;flex:0 0 auto}
+.kB .strich{flex:1;height:1px;background:var(--line)}
+.kB .knopf{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);
+  background:var(--card);display:grid;place-items:center;flex:0 0 auto;transition:transform .2s}
+.kB .knopf::before{content:"";width:7px;height:7px;border-right:1.8px solid var(--faint);
+  border-bottom:1.8px solid var(--faint);transform:rotate(-135deg) translate(-1px,-1px)}
+.kB.zu .knopf{transform:rotate(180deg)}
+
+/* ============ C: Kapsel rechts, wie die Knoepfe der App ============= */
+.kC{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  cursor:pointer;margin:22px 6px 9px;user-select:none}
+.kC .sect{margin:0}
+.kC .kap{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
+  letter-spacing:.03em;color:var(--muted);background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px 4px 9px;box-shadow:var(--shadow-s);flex:0 0 auto}
+.kC .kap::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;
+  border-bottom:2px solid currentColor;transform:rotate(-135deg) translateY(1px);transition:transform .18s}
+.kC.zu .kap::after{transform:rotate(45deg) translate(-1px,-1px)}
+
+/* ======= D: der Titel selbst, mit Dreieck davor (Inhaltsverzeichnis) ======= */
+.kD{display:flex;align-items:center;gap:7px;cursor:pointer;
+  margin:22px 6px 9px;user-select:none}
+.kD .sect{margin:0}
+.kD .drei{width:0;height:0;border-left:6px solid var(--faint);
+  border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;
+  transition:transform .18s;transform:rotate(90deg)}
+.kD.zu .drei{transform:rotate(0deg)}
+
+/* ====== E: Karte und Titel als ein Stueck, Griff an der Oberkante ====== */
+.kE{cursor:pointer;user-select:none;margin:22px 0 0}
+.kE .zeile{display:flex;align-items:center;gap:10px;padding:0 6px 9px}
+.kE .sect{margin:0;flex:1}
+.kE .griff{width:30px;height:5px;border-radius:999px;background:var(--line);
+  flex:0 0 auto;transition:background .18s}
+.kE:hover .griff{background:var(--faint)}
+.kE.zu .zeile{padding-bottom:0}
+.kE.zu + .nowcard{display:none}
+
+.hidden{display:none}
+</style></head><body>
+
+<h1>Abschnitte auf- und zuklappen</h1>
+<p class="hin">F&uuml;nf Arten, die &Uuml;berschriftenzeile zum Schalter zu machen. Jede ist
+antippbar &ndash; probiere sie an, jeweils auf und zu. Die schraffierte Fl&auml;che steht
+f&uuml;r den Inhalt, den es sp&auml;ter aus- und einblendet.</p>
+
+<div class="leiste"><button id="bTheme">Dunkel</button></div>
+
+<div id="raus"></div>
+
+<script>
+const VAR=[
+ ["A","Pfeil am Zeilenende",
+  "Der Pfeil sitzt rechts au&szlig;en auf H&ouml;he der &Uuml;berschrift. Zur&uuml;ckhaltend und &uuml;berall gleich, auch bei sehr langen Titeln."],
+ ["B","Linie f&uuml;llt die Zeile",
+  "Nach dem Titel l&auml;uft eine feine Linie bis zum runden Knopf am Rand. Fasst Titel und Schalter zu einer Einheit zusammen und trennt die Abschnitte sichtbar."],
+ ["C","Kapsel am Rand",
+  "Ein kleiner Pillenknopf wie die &uuml;brigen Knopfe der App, mit Beschriftung. Am deutlichsten als Bedienelement erkennbar, aber auch am lautesten."],
+ ["D","Dreieck vor dem Titel",
+  "Wie ein Inhaltsverzeichnis: das Dreieck steht vorn und dreht sich. Sehr vertraut, nimmt aber Platz vor dem Titel weg."],
+ ["E","Griff &uuml;ber der Karte",
+  "Ein Griff wie an einem Schubfach, rechts in der Zeile. Ruhig und modern &ndash; daf&uuml;r am wenigsten selbsterkl&auml;rend."]
+];
+const TITEL=["Mond im Jahr","Planeten am Himmel"];
+document.getElementById("raus").innerHTML=VAR.map(([k,t,b])=>{
+  const koepfe=TITEL.map((tt,i)=>{
+    const id=`k${k}${i}`;
+    let kopf;
+    if(k==="A")kopf=`<div class="kA" id="${id}"><div class="sect">${tt}</div><span class="pf"></span></div>`;
+    if(k==="B")kopf=`<div class="kB" id="${id}"><div class="sect">${tt}</div><span class="strich"></span><span class="knopf"></span></div>`;
+    if(k==="C")kopf=`<div class="kC" id="${id}"><div class="sect">${tt}</div><span class="kap">Zuklappen</span></div>`;
+    if(k==="D")kopf=`<div class="kD" id="${id}"><span class="drei"></span><div class="sect">${tt}</div></div>`;
+    if(k==="E")kopf=`<div class="kE" id="${id}"><div class="zeile"><div class="sect">${tt}</div><span class="griff"></span></div></div>`;
+    return kopf+`<div class="nowcard" id="${id}i"><div class="inhalt">Grafik</div></div>`;
+  }).join("");
+  return `<div style="margin-bottom:26px"><div style="display:flex;gap:9px;align-items:baseline;margin:22px 6px 0">
+      <b style="font-size:16px">${k}</b><span style="color:var(--muted);font-size:13px">${t}</span></div>
+      <p class="vb">${b}</p>${koepfe}</div>`;
+}).join("");
+
+VAR.forEach(([k])=>TITEL.forEach((tt,i)=>{
+  const id=`k${k}${i}`, kopf=document.getElementById(id), inhalt=document.getElementById(id+"i");
+  kopf.onclick=()=>{
+    const zu=kopf.classList.toggle("zu");
+    inhalt.classList.toggle("hidden",zu);
+    if(k==="C")kopf.querySelector(".kap").textContent=zu?"Aufklappen":"Zuklappen";
+  };
+}));
+// je ein Beispiel zugeklappt zeigen, damit man beide Zustaende sieht
+VAR.forEach(([k])=>document.getElementById(`k${k}1`).click());
+
+document.getElementById("bTheme").onclick=e=>{
+  const d=document.documentElement.classList.toggle("dunkel");
+  e.target.textContent=d?"Hell":"Dunkel";e.target.classList.toggle("an",d);
+};
+</script></body></html>
