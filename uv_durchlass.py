@@ -402,6 +402,42 @@ def spitzen_nach_wolkenart(log):
     return out
 
 
+def _regress(w):
+    """p aus ln(q) = p * ln(dl), Regression durch den Ursprung. None, wenn leer."""
+    x = [math.log(p["dl"]) for p in w]
+    y = [math.log(p["q"]) for p in w]
+    sxx = sum(a * a for a in x)
+    if sxx < 1e-9:
+        return None
+    pk = sum(a * b for a, b in zip(x, y)) / sxx
+    rest = sum((b - pk * a) ** 2 for a, b in zip(x, y))
+    gesamt = sum(b * b for b in y)
+    return {"punkte": len(w), "p_roh": round(pk, 3),
+            "r2": round(1 - rest / gesamt, 3) if gesamt > 1e-9 else 0.0,
+            "fehler": round(math.sqrt(rest / (len(w) - 1) / sxx), 3) if len(w) > 1 else 0.0,
+            "dl_mittel": round(sum(q["dl"] for q in w) / len(w), 3)}
+
+
+def gesamt(log):
+    """Ein Exponent ueber ALLE Klassen - der Wert, den die App liest.
+
+    Die Trennung nach Sonnenschein-Klassen war der erste Ansatz und hat nichts
+    gebracht: die Klassenwerte liegen zwischen 0,61 und 0,69 und schwanken von
+    Tag zu Tag um mehr, als sie sich unterscheiden, und "volle Sonne" bleibt
+    dauerhaft unbrauchbar (r2 0,21), weil dort kaum Variation im Durchlass
+    steckt. Gerechnet wird deshalb wie je Klasse, nur ueber alle Punkte."""
+    w = [p for tag in log.values() for p in tag
+         if p.get("sd") is not None and 0.08 < p["dl"] < 0.97 and p["q"] > 0.05]
+    if len(w) < MIN_PUNKTE:
+        return {"punkte": len(w), "p": None}
+    e = _regress(w)
+    if not e:
+        return {"punkte": len(w), "p": None}
+    e["p"] = round(max(0.15, min(1.0, e["p_roh"])), 3) if e["r2"] >= MIN_R2 else None
+    e["tage"] = len(log)
+    return e
+
+
 def auswerten(log):
     """Je Klasse den Exponenten p aus q = dl^p schaetzen."""
     alle = [p for tag in log.values() for p in tag]
@@ -432,23 +468,36 @@ def auswerten(log):
 
 
 def main():
-    datum = sys.argv[1] if len(sys.argv) > 1 else \
-        (dt.date.today() - dt.timedelta(days=1)).isoformat()
-    print("Wolkendurchlass-Paare fuer %s" % datum)
-    paare = sammeln(datum)
-    print("gesammelt: %d Paare" % len(paare))
+    # --nur-auswerten: das Protokoll neu bewerten, ohne einen Tag zu holen.
+    # Braucht man nach jeder Aenderung an der Auswertung - der Sammellauf
+    # zieht rund 20 Stationsbilder und dauert Minuten.
+    nur = "--nur-auswerten" in sys.argv[1:]
+    rest = [a for a in sys.argv[1:] if not a.startswith("--")]
+    datum = rest[0] if rest else (dt.date.today() - dt.timedelta(days=1)).isoformat()
 
     try:
         with open(LOG, encoding="utf-8") as fh:
             log = json.load(fh)
     except Exception:
         log = {}
-    if paare:
-        log[datum] = paare
-        with open(LOG, "w", encoding="utf-8") as fh:
-            json.dump(log, fh, ensure_ascii=False)
+    if nur:
+        print("nur auswerten: %d Tage im Protokoll, nichts geholt" % len(log))
+    else:
+        print("Wolkendurchlass-Paare fuer %s" % datum)
+        paare = sammeln(datum)
+        print("gesammelt: %d Paare" % len(paare))
+        if paare:
+            log[datum] = paare
+            with open(LOG, "w", encoding="utf-8") as fh:
+                json.dump(log, fh, ensure_ascii=False)
 
     erg = auswerten(log)
+    ges = gesamt(log)
+    print("\nExponent ueber ALLE Klassen (den liest die App):")
+    print("  %d Punkte aus %d Tagen | p = %s | r2 %.2f | +-%.3f"
+          % (ges["punkte"], ges.get("tage", 0),
+             ("%.3f" % ges["p"]) if ges.get("p") else "(verworfen)",
+             ges.get("r2", 0), ges.get("fehler", 0)))
     print("\n%-8s %8s %9s %9s %7s %9s" % ("Klasse", "Punkte", "Exponent", "+-", "r2", "Durchl."))
     for name, lo, hi in KLASSEN:
         e = erg[name]
@@ -500,14 +549,18 @@ def main():
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None, "tage": len(log),
                    "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; "
-                            "Regression ln(q)=p*ln(dl), ab %d Punkten und r2 %.2f" % (MIN_PUNKTE, MIN_R2),
+                            "Regression ln(q)=p*ln(dl), ab %d Punkten und r2 %.2f. "
+                            "Die App liest p_gesamt (alle Klassen zusammen)." % (MIN_PUNKTE, MIN_R2),
                    "klassen": {n: {"von": lo, "bis": hi} for n, lo, hi in KLASSEN},
+                   "p_gesamt": ges,
                    "p": erg, "tagesgang": tg, "spitzen": sp,
                    "wolkenart": wa}, fh, ensure_ascii=False, indent=1)
     print("\n%s geschrieben (%d von %d Klassen belegt, %d Tage im Log)"
           % (AUS, fertig, len(KLASSEN), len(log)))
-    if fertig < len(KLASSEN):
-        print("Solange eine Klasse leer ist, rechnet die App mit 0,5 weiter.")
+    if not ges.get("p"):
+        print("p_gesamt ist leer - die App bleibt beim festen Wert 0,669.")
+    elif fertig < len(KLASSEN):
+        print("Eine Klasse ist leer; die App liest ohnehin nur p_gesamt.")
     return 0
 
 
