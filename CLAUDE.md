@@ -276,43 +276,63 @@ Zwei Kurven, zwei ganz verschiedene Wege:
   Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
   unabhaengige Messgeraete an derselben Station unter denselben Wolken.
 
-### Offen: der Exponent steht fest, die Daten sind weiter
+### Erledigt (v4.26): der Exponent kommt jetzt aus der Datei
 
-`UV_K_EXP = 0.669` ist fest eingebaut (Stand v3.87, 1488 Paare).
-`uv-durchlass.json` hat inzwischen 14 Tage und sagt 0,679 +- 0,011 (teils
-Sonne, r2 0,52) und 0,682 +- 0,004 (keine Sonne, r2 0,81) - also 1,5 % hoeher
-und ueber die Klassen hinweg gleich. Die Klasse "volle Sonne" bleibt
-unbrauchbar (r2 0,21), weil dort kaum Variation im Durchlass steckt.
-Die App liest die Datei **nicht**; wer den Wert nachzieht, aendert die
-Konstante in `index.html` von Hand.
+`UV_K_EXP` startet auf 0,669, aber `uvDurchlassLaden()` holt alle sechs
+Stunden `uv-durchlass.json` und nimmt das Feld **`p_gesamt`** - EIN Exponent
+ueber alle Sonnenschein-Klassen (Stand 14 Tage: 0,685 aus 10 741 Paaren,
+r2 0,75). Die Klassentrennung bringt nichts, "volle Sonne" bleibt mit r2 0,21
+unbrauchbar. Faellt die Datei aus oder liegt der Wert ausserhalb 0,35-0,95,
+bleibt 0,669 stehen.
 
-### Offen: der Stationsfaktor und die 90-Prozent-Schwelle
+Wichtiger als der Wert ist, was dabei herauskam: Sagt man jeden Tag einzeln
+mit dem Exponenten der anderen 13 vorher, schwankt der Bias zwischen -17 %
+und +8 %. Der Wechsel von 0,669 auf 0,685 verschiebt ihn um 0,8
+Prozentpunkte. **Am Exponenten ist nichts mehr zu holen.** Wer die UV-Saeulen
+besser machen will, muss am Tag ansetzen, nicht an p.
 
-`uv_station.py` nimmt einen Tag nur bei **`MIN_SONNE = 0,90`** (Sonnenanteil
-11-15 Uhr). Der Grund steht im Skript und ist gut belegt: ueber 102
-Stationstage ist die Klasse 50-70 % Sonne der Wolkenrand-Ausreisser-Bereich
-(Median 1,209, 9 von 16 Tagen ueber 1,15).
+`uv_durchlass.py --nur-auswerten` bewertet das Protokoll neu, ohne einen Tag
+zu holen - der Sammellauf zieht rund 20 Stationsbilder und dauert Minuten.
 
-Fuer Wettenberg ist die Schwelle trotzdem zu streng. Aus `uv_klarlog.json`,
-15 Tage:
+### Erledigt (v4.26): der Stationsfaktor nimmt eine zweite Sonnenklasse
 
-    >= 90 % Sonne    1 Tag    1,134
-    70 bis 90 %      6 Tage   Median 1,118   Std 0,049
-    alle >= 70 %     7 Tage   Median 1,120   Std 0,045
+`MIN_SONNE` bleibt bei 0,90. Neu ist eine zweite Klasse 70-90 %, die **je
+Station** zugelassen wird, wenn sie mindestens `MIN_TAGE_2 = 3` Tage hat und
+ihre Streuung hoechstens `MAX_STREU_2 = 0,06` betraegt.
 
-Der einzelne Klartag und die sechs Teilsonnentage sagen dasselbe (1,134 gegen
-1,127 im Mittel, 0,6 % auseinander). Der Faktor steht also auf `tage: 1`
-und `vorlaeufig`, obwohl sieben Tage ihn stuetzen; die Daempfung
-`n/(n+0,43)` zieht ihn deshalb auf 1,094 statt 1,113.
+Die Mindestanzahl ist die halbe Regel, nicht Beiwerk: Ein einzelner Tag hat
+Streuung 0,000 und saehe damit am vertrauenswuerdigsten aus. Schneefernerhaus
+ist genau dieser Fall und liegt 17,5 % neben seinen sieben Klartagen. An den
+24 Stationen mit beiden Klassen:
 
-Nicht einfach die Schwelle senken - die 102-Stationstage-Statistik dagegen
-gilt weiter. Der saubere Weg waere, Tage mit 70-90 % Sonne mitzuzaehlen,
-**wenn ihre Streuung klein ist** (bei Wettenberg 0,049), sonst zu verwerfen.
-Vorher am Protokoll `uv-station-protokoll.json` gegenpruefen.
+    ohne Mindestanzahl, SD<=0,06   18 zugelassen  Median 2,1 %  MAX 17,5 %
+    ab 3 Tagen,         SD<=0,06    6 zugelassen  Median 0,8 %  max  3,4 %
 
-### Der Tagesgang der Truebung liegt noch brach
+Wettenberg steht damit auf 1,113 aus 7 Tagen statt 1,094 aus 1, und nicht
+mehr vorlaeufig. Sonst betroffen: Andernach (1,097), Zingst (neu, 1,080).
 
-`uv-durchlass.json` misst ihn: Steigung -0,0094 ueber 2619 Punkte von 22
-Stationen, vormittags 1,023, nachmittags 0,967 - also rund 5,6 % Unterschied
-zwischen Vor- und Nachmittag. Das r2 ist mit 0,034 winzig, der Effekt aber
-systematisch. Noch nicht eingebaut.
+### Erledigt (v4.25): der Tagesgang der Truebung
+
+Die Klarhimmelglocke ist nicht mehr symmetrisch um den Sonnenhoechststand:
+Faktor `1 + b*(Stunden seit Hoechststand)` mit `b = -0,0075/h`, geklemmt auf
++-6 %, angewandt in `uvCamsAnwenden`, `makeSunBell` und `physUvAt`.
+
+**Nicht** der Wert aus `uv-durchlass.json` (-0,0094 +- 0,001): dessen Fehler
+behandelt 2619 Punkte als unabhaengig, obwohl Punkte derselben Station am
+selben Tag es nicht sind. Geclustert nach Tagen -0,0080 (SD 0,0125), nach
+Stationen -0,0069 (SD 0,0086); 11 von 14 Tagen und 17 von 21 Stationen
+negativ. Die Richtung steht, die Groesse nicht - das 95-%-Band der
+Sechs-Stunden-Spanne reicht von -0,8 % bis -8,5 %.
+
+Die Glocke braucht den Faktor extra: `makeSunBell` fittet A*mu^k an die
+Stundenwerte, und mu ist symmetrisch um den Hoechststand - eine schiefe
+Kippung kann diese Regression gar nicht abbilden.
+
+### Offen: die Radar-Eichung hat keinen Abnehmer
+
+`regen_radar.py` laeuft alle sechs Stunden und schreibt `regen-radar.json`.
+**`index.html` liest die Datei nirgends** - die Pipeline laeuft seit jeher
+ins Leere. Wer sie anschliesst, muss zweierlei bedenken: der Nieselfaktor
+liegt bei 2,95, seine Quartile aber bei 1,25 und 5,00 - Faktor 4 Spannweite.
+Und er wirkt auf `radarSchwelleJetzt()`, also darauf, ob "es regnet jetzt"
+dasteht.
