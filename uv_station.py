@@ -55,6 +55,37 @@ Genau dort greift eine Schwelle von 0,70 noch mit. Ab 90 % Sonne sinkt die
 Streuung auf ein Drittel. Der frueher benutzte Wert 0,70 liess die
 Wolkenrand-Tage teilweise durch.
 
+DIE ZWEITE KLASSE: 70 BIS 90 PROZENT, ABER NUR BEI KLEINER STREUUNG
+Die Schwelle 0,90 ist fuer einen gut vermessenen Ort zu streng. Wettenberg
+hatte in 15 Tagen genau EINEN Tag ueber 90 % Sonne, aber sechs zwischen 70
+und 90 %, die dasselbe sagen (Median 1,118 gegen 1,134, 1,5 % auseinander).
+Der Faktor stand deshalb auf tage: 1 und wurde von der Schrumpfung auf
+1,094 statt 1,113 gezogen.
+
+Die Schwelle zu senken bleibt falsch - die 102-Stationstage-Statistik oben
+gilt weiter. Stattdessen wird die Klasse 70-90 % JE STATION zugelassen,
+wenn sie in sich stimmig ist. Zwei Bedingungen, beide noetig:
+
+    mindestens MIN_TAGE_2 Tage   und   Streuung <= MAX_STREU_2
+
+Die Mindestanzahl ist nicht Beiwerk, sie ist die halbe Regel: Ein einzelner
+Tag hat Streuung 0,000 und saehe damit am vertrauenswuerdigsten aus.
+Schneefernerhaus ist genau dieser Fall - ein 70-90-Tag, Streuung 0,000, und
+er liegt 17,5 % neben den sieben Klartagen derselben Station.
+
+Nachgemessen an den 24 Stationen, die BEIDES haben (>=90 % und 70-90 %),
+Abweichung der beiden Mediane voneinander:
+
+    ohne Mindestanzahl, SD<=0,06   18 zugelassen   Median 2,1 %   MAX 17,5 %
+    ab 2 Tagen,         SD<=0,06   11 zugelassen   Median 1,2 %   max  4,2 %
+    ab 3 Tagen,         SD<=0,06    6 zugelassen   Median 0,8 %   max  3,4 %
+
+Die Grenze 0,06 ist nicht gerundet, sondern die Luecke in den Daten: die
+Streuungen der Gruppen ab drei Tagen sind 0,035 0,037 0,038 0,045 0,048
+0,054 | 0,069 0,076 0,089 0,291. Sie wirft die beiden schaedlichsten
+Faelle hinaus (Langen +5,7 %, Schweinfurt -6,5 %) und laesst Wettenberg
+(0,054) herein.
+
 Jeder Stationstag wird in uv-station-protokoll.json festgehalten -
 genommen oder verworfen, mit Grund, zum Nachpruefen.
 """
@@ -63,7 +94,10 @@ import math
 
 LOG = "uv_klarlog.json"
 AUS = "uv-station.json"
-MIN_SONNE = 0.90      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag zaehlt
+MIN_SONNE = 0.90      # Anteil Sonnenschein 11-15 Uhr, damit ein Tag sicher zaehlt
+MIN_SONNE_2 = 0.70    # zweite Klasse: nur zugelassen, wenn sie in sich stimmig ist
+MIN_TAGE_2 = 3        # so viele Tage braucht die zweite Klasse (sonst ist SD=0 ein Artefakt)
+MAX_STREU_2 = 0.06    # und so klein muss ihre Streuung sein
 PROTOKOLL = "uv-station-protokoll.json"   # jeder Stationstag mit Grund
 MIN_SICHER = 3        # ab so vielen Tagen gilt der Faktor nicht mehr als vorlaeufig
 PRIOR = 0.43          # Gewicht der Pseudo-Beobachtung: ein Tag zaehlt zu 70 %
@@ -77,10 +111,20 @@ def median(xs):
     return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2
 
 
+def streuung(xs):
+    if len(xs) < 2:
+        return 0.0
+    m = sum(xs) / len(xs)
+    return math.sqrt(sum((v - m) ** 2 for v in xs) / (len(xs) - 1))
+
+
 def main():
     with open(LOG, "r", encoding="utf-8") as fh:
         log = json.load(fh)
 
+    # 1. Durchgang: alle brauchbaren Stationstage einsammeln und in die beiden
+    #    Sonnenklassen einsortieren. Ob die zweite zaehlt, entscheidet sich erst,
+    #    wenn ALLE Tage der Station beisammen sind - deshalb zwei Durchgaenge.
     je_station = {}
     prot = []
     for datum, tag in sorted(log.items()):
@@ -94,46 +138,75 @@ def main():
                 prot.append({"d": datum, "st": slug, "genommen": False,
                              "grund": "keine Sonnenscheindauer in Reichweite"})
                 continue
-            if so < MIN_SONNE:
+            if so < MIN_SONNE_2:
                 prot.append({"d": datum, "st": slug, "genommen": False,
                              "sonne": round(so, 2), "verh": z["verh"],
                              "grund": "nur %.0f %% Sonne 11-15 Uhr (Schwelle %.0f %%) - "
                                       "Maximum waere ein Wolkenrand-Ausreisser"
-                                      % (100 * so, 100 * MIN_SONNE)})
+                                      % (100 * so, 100 * MIN_SONNE_2)})
                 continue
-            prot.append({"d": datum, "st": slug, "genommen": True,
-                         "sonne": round(so, 2), "verh": z["verh"], "grund": "klar"})
-            je_station.setdefault(slug, {"tage": [], "la": z.get("la"),
-                                         "h": z.get("h"), "name": z.get("name", slug)})
-            je_station[slug]["tage"].append({"d": datum, "v": z["verh"]})
+            e = je_station.setdefault(slug, {"klar": [], "teil": [], "la": z.get("la"),
+                                             "h": z.get("h"), "name": z.get("name", slug)})
+            e["klar" if so >= MIN_SONNE else "teil"].append(
+                {"d": datum, "v": z["verh"], "so": so})
 
+    # 2. Durchgang: je Station entscheiden, ob die Klasse 70-90 % mitzaehlt,
+    #    und erst dann das Protokoll fuer diese Tage schreiben.
     out = {}
     for slug, e in sorted(je_station.items()):
-        werte = [t["v"] for t in e["tage"]]
+        teil = e["teil"]
+        sd2 = streuung([t["v"] for t in teil])
+        zweite = len(teil) >= MIN_TAGE_2 and sd2 <= MAX_STREU_2
+        if teil:
+            grund = ("%d Tage mit 70-90 %% Sonne, Streuung %.3f - stimmig, zaehlen mit"
+                     % (len(teil), sd2)) if zweite else (
+                     "%d Tage mit 70-90 %% Sonne, Streuung %.3f - %s"
+                     % (len(teil), sd2,
+                        "zu wenige (mindestens %d)" % MIN_TAGE_2 if len(teil) < MIN_TAGE_2
+                        else "zu unruhig (hoechstens %.2f)" % MAX_STREU_2))
+        for t in e["klar"]:
+            prot.append({"d": t["d"], "st": slug, "genommen": True,
+                         "sonne": round(t["so"], 2), "verh": t["v"], "grund": "klar"})
+        for t in teil:
+            prot.append({"d": t["d"], "st": slug, "genommen": zweite,
+                         "sonne": round(t["so"], 2), "verh": t["v"], "grund": grund})
+
+        tage = e["klar"] + (teil if zweite else [])
+        if not tage:
+            continue
+        werte = [t["v"] for t in tage]
         n = len(werte)
         m = median(werte)
         f = max(MIN_F, min(MAX_F, 1 + (m - 1) * n / (n + PRIOR)))   # Schrumpfung zur 1
         if abs(f - 1) < ABWEICHUNG:
             continue
-        sd = math.sqrt(sum((v - m) ** 2 for v in werte) / (n - 1)) if n > 1 else 0
         out[slug] = {"faktor": round(f, 3), "roh": round(m, 3), "tage": n,
                      "vorlaeufig": n < MIN_SICHER,
-                     "streuung": round(sd, 3),
-                     "von": min(t["d"] for t in e["tage"]),
-                     "bis": max(t["d"] for t in e["tage"])}
+                     "streuung": round(streuung(werte), 3),
+                     "klare_tage": len(e["klar"]),
+                     "teiltage": len(teil) if zweite else 0,
+                     "teiltage_verworfen": 0 if zweite else len(teil),
+                     "von": min(t["d"] for t in tage),
+                     "bis": max(t["d"] for t in tage)}
 
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None,
-                   "regel": "Median(Messung/Modell) an Tagen mit >=%d %% Sonne, "
-                            "zur 1 gedaempft mit n/(n+%.2f) - ein Tag zaehlt zu "
-                            "%.0f %%, geklemmt auf %.2f-%.2f, unter %.0f %% "
-                            "Abweichung kein Faktor, unter %d Tagen vorlaeufig"
-                            % (100 * MIN_SONNE, PRIOR, 100 / (1 + PRIOR),
+                   "regel": "Median(Messung/Modell) an Tagen mit >=%d %% Sonne; Tage mit "
+                            "%d-%d %% zaehlen mit, wenn es je Station mindestens %d sind "
+                            "und ihre Streuung hoechstens %.2f betraegt. Zur 1 gedaempft "
+                            "mit n/(n+%.2f) - ein Tag zaehlt zu %.0f %%, geklemmt auf "
+                            "%.2f-%.2f, unter %.0f %% Abweichung kein Faktor, unter %d "
+                            "Tagen vorlaeufig"
+                            % (100 * MIN_SONNE, 100 * MIN_SONNE_2, 100 * MIN_SONNE,
+                               MIN_TAGE_2, MAX_STREU_2, PRIOR, 100 / (1 + PRIOR),
                                MIN_F, MAX_F, 100 * ABWEICHUNG, MIN_SICHER),
                    "stationen": out}, fh, ensure_ascii=False, indent=1)
 
     with open(PROTOKOLL, "w", encoding="utf-8") as fh:
-        json.dump({"regel": "MIN_SONNE = %.0f %% Sonnenschein 11-15 Uhr" % (100 * MIN_SONNE),
+        json.dump({"regel": "MIN_SONNE = %.0f %%; Klasse %.0f-%.0f %% nur bei >=%d Tagen und "
+                            "Streuung <=%.2f je Station"
+                            % (100 * MIN_SONNE, 100 * MIN_SONNE_2, 100 * MIN_SONNE,
+                               MIN_TAGE_2, MAX_STREU_2),
                    "stationstage": prot}, fh, ensure_ascii=False, indent=1)
     gen = sum(1 for p in prot if p["genommen"])
     print("Protokoll: %d Stationstage, %d genommen, %d verworfen (%s)"
@@ -141,9 +214,9 @@ def main():
     print("uv-station.json: %d Stationen mit Faktor (von %d mit Daten)"
           % (len(out), len(je_station)))
     for slug, z in sorted(out.items(), key=lambda kv: -abs(kv[1]["faktor"] - 1)):
-        print("  %-24s x%.3f  (roh %.3f, %d Tage%s, Streuung %.3f)"
-              % (slug[:24], z["faktor"], z["roh"], z["tage"],
-                 ", vorlaeufig" if z["vorlaeufig"] else "", z["streuung"]))
+        print("  %-24s x%.3f  (roh %.3f, %d Tage = %d klar + %d teils%s, Streuung %.3f)"
+              % (slug[:24], z["faktor"], z["roh"], z["tage"], z["klare_tage"],
+                 z["teiltage"], ", vorlaeufig" if z["vorlaeufig"] else "", z["streuung"]))
     neutral = len(je_station) - len(out)
     if neutral:
         print("  ohne Faktor (Abweichung unter %.0f %%): %d Stationen" % (100 * ABWEICHUNG, neutral))

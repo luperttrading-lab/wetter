@@ -1,7 +1,7 @@
 {
  "stand": "2026-09-20",
  "tage": 14,
- "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; Regression ln(q)=p*ln(dl), ab 40 Punkten und r2 0.30",
+ "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; Regression ln(q)=p*ln(dl), ab 40 Punkten und r2 0.30. Die App liest p_gesamt (alle Klassen zusammen).",
  "klassen": {
   "voll": {
    "von": 9.5,
@@ -15,6 +15,15 @@
    "von": 0.0,
    "bis": 2.0
   }
+ },
+ "p_gesamt": {
+  "punkte": 10741,
+  "p_roh": 0.685,
+  "r2": 0.754,
+  "fehler": 0.004,
+  "dl_mittel": 0.56,
+  "p": 0.685,
+  "tage": 14
  },
  "p": {
   "voll": {
