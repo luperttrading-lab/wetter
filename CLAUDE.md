@@ -256,3 +256,63 @@ Verborgenen ebenfalls nicht setzen laesst.
 Ist eine Aufgabe fertig und veroeffentlicht, geht eine kurze
 Push-Benachrichtigung aufs iPhone. Dateien, an denen gearbeitet wurde -
 Screenshots, Vergleichsseiten -, gehen vor dem Ende der Antwort an den Nutzer.
+
+## Das UV-Modell: wo die Zahlen herkommen
+
+Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
+was ein neuer Chat wissen muss, bevor er etwas daran aendert.
+
+Zwei Kurven, zwei ganz verschiedene Wege:
+
+- **Schwarze Glocke ("max. moeglich")** = CAMS-Klarhimmel von Open-Meteo,
+  korrigiert mit `uvCamsFaktor()`: Geo-Korrektur nach Breite und Hoehe
+  (`0,939 - 0,0199*(Breite-50) + 0,0561*Hoehe[km]`, gefittet an 16 BfS-Bilder
+  mit DWD-Kurve) mal dem **Stationsfaktor** aus `uv-station.json`.
+  Fuer Wettenberg: 0,937 x 1,094 = 1,025 - die beiden Korrekturen heben sich
+  fast auf, was Zufall ist und nicht Absicht.
+- **Bunte Saeulen** = Glocke x Durchlass^`UV_K_EXP`. Der Durchlass ist
+  gemessen: DWD-Globalstrahlung im 10-Minuten-Takt (`solar10`) geteilt durch
+  die Klarhimmel-Globalstrahlung. **Nichts davon kommt vom BfS** - dass die
+  Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
+  unabhaengige Messgeraete an derselben Station unter denselben Wolken.
+
+### Offen: der Exponent steht fest, die Daten sind weiter
+
+`UV_K_EXP = 0.669` ist fest eingebaut (Stand v3.87, 1488 Paare).
+`uv-durchlass.json` hat inzwischen 14 Tage und sagt 0,679 +- 0,011 (teils
+Sonne, r2 0,52) und 0,682 +- 0,004 (keine Sonne, r2 0,81) - also 1,5 % hoeher
+und ueber die Klassen hinweg gleich. Die Klasse "volle Sonne" bleibt
+unbrauchbar (r2 0,21), weil dort kaum Variation im Durchlass steckt.
+Die App liest die Datei **nicht**; wer den Wert nachzieht, aendert die
+Konstante in `index.html` von Hand.
+
+### Offen: der Stationsfaktor und die 90-Prozent-Schwelle
+
+`uv_station.py` nimmt einen Tag nur bei **`MIN_SONNE = 0,90`** (Sonnenanteil
+11-15 Uhr). Der Grund steht im Skript und ist gut belegt: ueber 102
+Stationstage ist die Klasse 50-70 % Sonne der Wolkenrand-Ausreisser-Bereich
+(Median 1,209, 9 von 16 Tagen ueber 1,15).
+
+Fuer Wettenberg ist die Schwelle trotzdem zu streng. Aus `uv_klarlog.json`,
+15 Tage:
+
+    >= 90 % Sonne    1 Tag    1,134
+    70 bis 90 %      6 Tage   Median 1,118   Std 0,049
+    alle >= 70 %     7 Tage   Median 1,120   Std 0,045
+
+Der einzelne Klartag und die sechs Teilsonnentage sagen dasselbe (1,134 gegen
+1,127 im Mittel, 0,6 % auseinander). Der Faktor steht also auf `tage: 1`
+und `vorlaeufig`, obwohl sieben Tage ihn stuetzen; die Daempfung
+`n/(n+0,43)` zieht ihn deshalb auf 1,094 statt 1,113.
+
+Nicht einfach die Schwelle senken - die 102-Stationstage-Statistik dagegen
+gilt weiter. Der saubere Weg waere, Tage mit 70-90 % Sonne mitzuzaehlen,
+**wenn ihre Streuung klein ist** (bei Wettenberg 0,049), sonst zu verwerfen.
+Vorher am Protokoll `uv-station-protokoll.json` gegenpruefen.
+
+### Der Tagesgang der Truebung liegt noch brach
+
+`uv-durchlass.json` misst ihn: Steigung -0,0094 ueber 2619 Punkte von 22
+Stationen, vormittags 1,023, nachmittags 0,967 - also rund 5,6 % Unterschied
+zwischen Vor- und Nachmittag. Das r2 ist mit 0,034 winzig, der Effekt aber
+systematisch. Noch nicht eingebaut.
