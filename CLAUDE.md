@@ -117,3 +117,43 @@ io.open('/tmp/app.js','w',encoding='utf-8').write("\n;\n".join(b))
 PY
 node --check /tmp/app.js
 ```
+
+Der Syntaxcheck allein genuegt nicht. Jede sichtbare Aenderung wird im
+Browser mit echten Daten angesehen, bevor sie gepusht wird - Playwright und
+Chromium sind da, `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`. Ein kleiner
+lokaler Server (`python3 -m http.server 8899`) und ein Skript, das die Seite
+laedt, das Ergebnis ausliest und einen Screenshot macht. Fast jeder Fehler
+dieser Sitzung - verzerrte Diagramme, abgeschnittene Zeilen, unsichtbare
+Elemente - ist so aufgefallen und nicht beim Lesen des Codes.
+
+## Aufklappbare Abschnitte
+
+Seit v4.18 ist jede Abschnittsueberschrift ein Schalter: Titel, eine feine
+Linie bis zum Rand, dort ein runder Knopf. `klappBauen()` baut die Zeilen im
+Code um - wer einen Abschnitt hinzufuegt, traegt ihn nur in `KLAPP_ABS` ein.
+Zugeklappt ist die Voreinstellung; der Zustand steht je Abschnitt im Geraet
+(`klapp_<name>`).
+
+### Die Falle: ein verstecktes Canvas ist null Pixel breit
+
+Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
+- und dort wird gezeichnet, waehrend das Canvas `display:none` hat. Es bleibt
+dann auf seiner Standardbreite von 300 Pixeln stehen, und nach dem Aufklappen
+steht ein verzerrtes Bild da. Das faellt nicht beim ersten Start auf, sondern
+erst beim zweiten.
+
+Darum traegt sich jeder Abschnitt mit Canvas in `KLAPP_NACH` ein und zeichnet
+beim Aufklappen neu. Beim Jahresbild kommt ein `ResizeObserver` auf dem Canvas
+dazu: Er faengt jede Ursache ab - Einhaengen, Aufklappen, Drehen des Geraets.
+Betroffen waren `uvchart`, `bfsOvl`, `vitdCv`, `planetenCv`, `planetenSunCv`,
+`pvCv`, `mjCv` und die Stundenleiste, deren Scrollposition sich im
+Verborgenen ebenfalls nicht setzen laesst.
+
+## Im Chat: Kosten und Benachrichtigung
+
+Jede Antwort endet mit der Kostenzeile, jedes Mal frisch geholt:
+`python3 ~/.claude/tools/kosten.py --zeile`. Ist eine Aufgabe fertig und
+veroeffentlicht, geht eine kurze Push-Benachrichtigung aufs iPhone.
+
+Dateien, an denen gearbeitet wurde - Screenshots, Vergleichsseiten -, gehen
+vor dem Ende der Antwort an den Nutzer.
