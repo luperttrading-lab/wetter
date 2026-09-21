@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-19",
+ "stand": "2026-09-20",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
@@ -39,13 +39,13 @@
    "bis": "2026-09-19"
   },
   "Friedrichshafen": {
-   "faktor": 0.942,
-   "roh": 0.939,
-   "tage": 9,
+   "faktor": 0.947,
+   "roh": 0.945,
+   "tage": 10,
    "vorlaeufig": false,
-   "streuung": 0.028,
+   "streuung": 0.027,
    "von": "2026-09-04",
-   "bis": "2026-09-19"
+   "bis": "2026-09-20"
   },
   "Giessen-Wettenberg": {
    "faktor": 1.094,
@@ -58,12 +58,12 @@
   },
   "Klippeneck": {
    "faktor": 0.839,
-   "roh": 0.825,
-   "tage": 5,
+   "roh": 0.827,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.013,
+   "streuung": 0.019,
    "von": "2026-09-04",
-   "bis": "2026-09-19"
+   "bis": "2026-09-20"
   },
   "Lindenberg": {
    "faktor": 1.154,
@@ -84,13 +84,13 @@
    "bis": "2026-09-16"
   },
   "Stuttgart": {
-   "faktor": 0.924,
-   "roh": 0.919,
-   "tage": 7,
+   "faktor": 0.928,
+   "roh": 0.925,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.019,
+   "streuung": 0.018,
    "von": "2026-09-04",
-   "bis": "2026-09-19"
+   "bis": "2026-09-20"
   },
   "Wurmberg_B": {
    "faktor": 1.179,
