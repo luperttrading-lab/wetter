@@ -1,15 +1,18 @@
 {
  "stand": "2026-09-20",
- "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne, zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
+ "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne; Tage mit 70-90 % zaehlen mit, wenn es je Station mindestens 3 sind und ihre Streuung hoechstens 0.06 betraegt. Zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
-   "faktor": 1.069,
-   "roh": 1.098,
-   "tage": 1,
-   "vorlaeufig": true,
-   "streuung": 0,
-   "von": "2026-09-06",
-   "bis": "2026-09-06"
+   "faktor": 1.097,
+   "roh": 1.105,
+   "tage": 5,
+   "vorlaeufig": false,
+   "streuung": 0.035,
+   "klare_tage": 1,
+   "teiltage": 4,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-05",
+   "bis": "2026-09-19"
   },
   "Cuxhaven_B": {
    "faktor": 1.163,
@@ -17,6 +20,9 @@
    "tage": 2,
    "vorlaeufig": true,
    "streuung": 0.081,
+   "klare_tage": 2,
+   "teiltage": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-06",
    "bis": "2026-09-12"
   },
@@ -26,6 +32,9 @@
    "tage": 2,
    "vorlaeufig": true,
    "streuung": 0.088,
+   "klare_tage": 2,
+   "teiltage": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-06",
    "bis": "2026-09-15"
   },
@@ -35,6 +44,9 @@
    "tage": 2,
    "vorlaeufig": true,
    "streuung": 0.052,
+   "klare_tage": 2,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
    "von": "2026-09-06",
    "bis": "2026-09-19"
   },
@@ -43,18 +55,24 @@
    "roh": 0.945,
    "tage": 10,
    "vorlaeufig": false,
-   "streuung": 0.027,
+   "streuung": 0.026,
+   "klare_tage": 10,
+   "teiltage": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-04",
    "bis": "2026-09-20"
   },
   "Giessen-Wettenberg": {
-   "faktor": 1.094,
-   "roh": 1.134,
-   "tage": 1,
-   "vorlaeufig": true,
-   "streuung": 0,
-   "von": "2026-09-06",
-   "bis": "2026-09-06"
+   "faktor": 1.113,
+   "roh": 1.12,
+   "tage": 7,
+   "vorlaeufig": false,
+   "streuung": 0.049,
+   "klare_tage": 1,
+   "teiltage": 6,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-05",
+   "bis": "2026-09-19"
   },
   "Klippeneck": {
    "faktor": 0.839,
@@ -62,6 +80,9 @@
    "tage": 6,
    "vorlaeufig": false,
    "streuung": 0.019,
+   "klare_tage": 6,
+   "teiltage": 0,
+   "teiltage_verworfen": 5,
    "von": "2026-09-04",
    "bis": "2026-09-20"
   },
@@ -70,7 +91,10 @@
    "roh": 1.22,
    "tage": 1,
    "vorlaeufig": true,
-   "streuung": 0,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 0,
    "von": "2026-09-15",
    "bis": "2026-09-15"
   },
@@ -79,7 +103,10 @@
    "roh": 1.155,
    "tage": 3,
    "vorlaeufig": false,
-   "streuung": 0.051,
+   "streuung": 0.05,
+   "klare_tage": 3,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
    "von": "2026-09-06",
    "bis": "2026-09-16"
   },
@@ -89,6 +116,9 @@
    "tage": 8,
    "vorlaeufig": false,
    "streuung": 0.018,
+   "klare_tage": 8,
+   "teiltage": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-04",
    "bis": "2026-09-20"
   },
@@ -98,8 +128,23 @@
    "tage": 2,
    "vorlaeufig": true,
    "streuung": 0.037,
+   "klare_tage": 2,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
    "von": "2026-09-06",
    "bis": "2026-09-15"
+  },
+  "Zingst": {
+   "faktor": 1.08,
+   "roh": 1.087,
+   "tage": 5,
+   "vorlaeufig": false,
+   "streuung": 0.039,
+   "klare_tage": 0,
+   "teiltage": 5,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-06",
+   "bis": "2026-09-14"
   }
  }
 }
