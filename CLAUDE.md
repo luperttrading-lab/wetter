@@ -130,7 +130,7 @@ auch bei kurzen Antworten:
 Die Zeile sieht so aus:
 
 ```
-<sub>08.09. 19:11 Uhr · Frage 0,25 · heute 18,85 · ges. 229,16 $</sub>
+<sub>08.09. 19:11 Uhr · Arbeit 4 min · Frage 0,25 · heute 18,85 · ges. 229,16 $</sub>
 ```
 
 Laeuft das Skript nicht (kein Sitzungsprotokoll, anderes Werkzeug), das
@@ -155,8 +155,14 @@ Modell-IDs werden per **laengstem Praefix** aufgeloest, weil im Protokoll oft ei
 Datum anhaengt (`claude-haiku-4-5-20251001`). Ohne das greift der Rueckfall auf
 Opus-Preise und Haiku waere um Faktor 5 zu teuer.
 
-### Was die drei Zahlen bedeuten
+### Was die Zahlen bedeuten
 
+- **Arbeit** — Spanne vom letzten echten Nutzerbeitrag bis jetzt, also die reine
+  Bearbeitungszeit. Dieselbe Grenze wie bei „Frage": Werkzeugergebnisse stehen im
+  Protokoll ebenfalls als `user`, zaehlen hier aber nicht als Beginn. Unter einer
+  Minute steht `<1 min`, ab 90 Minuten `1 h 34 min`. Ist der Beitrag laenger als
+  36 Stunden her (Sitzung nach langer Pause fortgesetzt), faellt das Feld weg,
+  statt eine sinnlose Zahl zu zeigen.
 - **Frage** — alle Antworten seit dem letzten echten Nutzerbeitrag, diese Sitzung.
 - **heute** — Summe des lokalen Tages ueber **alle Projekte**, nicht nur diese
   Sitzung. Sonst waere die Zahl in einem eintaegigen Chat identisch mit „ges."

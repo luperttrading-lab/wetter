@@ -153,7 +153,33 @@ tot   = sum(cost(mo, u) for _, mo, u in seen.values())
 heute = sum(cost(mo, u) for ts, mo, u in alle.values() if lokal(ts) == heute_lokal)
 frage = sum(cost(mo, u) for ts, mo, u in seen.values() if last_user and ts >= last_user)
 de = lambda x: f'{x:.2f}'.replace('.', ',')
-print(f"<sub>{jetzt.strftime('%d.%m. %H:%M')} Uhr · Frage {de(frage)} · heute {de(heute)} · ges. {de(tot)} $</sub>")
+
+# "Arbeit" = Spanne vom letzten echten Nutzerbeitrag bis jetzt. Dieselbe Grenze wie
+# bei "Frage", damit beide Zahlen dasselbe meinen: Werkzeugergebnisse stehen im
+# Protokoll ebenfalls als `user`, zaehlen hier aber nicht als Beginn der Arbeit.
+# Die Zeile entsteht vor der Antwort, die Spanne ist also die reine Bearbeitungszeit
+# ohne das Schreiben der Antwort selbst.
+def dauer():
+    if not last_user:
+        return None
+    try:
+        t0 = datetime.datetime.fromisoformat(last_user.replace('Z', '+00:00'))
+    except Exception:
+        return None
+    sek = (datetime.datetime.now(datetime.timezone.utc) - t0).total_seconds()
+    if sek < 0 or sek > 36 * 3600:              # Unsinn lieber weglassen als anzeigen
+        return None
+    m = int(round(sek / 60))
+    if m < 1:
+        return '<1 min'
+    if m < 90:
+        return f'{m} min'
+    return f'{m // 60} h {m % 60:02d} min'
+
+d = dauer()
+arbeit = f'Arbeit {d} · ' if d else ''
+print(f"<sub>{jetzt.strftime('%d.%m. %H:%M')} Uhr · {arbeit}"
+      f"Frage {de(frage)} · heute {de(heute)} · ges. {de(tot)} $</sub>")
 
 if '-v' in sys.argv:
     days, mods = collections.Counter(), collections.Counter()
