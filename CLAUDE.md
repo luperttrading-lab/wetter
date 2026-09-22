@@ -175,6 +175,22 @@ mit `-` statt `/`. Zwei Clones desselben Repos an verschiedenen Pfaden ergeben a
 zwei getrennte Protokollordner. Deshalb kann „ges." nie ueber Repos hinweg zaehlen,
 „heute" dagegen schon.
 
+### In der Cloud zaehlt jeder Chat nur sich selbst
+
+Das gilt so nur auf einem Rechner, auf dem alle Sitzungen dasselbe
+`~/.claude/` teilen. Claude Code im Browser gibt **jedem Chat einen eigenen
+Container**; dessen `~/.claude/projects/` ist beim Start leer und enthaelt
+danach genau ein Protokoll - das des laufenden Chats.
+
+Folge: Ein zweiter Chat zum selben Repo faengt bei „ges. 0" an und zeigt
+unter „heute" ebenfalls nur seine eigenen Kosten. Er kann die Zahlen des
+ersten Chats nicht sehen, auch nicht die des gleichen Tages. Die Summe ueber
+mehrere Chats muss von Hand gebildet werden.
+
+Zum Vergleichen: Diese Sitzung stand am 22.09.2026 bei 840 $ ueber 20 Tage,
+2078 Nachrichten in einem einzigen Protokoll. Ein neuer Chat daneben zeigt
+davon nichts.
+
 ### Was das Skript rechnet
 
 Es liest das Sitzungsprotokoll `~/.claude/projects/<cwd mit - statt />/*.jsonl`
