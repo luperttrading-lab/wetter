@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-20",
+ "stand": "2026-09-21",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne; Tage mit 70-90 % zaehlen mit, wenn es je Station mindestens 3 sind und ihre Streuung hoechstens 0.06 betraegt. Zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
@@ -82,7 +82,7 @@
    "streuung": 0.019,
    "klare_tage": 6,
    "teiltage": 0,
-   "teiltage_verworfen": 5,
+   "teiltage_verworfen": 6,
    "von": "2026-09-04",
    "bis": "2026-09-20"
   },
@@ -99,16 +99,16 @@
    "bis": "2026-09-15"
   },
   "Norderney": {
-   "faktor": 1.136,
-   "roh": 1.155,
-   "tage": 3,
+   "faktor": 1.163,
+   "roh": 1.175,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.05,
+   "streuung": 0.044,
    "klare_tage": 3,
-   "teiltage": 0,
-   "teiltage_verworfen": 2,
+   "teiltage": 3,
+   "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-09-16"
+   "bis": "2026-09-21"
   },
   "Stuttgart": {
    "faktor": 0.928,
@@ -135,16 +135,16 @@
    "bis": "2026-09-15"
   },
   "Zingst": {
-   "faktor": 1.08,
-   "roh": 1.087,
-   "tage": 5,
+   "faktor": 1.09,
+   "roh": 1.096,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.039,
+   "streuung": 0.041,
    "klare_tage": 0,
-   "teiltage": 5,
+   "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-09-14"
+   "bis": "2026-09-21"
   }
  }
 }
