@@ -133,6 +133,11 @@ Die Zeile sieht so aus:
 <sub>08.09. 19:11 Uhr · Arbeit 4 min · Frage 0,25 · heute 18,85 · ges. 229,16 $</sub>
 ```
 
+**Nicht in einen Codeblock setzen.** Die Zeile geht roh in die Antwort, sonst
+zeigt die App einen Kasten mit sichtbaren `<sub>`-Tags statt der kleinen Zeile -
+und genau das ist mit "nicht umformatieren" gemeint. Passiert leicht, weil drei
+Backticks im Fliesstext sonst ueberall richtig sind.
+
 Laeuft das Skript nicht (kein Sitzungsprotokoll, anderes Werkzeug), das
 offen sagen statt eine Zahl zu erfinden.
 
