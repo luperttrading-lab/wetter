@@ -328,11 +328,38 @@ Die Glocke braucht den Faktor extra: `makeSunBell` fittet A*mu^k an die
 Stundenwerte, und mu ist symmetrisch um den Hoechststand - eine schiefe
 Kippung kann diese Regression gar nicht abbilden.
 
-### Offen: die Radar-Eichung hat keinen Abnehmer
+### Erledigt (v4.27): die Radar-Eichung ist angeschlossen
 
-`regen_radar.py` laeuft alle sechs Stunden und schreibt `regen-radar.json`.
-**`index.html` liest die Datei nirgends** - die Pipeline laeuft seit jeher
-ins Leere. Wer sie anschliesst, muss zweierlei bedenken: der Nieselfaktor
-liegt bei 2,95, seine Quartile aber bei 1,25 und 5,00 - Faktor 4 Spannweite.
-Und er wirkt auf `radarSchwelleJetzt()`, also darauf, ob "es regnet jetzt"
-dasteht.
+`regenRadarLaden()` holt `regen-radar.json`, `radarBoden(mmh)` rechnet die
+Radarrate in eine geschaetzte Bodenrate um. Drei Punkte, die jeder nachlesen
+sollte, der daran arbeitet - ausfuehrlich im Kommentar bei
+`radarSchwelleJetzt()`:
+
+1. **Die Stufenfaktoren sind nicht monoton.** niesel 2,95, leicht 0,83, hart
+   an der Grenze 0,5: Radar 0,49 ergaebe 1,45 mm/h, Radar 0,51 nur 0,42. Ein
+   staerkeres Echo waere weniger Regen. Stattdessen eine stetige Potenzkurve
+   durch zwei Anker, flach ausserhalb; die Bodenrate geht mit r^0,53. Der
+   Lader prueft `1+b > 0` und verwirft die Eichung, wenn das Protokoll
+   spaeter eine fallende Kurve liefert.
+
+2. **Anker ist NICHT das Feld `faktor`.** Das ist der Median der Quotienten,
+   und der ist nicht der Quotient der Mediane (niesel 2,95 gegen 1,90; leicht
+   0,83 gegen 0,85). Er gehoert auch nicht an den Klassenmedian, weil der
+   Quotient bei kleinem r am groessten ist. Genommen wird
+   `mess_median / radar_median`.
+
+3. **Der Faktor gilt nur, WENN es unten regnet.** `regen_radar.py` zaehlt nur
+   Stunden mit >= 0,2 mm an der Station. Wie oft das Gegenteil eintritt,
+   steht in derselben Datei unter `_boden_trocken`: bei Radar 0,10-0,25
+   bleibt der Boden in 66 % der Stunden trocken. Darum bleibt die
+   **Erkennung** auf den rohen Radarwerten (`radarSchwelleJetzt`,
+   `NOWCAST_TH`, jeder Vergleich, der entscheidet OB es regnet), und geeicht
+   wird nur, was als **Menge** dasteht.
+
+Ohne geladene Datei ist `radarBoden()` die Identitaet.
+
+### Offen: die Klasse "regen" hat erst 4 Paare
+
+Oberhalb von 1,17 mm/h gilt flach der Faktor der Klasse "leicht" (0,85).
+Sobald `regen` 30 Paare hat, gehoert ein dritter Anker in `regenRadarLaden()`.
+Der Nieselanker ist mit Standardfehler 0,60 (n=34) ebenfalls noch grob.
