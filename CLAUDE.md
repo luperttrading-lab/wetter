@@ -355,6 +355,42 @@ Die Glocke braucht den Faktor extra: `makeSunBell` fittet A*mu^k an die
 Stundenwerte, und mu ist symmetrisch um den Hoechststand - eine schiefe
 Kippung kann diese Regression gar nicht abbilden.
 
+### Erledigt (v4.28): die Saeule darf die Glocke nicht ueberragen
+
+`UV_K_MAX` stand auf 1,40 und liess eine Saeule 25 % ueber der
+Klarhimmelglocke zu. Am 22.09.2026 war das den ganzen Mittag zu sehen:
+"Wolkendurchlass 106 %", Saeulen ueber der schwarzen Kurve, die amtliche
+BfS-Messung daneben unter ihr.
+
+**Ursache:** Wolkenraender verstaerken die *Globalstrahlung*, aber kaum das
+*UV*. Der Pyranometer sieht bei Sonne durch eine Luecke die direkte Strahlung
+plus Reflexion von den Wolkenflanken; das UV ist schon zur Haelfte diffus und
+wird vom umstehenden Wolkenfeld zugleich beschnitten. Dazu wandte die App den
+Exponenten bis 1,40 an, obwohl `uv_durchlass.py` ihn nur auf
+`dl in (0,08 ; 0,97)` fittet.
+
+Gemessen, 12 771 Paare aus 22 Stationen, Median Messung/Glocke:
+
+    Durchlass   0,60-0,80  0,80-0,90  0,90-0,97  0,97-1,00  >1,00
+    gemessen        0,757      0,851      0,894      0,920  0,938
+    Modell alt      0,782      0,896      0,960      0,989  1,015
+
+In **keinem** Band liegt der gemessene Median ueber 1,0.
+
+### Offen: "Sonne durch eine Luecke" bleibt 8 % zu hoch
+
+Der Deckel nimmt die Spitze, nicht die Ursache. Bei Durchlass ab 0,97
+trennen sich die beiden Faelle klar:
+
+    wirklich klar (alle Schichten <15 %)   n=559   q = 0,971
+    Sonne durch eine Luecke                n=1229  q = 0,918
+
+Gegen ein Modell von 1,00 ist der zweite Fall 8,4 % zu hoch, der erste nur
+3 %. Die Zutaten zur Unterscheidung liegen bereit: Sonnenminuten je zehn
+Minuten aus `solar10`, Bewoelkung je Schicht von Open-Meteo (`wl`/`wm`/`wh`
+stehen im Durchlassprotokoll schon drin). Ein Daempfungsfaktor nur fuer den
+Lueckenfall waere der naechste Schritt.
+
 ### Erledigt (v4.27): die Radar-Eichung ist angeschlossen
 
 `regenRadarLaden()` holt `regen-radar.json`, `radarBoden(mmh)` rechnet die
