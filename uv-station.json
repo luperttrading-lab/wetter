@@ -1,30 +1,30 @@
 {
- "stand": "2026-09-21",
+ "stand": "2026-09-22",
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne; Tage mit 70-90 % zaehlen mit, wenn es je Station mindestens 3 sind und ihre Streuung hoechstens 0.06 betraegt. Zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
-   "faktor": 1.097,
-   "roh": 1.105,
-   "tage": 5,
+   "faktor": 1.095,
+   "roh": 1.102,
+   "tage": 6,
    "vorlaeufig": false,
-   "streuung": 0.035,
+   "streuung": 0.05,
    "klare_tage": 1,
-   "teiltage": 4,
+   "teiltage": 5,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-19"
+   "bis": "2026-09-22"
   },
   "Cuxhaven_B": {
-   "faktor": 1.163,
-   "roh": 1.198,
-   "tage": 2,
-   "vorlaeufig": true,
-   "streuung": 0.081,
-   "klare_tage": 2,
+   "faktor": 1.15,
+   "roh": 1.172,
+   "tage": 3,
+   "vorlaeufig": false,
+   "streuung": 0.059,
+   "klare_tage": 3,
    "teiltage": 0,
    "teiltage_verworfen": 1,
    "von": "2026-09-06",
-   "bis": "2026-09-12"
+   "bis": "2026-09-22"
   },
   "Dortmund": {
    "faktor": 1.066,
@@ -34,9 +34,21 @@
    "streuung": 0.088,
    "klare_tage": 2,
    "teiltage": 0,
-   "teiltage_verworfen": 1,
+   "teiltage_verworfen": 2,
    "von": "2026-09-06",
    "bis": "2026-09-15"
+  },
+  "Eckernfoerde": {
+   "faktor": 1.174,
+   "roh": 1.249,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-22",
+   "bis": "2026-09-22"
   },
   "Fichtelberg": {
    "faktor": 0.898,
@@ -51,40 +63,64 @@
    "bis": "2026-09-19"
   },
   "Friedrichshafen": {
-   "faktor": 0.947,
-   "roh": 0.945,
-   "tage": 10,
+   "faktor": 0.941,
+   "roh": 0.939,
+   "tage": 11,
    "vorlaeufig": false,
-   "streuung": 0.026,
-   "klare_tage": 10,
+   "streuung": 0.028,
+   "klare_tage": 11,
    "teiltage": 0,
    "teiltage_verworfen": 1,
    "von": "2026-09-04",
-   "bis": "2026-09-20"
+   "bis": "2026-09-22"
   },
   "Giessen-Wettenberg": {
-   "faktor": 1.113,
-   "roh": 1.12,
-   "tage": 7,
+   "faktor": 1.112,
+   "roh": 1.118,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.049,
+   "streuung": 0.047,
    "klare_tage": 1,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-19"
+   "bis": "2026-09-22"
+  },
+  "Groemitz": {
+   "faktor": 1.142,
+   "roh": 1.203,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
+   "von": "2026-09-22",
+   "bis": "2026-09-22"
+  },
+  "Hamburg": {
+   "faktor": 1.109,
+   "roh": 1.156,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-22",
+   "bis": "2026-09-22"
   },
   "Klippeneck": {
-   "faktor": 0.839,
-   "roh": 0.827,
-   "tage": 6,
+   "faktor": 0.835,
+   "roh": 0.825,
+   "tage": 7,
    "vorlaeufig": false,
-   "streuung": 0.019,
-   "klare_tage": 6,
+   "streuung": 0.018,
+   "klare_tage": 7,
    "teiltage": 0,
    "teiltage_verworfen": 6,
    "von": "2026-09-04",
-   "bis": "2026-09-20"
+   "bis": "2026-09-22"
   },
   "Lindenberg": {
    "faktor": 1.154,
@@ -94,7 +130,7 @@
    "streuung": 0.0,
    "klare_tage": 1,
    "teiltage": 0,
-   "teiltage_verworfen": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-15",
    "bis": "2026-09-15"
   },
@@ -118,9 +154,21 @@
    "streuung": 0.018,
    "klare_tage": 8,
    "teiltage": 0,
-   "teiltage_verworfen": 1,
+   "teiltage_verworfen": 2,
    "von": "2026-09-04",
    "bis": "2026-09-20"
+  },
+  "Todendorf": {
+   "faktor": 1.082,
+   "roh": 1.117,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-22",
+   "bis": "2026-09-22"
   },
   "Wurmberg_B": {
    "faktor": 1.179,
@@ -135,16 +183,28 @@
    "bis": "2026-09-15"
   },
   "Zingst": {
-   "faktor": 1.09,
-   "roh": 1.096,
-   "tage": 6,
+   "faktor": 1.086,
+   "roh": 1.091,
+   "tage": 7,
    "vorlaeufig": false,
-   "streuung": 0.041,
-   "klare_tage": 0,
+   "streuung": 0.038,
+   "klare_tage": 1,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-09-21"
+   "bis": "2026-09-22"
+  },
+  "Zirchow": {
+   "faktor": 1.176,
+   "roh": 1.251,
+   "tage": 1,
+   "vorlaeufig": true,
+   "streuung": 0.0,
+   "klare_tage": 1,
+   "teiltage": 0,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-22",
+   "bis": "2026-09-22"
   }
  }
 }
