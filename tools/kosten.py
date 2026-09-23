@@ -44,7 +44,11 @@ PREISE = {
 STD = (5, 25, 0.1)                              # Rueckfall fuer unbekannte Modelle: Opus 5
 FAST = (10, 50, 0.1)                            # speed="fast", nur Opus 5 / Opus 4.8
 WEB_SUCHE = 0.01                                # $ je Websuche (10 $ / 1000)
-TZ = 2                                          # Stunden Abstand zu UTC (Sommerzeit); im Winter 1
+# Ortszeit ueber zoneinfo statt fester Stundenzahl: TZ = 2 galt nur im Sommer,
+# ab der Umstellung am 25.10.2026 waeren Uhrzeit und Tagesgrenze eine Stunde
+# verschoben gewesen - und niemand haette daran gedacht, es umzustellen.
+from zoneinfo import ZoneInfo
+ZONE = ZoneInfo("Europe/Berlin")
 TTL5 = '--ttl5' in sys.argv
 
 base = os.path.expanduser('~/.claude/projects')
@@ -125,19 +129,18 @@ def cost(model, u):
     such = ((u.get('server_tool_use') or {}).get('web_search_requests', 0) or 0) * WEB_SUCHE
     return tok + such
 
-jetzt = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=TZ)
+jetzt = datetime.datetime.now(ZONE)
 heute_lokal = jetzt.strftime('%Y-%m-%d')
 def lokal(ts):
     try: return (datetime.datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                 + datetime.timedelta(hours=TZ)).strftime('%Y-%m-%d')
+                 .astimezone(ZONE)).strftime('%Y-%m-%d')
     except: return ''
 
 # "heute" zaehlt ueber ALLE Projekte, nicht nur diese Sitzung - sonst waere die Zahl in
 # einem eintaegigen Chat identisch mit "ges." und truege keine eigene Information.
 # Dateien, die vor der lokalen Mitternacht zuletzt geschrieben wurden, koennen nichts
 # von heute enthalten und werden gar nicht erst geoeffnet.
-schwelle = (jetzt.replace(hour=0, minute=0, second=0, microsecond=0)
-            - datetime.timedelta(hours=TZ)).timestamp()
+schwelle = jetzt.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
 alle, projekte = {}, set()
 for p in glob.glob(f'{base}/*/*.jsonl'):
     try:

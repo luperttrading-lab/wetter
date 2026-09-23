@@ -222,8 +222,9 @@ Drei Stolpersteine, die im Skript bereits geloest sind:
   Streaming mehrfach; ohne das kommt etwa das Dreifache heraus.
 - **„Letzte Frage" = ab dem letzten echten Nutzerbeitrag** — Werkzeugergebnisse
   stehen ebenfalls als `user` im Protokoll, zaehlen aber nicht als Frage.
-- **Tagesgrenze in Ortszeit** — `TZ = 2` im Skript (Sommerzeit); im Winter auf `1`
-  aendern, sonst ist zwischen 22 und 24 Uhr das „heute" falsch.
+- **Tagesgrenze in Ortszeit** — ueber `zoneinfo("Europe/Berlin")`, die
+  Zeitumstellung ist damit abgedeckt. Bis v4.30 stand dort ein festes `TZ = 2`,
+  das ab dem 25.10.2026 Uhrzeit und Tagesgrenze um eine Stunde verschoben haette.
 
 ### Lange Sitzungen ueber mehrere Tage
 
@@ -249,8 +250,6 @@ Ordner eine plausible, aber fremde Zahl.
   selbst fehlen und tauchen erst in der naechsten Zeile auf (bei „Frage" 10-50 Cent).
 - Nur die eine Sitzung wird gezaehlt, andere Chats zum selben Projekt haben eigene
   Protokolle. Gezaehlt wird die zuletzt geaenderte; `-v` weist auf weitere hin.
-- Winterzeit: `TZ = 2` im Skript auf `1` setzen. Faellt eine Zeitumstellung mitten in
-  eine lange Sitzung, sind die Tagesgrenzen davor um eine Stunde verschoben.
 - API-Listenpreise, keine Rechnung. Mit Abo zahlt man den Pauschalpreis.
 - Der Cache-Schreibpreis ist die groesste Stellschraube: Nach jedem Modellwechsel und
   nach jeder Pause laenger als die Cache-Gueltigkeit kostet die naechste Frage 3-10 $,
