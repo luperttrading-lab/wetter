@@ -310,8 +310,22 @@ def hoehen(stationen):
 
 
 def cams_faktor(la, h):
-    """Wie index.html uvCamsFaktor (v3.82): DWD/CAMS an 16 Stationen gefittet."""
-    f = 0.939 - 0.0199 * (la - 50) + 0.0561 * (h or 0) / 1000
+    """Wie index.html uvCamsFaktor. MUSS mit der App uebereinstimmen, sonst misst
+    der Stationsfaktor den Unterschied zwischen beiden Formeln statt der Geraete.
+
+    v1.4 (v4.31 der App, 23.09.2026): neu gefittet gegen MESSUNG/CAMS an 28
+    BfS-Stationen, nicht mehr gegen die DWD-Prognose. Die alte Formel
+    (0,939 - 0,0199*(Breite-50) + 0,0561*Hoehe) stammte aus dem Vergleich
+    DWD-Kurve/CAMS; die DWD-Prognose faellt nach Norden aber zu steil ab. Die
+    Stationsfaktoren trugen deshalb einen Breitentrend von +0,033 je Grad
+    (t = 3,6) - an der Kueste bis 15 Prozent Rest, in den Alpen -7 Prozent.
+    Neu: a = 0.9506, b = +0.0128 je Grad (+-0,0081), c = +0.0538 je km (+-0,029).
+    Die Breitensteigung ist nicht sicher von null verschieden; sicher ist nur,
+    dass die alte falsch war. uv_station.py prueft das bei jedem Lauf.
+
+    uv_klarlog.json wurde beim Wechsel umgerechnet (verh x alt/neu,
+    schwarz x neu/alt), damit alte und neue Eintraege dieselbe Formel meinen."""
+    f = 0.9506 +0.0128 * (la - 50) +0.0538 * (h or 0) / 1000
     return max(0.7, min(1.4, f))
 
 
