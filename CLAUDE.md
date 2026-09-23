@@ -77,6 +77,16 @@ ONLINE liegt, nicht die geladene.
   Nie `daten` nach `main` mergen und nie Daten dieser Pipeline auf `main`
   committen - sonst waechst das Repo um etwa 1 GB im Jahr.
 
+## Bright Sky: "sunshine" ist die VORANGEGANGENE Stunde
+
+Der Wert mit Stempel 14:00 beschreibt 13 bis 14 Uhr (ebenso `precipitation`
+und `solar`). `cloud_cover` und `icon` dagegen sind Momentanwerte ZUM
+Stempel. Wer beides nebeneinander zeigt oder verrechnet, muss den Sonnenwert
+eine Stunde zurueckschieben. Das hat zweimal zugeschlagen: v3.32 bei der
+UV-Treppe (Treppe eine Stunde versetzt), v4.29 in der Stundenleiste ("60 min
+Sonne" neben "bewoelkt"). `sonnenMoeglich(t)` rechnet deshalb ebenfalls die
+Stunde VOR t.
+
 ## Datenquellen und Lizenzen
 
 Welche Quelle was liefert, was sie heute kostet (nichts) und was bei einer
