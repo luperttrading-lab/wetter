@@ -86,6 +86,25 @@ Streuungen der Gruppen ab drei Tagen sind 0,035 0,037 0,038 0,045 0,048
 Faelle hinaus (Langen +5,7 %, Schweinfurt -6,5 %) und laesst Wettenberg
 (0,054) herein.
 
+DER WAECHTER (23.09.2026)
+Ein Stationsfaktor soll das GERAET erfassen, nicht einen Fehler des Modells.
+Ist die Geo-Korrektur in uvCamsFaktor falsch, schlucken die Faktoren den
+Fehler stillschweigend - und wo keine Station in der Naehe steht, bleibt er
+stehen. Genau das ist bis v4.30 passiert: die Faktoren trugen einen
+Breitentrend von +0,033 je Grad (t = 3,6), Norderney 1,175, Cuxhaven 1,227,
+Stuttgart 0,930. Die Faktoren sahen einzeln plausibel aus, erst die
+Regression ueber alle zeigte das Muster.
+
+Darum prueft jeder Lauf, ob die Stationsmediane systematisch von Breite oder
+Hoehe abhaengen: Regression roh ~ 1 + (Breite-50) + Hoehe[km] ueber alle
+Stationen mit mindestens WAECHTER_TAGE Tagen. Liegt |t| fuer Breite oder Hoehe
+ueber WAECHTER_T, steht in uv-station.json "alarm": true und im Lauf eine
+WARNUNG - dann gehoert die Geo-Korrektur neu gefittet, nicht der Faktor
+vergroessert. Der alte Fehler haette die Schwelle mit t = 3,6 gerissen.
+
+Die Schwelle 3 statt 2: der Waechter laeuft taeglich, und bei t = 2 schluege
+er bei rund jedem zwanzigsten Lauf ohne Grund an.
+
 Jeder Stationstag wird in uv-station-protokoll.json festgehalten -
 genommen oder verworfen, mit Grund, zum Nachpruefen.
 """
@@ -103,6 +122,9 @@ MIN_SICHER = 3        # ab so vielen Tagen gilt der Faktor nicht mehr als vorlae
 PRIOR = 0.43          # Gewicht der Pseudo-Beobachtung: ein Tag zaehlt zu 70 %
 MIN_F, MAX_F = 0.80, 1.25
 ABWEICHUNG = 0.05     # kleinere Abweichungen bleiben unkorrigiert
+WAECHTER_TAGE = 3     # so viele Tage braucht eine Station fuer den Waechter
+WAECHTER_MIN_ST = 10  # darunter rechnet der Waechter nicht
+WAECHTER_T = 3.0      # ab diesem |t| schlaegt er an
 
 
 def median(xs):
@@ -116,6 +138,48 @@ def streuung(xs):
         return 0.0
     m = sum(xs) / len(xs)
     return math.sqrt(sum((v - m) ** 2 for v in xs) / (len(xs) - 1))
+
+
+def waechter(punkte):
+    """punkte: [(breite, hoehe_m, median_verh), ...]. Regression gegen Breite und
+    Hoehe, gibt Steigungen, Fehler und t zurueck. Siehe DER WAECHTER oben."""
+    D = [(la - 50.0, h / 1000.0, q) for la, h, q in punkte]
+    n = len(D)
+    if n < WAECHTER_MIN_ST:
+        return {"stationen": n, "alarm": False,
+                "hinweis": "zu wenige Stationen (mindestens %d)" % WAECHTER_MIN_ST}
+    X = [[1.0, a, b] for a, b, _ in D]
+    y = [q for _, _, q in D]
+    m = 3
+    A = [[sum(X[i][r] * X[i][c] for i in range(n)) for c in range(m)] for r in range(m)]
+    M = [A[r][:] + [float(r == c) for c in range(m)] for r in range(m)]
+    for i in range(m):
+        p = max(range(i, m), key=lambda r: abs(M[r][i]))
+        M[i], M[p] = M[p], M[i]
+        d = M[i][i]
+        if abs(d) < 1e-12:
+            return {"stationen": n, "alarm": False, "hinweis": "Breite und Hoehe nicht trennbar"}
+        M[i] = [v / d for v in M[i]]
+        for r in range(m):
+            if r != i:
+                f = M[r][i]
+                M[r] = [M[r][c] - f * M[i][c] for c in range(2 * m)]
+    inv = [row[m:] for row in M]
+    bv = [sum(X[i][r] * y[i] for i in range(n)) for r in range(m)]
+    b = [sum(inv[r][c] * bv[c] for c in range(m)) for r in range(m)]
+    rest = sum((y[i] - sum(X[i][j] * b[j] for j in range(m))) ** 2 for i in range(n))
+    s2 = rest / (n - m)
+    se = [math.sqrt(max(0.0, s2 * inv[i][i])) for i in range(m)]
+    t = [b[i] / se[i] if se[i] > 0 else 0.0 for i in range(m)]
+    alarm = abs(t[1]) >= WAECHTER_T or abs(t[2]) >= WAECHTER_T
+    return {"stationen": n,
+            "breite": {"steigung": round(b[1], 4), "fehler": round(se[1], 4), "t": round(t[1], 2)},
+            "hoehe": {"steigung": round(b[2], 4), "fehler": round(se[2], 4), "t": round(t[2], 2)},
+            "mittel": round(b[0], 3), "reststreuung": round(math.sqrt(s2), 3),
+            "schwelle_t": WAECHTER_T, "alarm": alarm,
+            "hinweis": ("Die Stationsfaktoren haengen systematisch an Breite oder Hoehe - "
+                        "die Geo-Korrektur in uvCamsFaktor/cams_faktor neu fitten, "
+                        "nicht die Faktoren vergroessern.") if alarm else "kein Trend"}
 
 
 def main():
@@ -153,6 +217,7 @@ def main():
     # 2. Durchgang: je Station entscheiden, ob die Klasse 70-90 % mitzaehlt,
     #    und erst dann das Protokoll fuer diese Tage schreiben.
     out = {}
+    fuer_waechter = []
     for slug, e in sorted(je_station.items()):
         teil = e["teil"]
         sd2 = streuung([t["v"] for t in teil])
@@ -177,6 +242,8 @@ def main():
         werte = [t["v"] for t in tage]
         n = len(werte)
         m = median(werte)
+        if n >= WAECHTER_TAGE and e.get("la") is not None and e.get("h") is not None:
+            fuer_waechter.append((e["la"], e["h"], m))
         f = max(MIN_F, min(MAX_F, 1 + (m - 1) * n / (n + PRIOR)))   # Schrumpfung zur 1
         if abs(f - 1) < ABWEICHUNG:
             continue
@@ -189,8 +256,10 @@ def main():
                      "von": min(t["d"] for t in tage),
                      "bis": max(t["d"] for t in tage)}
 
+    w = waechter(fuer_waechter)
     with open(AUS, "w", encoding="utf-8") as fh:
         json.dump({"stand": max(log) if log else None,
+                   "waechter": w,
                    "regel": "Median(Messung/Modell) an Tagen mit >=%d %% Sonne; Tage mit "
                             "%d-%d %% zaehlen mit, wenn es je Station mindestens %d sind "
                             "und ihre Streuung hoechstens %.2f betraegt. Zur 1 gedaempft "
@@ -217,6 +286,13 @@ def main():
         print("  %-24s x%.3f  (roh %.3f, %d Tage = %d klar + %d teils%s, Streuung %.3f)"
               % (slug[:24], z["faktor"], z["roh"], z["tage"], z["klare_tage"],
                  z["teiltage"], ", vorlaeufig" if z["vorlaeufig"] else "", z["streuung"]))
+    if w.get("breite"):
+        print("\nWaechter (%d Stationen): Breite %+.4f je Grad (t = %+.1f), Hoehe %+.4f je km (t = %+.1f)"
+              % (w["stationen"], w["breite"]["steigung"], w["breite"]["t"],
+                 w["hoehe"]["steigung"], w["hoehe"]["t"]))
+        print("  WARNUNG: " + w["hinweis"] if w["alarm"] else "  kein Trend - die Faktoren messen die Geraete")
+    else:
+        print("\nWaechter: " + w["hinweis"])
     neutral = len(je_station) - len(out)
     if neutral:
         print("  ohne Faktor (Abweichung unter %.0f %%): %d Stationen" % (100 * ABWEICHUNG, neutral))

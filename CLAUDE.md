@@ -302,15 +302,49 @@ Zwei Kurven, zwei ganz verschiedene Wege:
 
 - **Schwarze Glocke ("max. moeglich")** = CAMS-Klarhimmel von Open-Meteo,
   korrigiert mit `uvCamsFaktor()`: Geo-Korrektur nach Breite und Hoehe
-  (`0,939 - 0,0199*(Breite-50) + 0,0561*Hoehe[km]`, gefittet an 16 BfS-Bilder
-  mit DWD-Kurve) mal dem **Stationsfaktor** aus `uv-station.json`.
-  Fuer Wettenberg: 0,937 x 1,094 = 1,025 - die beiden Korrekturen heben sich
-  fast auf, was Zufall ist und nicht Absicht.
+  (`0,9506 + 0,0128*(Breite-50) + 0,0538*Hoehe[km]`, seit v4.31 gefittet gegen
+  MESSUNG/CAMS an 28 BfS-Stationen) mal dem **Stationsfaktor** aus
+  `uv-station.json`. Fuer Wettenberg: 0,969 x 1,078 = 1,045.
+  **Dieselbe Formel steht in `uv_klarcheck.py` (`cams_faktor`)** - beide
+  muessen gleich bleiben, sonst misst der Stationsfaktor die Differenz der
+  Formeln statt der Geraete.
 - **Bunte Saeulen** = Glocke x Durchlass^`UV_K_EXP`. Der Durchlass ist
   gemessen: DWD-Globalstrahlung im 10-Minuten-Takt (`solar10`) geteilt durch
   die Klarhimmel-Globalstrahlung. **Nichts davon kommt vom BfS** - dass die
   Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
   unabhaengige Messgeraete an derselben Station unter denselben Wolken.
+
+### Erledigt (v4.31): Breitenkorrektur neu, mit Waechter
+
+Die alte Geo-Formel (`0,939 - 0,0199*(Breite-50) + ...`) war gegen die
+DWD-*Prognose* gefittet, und die faellt nach Norden zu steil ab. Die
+Stationsfaktoren haben den Fehler geschluckt: Stuttgart 0,930, Giessen 1,120,
+Norderney 1,175, Cuxhaven 1,227 - einzeln plausibel, zusammen ein Trend von
++0,033 je Grad bei t = 3,6. An Orten ohne Station in der Naehe stand der Fehler
+offen da: Kueste rund 15 % zu wenig UV, Alpen 7 % zu viel.
+
+Neu gefittet gegen Messung/CAMS: a = 0,9506, b = +0,0128 +- 0,0081 je Grad,
+c = +0,0538 +- 0,029 je km. **Sicher ist nur, dass -0,0199 falsch war** (vier
+Standardfehler); die neue Breitensteigung ist nicht sicher von null
+verschieden. `uv_klarlog.json` wurde dabei umgerechnet (verh x alt/neu,
+schwarz x neu/alt), damit alte und neue Eintraege dieselbe Formel meinen.
+
+**Der Waechter** in `uv_station.py` regressiert bei jedem Lauf die
+Stationsmediane gegen Breite und Hoehe und setzt in `uv-station.json`
+`"waechter": {"alarm": true}`, sobald |t| >= 3. Gegen das Protokoll von vorher
+schlaegt er an (t = +3,6), gegen das umgerechnete nicht (t = -0,9 / -0,4). Steht
+dort ein Alarm, gehoert die Geo-Formel neu gefittet - nicht die Faktoren
+vergroessert.
+
+### Offen: uv_durchlass.py rechnet gegen das ROHE CAMS
+
+`q = Messung / Glocke` mit `glocke = cs_max * (mu/mu_max)^2,42` - ohne
+Geo-Korrektur und ohne Stationsfaktor. Der Kommentar dort sagt "der kuerzt
+sich", das stimmt aber nur fuer das Verhaeltnis innerhalb einer Station, nicht
+fuer die Regression durch den Ursprung ueber alle Stationen. Die Aussagen aus
+v4.28 ("gemessen nie ueber 1,0", "Luecke 8 % zu hoch") beziehen sich auf diese
+rohe Glocke. Die Richtung bleibt, die genauen Prozente koennen sich um einige
+Punkte verschieben.
 
 ### Erledigt (v4.26): der Exponent kommt jetzt aus der Datei
 
