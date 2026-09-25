@@ -314,6 +314,28 @@ Zwei Kurven, zwei ganz verschiedene Wege:
   Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
   unabhaengige Messgeraete an derselben Station unter denselben Wolken.
 
+### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
+
+Das Jahresbild zeigt jetzt zwei Flaechen: hellgruen UV >= 3 bei klarem Himmel,
+dunkelgruen Sonne >= 45 Grad (Schattenregel). Beide Regeln sind Naeherungen und
+irren in entgegengesetzte Richtungen: UV >= 3 ist bei flacher Sonne zu
+grosszuegig (das Verhaeltnis Vitamin-D- zu Sonnenbrand-Wirkung ist nur ueber
+UV-Index ~5,5 annaehernd konstant), 45 Grad ist zu streng (Webb/Kline/Holick
+1988: in Edmonton, 52 Grad Nord, endet die Bildung erst im Oktober - Ende
+September, bei rund 37 Grad Hoechststand, bildete sich noch Previtamin D).
+Wettenberg: UV >= 3 an rund 205 Tagen, Sonne >= 45 Grad an 157 (4. April bis
+7. September).
+
+Das 45-Grad-Fenster wird GESCHLOSSEN berechnet (cos H0 = (sin 45 - sin phi sin
+delta)/(cos phi cos delta)), nicht gesucht - 1,3 ms statt 125 ms fuers Jahr,
+Abweichung zur Suche hoechstens 18 s.
+
+**Die Falle dabei: `ortsMs()` und `std()`/`ortsStundeDez()` gehen durch die
+Intl-Zeitzonenrechnung und kosten je Aufruf rund 0,2 ms.** In Schleifen ueber
+366 Tage dominieren sie alles andere. Die vorhandene UV->=3-Rechnung in
+`vitdJahr` braucht deshalb rund 210 ms, fast nur fuer diese Aufrufe - dort
+waere noch viel zu holen.
+
 ### Erledigt (v4.31): Breitenkorrektur neu, mit Waechter
 
 Die alte Geo-Formel (`0,939 - 0,0199*(Breite-50) + ...`) war gegen die
