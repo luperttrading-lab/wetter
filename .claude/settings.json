@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/kosten.py)",
+      "Bash(python3 tools/kosten.py *)"
+    ]
+  }
+}

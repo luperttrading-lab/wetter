@@ -250,6 +250,9 @@ Ordner eine plausible, aber fremde Zahl.
   selbst fehlen und tauchen erst in der naechsten Zeile auf (bei „Frage" 10-50 Cent).
 - Nur die eine Sitzung wird gezaehlt, andere Chats zum selben Projekt haben eigene
   Protokolle. Gezaehlt wird die zuletzt geaenderte; `-v` weist auf weitere hin.
+- Die Skill `.claude/skills/kostenzeile/` traegt Skript und Ablauf, damit beides in
+  einer neuen Sitzung nicht fehlt. `.claude/settings.json` gibt den Aufruf frei,
+  sonst fragt Claude Code bei jeder Antwort nach.
 - API-Listenpreise, keine Rechnung. Mit Abo zahlt man den Pauschalpreis.
 - Der Cache-Schreibpreis ist die groesste Stellschraube: Nach jedem Modellwechsel und
   nach jeder Pause laenger als die Cache-Gueltigkeit kostet die naechste Frage 3-10 $,
