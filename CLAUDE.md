@@ -427,6 +427,12 @@ Zeit). Getestet nur mit nachgebauter Open-Meteo-Antwort, weil der
 Prueframer an dem Tag ins Tageslimit von Open-Meteo lief (HTTP 429) - am
 Geraet mit echten Daten noch ansehen.
 
+v4.53: Orte unter dem Zugpfeil fallen weg (Nutzer: "Herborn kann man unter
+dem Pfeil nicht lesen"). `rkZugZeichnen(...,true)` zeichnet nichts und
+liefert die belegten Flaechen (Linie +-8 px, Striche, Zeitbeschriftungen);
+`wolkOrteZeichnen(x,P,W,H,sperr)` laesst jeden Ort weg, dessen Punkt
+hoechstens 8 px daneben liegt, und legt keine Beschriftung darauf.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
