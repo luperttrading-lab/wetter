@@ -318,9 +318,7 @@ v4.41: Knopf "Ton" (nur bei laufendem Kompass): Parksensor-Piepen zum
 naechstgelegenen sichtbaren Koerper (Planeten nur, wenn dunkel genug; Mond
 immer; Positionen fuer JETZT, nicht fuer die gewaehlte Uhrzeit). Abstand ist
 der Grosskreiswinkel, Pause waechst linear von 60 ms an der Schwelle bis 1 s
-ab 40 Grad. Dauerton-Schwelle ist ein Regler 1-10 Grad (`pl_ton_thr`,
-Voreinstellung 3) - Wert vom Nutzer nach dem Test draussen erfragen und als
-Voreinstellung setzen. v4.42: zwei Bestaetigungspiepser beim Einschalten
+ab 40 Grad. Dauerton-Schwelle: bis v4.43 ein Regler, seit v4.44 fest 3 Grad. v4.42: zwei Bestaetigungspiepser beim Einschalten
 (trennt "Ton kommt nicht durch" von "kein Ziel"); am Tag ohne Planet und
 Mond ist die Sonne das Ziel. iOS-Stummschalter: `navigator.audioSession.type =
 "playback"`, wo Safari es kennt.
@@ -329,6 +327,14 @@ v4.43: vier Klaenge zur Wahl (`pl_ton_klang`: hell 880 Hz, weich 520 Hz,
 tief 330 Hz Dreieck, steigend 300-700 Hz nach Naehe), Voreinstellung "weich"
 bis der Nutzer waehlt. Jeder Piepser blendet weich ein/aus
 (setTargetAtTime) - hartes setValueAtTime knackte und klang schaerfer.
+
+v4.44: Schalter statt Knopftext (Beschriftung fest, Schiebeschalter zeigt den
+Zustand - "Ton aus" war nicht zu deuten: Zustand oder Aktion?). Dauerton fest
+ab 3 Grad, vom Nutzer draussen gewaehlt; der Regler ist weg. Ziel waehlen:
+Koerper im Bild (28 px Fangradius, `cv._plPkte`) oder in der Legende
+antippen -> festes Ziel (`PL_TON.fix`), gestrichelter Ring; "automatisch"
+hebt es auf. Nur bei laufendem Kompass. Festes Ziel braucht keine
+Dunkelheit, nur den Horizont.
 
 ## Das UV-Modell: wo die Zahlen herkommen
 
