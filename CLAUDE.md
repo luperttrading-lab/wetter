@@ -383,6 +383,16 @@ Bild passen, sonst 30 bzw. 15 min; hoechstens vier Striche. Geprueft nur an
 einem echten Schauer (Giessen 27.09. 17 Uhr: Radar 55 km/h nach 82 Grad,
 700 hPa 47 km/h nach 61 Grad) und kuenstlichen Bewegungen.
 
+v4.48: Messung aus ALLEN 10-Minuten-Paaren der gemessenen Stunde (Versatz
+bis 12 Zellen, Deckung >= 30 %), Median der Komponenten; Rueckfall die
+Vorhersage jetzt -> +30 min, dann 700 hPa. Anlass: kurzlebige Schauer bei
+Giessen (225 -> 31 Zellen in 30 min) - der 30-min-Vergleich fand nur 10 %
+Deckung, die App schrieb "kein Regen im Bild", obwohl der Film Regen zeigte.
+10-min-Paare: 40-46 km/h nach 63-67 Grad, App 43 km/h nach 64 Grad,
+700 hPa 46 km/h nach 65 Grad. Andere Radar-App zum selben Zeitpunkt:
+Richtung rund 70 Grad. Der Hinweis unterscheidet jetzt "kein Regen im Bild"
+von "zu wenig Regen fuer eine Messung".
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
