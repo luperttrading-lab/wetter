@@ -354,6 +354,20 @@ Je Bildschirmpixel (halbe Aufloesung) wird die Zelle einmal nachgeschlagen
 (`RK.karte`), jedes Bild ist dann nur ein Nachschlagen. Farbe nach
 `radarBoden()` (geeicht), Regen ja/nein nach der rohen Rate (>= 0,1 mm/h).
 
+**Scheinechos (v4.46, `rkEntstoeren`):** Anlass Norden, 27.09.2026 - ein
+Fleck mit "31 mm/h" stand stundenlang an der Emsmuendung (Windparks
+Eemshaven/Delfzijl, rund 8 km vor dem DWD-Radar Emden) und wanderte in der
+Vorhersage als Regen weiter. Filter: (1) Maske = in der gemessenen Stunde in
+>= der Haelfte der Bilder nass (3x3-Nachbarschaft) UND allein (11x11-Fenster
+im Mittel <= 25 nasse Zellen), eine Zelle breiter; (2) in der Vorhersage
+wandert die Maske mit (Versatz je Bild <= 3 Zellen, der die meisten nassen
+Zellen deckt); (3) Einzelpunkte <= 2 Zellen fallen in allen Bildern weg.
+Norden: Vorhersage 150 -> 15 nasse Zellen (erster Test), im Browser danach 0.
+Grenze: ein echter Schauer, der eine Stunde auf demselben km2 steht, faellt
+mit weg. Der Balken "Niederschlag 2 Std" nutzt eine eigene 1-km-Abfrage und
+ist NICHT gefiltert - stuende ein Scheinecho genau ueber einem Ort, zeigte
+er Regen.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
