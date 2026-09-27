@@ -293,7 +293,7 @@ Ist eine Aufgabe fertig und veroeffentlicht, geht eine kurze
 Push-Benachrichtigung aufs iPhone. Dateien, an denen gearbeitet wurde -
 Screenshots, Vergleichsseiten -, gehen vor dem Ende der Antwort an den Nutzer.
 
-## Kompass im Planetenbild (v4.39)
+## Kompass im Planetenbild (v4.39/v4.40)
 
 Knopf "Richtung zeigen" unter der Planetenlegende, danach ein roter Strich
 dort, wohin das Handy zeigt. iOS: `webkitCompassHeading` (MAGNETISCH Nord)
@@ -301,10 +301,18 @@ und `webkitCompassAccuracy` (+-Grad, -1 = unkalibriert), Erlaubnis nur nach
 Tippen. Android: `deviceorientationabsolute`, 360 - alpha, ohne Genauigkeit.
 Dazu die Missweisung (`plMissweisung`, gefittet an 30 NOAA-Punkten in
 Deutschland, Rest <= 0,04 Grad, +0,14 Grad/Jahr) - Wettenberg +3,8 Grad.
-Glaettung als Vektor mit 0,25 s Zeitkonstante. Am Geraet noch NICHT
-geprueft (Stand 27.09.2026): offen ist vor allem, was iOS bei hochkant
-gehaltenem Handy liefert. Naechste Verbesserung waere eine Eichung am
-Mond oder an der Sonne (Handy draufhalten, tippen -> Versatz merken).
+Glaettung als Vektor mit 0,25 s Zeitkonstante. Am iPhone geprueft
+(27.09.2026): "funktioniert sehr gut"; das angezeigte +-10 Grad ist die
+Selbsteinschaetzung von iOS, keine Messung. Eine Eichung am Mond (Handy
+draufhalten, tippen -> Versatz merken, dann +-2-3 Grad) hat der Nutzer
+vorerst abgelehnt - "sieht so schon ganz gut aus".
+
+v4.40: dazu die HOEHE als waagrechter Strich und ein Ring im Kreuzungspunkt.
+Gezielt wird mit der OBERKANTE (Zeigestock, Bildschirm zum Betrachter) - die
+Achse, auf die sich auch webkitCompassHeading bezieht. Hoehe = beta
+(W3C: Hochkomponente der y-Achse ist sin beta, gamma spielt keine Rolle).
+Nicht die Rueckkamera: das waere asin(-cos beta cos gamma), und dann passte
+die Kompassrichtung nicht mehr zur selben Achse.
 
 ## Das UV-Modell: wo die Zahlen herkommen
 
