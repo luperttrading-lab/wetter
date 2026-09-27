@@ -296,7 +296,7 @@ Ist eine Aufgabe fertig und veroeffentlicht, geht eine kurze
 Push-Benachrichtigung aufs iPhone. Dateien, an denen gearbeitet wurde -
 Screenshots, Vergleichsseiten -, gehen vor dem Ende der Antwort an den Nutzer.
 
-## Kompass im Planetenbild (v4.39/v4.40)
+## Kompass im Planetenbild (v4.39-v4.41)
 
 Knopf "Richtung zeigen" unter der Planetenlegende, danach ein roter Strich
 dort, wohin das Handy zeigt. iOS: `webkitCompassHeading` (MAGNETISCH Nord)
@@ -316,6 +316,15 @@ Achse, auf die sich auch webkitCompassHeading bezieht. Hoehe = beta
 (W3C: Hochkomponente der y-Achse ist sin beta, gamma spielt keine Rolle).
 Nicht die Rueckkamera: das waere asin(-cos beta cos gamma), und dann passte
 die Kompassrichtung nicht mehr zur selben Achse.
+
+v4.41: Knopf "Ton" (nur bei laufendem Kompass): Parksensor-Piepen zum
+naechstgelegenen sichtbaren Koerper (Planeten nur, wenn dunkel genug; Mond
+immer; Positionen fuer JETZT, nicht fuer die gewaehlte Uhrzeit). Abstand ist
+der Grosskreiswinkel, Pause waechst linear von 60 ms an der Schwelle bis 1 s
+ab 40 Grad. Dauerton-Schwelle ist ein Regler 1-10 Grad (`pl_ton_thr`,
+Voreinstellung 3) - Wert vom Nutzer nach dem Test draussen erfragen und als
+Voreinstellung setzen. iOS-Stummschalter: `navigator.audioSession.type =
+"playback"`, wo Safari es kennt.
 
 ## Das UV-Modell: wo die Zahlen herkommen
 
