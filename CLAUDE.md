@@ -390,6 +390,14 @@ Deckung, die App schrieb "kein Regen im Bild", obwohl der Film Regen zeigte.
 Richtung rund 70 Grad. Der Hinweis unterscheidet jetzt "kein Regen im Bild"
 von "zu wenig Regen fuer eine Messung".
 
+v4.49 (Wunsch des Nutzers): Ausschnitt = Wolkenkarte (`WOLK`, rund
+130 x 110 km, `rkFenster`), Abfrage-Radius `rkAbfrageKm()` deckt das Fenster
+plus 8 km; rund 1,6-mal mehr Daten als bei 50 km. Die Ortsbeschriftung ist
+jetzt `wolkOrteZeichnen()` und wird von beiden Karten benutzt - gleiche Orte
+an gleicher Stelle. Am Pfeil nur noch die Zeitstriche (nur solche, die im
+Bild liegen); Richtung und Tempo stehen in der Zeile unter der Karte. Kein
+25-km-Ring mehr. Zeitkaestchen oben rechts (links oben steht Kreuztal).
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
