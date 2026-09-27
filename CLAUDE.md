@@ -328,6 +328,11 @@ Voreinstellung setzen. v4.42: zwei Bestaetigungspiepser beim Einschalten
 Mond ist die Sonne das Ziel. iOS-Stummschalter: `navigator.audioSession.type =
 "playback"`, wo Safari es kennt.
 
+v4.43: vier Klaenge zur Wahl (`pl_ton_klang`: hell 880 Hz, weich 520 Hz,
+tief 330 Hz Dreieck, steigend 300-700 Hz nach Naehe), Voreinstellung "weich"
+bis der Nutzer waehlt. Jeder Piepser blendet weich ein/aus
+(setTargetAtTime) - hartes setValueAtTime knackte und klang schaerfer.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
