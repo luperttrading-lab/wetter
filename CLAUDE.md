@@ -323,7 +323,9 @@ immer; Positionen fuer JETZT, nicht fuer die gewaehlte Uhrzeit). Abstand ist
 der Grosskreiswinkel, Pause waechst linear von 60 ms an der Schwelle bis 1 s
 ab 40 Grad. Dauerton-Schwelle ist ein Regler 1-10 Grad (`pl_ton_thr`,
 Voreinstellung 3) - Wert vom Nutzer nach dem Test draussen erfragen und als
-Voreinstellung setzen. iOS-Stummschalter: `navigator.audioSession.type =
+Voreinstellung setzen. v4.42: zwei Bestaetigungspiepser beim Einschalten
+(trennt "Ton kommt nicht durch" von "kein Ziel"); am Tag ohne Planet und
+Mond ist die Sonne das Ziel. iOS-Stummschalter: `navigator.audioSession.type =
 "playback"`, wo Safari es kennt.
 
 ## Das UV-Modell: wo die Zahlen herkommen
