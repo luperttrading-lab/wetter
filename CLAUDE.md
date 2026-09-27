@@ -433,6 +433,10 @@ liefert die belegten Flaechen (Linie +-8 px, Striche, Zeitbeschriftungen);
 `wolkOrteZeichnen(x,P,W,H,sperr)` laesst jeden Ort weg, dessen Punkt
 hoechstens 8 px daneben liegt, und legt keine Beschriftung darauf.
 
+v4.54: Zeitkasten oben rechts immer gleich breit (Nutzer). Ein unsichtbarer
+Platzhalter "00:00 in 188 min · Vorhersage" liegt per CSS-Grid in derselben
+Zelle wie der echte Text; `el('rkZeit').textContent` enthaelt deshalb beide.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
