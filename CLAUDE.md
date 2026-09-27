@@ -339,6 +339,24 @@ antippen -> festes Ziel (`PL_TON.fix`), gestrichelter Ring; "automatisch"
 hebt es auf. Nur bei laufendem Kompass. Festes Ziel braucht keine
 Dunkelheit, nur den Horizont.
 
+## Regenradar (v4.45)
+
+Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
+Aufklappen, danach hoechstens alle 5 min. Bright Sky `/radar`, format=plain
+(der Browser holt es gzip - trocken rund 1 KB, sonst einige hundert KB),
+50 km um den Ort (+6 km Rand), eine Stunde zurueck bis zwei voraus, 5-min-Takt.
+Entscheidungen des Nutzers (27.09.2026): Quelle Bright Sky statt DWD-WMS-Bild,
+50 km, Film mit Schieber.
+
+**Projektion:** Das Radarraster ist polar-stereographisch, die Esri-Kacheln
+Mercator. `rkStereo(lat,lon)` rechnet nach dem proj-String der Bright-Sky-Doku
+(lat_ts 60, lon_0 10, WGS84, x_0/y_0 aus der Doku); Pixelmitte Spalte c bei
+x=1000c, Zeile r bei y=-1000r, Zeile 0 = Norden. Geprueft gegen die vier
+Gitterecken der Doku, die Ecken der Antwort und `latlon_position`: 0,0 m.
+Je Bildschirmpixel (halbe Aufloesung) wird die Zelle einmal nachgeschlagen
+(`RK.karte`), jedes Bild ist dann nur ein Nachschlagen. Farbe nach
+`radarBoden()` (geeicht), Regen ja/nein nach der rohen Rate (>= 0,1 mm/h).
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
