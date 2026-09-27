@@ -467,6 +467,157 @@ def auswerten(log):
     return out
 
 
+# ---------------------------------------------------------------------------
+# v4.38: DIE GELERNTE KURVE - Saeule = Glocke x f(Durchlass), f aus der Messung
+#
+# Bisher rechnete die App f = min(1, dl)^p. Zwei Schwaechen:
+#  - der Deckel bei 1,0: an Sonnentagen klebte die Saeule an der Glocke, die
+#    BfS-Messung lag sichtbar darunter; mit dem Testregler "Saeulen stauchen"
+#    liefen die Saeulen dann wie mit dem Lineal parallel zur Kurve,
+#  - die Potenz ist im mittleren Bereich gut, an beiden Enden nicht.
+# Statt eine Formel zu raten, wird f aus den gesammelten Paaren abgelesen:
+# Median je Durchlass-Band, danach monoton gemacht (mehr Strahlung kann nicht
+# weniger UV bedeuten). Mit jedem Tag im Protokoll wird die Kurve genauer,
+# ohne dass jemand etwas einstellt.
+#
+# DER BEZUG MUSS DERSELBE SEIN WIE IN DER APP. q im Protokoll ist Messung
+# geteilt durch die ROHE Glocke (CAMS ohne Geo-Korrektur, ohne Stationsfaktor,
+# ohne Tagesgang). Die App multipliziert f aber mit ihrer korrigierten Glocke.
+# Deshalb wird hier jedes q durch genau diese drei Faktoren geteilt:
+#   Geo-Korrektur   cams_faktor(Breite, Hoehe)  - aus uv_klarcheck, wie die App
+#   Stationsfaktor  uv-station.json, fehlt er: 1 (so rechnet die App auch)
+#   Tagesgang       1 + UV_TRUEB_B * (Stunden seit Hoechststand), +-6 %
+# Ohne diesen Schritt haette die Kurve den Stationsfaktor ein zweites Mal
+# gelernt: q_roh liegt bei Sonne um 0,93, korrigiert um 0,94 bis 0,96.
+
+KURVE_BAND = 0.05        # Breite der Durchlass-Baender
+KURVE_MIN_N = 30         # so viele Paare braucht ein Band
+KURVE_MIN_PUNKTE = 8     # so viele Baender braucht die Kurve, sonst liest die App sie nicht
+KURVE_MAX = 1.0          # die Saeule ueberragt die Glocke nicht (v4.28)
+UV_TRUEB_B = -0.0075     # wie index.html
+UV_TRUEB_MAX = 0.06
+
+
+def _mittag_ortszeit(datum, lon):
+    """Sonnenhoechststand in Ortsstunden (Zeitgleichung wie mu())."""
+    d = dt.date.fromisoformat(datum)
+    g = 2 * math.pi * (d.timetuple().tm_yday - 1) / 365.25
+    eq = (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g)
+          - 0.014615 * math.cos(2 * g) - 0.040849 * math.sin(2 * g)) * 229.18
+    off = dt.datetime(d.year, d.month, d.day, 12, tzinfo=TZ).utcoffset().total_seconds() / 3600
+    return 12 - lon / 15 - eq / 60 + off
+
+
+def _app_bezug():
+    """Je Station, was die App auf die rohe Glocke aufschlaegt: (Geo x Station, Laenge)."""
+    from uv_klarcheck import cams_faktor
+    try:
+        with open("uv-station.json", encoding="utf-8") as fh:
+            stf = json.load(fh).get("stationen") or {}
+    except Exception:
+        stf = {}
+    try:
+        with open("uv_klarlog.json", encoding="utf-8") as fh:
+            kl = json.load(fh)
+    except Exception:
+        kl = {}
+    geo = {}
+    for tag in sorted(kl):                       # juengster Eintrag gewinnt
+        for slug, e in kl[tag].items():
+            if e.get("h") is not None and e.get("la") is not None:
+                geo[slug] = (e["la"], e["h"])
+    out = {}
+    for b in stationen_aus_app():
+        if b["slug"] not in geo:
+            continue
+        la, h = geo[b["slug"]]
+        g = max(0.7, min(1.4, cams_faktor(la, h)))
+        f = (stf.get(b["slug"]) or {}).get("faktor") or 1.0
+        out[b["slug"]] = (g * f, b["lo"])
+    return out
+
+
+def _korrigiert(log):
+    """(Tag, Durchlass, q gegen die Glocke der App) fuer alle verwertbaren Paare."""
+    bezug = _app_bezug()
+    out = []
+    for tag, ps in log.items():
+        for p in ps:
+            b = bezug.get(p["st"])
+            if not b or p.get("h") is None:
+                continue
+            tr = 1 + max(-UV_TRUEB_MAX, min(UV_TRUEB_MAX,
+                                            UV_TRUEB_B * (p["h"] - _mittag_ortszeit(tag, b[1]))))
+            out.append((tag, p["dl"], p["q"] / (b[0] * tr)))
+    return out
+
+
+def _kurve_aus(pkt):
+    """Median je Band, dann monoton (Pool Adjacent Violators, gewichtet mit n)."""
+    baender = []
+    i = 1
+    while KURVE_BAND * i < 1.05 - 1e-9:
+        a, b = KURVE_BAND * i, KURVE_BAND * (i + 1)
+        w = [(d, q) for _, d, q in pkt if a <= d < b]
+        if len(w) >= KURVE_MIN_N:
+            baender.append([median([d for d, _ in w]), median([q for _, q in w]), len(w)])
+        i += 1
+    bl = []                                        # Bloecke [Summe f*n, n, Anzahl Baender]
+    for _, f, n in baender:
+        bl.append([f * n, n, 1])
+        while len(bl) > 1 and bl[-2][0] / bl[-2][1] > bl[-1][0] / bl[-1][1]:
+            s2, n2, k2 = bl.pop()
+            bl[-1][0] += s2; bl[-1][1] += n2; bl[-1][2] += k2
+    mono = []
+    for s1, n1, k1 in bl:
+        mono += [s1 / n1] * k1
+    return [[round(b[0], 3), round(min(KURVE_MAX, f), 3), b[2]] for b, f in zip(baender, mono)]
+
+
+def kurve_wert(kurve, dl):
+    """Wie uvKurveD in der App: linear zwischen den Punkten, flach am oberen Ende,
+    unter dem ersten Punkt anteilig gegen null."""
+    if dl <= kurve[0][0]:
+        return kurve[0][1] * max(0.0, dl) / kurve[0][0]
+    for (x0, y0, _), (x1, y1, _) in zip(kurve, kurve[1:]):
+        if dl <= x1:
+            return y0 + (y1 - y0) * (dl - x0) / (x1 - x0)
+    return kurve[-1][1]
+
+
+def kurve(log, p_alt):
+    """Die gelernte Kurve plus Guete gegen das alte Modell min(1,dl)^p.
+
+    Guete ehrlich gerechnet: jeder Tag wird mit der Kurve der ANDEREN Tage
+    vorhergesagt. Sonst misst man nur, wie gut die Kurve die Daten nachzeichnet,
+    aus denen sie stammt."""
+    pkt = _korrigiert(log)
+    k = _kurve_aus(pkt)
+    erg = {"punkte": len(pkt), "tage": len(log), "kurve": k if len(k) >= KURVE_MIN_PUNKTE else None,
+           "band": KURVE_BAND, "min_n": KURVE_MIN_N}
+    if not erg["kurve"]:
+        return erg
+    tage = sorted(set(t for t, _, _ in pkt))
+    neu_f, alt_f, neu_b, alt_b = [], [], [], []
+    for tag in tage:
+        k2 = _kurve_aus([x for x in pkt if x[0] != tag])
+        drin = [x for x in pkt if x[0] == tag and x[2] > 0.02]
+        if len(k2) < KURVE_MIN_PUNKTE or len(drin) < 30:
+            continue
+        ln_neu = [math.log(q / max(0.02, kurve_wert(k2, d))) for _, d, q in drin]
+        ln_alt = [math.log(q / max(0.02, min(1.0, d) ** p_alt)) for _, d, q in drin]
+        neu_f += [abs(v) for v in ln_neu]; alt_f += [abs(v) for v in ln_alt]
+        neu_b.append(median(ln_neu)); alt_b.append(median(ln_alt))
+    if neu_b:
+        pz = lambda v: round(100 * (math.exp(v) - 1), 1)
+        erg["guete"] = {
+            "tage": len(neu_b),
+            "fehler_neu_pz": pz(median(neu_f)), "fehler_alt_pz": pz(median(alt_f)),
+            "tagesbias_neu_pz": [pz(min(neu_b)), pz(median(neu_b)), pz(max(neu_b))],
+            "tagesbias_alt_pz": [pz(min(alt_b)), pz(median(alt_b)), pz(max(alt_b))]}
+    return erg
+
+
 def main():
     # --nur-auswerten: das Protokoll neu bewerten, ohne einen Tag zu holen.
     # Braucht man nach jeder Aenderung an der Auswertung - der Sammellauf
@@ -531,6 +682,21 @@ def main():
                  ("%.3f" % e["p90"]) if e.get("p90") else "  -  ",
                  ("%.3f" % e["max"]) if e.get("max") else "  -  "))
 
+    ku = kurve(log, ges.get("p") or 0.669)
+    print("\nGelernte Kurve (Saeule = Glocke der App x f(Durchlass)) - DIE liest die App:")
+    if ku.get("kurve"):
+        print("  %d Paare aus %d Tagen, %d Baender" % (ku["punkte"], ku["tage"], len(ku["kurve"])))
+        print("  " + "  ".join("%.2f:%.3f" % (d, f) for d, f, _ in ku["kurve"]))
+        gu = ku.get("guete")
+        if gu:
+            print("  Tag fuer Tag vorhergesagt (%d Tage, jeweils aus den anderen gelernt):" % gu["tage"])
+            print("    typischer Fehler je 10 min   neu %4.1f %%   alt %4.1f %%"
+                  % (gu["fehler_neu_pz"], gu["fehler_alt_pz"]))
+            print("    Tagesbias min/Median/max     neu %+.1f/%+.1f/%+.1f %%   alt %+.1f/%+.1f/%+.1f %%"
+                  % tuple(gu["tagesbias_neu_pz"] + gu["tagesbias_alt_pz"]))
+    else:
+        print("  noch zu wenige Baender (%d Paare) - die App bleibt bei min(1,dl)^p" % ku["punkte"])
+
     wa = spitzen_nach_wolkenart(log)
     print("\nSpitzen nach Wolkenart (Open-Meteo-Schichten der Stunde):")
     print("  %-9s %7s %7s %7s %8s %7s %6s | %s" % ("Art", "Punkte", "Spitze", "90 %", "Mess/Kl", "Durchl", "Sonne", "sonnige Fenster: n  Spitze  90 %"))
@@ -552,7 +718,7 @@ def main():
                             "Regression ln(q)=p*ln(dl), ab %d Punkten und r2 %.2f. "
                             "Die App liest p_gesamt (alle Klassen zusammen)." % (MIN_PUNKTE, MIN_R2),
                    "klassen": {n: {"von": lo, "bis": hi} for n, lo, hi in KLASSEN},
-                   "p_gesamt": ges,
+                   "p_gesamt": ges, "kurve": ku,
                    "p": erg, "tagesgang": tg, "spitzen": sp,
                    "wolkenart": wa}, fh, ensure_ascii=False, indent=1)
     print("\n%s geschrieben (%d von %d Klassen belegt, %d Tage im Log)"

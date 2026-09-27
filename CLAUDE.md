@@ -361,7 +361,33 @@ schlaegt er an (t = +3,6), gegen das umgerechnete nicht (t = -0,9 / -0,4). Steht
 dort ein Alarm, gehoert die Geo-Formel neu gefittet - nicht die Faktoren
 vergroessert.
 
-### Offen: uv_durchlass.py rechnet gegen das ROHE CAMS
+### Erledigt (v4.38): die Saeulen lernen aus der Messung
+
+Saeule = Glocke x f(Durchlass). f ist keine Formel mehr (`min(1,k)^p` mit
+Deckel), sondern die **gelernte Kurve** aus `uv-durchlass.json`, Feld
+`kurve.kurve` = Liste `[Durchlass, f, n]`. `uv_durchlass.py` bildet sie bei
+jedem Klarcheck-Lauf (taeglich) neu: Median je 5-%-Band ab 30 Paaren, danach
+monoton gemacht, gedeckelt bei 1,0. Die App (`uvKurveD`) interpoliert linear;
+fehlt die Kurve oder ist sie unplausibel, gilt wieder die Potenz.
+
+**Bezug wie in der App:** Jedes q wird vorher durch Geo-Korrektur x
+Stationsfaktor x Tagesgang geteilt (`_korrigiert`). Stationen ohne Faktor
+zaehlen mit 1, wie in der App. Damit ist der alte offene Punkt "rechnet gegen
+das rohe CAMS" fuer die Kurve erledigt; `p_gesamt` rechnet weiter roh, wird
+aber nur noch als Rueckfall gebraucht.
+
+Stand 17 Tage, 15 326 Paare: bei voller Sonne f = 0,96, nicht 1,0 - darum
+klebten die Saeulen an Sonnentagen an der Glocke. Guete, jeder Tag aus den
+anderen vorhergesagt (steht im Klarcheck-Log, die 10-Uhr-Routine sieht sie):
+Tagesbias Median alt -2,6 %, neu -0,6 %; typischer Fehler je 10 min 14,9 ->
+14,3 %. Der Gewinn ist klein und sitzt bei Sonne; die Streuung von Tag zu Tag
+(-10 bis +7 %) bleibt - die kommt von Ozon und Dunst, die die
+Globalstrahlung nicht sieht.
+
+Der Testregler "Saeulen stauchen" (v4.32) ist entfernt, ein gespeicherter
+Wert `saeuleF` wird beim Start geloescht.
+
+### Frueher offen: uv_durchlass.py rechnet gegen das ROHE CAMS
 
 `q = Messung / Glocke` mit `glocke = cs_max * (mu/mu_max)^2,42` - ohne
 Geo-Korrektur und ohne Stationsfaktor. Der Kommentar dort sagt "der kuerzt
