@@ -401,6 +401,17 @@ an gleicher Stelle. Am Pfeil nur noch die Zeitstriche (nur solche, die im
 Bild liegen); Richtung und Tempo stehen in der Zeile unter der Karte. Kein
 25-km-Ring mehr. Zeitkaestchen oben rechts (links oben steht Kreuztal).
 
+v4.50 (Wunsch des Nutzers): EINE Karte "Wolken & Regen" mit Umschalter
+Wolken | Regen | Beides (`karteModus()`, gemerkt als `karte_modus`,
+Voreinstellung Regen). Der Block `wolkenSec` liegt jetzt IM Abschnitt
+`radarSec` und ist kein eigener Klapp-Abschnitt mehr (aus `KLAPP_ABS`
+entfernt); sein Titel ist ausgeblendet, `renderWolken` schreibt aber weiter
+die Standzeit hinein (die Radarzeile liest sie dort). Sichtbarkeit per CSS
+ueber `#radarSec[data-modus]`. "Beides": `wolkEbene()` (die weisse Ebene
+der Wolkenkarte, genau das WOLK-Fenster) wird im Radar unter die
+Regenfarben gelegt; die Wolkenregler bleiben sichtbar und zeichnen ueber
+`drawWolken()` auch das Radar neu. In "Wolken" wird kein Radar geladen.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
