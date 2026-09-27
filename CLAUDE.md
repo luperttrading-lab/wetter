@@ -415,6 +415,18 @@ demselben Innenabstand (Standard-`.nowcard`) und Radius wie die Wolkenkarte
 und ohne Abdunkeln des Satellitenbilds - vorher war sie breiter (andere Orte
 fielen weg) und dunkler. Beide jetzt 350 x 326 px im Test.
 
+v4.52 (Nutzer: Variante B): In "Beides" bewegen sich die Wolken im Film mit.
+Die Wolkenabfrage (`wolkenURL`) holt zusaetzlich `hourly` mit
+`past_hours=2&forecast_hours=3` - in DERSELBEN Abfrage, kein weiterer Abruf;
+Cache-Schluessel deshalb `wolkCache5`. `renderWolken` baut `_wolkStunden`
+(Zeiten ueber `utc_offset_seconds` in echte Zeitpunkte). `wolkEbene(zeit)`
+blendet zwischen den beiden umgebenden Stunden und verschiebt jede mit dem
+Zugpfeil bis zum Bildzeitpunkt; am Rand wird der Randwert fortgesetzt. Die
+reine Wolkenansicht nutzt weiter die aktuellen Werte (`wolkEbene()` ohne
+Zeit). Getestet nur mit nachgebauter Open-Meteo-Antwort, weil der
+Prueframer an dem Tag ins Tageslimit von Open-Meteo lief (HTTP 429) - am
+Geraet mit echten Daten noch ansehen.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
