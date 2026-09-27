@@ -368,6 +368,18 @@ mit weg. Der Balken "Niederschlag 2 Std" nutzt eine eigene 1-km-Abfrage und
 ist NICHT gefiltert - stuende ein Scheinecho genau ueber einem Ort, zeigte
 er Regen.
 
+**Zugpfeil (v4.47, `rkZug`/`rkZugZeichnen`):** Das Radarbild von vor 30 min
+wird bis 30 Zellen verschoben, bis es die nassen Zellen von jetzt am besten
+deckt (>= 30 Zellen, Deckung >= 30 %); sonst jetzt -> +30 min aus der
+Vorhersage; ohne Regen der Wind in 700 hPa (Open-Meteo, `rkWindZug`). Laeuft
+NACH dem Scheinecho-Filter - ein stehender Windpark taeuschte sonst 0 km/h
+vor. Gitternord weicht um (Laenge - 10) Grad ab, die Nordrichtung am Ort
+kommt aus `rkStereo`. Pfeil durch den Standort, Striche stromauf: "was dort
+ist, erreicht dich nach dieser Zeit". Stunden, solange zwei Striche ins
+Bild passen, sonst 30 bzw. 15 min; hoechstens vier Striche. Geprueft nur an
+einem echten Schauer (Giessen 27.09. 17 Uhr: Radar 55 km/h nach 82 Grad,
+700 hPa 47 km/h nach 61 Grad) und kuenstlichen Bewegungen.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
