@@ -1,68 +1,85 @@
-UV-Klarhimmel-Pruefung fuer 2026-09-25 (43 Stationen)
+UV-Klarhimmel-Pruefung fuer 2026-09-26 (43 Stationen)
 
 
-=== Modellpruefung 2026-09-25: Messspitze gegen die schwarze Kurve der App ===
+=== Modellpruefung 2026-09-26: Messspitze gegen die schwarze Kurve der App ===
 Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 50 km)
 
 Giessen-Gruppe         Breite Hoehe  Sonne | schwarz   Mess  Verh.
-Gießen                  50.60   203  100 % |    3.63   3.77   +4 %  klar
-Bonn                    50.70    67  100 % |    3.61   3.35   -7 %  klar
-Andernach               50.44    71  100 % |    3.70   3.81   +3 %  klar
-Fichtelberg             50.43  1212   68 % |    3.83   2.49  -35 %
-Kulmbach                50.11   308  100 % |    3.78   3.45   -9 %  klar
-Görlitz                 51.15   212    1 % |    3.32   1.71  -48 %
-Schweinfurt (Wasserlos  50.05   274  100 % |    3.77   2.37  -37 %  klar
-Langen                  49.99   141  100 % |    3.69   3.69   +0 %  klar
-Kassel                  51.31   174    -   |    3.57   3.66   +3 %
-Duderstadt              51.51   185  100 % |    3.53   3.13  -11 %  klar
-Dortmund                51.51    95  100 % |    3.46   3.37   -3 %  klar
-Melpitz                 51.53    86   61 % |    3.36   2.62  -22 %
+Gießen                  50.60   203   90 % |    3.49   3.83  +10 %
+Bonn                    50.70    67   94 % |    3.42   3.35   -2 %  klar
+Andernach               50.44    71   78 % |    3.50   3.77   +8 %
+Fichtelberg             50.43  1212  100 % |    3.78   2.44  -36 %  klar
+Kulmbach                50.11   308  100 % |    3.68   3.39   -8 %  klar
+Görlitz                 51.15   212  100 % |    3.27   3.13   -4 %  klar
+Schweinfurt (Wasserlos  50.05   274   98 % |    3.72   2.49  -33 %  klar
+Langen                  49.99   141  100 % |    3.69   3.72   +1 %  klar
+Kassel                  51.31   174    -   |    3.42   3.62   +6 %
+Duderstadt              51.51   185   90 % |    3.38   3.13   -7 %  klar
+Dortmund                51.51    95   59 % |    3.27   3.37   +3 %
+Melpitz                 51.53    86  100 % |    3.22   3.23   +0 %  klar
 
-Klare Stationen der Gruppe heute: 8, Messung/schwarz im Mittel -7.5 %
-=== GIESSEN KLAR === Sonne 100 %, Messung 3.77, schwarz 3.63 (+4 %)
+Klare Stationen der Gruppe heute: 8, Messung/schwarz im Mittel -11.1 %
 
-Protokoll seit 2026-09-04: 36 klare Stationstage in der Giessen-Gruppe, Messung/schwarz -5.6 % (Streuung 10.3 Pp)
+Protokoll seit 2026-09-04: 44 klare Stationstage in der Giessen-Gruppe, Messung/schwarz -6.6 % (Streuung 11.2 Pp)
   Giessen selbst an 3 klaren Tagen: +4.7 %
 
-Protokoll: 820 Stationstage, 211 genommen, 609 verworfen (uv-station-protokoll.json)
-uv-station.json: 16 Stationen mit Faktor (von 34 mit Daten)
-  Schweinfurt_Wasserlosen  x0.802  (roh 0.781, 4 Tage = 4 klar + 0 teils, Streuung 0.208)
-  Fichtelberg              x0.866  (roh 0.847, 3 Tage = 3 klar + 0 teils, Streuung 0.036)
-  Klippeneck               x0.875  (roh 0.869, 9 Tage = 9 klar + 0 teils, Streuung 0.021)
-  Lindenberg               x1.118  (roh 1.143, 2 Tage = 2 klar + 0 teils, vorlaeufig, Streuung 0.039)
-  Wurmberg_B               x1.110  (roh 1.122, 4 Tage = 4 klar + 0 teils, Streuung 0.022)
+Protokoll: 861 Stationstage, 236 genommen, 625 verworfen (uv-station-protokoll.json)
+uv-station.json: 17 Stationen mit Faktor (von 34 mit Daten)
+  Schweinfurt_Wasserlosen  x0.800  (roh 0.669, 5 Tage = 5 klar + 0 teils, Streuung 0.188)
+  Fichtelberg              x0.850  (roh 0.834, 4 Tage = 4 klar + 0 teils, Streuung 0.108)
+  Lindenberg               x1.146  (roh 1.167, 3 Tage = 3 klar + 0 teils, Streuung 0.031)
+  Klippeneck               x0.877  (roh 0.872, 10 Tage = 10 klar + 0 teils, Streuung 0.026)
+  Wurmberg_B               x1.114  (roh 1.124, 5 Tage = 5 klar + 0 teils, Streuung 0.041)
   Belm-Osnabrueck          x0.902  (roh 0.888, 3 Tage = 3 klar + 0 teils, Streuung 0.020)
-  Duderstadt_B             x0.903  (roh 0.893, 4 Tage = 4 klar + 0 teils, Streuung 0.034)
-  Chieming                 x1.094  (roh 1.099, 9 Tage = 9 klar + 0 teils, Streuung 0.052)
-  Giessen-Wettenberg       x1.077  (roh 1.080, 11 Tage = 3 klar + 8 teils, Streuung 0.047)
+  Duderstadt_B             x0.905  (roh 0.897, 5 Tage = 5 klar + 0 teils, Streuung 0.032)
+  Chieming                 x1.093  (roh 1.098, 10 Tage = 10 klar + 0 teils, Streuung 0.050)
+  Giessen-Wettenberg       x1.079  (roh 1.082, 12 Tage = 4 klar + 8 teils, Streuung 0.045)
+  Berlin                   x1.075  (roh 1.091, 2 Tage = 2 klar + 0 teils, vorlaeufig, Streuung 0.064)
   Zingst                   x0.926  (roh 0.921, 7 Tage = 1 klar + 6 teils, Streuung 0.032)
-  Andernach                x1.066  (roh 1.069, 9 Tage = 3 klar + 6 teils, Streuung 0.045)
-  Bonn                     x0.937  (roh 0.928, 3 Tage = 3 klar + 0 teils, Streuung 0.016)
-  Hohenpeissenberg         x1.063  (roh 1.066, 9 Tage = 9 klar + 0 teils, Streuung 0.025)
-  Kulmbach                 x0.945  (roh 0.942, 7 Tage = 3 klar + 4 teils, Streuung 0.042)
-  Stuttgart                x0.945  (roh 0.942, 10 Tage = 10 klar + 0 teils, Streuung 0.023)
+  Andernach                x1.066  (roh 1.069, 10 Tage = 3 klar + 7 teils, Streuung 0.042)
+  Bonn                     x0.935  (roh 0.929, 4 Tage = 4 klar + 0 teils, Streuung 0.033)
+  Hohenpeissenberg         x1.065  (roh 1.068, 10 Tage = 10 klar + 0 teils, Streuung 0.024)
+  Kulmbach                 x0.944  (roh 0.942, 8 Tage = 4 klar + 4 teils, Streuung 0.041)
+  Stuttgart                x0.944  (roh 0.942, 11 Tage = 11 klar + 0 teils, Streuung 0.022)
   Zirchow                  x1.055  (roh 1.079, 1 Tage = 1 klar + 0 teils, vorlaeufig, Streuung 0.000)
 
-Waechter (26 Stationen): Breite -0.0056 je Grad (t = -0.6), Hoehe +0.0043 je km (t = +0.1)
+Waechter (28 Stationen): Breite -0.0009 je Grad (t = -0.1), Hoehe +0.0070 je km (t = +0.2)
   kein Trend - die Faktoren messen die Geraete
-  ohne Faktor (Abweichung unter 5 %): 18 Stationen
+  ohne Faktor (Abweichung unter 5 %): 17 Stationen
 
-  klar         2120   1.034   1.140    0.943     98%   10.0 | 1846   1.031   1.095
-  hoch          970   1.049   1.176    0.854     89%   10.0 |  701   1.042   1.148
-  mittel       2487   1.060   1.189    0.800     68%    6.0 | 1107   1.054   1.174
-  tief        10050   1.095   1.294    0.633     52%    1.0 | 2582   1.067   1.219
-  gemischt     1337   1.057   1.191    0.847     83%    9.0 |  786   1.044   1.154
+  klar         2406   1.034   1.129    0.946     98%   10.0 | 2130   1.031   1.087
+  hoch         1203   1.048   1.163    0.869     90%   10.0 |  910   1.043   1.140
+  mittel       2566   1.059   1.187    0.800     68%    6.0 | 1150   1.053   1.174
+  tief        10177   1.094   1.291    0.635     52%    1.0 | 2632   1.066   1.218
+  gemischt     1380   1.057   1.191    0.847     84%    9.0 |  816   1.044   1.154
 
-uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 19 Tage im Log)
+uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 20 Tage im Log)
 Eine Klasse ist leer; die App liest ohnehin nur p_gesamt.
 Station                     DWD Messung Verhaeltnis
-Zugspitze (Schneefernerh   5.34   5.10     0.95  klar
-Kulmbach                   3.66   3.45     0.94  klar
-Schauinsland               4.84   4.41     0.91
-Melpitz                    3.22   2.62     0.82
-Zingst                     2.62   2.10     0.80
-Berlin                     3.05   1.88     0.62
-Lindenberg                 3.05   1.85     0.61
+Dortmund                   3.33   3.37     1.01  klar
+Salzgitter                 3.20   3.20     1.00  klar
+Zingst                     2.56   2.56     1.00  klar
+Kulmbach                   3.59   3.39     0.94  klar
+Zugspitze (Schneefernerh   5.32   5.00     0.94  klar
+Schauinsland               4.61   4.32     0.94  klar
+Lüneburg                   2.91   2.34     0.80
 
-2 von 7 Stationen klar (Schwelle 0.92)
-Zu bewoelkt - keine Auswertung. Morgen erneut pruefen.
+6 von 7 Stationen klar (Schwelle 0.92)
+
+=== KLARER TAG - Auswertung ===
+
+Station                  Breite Messung     DWD    CAMS
+Zugspitze (Schneefernerh  47.42    5.00    5.32    4.65
+Schauinsland              47.91    4.32    4.61    4.35
+Kulmbach                  50.11    3.39    3.59    3.80
+Dortmund                  51.51    3.37    3.33    3.35
+Salzgitter                52.15    3.20    3.20    3.30
+Zingst                    54.44    2.56    2.56    2.85
+
+Abweichung vom gemessenen Scheitel (6 Stationen):
+  DWD    gegen Messung:   +3.0 % (Streuung 3.7 Pp) | Breite: r=-0.855, -1.19 Pp je Grad
+  CAMS   gegen Messung:   +3.4 % (Streuung 7.4 Pp) | Breite: r=+0.636, +1.76 Pp je Grad
+
+Die Quelle mit der kleineren Abweichung und der flacheren Breitenabhaengigkeit trifft die Realitaet besser.
+
+Rohdaten: uv_klarcheck_2026-09-26.json
