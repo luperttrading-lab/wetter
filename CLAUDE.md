@@ -438,6 +438,16 @@ Platzhalter "00:00 in 188 min · Vorhersage" liegt per CSS-Grid in derselben
 Zelle wie der echte Text; `el('rkZeit').textContent` enthaelt deshalb beide.
 v4.55: Text linksbuendig - die Uhrzeit steht immer an derselben Stelle (Nutzer).
 
+## Sonnenkarte im UV-Abschnitt (v4.56)
+
+Die Karte "Sonne" (Bogen, Auf-/Untergang, Sonnenstunden) stand als letzte
+Karte in "Details". Seit v4.56 steht sie ganz oben im Abschnitt, der jetzt
+"Sonne, UV & Vitamin D" heisst (Klapp-Schluessel weiter `uvvitd`), VOR dem
+Schalter Gestern|Heute - sie zeigt nur heute. Eigenes Gitter `gridSonne`,
+gefuellt beim Bau des Hauptgitters; `gridUv` entsteht getrennt mit den
+UV-Daten. Das Hauptgitter nimmt `uvSec` das `hidden` ab, damit die Sonne
+auch ohne UV-Daten erscheint.
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
