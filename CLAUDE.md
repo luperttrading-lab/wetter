@@ -410,7 +410,10 @@ die Standzeit hinein (die Radarzeile liest sie dort). Sichtbarkeit per CSS
 ueber `#radarSec[data-modus]`. "Beides": `wolkEbene()` (die weisse Ebene
 der Wolkenkarte, genau das WOLK-Fenster) wird im Radar unter die
 Regenfarben gelegt; die Wolkenregler bleiben sichtbar und zeichnen ueber
-`drawWolken()` auch das Radar neu. In "Wolken" wird kein Radar geladen.
+`drawWolken()` auch das Radar neu. In "Wolken" wird kein Radar geladen. v4.51: Radarkarte mit
+demselben Innenabstand (Standard-`.nowcard`) und Radius wie die Wolkenkarte
+und ohne Abdunkeln des Satellitenbilds - vorher war sie breiter (andere Orte
+fielen weg) und dunkler. Beide jetzt 350 x 326 px im Test.
 
 ## Das UV-Modell: wo die Zahlen herkommen
 
