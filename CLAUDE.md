@@ -293,6 +293,19 @@ Ist eine Aufgabe fertig und veroeffentlicht, geht eine kurze
 Push-Benachrichtigung aufs iPhone. Dateien, an denen gearbeitet wurde -
 Screenshots, Vergleichsseiten -, gehen vor dem Ende der Antwort an den Nutzer.
 
+## Kompass im Planetenbild (v4.39)
+
+Knopf "Richtung zeigen" unter der Planetenlegende, danach ein roter Strich
+dort, wohin das Handy zeigt. iOS: `webkitCompassHeading` (MAGNETISCH Nord)
+und `webkitCompassAccuracy` (+-Grad, -1 = unkalibriert), Erlaubnis nur nach
+Tippen. Android: `deviceorientationabsolute`, 360 - alpha, ohne Genauigkeit.
+Dazu die Missweisung (`plMissweisung`, gefittet an 30 NOAA-Punkten in
+Deutschland, Rest <= 0,04 Grad, +0,14 Grad/Jahr) - Wettenberg +3,8 Grad.
+Glaettung als Vektor mit 0,25 s Zeitkonstante. Am Geraet noch NICHT
+geprueft (Stand 27.09.2026): offen ist vor allem, was iOS bei hochkant
+gehaltenem Handy liefert. Naechste Verbesserung waere eine Eichung am
+Mond oder an der Sonne (Handy draufhalten, tippen -> Versatz merken).
+
 ## Das UV-Modell: wo die Zahlen herkommen
 
 Die Herleitungen stehen ausfuehrlich als Kommentare in `index.html`. Hier nur,
