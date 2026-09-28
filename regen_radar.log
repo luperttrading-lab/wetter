@@ -1,4 +1,4 @@
-Radar-Eichung an den Bodenmessern, 27.09.2026 22:31 UTC
+Radar-Eichung an den Bodenmessern, 28.09.2026 07:32 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            0 Paare  (FRANKFURT/M)
   Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
@@ -15,22 +15,22 @@ Radar-Eichung an den Bodenmessern, 27.09.2026 22:31 UTC
   Nuernberg                 0 Paare  (NUERNBERG)
   Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
   Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
-  Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
+  Karlsruhe/Rheinstetten    2 Paare  (RHEINSTETTEN)
   Trier-Petrisberg          0 Paare  (TRIER)
   Saarbruecken              0 Paare  (SAARBRUECKEN)
   Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 0 Paare
+gesammelt: 2 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel        37    353     2.57      1.50      5.00     0.40 mm     0.21 mm
+niesel        37    355     2.57      1.50      5.00     0.40 mm     0.21 mm
 leicht        43     49     0.85      0.53      1.21     1.00 mm     1.12 mm
 regen          4      4      -         -         -           -           -  
 
-Radar sah nichts, Station mass etwas: 5 von 411 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 5 von 413 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      255 Stunden, davon 228 trocken (89 %)
-  Radarsumme 0 1 bis  0 25  69 Stunden, davon  45 trocken (65 %)
+  Radarsumme bis  0 1      256 Stunden, davon 229 trocken (89 %)
+  Radarsumme 0 1 bis  0 25  70 Stunden, davon  46 trocken (66 %)
   Radarsumme 0 25 bis  0 5  29 Stunden, davon  10 trocken (34 %)
   Radarsumme ab 0 5         53 Stunden, davon   3 trocken (6 %)
-regen-radar.json geschrieben (2 von 3 Klassen belegt, 10 Tage, 411 Paare)
+regen-radar.json geschrieben (2 von 3 Klassen belegt, 11 Tage, 413 Paare)
 Solange eine Klasse leer ist, rechnet die App ohne Korrektur weiter.
