@@ -336,6 +336,19 @@ antippen -> festes Ziel (`PL_TON.fix`), gestrichelter Ring; "automatisch"
 hebt es auf. Nur bei laufendem Kompass. Festes Ziel braucht keine
 Dunkelheit, nur den Horizont.
 
+v4.58: EICHTEST (Nutzer, 28.09.2026 - mit Finsternisbrille an der Sonne).
+Schalter "Eichtest" (nur bei laufendem Kompass). "Messpunkt": 0,4 s warten
+(Tippen ruckelt), 1 s die geglaetteten ROHwerte mitteln (`PL_KOMP.hdRoh`,
+`hochRoh`), mit der berechneten Position des Ziels vergleichen (gewaehltes
+Ziel, sonst Sonne, sonst Mond). Gespeichert wird der rohe Versatz plus die
+gerade geltende Eichung (`pl_eich_log`, hoechstens 200 Punkte). Bloecke je
+Eichung: Mittel und Streuung des Rests. "Eichung uebernehmen" = Mittel des
+laufenden Blocks, wirkt auf Strich, Ring und Ton (`pl_eich`), bis "Eichung
+aus"; der Kompassknopf zeigt dann "geeicht". "Kopieren" legt die Tabelle
+als Text in die Zwischenablage. Zweck: trennen, was eine Eichung wegnimmt
+(fester Versatz) und was bleibt (Zittern), und pruefen, ob der Versatz nach
+15-30 min noch gilt. Ergebnis steht noch aus.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
