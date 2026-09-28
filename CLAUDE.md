@@ -435,6 +435,18 @@ Platzhalter "00:00 in 188 min · Vorhersage" liegt per CSS-Grid in derselben
 Zelle wie der echte Text; `el('rkZeit').textContent` enthaelt deshalb beide.
 v4.55: Text linksbuendig - die Uhrzeit steht immer an derselben Stelle (Nutzer).
 
+v4.57 (Nutzer, Norden 28.09.2026): Pfeil zeigte 6 km/h nach O, der Wind in
+3 km Hoehe blies mit 72 km/h nach NO (Wind-App des Nutzers: 70 km/h). Die
+Radarechos lagen schwach ueber der Nordsee (Windparks/Meeresechos), wuchsen
+und schrumpften an Ort und Stelle; auch ohne die fest stehenden Zellen kamen
+nur rund 25 km/h heraus. Zwei Aenderungen: (1) Gegenprobe `rkZugPruefen()`:
+der 700-hPa-Wind wird jetzt IMMER geholt (je Ort 30 min zwischengespeichert);
+ab 20 km/h Hoehenwind gilt der Wind, wenn das Radartempo unter einem Drittel
+liegt oder die Richtung um mehr als 90 Grad abweicht (`RK.zug.verworfen`,
+der Hinweis nennt das verworfene Radartempo). (2) Suchbereich 20 statt 12
+Zellen je 10 min (bis 120 km/h); ueber 800 nassen Zellen eine gleichmaessige
+Stichprobe, damit grosse Regenflaechen nicht bremsen (Norden: 36 ms).
+
 ## Sonnenkarte im UV-Abschnitt (v4.56)
 
 Die Karte "Sonne" (Bogen, Auf-/Untergang, Sonnenstunden) stand als letzte
