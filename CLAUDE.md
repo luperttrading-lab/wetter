@@ -352,6 +352,15 @@ als Text in die Zwischenablage. Zweck: trennen, was eine Eichung wegnimmt
 (fester Versatz) und was bleibt (Zittern), und pruefen, ob der Versatz nach
 15-30 min noch gilt. Ergebnis steht noch aus.
 
+v4.59 (Nutzer): Nur die Kompassrichtung wird geeicht, die Hoehe nicht (wird
+weiter gemessen und in der Tabelle gezeigt). OFFEN, bevor je eine
+Hoeheneichung kommt: `altaz()` rechnet GEOZENTRISCH und ohne Refraktion - der
+Mond steht vom Standort aus bis ~0,95 Grad tiefer (Parallaxe ~ 0,95 Grad x
+cos Hoehe), die Luft hebt bei 10 Grad um 0,1, bei 2 Grad um 0,3 Grad. Eine
+Hoeheneichung am Mond wuerde die Parallaxe als Geraetefehler lernen.
+Tageslicht-Trick zum Anpeilen der Sonne: Schatten des Handys auf der Hand
+am kleinsten = Oberkante zeigt zur Sonne (etwa 1-2 Grad).
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
