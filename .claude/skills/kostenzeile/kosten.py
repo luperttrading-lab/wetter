@@ -27,6 +27,7 @@ PREISE = {
     'claude-mythos-5-1': (10,   50,  0.025),
     'claude-fable-5':    (10,   50,  0.1),
     'claude-mythos-5':   (10,   50,  0.1),
+    'claude-opus-5-5':   (4,    20,  0.05),     # eigener Lesefaktor 0,05 (Preisseite, Fn. 2)
     'claude-opus-5':     (5,    25,  0.1),
     'claude-opus-4-8':   (5,    25,  0.1),
     'claude-opus-4-7':   (5,    25,  0.1),
@@ -34,6 +35,7 @@ PREISE = {
     'claude-opus-4-5':   (5,    25,  0.1),
     'claude-opus-4-1':   (15,   75,  0.1),
     'claude-opus-4':     (15,   75,  0.1),
+    'claude-sonnet-5-5': (2,    10,  0.1),
     'claude-sonnet-5':   (2,    10,  0.1),
     'claude-sonnet-4-6': (3,    15,  0.1),
     'claude-sonnet-4-5': (3,    15,  0.1),
@@ -42,7 +44,13 @@ PREISE = {
     'claude-haiku-3-5':  (0.8,   4,  0.1),
 }
 STD = (5, 25, 0.1)                              # Rueckfall fuer unbekannte Modelle: Opus 5
-FAST = (10, 50, 0.1)                            # speed="fast", nur Opus 5 / Opus 4.8
+# speed="fast": eigener Preis je Modell, Cache-Faktoren gelten darauf.
+# Laengster Praefix wie oben - "claude-opus-5" ist auch Praefix von "claude-opus-5-5".
+FAST = {
+    'claude-opus-5-5':   (8,    40,  0.05),
+    'claude-opus-5':     (10,   50,  0.1),
+    'claude-opus-4-8':   (10,   50,  0.1),
+}
 WEB_SUCHE = 0.01                                # $ je Websuche (10 $ / 1000)
 # Ortszeit ueber zoneinfo statt fester Stundenzahl: TZ = 2 galt nur im Sommer,
 # ab der Umstellung am 25.10.2026 waeren Uhrzeit und Tagesgrenze eine Stunde
@@ -107,9 +115,9 @@ def preis(model, u):
     mo = model or ''
     treffer = [k for k in PREISE if mo.startswith(k)]
     p = PREISE[max(treffer, key=len)] if treffer else STD
-    if u.get('speed') == 'fast' and (mo.startswith('claude-opus-5')
-                                     or mo.startswith('claude-opus-4-8')):
-        p = FAST                                # doppelter Preis, Cache-Faktoren gelten darauf
+    schnell = [k for k in FAST if mo.startswith(k)]
+    if u.get('speed') == 'fast' and schnell:
+        p = FAST[max(schnell, key=len)]
     faktor = 1.1 if u.get('inference_geo') == 'us' else 1.0   # US-Datenresidenz
     return p[0] * faktor, p[1] * faktor, p[2]
 

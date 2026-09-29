@@ -166,6 +166,18 @@ Opus 4.8, doppelter Preis 10/50 $ je Mio.), **US-Datenresidenz**
 (0,01 $ je Suche). Alle drei stehen im Protokoll und wurden vorher stillschweigend
 mit 0 bzw. dem Standardpreis bewertet.
 
+**Opus 5.5** (seit 29.09.2026 in der Tabelle) hat eigene Preise: 4 / 20 $ je Mio.,
+Cache lesen **0,05x** Eingabe. `claude-opus-5` ist auch Praefix von `claude-opus-5-5` -
+ohne eigenen Eintrag lief 5.5 zum Opus-5-Preis, bei diesem Nutzungsmuster 50 % zu hoch.
+Fast Mode ist deshalb ebenfalls je Modell hinterlegt (Opus 5.5: 8 / 40 $).
+
+**Gegenprobe gegen Claude Code selbst:** Das Protokoll enthaelt gelegentlich Zeilen
+`"type": "cost-state"` mit Claude Codes eigener Rechnung (`modelUsage.costUSD`). Mit
+unserer Formel auf dieselben Token nachgerechnet: 13,1567765 $ gegen 13,1567765 $ -
+identisch auf sieben Stellen. Als Quelle fuer die Zeile taugt `cost-state` nicht: es
+wird nur sporadisch geschrieben und zaehlt je Prozess, nach jedem Container-Neustart
+von null.
+
 Modell-IDs werden per **laengstem Praefix** aufgeloest, weil im Protokoll oft ein
 Datum anhaengt (`claude-haiku-4-5-20251001`). Ohne das greift der Rueckfall auf
 Opus-Preise und Haiku waere um Faktor 5 zu teuer.
