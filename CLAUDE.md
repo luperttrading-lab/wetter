@@ -285,6 +285,19 @@ Hand geoeffnete bleiben offen; wer einen per Kachel geoeffneten von Hand
 antippt, uebernimmt ihn. Das Ziel sucht `kzZiel(z,true)` auch in
 zugeklappten Abschnitten.
 
+### Fuenf Kacheln zum Ausprobieren (v4.63)
+
+Im Pool, nicht in `KZ_STD`: `iss` (naechster SICHTBARER Ueberflug aus
+`_issPasses`), `vitd` (`vitdTag` heute: "ab"/"bis"/"vorbei"), `luft`
+(`_aqi.european_aqi`, `aqiCat`, `luftTreiber`), `himmel` (hellster Planet,
+der bis zum naechsten Sonnenaufgang >= 10 Grad hoch steht und fuer den es
+dunkel genug ist - `plDuskOf` wie im Bild), `regen24` (`_rainHourly`).
+Teures laeuft ueber `kzMerk(k,ms,fn)` (Planeten 5 min, Vitamin D 10 min),
+weil `kzRender` bei jeder Datenlieferung laeuft. Neue `kzRender()`-Aufrufe
+nach `_aqi`, `renderIss` und `_rainHourly`. Beschriftungen kurz halten: die
+Kachel ist ein Drittel breit, "11:38–14:50" oder "Luftqualitaet" werden
+abgeschnitten.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
