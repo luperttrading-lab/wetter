@@ -334,6 +334,12 @@ Innenabstand der Kachel rechts 9 -> 7 px. `kzPassen` misst mit 1 px Reserve
 Pruefung: `p467.py` im Scratchpad rendert ~30 Worst-Case-Texte als Kacheln
 bei 375 und 390 pt und meldet Umbruch/Verkleinerung.
 
+v4.68: UV-Werte als farbige Pille (`kzUvPille`, Farben `bfsBadgeCol` wie das
+UV-Abzeichen) statt des Worts "niedrig". Kachel "Planet": der ZUERST sichtbare
+Planet (Nutzer), bei gleicher Zeit der hellere. ISS-Hauptkarte zeigt "~" vor
+der Uhrzeit, wenn der Ueberflug mehr als 3 Tage entfernt und nur grob
+gerechnet ist - wie in der Liste.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
@@ -412,13 +418,22 @@ als Text in die Zwischenablage. Zweck: trennen, was eine Eichung wegnimmt
 15-30 min noch gilt. Ergebnis steht noch aus.
 
 v4.59 (Nutzer): Nur die Kompassrichtung wird geeicht, die Hoehe nicht (wird
-weiter gemessen und in der Tabelle gezeigt). OFFEN, bevor je eine
-Hoeheneichung kommt: `altaz()` rechnet GEOZENTRISCH und ohne Refraktion - der
+weiter gemessen und in der Tabelle gezeigt). ERLEDIGT in v4.68 (siehe unten),
+vorher galt: `altaz()` rechnet GEOZENTRISCH und ohne Refraktion - der
 Mond steht vom Standort aus bis ~0,95 Grad tiefer (Parallaxe ~ 0,95 Grad x
 cos Hoehe), die Luft hebt bei 10 Grad um 0,1, bei 2 Grad um 0,3 Grad. Eine
 Hoeheneichung am Mond wuerde die Parallaxe als Geraetefehler lernen.
 Tageslicht-Trick zum Anpeilen der Sonne: Schatten des Handys auf der Hand
 am kleinsten = Oberkante zeigt zur Sonne (etwa 1-2 Grad).
+
+v4.68: `altaz()` liefert jetzt die SCHEINBARE Hoehe: Mond minus 0,951 Grad x
+cos h (mittlere Horizontalparallaxe, schwankt 0,90-1,01), dazu fuer alle
+Koerper die Refraktion nach Saemundsson ab -1 Grad. Geprueft gegen PyEphem
+(Wettenberg, 29./30.09.2026): Mondhoehe 7,80/27,63/53,88 gegen 7,70/27,56/
+53,75 Grad - Rest 0,07-0,13 Grad (vorher rund 0,9). Das Azimut des Monds liegt
+0,4-0,65 Grad neben PyEphem - das ist die verkuerzte Mondtheorie, unter der
+Kompassgenauigkeit. `altaz()` wird nur im Planetenteil (und der Kachel
+"Planet") benutzt; Auf-/Untergangszeiten anderswo rechnen eigene Formeln.
 
 ## Regenradar (v4.45)
 
@@ -448,9 +463,12 @@ wandert die Maske mit (Versatz je Bild <= 3 Zellen, der die meisten nassen
 Zellen deckt); (3) Einzelpunkte <= 2 Zellen fallen in allen Bildern weg.
 Norden: Vorhersage 150 -> 15 nasse Zellen (erster Test), im Browser danach 0.
 Grenze: ein echter Schauer, der eine Stunde auf demselben km2 steht, faellt
-mit weg. Der Balken "Niederschlag 2 Std" nutzt eine eigene 1-km-Abfrage und
-ist NICHT gefiltert - stuende ein Scheinecho genau ueber einem Ort, zeigte
-er Regen.
+mit weg. Seit v4.68 ist auch der Balken "Niederschlag 2 Std" (und damit die
+Kachel "Regen") gefiltert: `loadNowcast` holt 7 km Umkreis (15x15 Zellen)
+und die letzte Stunde dazu, `renderNowcast` laesst `rkEntstoeren` darueber
+laufen und liest danach die Mittelzelle (`_nowStoer` = Zahl der Stellen).
+Vorher: 1 km, nur ab jetzt, ungefiltert - an der Kueste "Regen jetzt" durch
+ein Windpark-Echo, das die Karte schon ausblendete.
 
 **Zugpfeil (v4.47, `rkZug`/`rkZugZeichnen`):** Das Radarbild von vor 30 min
 wird bis 30 Zellen verschoben, bis es die nassen Zellen von jetzt am besten
@@ -731,7 +749,22 @@ Gemessen, 12 771 Paare aus 22 Stationen, Median Messung/Glocke:
 
 In **keinem** Band liegt der gemessene Median ueber 1,0.
 
-### Offen: "Sonne durch eine Luecke" bleibt 8 % zu hoch
+### Geprueft (v4.68): "Sonne durch eine Luecke" - Korrektur lohnt nicht mehr
+
+Nachgerechnet am 29.09.2026 gegen die GELERNTE Kurve (v4.38), 22 Tage,
+Messung / Kurve, Durchlass ab 0,97:
+
+    wirklich klar (alle Schichten <15 %)   n=1786  1,009
+    Luecke (eine Schicht >= 15 %)          n=2504  0,985
+    Luecke mit tiefen Wolken >= 15 %       n=1226  0,971
+
+Die Kurve hat den Unterschied weitgehend geschluckt: aus 8 % sind 2,4 %
+(klar gegen Luecke) geworden. Die Tagesmediane streuen im Lueckenfall von
+0,88 bis 1,03 - ein Faktor fuer 2-3 % ginge im Rauschen unter und braeuchte
+dazu Wolkenschichten je 10 Minuten in der App. Nicht eingebaut. Neu pruefen,
+wenn die Tage deutlich mehr werden.
+
+Frueher (v4.28, gegen die rohe Glocke):
 
 Der Deckel nimmt die Spitze, nicht die Ursache. Bei Durchlass ab 0,97
 trennen sich die beiden Faelle klar:
