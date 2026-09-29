@@ -319,6 +319,21 @@ UV jetzt "☀ bis 19:08"; Sonne "noch 6:14 h"; UV heute "jetzt 1,7";
 "in 25 min / 30 min leicht". Neues Feld `kurz` je Kachel = Beschriftung,
 solange Daten fehlen (vorher der lange Name aus dem Pool).
 
+v4.67 (Nutzer, New York: noch immer dreizeilige Kacheln - je nach Zustand):
+Die Grenze ist eng. Bei 375 pt ist `#kz` 305 px breit, eine Drittelkachel hat
+rund 77 px Text: Unterzeile ~12 Zeichen, Wert ~8. Deshalb ALLE Zustaende
+gekuerzt, nicht nur die gerade sichtbaren: ISS Tag in die Beschriftung ("ISS
+MORGEN", Wert nur die Uhrzeit, Unterzeile "53° · 6 min"); Luft Wort nur bei
+<= 5 Zeichen neben der Zahl, sonst in die Unterzeile; Morgen bei Regen die
+Menge, "Gewitter"/Schnee/Glaette gehen vor, lange WMO-Woerter gekuerzt
+(Griesel, Schnee, Glaette, Glatteis, Schauer); Regen 2 h "in X min" +
+Staerke; Tagesregen "noch 2,4 mm"; Regen 24 h "~0,4 mm"; Frost "gem.
+-12–-5"; Wind Boeen dreistellig ohne Punkt; Taupunkt "gesaettigt" bei 100 %.
+Innenabstand der Kachel rechts 9 -> 7 px. `kzPassen` misst mit 1 px Reserve
+(bei +0,2 px blieb "Boeen 125 N..." stehen).
+Pruefung: `p467.py` im Scratchpad rendert ~30 Worst-Case-Texte als Kacheln
+bei 375 und 390 pt und meldet Umbruch/Verkleinerung.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
