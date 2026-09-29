@@ -275,6 +275,16 @@ Code um - wer einen Abschnitt hinzufuegt, traegt ihn nur in `KLAPP_ABS` ein.
 Zugeklappt ist die Voreinstellung; der Zustand steht je Abschnitt im Geraet
 (`klapp_<name>`).
 
+### Aufklappen per Kachel (v4.62)
+
+Tippen auf eine Kachel oben klappt ihren Zielabschnitt auf (`sec._setzen(true,
+false)` - NICHT gemerkt) und springt hin; der Abschnitt traegt dann
+`_autoAuf`. Scrollt man danach ganz nach oben (scrollY <= 30, nachdem man
+einmal ueber 250 war), klappen alle `_autoAuf`-Abschnitte wieder zu. Von
+Hand geoeffnete bleiben offen; wer einen per Kachel geoeffneten von Hand
+antippt, uebernimmt ihn. Das Ziel sucht `kzZiel(z,true)` auch in
+zugeklappten Abschnitten.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
