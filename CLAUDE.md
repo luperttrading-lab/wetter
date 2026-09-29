@@ -469,6 +469,15 @@ der Hinweis nennt das verworfene Radartempo). (2) Suchbereich 20 statt 12
 Zellen je 10 min (bis 120 km/h); ueber 800 nassen Zellen eine gleichmaessige
 Stichprobe, damit grosse Regenflaechen nicht bremsen (Norden: 36 ms).
 
+v4.60 (Nutzer, Norden 29.09.2026, Vergleich mit anderer Radar-App ~50 km/h
+nach NNO): App zeigte 22 km/h NO aus dem Radar. Ursache: breites Regenband
+mit 3400 nassen Zellen - verschoben oder nicht deckte es sich fast gleich gut
+(82 % gegen 80 %), der Median fiel auf 13-22 km/h. Neu: ueber 600 nassen
+Zellen werden nur die KERNE verfolgt (Schwelle = 600. staerkster Wert in
+Bild A, dieselbe fuer B). Alle 11 Paare dann (-7,5) Zellen je 10 min =
+52 km/h nach 33 Grad; 700 hPa 44 km/h nach 28 Grad. Unter 600 nassen Zellen
+unveraendert 0,1 mm/h. Stichprobe jetzt bis 1500 Kernzellen; 88 ms.
+
 ## Sonnenkarte im UV-Abschnitt (v4.56)
 
 Die Karte "Sonne" (Bogen, Auf-/Untergang, Sonnenstunden) stand als letzte
