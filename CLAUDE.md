@@ -446,6 +446,12 @@ Zeit). Getestet nur mit nachgebauter Open-Meteo-Antwort, weil der
 Prueframer an dem Tag ins Tageslimit von Open-Meteo lief (HTTP 429) - am
 Geraet mit echten Daten noch ansehen.
 
+v4.61 (Nutzer, 29.09.2026): "Beides" wieder entfernt - "bringt nicht so viel".
+Nur noch Wolken | Regen; gespeichertes "beides" wird zu "regen". Der Code
+(`wolkEbene(zeit)`, `_wolkStunden`, hourly in `wolkenURL`) ruht und laesst
+sich zuruecknehmen, indem der Knopf wieder ins HTML kommt und `karteModus()`
+"beides" wieder zulaesst.
+
 v4.53: Orte unter dem Zugpfeil fallen weg (Nutzer: "Herborn kann man unter
 dem Pfeil nicht lesen"). `rkZugZeichnen(...,true)` zeichnet nichts und
 liefert die belegten Flaechen (Linie +-8 px, Striche, Zeitbeschriftungen);
