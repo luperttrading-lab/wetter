@@ -324,6 +324,16 @@ das ist gerundet, ein halbes Pixel Ueberhang reichte fuer "...". Kacheln
 einer Reihe gleich hoch (`.kz .k{display:flex}`). PV-Kachel heisst "PV heute"
 ("PHOTOVOLTAIK" passt in Grossbuchstaben in kein Drittel).
 
+v4.66 (Nutzer: "Regen heute zu lang, zu viel Text, wir verlieren Platz"):
+Texte so gekuerzt, dass bei 375/390/430 pt NICHTS mehr umbricht (Test misst
+`style.whiteSpace==='normal'` nach `kzPassen`). Regel: Unterzeile <= ~13
+Zeichen, Beschriftung <= 10. "Regen heute" -> "Tagesregen", Wert nur das
+Gefallene, Unterzeile "bis X erwartet"; Heute "bisher 13–23" (ganze Grad);
+UV jetzt "☀ bis 19:08"; Sonne "noch 6:14 h"; UV heute "jetzt 1,7";
+"7 Tage" / "2 Regentage"; Regen "nächste 2 h", "jetzt / bis ~14:35",
+"in 25 min / 30 min leicht". Neues Feld `kurz` je Kachel = Beschriftung,
+solange Daten fehlen (vorher der lange Name aus dem Pool).
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
