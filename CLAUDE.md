@@ -27,8 +27,8 @@ Bei jeder Aenderung, die gepusht wird:
 ### version.json braucht keine Pflege
 
 `checkUpdate()` fragt `version.json` (rund 20 Bytes) statt der ganzen
-`index.html` (174 KB gzip) - die App prueft alle zehn Minuten, das waeren
-sonst 16 MB am Tag. Die Datei schreibt der Workflow `version.yml` bei jedem
+`index.html` (251 KB gzip, Stand v4.69; frueher 174 KB) - die App prueft alle
+zehn Minuten, das waeren sonst rund 35 MB am Tag. Die Datei schreibt der Workflow `version.yml` bei jedem
 Push auf `main`, der `index.html` anfasst. Nicht von Hand aendern; wenn sie
 fehlt oder veraltet ist, faellt die App auf den alten Weg zurueck und liest
 die Versionsnummer aus der Seite selbst.
@@ -530,7 +530,10 @@ v4.61 (Nutzer, 29.09.2026): "Beides" wieder entfernt - "bringt nicht so viel".
 Nur noch Wolken | Regen; gespeichertes "beides" wird zu "regen". Der Code
 (`wolkEbene(zeit)`, `_wolkStunden`, hourly in `wolkenURL`) ruht und laesst
 sich zuruecknehmen, indem der Knopf wieder ins HTML kommt und `karteModus()`
-"beides" wieder zulaesst.
+"beides" wieder zulaesst. v4.69: der ruhende Code ist ENTFERNT (Stundenwerte in
+`wolkenURL`, `_wolkStunden`, Zeit-Zweig in `wolkEbene`, Beides-Zweige in
+Radar, Hinweis und CSS); Cache-Schluessel jetzt `wolkCache6`. Zurueckholen
+aus `wetter-giessen-v4_68.html`.
 
 v4.53: Orte unter dem Zugpfeil fallen weg (Nutzer: "Herborn kann man unter
 dem Pfeil nicht lesen"). `rkZugZeichnen(...,true)` zeichnet nichts und
@@ -613,9 +616,11 @@ Abweichung zur Suche hoechstens 18 s.
 
 **Die Falle dabei: `ortsMs()` und `std()`/`ortsStundeDez()` gehen durch die
 Intl-Zeitzonenrechnung und kosten je Aufruf rund 0,2 ms.** In Schleifen ueber
-366 Tage dominieren sie alles andere. Die vorhandene UV->=3-Rechnung in
-`vitdJahr` braucht deshalb rund 210 ms, fast nur fuer diese Aufrufe - dort
-waere noch viel zu holen.
+366 Tage dominieren sie alles andere. Erledigt in v4.69: `vitdTag(d,K,off)`
+nimmt den Tagesversatz aus `vitdJahr` mit und rechnet ohne `ortsMs`,
+Beginn/Ende ueber `stdOff` statt `ortsStundeDez`. 267 -> rund 90 ms
+(Chromium, Mittel aus 3), Ergebnis in Berlin und New York hoechstens 1 s
+anders. Der Rest: `tzVersatzMin` je Tag (rund 30 ms) und die UV-Suche.
 
 ### Erledigt (v4.31): Breitenkorrektur neu, mit Waechter
 
