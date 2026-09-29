@@ -316,6 +316,14 @@ v4.64 (Nutzer): ISS-Kachel ab 72 h bis zum naechsten sichtbaren Ueberflug
 Ueberflug 16 Tage spaeter. `issCountdown` ab 48 h in Tagen ("in 356 Std"
 war unlesbar), ab morgen mit dem Tag davor.
 
+v4.65 (Nutzer: "nichts hinschreiben, was man nicht lesen kann"): Kachelzeilen
+schneiden nicht mehr mit "..." ab. `kzPassen(box)` nach jedem `kzRender` und
+per ResizeObserver: zu breite Zeile erst bis 88 % verkleinern (darunter
+unleserlich), sonst umbrechen. Gemessen mit einer Range, nicht scrollWidth -
+das ist gerundet, ein halbes Pixel Ueberhang reichte fuer "...". Kacheln
+einer Reihe gleich hoch (`.kz .k{display:flex}`). PV-Kachel heisst "PV heute"
+("PHOTOVOLTAIK" passt in Grossbuchstaben in kein Drittel).
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
