@@ -298,6 +298,12 @@ nach `_aqi`, `renderIss` und `_rainHourly`. Beschriftungen kurz halten: die
 Kachel ist ein Drittel breit, "11:38–14:50" oder "Luftqualitaet" werden
 abgeschnitten.
 
+v4.64 (Nutzer): ISS-Kachel ab 72 h bis zum naechsten sichtbaren Ueberflug
+"keiner · naechster in X Tagen". `issWhen` ab 7 Tagen mit Datum ("Do 15.10.")
+- vorher stand nur "Do", und die Kachel zeigte so "Do 06:27" fuer einen
+Ueberflug 16 Tage spaeter. `issCountdown` ab 48 h in Tagen ("in 356 Std"
+war unlesbar), ab morgen mit dem Tag davor.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
