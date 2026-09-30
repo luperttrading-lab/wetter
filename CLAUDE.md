@@ -648,8 +648,13 @@ Rest unter dem Gemessenen liegt "max 3,2" ohne Tilde; nachmittags UV < 0,5
 "3,3 gem." / "Tagesmax"; nach Sonnenuntergang "UV MORGEN" "3,1 erw." /
 "klar 3,6" (`kzUvMorgen`: Stundenklarwert x `uvKurveD(uvProgK(t))`, dafuer
 Luftabfrage `forecast_days=2`). Erwartet = max(gemessen, Prognose Rest).
-Die Tageswerte schreibt `drawUV` nach `window._uvHeute` und ruft `kzRender`,
-wenn sich eine Zahl aendert. `kzUvJetzt()` nimmt jetzt die letzte
+Die Tageswerte rechnet seit v4.74 `uvTagRechnen()` SELBST (Glocke
+`makeSunBell`, Messung `solar10Werte`, Prognose `uvProgK`, 5-min-Schritt;
+gegen drawUV auf 0,01 gleich). Bis v4.73 las die Kachel `window._uvHeute`
+aus `drawUV` - lief sie vor dem ersten Zeichnen, stand "3,6 max / maessig"
+(Klarwert) statt "3,2 erw." da (Nutzer, 30.09. 07:55). `drawUV` schreibt
+`_uvHeute` weiter und ruft `kzRender`, wenn sich eine Zahl aendert. Ohne
+Prognose steht jetzt "3,6 klar" statt "3,6 max". `kzUvJetzt()` nimmt jetzt die letzte
 10-Minuten-Messung (wie das Abzeichen), Open-Meteo nur noch als Rueckfall -
 das gilt auch fuer die Kachel "Sonne / UV". "klar" = `uv_index_clear_sky`.
 Geprueft mit verstellter Uhr am 29.09.: 06:30 3,1 erw.; 10:30 1,5 jetzt /
