@@ -364,6 +364,21 @@ wie auf den Kacheln (`.kzminI`); Zahnrad ist jetzt ein Knopf "⚙ Tempo"
 LINKS, "Fertig" rechts (vorher 15-px-Zeichen direkt neben "Fertig" - Nutzer
 traf "Fertig" statt Zahnrad).
 
+v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
+`alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
+eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
+`_kzWeC mod n` (Klasse `.an`). Alle Kacheln schalten im selben Takt: gerade
+Takte dauern "Haupttext", ungerade "Zusatz" - bei 3 Planeten stehen die also
+abwechselnd 6 und 4 s. Planet: ALLE Planeten, die ab jetzt bis zur
+Morgendaemmerung sichtbar werden, in der Reihenfolge ihres Erscheinens,
+Beschriftung "Planet 2/3"; untergegangene fallen raus (Suche beginnt jetzt).
+Regen (wenn die 2 h trocken sind): Zusatz "ab 09:00 / morgen 28 %" aus
+`_rainHourly` (`kzRegenDanach`, Suche ab +1,5 h). Open-Meteo `precipitation`
+ist die Summe der Stunde VOR dem Stempel - Beginn = Stempel - 1 h; die Kachel
+"Regen 24 h" zeigte deshalb bis v4.75 eine Stunde zu spaet. "morgen · 28 %"
+brach um, "morgen 28 %" passt (auf 10,5 px), bei "morgen" und 100 % faellt
+die Zahl weg.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
