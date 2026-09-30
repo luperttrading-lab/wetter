@@ -355,6 +355,23 @@ Planet (Nutzer), bei gleicher Zeit der hellere. ISS-Hauptkarte zeigt "~" vor
 der Uhrzeit, wenn der Ueberflug mehr als 3 Tage entfernt und nur grob
 gerechnet ist - wie in der Liste.
 
+v4.73 (Nutzer: B+C): Kachel "Sonne" zeigt kein "UV jetzt" mehr (steht in
+"UV heute"). Stattdessen WECHSELT sie ruhig: "bis 19:06 / noch 8:06 h" <->
+"☀ 2:40 h / bisher" (nach Sonnenuntergang "ab 07:23 / in 11:23 h" <->
+"☀ 5:01 h / heute"). Sonnenstunden `kzSonneHeute()`: Summe `sd` der
+10-Minuten-Station seit Mitternacht (Wert i endet bei t0+i*dt), sonst Bright
+Sky `sunshine` stuendlich; am 29.09. beides 301 min. Allgemein: eine Kachel
+darf `v2`/`s2` liefern, `kzZeile` legt beide Texte in dieselbe Grid-Zelle
+(Breite = der laengere), `#kz.kzw2` schaltet um. Erst ausblenden, dann
+einblenden (je halbe Blendzeit) - Ueberblenden liess beide Texte halb
+uebereinander stehen. Laeuft auch bei "Bewegung reduzieren" (eine Blende ist
+keine Bewegung). Regler unter dem Zahnrad: Haupttext / Zusatz / Blende,
+Voreinstellung 6 / 3 / 0,8 s (`KZ_WE_STD`, gespeichert `kzWechsel`) - noch
+nicht vom Nutzer gewaehlt. `kzPassen` misst Wechselzeilen je Text einzeln
+(die Spans sind so breit wie die Zelle, die Range meldete sonst Ueberbreite).
+"☀ 10:16 h bisher" passt in KEINE Unterzeile (375 pt) - darum wechselt der
+Wert mit.
+
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
 Wer einen Abschnitt zuklappt, findet ihn beim naechsten Start zugeklappt vor
