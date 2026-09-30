@@ -1,0 +1,57 @@
+name: UV-Prognose
+
+# Zweimal am Tag die LIVE-APP in einem headless Chromium oeffnen und die Zahlen
+# der Kachel "UV heute" auslesen (uv_prognose.py): morgens die Erwartung fuer
+# heute, abends das Gemessene und die Erwartung fuer morgen. Nach ein paar
+# Wochen zeigt uv_prognose_log.json (Feld _auswertung), ob "erw." im Schnitt
+# stimmt. Sommer-/Winterzeit: die Skriptlogik nimmt die Ortszeit, der Cron
+# liegt so, dass beide Zeiten morgens vor 12 und abends nach Sonnenuntergang
+# landen.
+
+on:
+  schedule:
+    - cron: "20 5 * * *"     # 07:20 Sommerzeit / 06:20 Winterzeit
+    - cron: "5 20 * * *"     # 22:05 Sommerzeit / 21:05 Winterzeit
+  workflow_dispatch:
+    inputs:
+      modus:
+        description: "morgens oder abends (leer = nach Uhrzeit)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uv-prognose
+  cancel-in-progress: false
+
+jobs:
+  messen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Playwright und Chromium installieren
+        run: |
+          pip install --quiet playwright
+          playwright install --with-deps chromium
+
+      - name: App auslesen
+        env:
+          MODUS: ${{ inputs.modus }}
+        run: python uv_prognose.py $MODUS
+
+      - name: Log committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add uv_prognose_log.json
+          git diff --staged --quiet || git commit -m "UV-Prognose $(date -u +%F)"
+          git pull --rebase --autostash origin main || true
+          git push || (git pull --rebase --autostash origin main && git push)
