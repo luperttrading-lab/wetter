@@ -626,7 +626,7 @@ Deutschlands kein `solar` -> keine Prognose. Anlass: Open-Meteos `uv_index`
 wirken darin kaum, die Kachel "UV heute" zeigte so faktisch den Klarwert.
 v4.71: Kachel "UV heute" (`kzUvHeute`), vom Nutzer gewaehlt (30.09.2026):
 vor Aufgang und vormittags bei UV < 0,5 "3,1 erw." / "klar 3,5"; tagsueber
-"1,6 jetzt" / "max ~3,1" (Tilde = erwartet), sobald die Prognose fuer den
+"1,6 jetzt" / "erw. 3,1" (v4.72, vorher "max ~3,1"), sobald die Prognose fuer den
 Rest unter dem Gemessenen liegt "max 3,2" ohne Tilde; nachmittags UV < 0,5
 "3,3 gem." / "Tagesmax"; nach Sonnenuntergang "UV MORGEN" "3,1 erw." /
 "klar 3,6" (`kzUvMorgen`: Stundenklarwert x `uvKurveD(uvProgK(t))`, dafuer
