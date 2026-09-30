@@ -428,6 +428,18 @@ letzten DWD-Messung 100 min, radar 25, om = Open-Meteo stuendlich 200, fc =
 Tagesvorhersage 200, aqi 200); ist sie aelter, wird die Kachel blass
 (`.kzalt`, Deckkraft .6) und wechselt zusaetzlich auf "Stand HH:MM". Ohne
 Ausfall unsichtbar. Sonne/PV/Planet/ISS/Mond sind nicht erfasst (Rechnung).
+v4.83 (Nutzer): WISCHEN statt Timer als Standard (`kzWe().modus`
+"wischen"|"auto", gespeichert in `kzWechsel2`). Wischen: Kachel steht still,
+Wisch nach links = naechste, nach rechts = vorherige Ansicht NUR dieser
+Kachel (`kzWeSchritt`, `_kzWeI[id]`, an Ort und Stelle umgeschaltet - die
+Blende laeuft). Waagrecht >= 28 px und > 1,6 x senkrecht; gemeint ist die
+Kachel, auf der der Finger AUFSETZTE (`_kzP0.id`), nicht die beim Loslassen.
+`.kz:not(.edit) .k{touch-action:pan-y}`. Tippen (<= 14 px) oeffnet weiter den
+Abschnitt. Im Auto-Modus gilt der alte Takt (Wisch geht auch dort bis zum
+naechsten Takt). Einstellungen: Umschalter "Wischen | Automatisch"; der
+Regler "Takt" erscheint nur bei Automatisch (Blende und Faerbung in beiden).
+Der Knopf heisst "Einstellungen" (nicht mehr "Tempo" - dort steht mehr als
+Tempo). Nicht am iPhone geprueft (Mausereignisse im Browser).
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
