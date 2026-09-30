@@ -440,6 +440,13 @@ naechsten Takt). Einstellungen: Umschalter "Wischen | Automatisch"; der
 Regler "Takt" erscheint nur bei Automatisch (Blende und Faerbung in beiden).
 Der Knopf heisst "Einstellungen" (nicht mehr "Tempo" - dort steht mehr als
 Tempo). Nicht am iPhone geprueft (Mausereignisse im Browser).
+v4.84 (Nutzer): Der Auto-Modus heisst "Auto + Wischen" - Wischen geht dort
+auch, und ein Wisch startet den Takt NEU (`kzWeSchritt` ruft
+`kzWechselLauf()`), sonst schaltete es gleich wieder von allein weiter. Der
+Takt setzt die Ansichten nicht mehr auf den gemeinsamen Zaehler zurueck,
+sondern rueckt jede Kachel von IHRER Ansicht eins weiter (`_kzWeI` gilt in
+beiden Modi, `kzIdx` liest nur noch das). Der Neustart gilt fuer alle
+Kacheln (ein Timer), nicht nur die gewischte.
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
