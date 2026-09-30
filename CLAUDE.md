@@ -385,6 +385,10 @@ aus chartRows; "max um 15 Uhr" brach um), UV heute ("Spitze 13:25" = Zeit
 des erwarteten bzw. gemessenen Tageshoechstwerts, auch "UV morgen") und
 7 Tage (nasse Tage zusammengefasst "Do–Sa, Di", alle 7 "jeden Tag", laenger
 als 12 Zeichen -> kein Zusatz). Regler-Ueberschrift "Wechsel der Kacheln".
+v4.79 (Nutzer): Zahnrad als SVG (`KZ_GEAR`, 20 px bei "Tempo", 17 px bei
+"Kacheln waehlen") - das Zeichen U+2699 war am iPhone kaum als Zahnrad zu
+erkennen. Minus im Hinweis `vertical-align:middle; top:-1px` - Mitte auf
+0,3 px mit der Textmitte (vorher sass es tiefer).
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
