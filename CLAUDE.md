@@ -356,6 +356,13 @@ nicht vom Nutzer gewaehlt. `kzPassen` misst Wechselzeilen je Text einzeln
 (die Spans sind so breit wie die Zelle, die Range meldete sonst Ueberbreite).
 "☀ 10:16 h bisher" passt in KEINE Unterzeile (375 pt) - darum wechselt der
 Wert mit.
+v4.75 (Nutzer: "sehe keine Aenderung"): Der Wechsel lief nur ab 1 Minute
+Sonne - morgens ohne Sonne stand die Kachel still und sah kaputt aus. Jetzt
+auch "☀ 0 min / bisher", sobald die Sonne auf ist und Daten da sind.
+Bearbeiten-Fuss: Hinweis in eigener Zeile, das Minus darin als grauer Kreis
+wie auf den Kacheln (`.kzminI`); Zahnrad ist jetzt ein Knopf "⚙ Tempo"
+LINKS, "Fertig" rechts (vorher 15-px-Zeichen direkt neben "Fertig" - Nutzer
+traf "Fertig" statt Zahnrad).
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
