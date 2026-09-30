@@ -598,6 +598,19 @@ Zwei Kurven, zwei ganz verschiedene Wege:
   Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
   unabhaengige Messgeraete an derselben Station unter denselben Wolken.
 
+### v4.70: Prognosesaeulen im UV-Bild
+
+Rechts von der Messung (ab Ende der 10-Minuten-Werte, sonst ab jetzt) blasse
+Saeulen (`UV_PROG_ALPHA` 0,3, gestrichelte Oberkante, keine Punkte) fuer den
+Rest des Tages. Durchlass = Bright Sky `solar` (MOSMIX, Stunde VOR dem
+Stempel) / Mittel von `gClear` ueber dieselbe Stunde, zwischen den
+Stundenmitten linear, dann `uvKurveD` wie bei der Messung (`uvProgStd()`, aus
+`chartRows`). Ergebnis in `window._uvProg` ({max, t, ab}). Ausserhalb
+Deutschlands kein `solar` -> keine Prognose. Anlass: Open-Meteos `uv_index`
+(CAMS, "mit Wolken") lag am 30.09. bei 3,35 gegen 3,4 klar - die Wolken
+wirken darin kaum, die Kachel "UV heute" zeigte so faktisch den Klarwert.
+Die Kachel selbst ist noch offen (Nutzer waehlt die Zustaende ueber den Tag).
+
 ### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
 
 Das Jahresbild zeigt jetzt zwei Flaechen: hellgruen UV >= 3 bei klarem Himmel,
