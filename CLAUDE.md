@@ -447,6 +447,11 @@ Takt setzt die Ansichten nicht mehr auf den gemeinsamen Zaehler zurueck,
 sondern rueckt jede Kachel von IHRER Ansicht eins weiter (`_kzWeI` gilt in
 beiden Modi, `kzIdx` liest nur noch das). Der Neustart gilt fuer alle
 Kacheln (ein Timer), nicht nur die gewischte.
+v4.85 (Nutzer): "Auto + Wischen" ist VOREINSTELLUNG (`KZ_WE_STD.modus`
+"auto"). Gespeichert wird jetzt mit `mv:2`; ein Modus ohne diese Marke (aus
+v4.83/84, da war "wischen" nur Voreinstellung) gilt nicht mehr - Takt, Blende
+und Faerbung bleiben erhalten. Dabei behoben: in der Ladezeile stand
+`if(!o)return null;` HINTER einem `//`-Kommentar (lief nur dank try/catch).
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
