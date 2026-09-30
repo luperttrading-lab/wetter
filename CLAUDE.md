@@ -609,7 +609,21 @@ Stundenmitten linear, dann `uvKurveD` wie bei der Messung (`uvProgStd()`, aus
 Deutschlands kein `solar` -> keine Prognose. Anlass: Open-Meteos `uv_index`
 (CAMS, "mit Wolken") lag am 30.09. bei 3,35 gegen 3,4 klar - die Wolken
 wirken darin kaum, die Kachel "UV heute" zeigte so faktisch den Klarwert.
-Die Kachel selbst ist noch offen (Nutzer waehlt die Zustaende ueber den Tag).
+v4.71: Kachel "UV heute" (`kzUvHeute`), vom Nutzer gewaehlt (30.09.2026):
+vor Aufgang und vormittags bei UV < 0,5 "3,1 erw." / "klar 3,5"; tagsueber
+"1,6 jetzt" / "max ~3,1" (Tilde = erwartet), sobald die Prognose fuer den
+Rest unter dem Gemessenen liegt "max 3,2" ohne Tilde; nachmittags UV < 0,5
+"3,3 gem." / "Tagesmax"; nach Sonnenuntergang "UV MORGEN" "3,1 erw." /
+"klar 3,6" (`kzUvMorgen`: Stundenklarwert x `uvKurveD(uvProgK(t))`, dafuer
+Luftabfrage `forecast_days=2`). Erwartet = max(gemessen, Prognose Rest).
+Die Tageswerte schreibt `drawUV` nach `window._uvHeute` und ruft `kzRender`,
+wenn sich eine Zahl aendert. `kzUvJetzt()` nimmt jetzt die letzte
+10-Minuten-Messung (wie das Abzeichen), Open-Meteo nur noch als Rueckfall -
+das gilt auch fuer die Kachel "Sonne / UV". "klar" = `uv_index_clear_sky`.
+Geprueft mit verstellter Uhr am 29.09.: 06:30 3,1 erw.; 10:30 1,5 jetzt /
+max ~3,1; 13:15 2,5 jetzt / max 3,2; 15:30 1,4 / max 3,3; 18:15 3,3 gem.;
+20:00 UV morgen 3,1 / klar 3,6. Ohne Prognose (Ausland) wie bisher der
+Klarwert.
 
 ### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
 
