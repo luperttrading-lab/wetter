@@ -398,6 +398,12 @@ dazu Blende und "Faerbung" (leichtes Blau hinter wechselnden Kacheln,
 `--kzwf` = Prozent x 0,16, Voreinstellung aus). Regler (`kzRegler`): 32 px
 Flaeche, 26-px-Knopf, touch-action:none, Tippen auf die Bahn setzt den Wert,
 Ziehen per Pointer-Capture - vorher reagierten sie am iPhone schwer.
+v4.81 (Nutzer): Bearbeiten-Modus schliesst nur noch bei einem TIPPEN
+ausserhalb (<= 10 px Bewegung, pointercancel = Scrollen bricht ab) und nie
+auf Hoehe von Kacheln/Reglern/Fuss - vorher schloss ihn schon das Aufsetzen
+zum Scrollen rechts neben den Werten. Ueberschriften "Wackeln beim
+Sortieren", "Wechsel der Kacheln", "Faerbung wechselnder Kacheln" (Regler
+dort heisst "Staerke").
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
