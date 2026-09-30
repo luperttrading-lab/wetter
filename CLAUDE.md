@@ -419,6 +419,15 @@ auf Hoehe von Kacheln/Reglern/Fuss - vorher schloss ihn schon das Aufsetzen
 zum Scrollen rechts neben den Werten. Ueberschriften "Wackeln beim
 Sortieren", "Wechsel der Kacheln", "Faerbung wechselnder Kacheln" (Regler
 dort heisst "Staerke").
+v4.82 (Nutzer): Voreinstellung des Wechsels Takt 4 s / Blende 1,5 s /
+Faerbung aus; neuer Speicherschluessel `kzWechsel2` (die Testwerte im alten
+`kzWechsel` gelten nicht mehr). "Regen 24 h": liegt der Beginn morgen, wechselt
+die Unterzeile "morgen" / Menge. DATENFRISCHE (`kzAlter`, `KZ_QUELLE`,
+`KZ_ALT`, `_kzStand`): jede Quelle merkt ihren letzten Abruf (mess = Zeit der
+letzten DWD-Messung 100 min, radar 25, om = Open-Meteo stuendlich 200, fc =
+Tagesvorhersage 200, aqi 200); ist sie aelter, wird die Kachel blass
+(`.kzalt`, Deckkraft .6) und wechselt zusaetzlich auf "Stand HH:MM". Ohne
+Ausfall unsichtbar. Sonne/PV/Planet/ISS/Mond sind nicht erfasst (Rechnung).
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
