@@ -395,6 +395,11 @@ brach um, "morgen 28 %" passt (auf 10,5 px), bei "morgen" und 100 % faellt
 die Zahl weg.
 v4.77 (Nutzer): Der Regen-Zusatz erscheint nur, wenn "Regen 24 h" NICHT
 gewaehlt ist - sonst stand dieselbe Uhrzeit zweimal da.
+v4.78 (Nutzer): Wechsel auch fuer Heute ("max 16 Uhr", `kzWaermsteStunde`
+aus chartRows; "max um 15 Uhr" brach um), UV heute ("Spitze 13:25" = Zeit
+des erwarteten bzw. gemessenen Tageshoechstwerts, auch "UV morgen") und
+7 Tage (nasse Tage zusammengefasst "Do–Sa, Di", alle 7 "jeden Tag", laenger
+als 12 Zeichen -> kein Zusatz). Regler-Ueberschrift "Wechsel der Kacheln".
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
