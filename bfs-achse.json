@@ -1,5 +1,5 @@
 {
- "stand": "2026-09-30T15:55:24+00:00",
+ "stand": "2026-09-30T20:49:03+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
   "Andernach": {
@@ -1336,9 +1336,7 @@
    "2026-09-30": 6
   }
  },
- "gelesen": 85,
- "nicht_lesbar": 1,
- "gruende": {
-  "Bonn|2026-09-30": "Leiste nicht gefunden (640x480; Proben bei y=30%: x38:#ffffff x58:#ffffff x77:#ffffff)"
- }
+ "gelesen": 86,
+ "nicht_lesbar": 0,
+ "gruende": {}
 }
