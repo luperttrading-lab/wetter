@@ -389,6 +389,15 @@ v4.79 (Nutzer): Zahnrad als SVG (`KZ_GEAR`, 20 px bei "Tempo", 17 px bei
 "Kacheln waehlen") - das Zeichen U+2699 war am iPhone kaum als Zahnrad zu
 erkennen. Minus im Hinweis `vertical-align:middle; top:-1px` - Mitte auf
 0,3 px mit der Textmitte (vorher sass es tiefer).
+v4.80 (Nutzer: Variante A, "ruhig"): Wechselnde Kacheln tragen PUNKTE
+(`.kzdots`, einer je Ansicht, der dunkle = aktuelle) - senkrecht im rechten
+Innenrand, weil sie oben rechts "UV MORGEN" ueberdeckten (Abstand zum Text
+jetzt >= 1,3 px). "Planet 1/3" entfaellt. EIN Takt fuer alle Ansichten
+(`kzWe().takt`, Voreinstellung 5 s; alte Speicherung an/aus -> takt = an),
+dazu Blende und "Faerbung" (leichtes Blau hinter wechselnden Kacheln,
+`--kzwf` = Prozent x 0,16, Voreinstellung aus). Regler (`kzRegler`): 32 px
+Flaeche, 26-px-Knopf, touch-action:none, Tippen auf die Bahn setzt den Wert,
+Ziehen per Pointer-Capture - vorher reagierten sie am iPhone schwer.
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
