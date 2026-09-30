@@ -443,6 +443,15 @@ Verborgenen ebenfalls nicht setzen laesst.
 
 ## Benachrichtigung und Dateien
 
+Nutzerwunsch (30.09.2026): IMMER eine Nachricht aufs iPhone, wenn etwas fertig
+ist - der Nutzer hat die Claude-App dann oft geschlossen. Das gilt nicht nur
+fuer veroeffentlichte Versionen, sondern fuer jede abgeschlossene Aufgabe
+(auch Analysen, Pipeline-Aenderungen, Antworten auf laengere Auftraege) und
+fuer jede Rueckfrage, ohne die es nicht weitergeht. Das Werkzeug
+`PushNotification` meldet nur "requested" - die Zustellung laesst sich nicht
+pruefen; deshalb steht die Kernaussage im Text der Nachricht selbst, nicht
+nur "fertig".
+
 Ist eine Aufgabe fertig und veroeffentlicht, geht eine kurze
 Push-Benachrichtigung aufs iPhone. Dateien, an denen gearbeitet wurde -
 Screenshots, Vergleichsseiten -, gehen vor dem Ende der Antwort an den Nutzer.
