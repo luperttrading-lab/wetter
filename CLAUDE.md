@@ -284,8 +284,11 @@ Elemente - ist so aufgefallen und nicht beim Lesen des Codes.
 Seit v4.18 ist jede Abschnittsueberschrift ein Schalter: Titel, eine feine
 Linie bis zum Rand, dort ein runder Knopf. `klappBauen()` baut die Zeilen im
 Code um - wer einen Abschnitt hinzufuegt, traegt ihn nur in `KLAPP_ABS` ein.
-Zugeklappt ist die Voreinstellung; der Zustand steht je Abschnitt im Geraet
-(`klapp_<name>`).
+Seit v4.86 (Nutzer) ist OFFEN die Voreinstellung (v4.20-v4.85: zugeklappt);
+zu bleibt nur, was von Hand zugeklappt wurde (`klapp_<name>` = "0"). Ueber
+dem ersten Abschnitt stehen "Alle auf" / "Alle zu" (`#kAlle`, `klappAlle`),
+beide werden gemerkt. Folge: beim Start wird alles gerechnet und das Radar
+sofort geladen (vorher erst beim Aufklappen).
 
 ### Aufklappen per Kachel (v4.62)
 
