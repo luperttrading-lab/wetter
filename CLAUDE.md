@@ -719,6 +719,24 @@ max ~3,1; 13:15 2,5 jetzt / max 3,2; 15:30 1,4 / max 3,3; 18:15 3,3 gem.;
 20:00 UV morgen 3,1 / klar 3,6. Ohne Prognose (Ausland) wie bisher der
 Klarwert.
 
+### Prognose gegen Messung (uv_prognose.py, ab 30.09.2026)
+
+Stimmt "erw." in der Kachel "UV heute"? Am 30.09. sagte die App morgens 3,1,
+gemessen wurden 3,3 - ein Tag, kein Beleg. `uv_prognose.py` (Workflow
+`uv-prognose.yml`, 07:20 und 22:05 Ortszeit) oeffnet die LIVE-APP in headless
+Chromium und liest `uvTagRechnen()` / `kzUvMorgen()` aus - genau der
+Rechenweg, den der Nutzer sieht, kein zweites Modell in Python. Morgens:
+erwartetes Tagesmaximum (`erw_tag`), Klarwert; abends: gemessenes Maximum und
+die Erwartung fuer MORGEN (wird beim naechsten Tag als `vortag` verbucht - so
+zeigt sie die Kachel ab Sonnenuntergang). Log `uv_prognose_log.json`, darin
+`_auswertung` (Bias, Streuung, mittlerer Fehler, Bias in %; `--auswerten`
+lokal). Unter etwa 10 Tagen unbelastbar. Grenzen: (1) Ein Handstart des
+Workflows nach Sonnenaufgang erfasst nur den Rest des Tages (`erw_tag` nimmt
+das schon Gemessene hinzu). (2) Antwortet Open-Meteo dem geteilten Runner mit
+429, bricht der Lauf nach zwei Versuchen ab - dann fehlt der Tag, es wird
+nichts Falsches eingetragen. Lokal getestet mit eingespielter Luftabfrage
+(die eigene Abfrage der App scheitert im Pruefstand).
+
 ### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
 
 Das Jahresbild zeigt jetzt zwei Flaechen: hellgruen UV >= 3 bei klarem Himmel,
