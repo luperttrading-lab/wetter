@@ -393,6 +393,8 @@ ist die Summe der Stunde VOR dem Stempel - Beginn = Stempel - 1 h; die Kachel
 "Regen 24 h" zeigte deshalb bis v4.75 eine Stunde zu spaet. "morgen · 28 %"
 brach um, "morgen 28 %" passt (auf 10,5 px), bei "morgen" und 100 % faellt
 die Zahl weg.
+v4.77 (Nutzer): Der Regen-Zusatz erscheint nur, wenn "Regen 24 h" NICHT
+gewaehlt ist - sonst stand dieselbe Uhrzeit zweimal da.
 
 ### Die Falle: ein verstecktes Canvas ist null Pixel breit
 
