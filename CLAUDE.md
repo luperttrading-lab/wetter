@@ -739,6 +739,11 @@ Geprueft mit verstellter Uhr am 29.09.: 06:30 3,1 erw.; 10:30 1,5 jetzt /
 max ~3,1; 13:15 2,5 jetzt / max 3,2; 15:30 1,4 / max 3,3; 18:15 3,3 gem.;
 20:00 UV morgen 3,1 / klar 3,6. Ohne Prognose (Ausland) wie bisher der
 Klarwert.
+v4.87 (Nutzer): Nach Sonnenuntergang bis MITTERNACHT zuerst noch "UV heute"
+"3,3 gem." / "Spitze 13:15" (gemessenes Tagesmaximum), im Wechsel "UV morgen"
+"1,9 erw." / "klar 3,5". Ab Mitternacht gilt der Morgenzweig des neuen Tages
+("erw." / "klar", Zusatz "Spitze"). Ohne Messung (Ausland) wie bisher nur
+"UV morgen". Geprueft 30.09. 20:45 mit echten Daten und Uhr 01.10. 00:30.
 
 ### Prognose gegen Messung (uv_prognose.py, ab 30.09.2026)
 
