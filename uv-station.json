@@ -1,19 +1,19 @@
 {
- "stand": "2026-09-29",
+ "stand": "2026-09-30",
  "waechter": {
-  "stationen": 32,
+  "stationen": 33,
   "breite": {
-   "steigung": 0.0017,
-   "fehler": 0.0118,
-   "t": 0.15
+   "steigung": 0.0021,
+   "fehler": 0.011,
+   "t": 0.19
   },
   "hoehe": {
-   "steigung": -0.0119,
-   "fehler": 0.045,
-   "t": -0.26
+   "steigung": -0.0063,
+   "fehler": 0.0432,
+   "t": -0.15
   },
-  "mittel": 0.984,
-  "reststreuung": 0.11,
+  "mittel": 0.981,
+  "reststreuung": 0.106,
   "schwelle_t": 3.0,
   "alarm": false,
   "hinweis": "kein Trend"
@@ -33,16 +33,16 @@
    "bis": "2026-09-27"
   },
   "Belm-Osnabrueck": {
-   "faktor": 0.907,
-   "roh": 0.897,
-   "tage": 4,
+   "faktor": 0.897,
+   "roh": 0.888,
+   "tage": 5,
    "vorlaeufig": false,
-   "streuung": 0.036,
-   "klare_tage": 4,
+   "streuung": 0.033,
+   "klare_tage": 5,
    "teiltage": 0,
    "teiltage_verworfen": 2,
    "von": "2026-09-15",
-   "bis": "2026-09-27"
+   "bis": "2026-09-30"
   },
   "Bonn": {
    "faktor": 0.934,
@@ -57,64 +57,76 @@
    "bis": "2026-09-27"
   },
   "Chieming": {
-   "faktor": 1.093,
-   "roh": 1.096,
-   "tage": 13,
-   "vorlaeufig": false,
-   "streuung": 0.044,
-   "klare_tage": 13,
-   "teiltage": 0,
-   "teiltage_verworfen": 1,
-   "von": "2026-09-04",
-   "bis": "2026-09-29"
-  },
-  "Duderstadt_B": {
-   "faktor": 0.906,
-   "roh": 0.902,
-   "tage": 10,
-   "vorlaeufig": false,
-   "streuung": 0.035,
-   "klare_tage": 7,
-   "teiltage": 3,
-   "teiltage_verworfen": 0,
-   "von": "2026-09-05",
-   "bis": "2026-09-29"
-  },
-  "Fichtelberg": {
-   "faktor": 0.8,
-   "roh": 0.645,
-   "tage": 7,
-   "vorlaeufig": false,
-   "streuung": 0.127,
-   "klare_tage": 7,
-   "teiltage": 0,
-   "teiltage_verworfen": 2,
-   "von": "2026-09-06",
-   "bis": "2026-09-29"
-  },
-  "Giessen-Wettenberg": {
-   "faktor": 1.08,
-   "roh": 1.082,
+   "faktor": 1.091,
+   "roh": 1.094,
    "tage": 14,
    "vorlaeufig": false,
    "streuung": 0.042,
-   "klare_tage": 5,
+   "klare_tage": 14,
+   "teiltage": 0,
+   "teiltage_verworfen": 1,
+   "von": "2026-09-04",
+   "bis": "2026-09-30"
+  },
+  "Duderstadt_B": {
+   "faktor": 0.901,
+   "roh": 0.897,
+   "tage": 11,
+   "vorlaeufig": false,
+   "streuung": 0.036,
+   "klare_tage": 8,
+   "teiltage": 3,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-05",
+   "bis": "2026-09-30"
+  },
+  "Eckernfoerde": {
+   "faktor": 1.051,
+   "roh": 1.062,
+   "tage": 2,
+   "vorlaeufig": true,
+   "streuung": 0.013,
+   "klare_tage": 2,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
+   "von": "2026-09-22",
+   "bis": "2026-09-30"
+  },
+  "Fichtelberg": {
+   "faktor": 0.8,
+   "roh": 0.673,
+   "tage": 8,
+   "vorlaeufig": false,
+   "streuung": 0.117,
+   "klare_tage": 8,
+   "teiltage": 0,
+   "teiltage_verworfen": 2,
+   "von": "2026-09-06",
+   "bis": "2026-09-30"
+  },
+  "Giessen-Wettenberg": {
+   "faktor": 1.078,
+   "roh": 1.08,
+   "tage": 15,
+   "vorlaeufig": false,
+   "streuung": 0.042,
+   "klare_tage": 6,
    "teiltage": 9,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-29"
+   "bis": "2026-09-30"
   },
   "Hohenpeissenberg": {
-   "faktor": 1.065,
-   "roh": 1.067,
-   "tage": 13,
+   "faktor": 1.066,
+   "roh": 1.068,
+   "tage": 14,
    "vorlaeufig": false,
-   "streuung": 0.023,
-   "klare_tage": 13,
+   "streuung": 0.022,
+   "klare_tage": 14,
    "teiltage": 0,
    "teiltage_verworfen": 2,
    "von": "2026-09-04",
-   "bis": "2026-09-29"
+   "bis": "2026-09-30"
   },
   "Klippeneck": {
    "faktor": 0.88,
@@ -124,21 +136,21 @@
    "streuung": 0.025,
    "klare_tage": 12,
    "teiltage": 0,
-   "teiltage_verworfen": 7,
+   "teiltage_verworfen": 8,
    "von": "2026-09-04",
    "bis": "2026-09-28"
   },
   "Kulmbach": {
-   "faktor": 0.935,
-   "roh": 0.932,
-   "tage": 11,
+   "faktor": 0.929,
+   "roh": 0.926,
+   "tage": 12,
    "vorlaeufig": false,
-   "streuung": 0.047,
-   "klare_tage": 7,
+   "streuung": 0.048,
+   "klare_tage": 8,
    "teiltage": 4,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-29"
+   "bis": "2026-09-30"
   },
   "Lindenberg": {
    "faktor": 1.095,
@@ -154,51 +166,51 @@
   },
   "Schweinfurt_Wasserlosen": {
    "faktor": 0.8,
-   "roh": 0.669,
-   "tage": 7,
+   "roh": 0.68,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.16,
-   "klare_tage": 7,
+   "streuung": 0.149,
+   "klare_tage": 8,
    "teiltage": 0,
    "teiltage_verworfen": 5,
    "von": "2026-09-04",
-   "bis": "2026-09-29"
+   "bis": "2026-09-30"
   },
   "Stuttgart": {
-   "faktor": 0.942,
-   "roh": 0.94,
-   "tage": 14,
+   "faktor": 0.94,
+   "roh": 0.938,
+   "tage": 15,
    "vorlaeufig": false,
    "streuung": 0.021,
-   "klare_tage": 14,
+   "klare_tage": 15,
    "teiltage": 0,
    "teiltage_verworfen": 2,
    "von": "2026-09-04",
-   "bis": "2026-09-29"
+   "bis": "2026-09-30"
   },
   "Wurmberg_B": {
-   "faktor": 1.117,
-   "roh": 1.124,
-   "tage": 7,
+   "faktor": 1.136,
+   "roh": 1.143,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.045,
-   "klare_tage": 7,
+   "streuung": 0.042,
+   "klare_tage": 8,
    "teiltage": 0,
    "teiltage_verworfen": 3,
    "von": "2026-09-06",
-   "bis": "2026-09-28"
+   "bis": "2026-09-30"
   },
   "Zingst": {
-   "faktor": 0.925,
-   "roh": 0.921,
-   "tage": 9,
+   "faktor": 0.927,
+   "roh": 0.924,
+   "tage": 10,
    "vorlaeufig": false,
-   "streuung": 0.029,
-   "klare_tage": 3,
+   "streuung": 0.027,
+   "klare_tage": 4,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-09-28"
+   "bis": "2026-09-30"
   },
   "Zirchow": {
    "faktor": 1.092,
