@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-01T13:55:24+00:00",
+ "stand": "2026-10-01T19:32:21+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
   "Andernach": {
@@ -1379,9 +1379,7 @@
    "2026-10-01": 4
   }
  },
- "gelesen": 85,
- "nicht_lesbar": 1,
- "gruende": {
-  "Eckernfoerde|2026-10-01": "Leiste nicht gefunden (640x480; Proben bei y=30%: x38:#ffffff x58:#ffffff x77:#ffffff)"
- }
+ "gelesen": 86,
+ "nicht_lesbar": 0,
+ "gruende": {}
 }
