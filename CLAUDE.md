@@ -620,8 +620,8 @@ blau, ohne mitzuzaehlen.
 
 **Grenzen (v4.89, Nutzer: "zur Orientierung, haben die anderen Karten auch"):**
 Staats- und Landesgrenzen in Radar- UND Wolkenkarte (`grenzenZeichnen`, vor
-den Orten, ueber dem Regen; weisse Linie 1,2 px, Staat 1,7 px, auf dunklem
-Saum). Daten `grenzen.json` (136 KB, gzip 54 KB), gebaut von `tools/grenzen.py`
+den Orten, ueber dem Regen; v4.90 (Nutzer): SCHWARZ 1,4 px, Staat 1,9 px,
+auf hellem Saum 40 % - v4.89 war weiss auf dunklem Saum). Daten `grenzen.json` (136 KB, gzip 54 KB), gebaut von `tools/grenzen.py`
 aus BKG VG250, Ebene LI, AGZ 1+2, Douglas-Peucker 100 m, Koordinaten in
 1e-4 Grad als Differenzen. Geladen beim ersten Zeichnen, danach zeichnen
 beide Karten neu; nur Linien, deren Rahmen das Fenster schneidet (3,8 ms je
