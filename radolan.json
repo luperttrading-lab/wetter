@@ -1,8 +1,8 @@
 {
   "datum": "2026-10-01",
-  "summe_mm": 1.48,
-  "stunden_ok": 14,
-  "stunden_erwartet": 17,
+  "summe_mm": 7.96,
+  "stunden_ok": 22,
+  "stunden_erwartet": 22,
   "stunden": [
     {
       "stunde": "01:00",
@@ -34,8 +34,7 @@
     },
     {
       "stunde": "08:00",
-      "mm": null,
-      "fehler": "<urlopen error [Errno 104] Connection reset by peer>"
+      "mm": 0.0
     },
     {
       "stunde": "09:00",
@@ -55,8 +54,7 @@
     },
     {
       "stunde": "13:00",
-      "mm": null,
-      "fehler": "Remote end closed connection without response"
+      "mm": 0.0
     },
     {
       "stunde": "14:00",
@@ -72,8 +70,27 @@
     },
     {
       "stunde": "17:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.63
+    },
+    {
+      "stunde": "18:00",
+      "mm": 0.8
+    },
+    {
+      "stunde": "19:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "20:00",
+      "mm": 3.11
+    },
+    {
+      "stunde": "21:00",
+      "mm": 0.05
+    },
+    {
+      "stunde": "22:00",
+      "mm": 1.89
     }
   ],
   "umgebung_3x3": [
@@ -83,7 +100,7 @@
           410,
           424
         ],
-        "mm": 1.0,
+        "mm": 7.3,
         "eigenes": false
       },
       {
@@ -91,7 +108,7 @@
           410,
           425
         ],
-        "mm": 1.3,
+        "mm": 7.6,
         "eigenes": false
       },
       {
@@ -99,7 +116,7 @@
           410,
           426
         ],
-        "mm": 1.1,
+        "mm": 7.4,
         "eigenes": false
       }
     ],
@@ -109,7 +126,7 @@
           409,
           424
         ],
-        "mm": 1.4,
+        "mm": 7.9,
         "eigenes": false
       },
       {
@@ -117,7 +134,7 @@
           409,
           425
         ],
-        "mm": 1.5,
+        "mm": 8.0,
         "eigenes": true
       },
       {
@@ -125,7 +142,7 @@
           409,
           426
         ],
-        "mm": 1.4,
+        "mm": 7.9,
         "eigenes": false
       }
     ],
@@ -135,7 +152,7 @@
           408,
           424
         ],
-        "mm": 1.5,
+        "mm": 7.8,
         "eigenes": false
       },
       {
@@ -143,7 +160,7 @@
           408,
           425
         ],
-        "mm": 1.6,
+        "mm": 8.0,
         "eigenes": false
       },
       {
@@ -151,16 +168,16 @@
           408,
           426
         ],
-        "mm": 1.4,
+        "mm": 7.9,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-10-01",
-    "mm": 1.48
+    "mm": 7.96
   },
-  "aktualisiert": "2026-10-01T15:23:16+00:00",
+  "aktualisiert": "2026-10-01T20:28:27+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -169,9 +186,9 @@
       "lat": 50.6479651,
       "lon": 8.6740943,
       "datum": "2026-10-01",
-      "summe_mm": 1.48,
-      "stunden_ok": 14,
-      "stunden_erwartet": 17,
+      "summe_mm": 7.96,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -203,8 +220,7 @@
         },
         {
           "stunde": "08:00",
-          "mm": null,
-          "fehler": "<urlopen error [Errno 104] Connection reset by peer>"
+          "mm": 0.0
         },
         {
           "stunde": "09:00",
@@ -224,8 +240,7 @@
         },
         {
           "stunde": "13:00",
-          "mm": null,
-          "fehler": "Remote end closed connection without response"
+          "mm": 0.0
         },
         {
           "stunde": "14:00",
@@ -241,8 +256,27 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.63
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.8
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 3.11
+        },
+        {
+          "stunde": "21:00",
+          "mm": 0.05
+        },
+        {
+          "stunde": "22:00",
+          "mm": 1.89
         }
       ],
       "umgebung_3x3": [
@@ -252,7 +286,7 @@
               410,
               424
             ],
-            "mm": 1.0,
+            "mm": 7.3,
             "eigenes": false
           },
           {
@@ -260,7 +294,7 @@
               410,
               425
             ],
-            "mm": 1.3,
+            "mm": 7.6,
             "eigenes": false
           },
           {
@@ -268,7 +302,7 @@
               410,
               426
             ],
-            "mm": 1.1,
+            "mm": 7.4,
             "eigenes": false
           }
         ],
@@ -278,7 +312,7 @@
               409,
               424
             ],
-            "mm": 1.4,
+            "mm": 7.9,
             "eigenes": false
           },
           {
@@ -286,7 +320,7 @@
               409,
               425
             ],
-            "mm": 1.5,
+            "mm": 8.0,
             "eigenes": true
           },
           {
@@ -294,7 +328,7 @@
               409,
               426
             ],
-            "mm": 1.4,
+            "mm": 7.9,
             "eigenes": false
           }
         ],
@@ -304,7 +338,7 @@
               408,
               424
             ],
-            "mm": 1.5,
+            "mm": 7.8,
             "eigenes": false
           },
           {
@@ -312,7 +346,7 @@
               408,
               425
             ],
-            "mm": 1.6,
+            "mm": 8.0,
             "eigenes": false
           },
           {
@@ -320,14 +354,14 @@
               408,
               426
             ],
-            "mm": 1.4,
+            "mm": 7.9,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-10-01",
-        "mm": 1.48
+        "mm": 7.96
       },
       "methode": "bilinear, 50.6480N 8.6741E"
     },
@@ -336,9 +370,9 @@
       "lat": 50.5055647,
       "lon": 8.6226918,
       "datum": "2026-10-01",
-      "summe_mm": 1.92,
-      "stunden_ok": 14,
-      "stunden_erwartet": 17,
+      "summe_mm": 11.61,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -370,8 +404,7 @@
         },
         {
           "stunde": "08:00",
-          "mm": null,
-          "fehler": "<urlopen error [Errno 104] Connection reset by peer>"
+          "mm": 0.0
         },
         {
           "stunde": "09:00",
@@ -391,8 +424,7 @@
         },
         {
           "stunde": "13:00",
-          "mm": null,
-          "fehler": "Remote end closed connection without response"
+          "mm": 0.0
         },
         {
           "stunde": "14:00",
@@ -408,8 +440,27 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.15
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.17
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.57
+        },
+        {
+          "stunde": "20:00",
+          "mm": 4.58
+        },
+        {
+          "stunde": "21:00",
+          "mm": 1.15
+        },
+        {
+          "stunde": "22:00",
+          "mm": 3.07
         }
       ],
       "umgebung_3x3": [
@@ -419,7 +470,7 @@
               393,
               419
             ],
-            "mm": 1.5,
+            "mm": 10.7,
             "eigenes": false
           },
           {
@@ -427,7 +478,7 @@
               393,
               420
             ],
-            "mm": 1.7,
+            "mm": 10.9,
             "eigenes": false
           },
           {
@@ -435,7 +486,7 @@
               393,
               421
             ],
-            "mm": 1.7,
+            "mm": 11.6,
             "eigenes": false
           }
         ],
@@ -445,7 +496,7 @@
               392,
               419
             ],
-            "mm": 1.2,
+            "mm": 10.3,
             "eigenes": false
           },
           {
@@ -453,7 +504,7 @@
               392,
               420
             ],
-            "mm": 2.2,
+            "mm": 12.2,
             "eigenes": true
           },
           {
@@ -461,7 +512,7 @@
               392,
               421
             ],
-            "mm": 1.7,
+            "mm": 11.1,
             "eigenes": false
           }
         ],
@@ -471,7 +522,7 @@
               391,
               419
             ],
-            "mm": 1.2,
+            "mm": 11.5,
             "eigenes": false
           },
           {
@@ -479,7 +530,7 @@
               391,
               420
             ],
-            "mm": 1.8,
+            "mm": 12.6,
             "eigenes": false
           },
           {
@@ -487,14 +538,14 @@
               391,
               421
             ],
-            "mm": 1.3,
+            "mm": 11.2,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-10-01",
-        "mm": 1.92
+        "mm": 11.61
       },
       "methode": "bilinear, 50.5056N 8.6227E"
     },
@@ -503,9 +554,9 @@
       "lat": 53.5941,
       "lon": 7.2066,
       "datum": "2026-10-01",
-      "summe_mm": 0.26,
-      "stunden_ok": 14,
-      "stunden_erwartet": 17,
+      "summe_mm": 1.16,
+      "stunden_ok": 22,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -537,8 +588,7 @@
         },
         {
           "stunde": "08:00",
-          "mm": null,
-          "fehler": "<urlopen error [Errno 104] Connection reset by peer>"
+          "mm": 0.21
         },
         {
           "stunde": "09:00",
@@ -558,8 +608,7 @@
         },
         {
           "stunde": "13:00",
-          "mm": null,
-          "fehler": "Remote end closed connection without response"
+          "mm": 0.7
         },
         {
           "stunde": "14:00",
@@ -575,8 +624,27 @@
         },
         {
           "stunde": "17:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
+        },
+        {
+          "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "21:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -586,7 +654,7 @@
               755,
               331
             ],
-            "mm": 0.5,
+            "mm": 1.8,
             "eigenes": false
           },
           {
@@ -594,7 +662,7 @@
               755,
               332
             ],
-            "mm": 0.5,
+            "mm": 1.6,
             "eigenes": false
           },
           {
@@ -602,7 +670,7 @@
               755,
               333
             ],
-            "mm": 0.4,
+            "mm": 1.2,
             "eigenes": false
           }
         ],
@@ -612,7 +680,7 @@
               754,
               331
             ],
-            "mm": 0.4,
+            "mm": 1.5,
             "eigenes": false
           },
           {
@@ -620,7 +688,7 @@
               754,
               332
             ],
-            "mm": 0.3,
+            "mm": 1.3,
             "eigenes": true
           },
           {
@@ -628,7 +696,7 @@
               754,
               333
             ],
-            "mm": 0.2,
+            "mm": 1.0,
             "eigenes": false
           }
         ],
@@ -638,7 +706,7 @@
               753,
               331
             ],
-            "mm": 0.5,
+            "mm": 1.6,
             "eigenes": false
           },
           {
@@ -646,7 +714,7 @@
               753,
               332
             ],
-            "mm": 0.4,
+            "mm": 1.2,
             "eigenes": false
           },
           {
@@ -654,14 +722,14 @@
               753,
               333
             ],
-            "mm": 0.5,
+            "mm": 1.4,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-10-01",
-        "mm": 0.26
+        "mm": 1.16
       },
       "methode": "bilinear, 53.5941N 7.2066E"
     }
