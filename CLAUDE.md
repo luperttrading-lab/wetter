@@ -580,6 +580,29 @@ laufen und liest danach die Mittelzelle (`_nowStoer` = Zahl der Stellen).
 Vorher: 1 km, nur ab jetzt, ungefiltert - an der Kueste "Regen jetzt" durch
 ein Windpark-Echo, das die Karte schon ausblendete.
 
+v4.88 (Nutzer-Vergleich mit WetterOnline, 01.10.2026 07:04): ZWEI Fehler.
+(1) Der Filter loeschte echten Regen. Im 15x15-Fenster des Balkens galt
+Niesel der letzten Stunde als "fest und allein" (das Fenster ist zu klein, um
+Nachbarschaft zu sehen), und in der Vorhersage suchte sich die mitwandernde
+Maske (+-3 Zellen je Bild, kumulativ) genau den ankommenden Regen: Balken
+07:45-09:00 trocken, roh durchgehend 0,12-0,72 mm/h. Auch auf der Karte
+(70 km) verschwanden rund 1 % der nassen Vorhersagezellen, im 7-km-Fenster
+28 %. Jetzt loescht `nulle` je Bild nur, wenn ein Ring von 3 Zellen um die
+(verschobene) Maske hoechstens 25 % nass ist (ab 8 Ringzellen). Ein
+Windpark ueber trockenem Meer faellt weiter weg; steckt er in echtem Regen,
+bleibt er stehen. Den Fall Norden (27.09.) konnte ich nicht nachspielen -
+Bright Sky liefert nur die letzten Stunden; am 01.10. regnete es dort
+flaechig, alter und neuer Filter liessen fast alles stehen.
+(2) Ueberschrift "Regen in 5 Min · ~5 Min lang" beschrieb einen einzelnen
+Balken und verschwieg 85 min Regen danach. `nowEreignisse()`: nasse Schritte
+zu Ereignissen, Luecken bis 15 min ueberbrueckt; regnet es jetzt, zaehlt das
+Jetzt-Ereignis (mit "in X Min maessig", wenn danach ein groesseres kommt),
+sonst das GROESSTE (Summe der Bodenrate). Ueberschrift, Staerke und Kachel
+"Regen" nutzen dieselben Ereignisse; "haelt ueber 2 Std an", wenn es bis
+zum Ende reicht. Balken "jetzt" ist blass (`.bar.blass`), wenn er ueber 0,1,
+aber unter der Jetzt-Schwelle (0,25 bei trockener Station) liegt - vorher
+blau, ohne mitzuzaehlen.
+
 **Zugpfeil (v4.47, `rkZug`/`rkZugZeichnen`):** Das Radarbild von vor 30 min
 wird bis 30 Zellen verschoben, bis es die nassen Zellen von jetzt am besten
 deckt (>= 30 Zellen, Deckung >= 30 %); sonst jetzt -> +30 min aus der
