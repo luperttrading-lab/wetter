@@ -603,6 +603,21 @@ zum Ende reicht. Balken "jetzt" ist blass (`.bar.blass`), wenn er ueber 0,1,
 aber unter der Jetzt-Schwelle (0,25 bei trockener Station) liegt - vorher
 blau, ohne mitzuzaehlen.
 
+**Grenzen (v4.89, Nutzer: "zur Orientierung, haben die anderen Karten auch"):**
+Staats- und Landesgrenzen in Radar- UND Wolkenkarte (`grenzenZeichnen`, vor
+den Orten, ueber dem Regen; weisse Linie 1,2 px, Staat 1,7 px, auf dunklem
+Saum). Daten `grenzen.json` (136 KB, gzip 54 KB), gebaut von `tools/grenzen.py`
+aus BKG VG250, Ebene LI, AGZ 1+2, Douglas-Peucker 100 m, Koordinaten in
+1e-4 Grad als Differenzen. Geladen beim ersten Zeichnen, danach zeichnen
+beide Karten neu; nur Linien, deren Rahmen das Fenster schneidet (3,8 ms je
+Radarbild im Test). NICHT VG2500: lag um Wettenberg bis 1,8 km neben VG250
+(90 % unter 581 m), auf der 130-km-Karte bis 5 px. Quellvermerk "Grenzen ©
+GeoBasis-DE / BKG (2026)" steht unter beiden Karten (Pflicht nach
+dl-de/by-2-0, siehe LIZENZEN.md). Nebenbei: Ortsnamen bekamen
+`lineJoin="round"` - die schwarze Kontur zog an M, N, W, A Gehrungsspitzen
+("Marburg", "Nidda", "Weilburg"). Ausland zeigt nur die deutsche
+Staatsgrenze; Grenzen zwischen Nachbarlaendern fehlen.
+
 **Zugpfeil (v4.47, `rkZug`/`rkZugZeichnen`):** Das Radarbild von vor 30 min
 wird bis 30 Zellen verschoben, bis es die nassen Zellen von jetzt am besten
 deckt (>= 30 Zellen, Deckung >= 30 %); sonst jetzt -> +30 min aus der
