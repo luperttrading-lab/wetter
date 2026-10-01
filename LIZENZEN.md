@@ -13,6 +13,7 @@ auf GitHub Pages, ein Nutzer, keine Werbung) ist alles frei — die Spalte
 | nominatim.openstreetmap.org | Ortssuche | frei | eingeschraenkt |
 | server.arcgisonline.com (World_Imagery) | Satellitenkacheln der Wolkenkarte | geduldet | **nicht erlaubt** |
 | uvi.bfs.de | UV-Tagesgrafiken (Bildauswertung) | frei | ungeklaert |
+| daten.gdz.bkg.bund.de (VG250) | Staats- und Landesgrenzen in den Karten (`grenzen.json`, seit v4.89) | frei | frei, Namensnennung "© GeoBasis-DE / BKG (Jahr)" (dl-de/by-2-0) |
 | GitHub Actions und Pages | Rechnen, Ausliefern | frei (Repo oeffentlich) | frei, solange oeffentlich |
 
 ## Die drei Punkte, die im Verkaufsfall zu klaeren waeren
