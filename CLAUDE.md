@@ -377,6 +377,15 @@ Wert mit.
 v4.75 (Nutzer: "sehe keine Aenderung"): Der Wechsel lief nur ab 1 Minute
 Sonne - morgens ohne Sonne stand die Kachel still und sah kaputt aus. Jetzt
 auch "☀ 0 min / bisher", sobald die Sonne auf ist und Daten da sind.
+v4.91 (Nutzer, 03.10. Nebel): ERSTE SONNE. Solange heute < 10 min Sonne
+gemessen sind und noch welche erwartet wird, zeigt die Kachel zuerst
+"☀ ~11:30 / erste Sonne" (dann "bis 19:00 / noch" und "☀ 0 min / bisher").
+`kzSonneErwartet()`: aus `chartRows` (Bright Sky = MOSMIX, NICHT `fullRows` -
+das endet bei jetzt), erste Stunde mit >= 30 min erwarteter Sonne, Beginn =
+Stempel minus Sonnenminuten, auf 15 min gerundet; "☀ bald" ab 15 min vorher.
+MOSMIX-Sonnenminuten sind Erwartungswerte. Modelle streuten am 03.10. um 09 Uhr
+von 08:00 (ECMWF) ueber 10:00 (ICON-EU) bis 11:30/11:45 (MOSMIX/ICON-D2) -
+Nebelaufloesung ist schwer. Gegenprobe mit der 10-Minuten-Station steht aus.
 Bearbeiten-Fuss: Hinweis in eigener Zeile, das Minus darin als grauer Kreis
 wie auf den Kacheln (`.kzminI`); Zahnrad ist jetzt ein Knopf "⚙ Tempo"
 LINKS, "Fertig" rechts (vorher 15-px-Zeichen direkt neben "Fertig" - Nutzer
