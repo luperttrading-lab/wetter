@@ -596,6 +596,17 @@ v4.95 (Nutzer): dasselbe fuer die Kachel "Mond" und die Mondkarte
 Geprueft: 03.10. 11:05 48 Grad links von oben, 04.10. 06:00 132,6 Grad
 (PyEphem 132,7).
 
+v4.96 (Nutzer, 03.10.: "Anzeige direkt ueber dem Mond"): Im Bild "Mond im
+Jahr" sass das Kaestchen mit den beiden Dauern mittig oben auf der
+heute-Senkrechten - bei langem Mondbogen (17 h 55 min) genau auf dem Ring.
+Jetzt 10 px NEBEN der Senkrechten, Seite und Hoehe nach der kleinsten
+Ueberdeckung (Kurvenpunkt 1, Voll-/Neumond 6, Ring 1000; Gleichstand: oben,
+rechts). Geprueft an sechs Tagen (Jan, Maerz, Juni, Aug, Okt, Dez): kein Ring
+verdeckt. Dabei nachgeprueft: der Mondschatten im Planetenbild DREHT sich mit
+der gewaehlten Uhrzeit (03.10.: 06:00 114 Grad, 07:30 82, 09:30 54, 13:00 52) -
+zwischen Vormittag und Nachmittag aendert er sich wirklich kaum (PyEphem
+09:05 48, 12:30 56, 13:40 63 Grad).
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
