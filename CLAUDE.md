@@ -617,6 +617,22 @@ nicht unter "Jetzt" verschwindet. Zeigt, warum die helle Seite nicht auf die
 Sonne IM BILD zeigt: 03.10. 08:20 Mond 62 Grad SW, Sonne 7 Grad OSO (94 Grad
 auseinander) - der Bogen verlaesst den Mond nach links oben.
 
+v4.98 (Nutzer: "unverzerrte Darstellung zum Anklicken", Lichtweg "mit
+Einschaltung und Erklaerung"): Umschalter "Panorama | Himmelskarte" ueber dem
+Planetenbild (`pl_ansicht`, Voreinstellung Panorama) und Schalter "Lichtweg"
+(`pl_lichtweg`, Voreinstellung AUS) mit Erklaerzeile `#plInfo` (`plLwNote`).
+HIMMELSKARTE (`plKarteZeichnen`): stereographisch, Zenit Mitte, Horizont Rand,
+N oben, O LINKS (Blick nach oben), r = R tan(z/2). Winkeltreu - die Sichel
+wird aus der Karte gerichtet (0,5 Grad entlang des Grosskreises Mond -> Sonne,
+projiziert, atan2), Lichtweg und helle Seite passen exakt. Geprueft gegen
+PyEphem: Winkel der hellen Seite zum Zenit -65,7/-58,8/-119,2 gegen
+-66,0/-58,9/-119,5 Grad (03.10. 08:20, 15:00; 04.10. 07:00). Hoehe
+`PL_KARTE_TOP` + 2R + 26 (Raeder und "Jetzt" liegen darueber). `plTexF`
+(Planetenportraets) ist jetzt top-level; der Fuss von drawPlaneten (Raeder,
+Legende) ist die innere Funktion `plTail()`, die Karte ruft sie auch. Kompass
+in der Karte: Speiche in Blickrichtung, Ring auf der Hoehe. Am iPhone nicht
+geprueft.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
