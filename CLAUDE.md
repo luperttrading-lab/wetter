@@ -579,6 +579,17 @@ Koerper die Refraktion nach Saemundsson ab -1 Grad. Geprueft gegen PyEphem
 Kompassgenauigkeit. `altaz()` wird nur im Planetenteil (und der Kachel
 "Planet") benutzt; Auf-/Untergangszeiten anderswo rechnen eigene Formeln.
 
+v4.94 (Nutzer, 03.10.: "am Himmel von oben beleuchtet, im Bild von der Seite"):
+Die Lage der Mondsichel im Planetenbild kam aus BILDkoordinaten
+(atan2(Y(sonne)-y, X(sonne)-x)) - das Bild zieht 360 Grad Azimut ueber die
+Breite und staucht die Hoehe, eine Gerade darin ist kein Grosskreis. Jetzt
+Anfangsrichtung des Grosskreises Mond -> Sonne in alt/az, gemessen vom Zenit
+zu wachsendem Azimut (= rechts im Bild). Geprueft gegen PyEphem (chi - q,
+Positionswinkel des hellen Randes minus parallaktischer Winkel) an vier
+Zeitpunkten: Betrag auf 0,1 Grad gleich (03.10. 11:55: 48 Grad links von
+oben, vorher im Bild fast waagrecht). Das Mondfoto selbst wird nicht
+gedreht (Krater stehen also nicht exakt), nur der Schatten.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
