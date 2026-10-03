@@ -618,6 +618,19 @@ Legende) ist die innere Funktion `plTail()`, die Karte ruft sie auch. Kompass
 in der Karte: Speiche in Blickrichtung, Ring auf der Hoehe. Am iPhone nicht
 geprueft.
 
+v4.99 (Nutzer): dritte Ansicht BLICK ("durchs Handy", `plBlickZeichnen`,
+`pl_ansicht`="blick"). Gnomonisch wie ein Kamerabild, 60 Grad breit
+(`PL_BLICK_FOV`), Mitte = Kompassrichtung + Hoehe der Oberkante (Eichung gilt),
+oben = zum Zenit; die Drehung des Handys um die eigene Achse (gamma) wird
+nicht ausgewertet. Grosskreise = Geraden (Horizont waagrecht, Lichtweg gerade),
+nichts gespiegelt - die Sichel steht wie am Himmel. Ohne Kompass steht die
+Mitte auf dem gewaehlten Ziel, sonst Mond, Sonne, hellster Planet, sonst S 20
+Grad (`plBlickMitte`, Hoehe 12-80 Grad). Mond, Sonne, gewaehltes Ziel ausserhalb:
+Pfeil am Rand mit Winkelabstand. Zeile "Handy zeigt SSO 160 Grad - Hoehe 35"
+steht in `#plInfo` (im Bild ueberdeckte sie die Richtungsbeschriftung).
+Lichtweg-Erklaerung sagt jetzt "Mond unter dem Horizont", wenn er unten ist.
+Getestet nur mit gesetzten Kompasswerten im Browser, nicht am iPhone.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
