@@ -592,6 +592,16 @@ der gewaehlten Uhrzeit (03.10.: 06:00 114 Grad, 07:30 82, 09:30 54, 13:00 52) -
 zwischen Vormittag und Nachmittag aendert er sich wirklich kaum (PyEphem
 09:05 48, 12:30 56, 13:40 63 Grad).
 
+v4.97 (Nutzer: "kann das falsch aussehen, weil die Sonne von hinten kommt?"):
+LICHTWEG im Planetenbild - der Grosskreis Sonne -> Mond als gestrichelte
+gelbe Linie mit Pfeilspitze am Mond. Gerechnet als Slerp der Einheitsvektoren
+(Ost, Nord, Oben) in 1-Grad-Schritten, Azimut stetig fortgesetzt; gezeichnet
+nur im Fenster, ueber dem Horizont und bis 76 Grad, nur wenn der Mond oben
+ist. Liegt auf dem Overlay (`planetenSunCv`) wie die Sonne, damit der Pfeil
+nicht unter "Jetzt" verschwindet. Zeigt, warum die helle Seite nicht auf die
+Sonne IM BILD zeigt: 03.10. 08:20 Mond 62 Grad SW, Sonne 7 Grad OSO (94 Grad
+auseinander) - der Bogen verlaesst den Mond nach links oben.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
