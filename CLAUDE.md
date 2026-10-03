@@ -631,6 +631,15 @@ steht in `#plInfo` (im Bild ueberdeckte sie die Richtungsbeschriftung).
 Lichtweg-Erklaerung sagt jetzt "Mond unter dem Horizont", wenn er unten ist.
 Getestet nur mit gesetzten Kompasswerten im Browser, nicht am iPhone.
 
+v5.00 (Nutzer: "als laege das Handy auf dem Tisch", Blick von unten ins Handy
+"unintuitiv"): Himmelskarte jetzt von OBEN gesehen - N oben, O RECHTS wie eine
+Landkarte (`plKartePkt`: x = cx + r sin(az - rot)). Mit laufendem Kompass
+dreht sie mit (`o.rot` = Blickrichtung, oben = vorn; gegen die Richtung
+geprueft: Blick W -> S links, N rechts). Der Mond ist dadurch seitenverkehrt
+zum Himmel (die Karte ist das Spiegelbild); die Sichel wird weiter aus der
+Karte gerichtet und passt zum Lichtweg. Die Erklaerzeile sagt das und
+verweist fuer den echten Anblick auf "Blick". Nach v4.99 kam laut Regel v5.00.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
