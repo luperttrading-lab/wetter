@@ -551,6 +551,16 @@ als Text in die Zwischenablage. Zweck: trennen, was eine Eichung wegnimmt
 (fester Versatz) und was bleibt (Zittern), und pruefen, ob der Versatz nach
 15-30 min noch gilt. Ergebnis steht noch aus.
 
+v4.93 (Nutzer, 03.10.: "man trifft den Eichknopf nicht"): Bei laufendem
+Kompass UND Eichtest ist ein TIPP IRGENDWO (<= 10 px, <= 700 ms; nicht auf
+Knoepfen/Links/Legende/Drehraedern - `closest(...)` in der pointerup-Pruefung)
+ein Eichpunkt (`plEichTipp`): Messung wie "Messpunkt", danach SOFORT Eichung
+= Mittel aller Punkte seit dem Einschalten des Eichtests (`PL_EICH.sitz`).
+Bestaetigung: Dreiklang 659/831/988 Hz (`plEichKlang`, AudioContext wird schon
+beim Tipp angelegt - iOS), Einblendung "Geeicht: Kompass 4,7 Grad zu weit
+rechts" 3,5 s, im Kasten eine Skala -15..+15 Grad mit Punkt. Im Eichtest
+waehlt ein Tipp aufs Bild KEIN Ziel mehr (Ziel ueber die Legende).
+Getestet nur mit Mausklicks und gesetzten Kompasswerten, nicht am iPhone.
 v4.59 (Nutzer): Nur die Kompassrichtung wird geeicht, die Hoehe nicht (wird
 weiter gemessen und in der Tabelle gezeigt). ERLEDIGT in v4.68 (siehe unten),
 vorher galt: `altaz()` rechnet GEOZENTRISCH und ohne Refraktion - der
