@@ -574,6 +574,12 @@ Positionswinkel des hellen Randes minus parallaktischer Winkel) an vier
 Zeitpunkten: Betrag auf 0,1 Grad gleich (03.10. 11:55: 48 Grad links von
 oben, vorher im Bild fast waagrecht). Das Mondfoto selbst wird nicht
 gedreht (Krater stehen also nicht exakt), nur der Schatten.
+v4.95 (Nutzer): dasselbe fuer die Kachel "Mond" und die Mondkarte
+(`moonSvg(mo,dreh)`, `mondHellDreh(frac)`): Grundzeichnung Lichtseite rechts
+(zunehmend) bzw. links (abnehmend), Schattenmaske gedreht um (Winkel am Himmel
+- (+-90)). Nur solange der Mond ueber dem Horizont steht, sonst Grundzeichnung.
+Geprueft: 03.10. 11:05 48 Grad links von oben, 04.10. 06:00 132,6 Grad
+(PyEphem 132,7).
 
 ## Regenradar (v4.45)
 
