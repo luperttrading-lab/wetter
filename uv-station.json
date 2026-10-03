@@ -1,19 +1,19 @@
 {
- "stand": "2026-10-01",
+ "stand": "2026-10-02",
  "waechter": {
-  "stationen": 33,
+  "stationen": 34,
   "breite": {
-   "steigung": 0.003,
-   "fehler": 0.0109,
-   "t": 0.27
+   "steigung": 0.0052,
+   "fehler": 0.0103,
+   "t": 0.51
   },
   "hoehe": {
-   "steigung": -0.0025,
-   "fehler": 0.0427,
-   "t": -0.06
+   "steigung": 0.001,
+   "fehler": 0.042,
+   "t": 0.02
   },
-  "mittel": 0.979,
-  "reststreuung": 0.105,
+  "mittel": 0.977,
+  "reststreuung": 0.103,
   "schwelle_t": 3.0,
   "alarm": false,
   "hinweis": "kein Trend"
@@ -21,28 +21,28 @@
  "regel": "Median(Messung/Modell) an Tagen mit >=90 % Sonne; Tage mit 70-90 % zaehlen mit, wenn es je Station mindestens 3 sind und ihre Streuung hoechstens 0.06 betraegt. Zur 1 gedaempft mit n/(n+0.43) - ein Tag zaehlt zu 70 %, geklemmt auf 0.80-1.25, unter 5 % Abweichung kein Faktor, unter 3 Tagen vorlaeufig",
  "stationen": {
   "Andernach": {
-   "faktor": 1.066,
-   "roh": 1.069,
-   "tage": 11,
+   "faktor": 1.055,
+   "roh": 1.056,
+   "tage": 12,
    "vorlaeufig": false,
-   "streuung": 0.045,
+   "streuung": 0.05,
    "klare_tage": 4,
-   "teiltage": 7,
+   "teiltage": 8,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-27"
+   "bis": "2026-10-02"
   },
   "Belm-Osnabrueck": {
-   "faktor": 0.897,
-   "roh": 0.888,
-   "tage": 5,
+   "faktor": 0.902,
+   "roh": 0.897,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.033,
+   "streuung": 0.04,
    "klare_tage": 5,
-   "teiltage": 0,
-   "teiltage_verworfen": 2,
-   "von": "2026-09-15",
-   "bis": "2026-09-30"
+   "teiltage": 3,
+   "teiltage_verworfen": 0,
+   "von": "2026-09-12",
+   "bis": "2026-10-02"
   },
   "Bonn": {
    "faktor": 0.934,
@@ -81,16 +81,16 @@
    "bis": "2026-09-30"
   },
   "Eckernfoerde": {
-   "faktor": 1.051,
-   "roh": 1.062,
-   "tage": 2,
-   "vorlaeufig": true,
-   "streuung": 0.013,
+   "faktor": 1.066,
+   "roh": 1.072,
+   "tage": 5,
+   "vorlaeufig": false,
+   "streuung": 0.021,
    "klare_tage": 2,
-   "teiltage": 0,
-   "teiltage_verworfen": 2,
+   "teiltage": 3,
+   "teiltage_verworfen": 0,
    "von": "2026-09-22",
-   "bis": "2026-09-30"
+   "bis": "2026-10-02"
   },
   "Fichtelberg": {
    "faktor": 0.8,
@@ -105,16 +105,16 @@
    "bis": "2026-10-01"
   },
   "Giessen-Wettenberg": {
-   "faktor": 1.078,
-   "roh": 1.08,
-   "tage": 15,
+   "faktor": 1.072,
+   "roh": 1.074,
+   "tage": 16,
    "vorlaeufig": false,
-   "streuung": 0.042,
-   "klare_tage": 6,
+   "streuung": 0.041,
+   "klare_tage": 7,
    "teiltage": 9,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-09-30"
+   "bis": "2026-10-02"
   },
   "Hohenpeissenberg": {
    "faktor": 1.067,
@@ -172,7 +172,7 @@
    "streuung": 0.149,
    "klare_tage": 8,
    "teiltage": 0,
-   "teiltage_verworfen": 5,
+   "teiltage_verworfen": 6,
    "von": "2026-09-04",
    "bis": "2026-09-30"
   },
