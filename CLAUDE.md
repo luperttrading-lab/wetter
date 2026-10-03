@@ -627,6 +627,14 @@ dl-de/by-2-0, siehe LIZENZEN.md). Nebenbei: Ortsnamen bekamen
 ("Marburg", "Nidda", "Weilburg"). Ausland zeigt nur die deutsche
 Staatsgrenze; Grenzen zwischen Nachbarlaendern fehlen.
 
+**Kein Pfeil (v4.92, Nutzer: "sieht aus wie eine Ortsangabe"):** Unter 3 km/h
+statt weisser Beschriftung ein dunkler Kasten wie die Zeitanzeige: "Kein Pfeil
+– Regen zieht kaum" unter dem Standort; die Zeile unter der Karte sagt dann
+"Kein Pfeil: der Regen bewegt sich kaum (unter 3 km/h ...)" statt "Zug nach S,
+0 km/h". Anlass 03.10. 09:20 Nebel: 40-216 Zellen mit 0,1-0,2 mm/h standen
+eine Stunde still (Niesel aus dem Nebel, Wind 6 km/h) - 0 km/h war richtig
+gemessen, sah aber nach Fehler aus.
+
 **Zugpfeil (v4.47, `rkZug`/`rkZugZeichnen`):** Das Radarbild von vor 30 min
 wird bis 30 Zellen verschoben, bis es die nassen Zellen von jetzt am besten
 deckt (>= 30 Zellen, Deckung >= 30 %); sonst jetzt -> +30 min aus der
