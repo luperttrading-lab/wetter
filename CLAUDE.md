@@ -662,6 +662,16 @@ Beschriftungen jetzt auf dem Overlay (`planetenSunCv`, VOR Raedern und
 Liegt die Hoehe in der oberen Zone, steht "Hoehe 64 Grad" direkt neben dem
 Ring statt am Rand unter dem Zeitrad.
 
+v5.02 (Nutzer, 04.10. 12:27, Handy flach auf dem Buergersteig der
+Weiherstrasse, OSM-Richtung 177,5 Grad): iOS-Kompass 178 Grad, App 188 Grad
+"geeicht". Ursache: eine gespeicherte Eichung (`pl_eich`, rund -10 Grad aus
+frueheren Tipps im Eichtest) - sie bleibt, bis "Eichung aus" gedrueckt wird;
+"Loeschen" nahm nur die Messpunkte weg. Jetzt: "Loeschen" nimmt Punkte UND
+Eichung weg (Rueckfrage nennt beides), der Kompassknopf zeigt die Groesse
+("geeicht 10 Grad"). Kalibrierhilfe ohne Himmel: Handy flach an einer
+geraden Strasse anlegen, deren Richtung bekannt ist (Weiherstrasse 177,5 /
+357,5 Grad geografisch, aus OSM-Weg 4910338, 94 m gerade).
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
