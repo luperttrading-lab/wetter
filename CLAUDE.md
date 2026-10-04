@@ -833,6 +833,12 @@ Bild A, dieselbe fuer B). Alle 11 Paare dann (-7,5) Zellen je 10 min =
 52 km/h nach 33 Grad; 700 hPa 44 km/h nach 28 Grad. Unter 600 nassen Zellen
 unveraendert 0,1 mm/h. Stichprobe jetzt bis 1500 Kernzellen; 88 ms.
 
+**Bewusst NICHT gemacht (04.10.2026, Nutzer):** Zugpfeil in der Wolkenkarte.
+Wolken ziehen je Hoehe verschieden (tief 850 hPa, mittel 700, Cirrus 300 hPa -
+oft doppelt so schnell und 30-90 Grad anders), ein zweiter Pfeil neben dem
+Radarpfeil haette mehr verwirrt als geholfen. Grundsatz des Nutzers: Auftraege
+ueberdenken und Dinge, die den Laien verwirren, lieber nicht bauen.
+
 ## Sonnenkarte im UV-Abschnitt (v4.56)
 
 Die Karte "Sonne" (Bogen, Auf-/Untergang, Sonnenstunden) stand als letzte
