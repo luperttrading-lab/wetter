@@ -655,6 +655,13 @@ zum Himmel (die Karte ist das Spiegelbild); die Sichel wird weiter aus der
 Karte gerichtet und passt zum Lichtweg. Die Erklaerzeile sagt das und
 verweist fuer den echten Anblick auf "Blick". Nach v4.99 kam laut Regel v5.00.
 
+v5.01 (Nutzer, 04.10. 07:40: "den Ortungskreis sieht man hinter dem Schild
+nicht"): Im Panorama liegen Kompass-Strich, Hoehenlinie, Ring und
+Beschriftungen jetzt auf dem Overlay (`planetenSunCv`, VOR Raedern und
+"Jetzt"), Ring Radius 16 statt 9 (der Mond hat 12,5 und deckte ihn ganz zu).
+Liegt die Hoehe in der oberen Zone, steht "Hoehe 64 Grad" direkt neben dem
+Ring statt am Rand unter dem Zeitrad.
+
 ## Regenradar (v4.45)
 
 Eigener Abschnitt `radarSec` (Klapp-Schluessel `radar`), laedt erst beim
