@@ -376,6 +376,15 @@ wie auf den Kacheln (`.kzminI`); Zahnrad ist jetzt ein Knopf "⚙ Tempo"
 LINKS, "Fertig" rechts (vorher 15-px-Zeichen direkt neben "Fertig" - Nutzer
 traf "Fertig" statt Zahnrad).
 
+v5.03 (Nutzer, 05.10. 10:19 Nebel: Kachel "☀ ~11:30", Stundenleiste 10-11 Uhr
+schon 28 min, draussen spitzte die Sonne durch): `kzSonneErwartet()` nimmt die
+erste Stunde mit >= 10 statt >= 30 erwarteten Sonnenminuten. Zusaetzlich
+verschwindet "erste Sonne", sobald die Station in den letzten 30 min >= 2 min
+Sonne gemessen hat (`kzSonneHeute().zuletzt`). Geprueft mit eingespielten
+Stunden: 0/28/35 -> "☀ bald" (10:30), 9/21/32 -> 10:45, 0/0/5/40 -> 12:15.
+Die 10-min-Station liefert mit rund 30-40 min Verzug (05.10. 10:19: letzte
+Werte 09:50) - die ersten Strahlen sieht man draussen frueher als die App.
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
