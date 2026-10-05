@@ -384,6 +384,11 @@ Sonne gemessen hat (`kzSonneHeute().zuletzt`). Geprueft mit eingespielten
 Stunden: 0/28/35 -> "☀ bald" (10:30), 9/21/32 -> 10:45, 0/0/5/40 -> 12:15.
 Die 10-min-Station liefert mit rund 30-40 min Verzug (05.10. 10:19: letzte
 Werte 09:50) - die ersten Strahlen sieht man draussen frueher als die App.
+v5.04: Auch die gerade abgelaufene Stunde zaehlt mit (Stempel bis 60 min alt;
+fuer vergangene Stempel liefert Bright Sky die BEOBACHTETE Sonnenscheindauer).
+Vorher sprang "bald" zum Stundenwechsel zurueck (11:01: Stempel 11 Uhr fiel
+raus, 12 Uhr mit 35 min ergab "~11:30"). Geprueft 0/28/35/45: 09:30 und 10:10
+"~10:30", 10:19 bis 12:05 durchgehend "bald".
 
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
