@@ -405,6 +405,25 @@ Vorher sprang "bald" zum Stundenwechsel zurueck (11:01: Stempel 11 Uhr fiel
 raus, 12 Uhr mit 35 min ergab "~11:30"). Geprueft 0/28/35/45: 09:30 und 10:10
 "~10:30", 10:19 bis 12:05 durchgehend "bald".
 
+v5.05 (Nutzer: "Pollenflug-Kachel"): Kachel `pollen` (einmalig per
+`kzPollenNeu` ans Ende der eigenen Auswahl gehaengt). Quelle in Deutschland
+der amtliche DWD-Pollenflug-Gefahrenindex (`s31fg.json`, acht Arten inkl.
+Hasel und Esche, Stufen 0 / 0-1 / ... / 3, Ausgabe gegen 11 Uhr fuer
+heute/morgen/uebermorgen). Die DWD-Datei hat KEINEN CORS-Kopf - darum holt
+`pollen.py` (Workflow `pollen.yml`, 09:35 und 10:35 UTC) sie nach
+`pollen.json` auf `main` (rund 6 KB, nur bei Aenderung). Region: naechster
+Stuetzpunkt in `POL_PUNKTE` (mehrere je Teilregion, von Hand; Gießen/Wetzlar/
+Marburg/Kassel -> 91, Frankfurt/Wiesbaden/Darmstadt -> 92, an 40 Staedten
+geprueft), ab 45 km Abstand Ausland -> CAMS (`_pollenCams`, nur Graeser,
+Birke, Erle, Beifuss, Ambrosia - CAMS kennt weder Hasel noch Esche).
+Grenznah (Luxemburg) gilt die deutsche Nachbarregion. Vor 11 Uhr ist der
+Stand von gestern - `polTage` verschiebt dann um einen Tag; aelter als
+gestern -> nichts. Kachel: staerkste Art + farbige Pille (Stufe), Wechsel
+zweitstaerkste Art und "POLLEN DI" (Wochentag morgen) - "morgen" + Pille
+braucht 91-108 px, die Drittelkachel hat 78. Die grosse Kachel "Pollenflug"
+unten (`pollenSubBauen`) zeigt ebenfalls zuerst DWD mit Regionsname.
+Im Oktober steht ueberall 0 - die Kachel zeigt dann "keine".
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist

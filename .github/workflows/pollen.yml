@@ -1,0 +1,39 @@
+name: Pollenflug (DWD) holen
+
+# Der DWD aktualisiert den Pollenflug-Gefahrenindex gegen 11 Uhr Ortszeit.
+# Zwei Laeufe (09:35 und 10:35 UTC) decken Sommer- und Winterzeit ab; der
+# zweite findet meist nichts Neues und committet dann nicht.
+
+on:
+  schedule:
+    - cron: "35 9,10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pollen-json
+  cancel-in-progress: false
+
+jobs:
+  pollen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: pollen.json schreiben
+        run: python3 pollen.py
+      - name: committen
+        run: |
+          if git diff --quiet -- pollen.json && git ls-files --error-unmatch pollen.json >/dev/null 2>&1; then echo "unveraendert"; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pollen.json
+          git commit -q -m "Pollenflug aktualisiert"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push abgelehnt, Versuch $i - hole main neu"
+            sleep $((i*3))
+            git pull --rebase -q origin main
+          done
+          exit 1
