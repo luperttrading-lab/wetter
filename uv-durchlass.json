@@ -1,6 +1,6 @@
 {
- "stand": "2026-10-04",
- "tage": 28,
+ "stand": "2026-10-05",
+ "tage": 29,
  "regel": "UV = Klarhimmel x Durchlass^p, p je Sonnenschein-Klasse; Regression ln(q)=p*ln(dl), ab 40 Punkten und r2 0.30. Die App liest p_gesamt (alle Klassen zusammen).",
  "klassen": {
   "voll": {
@@ -17,17 +17,17 @@
   }
  },
  "p_gesamt": {
-  "punkte": 18721,
-  "p_roh": 0.675,
-  "r2": 0.762,
+  "punkte": 19148,
+  "p_roh": 0.673,
+  "r2": 0.761,
   "fehler": 0.003,
-  "dl_mittel": 0.593,
-  "p": 0.675,
-  "tage": 28
+  "dl_mittel": 0.595,
+  "p": 0.673,
+  "tage": 29
  },
  "kurve": {
-  "punkte": 24254,
-  "tage": 28,
+  "punkte": 25080,
+  "tage": 29,
   "kurve": [
    [
     0.082,
@@ -36,169 +36,169 @@
    ],
    [
     0.129,
-    0.199,
-    557
+    0.201,
+    558
    ],
    [
     0.175,
-    0.262,
-    666
+    0.263,
+    671
    ],
    [
     0.228,
-    0.34,
-    795
+    0.341,
+    806
    ],
    [
     0.275,
-    0.416,
-    894
+    0.417,
+    912
    ],
    [
-    0.324,
-    0.476,
-    972
+    0.325,
+    0.48,
+    1000
    ],
    [
     0.376,
-    0.546,
-    989
+    0.548,
+    1010
    ],
    [
     0.424,
-    0.608,
-    1098
+    0.611,
+    1117
    ],
    [
     0.476,
     0.655,
-    1161
+    1174
    ],
    [
     0.525,
-    0.685,
-    1171
+    0.687,
+    1186
    ],
    [
     0.574,
-    0.713,
-    1133
+    0.718,
+    1152
    ],
    [
     0.626,
-    0.743,
-    977
+    0.744,
+    988
    ],
    [
     0.676,
-    0.774,
-    926
+    0.776,
+    948
    ],
    [
     0.725,
-    0.789,
-    1007
+    0.792,
+    1023
    ],
    [
     0.775,
-    0.834,
-    892
+    0.837,
+    911
    ],
    [
     0.825,
-    0.869,
-    1028
+    0.872,
+    1054
    ],
    [
     0.876,
-    0.889,
-    1246
+    0.894,
+    1297
    ],
    [
     0.93,
-    0.942,
-    1897
+    0.946,
+    1979
    ],
    [
     0.977,
-    0.965,
-    3440
+    0.966,
+    3653
    ],
    [
     1.022,
     0.966,
-    3174
+    3410
    ]
   ],
   "band": 0.05,
   "min_n": 30,
   "guete": {
-   "tage": 28,
-   "fehler_neu_pz": 11.8,
-   "fehler_alt_pz": 12.2,
+   "tage": 29,
+   "fehler_neu_pz": 11.6,
+   "fehler_alt_pz": 12.0,
    "tagesbias_neu_pz": [
-    -12.1,
-    -0.1,
-    4.9
+    -12.3,
+    -0.0,
+    4.6
    ],
    "tagesbias_alt_pz": [
-    -12.6,
-    -1.5,
+    -12.5,
+    -0.9,
     3.4
    ]
   }
  },
  "p": {
   "voll": {
-   "punkte": 4951,
+   "punkte": 5172,
    "p": null,
-   "p_roh": 0.667,
-   "r2": 0.209,
+   "p_roh": 0.653,
+   "r2": 0.205,
    "fehler": 0.018,
-   "dl_mittel": 0.88
+   "dl_mittel": 0.881
   },
   "teils": {
-   "punkte": 5448,
-   "p": 0.645,
-   "p_roh": 0.645,
-   "r2": 0.52,
+   "punkte": 5530,
+   "p": 0.641,
+   "p_roh": 0.641,
+   "r2": 0.519,
    "fehler": 0.008,
-   "dl_mittel": 0.686
+   "dl_mittel": 0.685
   },
   "keine": {
-   "punkte": 8993,
-   "p": 0.676,
-   "p_roh": 0.676,
-   "r2": 0.815,
+   "punkte": 9129,
+   "p": 0.674,
+   "p_roh": 0.674,
+   "r2": 0.814,
    "fehler": 0.003,
-   "dl_mittel": 0.374
+   "dl_mittel": 0.375
   }
  },
  "tagesgang": {
-  "punkte": 7330,
+  "punkte": 7824,
   "stationen": 22,
-  "steigung": -0.0078,
+  "steigung": -0.0074,
   "fehler": 0.0005,
-  "mitte": 0.9977,
-  "r2": 0.027,
-  "vormittags": 1.021,
-  "nachmittags": 0.974
+  "mitte": 0.9979,
+  "r2": 0.025,
+  "vormittags": 1.02,
+  "nachmittags": 0.976
  },
  "spitzen": {
   "voll": {
-   "punkte": 10108,
+   "punkte": 10726,
    "spitze": 1.036,
-   "p90": 1.113,
+   "p90": 1.108,
    "max": 1.899
   },
   "teils": {
-   "punkte": 5641,
+   "punkte": 5724,
    "spitze": 1.088,
-   "p90": 1.277,
+   "p90": 1.276,
    "max": 2.379
   },
   "keine": {
-   "punkte": 9080,
+   "punkte": 9216,
    "spitze": 1.084,
    "p90": 1.267,
    "max": 2.914
@@ -206,58 +206,58 @@
  },
  "wolkenart": {
   "klar": {
-   "punkte": 3635,
+   "punkte": 3928,
    "spitze": 1.031,
-   "p90": 1.096,
-   "sonnig_n": 3339,
-   "sonnig_spitze": 1.03,
-   "sonnig_p90": 1.075,
-   "q": 0.962,
-   "dl": 0.985,
+   "p90": 1.093,
+   "sonnig_n": 3628,
+   "sonnig_spitze": 1.029,
+   "sonnig_p90": 1.074,
+   "q": 0.96,
+   "dl": 0.986,
    "sonne": 10.0
   },
   "hoch": {
-   "punkte": 2280,
-   "spitze": 1.042,
-   "p90": 1.132,
-   "sonnig_n": 1786,
-   "sonnig_spitze": 1.038,
-   "sonnig_p90": 1.105,
-   "q": 0.874,
-   "dl": 0.89,
+   "punkte": 2414,
+   "spitze": 1.041,
+   "p90": 1.128,
+   "sonnig_n": 1919,
+   "sonnig_spitze": 1.037,
+   "sonnig_p90": 1.102,
+   "q": 0.878,
+   "dl": 0.894,
    "sonne": 10.0
   },
   "mittel": {
-   "punkte": 4150,
+   "punkte": 4166,
    "spitze": 1.048,
    "p90": 1.159,
-   "sonnig_n": 2084,
+   "sonnig_n": 2096,
    "sonnig_spitze": 1.042,
    "sonnig_p90": 1.137,
    "q": 0.822,
-   "dl": 0.709,
+   "dl": 0.71,
    "sonne": 8.0
   },
   "tief": {
-   "punkte": 12107,
-   "spitze": 1.086,
-   "p90": 1.276,
-   "sonnig_n": 3386,
-   "sonnig_spitze": 1.061,
-   "sonnig_p90": 1.203,
-   "q": 0.647,
-   "dl": 0.532,
+   "punkte": 12416,
+   "spitze": 1.085,
+   "p90": 1.272,
+   "sonnig_n": 3536,
+   "sonnig_spitze": 1.059,
+   "sonnig_p90": 1.2,
+   "q": 0.652,
+   "dl": 0.535,
    "sonne": 1.0
   },
   "gemischt": {
-   "punkte": 1948,
-   "spitze": 1.049,
-   "p90": 1.169,
-   "sonnig_n": 1277,
+   "punkte": 2021,
+   "spitze": 1.047,
+   "p90": 1.167,
+   "sonnig_n": 1336,
    "sonnig_spitze": 1.038,
-   "sonnig_p90": 1.128,
-   "q": 0.873,
-   "dl": 0.88,
+   "sonnig_p90": 1.127,
+   "q": 0.877,
+   "dl": 0.888,
    "sonne": 10.0
   }
  }
