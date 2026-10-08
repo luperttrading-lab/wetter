@@ -35,15 +35,19 @@ PREISE = {
     'claude-opus-4-5':   (5,    25,  0.1),
     'claude-opus-4-1':   (15,   75,  0.1),
     'claude-opus-4':     (15,   75,  0.1),
-    'claude-sonnet-5-5': (2,    10,  0.1),
+    'claude-sonnet-5-5': (2,    10,  0.05),     # Lesefaktor 0,05 (Preisseite 08.10.2026)
     'claude-sonnet-5':   (2,    10,  0.1),
     'claude-sonnet-4-6': (3,    15,  0.1),
     'claude-sonnet-4-5': (3,    15,  0.1),
     'claude-sonnet-4':   (3,    15,  0.1),
+    'claude-haiku-5-5':  (0.10,  0.50, 0.1),    # bis 100.000 Token je Anfrage, s. STAFFEL
     'claude-haiku-4-5':  (1,     5,  0.1),
     'claude-haiku-3-5':  (0.8,   4,  0.1),
 }
 STD = (5, 25, 0.1)                              # Rueckfall fuer unbekannte Modelle: Opus 5
+# Preisstaffel nach Laenge der Anfrage (Eingabe + Cache lesen + Cache schreiben):
+# ueber der Grenze gilt der zweite Preis. Bisher nur Haiku 5.5.
+STAFFEL = {'claude-haiku-5-5': (100_000, (0.50, 2.50, 0.1))}
 # speed="fast": eigener Preis je Modell, Cache-Faktoren gelten darauf.
 # Laengster Praefix wie oben - "claude-opus-5" ist auch Praefix von "claude-opus-5-5".
 FAST = {
@@ -109,12 +113,28 @@ def lies(pfad):
     return treffer, letzte
 
 seen, last_user = lies(f)
+# Unteragenten schreiben ein EIGENES Protokoll neben das Hauptprotokoll:
+#   <sitzung>.jsonl  +  <sitzung>/subagents/agent-<id>.jsonl
+# Ohne diese Dateien fehlen ihre Kosten komplett (geprueft 08.10.2026 mit einem
+# Haiku-Agenten). Nur ihre Antworten zaehlen; ihre "user"-Zeilen sind Auftraege
+# des Haupt-Claude und duerfen die Grenze der laufenden Frage nicht verschieben.
+UNTER = sorted(glob.glob(os.path.join(os.path.splitext(f)[0], 'subagents', '*.jsonl')))
+unter_ids = set()
+for _p in UNTER:
+    _tr, _ = lies(_p)
+    unter_ids.update(_tr); seen.update(_tr)
 
 def preis(model, u):
     """Basispreise fuer diese Nachricht: laengster Praefix, Fast-Mode, Datenresidenz."""
     mo = model or ''
     treffer = [k for k in PREISE if mo.startswith(k)]
     p = PREISE[max(treffer, key=len)] if treffer else STD
+    st = [k for k in STAFFEL if mo.startswith(k)]
+    if st:
+        grenze, teuer = STAFFEL[max(st, key=len)]
+        laenge = ((u.get('input_tokens', 0) or 0) + (u.get('cache_read_input_tokens', 0) or 0)
+                  + (u.get('cache_creation_input_tokens', 0) or 0))
+        if laenge > grenze: p = teuer
     schnell = [k for k in FAST if mo.startswith(k)]
     if u.get('speed') == 'fast' and schnell:
         p = FAST[max(schnell, key=len)]
@@ -150,13 +170,13 @@ def lokal(ts):
 # von heute enthalten und werden gar nicht erst geoeffnet.
 schwelle = jetzt.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
 alle, projekte = {}, set()
-for p in glob.glob(f'{base}/*/*.jsonl'):
+for p in glob.glob(f'{base}/*/*.jsonl') + glob.glob(f'{base}/*/*/subagents/*.jsonl'):
     try:
         if os.path.getmtime(p) < schwelle: continue
     except OSError: continue
     tr, _ = lies(p)
     if any(lokal(ts) == heute_lokal for ts, _, _ in tr.values()):
-        projekte.add(os.path.basename(os.path.dirname(p)))
+        projekte.add(os.path.relpath(p, base).split(os.sep)[0])
     alle.update(tr)                             # message.id ist global eindeutig
 alle.update(seen)                               # eigene Sitzung sicher enthalten
 
@@ -198,6 +218,10 @@ if '-v' in sys.argv:
         days[lokal(ts)] += cost(mo, u); mods[mo] += cost(mo, u)
     print('Tage:   ', {d: round(c, 2) for d, c in sorted(days.items())})
     print('Modelle:', {m: round(c, 2) for m, c in mods.items()})
+    if UNTER:
+        uk = sum(cost(mo, u) for k, (ts, mo, u) in seen.items() if k in unter_ids)
+        print(f'Agenten: {len(UNTER)} Unteragent(en), {len(unter_ids)} Antworten, '
+              f'{uk:.4f} $ - in den Summen oben enthalten')
     print('Suchen: ', sum((u.get('server_tool_use') or {}).get('web_search_requests', 0) or 0
                           for _, _, u in seen.values()))
     stempel = sorted(ts for ts, _, _ in seen.values() if ts)
