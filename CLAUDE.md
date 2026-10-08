@@ -178,6 +178,16 @@ identisch auf sieben Stellen. Als Quelle fuer die Zeile taugt `cost-state` nicht
 wird nur sporadisch geschrieben und zaehlt je Prozess, nach jedem Container-Neustart
 von null.
 
+**Unteragenten** (Stand 08.10.2026, mit einem Haiku-Agenten nachgewiesen) schreiben
+ein EIGENES Protokoll: `<sitzung>.jsonl` und daneben `<sitzung>/subagents/agent-<id>.jsonl`.
+Bis dahin fehlten ihre Kosten in der Zeile vollstaendig. Das Skript liest die Dateien jetzt
+mit; ihre `user`-Zeilen (Auftraege des Haupt-Claude) verschieben die Fragegrenze nicht.
+`-v` nennt Zahl und Kosten der Unteragenten.
+
+**Haiku 5.5** ist nach Laenge der Anfrage gestaffelt: bis 100.000 Token 0,10 / 0,50 $,
+darueber 0,50 / 2,50 $ (`STAFFEL` im Skript). **Sonnet 5.5** liest den Cache seit Oktober
+zu 0,05x (0,10 $/M), am 29.09. stand dort noch 0,1x.
+
 Modell-IDs werden per **laengstem Praefix** aufgeloest, weil im Protokoll oft ein
 Datum anhaengt (`claude-haiku-4-5-20251001`). Ohne das greift der Rueckfall auf
 Opus-Preise und Haiku waere um Faktor 5 zu teuer.
