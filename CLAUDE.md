@@ -409,6 +409,19 @@ braucht 91-108 px, die Drittelkachel hat 78. Die grosse Kachel "Pollenflug"
 unten (`pollenSubBauen`) zeigt ebenfalls zuerst DWD mit Regionsname.
 Im Oktober steht ueberall 0 - die Kachel zeigt dann "keine".
 
+v5.06 (Nutzer, 09.10.: ISS "keiner / in 6 Tagen" unverstaendlich - las sich
+als "keiner in 6 Tagen"): ab 72 h jetzt "ISS / in 6 Tagen / Do ~19:31", ab 7
+Tagen Unterzeile "So 18.10." (mit Uhrzeit brach sie um); gar keiner im
+Rechenfenster "keiner / bis 29.10.". WOLKEN bei Planet und ISS (Nutzer:
+"erkennen, ob die Planeten sichtbar sind oder Wolken"): `kzWolke(t)` nimmt
+`issCloudAt` (Open-Meteo cloud_cover stuendlich, 7 Tage) und die Stufen von
+`issAmpel` (<= 33 klar, <= 66 diesig, darueber bedeckt). Klar: nichts; diesig:
+blasse Wolke hinter dem Wert; bedeckt: dunkle Wolke und der Wert blass
+(`kzBlass`). Hinter dem WERT, nicht der Beschriftung - "ISS MORGEN" fuellt
+die Beschriftung schon (10 px). Planet: Zeit = Erscheinen des Planeten
+("jetzt im" = jetzt); Wolken ausserhalb `kzMerk`, weil sie nach der Rechnung
+kommen. ISS ab 72 h ohne Wolke (Vorhersage zu unsicher).
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
