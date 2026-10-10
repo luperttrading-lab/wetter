@@ -1,16 +1,16 @@
 {
- "stand": "2026-10-08",
+ "stand": "2026-10-09",
  "waechter": {
   "stationen": 33,
   "breite": {
    "steigung": 0.0035,
-   "fehler": 0.0105,
+   "fehler": 0.0106,
    "t": 0.33
   },
   "hoehe": {
-   "steigung": 0.0032,
-   "fehler": 0.0415,
-   "t": 0.08
+   "steigung": 0.0043,
+   "fehler": 0.0416,
+   "t": 0.1
   },
   "mittel": 0.977,
   "reststreuung": 0.102,
@@ -57,16 +57,16 @@
    "bis": "2026-10-06"
   },
   "Chieming": {
-   "faktor": 1.092,
-   "roh": 1.094,
-   "tage": 18,
+   "faktor": 1.094,
+   "roh": 1.096,
+   "tage": 19,
    "vorlaeufig": false,
-   "streuung": 0.048,
-   "klare_tage": 18,
+   "streuung": 0.047,
+   "klare_tage": 19,
    "teiltage": 0,
    "teiltage_verworfen": 1,
    "von": "2026-09-04",
-   "bis": "2026-10-06"
+   "bis": "2026-10-09"
   },
   "Duderstadt_B": {
    "faktor": 0.891,
@@ -117,16 +117,16 @@
    "bis": "2026-10-06"
   },
   "Hohenpeissenberg": {
-   "faktor": 1.069,
-   "roh": 1.07,
-   "tage": 21,
+   "faktor": 1.072,
+   "roh": 1.073,
+   "tage": 22,
    "vorlaeufig": false,
    "streuung": 0.029,
    "klare_tage": 17,
-   "teiltage": 4,
+   "teiltage": 5,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-06"
+   "bis": "2026-10-09"
   },
   "Klippeneck": {
    "faktor": 0.881,
