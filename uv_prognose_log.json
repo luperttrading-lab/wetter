@@ -248,6 +248,12 @@
   }
  },
  "2026-10-11": {
+  "abends": {
+   "mess": 1.99,
+   "mess_zeit": "2026-10-11T10:45:00.000Z",
+   "uhr": "13:28",
+   "version": "v5.06"
+  },
   "morgens": {
    "erw": 1.77,
    "erw_tag": 1.77,
@@ -265,21 +271,30 @@
    "version": "v5.06"
   }
  },
+ "2026-10-12": {
+  "vortag": {
+   "erw": 2.22,
+   "erw_zeit": "2026-10-12T11:00:00.000Z",
+   "klar": 2.53,
+   "uhr": "13:28",
+   "version": "v5.06"
+  }
+ },
  "_auswertung": {
   "hinweis": "unter 10 Tagen nicht belastbar",
   "morgens": {
    "bias": -0.15,
-   "bias_pct": -6.9,
-   "mae": 0.33,
-   "n": 10,
-   "sd": 0.45
+   "bias_pct": -7.3,
+   "mae": 0.32,
+   "n": 11,
+   "sd": 0.43
   },
   "vortag": {
    "bias": -0.17,
-   "bias_pct": -4.7,
-   "mae": 0.39,
-   "n": 10,
-   "sd": 0.42
+   "bias_pct": -5.5,
+   "mae": 0.38,
+   "n": 11,
+   "sd": 0.4
   }
  }
 }
