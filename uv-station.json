@@ -1,18 +1,18 @@
 {
- "stand": "2026-10-09",
+ "stand": "2026-10-10",
  "waechter": {
   "stationen": 33,
   "breite": {
-   "steigung": 0.0035,
+   "steigung": 0.0037,
    "fehler": 0.0106,
-   "t": 0.33
+   "t": 0.35
   },
   "hoehe": {
-   "steigung": 0.0043,
+   "steigung": 0.0045,
    "fehler": 0.0416,
-   "t": 0.1
+   "t": 0.11
   },
-  "mittel": 0.977,
+  "mittel": 0.976,
   "reststreuung": 0.102,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -213,16 +213,16 @@
    "bis": "2026-10-05"
   },
   "Zingst": {
-   "faktor": 0.922,
+   "faktor": 0.921,
    "roh": 0.919,
-   "tage": 14,
+   "tage": 15,
    "vorlaeufig": false,
-   "streuung": 0.035,
+   "streuung": 0.034,
    "klare_tage": 7,
-   "teiltage": 7,
+   "teiltage": 8,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-10-05"
+   "bis": "2026-10-10"
   },
   "Zirchow": {
    "faktor": 1.095,
@@ -232,7 +232,7 @@
    "streuung": 0.032,
    "klare_tage": 6,
    "teiltage": 0,
-   "teiltage_verworfen": 0,
+   "teiltage_verworfen": 1,
    "von": "2026-09-22",
    "bis": "2026-10-05"
   }
