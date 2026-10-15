@@ -1,16 +1,16 @@
 {
- "stand": "2026-10-13",
+ "stand": "2026-10-14",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0062,
+   "steigung": 0.0063,
    "fehler": 0.0096,
-   "t": 0.64
+   "t": 0.66
   },
   "hoehe": {
-   "steigung": 0.0129,
+   "steigung": 0.0133,
    "fehler": 0.0391,
-   "t": 0.33
+   "t": 0.34
   },
   "mittel": 0.974,
   "reststreuung": 0.096,
@@ -23,14 +23,14 @@
   "Belm-Osnabrueck": {
    "faktor": 0.947,
    "roh": 0.945,
-   "tage": 11,
+   "tage": 12,
    "vorlaeufig": false,
-   "streuung": 0.043,
+   "streuung": 0.041,
    "klare_tage": 7,
-   "teiltage": 4,
+   "teiltage": 5,
    "teiltage_verworfen": 0,
    "von": "2026-09-12",
-   "bis": "2026-10-05"
+   "bis": "2026-10-14"
   },
   "Berlin": {
    "faktor": 1.086,
@@ -52,7 +52,7 @@
    "streuung": 0.028,
    "klare_tage": 9,
    "teiltage": 0,
-   "teiltage_verworfen": 4,
+   "teiltage_verworfen": 5,
    "von": "2026-09-06",
    "bis": "2026-10-12"
   },
@@ -88,7 +88,7 @@
    "streuung": 0.037,
    "klare_tage": 3,
    "teiltage": 0,
-   "teiltage_verworfen": 6,
+   "teiltage_verworfen": 7,
    "von": "2026-09-22",
    "bis": "2026-10-12"
   },
@@ -153,28 +153,28 @@
    "bis": "2026-10-12"
   },
   "Lindenberg": {
-   "faktor": 1.119,
-   "roh": 1.123,
-   "tage": 13,
+   "faktor": 1.116,
+   "roh": 1.119,
+   "tage": 14,
    "vorlaeufig": false,
-   "streuung": 0.052,
+   "streuung": 0.051,
    "klare_tage": 10,
-   "teiltage": 3,
+   "teiltage": 4,
    "teiltage_verworfen": 0,
    "von": "2026-09-15",
-   "bis": "2026-10-13"
+   "bis": "2026-10-14"
   },
   "Salzgitter": {
-   "faktor": 0.944,
-   "roh": 0.942,
-   "tage": 16,
+   "faktor": 0.937,
+   "roh": 0.935,
+   "tage": 17,
    "vorlaeufig": false,
-   "streuung": 0.054,
+   "streuung": 0.052,
    "klare_tage": 11,
-   "teiltage": 5,
+   "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-10-06"
+   "bis": "2026-10-14"
   },
   "Schweinfurt_Wasserlosen": {
    "faktor": 0.8,
@@ -184,7 +184,7 @@
    "streuung": 0.125,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 6,
+   "teiltage_verworfen": 7,
    "von": "2026-09-04",
    "bis": "2026-10-06"
   },
