@@ -1,35 +1,35 @@
-Radar-Eichung an den Bodenmessern, 16.10.2026 22:10 UTC
-  Giessen/Wettenberg        0 Paare  (GIESSEN)
-  Frankfurt/Main            0 Paare  (FRANKFURT/M)
-  Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
-  Koeln/Bonn                0 Paare  (KOELN/BONN)
-  Dortmund                  0 Paare  (WALTROP-ABDINGHOF)
-  Muenster/Osnabrueck       2 Paare  (MUENSTER/OSNABR.)
-  Hamburg-Fuhlsbuettel      2 Paare  (HAMBURG-FU.)
-  Bremen                    4 Paare  (BREMEN)
-  Hannover                  1 Paare  (HANNOVER)
-  Berlin-Tegel              0 Paare  (BERLIN-TEGEL)
-  Leipzig/Halle             0 Paare  (LEIPZIG/SCHKEUDITZ)
-  Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
-  Erfurt-Weimar             0 Paare  (ERFURT)
-  Nuernberg                 0 Paare  (NUERNBERG)
-  Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
-  Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
-  Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
-  Trier-Petrisberg          0 Paare  (TRIER)
-  Saarbruecken              0 Paare  (SAARBRUECKEN)
-  Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 9 Paare
+Radar-Eichung an den Bodenmessern, 17.10.2026 06:05 UTC
+  Giessen/Wettenberg        2 Paare  (Neu-Ulrichstein)
+  Frankfurt/Main            0 Paare  (Frankfurt/Main)
+  Kassel                    2 Paare  (Schauenburg-Elgershausen)
+  Koeln/Bonn                4 Paare  (Köln/Bonn)
+  Dortmund                  4 Paare  (Werl)
+  Muenster/Osnabrueck       1 Paare  (Münster/Osnabrück)
+  Hamburg-Fuhlsbuettel      4 Paare  (Hamburg-Fuhlsbüttel)
+  Bremen                    3 Paare  (Bremen)
+  Hannover                  4 Paare  (Hannover)
+  Berlin-Tegel              0 Paare  (Berlin-Tempelhof)
+  Leipzig/Halle             0 Paare  (Leipzig/Halle)
+  Dresden-Klotzsche         0 Paare  (Dresden-Klotzsche)
+  Erfurt-Weimar             0 Paare  (Erfurt-Weimar)
+  Nuernberg                 0 Paare  (Nürnberg)
+  Muenchen-Flughafen        1 Paare  (München-Flughafen)
+  Stuttgart-Echterdingen    0 Paare  (Stuttgart-Echterdingen)
+  Karlsruhe/Rheinstetten    0 Paare  (Rheinstetten)
+  Trier-Petrisberg          4 Paare  (Trier-Petrisberg)
+  Saarbruecken              0 Paare  (Saarbrücken-Ensheim)
+  Freiburg                  1 Paare  (Freiburg)
+gesammelt: 30 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       142    863     2.25      1.25      4.29     0.40 mm     0.21 mm
-leicht       159    179     0.87      0.53      1.27     0.90 mm     1.03 mm
-regen         32     32     0.95      0.54      1.43     3.70 mm     3.83 mm
+niesel       149    885     2.16      1.20      4.00     0.40 mm     0.21 mm
+leicht       165    186     0.88      0.53      1.27     0.90 mm     1.05 mm
+regen         33     33     0.90      0.47      1.40     3.40 mm     3.82 mm
 
-Radar sah nichts, Station mass etwas: 23 von 1097 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 23 von 1127 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      554 Stunden, davon 472 trocken (85 %)
-  Radarsumme 0 1 bis  0 25 203 Stunden, davon 123 trocken (61 %)
-  Radarsumme 0 25 bis  0 5 106 Stunden, davon  28 trocken (26 %)
-  Radarsumme ab 0 5        211 Stunden, davon   8 trocken (4 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 28 Tage, 1097 Paare)
+  Radarsumme bis  0 1      563 Stunden, davon 481 trocken (85 %)
+  Radarsumme 0 1 bis  0 25 211 Stunden, davon 128 trocken (61 %)
+  Radarsumme 0 25 bis  0 5 111 Stunden, davon  28 trocken (25 %)
+  Radarsumme ab 0 5        219 Stunden, davon   8 trocken (4 %)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 29 Tage, 1127 Paare)
