@@ -1,8 +1,8 @@
 {
   "datum": "2026-10-18",
   "summe_mm": 0.0,
-  "stunden_ok": 10,
-  "stunden_erwartet": 11,
+  "stunden_ok": 14,
+  "stunden_erwartet": 15,
   "stunden": [
     {
       "stunde": "01:00",
@@ -46,6 +46,22 @@
     },
     {
       "stunde": "11:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "12:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "13:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "14:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "15:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -134,7 +150,7 @@
     "datum": "2026-10-17",
     "mm": 1.04
   },
-  "aktualisiert": "2026-10-18T09:01:43+00:00",
+  "aktualisiert": "2026-10-18T13:12:12+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -144,8 +160,8 @@
       "lon": 8.6740943,
       "datum": "2026-10-18",
       "summe_mm": 0.0,
-      "stunden_ok": 10,
-      "stunden_erwartet": 11,
+      "stunden_ok": 14,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -189,6 +205,22 @@
         },
         {
           "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -284,9 +316,9 @@
       "lat": 50.5055647,
       "lon": 8.6226918,
       "datum": "2026-10-18",
-      "summe_mm": 0.0,
-      "stunden_ok": 10,
-      "stunden_erwartet": 11,
+      "summe_mm": 0.16,
+      "stunden_ok": 14,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -330,6 +362,22 @@
         },
         {
           "stunde": "11:00",
+          "mm": 0.16
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "15:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -341,7 +389,7 @@
               393,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           },
           {
@@ -349,7 +397,7 @@
               393,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           },
           {
@@ -357,7 +405,7 @@
               393,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           }
         ],
@@ -367,7 +415,7 @@
               392,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           },
           {
@@ -375,7 +423,7 @@
               392,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.1,
             "eigenes": true
           },
           {
@@ -383,7 +431,7 @@
               392,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           }
         ],
@@ -393,7 +441,7 @@
               391,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           },
           {
@@ -401,7 +449,7 @@
               391,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           },
           {
@@ -409,14 +457,14 @@
               391,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.2,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
-        "datum": "2026-10-17",
-        "mm": 1.7
+        "datum": "2026-10-18",
+        "mm": 0.16
       },
       "methode": "bilinear, 50.5056N 8.6227E"
     },
@@ -425,9 +473,9 @@
       "lat": 53.5941,
       "lon": 7.2066,
       "datum": "2026-10-18",
-      "summe_mm": 2.66,
-      "stunden_ok": 10,
-      "stunden_erwartet": 11,
+      "summe_mm": 2.81,
+      "stunden_ok": 14,
+      "stunden_erwartet": 15,
       "stunden": [
         {
           "stunde": "01:00",
@@ -471,6 +519,22 @@
         },
         {
           "stunde": "11:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "12:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "13:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "14:00",
+          "mm": 0.15
+        },
+        {
+          "stunde": "15:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -482,7 +546,7 @@
               755,
               331
             ],
-            "mm": 2.6,
+            "mm": 2.7,
             "eigenes": false
           },
           {
@@ -490,7 +554,7 @@
               755,
               332
             ],
-            "mm": 3.3,
+            "mm": 3.4,
             "eigenes": false
           },
           {
@@ -508,7 +572,7 @@
               754,
               331
             ],
-            "mm": 2.3,
+            "mm": 2.5,
             "eigenes": false
           },
           {
@@ -516,7 +580,7 @@
               754,
               332
             ],
-            "mm": 2.6,
+            "mm": 2.8,
             "eigenes": true
           },
           {
@@ -524,7 +588,7 @@
               754,
               333
             ],
-            "mm": 2.7,
+            "mm": 2.8,
             "eigenes": false
           }
         ],
@@ -534,7 +598,7 @@
               753,
               331
             ],
-            "mm": 2.4,
+            "mm": 2.5,
             "eigenes": false
           },
           {
@@ -542,7 +606,7 @@
               753,
               332
             ],
-            "mm": 3.3,
+            "mm": 3.4,
             "eigenes": false
           },
           {
@@ -550,14 +614,14 @@
               753,
               333
             ],
-            "mm": 2.9,
+            "mm": 3.0,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-10-18",
-        "mm": 2.66
+        "mm": 2.81
       },
       "methode": "bilinear, 53.5941N 7.2066E"
     }
