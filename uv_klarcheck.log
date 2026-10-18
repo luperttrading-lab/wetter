@@ -1,29 +1,27 @@
-UV-Klarhimmel-Pruefung fuer 2026-10-16 (43 Stationen)
+UV-Klarhimmel-Pruefung fuer 2026-10-17 (43 Stationen)
 
 
-=== Modellpruefung 2026-10-16: Messspitze gegen die schwarze Kurve der App ===
+=== Modellpruefung 2026-10-17: Messspitze gegen die schwarze Kurve der App ===
 Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 50 km)
 
 Giessen-Gruppe         Breite Hoehe  Sonne | schwarz   Mess  Verh.
-Gießen                  50.60   203   75 % |    2.18   0.00      -
-Bonn                    50.70    67   94 % |    2.07   2.10   +1 %  klar
-Andernach               50.44    71   99 % |    2.16   2.17   +0 %  klar
-Fichtelberg             50.43  1212   88 % |    2.60   2.06  -21 %
-Kulmbach                50.11   308   70 % |    2.37   2.19   -8 %
-Görlitz                 51.15   212  100 % |    2.20   2.00   -9 %  klar
-Schweinfurt (Wasserlos  50.05   274   59 % |    2.37   0.55  -77 %
-Langen                  49.99   141   76 % |    2.30   2.29   -1 %
-Kassel                  51.31   174    -   |    2.20   1.96  -11 %
-Duderstadt              51.51   185   81 % |    2.16   1.85  -14 %
-Dortmund                51.51    95  100 % |    1.95   1.90   -3 %  klar
-Melpitz                 51.53    86   99 % |    2.14   2.29   +7 %  klar
-
-Klare Stationen der Gruppe heute: 5, Messung/schwarz im Mittel -0.6 %
+Gießen                  50.60   203    9 % |    1.99   0.00      -
+Bonn                    50.70    67   39 % |    1.97   1.91   -3 %
+Andernach               50.44    71   12 % |    2.02   2.00   -1 %
+Fichtelberg             50.43  1212    0 % |    2.04   0.64  -68 %
+Kulmbach                50.11   308    0 % |    1.94   0.69  -64 %
+Görlitz                 51.15   212    8 % |    1.81   1.68   -7 %
+Schweinfurt (Wasserlos  50.05   274    0 % |    2.13   0.21  -90 %
+Langen                  49.99   141    1 % |    2.11   1.56  -26 %
+Kassel                  51.31   174    -   |    2.00   1.55  -23 %
+Duderstadt              51.51   185    0 % |    1.96   0.86  -56 %
+Dortmund                51.51    95   17 % |    1.90   1.78   -6 %
+Melpitz                 51.53    86    0 % |    1.80   0.73  -60 %
 
 Protokoll seit 2026-09-04: 120 klare Stationstage in der Giessen-Gruppe, Messung/schwarz -8.5 % (Streuung 12.7 Pp)
   Giessen selbst an 9 klaren Tagen: +3.5 %
 
-Protokoll: 1640 Stationstage, 550 genommen, 1090 verworfen (uv-station-protokoll.json)
+Protokoll: 1681 Stationstage, 551 genommen, 1130 verworfen (uv-station-protokoll.json)
 uv-station.json: 19 Stationen mit Faktor (von 34 mit Daten)
   Fichtelberg              x0.800  (roh 0.767, 15 Tage = 11 klar + 4 teils, Streuung 0.097)
   Schweinfurt_Wasserlosen  x0.800  (roh 0.696, 12 Tage = 12 klar + 0 teils, Streuung 0.165)
@@ -45,44 +43,31 @@ uv-station.json: 19 Stationen mit Faktor (von 34 mit Daten)
   Bonn                     x0.947  (roh 0.945, 11 Tage = 11 klar + 0 teils, Streuung 0.040)
   Goerlitz                 x0.948  (roh 0.947, 18 Tage = 12 klar + 6 teils, Streuung 0.040)
 
-Waechter (34 Stationen): Breite +0.0067 je Grad (t = +0.7), Hoehe +0.0152 je km (t = +0.4)
+Waechter (34 Stationen): Breite +0.0068 je Grad (t = +0.7), Hoehe +0.0156 je km (t = +0.4)
   kein Trend - die Faktoren messen die Geraete
   ohne Faktor (Abweichung unter 5 %): 15 Stationen
 
-  klar         4711   1.031   1.099    0.958     99%   10.0 | 4263   1.029   1.074
+  klar         4742   1.031   1.100    0.958     99%   10.0 | 4284   1.029   1.075
   hoch         2668   1.040   1.123    0.884     90%   10.0 | 2140   1.037   1.100
-  mittel       5378   1.048   1.151    0.809     70%    7.0 | 2584   1.042   1.132
-  tief        16572   1.087   1.272    0.641     52%    1.0 | 4387   1.059   1.196
+  mittel       5384   1.048   1.150    0.809     70%    7.0 | 2585   1.042   1.132
+  tief        17040   1.088   1.273    0.637     51%    1.0 | 4427   1.059   1.195
   gemischt     2402   1.046   1.161    0.881     89%   10.0 | 1597   1.038   1.125
 
-uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 39 Tage im Log)
+uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 40 Tage im Log)
 Eine Klasse ist leer; die App liest ohnehin nur p_gesamt.
 Station                     DWD Messung Verhaeltnis
-Zingst                     1.45   1.69     1.16  klar
-Sylt (Tinnum)              1.42   1.57     1.11  klar
-Norderney                  1.56   1.63     1.05  klar
-Dortmund                   1.95   1.90     0.98  klar
-Zugspitze (Schneefernerh   3.57   3.46     0.97  klar
-Schauinsland               2.94   2.82     0.96  klar
-Kulmbach                   2.32   2.19     0.94  klar
+Bonn                       1.79   1.91     1.07  klar
+Zugspitze (Schneefernerh   2.95   3.01     1.02  klar
+Dortmund                   1.79   1.78     0.99  klar
+Salzgitter                 1.75   1.36     0.78
+Langen                     2.03   1.56     0.77
+Lindenberg                 1.69   1.27     0.75
+Zingst                     1.38   0.69     0.50
+Melpitz                    1.77   0.73     0.41
+München                    2.36   0.93     0.40
+Berlin                     1.69   0.64     0.38
+Kulmbach                   2.00   0.69     0.35
+Schauinsland               2.64   0.60     0.23
 
-7 von 7 Stationen klar (Schwelle 0.92)
-
-=== KLARER TAG - Auswertung ===
-
-Station                  Breite Messung     DWD    CAMS
-Zugspitze (Schneefernerh  47.42    3.46    3.57    3.20
-Schauinsland              47.91    2.82    2.94    2.85
-Kulmbach                  50.11    2.19    2.32    2.45
-Dortmund                  51.51    1.90    1.95    2.00
-Norderney                 53.71    1.63    1.56    1.70
-Zingst                    54.44    1.69    1.45    1.60
-Sylt (Tinnum)             54.89    1.57    1.42    1.55
-
-Abweichung vom gemessenen Scheitel (7 Stationen):
-  DWD    gegen Messung:   -1.7 % (Streuung 7.7 Pp) | Breite: r=-0.854, -2.14 Pp je Grad
-  CAMS   gegen Messung:   +1.2 % (Streuung 6.6 Pp) | Breite: r=+0.008, +0.02 Pp je Grad
-
-Die Quelle mit der kleineren Abweichung und der flacheren Breitenabhaengigkeit trifft die Realitaet besser.
-
-Rohdaten: uv_klarcheck_2026-10-16.json
+3 von 12 Stationen klar (Schwelle 0.92)
+Zu bewoelkt - keine Auswertung. Morgen erneut pruefen.
