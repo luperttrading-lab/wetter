@@ -1,7 +1,7 @@
 {
  "stand": "2026-10-18",
  "tage": 30,
- "paare": 1283,
+ "paare": 1306,
  "regel": "Faktor = Median(Stationssumme / Radarsumme) je Stunde, Klasse nach der Radarrate, ab 30 Paaren; gezaehlt werden nur Stunden mit mindestens 0.2 mm an der Station - darunter loest die Kippwaage nicht auf und der Quotient waere Quantisierungsrauschen (Feld \"roh\": Paare ohne diese Bedingung)",
  "klassen": {
   "niesel": {
@@ -19,56 +19,56 @@
  },
  "faktor": {
   "niesel": {
-   "paare": 188,
-   "roh": 987,
-   "faktor": 2.3,
+   "paare": 194,
+   "roh": 1005,
+   "faktor": 2.35,
    "q25": 1.2,
    "q75": 4.35,
    "mess_median": 0.4,
    "radar_median": 0.21
   },
   "leicht": {
-   "paare": 202,
-   "roh": 225,
+   "paare": 205,
+   "roh": 229,
    "faktor": 0.92,
    "q25": 0.58,
-   "q75": 1.34,
-   "mess_median": 0.95,
+   "q75": 1.31,
+   "mess_median": 0.9,
    "radar_median": 1.02
   },
   "regen": {
-   "paare": 37,
-   "roh": 37,
+   "paare": 38,
+   "roh": 38,
    "faktor": 0.79,
-   "q25": 0.43,
+   "q25": 0.42,
    "q75": 1.39,
-   "mess_median": 2.9,
-   "radar_median": 3.76
+   "mess_median": 2.85,
+   "radar_median": 3.72
   },
   "_radar_blind": {
    "faelle": 34,
-   "von": 1283,
+   "von": 1306,
    "mm_median": 0.1
   },
   "_boden_trocken": {
    "bis_0_1": {
-    "stunden": 617,
-    "boden_trocken": 523,
-    "anteil": 0.85
+    "stunden": 631,
+    "boden_trocken": 533,
+    "anteil": 0.84
    },
    "0_1_bis_0_25": {
-    "stunden": 239,
-    "boden_trocken": 135,
-    "anteil": 0.56
+    "stunden": 242,
+    "boden_trocken": 137,
+    "anteil": 0.57
    },
    "0_25_bis_0_5": {
-    "stunden": 131,
+    "stunden": 132,
     "boden_trocken": 30,
     "anteil": 0.23
    },
    "ab_0_5": {
-    "stunden": 262,
-    "boden_trocken": 10,
+    "stunden": 267,
+    "boden_trocken": 11,
     "anteil": 0.04
    }
   }
