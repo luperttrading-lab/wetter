@@ -1,16 +1,16 @@
 {
- "stand": "2026-10-17",
+ "stand": "2026-10-18",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0068,
+   "steigung": 0.0067,
    "fehler": 0.0096,
-   "t": 0.71
+   "t": 0.7
   },
   "hoehe": {
-   "steigung": 0.0156,
+   "steigung": 0.0143,
    "fehler": 0.0389,
-   "t": 0.4
+   "t": 0.37
   },
   "mittel": 0.974,
   "reststreuung": 0.096,
