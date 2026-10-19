@@ -385,6 +385,17 @@
    "version": "v5.06"
   }
  },
+ "2026-10-20": {
+  "morgens": {
+   "erw": 1.66,
+   "erw_tag": 1.66,
+   "erw_zeit": "2026-10-20T11:13:55.105Z",
+   "klar": 2.1,
+   "mess": null,
+   "uhr": "01:28",
+   "version": "v5.06"
+  }
+ },
  "_auswertung": {
   "hinweis": "unter 10 Tagen nicht belastbar",
   "morgens": {
