@@ -983,7 +983,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.08</span>
+      <span class="ver">v5.09</span>
     </div>
   </header>
 
@@ -4923,7 +4923,7 @@ const KZ_DEF={
   regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},r(){
     const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time)return null;
     const now=Date.now(),H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0)}))
-      .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000);
+      .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);   // v5.09: 24 Stunden wie der Abschnitt (vorher bis 25 - "~2,1 mm" gegen "~1,7 mm")
     if(!H.length)return null;
     const tot=H.reduce((a,x)=>a+x.mm,0),fr=H.findIndex(x=>x.mm>=0.1);
     if(fr<0)return {l:"Regen 24 h",v:'<span class="ok">Trocken</span>',s:"bis morgen"};
@@ -5330,7 +5330,11 @@ function renderRainHours(d){
   if(H.length<4){sec.classList.add("hidden");return;}
   const TH=0.1,total=H.reduce((s,x)=>s+x.mm,0),peak=Math.max(...H.map(x=>x.mm)),pop=Math.max(...H.map(x=>x.pop||0));
   const f1=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
-  const hLbl=t=>ortsStunde(new Date(t).getTime())+" Uhr";
+  /* v5.09: precipitation ist die Summe der Stunde VOR dem Stempel - der Balken
+     mit Stempel 17 Uhr ist der Regen von 16 bis 17 Uhr. Ueberschrift und Achse
+     nennen deshalb den BEGINN der Stunde (vorher "Regen ab 17 Uhr", die Kachel
+     "Regen 24 h" sagte richtig "ab 16:00"). */
+  const hLbl=t=>ortsStunde(new Date(t).getTime()-36e5)+" Uhr";
   let summary,detail;const fr=H.findIndex(x=>x.mm>=TH);
   if(peak<TH){summary="Trocken";detail=pop>=30?`kein nennenswerter Regen · bis ${pop}% Wahrsch.`:"die nächsten 24 Std kein Regen";}
   else if(fr<=0){summary="Regen aktuell";detail=`~${f1(total)} mm · Spitze ${f1(peak)} mm/h`;}

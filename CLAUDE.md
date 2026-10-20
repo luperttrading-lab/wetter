@@ -476,6 +476,20 @@ vom Nutzer gewaehlt oder zu breit: UV "klar 3,5" / "erw." / "gem."
 ("wolkenlos 3,5" passt nur auf 88 %), Wind "Boeen 35 · S" (Richtung = woher;
 "aus SW" passt dreistellig nicht).
 
+v5.09 (Nutzer-Screenshot 20.10.: Kachel "Regen 24 h" "ab 16:00 ~2,1 mm",
+Abschnitt "Regen ab 17 Uhr ~1,7 mm gesamt"): zwei Fehler. (1) Der Abschnitt
+`renderRainHours` nannte den STEMPEL statt des Stundenbeginns (precipitation =
+Stunde VOR dem Stempel) - jetzt `hLbl` = Stempel - 1 h, auch an der Achse.
+(2) Die Kachel nahm bis zu 25 Stunden (Fenster now-30 min bis now+24,5 h),
+der Abschnitt 24 - jetzt beide `slice(0,24)`. Geprueft mit eingespieltem
+Regen nur im Stempel 17 Uhr: beide "ab 16", beide 0,4 mm.
+VARIANTENSEITE `regentest.html` (Nutzer: Tagesregen mit Stundenbalken 0-24
+Uhr, evtl. morgen): A Drittelkachel nur heute, B Drittelkachel heute <->
+morgen im Wechsel, C doppelt breit mit 48 Balken. Echte Daten (gefallen:
+Bright Sky, nur vergangene Stempel; erwartet: Open-Meteo, Rueckfall MOSMIX)
+oder "Beispiel: Schauertag". Balken 16 px hoch, volle Hoehe ab 1 mm/h,
+dunkelblau gefallen, hellblau erwartet, roter Strich jetzt. Wahl steht aus.
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
