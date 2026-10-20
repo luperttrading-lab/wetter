@@ -1397,3 +1397,14 @@ rotes "Sa So", F ohne Wochenende. Echte Daten (Open-Meteo 16 Tage) oder Beispiel
 Wahl steht aus. Langes Druecken auf eine Kachel ist schon belegt (450 ms =
 Bearbeiten/Sortieren) - eine Vergroesserung per Druecken ginge nur ueber eine
 andere Geste.
+v5.20 (Nutzer, statt der Varianten A-F): ROTER PUNKT unter Samstag und Sonntag
+(`.kzbwp`, 3 px - bei 4 px beruehrten sich Sa und So, Spaltenabstand 4,5 px),
+mittig unter der Spalte per calc((1+i) px + (100% - (n+1) px) * (i+0,5)/n),
+geprueft auf 0,1 px gegen die Spaltenmitten. Kein grauer Hintergrund, kein
+"Sa So" mehr. Saeulen 21 px, darunter 6 px Punktzeile. ERKLAERUNG per Tipp:
+`kzPunktTipp(tile,e)` im Tipp-Zweig von `ende` - landet ein Tipp in der
+untersten ~12 px der SICHTBAREN Grafik, erscheint 2,8 s die Blase `#kzTipp`
+"Roter Punkt = Wochenende (Sa/So)" ueber der Kachel, statt zum Abschnitt zu
+springen; weiter oben springt der Tipp wie immer. Geprueft mit Mausklicks
+(Punktzeile: Blase, kein Sprung; oben: Sprung), nicht am iPhone.
+`wochenendtest.html` bleibt als Archiv.
