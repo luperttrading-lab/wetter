@@ -1388,3 +1388,12 @@ ist breiter als die beiden Spalten (~9 px), steht also mittig darunter.
 UNTEN statt oben (Nutzer schlug oben vor): 9 Folgetage enthalten immer ein
 Wochenende, oben stiesse es jedes Mal an "unsicher". Saeulen dafuer 20 statt
 27 px hoch (8 px Schriftzeile). Geprueft mit Beginn Di/Fr/Sa/So, hell und dunkel.
+v5.19 (Nutzer): "unsicher" in der Grafik entfernt (blass genuegt; die 16-Tage-Liste
+blendet dieselben Tage ab, `.fc-row.far`). VARIANTENSEITE `wochenendtest.html`
+fuer die Markierung des Wochenendes (Nutzer: grau unverstaendlich, Sa/So sehr klein,
+evtl. Rot + Legende): A grau + "Sa So" 7 px (= App), B 6 px, C rot hinterlegt +
+Legende "Sa/So" oben rechts, D roter Strich an der Grundlinie + Legende, E rot +
+rotes "Sa So", F ohne Wochenende. Echte Daten (Open-Meteo 16 Tage) oder Beispiel.
+Wahl steht aus. Langes Druecken auf eine Kachel ist schon belegt (450 ms =
+Bearbeiten/Sortieren) - eine Vergroesserung per Druecken ginge nur ueber eine
+andere Geste.
