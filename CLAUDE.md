@@ -1336,3 +1336,15 @@ Ohne geladene Datei ist `radarBoden()` die Identitaet.
 Oberhalb von 1,17 mm/h gilt flach der Faktor der Klasse "leicht" (0,85).
 Sobald `regen` 30 Paare hat, gehoert ein dritter Anker in `regenRadarLaden()`.
 Der Nieselanker ist mit Standardfehler 0,60 (n=34) ebenfalls noch grob.
+
+## Zuletzt verwendete Orte (v5.14)
+
+Nutzer: "die letzten gesuchten Orte speichern". Im Standort-Dialog unter den
+festen Orten eine Zeile "Zuletzt verwendet:" (`#locZulWrap`, `#locZul`),
+Knoepfe wechseln direkt wie die festen, das x rechts entfernt nur den
+Eintrag. Speicher `locZuletzt` (hoechstens 6, neuester zuerst), geschrieben
+in `saveGo` -> `fertig` per `locZulMerken(neu, LOC)`: der NEUE und der
+VERLASSENE Ort - so ist der vorige Ort immer einen Tipp entfernt, auch wenn
+er vor v5.14 eingestellt wurde. Feste Orte (`LOC_FEST`) und der aktuelle Ort
+erscheinen nicht; gleich = 0,01 Grad. Geprueft (Playwright): New York ->
+Neustadt -> Muenchen, Liste und Wechsel stimmen, x loescht ohne Wechsel.
