@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Regenkachel — Varianten</title>
+<style>
+/* Vergleichsseite (v5.09): drei Formen einer Tagesregen-Kachel mit Stundenbalken.
+   Kacheln im selben Raster und mit denselben Massen wie oben in der App
+   (.kz: drei Spalten, 8 px Abstand; .ki: 8/7/7/8 px Innenabstand). */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
+h1{font-size:20px;margin:4px 0 2px}
+.info{font-size:13px;color:var(--muted);margin:0 0 10px}
+.knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.knoepfe button{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 12px;color:var(--ink)}
+.knoepfe button.an{background:#1e293b;color:#fff;border-color:#1e293b}
+.karte{background:#fffdf9;border:1px solid var(--line);border-radius:18px;padding:12px 12px 14px;margin:14px 0}
+.karte h2{font-size:16px;margin:0 0 2px}
+.karte p{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.kz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k{display:flex;min-width:0}.k>.ki{flex:1 1 auto}
+.k.breit{grid-column:span 2}
+.ki{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;min-width:0;position:relative}
+.l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden}
+.v{font-size:14.5px;letter-spacing:-.01em;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.s{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden}
+.dn{color:#2f86cf}.up{color:#d8472f}
+.attrappe .ki{opacity:.45}
+/* die Balken */
+.bal{position:relative;display:flex;align-items:flex-end;gap:1px;height:16px;margin-top:5px}
+.bal i{flex:1 1 0;min-width:1px;border-radius:1px 1px 0 0;background:#d6dbe2;height:1px}
+.bal i.gem{background:#2f86cf}
+.bal i.erw{background:#9cc7ee}
+.bal .jetzt{position:absolute;top:-2px;bottom:0;width:1.5px;background:#d8472f;border-radius:1px}
+.bal .trenn{position:absolute;top:-2px;bottom:0;width:1px;background:#b8c0cc}
+.halb{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.halb>div{min-width:0}
+.punkte{position:absolute;top:50%;right:2px;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px}
+.punkte b{width:4px;height:4px;border-radius:50%;background:#cfd5dd}.punkte b.an{background:#5c6b80}
+.wechsel .ansicht{transition:opacity .75s}
+.wechsel .ansicht.weg{opacity:0}
+.legende{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.legende span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+.stand{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<h1>Regenkachel mit Stundenbalken</h1>
+<p class="info">Drei Formen zum Vergleichen, im selben Raster wie oben in der App. Die blassen Kacheln daneben sind nur Platzhalter, damit man sieht, wie die Reihe wirkt.</p>
+<div class="knoepfe" id="quelle">
+  <button type="button" data-q="echt" class="an">Echte Daten</button>
+  <button type="button" data-q="bsp">Beispiel: Schauertag</button>
+</div>
+<div class="legende"><span style="--c:#2f86cf">gefallen</span><span style="--c:#9cc7ee">erwartet</span><span style="--c:#d8472f">jetzt</span></div>
+
+<div class="karte">
+  <h2>A · Drittelkachel, nur heute</h2>
+  <p>Text wie jetzt, darunter 24 Balken von 0 bis 24 Uhr.</p>
+  <div class="kz" id="varA"></div>
+</div>
+<div class="karte">
+  <h2>B · Drittelkachel, heute und morgen im Wechsel</h2>
+  <p>Wie A, wechselt alle 4 s auf morgen (in der App auch per Wischen). Darunter beide Ansichten nebeneinander.</p>
+  <div class="kz" id="varB"></div>
+  <div class="kz" id="varB2" style="margin-top:8px"></div>
+</div>
+<div class="karte">
+  <h2>C · Doppelt breit, heute und morgen nebeneinander</h2>
+  <p>48 Balken, Trennstrich um Mitternacht. Braucht den Platz von zwei Kacheln.</p>
+  <div class="kz" id="varC"></div>
+</div>
+<div class="stand" id="stand">lädt …</div>
+
+<script>
+"use strict";
+/* Ort wie in der App: eigener Ort aus "locProfile", sonst Wettenberg
+   (Wetterpunkt 50.6034 / 8.6516 wie LAT/LON im Wettenberg-Profil). */
+let ORT={lat:50.6034,lon:8.6516,name:"Wettenberg"};
+try{const p=JSON.parse(localStorage.getItem("locProfile")||"null");
+  if(p&&isFinite(+p.lat)&&isFinite(+p.lon)&&!p.isWettenberg)ORT={lat:+p.lat,lon:+p.lon,name:p.name||"eigener Ort"};}catch(e){}
+const TZ="Europe/Berlin";
+const f1=v=>(Math.round(v*10)/10).toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});
+const tagStr=ms=>new Date(ms).toLocaleDateString("sv-SE",{timeZone:TZ});              // JJJJ-MM-TT in Ortszeit
+const stdOrt=ms=>+new Date(ms).toLocaleString("en-US",{timeZone:TZ,hour:"numeric",hourCycle:"h23"});
+const wtag=ms=>new Date(ms).toLocaleDateString("de-DE",{weekday:"short",timeZone:TZ}).replace(".","");
+
+/* Daten: je Tag 24 Stunden {mm, gem}. "precipitation" ist die Summe der Stunde
+   VOR dem Stempel - der Wert mit Stempel 17 Uhr gehoert in den Balken 16-17. */
+let TAGE=null,QUELLE="echt";
+async function holen(){
+  const n=Date.now(),heute=tagStr(n),morgen=tagStr(n+864e5),ueber=tagStr(n+2*864e5);
+  const leer=()=>Array.from({length:24},()=>({mm:0,gem:false,da:false}));
+  const T={[heute]:leer(),[morgen]:leer()};
+  const setz=(stempelMs,mm,gem)=>{const b=stempelMs-36e5,d=tagStr(b);if(!T[d])return;const h=stdOrt(b);
+    if(T[d][h].gem&&!gem)return;T[d][h]={mm:Math.max(0,+mm||0),gem,da:true};};
+  /* gefallen: Bright Sky, nur Stunden, die schon vorbei sind */
+  try{const r=await fetch(`https://api.brightsky.dev/weather?lat=${ORT.lat}&lon=${ORT.lon}&date=${heute}&last_date=${ueber}&tz=${TZ}`);
+    const j=await r.json();for(const w of j.weather||[]){const t=new Date(w.timestamp).getTime();
+      if(t<=n&&w.precipitation!=null)setz(t,w.precipitation,true);}}catch(e){}
+  /* erwartet: Open-Meteo stuendlich wie in der App (_rainHourly); Rueckfall MOSMIX */
+  let om=false;
+  try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ORT.lat}&longitude=${ORT.lon}&hourly=precipitation&forecast_days=3&timezone=${encodeURIComponent(TZ)}&timeformat=unixtime`);
+    const j=await r.json();const h=j.hourly;h.time.forEach((t,i)=>{const ms=t*1000;if(ms>n)setz(ms,h.precipitation[i],false);});om=true;}catch(e){}
+  if(!om){try{const r=await fetch(`https://api.brightsky.dev/weather?lat=${ORT.lat}&lon=${ORT.lon}&date=${heute}&last_date=${ueber}&tz=${TZ}`);
+    const j=await r.json();for(const w of j.weather||[]){const t=new Date(w.timestamp).getTime();if(t>n&&w.precipitation!=null)setz(t,w.precipitation,false);}}catch(e){}}
+  return {T,heute,morgen,om};
+}
+/* Beispiel: Schauer am Nachmittag, Landregen in der Nacht zu morgen */
+function beispiel(){
+  const n=Date.now(),heute=tagStr(n),morgen=tagStr(n+864e5),hj=stdOrt(n);
+  const H=[0,0,0,0,0,0,0,.2,.1,0,0,0,0,.6,1.8,.9,0,0,.1,0,.3,.8,1.2,1.5];
+  const M=[1.4,1.1,.9,.6,.3,.1,0,0,0,0,0,0,.2,.4,0,0,0,0,0,0,0,0,0,0];
+  return {T:{[heute]:H.map((mm,h)=>({mm,gem:h<hj,da:true})),[morgen]:M.map(mm=>({mm,gem:false,da:true}))},heute,morgen,om:true};
+}
+
+const SKALA_MIN=1.0;   // mm/h fuer volle Hoehe mindestens - Niesel bleibt flach
+function balken(tage,mitJetzt){
+  const alle=tage.flat(),sk=Math.max(SKALA_MIN,...alle.map(x=>x.mm));
+  const n=Date.now(),hj=stdOrt(n)+new Date(n).getMinutes()/60;
+  let h=alle.map(x=>{if(!(x.mm>=0.1))return `<i${x.gem?' class="gem" style="opacity:.35"':''}></i>`;
+    return `<i class="${x.gem?"gem":"erw"}" style="height:${Math.max(2,Math.round(x.mm/sk*16))}px"></i>`;}).join("");
+  if(tage.length===2)h+=`<span class="trenn" style="left:calc(50% - .5px)"></span>`;
+  if(mitJetzt)h+=`<span class="jetzt" style="left:calc(${(hj/24/tage.length*100).toFixed(2)}% - .75px)"></span>`;
+  return `<div class="bal">${h}</div>`;
+}
+const summe=a=>a.reduce((s,x)=>s+x.mm,0);
+function texteHeute(T){const gef=summe(T.filter(x=>x.gem)),rest=summe(T.filter(x=>!x.gem));
+  return {l:"Tagesregen",v:`${f1(gef)} mm`,s:rest>=0.05?`noch ${f1(rest)} mm`:"gefallen"};}
+function texteMorgen(T,ms){const m=summe(T);return {l:"Regen "+wtag(ms),v:m>=0.05?`~${f1(m)} mm`:"trocken",s:m>=0.05?"erwartet":"kein Regen"};}
+const kachel=(x,bal,extra="",kl="")=>`<div class="k ${kl}"><div class="ki">${extra}<div class="l">${x.l}</div><div class="v">${x.v}</div><div class="s">${x.s}</div>${bal}</div></div>`;
+const attrappe=(l,v,s)=>`<div class="k attrappe"><div class="ki"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
+const AT1=attrappe("Heute",'<span class="dn">6°</span> / <span class="up">11°</span>',"bisher 6–10"),AT2=attrappe("Wind","24 km/h","Böen 35 · S");
+
+let _wTimer=null;
+function zeichnen(D){
+  const H=D.T[D.heute],M=D.T[D.morgen],mMs=Date.now()+864e5,th=texteHeute(H),tm=texteMorgen(M,mMs);
+  document.getElementById("varA").innerHTML=kachel(th,balken([H],true))+AT1+AT2;
+  /* B: echte Wechselkachel (Blende wie in der App) */
+  const pk=i=>`<div class="punkte"><b${i===0?' class="an"':''}></b><b${i===1?' class="an"':''}></b></div>`;
+  document.getElementById("varB").innerHTML=`<div class="k wechsel"><div class="ki" id="bWe">${pk(0)}<div class="ansicht">${inhalt(th,balken([H],true))}</div></div></div>`+AT1+AT2;
+  document.getElementById("varB2").innerHTML=kachel(th,balken([H],true),pk(0))+kachel(tm,balken([M],false),pk(1))+`<div></div>`;
+  clearInterval(_wTimer);let i=0;
+  _wTimer=setInterval(()=>{const k=document.getElementById("bWe");if(!k)return;const a=k.querySelector(".ansicht");a.classList.add("weg");
+    setTimeout(()=>{i=1-i;a.innerHTML=i?inhalt(tm,balken([M],false)):inhalt(th,balken([H],true));k.querySelector(".punkte").outerHTML=pk(i);a.classList.remove("weg");},750);},4000);
+  /* C: doppelt breit */
+  const C=`<div class="k breit"><div class="ki"><div class="halb">
+      <div><div class="l">Regen heute</div><div class="v">${th.v}</div><div class="s">${th.s}</div></div>
+      <div><div class="l">${tm.l}</div><div class="v">${tm.v}</div><div class="s">${tm.s}</div></div>
+    </div>${balken([H,M],true)}</div></div>`;
+  document.getElementById("varC").innerHTML=C+AT2;
+  const st=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
+  document.getElementById("stand").textContent=QUELLE==="bsp"?"Beispieldaten (erfunden) · Uhrzeit von jetzt":
+    `${ORT.name} · Stand ${st} · gefallen: DWD-Station über Bright Sky · erwartet: ${D.om?"Open-Meteo":"MOSMIX über Bright Sky"}`;
+}
+const inhalt=(x,bal)=>`<div class="l">${x.l}</div><div class="v">${x.v}</div><div class="s">${x.s}</div>${bal}`;
+
+async function laden(){
+  if(QUELLE==="bsp"){zeichnen(beispiel());return;}
+  if(!TAGE)TAGE=await holen();
+  zeichnen(TAGE);
+}
+document.getElementById("quelle").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  QUELLE=b.dataset.q;document.querySelectorAll("#quelle button").forEach(x=>x.classList.toggle("an",x===b));laden();});
+laden();
+</script>
+</body>
+</html>
