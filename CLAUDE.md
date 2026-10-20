@@ -1355,3 +1355,9 @@ Liste, Kopf "Zuletzt verwendet – direkt wechseln:", hoechstens 8. Leer: Hinwei
 `#locZulLeer`. Das x fragt nach (`confirm("„Ort“ aus der Liste loeschen?")`).
 Folge fuer Bestandsnutzer: die Liste beginnt leer; ein Ort steht erst drin,
 wenn man ihn einmal uebernommen bzw. von ihm weggewechselt hat.
+v5.16 (Nutzer: "Logikfehler - wir haben gar keinen Ort eingegeben"): Im
+Hauptschritt steht "Uebernehmen" nur, wenn Breite/Laenge/Name vom aktuellen
+Ort abweichen (`apStand()`, bei `schritt("haupt")`, am Ende von `show()` und
+bei jeder Eingabe); sonst nur ein breiter Knopf "Schliessen". Suche, GPS und
+Einfuegen haben ihren eigenen Knopf im Bestaetigungsschritt. Ortsknoepfe
+(`.loc-go`) etwas blauer: hell #dcebf9 / Rand #9fc5ea, dunkel #1d3550 / #3a5f88.

@@ -856,7 +856,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 .loc-zul .loc-btn{flex:1 1 auto;position:relative;padding:11px 26px 11px 10px;white-space:nowrap}
 .loc-x{position:absolute;top:0;right:0;bottom:0;width:26px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;opacity:.5}
 .loc-quick{font-size:11.5px;font-weight:700;color:#5c6b80;margin:13px 0 -2px}
-.loc-go{background:#eaf3fb;border-color:#bcd6ee;color:#1c4b78}
+.loc-go{background:#dcebf9;border-color:#9fc5ea;color:#1c4b78}   /* v5.16: etwas blauer (Nutzer) */
 /* v3.46: Im Bestaetigungsschritt traegt der Ortsname die Aussage — er wird
    groesser gesetzt, die Koordinaten stehen klein darunter. */
 #locConfSub{margin:6px 0 0;font-variant-numeric:tabular-nums}
@@ -914,7 +914,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .loc-box{background:#141a23;color:var(--ink)}
   html.dunkel .loc-box input{background:var(--feld);border-color:var(--feld-line);color:var(--ink)}
   html.dunkel .loc-btn{background:var(--stufe);border-color:var(--line);color:#cfdaea}
-  html.dunkel .loc-go{background:#1b2a3a;border-color:#2e4560;color:#9dc4ea}
+  html.dunkel .loc-go{background:#1d3550;border-color:#3a5f88;color:#a8cdf0}
   html.dunkel .loc-hit{background:var(--card);border-color:var(--line);color:var(--ink)}
   html.dunkel .loc-ovl{background:rgba(4,8,14,.62)}
   html.dunkel .loc-box input.loc-ok{background:#12251a;border-color:#3d9a52;color:#8fe0a8}
@@ -1005,7 +1005,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.15</span>
+      <span class="ver">v5.16</span>
     </div>
   </header>
 
@@ -9848,6 +9848,7 @@ load();
     an("locCoordGrp", m==="haupt");
     an("locActGrp",   m==="haupt");
     an("locBtnGrp",   m==="haupt");
+    if(m==="haupt")apStand();
     an("locConfSub",  m==="conf");
     an("locConfGrp",  m==="conf");
     const b=el("locOverlay").querySelector(".loc-box");
@@ -9855,6 +9856,19 @@ load();
     const h=el("locH");
     if(h)h.textContent=kopf||(m==="suche"?"Ort w\u00e4hlen":m==="conf"?"Ort best\u00e4tigen":"Standort");
   };
+  /* v5.16 (Nutzer: "Logikfehler - wir haben gar keinen Ort eingegeben"):
+     "Uebernehmen" nur, wenn die Felder vom aktuellen Ort abweichen; sonst
+     gibt es nichts zu uebernehmen, und der zweite Knopf heisst "Schliessen".
+     Suche, GPS und eingefuegte Koordinaten haben ihren eigenen Knopf im
+     Bestaetigungsschritt; hier zaehlen Eingaben von Hand und die Rueckkehr
+     aus der Bestaetigung. */
+  function apStand(){
+    const z=id=>parseFloat(String(el(id).value).trim().replace(",","."));
+    const geaendert=!(Math.abs(z("locLat")-LOC.lat)<1e-5&&Math.abs(z("locLon")-LOC.lon)<1e-5)
+      ||_locSan(el("locName").value).trim()!==(LOC.name||"");
+    ap.classList.toggle("hidden",!geaendert);
+    el("locCancel").textContent=geaendert?"Abbrechen":"Schlie\u00dfen";
+  }
   let _locQuelle="";
   const confZeigen=()=>{
     const la=String(el("locLat").value).trim(),lo=String(el("locLon").value).trim();
@@ -9870,7 +9884,7 @@ load();
        Oeffnen zeigen die Felder nur den aktuellen Ort, also muss sie weg —
        sonst blieb sie aus dem vorigen Aufruf stehen. */
     ["locLat","locLon","locName"].forEach(i=>el(i).classList.remove("loc-ok"));
-    msg.textContent="";delete ap.dataset.warned;locZulZeigen();ov.classList.remove("hidden");};
+    msg.textContent="";delete ap.dataset.warned;locZulZeigen();apStand();ov.classList.remove("hidden");};
   /* v5.14: Zuletzt verwendete Orte als Knoepfe, direkt wechseln wie die festen.
      Der aktuelle Ort fehlt (dorthin wechseln ist sinnlos). Das x rechts
      entfernt einen Eintrag nach Rueckfrage (v5.15), ohne zu wechseln. */
@@ -9925,7 +9939,7 @@ load();
     msg.innerHTML='<span class="loc-lauf">'+_locQuelle+' erkannt \u2013 Ortsname wird gesucht \u2026</span>';
     autoName(la,lo);
   }
-  ["locLat","locLon","locName"].forEach(id=>el(id).addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";
+  ["locLat","locLon","locName"].forEach(id=>el(id).addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";apStand();
     el(id).classList.remove("loc-ok");                       // v3.44: von Hand geaendert = nicht mehr automatisch bestaetigt
     if(id!=="locName")locSplit(id,false);}));
   el("locPaste").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste",true);});
