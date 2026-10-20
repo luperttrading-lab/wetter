@@ -300,6 +300,23 @@ dem ersten Abschnitt stehen "Alle auf" / "Alle zu" (`#kAlle`, `klappAlle`),
 beide werden gemerkt. Folge: beim Start wird alles gerechnet und das Radar
 sofort geladen (vorher erst beim Aufklappen).
 
+### Erster Start und Geheimknopf (v5.08)
+
+Nutzer: "beim Start weniger Einblendungen" + Geheimknopf, um das zu sehen.
+NEUE Nutzer finden `KLAPP_ZU_NEU` zugeklappt (umkreis, bilanz, pv, mond,
+planeten, iss, meteore, ereignisse) und die Kacheln `KZ_STD` ohne Pollen.
+BESTANDSNUTZER behalten "alles offen": das erste Script prueft als
+Allererstes, ob schon Eintraege ausser Zwischenspeichern (/cache/i) da sind,
+und setzt dann `klappBestand` (einmalig, Marke `klappStd2`). Wer neue Teile
+hinzufuegt, die nur Kenner brauchen: in `KLAPP_ZU_NEU` eintragen.
+GEHEIMKNOPF: 3 s auf die Versionsnummer (`.ver`) -> `erstStartUmschalten()`
+legt alle Eintraege ausser /cache/i in EINEN Eintrag `erstStartSicherung`,
+loescht sie und laedt neu = Ansicht eines neuen Nutzers, mit dunklem Balken
+unten "So sieht die App beim ersten Start aus" + Knopf "Zurueck zu meinen
+Einstellungen" (oder nochmal 3 s). Zurueck stellt alles exakt wieder her;
+was in der Vorschau eingestellt wurde, verfaellt. Geprueft (Playwright):
+Bestand A -> Vorschau -> zurueck, Eintraege identisch, Cache bleibt.
+
 ### Aufklappen per Kachel (v4.62)
 
 Tippen auf eine Kachel oben klappt ihren Zielabschnitt auf (`sec._setzen(true,
