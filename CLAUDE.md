@@ -525,6 +525,20 @@ halbes Zeichen auf ~73 px Grafik), auf der Seite des Wochentags (rechts, ab
 09:00/14:00/20:30/23:30/03:00/06:30. Wochentag aus dem exakten Zeitpunkt
 (`mnMs`), nicht aus Prozent zurueckgerechnet (23:59:59 ergaebe den Vortag).
 
+v5.13 (Nutzer, 20.10. 16:04: Kachel "Regen in 5 min", Abschnitt "Regen ab 18
+Uhr" - "nicht konsistent"): Radar und Modell wurden nie abgeglichen. Jetzt
+`regenIntervall(a,b,mmStd)`: Teil von [a,b), den der Nowcast abdeckt
+(`regenRadarTeil`, Schritt i = [t_i, t_i+5 min), nass ab roher Schwelle TH,
+Menge = geeichte Bodenrate), Rest anteilig aus dem Modell. Gilt fuer
+`kzRegen24H` (Kachel/Balken), `renderRainHours` (Abschnitt, Zusatz "erste 2 Std
+aus dem Radar"), `bilanzRest` ("bis 24 Uhr") und `kzRegenDanach` (Zusatz der
+Kachel "Regen"). `_kz.nowcast.zeit` neu; nach jedem Nowcast zeichnet
+`renderRainHours(_rainHrD)` neu. Dabei behoben: `bilanzRest` behandelte den
+Stempel als STUNDENBEGINN (precipitation = Stunde VOR dem Stempel) - die
+laufende Stunde fehlte, 23-24 Uhr ebenso. Geprueft: Modell Regen ab 17 Uhr,
+Radar 16:10-16:40 leicht und danach trocken -> Abschnitt "ab 16 Uhr", 17-18
+Uhr trocken, "bis 24 Uhr" = 24 h = 1,1 mm, Zusatz "ab 18:00".
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
