@@ -516,6 +516,15 @@ fuer beide Kacheln. MESSUNG statt Mockup: "Regen heute" 89 px und
 "24 h · ~2,6 mm" 99 px passen NICHT in 78 px - das Mockup war rund 7 px
 breiter als die App. "Bis 24 Uhr" 73 px, "24 h 2,6 mm" 81 px (auf 88 %).
 
+v5.12 (Nutzer, Variante D aus `nachttest.html`; Sonne = TAGESLICHT, nicht
+Sonnenschein): Stundenbalken mit Tag hellgelb (`.kzbd`) und Nacht blaugrau
+(`.kzbn`), dazu `KZ_SONNE` / `KZ_MOND` in der Mitte jedes Abschnitts ab 14 %
+Breite (`.kzbs`). Sperrzone um den Mitternachtsstrich 28 % (Wochentag ~15 px +
+halbes Zeichen auf ~73 px Grafik), auf der Seite des Wochentags (rechts, ab
+78 % links vom Strich); bei 14 % stand der Mond noch direkt am "Mi". Geprueft
+09:00/14:00/20:30/23:30/03:00/06:30. Wochentag aus dem exakten Zeitpunkt
+(`mnMs`), nicht aus Prozent zurueckgerechnet (23:59:59 ergaebe den Vortag).
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
