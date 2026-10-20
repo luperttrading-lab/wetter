@@ -148,6 +148,9 @@ html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 .kz .k{position:relative;min-width:0;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;cursor:pointer}
 .kz .k{display:flex}.kz .k>.ki{flex:1 1 auto}   /* v4.65: Kacheln einer Reihe gleich hoch, wenn eine umbricht */
 .kz .ki{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;min-width:0}   /* v4.67: 3 px mehr Textbreite */
+#erstStartBalken{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;
+  background:#1e293b;color:#fff;font-size:13.5px;line-height:1.3;padding:10px 12px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#erstStartBalken button{font:inherit;font-weight:700;background:#fff;color:#1e293b;border:0;border-radius:10px;padding:7px 11px}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
 .kz .ki .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -919,6 +922,19 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 </head>
 <body>
 <script>
+/* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
+   die Wetterabschnitte, Himmel/ISS/PV & Co. sind zu (KLAPP_ZU_NEU). Wer die
+   App schon benutzt, behaelt die bisherige Voreinstellung (alles offen) -
+   erkannt hier, als ALLERERSTES, bevor irgendein anderer Teil etwas
+   speichert: gibt es schon Eintraege ausser Zwischenspeichern, ist es ein
+   Bestandsnutzer ("klappBestand"). Die Erststart-Vorschau (3 s auf die
+   Versionsnummer) raeumt alles ausser der Sicherung weg und gilt damit als neu. */
+(function(){try{
+  if(localStorage.getItem("klappStd2"))return;
+  var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!/cache/i.test(k)&&k!=="erstStartSicherung")n++;}
+  if(n>0)localStorage.setItem("klappBestand","1");
+  localStorage.setItem("klappStd2","1");
+}catch(e){}})();
 /* v3.51: Ansicht festlegen, BEVOR der Browser zeichnet — sonst blitzt beim
    Start die falsche Ansicht auf. Drei Zustaende: "auto" folgt der SONNE am
    angezeigten Ort (nicht der Systemeinstellung: eine Wetteransicht soll hell
@@ -967,7 +983,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.07</span>
+      <span class="ver">v5.08</span>
     </div>
   </header>
 
@@ -4243,6 +4259,8 @@ const KLAPP_NACH={
 };
 function klappZu(id){const e=el(id);return !!(e&&e.classList.contains("kzu"));}
 
+/* v5.08: fuer NEUE Nutzer zu - alles, was nicht unmittelbar Wetter ist */
+const KLAPP_ZU_NEU=new Set(["umkreis","bilanz","pv","mond","planeten","iss","meteore","ereignisse"]);
 function klappBauen(){
   KLAPP_ABS.forEach(([id,key])=>{
     const sec=el(id); if(!sec||sec._klapp)return;
@@ -4297,12 +4315,39 @@ function klappBauen(){
     sec._doppelWeg=doppelWeg;
     /* v4.85 (Nutzer): wieder OFFEN als Voreinstellung. Zu bleibt nur, was
        jemand von Hand zugeklappt hat ("0") - dafuer oben "Alle auf / Alle zu". */
-    let auf=true; try{ if(localStorage.getItem("klapp_"+key)==="0")auf=false; }catch(e){}
+    let auf=true; try{ const g=localStorage.getItem("klapp_"+key);
+      if(g==="0")auf=false; else if(g==null&&!localStorage.getItem("klappBestand")&&KLAPP_ZU_NEU.has(key))auf=false; }catch(e){}   // v5.08
     setzen(auf,false);
     sec._setzen=setzen;   // v4.62: fuer das Aufklappen per Kachel
     zeile.addEventListener("click",()=>{sec._autoAuf=false;setzen(sec.classList.contains("kzu"),true);});   // von Hand: bleibt, wie es ist
   });
 }
+/* v5.08 (Nutzer): GEHEIMKNOPF - 3 s auf die Versionsnummer druecken zeigt die
+   App, wie ein neuer Nutzer sie beim ersten Start sieht; nochmal 3 s (oder
+   "Zurueck" im Balken) stellt die eigenen Einstellungen wieder her. Dafuer
+   werden alle Eintraege ausser Zwischenspeichern (/cache/i) in EINEN
+   Eintrag "erstStartSicherung" gelegt und entfernt. Was man in der Vorschau
+   einstellt, verfaellt beim Zurueckschalten. */
+function erstStartUmschalten(){try{
+  const B="erstStartSicherung",alt=localStorage.getItem(B),eig=[];
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!/cache/i.test(k))eig.push(k);}
+  if(alt==null){const o={};eig.forEach(k=>{o[k]=localStorage.getItem(k);});const j=JSON.stringify(o);
+    eig.forEach(k=>localStorage.removeItem(k));localStorage.setItem(B,j);}
+  else{const o=JSON.parse(alt);eig.forEach(k=>localStorage.removeItem(k));Object.keys(o).forEach(k=>localStorage.setItem(k,o[k]));}
+  location.reload();
+}catch(e){alert("Umschalten ging nicht: "+e.message);}}
+(function(){
+  const v=document.querySelector(".ver");if(!v)return;let t=null;
+  v.style.cssText+=";-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none;cursor:default";
+  v.addEventListener("pointerdown",()=>{clearTimeout(t);t=setTimeout(erstStartUmschalten,3000);});
+  ["pointerup","pointercancel","pointerleave"].forEach(n=>v.addEventListener(n,()=>clearTimeout(t)));
+  v.addEventListener("contextmenu",e=>e.preventDefault());
+  let vs=false;try{vs=localStorage.getItem("erstStartSicherung")!=null;}catch(e){}
+  if(!vs)return;
+  const b=document.createElement("div");b.id="erstStartBalken";
+  b.innerHTML='<span>So sieht die App beim <b>ersten Start</b> aus.</span><button type="button">Zurück zu meinen Einstellungen</button>';
+  b.querySelector("button").onclick=erstStartUmschalten;document.body.appendChild(b);
+})();
 function klappAlle(auf){KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec._setzen){sec._autoAuf=false;
   if(sec.classList.contains("kzu")===auf)sec._setzen(auf,true);else{try{localStorage.setItem("klapp_"+KLAPP_ABS.find(a=>a[0]===id)[1],auf?"1":"0");}catch(e){}}}});}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#kAlle button");if(b)klappAlle(b.dataset.a==="1");});
@@ -4435,8 +4480,9 @@ function pollenLaden(){
 pollenLaden();setInterval(pollenLaden,3*36e5);
 const KZ_STD=["heute","regen","regenHeute","morgen","wind","sonne"];
 let _kzWahl=(()=>{try{const a=JSON.parse(localStorage.getItem("kzWahl")||"null");if(Array.isArray(a))return a;}catch(e){}return KZ_STD.slice();})();
-/* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl */
-try{if(!localStorage.getItem("kzPollenNeu")){if(!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
+/* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl.
+   v5.08: nur bei GESPEICHERTER Auswahl - Neue bekommen KZ_STD ohne Pollen */
+try{if(!localStorage.getItem("kzPollenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
 let _kzEdit=false,_kzDrag=null,_kzTimer=null,_kzP0=null,_kzMoved=0,_kzRegAuf=false;
 const kzF1=v=>(v==null||isNaN(v))?"–":(Math.abs(v)<10?fmt1(v):String(Math.round(v)));
 const kzR0=v=>(v==null||isNaN(v))?"–":String(Math.round(v));
