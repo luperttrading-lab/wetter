@@ -1408,3 +1408,17 @@ untersten ~12 px der SICHTBAREN Grafik, erscheint 2,8 s die Blase `#kzTipp`
 springen; weiter oben springt der Tipp wie immer. Geprueft mit Mausklicks
 (Punktzeile: Blase, kein Sprung; oben: Sprung), nicht am iPhone.
 `wochenendtest.html` bleibt als Archiv.
+v5.21 (Nutzer: "Punkte kaum zu sehen und kaum zu druecken - auf Druck die Kachel
+groesser machen"): GROSSANSICHT. Eine Kachel darf `gross()` liefern (HTML); dann
+oeffnet ein Tipp `kzGrossZeigen(html,ziel)` statt zu springen - Fenster im Stil
+des Standort-Dialogs (`loc-ovl`/`loc-box`), Knoepfe "Vorhersage" (springt zu
+`ziel`) und "Schliessen", Tipp daneben oder Esc schliesst. Klicks auf den
+Hintergrund in den ersten 450 ms zaehlen nicht (iOS schickt den Klick des
+oeffnenden Tipps erst nach pointerup). Bisher nur `regen7`: `kzTageGross(W)`,
+16 Spalten (~17 px) mit mm-Wert, Wochentag (Sa/So rot), Datum; Kopf "7 Tage |
+unsicher"; Summen 7 Tage und Tag 8-16; Skala volle Hoehe = max(10 mm, Hoechstwert).
+Ziel der Kachel jetzt `fcSec` (16-Tage-Liste) statt `bilanzSec`. In der Kachel
+statt zweier 3-px-Punkte EIN roter Strich je Wochenende (`.kzbwp`, 3 px hoch,
+von Spaltenbeginn a bis Spaltenende b - auf 0,1 px gegen die Spalten geprueft).
+`kzPunktTipp` und `#kzTipp` sind entfernt. Kandidat fuer dieselbe Grossansicht:
+die 24-h-Stundenbalken von `regenHeute`.

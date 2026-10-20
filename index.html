@@ -178,11 +178,29 @@ html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
 /* v5.17: Tagessaeulen der Kachel "7 Tage" - je Tag eine Spalte, Wochenende
    leicht hinterlegt, ab Tag 8 blass (unsichere Vorhersage) mit Trennstrich */
 .kz .kzbal .kzbw b{flex:1 1 0;min-width:1px;height:100%;display:flex;align-items:flex-end;padding-bottom:6px;box-sizing:border-box}   /* v5.20: unten 6 px fuer die roten Punkte */
-.kz .kzbal .kzbwp{position:absolute;bottom:1px;width:3px;height:3px;margin-left:-1.5px;border-radius:50%;background:#d93a3a;z-index:1}   /* v5.20: Wochenende */
+.kz .kzbal .kzbwp{position:absolute;bottom:1px;height:3px;border-radius:1.5px;background:#d93a3a;z-index:1}   /* v5.21: ein roter Strich je Wochenende (v5.20: zwei 3-px-Punkte, kaum zu sehen) */
 html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
-#kzTipp{position:fixed;z-index:500;max-width:calc(100vw - 16px);padding:6px 10px;border-radius:9px;background:rgba(23,32,46,.94);color:#fff;font:600 12.5px/1.3 -apple-system,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
-#kzTipp.an{opacity:1}
-#kzTipp i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff6b6b;margin-right:5px;vertical-align:1px}
+/* v5.21: Grossansicht der 16-Tage-Grafik (Tipp auf die Kachel) */
+.kzg-titel{font-size:17px;font-weight:800;margin:0 0 3px}
+.kzg-sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+.kzg-kopf{display:grid;grid-template-columns:7fr 9fr;gap:2px;font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:2px}
+.kzg-kopf span:last-child{opacity:.7;border-left:1.5px solid rgba(40,56,90,.3);padding-left:4px}
+.kzg-ch{display:grid;gap:2px;align-items:end}
+.kzg-c{display:flex;flex-direction:column;align-items:center;min-width:0}
+.kzg-w{font-size:8.5px;font-weight:700;color:var(--muted);height:12px;line-height:12px;white-space:nowrap;letter-spacing:-.02em}
+.kzg-a{height:110px;width:100%;display:flex;align-items:flex-end}
+.kzg-a i{width:100%;background:#3a8fd8;border-radius:2px 2px 0 0}
+.kzg-a i.tr{height:1px;background:rgba(92,107,128,.35)}
+.kzg-c.un .kzg-a i,.kzg-c.un .kzg-w{opacity:.45}
+.kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(40,56,90,.3)}
+.kzg-t{font-size:10.5px;font-weight:800;margin-top:4px;line-height:1.1}
+.kzg-c.we .kzg-t{color:#d33a3a}
+.kzg-d{font-size:9px;color:var(--muted);line-height:1.3}
+.kzg-leg{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
+.kzg-leg b{color:#d33a3a}
+html.dunkel .kzg-c.we .kzg-t,html.dunkel .kzg-leg b{color:#ff8080}
+html.dunkel .kzg-c.ab .kzg-a,html.dunkel .kzg-kopf span:last-child{border-color:rgba(255,255,255,.3)}
+html.dunkel .kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(255,255,255,.3)}
 .kz .kzbal .kzbw b>i{flex:1 1 auto}
 .kz .kzbal .kzbw b.un>i{opacity:.4}
 .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(40,56,90,.45)}
@@ -1022,7 +1040,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.20</span>
+      <span class="ver">v5.21</span>
     </div>
   </header>
 
@@ -4603,35 +4621,56 @@ function kzRegenGrafik(H){
    die Folgetage sind nur ein Ausblick. Volle Hoehe ab 10 mm am Tag (feste
    Skala, damit ein nasser Tag die anderen nicht flach drueckt); darueber
    gedeckelt. */
-/* v5.20: Tipp auf die Punktzeile der 16-Tage-Grafik (unterste ~12 px, nur wenn
-   die Grafik gerade sichtbar ist) erklaert den roten Punkt, statt zu springen. */
-function kzPunktTipp(tile,e){
-  const bal=[...tile.querySelectorAll(".kzbal")].find(b=>b.querySelector(".kzbwp")&&!b.closest(".kzwe>span:not(.an)"));if(!bal)return false;
-  const r=bal.getBoundingClientRect();if(e.clientY<r.bottom-12||e.clientY>r.bottom+9||e.clientX<r.left-6||e.clientX>r.right+6)return false;
-  let t=el("kzTipp");if(!t){t=document.createElement("div");t.id="kzTipp";document.body.appendChild(t);}
-  t.innerHTML='<i></i>Roter Punkt = Wochenende (Sa/So)';t.style.left="0px";t.style.top="0px";
-  const w=t.offsetWidth,h=t.offsetHeight;
-  t.style.left=Math.max(8,Math.min(innerWidth-w-8,e.clientX-w/2))+"px";t.style.top=Math.max(8,r.top-h-6)+"px";
-  t.classList.add("an");clearTimeout(t._z);t._z=setTimeout(()=>t.classList.remove("an"),2800);
+/* v5.21 (Nutzer: "Punkte kaum zu sehen und kaum zu druecken - auf Druck die
+   Kachel groesser machen"): Tipp auf die Kachel oeffnet eine Grossansicht
+   (kzGrossZeigen) mit Wochentagen, Datum, Millimetern und Legende; von dort
+   geht es zur 16-Tage-Vorhersage. In der Kachel ein roter STRICH je
+   Wochenende statt zweier 3-px-Punkte. */
+const KZ_WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+function kzTageGross(T){
+  const n=T.length,sk=Math.max(10,...T.map(x=>+x.mm||0)),f=v=>v<0.1?"":v<10?kzF1(v):String(Math.round(v));
+  const s7=T.slice(0,7).reduce((a,x)=>a+(+x.mm||0),0),r7=T.slice(0,7).filter(x=>(+x.mm||0)>=0.5).length,s9=T.slice(7).reduce((a,x)=>a+(+x.mm||0),0);
+  const cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
+    const kl=["kzg-c",(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
+    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(mm/sk*110))}px"></i>`:`<i class="tr"></i>`;
+    return `<div class="${kl}"><div class="kzg-w">${f(mm)}</div><div class="kzg-a">${bar}</div><div class="kzg-t">${KZ_WT[wd]}</div><div class="kzg-d">${+x.t.slice(8,10)}.</div></div>`;}).join("");
+  return `<div class="kzg-titel">Regen \u00b7 ${n} Tage</div>
+    <div class="kzg-sub">N\u00e4chste 7 Tage ${kzF1(s7)} mm${r7?` \u00b7 ${r7} ${r7===1?"Regentag":"Regentage"}`:""}${n>7?`<br>Tag 8\u2013${n}: ${kzF1(s9)} mm (unsicher)`:""}</div>
+    ${n>7?`<div class="kzg-kopf" style="grid-template-columns:7fr ${n-7}fr"><span>7 Tage</span><span>unsicher</span></div>`:""}
+    <div class="kzg-ch" style="grid-template-columns:repeat(${n},1fr)">${cols}</div>
+    <div class="kzg-leg"><b>Rot</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Zahlen in mm${sk>10?"":" \u00b7 volle H\u00f6he 10 mm"}</div>`;
+}
+function kzGrossZeigen(html,ziel){
+  let ov=el("kzGrossOv");
+  if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
+    ov.innerHTML='<div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn" id="kzGrossZiel">Vorhersage</button><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>';
+    document.body.appendChild(ov);
+    const zu=()=>ov.classList.add("hidden");
+    // iOS schickt den Klick zum oeffnenden Tipp erst NACH pointerup - dann laege er auf dem Hintergrund
+    ov.addEventListener("click",e=>{if(e.target===ov&&Date.now()-ov._auf>450)zu();});
+    el("kzGrossZu").onclick=zu;
+    el("kzGrossZiel").onclick=()=>{zu();if(ov._ziel)kzSpring(ov._ziel);};
+    document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
+  el("kzGrossIn").innerHTML=html;ov._ziel=ziel;ov._auf=Date.now();ov.classList.remove("hidden");
   return true;
 }
 function kzTageGrafik(T){
   /* Wochenende: v5.17 grau hinterlegt (Nutzer: "verstehe ich nicht"), v5.18 dazu
-     "Sa So" in 7 px (zu klein), v5.19 Variantenseite wochenendtest.html. v5.20
-     (Nutzer): ein ROTER PUNKT unter Samstag und Sonntag; Tippen auf die
-     Punktzeile erklaert ihn (kzPunktTipp), statt zum Abschnitt zu springen.
-     Saeulen 21 px, darunter 6 px fuer die Punkte. */
+     "Sa So" in 7 px (zu klein), v5.19 Variantenseite wochenendtest.html, v5.20
+     rote 3-px-Punkte (kaum zu sehen), v5.21 ein roter Strich je Wochenende,
+     erklaert in der Grossansicht (kzTageGross). Saeulen 21 px, darunter 6 px. */
   const n=T.length,H=21,cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
     const kl=[(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
     const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*H))}px"></i>`:`<i class="tr"></i>`;
     return `<b${kl?` class="${kl}"`:""}>${bar}</b>`;}).join("");
   /* v5.19 (Nutzer): kein "unsicher" mehr - blass genuegt, die 16-Tage-Liste
      unten blendet dieselben Tage ebenfalls ab (.fc-row.far) */
-  /* Punkt mittig unter Spalte i: Innenbreite 100% - 2 px Rand, n Spalten mit
-     1 px Abstand -> Spaltenbreite (100% - (n+1) px)/n, Mitte bei
-     (1+i) px + Spaltenbreite*(i+0,5) */
-  const pk=T.map((x,i)=>{const d=new Date(x.t+"T12:00").getDay();if(d!==0&&d!==6)return "";
-    return `<i class="kzbwp" style="left:calc(${1+i}px + (100% - ${n+1}px) * ${((i+.5)/n).toFixed(4)})"></i>`;}).join("");
+  /* Strich unter Spalten a..b: Innenbreite 100% - 2 px Rand, n Spalten mit 1 px
+     Abstand -> Spaltenbreite c = (100% - (n+1) px)/n; Spalte i beginnt bei
+     (1+i) px + c*i. Strich von Beginn a bis Ende b = (b-a) px + c*(b-a+1). */
+  const wd=T.map(x=>new Date(x.t+"T12:00").getDay()),gr=[];
+  wd.forEach((d,i)=>{if(d!==0&&d!==6)return;const g=gr[gr.length-1];if(g&&g[1]===i-1)g[1]=i;else gr.push([i,i]);});
+  const c=`(100% - ${n+1}px)`,pk=gr.map(([a,b])=>`<i class="kzbwp" style="left:calc(${1+a}px + ${c} * ${(a/n).toFixed(4)});width:calc(${b-a}px + ${c} * ${((b-a+1)/n).toFixed(4)})"></i>`).join("");
   return `&nbsp;<span class="kzbal"><span class="kzbb kzbw">${cols}</span>${pk}</span>`;
 }
 const KZ_SONNE='<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="#e0a100"/><g stroke="#e0a100" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>';
@@ -5090,7 +5129,9 @@ const KZ_DEF={
     const gr={v:kzRegenGrafik(H),s:""};
     return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`},gr]}
                  :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
-  regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"bilanzSec",alt:"fcSec"},r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
+  regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"fcSec"},
+    gross(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const W=T.filter(x=>x.t>=ymd(new Date())).slice(0,16);return W.length?kzTageGross(W):null;},
+    r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
     const w=T.filter(x=>x.t>=h).slice(0,7);if(!w.length)return null;const sum=w.reduce((a,x)=>a+(+x.mm||0),0),n=w.filter(x=>(+x.mm||0)>=0.5).length;
     const a={l:"7 Tage",v:`${kzF1(sum)} mm`,s:n?`${n} ${n===1?"Regentag":"Regentage"}`:"trocken"};
     /* v5.17 (Nutzer): zweite Ansicht Saeulen je Tag statt der Wochentage; dazu
@@ -5288,7 +5329,10 @@ function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;
     if(!_kzEdit&&_kzP0&&_kzP0.id&&e.type==="pointerup"){   // v4.83: Wisch waagrecht (>= 28 px, deutlich mehr als senkrecht); gemeint ist die Kachel, auf der der Finger AUFSETZTE
       const dx=e.clientX-_kzP0.x,dy=e.clientY-_kzP0.y,t0=box.querySelector(`.k[data-id="${_kzP0.id}"]`);
       if(t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
-    if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){if(kzPunktTipp(tile,e)){_kzP0=null;return;}const d=KZ_DEF[tile.dataset.id];if(d)kzSpring(d.ziel);}
+    if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){const d=KZ_DEF[tile.dataset.id];
+      let g=null;try{g=d&&d.gross?d.gross():null;}catch(x){}   // v5.21: Kacheln mit Grossansicht oeffnen sie statt zu springen
+      if(g){kzGrossZeigen(g,d.ziel);_kzP0=null;return;}
+      if(d)kzSpring(d.ziel);}
     _kzP0=null;};
   document.addEventListener("pointerup",ende);
   document.addEventListener("pointercancel",ende);
