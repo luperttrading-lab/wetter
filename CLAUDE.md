@@ -70,6 +70,14 @@ ONLINE liegt, nicht die geladene.
 
 - RADOLAN, BfS-Achse, BfS-Stationen: Actions committen ihre JSON-Dateien
   auf `main` (kleine Dateien, seltene Laeufe).
+- **GitHub-Zeitplaene sind unzuverlaessig** (gemessen: solar10 03.09. 2 von 68
+  Terminen; RADOLAN 19./20.10. 6 von 48; UV-Prognose 3-5 h zu spaet). Was
+  regelmaessig laufen MUSS, laeuft als SCHLEIFE in einem Job (5,5 h) und
+  startet am Ende seinen Nachfolger per workflow_dispatch (`actions: write`,
+  concurrency mit cancel-in-progress, Nachfolger nur bei success): so
+  `solar10.yml` (seit 05.09.) und `radolan.yml` (seit 20.10., Abruf :07/:37,
+  Rueckfall-Cron alle 4 h). Laeufe, die nur einmal am Tag zaehlen, pruefen
+  stattdessen ihr Zeitfenster selbst (`uv_prognose.py`).
 - **Solar 10-Minuten** (`solar10.py`, alle 15 min, ~60 Stationen): schreibt
   nach Branch `daten` **ohne Historie** (jeder Lauf ersetzt den einzigen
   Commit per force-push). Die App liest

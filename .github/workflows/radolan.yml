@@ -1,19 +1,36 @@
 name: RADOLAN Tagesregen
 
+# Warum eine Schleife statt eines Zeitplans (20.10.2026): angemeldet war
+# "5,35 * * * *", also 48 Laeufe am Tag. Gelaufen sind am 19./20.10. sechs
+# (11:11, 17:43, 22:16, 01:12, 06:31, 12:04 UTC) - GitHub fuehrt "schedule"
+# nur nach bestem Bemuehen aus und verwirft Termine bei Last. Die App zeigte
+# deshalb meist "Radardaten fehlen · letzter Stand vor 2 h" und in der
+# Regenbilanz 0 mm, obwohl RADOLAN 0,4 mm hatte.
+#
+# Jetzt wie solar10.yml: EIN Lauf holt selbst alle 30 Minuten (um :07 und :37,
+# RW hat rund 30 min Latenz) und haelt 5,5 Stunden durch; am Ende startet er
+# seinen Nachfolger per workflow_dispatch (mit GITHUB_TOKEN erlaubt). Der
+# Zeitplan bleibt nur als Rueckfall, falls die Kette reisst; die
+# concurrency-Gruppe sorgt dafuer, dass nie zwei Sammler nebeneinander laufen.
+# Ein Abruf dauert rund 20 s. Das Repo ist oeffentlich, Laufzeit kostet nichts.
+
 on:
   schedule:
-    # zweimal pro Stunde (UTC), um die GitHub-Drosselung geplanter Jobs abzufedern:
-    # faellt ein Lauf aus, greift der andere. :35 holt die eben beendete Stunde
-    # (RW hat ~30 min Latenz), :05 ist der Nachzuegler-Versuch der Vorstunde.
-    - cron: "5,35 * * * *"
-  workflow_dispatch:           # erlaubt manuelles Ausloesen zum Testen
+    - cron: "17 */4 * * *"     # Rueckfall alle 4 h, falls die Kette reisst
+  workflow_dispatch:           # Kette und Handstart
+
+concurrency:
+  group: radolan
+  cancel-in-progress: true
 
 permissions:
-  contents: write              # noetig, damit die Action radolan.json committen darf
+  contents: write              # radolan.json committen
+  actions: write               # eigenen Nachfolger starten
 
 jobs:
   radolan:
     runs-on: ubuntu-latest
+    timeout-minutes: 355       # GitHub erlaubt hoechstens 360 pro Job
     steps:
       - uses: actions/checkout@v4
 
@@ -24,13 +41,51 @@ jobs:
       - name: numpy installieren
         run: pip install --quiet numpy
 
-      - name: RADOLAN holen und radolan.json schreiben
-        run: python radolan_regen.py
-
-      - name: radolan.json committen (nur bei Aenderung)
+      - name: Alle 30 Minuten holen und committen
         run: |
+          set -u
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add radolan.json radolan-archiv.json
-          git diff --staged --quiet || git commit -m "RADOLAN Tagesregen aktualisiert"
-          git push
+          ENDE=$(( $(date -u +%s) + 330*60 ))   # 5,5 h, mit Puffer zum Job-Limit
+          RUNDE=0
+          while : ; do
+            RUNDE=$(( RUNDE + 1 ))
+            echo "::group::Runde $RUNDE - $(date -u +%H:%M)Z"
+            # andere Workflows committen ebenfalls auf main - vorher nachziehen
+            git pull -q --rebase origin main || echo "pull fehlgeschlagen"
+            python radolan_regen.py || echo "Abruf fehlgeschlagen"
+            git add radolan.json radolan-archiv.json
+            if git diff --staged --quiet; then
+              echo "unveraendert - kein Commit"
+            else
+              git commit -q -m "RADOLAN Tagesregen aktualisiert"
+              for i in 1 2 3 4 5; do
+                git pull -q --rebase origin main && git push -q && { echo "gepusht"; break; }
+                sleep $(( i * 5 ))
+              done
+            fi
+            echo "::endgroup::"
+
+            JETZT=$(date -u +%s)
+            if [ "$JETZT" -ge "$ENDE" ]; then echo "Laufzeit erreicht - Ende"; break; fi
+            # naechster Abruf um :07 oder :37
+            M=$(date -u +%-M); S=$(date -u +%-S)
+            if   [ "$M" -lt 7 ];  then W=$(( (7-M)*60 - S ))
+            elif [ "$M" -lt 37 ]; then W=$(( (37-M)*60 - S ))
+            else                       W=$(( (67-M)*60 - S )); fi
+            if [ $(( JETZT + W )) -ge "$ENDE" ]; then echo "naechste Runde liegt nach dem Ende - Ende"; break; fi
+            sleep "$W"
+          done
+
+      # Nur nach regulaerem Ende (success). Mit always() wuerde auch ein von
+      # einem neuen Lauf abgeloester (gecancelter) Lauf einen Nachfolger
+      # starten - eine Kette von Sofortstarts.
+      - name: Nachfolger starten
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -o /dev/null -w "Nachfolger: HTTP %{http_code}\n" -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/radolan.yml/dispatches" \
+            -d '{"ref":"main"}'
