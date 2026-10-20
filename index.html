@@ -156,13 +156,19 @@ html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 /* absolut zur Kachel (.ki ist position:relative) - so beeinflusst die Grafik
    die Zeilenhoehen nicht, und das overflow:hidden der Zeile schneidet nicht */
 .kz .kzbal{position:absolute;left:8px;right:13px;top:25px;bottom:7px;border-radius:4px;overflow:hidden}
-.kz .kzbal .kzbn{position:absolute;top:0;bottom:0;background:rgba(40,56,90,.10)}
+.kz .kzbal .kzbn,.kz .kzbal .kzbd{position:absolute;top:0;bottom:0}
+.kz .kzbal .kzbn{background:rgba(45,70,150,.17)}
+.kz .kzbal .kzbd{background:rgba(255,190,40,.16)}
+.kz .kzbal .kzbs{position:absolute;top:1px;line-height:0;margin-left:-4.5px;z-index:1}
+.kz .kzbal .kzmd{fill:#3b4f8f}
+html.dunkel .kz .kzbal .kzbd{background:rgba(255,196,60,.13)}
+html.dunkel .kz .kzbal .kzmd{fill:#c9d4f5}
 .kz .kzbal .kzbm{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(40,56,90,.35)}
 .kz .kzbal .kzbt{position:absolute;top:1px;font-size:8.5px;line-height:1;font-weight:700;color:var(--muted);letter-spacing:0;z-index:1}
 .kz .kzbal .kzbb{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
 .kz .kzbal .kzbb i{flex:1 1 0;min-width:1px;background:#3a8fd8;border-radius:1px 1px 0 0}
 .kz .kzbal .kzbb i.tr{height:1px;background:rgba(92,107,128,.35)}
-html.dunkel .kz .kzbal .kzbn{background:rgba(0,0,0,.28)}
+html.dunkel .kz .kzbal .kzbn{background:rgba(70,100,190,.30)}
 html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
@@ -996,7 +1002,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.11</span>
+      <span class="ver">v5.12</span>
     </div>
   </header>
 
@@ -4523,19 +4529,36 @@ function kzRegen24H(){
    Niesel flach bleibt. HTML statt SVG - ein gestrecktes SVG verzerrt Schrift. */
 function kzRegenGrafik(H){
   const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
-  let bg="";
-  /* Nachtstreifen aus Auf- und Untergaengen von gestern bis uebermorgen */
+  /* v5.12 (Nutzer, Variante D aus nachttest.html): Tag hellgelb, Nacht blaugrau,
+     dazu ein kleines Sonnen- bzw. Mondzeichen je Abschnitt. Die Sonne steht fuer
+     TAGESLICHT, nicht fuer Sonnenschein (Nutzer: "sollte verstaendlich sein"). */
+  const nacht=[];
   try{const ev=[];for(let k=-1;k<=2;k++){const d=new Date(W0+k*864e5),r=sunMoment(d,true),u=sunMoment(d,false);if(r!=null&&u!=null)ev.push([r,u]);}
     ev.sort((a,b)=>a[0]-b[0]);
     for(let i=0;i+1<ev.length;i++){const a=ev[i][1],b=ev[i+1][0];   // Untergang bis naechster Aufgang
-      if(b<=W0||a>=W1)continue;bg+=`<i class="kzbn" style="left:${pc(a).toFixed(1)}%;width:${(pc(b)-pc(a)).toFixed(1)}%"></i>`;}}catch(e){}
+      if(b>W0&&a<W1)nacht.push([pc(a),pc(b)]);}}catch(e){}
+  const tag=[];let x0=0;nacht.forEach(([a,b])=>{if(a>x0)tag.push([x0,a]);x0=Math.max(x0,b);});if(x0<100)tag.push([x0,100]);
+  let mn=null,mnMs=null;for(const x of H){const b=x.t-36e5;if(b>W0&&ortsStunde(b)===0){mn=pc(b);mnMs=b;break;}}
+  let bg="";
+  const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(1)}%;width:${(b-a).toFixed(1)}%"></i>`;
+  tag.forEach(([a,b])=>{bg+=seg(a,b,"kzbd");});nacht.forEach(([a,b])=>{bg+=seg(a,b,"kzbn");});
+  /* Zeichen in die Mitte eines Abschnitts ab 10 % Breite - aber nicht auf das
+     "Mi" rechts neben dem Mitternachtsstrich (rund 12 % breit) */
+  /* Sperrzone um Mitternacht in % der rund 73 px breiten Grafik: Wochentag ~15 px
+     plus halbes Zeichen ~5 px = 28 %. Der Wochentag steht rechts vom Strich, ab 78 % links davon. */
+  const sperr=mn==null?null:mn>78?[mn-28,mn+2]:[mn-2,mn+28];
+  const platz=(a,b)=>{let t=[[a,b]];if(sperr&&sperr[1]>a&&sperr[0]<b)t=[[a,sperr[0]],[sperr[1],b]];
+    const f=t.filter(([p,q])=>q-p>=14).sort((u,v)=>(v[1]-v[0])-(u[1]-u[0]))[0];return f?(f[0]+f[1])/2:null;};
+  tag.forEach(([a,b])=>{const m=platz(a,b);if(m!=null)bg+=`<span class="kzbs" style="left:${m.toFixed(1)}%">${KZ_SONNE}</span>`;});
+  nacht.forEach(([a,b])=>{const m=platz(a,b);if(m!=null)bg+=`<span class="kzbs" style="left:${m.toFixed(1)}%">${KZ_MOND}</span>`;});
   /* Mitternacht */
-  for(const x of H){const b=x.t-36e5;if(b>W0&&ortsStunde(b)===0){const L=pc(b);
-    bg+=`<i class="kzbm" style="left:${L.toFixed(1)}%"></i><b class="kzbt" style="${L>78?`right:${(100-L+3).toFixed(1)}%`:`left:calc(${L.toFixed(1)}% + 2px)`}">${kzWtag(b)}</b>`;}}
+  if(mn!=null)bg+=`<i class="kzbm" style="left:${mn.toFixed(1)}%"></i><b class="kzbt" style="${mn>78?`right:${(100-mn+3).toFixed(1)}%`:`left:calc(${mn.toFixed(1)}% + 2px)`}">${kzWtag(mnMs)}</b>`;
   const sk=Math.max(1,...H.map(x=>x.mm));
   const bars=H.map(x=>x.mm>=0.1?`<i style="height:${Math.max(2,Math.round(x.mm/sk*22))}px"></i>`:`<i class="tr"></i>`).join("");
   return `&nbsp;<span class="kzbal">${bg}<span class="kzbb">${bars}</span></span>`;
 }
+const KZ_SONNE='<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="#e0a100"/><g stroke="#e0a100" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>';
+const KZ_MOND='<svg width="8" height="9" viewBox="0 0 10 10" aria-hidden="true"><path class="kzmd" d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z"/></svg>';
 const kzStaerke=v=>v<0.5?"sehr leicht":v<2.5?"leicht":v<10?"mäßig":"stark";
 const kzLetzte=()=>(typeof lastRows!=="undefined"&&lastRows&&lastRows.length)?lastRows.at(-1):null;
 /* v4.68: UV-Stufe als Farbe statt Wort (das Wort passte nicht mehr in die
