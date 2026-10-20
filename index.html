@@ -1002,7 +1002,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.12</span>
+      <span class="ver">v5.13</span>
     </div>
   </header>
 
@@ -4519,7 +4519,8 @@ const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="1
 function kzRegen24H(){
   const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time)return null;
   const now=Date.now(),H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0)}))
-    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);
+    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24)
+    .map(x=>({t:x.t,mm:regenIntervall(x.t-36e5,x.t,x.mm)}));   // v5.13: erste 2 h aus dem Radar
   return H.length?H:null;
 }
 /* v5.10: Stundenbalken fuer "Regen 24 h". H = 24 Open-Meteo-Stunden, Wert mit
@@ -4749,7 +4750,7 @@ function kzRegenDanach(){
   const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time||!h.precipitation)return {};
   const now=Date.now();
   for(let i=0;i<h.time.length;i++){const t=new Date(h.time[i]).getTime(),ab=t-36e5;
-    if(ab<now+1.5*36e5)continue;if(!((+h.precipitation[i]||0)>=0.1))continue;
+    if(ab<now+1.5*36e5)continue;if(!(regenIntervall(ab,t,Math.max(0,+h.precipitation[i]||0))>=0.1))continue;   // v5.13: wie die 24-h-Ansicht, Radar wo es reicht
     const p=h.precipitation_probability?h.precipitation_probability[i]:null;
     const heute=ymd(new Date()),tag=ymd(new Date(ab))===heute?"heute":ymd(new Date(ab))===ymd(new Date(now+864e5))?"morgen":kzWtag(ab);
     // "morgen · 28 %" brach bei 375 pt um; "morgen 28 %" passt knapp, mit 100 % nicht mehr
@@ -5389,8 +5390,10 @@ function renderNowcast(j){
     const N=NE.E.filter(x=>x.st>0&&x.sum>H.sum).sort((a,b)=>b.sum-a.sum)[0];
     detail=H.bisEnde?`anhaltend · bis ${f1(H.peakB)} mm/h`:N?`lässt in ~${H.e*5} Min nach · in ${N.st*5} Min ${strength(N.peakB)}`:`lässt in ~${H.e*5} Min nach · bis ${f1(H.peakB)} mm/h`;}
   else{summary=`Regen in ${H.st*5} Min · ${strength(H.peakB)}`;detail=H.bisEnde?`hält über 2 Std an · bis ${f1(H.peakB)} mm/h`:`~${(H.e-H.st)*5} Min lang · bis ${f1(H.peakB)} mm/h`;}
-  _kz.nowcast={serie:series.map(q=>q.mmh),serieB:series.map(q=>q.b),TH,peak,peakB,
+  _kz.nowcast={serie:series.map(q=>q.mmh),serieB:series.map(q=>q.b),zeit:series.map(q=>q.t),TH,peak,peakB,
                THjetzt:radarSchwelleJetzt(),geeicht:!!_radarEich};kzStandSetzen("radar");kzRender();   // v3.89: Kachel "Regen"
+  // v5.13: 24-Stunden-Ansicht und "bis 24 Uhr" nehmen die ersten 2 Stunden aus dem Radar - neu zeichnen
+  if(_rainHrD)try{renderRainHours(_rainHrD);}catch(e){}
   /* Die Balken zeigen die Bodenrate, trocken bleibt trocken nach dem rohen
      Wert - sonst wuerde ein Balken auftauchen, wo die Erkennung "kein Regen"
      sagt. Die Skala richtet sich nach demselben Massstab wie die Zahl darueber. */
@@ -5401,14 +5404,32 @@ function renderNowcast(j){
 }
 
 /* --- Render: Regen-Stundenprognose (nächste 24 Std, Open-Meteo ICON-D2) --- */
+/* v5.13 (Nutzer, 20.10. 16:04: Kachel "Regen in 5 min", Abschnitt "Regen ab
+   18 Uhr" - "nicht konsistent"): Radar (Bright Sky, 2 h, 5-min-Schritte) und
+   Modell (Open-Meteo, stuendlich) wurden nie abgeglichen. Jetzt gilt fuer jede
+   Zeitspanne: der Teil, den das Radar abdeckt, kommt aus dem Radar (geeichte
+   Bodenrate, nass nur ab der rohen Schwelle TH - wie die Kachel "Regen"), der
+   Rest anteilig aus dem Modell. Radarschritt i gilt fuer [t_i, t_i + 5 min). */
+let _rainHrD=null;
+function regenRadarTeil(a,b){
+  const n=typeof _kz!=="undefined"?_kz.nowcast:null;if(!n||!n.zeit)return {mm:0,dur:0};
+  let mm=0,dur=0;
+  for(let i=0;i<n.zeit.length;i++){const lo=Math.max(a,n.zeit[i]),hi=Math.min(b,n.zeit[i]+3e5);if(hi<=lo)continue;
+    dur+=hi-lo;if(n.serie[i]>=n.TH)mm+=n.serieB[i]*(hi-lo)/36e5;}
+  return {mm,dur};
+}
+/* Regen in [a,b); mmStd = Modellwert der Stunde, in der [a,b) liegt */
+function regenIntervall(a,b,mmStd){if(!(b>a))return 0;const R=regenRadarTeil(a,b);return R.mm+mmStd*Math.max(0,(b-a)-R.dur)/36e5;}
 function renderRainHours(d){
-  const sec=el("rainHrSec");if(!sec)return;
+  const sec=el("rainHrSec");if(!sec)return;_rainHrD=d;
   const h=d&&d.hourly;if(!h||!h.time||!h.precipitation){sec.classList.add("hidden");return;}
   _rainHourly=h;kzStandSetzen("om");if(_lastFcJ)renderForecast(_lastFcJ);if(typeof kzRender==="function")kzRender();   // v4.63: Kachel Regen 24 Std;// Stundendaten fuer die "Heute"-Restrechnung der Vorhersage bereitstellen
   const now=Date.now();
   const H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0),pop:h.precipitation_probability?h.precipitation_probability[i]:null}))
-    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);
+    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24)
+    .map(x=>Object.assign(x,{mm:regenIntervall(x.t-36e5,x.t,x.mm)}));   // v5.13: erste 2 h aus dem Radar
   if(H.length<4){sec.classList.add("hidden");return;}
+  const mitRadar=!!(_kz.nowcast&&_kz.nowcast.zeit&&_kz.nowcast.zeit.some(t=>t>now));
   const TH=0.1,total=H.reduce((s,x)=>s+x.mm,0),peak=Math.max(...H.map(x=>x.mm)),pop=Math.max(...H.map(x=>x.pop||0));
   const f1=v=>v.toLocaleString("de-DE",{maximumFractionDigits:1});
   /* v5.09: precipitation ist die Summe der Stunde VOR dem Stempel - der Balken
@@ -5420,6 +5441,7 @@ function renderRainHours(d){
   if(peak<TH){summary="Trocken";detail=pop>=30?`kein nennenswerter Regen · bis ${pop}% Wahrsch.`:"die nächsten 24 Std kein Regen";}
   else if(fr<=0){summary="Regen aktuell";detail=`~${f1(total)} mm · Spitze ${f1(peak)} mm/h`;}
   else{summary=`Regen ab ${hLbl(H[fr].t)}`;detail=`~${f1(total)} mm gesamt · Spitze ${f1(peak)} mm/h`;}
+  if(mitRadar)detail+=" · erste 2 Std aus dem Radar";
   const sc=Math.max(peak,0.5);let prevD=new Date(H[0].t).getDate();
   const bars=H.map(x=>{const dd=new Date(x.t),db=dd.getDate()!==prevD;prevD=dd.getDate();const ht=x.mm<TH?2:Math.max(3,Math.round(x.mm/sc*46));return `<div class="bar${x.mm<TH?" dry":""}${db?" daybreak":""}" style="height:${ht}px"></div>`;}).join("");
   const last=H.length-1,idx=[0,Math.round(last*0.25),Math.round(last*0.5),Math.round(last*0.75),last];
@@ -8780,18 +8802,17 @@ function bilanzProg(tageVoraus){          // v2.60: Tagessummen der Vorhersage a
   return out;
 }
 function bilanzRest(){
-  // v2.64: noch ausstehender Regen heute. Die laufende Stunde zaehlt nur mit dem
-  // Anteil, der noch bevorsteht - ihr bereits gefallener Teil steckt schon im Radarwert.
+  /* v2.64: noch ausstehender Regen heute. v5.13: precipitation mit Stempel t ist
+     die Stunde t-1h..t (vorher als t..t+1h gerechnet - die laufende Stunde
+     fehlte, 23-24 Uhr ebenso); gezaehlt wird der Teil zwischen jetzt und
+     Mitternacht, die ersten 2 Stunden aus dem Radar (regenIntervall). */
   const h=(typeof _rainHourly!=="undefined")?_rainHourly:null;
   if(!h||!h.time||!h.precipitation)return 0;
-  const jetzt=new Date(),hStart=new Date(jetzt);hStart.setMinutes(0,0,0);
-  const anteil=1-(jetzt-hStart)/36e5;
-  const tag=ymd(jetzt);let mm=0;
+  const now=Date.now(),mn=new Date(now);mn.setHours(24,0,0,0);const ende=mn.getTime();let mm=0;
   for(let i=0;i<h.time.length;i++){
-    if(String(h.time[i]||"").slice(0,10)!==tag)continue;
     const t=new Date(h.time[i]).getTime(),v=Math.max(0,+h.precipitation[i]||0);
-    if(t<hStart.getTime())continue;
-    mm+=(t===hStart.getTime())?v*anteil:v;
+    const a=Math.max(t-36e5,now),b=Math.min(t,ende);
+    if(b>a)mm+=regenIntervall(a,b,v);
   }
   return Math.round(mm*10)/10;
 }
