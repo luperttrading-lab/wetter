@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Regenkacheln — zwei Varianten</title>
+<style>
+/* Mockup (20.10.2026): Tagesregen + Regen 24 h zu EINER Kachel. Kachelmasse
+   wie oben in der App (.kz drei Spalten, 8 px Abstand, .ki 8/7/7/8 px). */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
+h1{font-size:20px;margin:4px 0 2px}
+.info{font-size:13px;color:var(--muted);margin:0 0 6px}
+.karte{background:#fffdf9;border:1px solid var(--line);border-radius:18px;padding:12px 12px 14px;margin:14px 0}
+.karte h2{font-size:16px;margin:0 0 2px}
+.karte p{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.karte h3{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.kz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k{display:flex;min-width:0}.k>.ki{flex:1 1 auto}
+.ki{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;min-width:0;position:relative;min-height:61px}
+.l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden}
+.v{font-size:14.5px;letter-spacing:-.01em;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.s{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden}
+.ok{color:#2e8b57}
+.attrappe .ki{opacity:.45}
+.neu .ki{box-shadow:0 0 0 2px #3a8fd8}
+.zusatz .ki{box-shadow:0 0 0 2px #f0b429}
+.punkte{position:absolute;top:50%;right:2px;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px}
+.punkte b{width:4px;height:4px;border-radius:50%;background:#cfd5dd}.punkte b.an{background:#5c6b80}
+.ansicht{transition:opacity .6s}.ansicht.weg{opacity:0}
+/* Stundenbalken wie in der App (v5.10, .kzbal) */
+.kzbal{position:absolute;left:8px;right:13px;top:25px;bottom:7px;border-radius:4px;overflow:hidden}
+.kzbn{position:absolute;top:0;bottom:0;background:rgba(40,56,90,.10)}
+.kzbm{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(40,56,90,.35)}
+.kzbt{position:absolute;top:1px;font-size:8.5px;line-height:1;font-weight:700;color:var(--muted);z-index:1}
+.kzbb{position:absolute;inset:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
+.kzbb i{flex:1 1 0;min-width:1px;background:#3a8fd8;border-radius:1px 1px 0 0}
+.kzbb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.leg{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.leg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;box-shadow:0 0 0 2px var(--c) inset}
+.nr{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:#1e293b;color:#fff;font-size:11px;font-weight:800;text-align:center;line-height:18px;margin-right:4px}
+.unter{font-size:11.5px;color:var(--muted);margin-top:4px;text-align:center}
+</style>
+</head>
+<body>
+<h1>Regenkacheln zusammenlegen</h1>
+<p class="info">Beispiel wie heute früh: noch kein Regen gefallen, bis Mitternacht 0,2 mm, in 24 Stunden ~2,6 mm ab 16 Uhr, Schwerpunkt in der Nacht. Oben jeweils die Reihe, wie sie in der App wechselt; darunter alle Ansichten nebeneinander.</p>
+<div class="leg"><span style="--c:#3a8fd8">neue Regenkachel</span><span style="--c:#f0b429">Kachel „Regen“ mit Zusatz</span></div>
+
+<div class="karte">
+  <h2>Variante 1 · zwei Ansichten (Empfehlung)</h2>
+  <p>Die neue Kachel sagt <b>wie viel</b>, die Kachel „Regen“ sagt <b>wann</b>: Sie bekommt „ab 16:00“ als zweite Ansicht zurück.</p>
+  <h3>So wechselt die Reihe</h3>
+  <div class="kz" id="r1"></div>
+  <h3>Alle Ansichten</h3>
+  <div class="kz" id="a1"></div>
+  <div class="kz" id="a1b" style="margin-top:8px"></div>
+</div>
+
+<div class="karte">
+  <h2>Variante 2 · drei Ansichten</h2>
+  <p>Alles in einer Kachel. Die Kachel „Regen“ bleibt wie heute, ohne Zusatz.</p>
+  <h3>So wechselt die Reihe</h3>
+  <div class="kz" id="r2"></div>
+  <h3>Alle Ansichten</h3>
+  <div class="kz" id="a2"></div>
+</div>
+
+<script>
+"use strict";
+/* Beispielwerte: 24 Stunden ab 09:00. Wert i = Regen von 09+i bis 10+i Uhr. */
+const MM=[0,0,0,0,0,0,0,.1,0,0,.1,0,.2,.3,.3,0,.2,.3,.6,.5,0,0,0,0];
+const START=9,SU=18.4,SA=7.93;   // Sonnenuntergang 18:24, Aufgang 07:56
+function grafik(){
+  const pc=h=>(h/24*100).toFixed(1);
+  const a=SU-START,b=24-START+SA;   // Nacht in Stunden ab Fensterbeginn
+  let bg=`<i class="kzbn" style="left:${pc(a)}%;width:${pc(b-a)}%"></i>`;
+  const mn=24-START;bg+=`<i class="kzbm" style="left:${pc(mn)}%"></i><b class="kzbt" style="left:calc(${pc(mn)}% + 2px)">Mi</b>`;
+  const bars=MM.map(x=>x>=0.1?`<i style="height:${Math.max(2,Math.round(x/1*22))}px"></i>`:`<i class="tr"></i>`).join("");
+  return `<span class="kzbal">${bg}<span class="kzbb">${bars}</span></span>`;
+}
+const pk=(n,i)=>`<div class="punkte">${Array.from({length:n},(_,j)=>`<b${j===i?' class="an"':''}></b>`).join("")}</div>`;
+const inhalt=x=>x.g?`<div class="l">${x.l}</div>${grafik()}`:`<div class="l">${x.l}</div><div class="v">${x.v}</div><div class="s">${x.s}</div>`;
+const kachel=(x,n,i,kl="")=>`<div class="k ${kl}"><div class="ki">${n>1?pk(n,i):""}${inhalt(x)}</div></div>`;
+const attrappe=(l,v,s)=>`<div class="k attrappe"><div class="ki"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
+
+const HEUTE={l:"Regen heute",v:"0,0 mm",s:"noch 0,2 mm"};
+const T24={l:"Regen 24 h",v:"ab 16:00",s:"~2,6 mm"};
+const G1={l:"24 h · ~2,6 mm",g:1}, G2={l:"Regen 24 h",g:1};
+const REGEN0={l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"};
+const REGEN1={l:"Regen",v:"ab 16:00",s:"heute 80 %"};
+const V1=[HEUTE,G1],V2=[HEUTE,T24,G2],R1=[REGEN0,REGEN1];
+
+/* Alle Ansichten nebeneinander */
+document.getElementById("a1").innerHTML=V1.map((x,i)=>kachel(x,2,i,"neu")).join("")+`<div></div>`;
+document.getElementById("a1b").innerHTML=R1.map((x,i)=>kachel(x,2,i,"zusatz")).join("")+`<div></div>`;
+document.getElementById("a2").innerHTML=V2.map((x,i)=>kachel(x,3,i,"neu")).join("");
+
+/* Wechselnde Reihen (Takt 4 s wie in der App) */
+const AT=attrappe("7 Tage","19 mm","Mi–Fr, So");
+function reihe(id,teile){   // teile: [{V,kl}] oder fester HTML-Text
+  const el=document.getElementById(id);
+  el.innerHTML=teile.map((t,j)=>typeof t==="string"?t:`<div class="k ${t.kl}"><div class="ki" data-j="${j}"><span class="pk"></span><div class="ansicht"></div></div></div>`).join("");
+  const st=teile.map(()=>0);
+  const zeigen=()=>teile.forEach((t,j)=>{if(typeof t==="string")return;const ki=el.querySelector(`.ki[data-j="${j}"]`);
+    ki.querySelector(".pk").innerHTML=t.V.length>1?pk(t.V.length,st[j]):"";ki.querySelector(".ansicht").innerHTML=inhalt(t.V[st[j]]);});
+  zeigen();
+  setInterval(()=>{el.querySelectorAll(".ansicht").forEach(a=>a.classList.add("weg"));
+    setTimeout(()=>{teile.forEach((t,j)=>{if(typeof t!=="string")st[j]=(st[j]+1)%t.V.length;});zeigen();
+      el.querySelectorAll(".ansicht").forEach(a=>a.classList.remove("weg"));},600);},4000);
+}
+reihe("r1",[{V:R1,kl:"zusatz"},{V:V1,kl:"neu"},AT]);
+reihe("r2",[{V:[REGEN0],kl:""},{V:V2,kl:"neu"},AT]);
+</script>
+</body>
+</html>
