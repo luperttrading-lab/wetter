@@ -996,7 +996,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.10</span>
+      <span class="ver">v5.11</span>
     </div>
   </header>
 
@@ -4493,6 +4493,11 @@ function pollenLaden(){
 pollenLaden();setInterval(pollenLaden,3*36e5);
 const KZ_STD=["heute","regen","regenHeute","morgen","wind","sonne"];
 let _kzWahl=(()=>{try{const a=JSON.parse(localStorage.getItem("kzWahl")||"null");if(Array.isArray(a))return a;}catch(e){}return KZ_STD.slice();})();
+/* v5.11: "Regen 24 h" steckt jetzt in der Kachel "Bis 24 Uhr" (regenHeute) - einmalig
+   zusammenlegen: beide gewaehlt -> regen24 raus; nur regen24 -> an seine Stelle regenHeute */
+try{if(!localStorage.getItem("kzRegenZus")){const i=_kzWahl.indexOf("regen24");
+  if(i>=0){if(_kzWahl.includes("regenHeute"))_kzWahl.splice(i,1);else _kzWahl[i]="regenHeute";localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}
+  localStorage.setItem("kzRegenZus","1");}}catch(e){}
 /* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl.
    v5.08: nur bei GESPEICHERTER Auswahl - Neue bekommen KZ_STD ohne Pollen */
 try{if(!localStorage.getItem("kzPollenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
@@ -4503,6 +4508,14 @@ const kzHM=ms=>new Date(ms).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2
 const kzRichtung=g=>(g==null||isNaN(g))?"":["N","NO","O","SO","S","SW","W","NW"][Math.round(((+g%360)+360)%360/45)%8];
 const kzUvStufe=u=>u<3?"niedrig":u<6?"mäßig":u<8?"hoch":u<11?"sehr hoch":"extrem";
 const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="11" aria-label="Regen"><path d="M6 1C4 5 1.5 8 1.5 10.6a4.5 4.5 0 0 0 9 0C10.5 8 8 5 6 1z" fill="#3b82f6"/></svg>';
+/* v5.09: 24 Stunden wie der Abschnitt (vorher bis 25 - "~2,1 mm" gegen "~1,7 mm").
+   Wert mit Stempel t = Regen von t-1h bis t (Open-Meteo precipitation). */
+function kzRegen24H(){
+  const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time)return null;
+  const now=Date.now(),H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0)}))
+    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);
+  return H.length?H:null;
+}
 /* v5.10: Stundenbalken fuer "Regen 24 h". H = 24 Open-Meteo-Stunden, Wert mit
    Stempel t = Regen von t-1h bis t; der Streifen reicht also von H[0].t-1h bis
    H[23].t. Hintergrund: Nacht (Sonne unter dem Horizont) leicht dunkler,
@@ -4812,13 +4825,25 @@ const KZ_DEF={
     if(H&&H.st===0)return {l:"Regen",v:'<span class="warn">jetzt</span>',s:!H.bisEnde?`bis ~${kzHM(Date.now()+H.e*3e5)}`:kzStaerke(H.peakB)};   // v4.66: kuerzer
     if(!H)return Object.assign({l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"},kzRegenDanach());
     return {l:"Regen",v:`in ${H.st*5} min`,s:kzStaerke(H.peakB)};}},
-  regenHeute:{name:"Regen heute",kurz:"Tagesregen",ziel:{id:"bilanzSec",alt:"Heute gesamt"},r(){let gef=_kz.radHeute;
+  regenHeute:{name:"Regen bis 24 Uhr + 24 Std",kurz:"Bis 24 Uhr",ziel:{id:"bilanzSec",alt:"Heute gesamt"},r(){let gef=_kz.radHeute;
     if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
     let rest=null;try{if(typeof _rainHourly!=="undefined"&&_rainHourly&&typeof bilanzRest==="function")rest=bilanzRest();}catch(e){}
     if(gef==null)return null;const erw=rest!=null?gef+rest:null;
     /* v4.66 (Nutzer: "zu lang, zu viel Text"): fuenf Zeilen in der Kachel. Oben nur
        das Gefallene, darunter die Erwartung fuer den ganzen Tag. */
-    return {l:"Tagesregen",v:`${kzF1(gef)} mm`,s:erw!=null&&erw-gef>=0.05?`noch ${kzF1(erw-gef)} mm`:"gefallen"};}},
+    /* v5.11 (Nutzer, Variante 1 aus regentest2.html): Tagesregen und "Regen 24 h"
+       in EINER Kachel. Ansicht 1 "BIS 24 UHR" (Nutzer: "dann ist klar, bis 24 Uhr
+       sind nicht 24 Stunden"): Wert = ganzer Tag (gefallen + erwartet), darunter
+       wie viel davon schon gefallen ist. Ansicht 2: Stundenbalken der 24 Stunden
+       ab jetzt, Ueberschrift "24 h 2,6 mm". Das WANN steht in der Kachel "Regen"
+       (Zusatz "ab 16:00", kzRegenDanach), solange "Regen 24 h" nicht gewaehlt ist.
+       "Regen heute" (89 px) und "24 h · ~2,6 mm" (99 px) passen nicht in 78 px. */
+    const rest2=erw!=null?erw-gef:0;
+    const a={l:"Bis 24 Uhr",v:`${kzF1(erw!=null?erw:gef)} mm`,
+      s:erw==null?"bisher":rest2<0.05?"gefallen":gef<0.05?"erwartet":`${kzF1(gef)} gefallen`};
+    const H=kzRegen24H();
+    if(H&&H.some(x=>x.mm>=0.1)){const tot=H.reduce((q,x)=>q+x.mm,0);a.alt=[{l:`24 h ${kzF1(tot)} mm`,v:kzRegenGrafik(H),s:""}];}
+    return a;}},
   wind:{name:"Wind",ziel:{label:"Wind & Böen",text:"Stündlich"},r(){const r=kzLetzte();if(!r||r.wind_speed==null)return null;const g=r.wind_gust_speed!=null?r.wind_gust_speed:r.wind_gust_speed_10;
     const gs=g!=null?kzR0(g):"–",ri=kzRichtung(r.wind_direction);
     return {l:"Wind",v:`${kzR0(r.wind_speed)} km/h`,s:`Böen ${gs}${ri?(gs.length>2?" ":" · ")+ri:""}`};}},
@@ -4954,10 +4979,7 @@ const KZ_DEF={
     return Object.assign({},A[0],{alt:A.slice(1)});
     }catch(e){return null;}}},
   regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},r(){
-    const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time)return null;
-    const now=Date.now(),H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0)}))
-      .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24);   // v5.09: 24 Stunden wie der Abschnitt (vorher bis 25 - "~2,1 mm" gegen "~1,7 mm")
-    if(!H.length)return null;
+    const H=kzRegen24H(),now=Date.now();if(!H)return null;
     const tot=H.reduce((a,x)=>a+x.mm,0),fr=H.findIndex(x=>x.mm>=0.1);
     if(fr<0)return {l:"Regen 24 h",v:'<span class="ok">Trocken</span>',s:"bis morgen"};
     // v4.76: precipitation gilt fuer die Stunde VOR dem Stempel - Beginn = Stempel - 1 h (vorher eine Stunde zu spaet)

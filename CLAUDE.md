@@ -503,6 +503,19 @@ overflow:hidden der Zeile beschnitten. Kachelhoehe gleich den Nachbarn
 (61 px). Nur Tests mit eingespielten Stundenwerten (Open-Meteo aus dem
 Pruefstand nicht erreichbar). `regentest.html` bleibt als Archiv.
 
+v5.11 (Nutzer, Variante 1 aus `regentest2.html`): "Tagesregen" und "Regen 24 h"
+in EINER Kachel (`regenHeute`, Name "Regen bis 24 Uhr + 24 Std"). Ansicht 1
+"BIS 24 UHR" (Nutzer: bis 24 Uhr sind nicht 24 Stunden): Wert = ganzer Tag
+(gefallen + erwartet), Unterzeile "erwartet" / "1,2 gefallen" / "gefallen".
+Ansicht 2: Stundenbalken (`kzRegenGrafik`) mit Ueberschrift "24 h 2,6 mm",
+nur wenn in 24 h Regen kommt. Das WANN steht wieder als Zusatz in der Kachel
+"Regen" (`kzRegenDanach`, laeuft, solange `regen24` nicht gewaehlt ist).
+Einmalig (`kzRegenZus`): beide gewaehlt -> regen24 raus, nur regen24 -> wird
+regenHeute. `regen24` bleibt im Pool. `kzRegen24H()` liefert die 24 Stunden
+fuer beide Kacheln. MESSUNG statt Mockup: "Regen heute" 89 px und
+"24 h · ~2,6 mm" 99 px passen NICHT in 78 px - das Mockup war rund 7 px
+breiter als die App. "Bis 24 Uhr" 73 px, "24 h 2,6 mm" 81 px (auf 88 %).
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
