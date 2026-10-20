@@ -412,20 +412,20 @@
   }
  },
  "_auswertung": {
-  "hinweis": "unter 10 Tagen nicht belastbar",
+  "hinweis": "ab 10 Tagen: Richtung belastbar, Groesse noch grob",
   "morgens": {
-   "bias": -0.16,
-   "bias_pct": -8.0,
-   "mae": 0.32,
-   "n": 14,
-   "sd": 0.41
+   "bias": -0.28,
+   "bias_pct": -13.9,
+   "mae": 0.28,
+   "n": 12,
+   "sd": 0.25
   },
   "vortag": {
-   "bias": -0.17,
-   "bias_pct": -5.8,
-   "mae": 0.34,
-   "n": 13,
-   "sd": 0.37
+   "bias": -0.24,
+   "bias_pct": -8.8,
+   "mae": 0.31,
+   "n": 12,
+   "sd": 0.28
   }
  }
 }
