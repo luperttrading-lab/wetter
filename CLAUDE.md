@@ -1348,3 +1348,10 @@ VERLASSENE Ort - so ist der vorige Ort immer einen Tipp entfernt, auch wenn
 er vor v5.14 eingestellt wurde. Feste Orte (`LOC_FEST`) und der aktuelle Ort
 erscheinen nicht; gleich = 0,01 Grad. Geprueft (Playwright): New York ->
 Neustadt -> Muenchen, Liste und Wechsel stimmen, x loescht ohne Wechsel.
+v5.15 (Nutzer): die fuenf festen Orte (Wettenberg, Huettenberg, Norden,
+Muenchen, Kiel; Knoepfe `locWtb` usw. und die Konstanten ausser
+`LOC_WETTENBERG`, das Vorgabeort bleibt) sind ENTFERNT - es gibt nur noch die
+Liste, Kopf "Zuletzt verwendet – direkt wechseln:", hoechstens 8. Leer: Hinweis
+`#locZulLeer`. Das x fragt nach (`confirm("„Ort“ aus der Liste loeschen?")`).
+Folge fuer Bestandsnutzer: die Liste beginnt leer; ein Ort steht erst drin,
+wenn man ihn einmal uebernommen bzw. von ihm weggewechselt hat.
