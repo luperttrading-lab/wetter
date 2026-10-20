@@ -1040,7 +1040,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.21</span>
+      <span class="ver">v5.22</span>
     </div>
   </header>
 
@@ -4953,8 +4953,11 @@ const KZ_DEF={
     if(d.hiMeas!=null)hi=Math.max(hi,d.hiMeas);
     if(lo==null||hi==null||isNaN(lo)||isNaN(hi))return null;
     const tm=kzWaermsteStunde();   // v4.78: Zusatz "max 15 Uhr" ("max um 15 Uhr" brach bei 375 pt um)
-    return {l:"Heute",v:`<span class="dn">${kzR0(lo)}°</span> / <span class="up">${kzR0(hi)}°</span>`,s2:tm!=null?`max ${tm} Uhr`:null,
-            s:d.loMeas!=null?((b=>b.length<=6?"bisher "+b:"gem. "+b)(`${kzR0(d.loMeas)}–${kzR0(d.hiMeas)}`)):"Prognose"};}},   // Frost: "bisher −12–−5" passt nicht   // v4.66: ganze Grad - "15,9–18,9" brach um
+    /* v5.22 (Nutzer): kein "bisher 4–11" mehr - "Heute bisher ↓ 3,5° ↑ 11,2°" steht
+       direkt darueber (und rundete 3,5 zu 4, waehrend die Kachel 3° zeigte).
+       Die Kachel wechselt damit nicht mehr, Unterzeile nur die waermste Stunde. */
+    return {l:"Heute",v:`<span class="dn">${kzR0(lo)}°</span> / <span class="up">${kzR0(hi)}°</span>`,
+            s:tm!=null?`max ${tm} Uhr`:"Prognose"};}},
   regen:{name:"Regen · nächste 2 Std",ziel:{id:"nowcastSec",alt:"rainHrSec"},r(){const n=_kz.nowcast;if(!n)return {l:"Regen",v:"–",s:"kein Radar"};
     const {serie,TH,peak}=n;const TJ=n.THjetzt!=null?n.THjetzt:TH;
     const pB=n.peakB!=null?n.peakB:peak;   // v4.27: Staerke aus der geeichten Bodenrate

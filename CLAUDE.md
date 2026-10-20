@@ -1422,3 +1422,8 @@ statt zweier 3-px-Punkte EIN roter Strich je Wochenende (`.kzbwp`, 3 px hoch,
 von Spaltenbeginn a bis Spaltenende b - auf 0,1 px gegen die Spalten geprueft).
 `kzPunktTipp` und `#kzTipp` sind entfernt. Kandidat fuer dieselbe Grossansicht:
 die 24-h-Stundenbalken von `regenHeute`.
+
+v5.22 (Nutzer: "Heute bisher brauchen wir in der ersten Kachel nicht, steht oben
+drueber"): Kachel "Heute" zeigt nur noch "max 15 Uhr" (waermste Stunde), kein
+"bisher 4–11" mehr und damit keinen Wechsel. Nebenbei verschwindet ein
+Widerspruch: die Zeile darueber zeigt 3,5°, die Kachel rundete auf "bisher 4".
