@@ -1,8 +1,8 @@
 {
   "datum": "2026-10-20",
-  "summe_mm": 0.16,
-  "stunden_ok": 18,
-  "stunden_erwartet": 18,
+  "summe_mm": 0.41,
+  "stunden_ok": 20,
+  "stunden_erwartet": 20,
   "stunden": [
     {
       "stunde": "01:00",
@@ -75,6 +75,14 @@
     {
       "stunde": "18:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "20:00",
+      "mm": 0.25
     }
   ],
   "umgebung_3x3": [
@@ -84,7 +92,7 @@
           410,
           424
         ],
-        "mm": 0.1,
+        "mm": 0.3,
         "eigenes": false
       },
       {
@@ -92,7 +100,7 @@
           410,
           425
         ],
-        "mm": 0.1,
+        "mm": 0.3,
         "eigenes": false
       },
       {
@@ -100,7 +108,7 @@
           410,
           426
         ],
-        "mm": 0.1,
+        "mm": 0.4,
         "eigenes": false
       }
     ],
@@ -110,7 +118,7 @@
           409,
           424
         ],
-        "mm": 0.1,
+        "mm": 0.3,
         "eigenes": false
       },
       {
@@ -118,7 +126,7 @@
           409,
           425
         ],
-        "mm": 0.2,
+        "mm": 0.5,
         "eigenes": true
       },
       {
@@ -126,7 +134,7 @@
           409,
           426
         ],
-        "mm": 0.1,
+        "mm": 0.3,
         "eigenes": false
       }
     ],
@@ -136,7 +144,7 @@
           408,
           424
         ],
-        "mm": 0.1,
+        "mm": 0.3,
         "eigenes": false
       },
       {
@@ -144,7 +152,7 @@
           408,
           425
         ],
-        "mm": 0.2,
+        "mm": 0.4,
         "eigenes": false
       },
       {
@@ -152,16 +160,16 @@
           408,
           426
         ],
-        "mm": 0.2,
+        "mm": 0.3,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-10-20",
-    "mm": 0.16
+    "mm": 0.41
   },
-  "aktualisiert": "2026-10-20T16:57:57+00:00",
+  "aktualisiert": "2026-10-20T18:52:13+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -170,9 +178,9 @@
       "lat": 50.6479651,
       "lon": 8.6740943,
       "datum": "2026-10-20",
-      "summe_mm": 0.16,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "summe_mm": 0.41,
+      "stunden_ok": 20,
+      "stunden_erwartet": 20,
       "stunden": [
         {
           "stunde": "01:00",
@@ -245,6 +253,14 @@
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.25
         }
       ],
       "umgebung_3x3": [
@@ -254,7 +270,7 @@
               410,
               424
             ],
-            "mm": 0.1,
+            "mm": 0.3,
             "eigenes": false
           },
           {
@@ -262,7 +278,7 @@
               410,
               425
             ],
-            "mm": 0.1,
+            "mm": 0.3,
             "eigenes": false
           },
           {
@@ -270,7 +286,7 @@
               410,
               426
             ],
-            "mm": 0.1,
+            "mm": 0.4,
             "eigenes": false
           }
         ],
@@ -280,7 +296,7 @@
               409,
               424
             ],
-            "mm": 0.1,
+            "mm": 0.3,
             "eigenes": false
           },
           {
@@ -288,7 +304,7 @@
               409,
               425
             ],
-            "mm": 0.2,
+            "mm": 0.5,
             "eigenes": true
           },
           {
@@ -296,7 +312,7 @@
               409,
               426
             ],
-            "mm": 0.1,
+            "mm": 0.3,
             "eigenes": false
           }
         ],
@@ -306,7 +322,7 @@
               408,
               424
             ],
-            "mm": 0.1,
+            "mm": 0.3,
             "eigenes": false
           },
           {
@@ -314,7 +330,7 @@
               408,
               425
             ],
-            "mm": 0.2,
+            "mm": 0.4,
             "eigenes": false
           },
           {
@@ -322,14 +338,14 @@
               408,
               426
             ],
-            "mm": 0.2,
+            "mm": 0.3,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-10-20",
-        "mm": 0.16
+        "mm": 0.41
       },
       "methode": "bilinear, 50.6480N 8.6741E"
     },
@@ -338,9 +354,9 @@
       "lat": 50.5055647,
       "lon": 8.6226918,
       "datum": "2026-10-20",
-      "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "summe_mm": 0.75,
+      "stunden_ok": 20,
+      "stunden_erwartet": 20,
       "stunden": [
         {
           "stunde": "01:00",
@@ -413,6 +429,14 @@
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
+          "mm": 0.75
         }
       ],
       "umgebung_3x3": [
@@ -422,7 +446,7 @@
               393,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.8,
             "eigenes": false
           },
           {
@@ -430,7 +454,7 @@
               393,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.9,
             "eigenes": false
           },
           {
@@ -438,7 +462,7 @@
               393,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.7,
             "eigenes": false
           }
         ],
@@ -448,7 +472,7 @@
               392,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.7,
             "eigenes": false
           },
           {
@@ -456,7 +480,7 @@
               392,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.8,
             "eigenes": true
           },
           {
@@ -464,7 +488,7 @@
               392,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.6,
             "eigenes": false
           }
         ],
@@ -474,7 +498,7 @@
               391,
               419
             ],
-            "mm": 0.0,
+            "mm": 0.6,
             "eigenes": false
           },
           {
@@ -482,7 +506,7 @@
               391,
               420
             ],
-            "mm": 0.0,
+            "mm": 0.6,
             "eigenes": false
           },
           {
@@ -490,14 +514,14 @@
               391,
               421
             ],
-            "mm": 0.0,
+            "mm": 0.5,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
-        "datum": "2026-10-18",
-        "mm": 0.16
+        "datum": "2026-10-20",
+        "mm": 0.75
       },
       "methode": "bilinear, 50.5056N 8.6227E"
     },
@@ -507,8 +531,8 @@
       "lon": 7.2066,
       "datum": "2026-10-20",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_ok": 20,
+      "stunden_erwartet": 20,
       "stunden": [
         {
           "stunde": "01:00",
@@ -580,6 +604,14 @@
         },
         {
           "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "20:00",
           "mm": 0.0
         }
       ],
