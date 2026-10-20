@@ -1076,6 +1076,24 @@ das schon Gemessene hinzu). (2) Antwortet Open-Meteo dem geteilten Runner mit
 nichts Falsches eingetragen. Lokal getestet mit eingespielter Luftabfrage
 (die eigene Abfrage der App scheitert im Pruefstand).
 
+**20.10.2026: Laufzeiten repariert, Befund systematisch.** GitHub startete die
+geplanten Laeufe 3-5 h zu spaet (07:20 -> 12:11, 22:05 -> 01:28 am Folgetag),
+und die Rolle hing an der Uhrzeit: der verspaetete Morgenlauf verbuchte als
+"gemessenes Maximum" den Stand VOR der Tagesspitze (20.10.: 1,46 statt ~2,1).
+Jetzt entscheidet der SONNENSTAND (`fenster()`, Auf-/Untergang aus der App):
+morgens bis 2 h nach Aufgang und solange gemessen < 0,5, abends ab 1 h vor
+Untergang bis Mitternacht; ausserhalb wird nichts eingetragen. Je drei
+Cron-Laeufe pro Fenster (:37/:43, nicht :00/:05). Neue Eintraege tragen
+`gueltig`; alte Abendlaeufe vor 13:00 gelten als ungueltig (`_gilt`).
+Ergebnis mit 12 gueltigen Tagen: Morgenprognose an ALLEN 12 Tagen unter dem
+gemessenen Maximum (Vorzeichentest p ~ 0,0005), Bias -0,28 UV (-14 %), klare
+Tage 1-5 %, Tage mit Wolkenluecken 25-40 %. Vermutete Ursache: Jensen - MOSMIX
+`solar` ist ein Stundenmittel (Erwartungswert ueber Sonne und Wolke), die
+Tagesspitze ein Maximum ueber 10-Minuten-Werten; E[max] >= max E. Naechster
+Schritt (Nutzer zugestimmt, steht aus): Spitze aus Stunden mit erwarteter
+Sonne (MOSMIX `sunshine` >= ~10 min) mit Klar-Durchlass rechnen, nur fuer die
+Zahl "erw.", nicht fuer die Saeulen - dann 2-3 Wochen vorwaerts vergleichen.
+
 ### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
 
 Das Jahresbild zeigt jetzt zwei Flaechen: hellgruen UV >= 3 bei klarem Himmel,
