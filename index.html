@@ -177,7 +177,8 @@ html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
 .kz .ki .v:has(.kzbal),.kz .ki .kzwe>span:has(.kzbal){overflow:visible}
 /* v5.17: Tagessaeulen der Kachel "7 Tage" - je Tag eine Spalte, Wochenende
    leicht hinterlegt, ab Tag 8 blass (unsichere Vorhersage) mit Trennstrich */
-.kz .kzbal .kzbw b{flex:1 1 0;min-width:1px;height:100%;display:flex;align-items:flex-end}
+.kz .kzbal .kzbw b{flex:1 1 0;min-width:1px;height:100%;display:flex;align-items:flex-end;padding-bottom:8px;box-sizing:border-box}   /* v5.18: unten 8 px fuer "Sa So" */
+.kz .kzbal .kzbwt{position:absolute;bottom:0;font-size:7px;line-height:8px;font-weight:700;color:var(--muted);text-align:center;white-space:nowrap;letter-spacing:0;z-index:1}
 .kz .kzbal .kzbw b.we{background:rgba(45,70,150,.12)}
 .kz .kzbal .kzbw b>i{flex:1 1 auto}
 .kz .kzbal .kzbw b.un>i{opacity:.4}
@@ -1020,7 +1021,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.17</span>
+      <span class="ver">v5.18</span>
     </div>
   </header>
 
@@ -4602,12 +4603,21 @@ function kzRegenGrafik(H){
    Skala, damit ein nasser Tag die anderen nicht flach drueckt); darueber
    gedeckelt. Wochenende hinterlegt, damit man die Tage zuordnen kann. */
 function kzTageGrafik(T){
-  const n=T.length,H=27,cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
+  /* v5.18 (Nutzer: "Grau verstehe ich nicht"): die hinterlegten Spalten sind das
+     Wochenende - jetzt mit "Sa So" darunter wie an einer Achse. UNTEN statt oben
+     (Nutzer schlug oben vor): 9 Folgetage enthalten immer ein Wochenende, oben
+     stiesse es also jedes Mal an "unsicher". Saeulen dafuer 20 statt 27 px. */
+  const n=T.length,H=20,cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
     const kl=[(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
     const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*H))}px"></i>`:`<i class="tr"></i>`;
     return `<b${kl?` class="${kl}"`:""}>${bar}</b>`;}).join("");
   const un=n>=14?`<b class="kzbu">unsicher</b>`:"";   // rechtsbuendig: der blasse Teil ist ~41 px breit, das Wort ~38
-  return `&nbsp;<span class="kzbal">${un}<span class="kzbb kzbw">${cols}</span></span>`;
+  // Wochenend-Gruppen (Sa+So, am Rand auch einzeln): Beschriftung mittig unter der Gruppe, am Rand geklemmt
+  const wd=T.map(x=>new Date(x.t+"T12:00").getDay()),gr=[];
+  wd.forEach((d,i)=>{if(d!==0&&d!==6)return;const g=gr[gr.length-1];if(g&&g[1]===i-1)g[1]=i;else gr.push([i,i]);});
+  const wt=gr.map(([a,b])=>{const txt=wd.slice(a,b+1).map(d=>d===6?"Sa":"So").join(" "),w=b>a?22:10,c=(a+b+1)/2/n*100;   // gemessen bei 7 px: "Sa So" 22 px, "Sa" 10 px
+    return `<b class="kzbwt" style="width:${w}px;left:clamp(0px,calc(${c.toFixed(2)}% - ${w/2}px),calc(100% - ${w}px))">${txt}</b>`;}).join("");
+  return `&nbsp;<span class="kzbal">${un}<span class="kzbb kzbw">${cols}</span>${wt}</span>`;
 }
 const KZ_SONNE='<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="#e0a100"/><g stroke="#e0a100" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>';
 const KZ_MOND='<svg width="8" height="9" viewBox="0 0 10 10" aria-hidden="true"><path class="kzmd" d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z"/></svg>';

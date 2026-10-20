@@ -1380,3 +1380,11 @@ mit overflow:visible. Am iPhone noch nicht bestaetigt (kein WebKit im Pruefstand
 Pruefstand: Chromium kommt nicht selbst ins Netz; `netz.py` im Scratchpad leitet
 alle Abrufe per `page.route` ueber Python (Proxy + CA-Bundle) - so laeuft die
 App mit ECHTEN Daten.
+v5.18 (Nutzer: "grauen Hintergrund verstehe ich nicht" -> "mini klein Sa und So"):
+unter den hinterlegten Wochenend-Spalten steht "Sa So" (`.kzbwt`, 7 px, wie
+eine Achse; einzeln "Sa"/"So" am Rand), mittig unter der Gruppe, per CSS
+`clamp()` im Streifen gehalten. Gemessen: "Sa So" 22 px, "Sa" 10 px - die Schrift
+ist breiter als die beiden Spalten (~9 px), steht also mittig darunter.
+UNTEN statt oben (Nutzer schlug oben vor): 9 Folgetage enthalten immer ein
+Wochenende, oben stiesse es jedes Mal an "unsicher". Saeulen dafuer 20 statt
+27 px hoch (8 px Schriftzeile). Geprueft mit Beginn Di/Fr/Sa/So, hell und dunkel.
