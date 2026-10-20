@@ -1,19 +1,19 @@
 {
- "stand": "2026-10-18",
+ "stand": "2026-10-19",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0067,
+   "steigung": 0.0065,
    "fehler": 0.0096,
-   "t": 0.7
+   "t": 0.68
   },
   "hoehe": {
-   "steigung": 0.0143,
-   "fehler": 0.0389,
-   "t": 0.37
+   "steigung": 0.015,
+   "fehler": 0.0388,
+   "t": 0.39
   },
   "mittel": 0.974,
-  "reststreuung": 0.096,
+  "reststreuung": 0.095,
   "schwelle_t": 3.0,
   "alarm": false,
   "hinweis": "kein Trend"
@@ -33,28 +33,28 @@
    "bis": "2026-10-16"
   },
   "Berlin": {
-   "faktor": 1.087,
-   "roh": 1.089,
-   "tage": 16,
+   "faktor": 1.086,
+   "roh": 1.088,
+   "tage": 17,
    "vorlaeufig": false,
-   "streuung": 0.055,
-   "klare_tage": 10,
+   "streuung": 0.057,
+   "klare_tage": 11,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-17",
-   "bis": "2026-10-16"
+   "bis": "2026-10-19"
   },
   "Bonn": {
-   "faktor": 0.947,
-   "roh": 0.945,
-   "tage": 11,
+   "faktor": 0.939,
+   "roh": 0.937,
+   "tage": 12,
    "vorlaeufig": false,
    "streuung": 0.04,
-   "klare_tage": 11,
+   "klare_tage": 12,
    "teiltage": 0,
    "teiltage_verworfen": 5,
    "von": "2026-09-06",
-   "bis": "2026-10-16"
+   "bis": "2026-10-19"
   },
   "Chieming": {
    "faktor": 1.092,
@@ -69,16 +69,16 @@
    "bis": "2026-10-16"
   },
   "Duderstadt_B": {
-   "faktor": 0.882,
-   "roh": 0.879,
-   "tage": 16,
+   "faktor": 0.892,
+   "roh": 0.887,
+   "tage": 10,
    "vorlaeufig": false,
-   "streuung": 0.042,
+   "streuung": 0.034,
    "klare_tage": 10,
-   "teiltage": 6,
-   "teiltage_verworfen": 0,
-   "von": "2026-09-05",
-   "bis": "2026-10-16"
+   "teiltage": 0,
+   "teiltage_verworfen": 7,
+   "von": "2026-09-06",
+   "bis": "2026-10-05"
   },
   "Eckernfoerde": {
    "faktor": 1.063,
@@ -105,16 +105,16 @@
    "bis": "2026-10-16"
   },
   "Giessen-Wettenberg": {
-   "faktor": 1.059,
-   "roh": 1.06,
-   "tage": 21,
+   "faktor": 1.057,
+   "roh": 1.058,
+   "tage": 22,
    "vorlaeufig": false,
-   "streuung": 0.043,
-   "klare_tage": 10,
+   "streuung": 0.047,
+   "klare_tage": 11,
    "teiltage": 11,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-12"
+   "bis": "2026-10-19"
   },
   "Goerlitz": {
    "faktor": 0.948,
@@ -165,28 +165,28 @@
    "bis": "2026-10-16"
   },
   "Lindenberg": {
-   "faktor": 1.12,
-   "roh": 1.123,
-   "tage": 15,
+   "faktor": 1.124,
+   "roh": 1.127,
+   "tage": 16,
    "vorlaeufig": false,
    "streuung": 0.049,
-   "klare_tage": 11,
+   "klare_tage": 12,
    "teiltage": 4,
    "teiltage_verworfen": 0,
    "von": "2026-09-15",
-   "bis": "2026-10-16"
+   "bis": "2026-10-19"
   },
   "Salzgitter": {
-   "faktor": 0.937,
+   "faktor": 0.936,
    "roh": 0.935,
-   "tage": 18,
+   "tage": 19,
    "vorlaeufig": false,
-   "streuung": 0.051,
-   "klare_tage": 12,
+   "streuung": 0.055,
+   "klare_tage": 13,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-10-16"
+   "bis": "2026-10-19"
   },
   "Schweinfurt_Wasserlosen": {
    "faktor": 0.8,
@@ -201,16 +201,16 @@
    "bis": "2026-10-15"
   },
   "Stuttgart": {
-   "faktor": 0.939,
-   "roh": 0.938,
-   "tage": 23,
+   "faktor": 0.94,
+   "roh": 0.939,
+   "tage": 24,
    "vorlaeufig": false,
-   "streuung": 0.024,
+   "streuung": 0.023,
    "klare_tage": 19,
-   "teiltage": 4,
+   "teiltage": 5,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-16"
+   "bis": "2026-10-19"
   },
   "Wurmberg_B": {
    "faktor": 1.137,
@@ -220,7 +220,7 @@
    "streuung": 0.042,
    "klare_tage": 10,
    "teiltage": 0,
-   "teiltage_verworfen": 6,
+   "teiltage_verworfen": 7,
    "von": "2026-09-06",
    "bis": "2026-10-05"
   },
@@ -237,16 +237,16 @@
    "bis": "2026-10-16"
   },
   "Zirchow": {
-   "faktor": 1.08,
-   "roh": 1.085,
-   "tage": 7,
+   "faktor": 1.078,
+   "roh": 1.082,
+   "tage": 8,
    "vorlaeufig": false,
-   "streuung": 0.033,
-   "klare_tage": 7,
+   "streuung": 0.044,
+   "klare_tage": 8,
    "teiltage": 0,
    "teiltage_verworfen": 1,
    "von": "2026-09-22",
-   "bis": "2026-10-13"
+   "bis": "2026-10-19"
   }
  }
 }
