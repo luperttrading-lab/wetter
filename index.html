@@ -1005,7 +1005,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.14</span>
+      <span class="ver">v5.15</span>
     </div>
   </header>
 
@@ -1111,10 +1111,9 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
     <div class="loc-row hidden" id="locConfGrp"><button type="button" id="locConfBack" class="loc-btn">&larr; Zur&uuml;ck</button><button type="button" id="locConfGo" class="loc-btn loc-pri">Diesen Ort verwenden</button></div>
     <div id="locActGrp">
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
-    <div class="loc-quick">Direkt wechseln &ndash; ohne &bdquo;&Uuml;bernehmen&ldquo;:</div>
-    <div class="loc-row"><button type="button" id="locWtb" class="loc-btn loc-go">Wettenberg</button><button type="button" id="locHtb" class="loc-btn loc-go">Hüttenberg</button><button type="button" id="locNdd" class="loc-btn loc-go">Norden</button></div>
-    <div class="loc-row"><button type="button" id="locMuc" class="loc-btn loc-go">M&uuml;nchen</button><button type="button" id="locKie" class="loc-btn loc-go">Kiel</button></div>
-    <div id="locZulWrap" class="hidden"><div class="loc-quick">Zuletzt verwendet:</div><div class="loc-row loc-zul" id="locZul"></div></div>
+    <div class="loc-quick">Zuletzt verwendet &ndash; direkt wechseln:</div>
+    <div class="loc-row loc-zul" id="locZul"></div>
+    <div class="loc-hint hidden" id="locZulLeer">Hier erscheinen die Orte, die du &uuml;bernimmst &ndash; ein Tipp wechselt dann direkt dorthin.</div>
     </div>
     <div class="loc-row" id="locBtnGrp"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
     </div>
@@ -1129,10 +1128,6 @@ var satellite=(()=>{var _o=Object.defineProperty;var r0=Object.getOwnPropertyDes
 "use strict";
 /* ===== Standort-Profil: URL-Parameter ?lat&lon&name > localStorage locProfile > Default Wettenberg ===== */
 const LOC_WETTENBERG={lat:50.6481,lon:8.6743,name:"Wettenberg",isWettenberg:true,tz:"Europe/Berlin"};
-const LOC_NORDDEICH={lat:53.5941,lon:7.2066,name:"Norden",isWettenberg:false,tz:"Europe/Berlin"};   // v2.93: Stadt Norden statt des Ortsteils Norddeich (OSM 53°35′38,76″N / 7°12′23,76″O)
-const LOC_MUENCHEN={lat:48.1374,lon:11.5755,name:"M\u00fcnchen",isWettenberg:false,tz:"Europe/Berlin"};   // v2.55
-const LOC_KIEL={lat:54.3233,lon:10.1394,name:"Kiel",isWettenberg:false,tz:"Europe/Berlin"};
-const LOC_HUETTENBERG={lat:50.5055647,lon:8.6226918,name:"H\u00fcttenberg",isWettenberg:false,tz:"Europe/Berlin"};   // v3.01: Punkt von Lutz vorgegeben
 function _locSan(x){return String(x==null?"":x).replace(/[<>&"'`]/g,"").slice(0,40);}
 /* Zeitzonenname nur uebernehmen, wenn Intl ihn wirklich kennt — sonst wirft
    jedes spaetere toLocaleString einen RangeError und die App steht. */
@@ -1156,12 +1151,12 @@ function loadLoc(){
   return LOC_WETTENBERG;
 }
 const LOC=loadLoc();
-/* v5.14 (Nutzer): die zuletzt verwendeten Orte, hoechstens 6, neuester zuerst.
+/* v5.14 (Nutzer): die zuletzt verwendeten Orte, neuester zuerst (v5.15: 8).
    Gemerkt beim Wechseln: der neue Ort UND der verlassene - so ist der vorige
    Ort immer einen Tipp entfernt, auch wenn er vor v5.14 eingestellt wurde.
-   Die festen Orte (Wettenberg ... Kiel) stehen schon als Knoepfe da und
-   fallen raus; gleich = auf 0,01 Grad (rund 1 km). */
-const LOC_FEST=[LOC_WETTENBERG,LOC_HUETTENBERG,LOC_NORDDEICH,LOC_MUENCHEN,LOC_KIEL];
+   v5.15 (Nutzer): die fuenf festen Orte (Wettenberg, Huettenberg, Norden,
+   Muenchen, Kiel) sind weg, es gibt nur noch diese Liste. Gleich = auf
+   0,01 Grad (rund 1 km). */
 const locGleich=(a,b)=>!!(a&&b)&&Math.abs(a.lat-b.lat)<0.01&&Math.abs(a.lon-b.lon)<0.01;
 function locZulLesen(){
   try{const a=JSON.parse(localStorage.getItem("locZuletzt")||"[]");if(!Array.isArray(a))return [];
@@ -1174,10 +1169,10 @@ function locZulMerken(neu,alt){
   const a=[];
   for(const o of [neu,alt,...locZulLesen()]){
     if(!o||!isFinite(+o.lat)||!isFinite(+o.lon))continue;
-    if(LOC_FEST.some(f=>locGleich(f,o))||a.some(x=>locGleich(x,o)))continue;
+    if(a.some(x=>locGleich(x,o)))continue;
     a.push({lat:+o.lat,lon:+o.lon,name:_locSan(o.name),tz:o.tz});
   }
-  locZulSchreiben(a.slice(0,6));
+  locZulSchreiben(a.slice(0,8));
 }
 const LOC_KEY="_"+LOC.lat.toFixed(2)+"_"+LOC.lon.toFixed(2); // Cache-Suffix pro Standort
 /* Wetter-Koordinaten: im Wettenberg-Profil stationsnah (DWD 01639), sonst = Standort */
@@ -9878,14 +9873,14 @@ load();
     msg.textContent="";delete ap.dataset.warned;locZulZeigen();ov.classList.remove("hidden");};
   /* v5.14: Zuletzt verwendete Orte als Knoepfe, direkt wechseln wie die festen.
      Der aktuelle Ort fehlt (dorthin wechseln ist sinnlos). Das x rechts
-     entfernt einen Eintrag, ohne zu wechseln. */
+     entfernt einen Eintrag nach Rueckfrage (v5.15), ohne zu wechseln. */
   function locZulZeigen(){
-    const box=el("locZul"),w=el("locZulWrap"),a=locZulLesen().filter(o=>!locGleich(o,LOC)&&!LOC_FEST.some(f=>locGleich(f,o)));
-    box.innerHTML="";w.classList.toggle("hidden",!a.length);
+    const box=el("locZul"),a=locZulLesen().filter(o=>!locGleich(o,LOC));
+    box.innerHTML="";el("locZulLeer").classList.toggle("hidden",!!a.length);
     a.forEach(o=>{const b=document.createElement("button");b.type="button";b.className="loc-btn loc-go";
       b.textContent=o.name;const x=document.createElement("span");x.className="loc-x";x.textContent="\u00d7";
       x.setAttribute("role","button");x.setAttribute("aria-label",o.name+" aus der Liste entfernen");b.appendChild(x);
-      b.onclick=e=>{if(e.target===x){locZulSchreiben(locZulLesen().filter(y=>!locGleich(y,o)));locZulZeigen();return;}saveGo(o);};
+      b.onclick=e=>{if(e.target===x){if(!confirm("\u201e"+o.name+"\u201c aus der Liste l\u00f6schen?"))return;locZulSchreiben(locZulLesen().filter(y=>!locGleich(y,o)));locZulZeigen();return;}saveGo(o);};
       box.appendChild(b);});
   }
   const hide=()=>ov.classList.add("hidden");
@@ -9952,11 +9947,6 @@ load();
       to
     ]).then(j=>{const t=_tzSan(j&&j.timezone);if(t)p.tz=t;}).catch(()=>{}).then(fertig);
   }
-  el("locWtb").onclick=()=>saveGo(LOC_WETTENBERG);
-  el("locHtb").onclick=()=>saveGo(LOC_HUETTENBERG);
-  el("locNdd").onclick=()=>saveGo(LOC_NORDDEICH);
-  el("locMuc").onclick=()=>saveGo(LOC_MUENCHEN);
-  el("locKie").onclick=()=>saveGo(LOC_KIEL);
   ap.onclick=()=>{
     const la=parseFloat(String(el("locLat").value).trim().replace(",",".")),
           lo=parseFloat(String(el("locLon").value).trim().replace(",","."));
