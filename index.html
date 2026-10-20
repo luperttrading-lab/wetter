@@ -151,6 +151,19 @@ html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 #erstStartBalken{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;
   background:#1e293b;color:#fff;font-size:13.5px;line-height:1.3;padding:10px 12px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 #erstStartBalken button{font:inherit;font-weight:700;background:#fff;color:#1e293b;border:0;border-radius:10px;padding:7px 11px}
+/* v5.10: Stundenbalken in "Regen 24 h" - steht in der Zeile des Werts und ragt
+   ueber die (leere) Unterzeile, damit die Kachel nicht hoeher wird */
+/* absolut zur Kachel (.ki ist position:relative) - so beeinflusst die Grafik
+   die Zeilenhoehen nicht, und das overflow:hidden der Zeile schneidet nicht */
+.kz .kzbal{position:absolute;left:8px;right:13px;top:25px;bottom:7px;border-radius:4px;overflow:hidden}
+.kz .kzbal .kzbn{position:absolute;top:0;bottom:0;background:rgba(40,56,90,.10)}
+.kz .kzbal .kzbm{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(40,56,90,.35)}
+.kz .kzbal .kzbt{position:absolute;top:1px;font-size:8.5px;line-height:1;font-weight:700;color:var(--muted);letter-spacing:0;z-index:1}
+.kz .kzbal .kzbb{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
+.kz .kzbal .kzbb i{flex:1 1 0;min-width:1px;background:#3a8fd8;border-radius:1px 1px 0 0}
+.kz .kzbal .kzbb i.tr{height:1px;background:rgba(92,107,128,.35)}
+html.dunkel .kz .kzbal .kzbn{background:rgba(0,0,0,.28)}
+html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
 .kz .ki .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -983,7 +996,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.09</span>
+      <span class="ver">v5.10</span>
     </div>
   </header>
 
@@ -4490,6 +4503,26 @@ const kzHM=ms=>new Date(ms).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2
 const kzRichtung=g=>(g==null||isNaN(g))?"":["N","NO","O","SO","S","SW","W","NW"][Math.round(((+g%360)+360)%360/45)%8];
 const kzUvStufe=u=>u<3?"niedrig":u<6?"mäßig":u<8?"hoch":u<11?"sehr hoch":"extrem";
 const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="11" aria-label="Regen"><path d="M6 1C4 5 1.5 8 1.5 10.6a4.5 4.5 0 0 0 9 0C10.5 8 8 5 6 1z" fill="#3b82f6"/></svg>';
+/* v5.10: Stundenbalken fuer "Regen 24 h". H = 24 Open-Meteo-Stunden, Wert mit
+   Stempel t = Regen von t-1h bis t; der Streifen reicht also von H[0].t-1h bis
+   H[23].t. Hintergrund: Nacht (Sonne unter dem Horizont) leicht dunkler,
+   Mitternacht als Strich mit dem Wochentag. Volle Hoehe ab 1 mm/h, damit
+   Niesel flach bleibt. HTML statt SVG - ein gestrecktes SVG verzerrt Schrift. */
+function kzRegenGrafik(H){
+  const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
+  let bg="";
+  /* Nachtstreifen aus Auf- und Untergaengen von gestern bis uebermorgen */
+  try{const ev=[];for(let k=-1;k<=2;k++){const d=new Date(W0+k*864e5),r=sunMoment(d,true),u=sunMoment(d,false);if(r!=null&&u!=null)ev.push([r,u]);}
+    ev.sort((a,b)=>a[0]-b[0]);
+    for(let i=0;i+1<ev.length;i++){const a=ev[i][1],b=ev[i+1][0];   // Untergang bis naechster Aufgang
+      if(b<=W0||a>=W1)continue;bg+=`<i class="kzbn" style="left:${pc(a).toFixed(1)}%;width:${(pc(b)-pc(a)).toFixed(1)}%"></i>`;}}catch(e){}
+  /* Mitternacht */
+  for(const x of H){const b=x.t-36e5;if(b>W0&&ortsStunde(b)===0){const L=pc(b);
+    bg+=`<i class="kzbm" style="left:${L.toFixed(1)}%"></i><b class="kzbt" style="${L>78?`right:${(100-L+3).toFixed(1)}%`:`left:calc(${L.toFixed(1)}% + 2px)`}">${kzWtag(b)}</b>`;}}
+  const sk=Math.max(1,...H.map(x=>x.mm));
+  const bars=H.map(x=>x.mm>=0.1?`<i style="height:${Math.max(2,Math.round(x.mm/sk*22))}px"></i>`:`<i class="tr"></i>`).join("");
+  return `&nbsp;<span class="kzbal">${bg}<span class="kzbb">${bars}</span></span>`;
+}
 const kzStaerke=v=>v<0.5?"sehr leicht":v<2.5?"leicht":v<10?"mäßig":"stark";
 const kzLetzte=()=>(typeof lastRows!=="undefined"&&lastRows&&lastRows.length)?lastRows.at(-1):null;
 /* v4.68: UV-Stufe als Farbe statt Wort (das Wort passte nicht mehr in die
@@ -4930,8 +4963,11 @@ const KZ_DEF={
     // v4.76: precipitation gilt fuer die Stunde VOR dem Stempel - Beginn = Stempel - 1 h (vorher eine Stunde zu spaet)
     // v4.82 (Nutzer): "ab 04:00" ohne Tag las sich wie heute - liegt der Beginn morgen, wechselt die Unterzeile "morgen" / Menge
     const b0=H[fr].t-36e5,morgen=b0>now&&ymd(new Date(b0))!==ymd(new Date(now));
-    return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`}]}
-                 :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`};}},
+    /* v5.10 (Nutzer): zweite Ansicht = Stundenbalken der 24 Stunden ab jetzt,
+       an Stelle von Wert und Unterzeile - die Kachel wird nicht hoeher. */
+    const gr={v:kzRegenGrafik(H),s:""};
+    return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`},gr]}
+                 :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
   regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"bilanzSec",alt:"fcSec"},r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
     const w=T.filter(x=>x.t>=h).slice(0,7);if(!w.length)return null;const sum=w.reduce((a,x)=>a+(+x.mm||0),0),n=w.filter(x=>(+x.mm||0)>=0.5).length;
     // v4.77: Zusatz = welche Tage nass sind, Folgen zusammengefasst ("Do–Sa, Mo"); zu lang -> kein Zusatz

@@ -490,6 +490,19 @@ Bright Sky, nur vergangene Stempel; erwartet: Open-Meteo, Rueckfall MOSMIX)
 oder "Beispiel: Schauertag". Balken 16 px hoch, volle Hoehe ab 1 mm/h,
 dunkelblau gefallen, hellblau erwartet, roter Strich jetzt. Wahl steht aus.
 
+v5.10 (Nutzer nach regentest.html: nicht doppelt breit, nicht 0-24 Uhr,
+sondern ab JETZT 24 Stunden; Tag/Nacht eingefaerbt; Grafik als ZWEITE
+ANSICHT statt darunter, damit die Kachel nicht hoeher wird): Kachel
+"Regen 24 h" wechselt Text <-> Stundenbalken (`kzRegenGrafik(H)`, dieselben
+24 Stunden wie Text und Abschnitt). Nacht = Sonnenuntergang bis -aufgang
+(`sunMoment`, gestern bis uebermorgen) leicht dunkler, Mitternacht als
+Strich mit Wochentag ("Mi"), volle Hoehe ab 1 mm/h. Die Grafik liegt
+ABSOLUT in der Kachel (`.kzbal`, top 25 px, Rechts 13 px frei fuer die
+Punkte) - im Fluss der Wertzeile machte sie die Zeile hoeher bzw. wurde vom
+overflow:hidden der Zeile beschnitten. Kachelhoehe gleich den Nachbarn
+(61 px). Nur Tests mit eingespielten Stundenwerten (Open-Meteo aus dem
+Pruefstand nicht erreichbar). `regentest.html` bleibt als Archiv.
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist
