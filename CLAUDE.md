@@ -447,6 +447,18 @@ die Beschriftung schon (10 px). Planet: Zeit = Erscheinen des Planeten
 ("jetzt im" = jetzt); Wolken ausserhalb `kzMerk`, weil sie nach der Rechnung
 kommen. ISS ab 72 h ohne Wolke (Vorhersage zu unsicher).
 
+v5.07 (Nutzer: Textpruefung aller Kachelzustaende, jede Kachel als Satz
+gelesen wie beim ISS-Fall). Geaendert: ISS "53° · 6 min" -> "ab SW · 6 min"
+(Grad las sich als Temperatur; ab 10 min "SW · 12 min"); Planet "ab 03:33 O"
+-> "03:33 im O" (einzelnes O wie Null; "ab 03:33 im SO" 94 px zu breit);
+Morgen "2,5 mm" -> Tropfen + "2,5 mm" (`KZ_TROPFEN`; "2,5 mm Regen" braucht
+89 px, Platz 78 - das Wort fiel deshalb IMMER weg); Pollen "keine / DWD-Index"
+-> "keine / heute", morgen "keine / erwartet". Gemessen bei 375 pt
+(`p507m.py`: Text in eine Kachel, Breite gegen Platz). NICHT geaendert, weil
+vom Nutzer gewaehlt oder zu breit: UV "klar 3,5" / "erw." / "gem."
+("wolkenlos 3,5" passt nur auf 88 %), Wind "Boeen 35 · S" (Richtung = woher;
+"aus SW" passt dreistellig nicht).
+
 v4.76 (Nutzer): Wechsel mit BELIEBIG vielen Varianten. Eine Kachel liefert
 `alt:[{l?,v?,s?},...]` (oder weiter `v2`/`s2`); `kzVarianten(x)` macht daraus
 eine Liste, `kzZeile(k,arr)` legt alle Texte in eine Zelle, sichtbar ist

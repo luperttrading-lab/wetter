@@ -148,6 +148,7 @@ html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 .kz .k{position:relative;min-width:0;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;cursor:pointer}
 .kz .k{display:flex}.kz .k>.ki{flex:1 1 auto}   /* v4.65: Kacheln einer Reihe gleich hoch, wenn eine umbricht */
 .kz .ki{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;min-width:0}   /* v4.67: 3 px mehr Textbreite */
+.kz .kztropfen{vertical-align:-1px;margin-right:2px}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
 .kz .ki .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kz .ki .v{font-size:14.5px;letter-spacing:-.01em;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -966,7 +967,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.06</span>
+      <span class="ver">v5.07</span>
     </div>
   </header>
 
@@ -4411,11 +4412,11 @@ function kzPollen(){
     /* "morgen" + Pille braucht 91-108 px, die Drittelkachel hat 78 (375 pt);
        "POLLEN MORGEN" passt auch nicht. Darum der Wochentag in der Beschriftung. */
     const hz=tzTeile(Date.now()),wt=["So","Mo","Di","Mi","Do","Fr","Sa"][new Date(Date.UTC(hz.year,hz.month-1,hz.day+1)).getUTCDay()];
-    if(mo)alt.push(mo.length?{l:"Pollen "+wt,v:mo[0].n,s:polPille(mo[0].w,mo[0].t)}:{l:"Pollen "+wt,v:"keine",s:"DWD-Index"});
-    if(!h.length)return {l:"Pollen",v:"keine",s:"DWD-Index",alt};
+    if(mo)alt.push(mo.length?{l:"Pollen "+wt,v:mo[0].n,s:polPille(mo[0].w,mo[0].t)}:{l:"Pollen "+wt,v:"keine",s:"erwartet"});
+    if(!h.length)return {l:"Pollen",v:"keine",s:"heute",alt};   // v5.07: "keine / DWD-Index" war Fachsprache
     return {l:"Pollen",v:h[0].n,s:polPille(h[0].w,h[0].t),alt};}
   if(_pollenCams){
-    if(!_pollenCams.length)return {l:"Pollen",v:"keine",s:"Modell CAMS"};
+    if(!_pollenCams.length)return {l:"Pollen",v:"keine",s:"heute"};
     const [n,v]=_pollenCams[0],[pc,col]=pollenCat(v);
     return {l:"Pollen",v:n,s:`<span class="kzuv" style="background:${col};color:#1c2a1a">${pc}</span>`};}
   return {l:"Pollen",v:"–",s:"lädt"};
@@ -4442,6 +4443,7 @@ const kzR0=v=>(v==null||isNaN(v))?"–":String(Math.round(v));
 const kzHM=ms=>new Date(ms).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
 const kzRichtung=g=>(g==null||isNaN(g))?"":["N","NO","O","SO","S","SW","W","NW"][Math.round(((+g%360)+360)%360/45)%8];
 const kzUvStufe=u=>u<3?"niedrig":u<6?"mäßig":u<8?"hoch":u<11?"sehr hoch":"extrem";
+const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="11" aria-label="Regen"><path d="M6 1C4 5 1.5 8 1.5 10.6a4.5 4.5 0 0 0 9 0C10.5 8 8 5 6 1z" fill="#3b82f6"/></svg>';
 const kzStaerke=v=>v<0.5?"sehr leicht":v<2.5?"leicht":v<10?"mäßig":"stark";
 const kzLetzte=()=>(typeof lastRows!=="undefined"&&lastRows&&lastRows.length)?lastRows.at(-1):null;
 /* v4.68: UV-Stufe als Farbe statt Wort (das Wort passte nicht mehr in die
@@ -4761,7 +4763,9 @@ const KZ_DEF={
     // v4.67: "Teils bewölkt · 2,3 mm" brach um - bei Regen die Menge, das Wort nur, wenn es kurz ist
     const KW={"Schneegriesel":"Griesel","Schneeschauer":"Schnee","Gefr. Niesel":"Glätte","Gefr. Regen":"Glatteis","Starkschauer":"Schauer"};
     const w=KW[wc]||wc,mmT=x.mm>=0.5?kzF1(x.mm)+" mm":"",wichtig=/Gewitter|Schnee|Griesel|Glät|Glatt/.test(w);
-    return {l:"Morgen",v:`<span class="dn">${kzR0(x.lo)}°</span> / <span class="up">${kzR0(x.hi)}°</span>`,s:wichtig||!mmT?w:(mmT+" Regen").length<=10?mmT+" Regen":mmT};}},
+    /* v5.07 (Textpruefung): "2,5 mm Regen" passt nie (89 px, Platz 78), es stand
+       nur "2,5 mm" da. Ein Tropfen davor sagt "Regen" in 8 px. */
+    return {l:"Morgen",v:`<span class="dn">${kzR0(x.lo)}°</span> / <span class="up">${kzR0(x.hi)}°</span>`,s:wichtig||!mmT?w:KZ_TROPFEN+mmT};}},
   druck:{name:"Luftdruck",ziel:{label:"Luftdruck",text:"Details"},r(){const r=kzLetzte();if(!r||r.pressure_msl==null)return null;const p=+r.pressure_msl,p3=_kz.hero&&_kz.hero.d?_kz.hero.d.press3:null;
     if(p3==null)return {l:"Luftdruck",v:`${kzR0(p)} hPa`,s:"Tendenz fehlt"};const d=p-p3;const pf=d>0.5?'<span class="up">↑</span>':d<-0.5?'<span class="dn">↓</span>':"→";
     return {l:"Luftdruck",v:`${kzR0(p)} ${pf}`,s:`${d>=0?"+":"−"}${fmt1(Math.abs(d))} in 3 h`};}},
@@ -4820,7 +4824,11 @@ const KZ_DEF={
       return {l:"ISS",v:`in ${tage} Tagen`,s:tage>=7?`${wt} ${d.getDate()}.${d.getMonth()+1}.`:wt+" ~"+issTime(p.start)};}   // ab 7 Tagen nur das Datum ("18.10. ~19:31" brach um)
     // v4.67: Tag in die Beschriftung ("ISS MORGEN"), sonst brach "Morgen 19:16" um
     const w=kzWolke(p.start.getTime());
-    return {l:"ISS "+tag,v:kzBlass(issTime(p.start),w),s:`${Math.round(p.maxEl)}° · ${Math.max(1,Math.round(p.durSec/60))} min`};}},
+    /* v5.07 (Textpruefung): "53° · 6 min" las sich in einer Wetter-App wie eine
+       Temperatur. Jetzt die Richtung, in die man schaut ("ab SW" = taucht im SW
+       auf); ab 10 min ohne "ab" (sonst zu breit). Die Hoehe steht im Abschnitt. */
+    const dm=Math.max(1,Math.round(p.durSec/60)),ri=kzRichtung(p.startAz);
+    return {l:"ISS "+tag,v:kzBlass(issTime(p.start),w),s:ri?(dm<10?`ab ${ri} · ${dm} min`:`${ri} · ${dm} min`):`${dm} min`};}},
   vitd:{name:"Vitamin-D-Fenster",kurz:"Vitamin D",ziel:{label:"Vitamin-D im Jahresverlauf",alt:"uvSec"},r(){
     let w=null;try{w=kzMerk("vitd",6e5,()=>vitdTag(new Date(),vitdKalib()));}catch(e){}
     if(!window.satellite)return null;
@@ -4863,7 +4871,7 @@ const KZ_DEF={
     if(!Array.isArray(L))return L;
     // v5.06: Wolken ausserhalb von kzMerk - sie kommen spaeter als die Rechnung
     const A=L.map(x=>{const w=kzWolke(x.jetzt?Date.now():x.t);   // v4.80: Punkte statt "1/3"
-      return {l:"Planet",v:kzBlass(P_NAME[x.b],w),s:(x.jetzt?"jetzt im ":"ab "+kzHM(x.t)+" ")+kzRichtung(x.az)};});
+      return {l:"Planet",v:kzBlass(P_NAME[x.b],w),s:(x.jetzt?"jetzt im ":kzHM(x.t)+" im ")+kzRichtung(x.az)};});   // v5.07: "ab 03:33 O" - das einzelne O las sich wie eine Null; "ab 03:33 im SO" ist zu breit
     return Object.assign({},A[0],{alt:A.slice(1)});
     }catch(e){return null;}}},
   regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},r(){
