@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Tag und Nacht — Varianten</title>
+<style>
+/* Vergleichsseite (20.10.2026): Tag/Nacht in den Stundenbalken der Kachel
+   "Bis 24 Uhr / 24 h". Kachelbreite wie in der App: dort ist das Kachelraster
+   bei 375 pt 305 px breit (Seite minus 70 px). */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee;--ki:rgba(255,255,255,.72);--karte:#fffdf9}
+html.dunkel{--ink:#e7edf5;--muted:#a3b2c6;--line:#33405a;--bg:#121821;--ki:rgba(255,255,255,.07);--karte:#1a212c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding:16px 0 calc(28px + env(safe-area-inset-bottom))}
+.rand{padding:0 16px}
+h1{font-size:20px;margin:4px 0 2px}
+.info{font-size:13px;color:var(--muted);margin:0 0 8px}
+.knoepfe{display:flex;gap:8px;margin:6px 0 2px}
+.knoepfe button{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:var(--karte);color:var(--ink);border-radius:10px;padding:7px 12px}
+.knoepfe button.an{background:#1e293b;color:#fff;border-color:#1e293b}
+.vari{margin:16px auto 0;width:calc(100vw - 70px)}
+.vari h2{font-size:15px;margin:0}
+.vari p{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.kz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ki{background:var(--ki);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;position:relative;height:61px;line-height:1.3}
+.l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden}
+.v{font-size:14.5px;font-weight:800;margin-top:2px;white-space:nowrap}
+.s{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap}
+.gross .ki{height:122px}
+.gross .l{font-size:12px}
+/* Grafik wie in der App */
+.bal{position:absolute;left:8px;right:13px;top:25px;bottom:7px;border-radius:4px;overflow:hidden}
+.gross .bal{top:30px}
+.bal .bb{position:absolute;inset:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
+.bal .bb i{flex:1 1 0;min-width:1px;background:#3a8fd8;border-radius:1px 1px 0 0}
+.bal .bb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.bal .seg{position:absolute;top:0;bottom:0}
+.bal .mn{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(40,56,90,.35)}
+html.dunkel .bal .mn{background:rgba(255,255,255,.3)}
+.bal .wt{position:absolute;top:1px;font-size:8.5px;line-height:1;font-weight:700;color:var(--muted);z-index:2}
+.bal .sym{position:absolute;top:1px;z-index:2;line-height:0}
+.bal .band{position:absolute;left:0;right:0;bottom:0;height:3px}
+.bal .band i{position:absolute;top:0;bottom:0}
+.bal.mitband .bb{bottom:4px}
+.leer{visibility:hidden}
+</style>
+</head>
+<body>
+<div class="rand">
+<h1>Tag und Nacht in den Stundenbalken</h1>
+<p class="info">Gleiche Beispieldaten in vier Formen: 24 Stunden ab 09:00, Sonnenuntergang 18:24, Aufgang 07:56, Mitternacht als Strich mit „Mi“. Oben jeweils in Originalgröße, darunter doppelt so groß zum genauen Hinsehen.</p>
+<div class="knoepfe" id="hd"><button type="button" data-m="hell" class="an">Hell</button><button type="button" data-m="dunkel">Dunkel</button></div>
+</div>
+<div id="liste"></div>
+
+<script>
+"use strict";
+const MM=[0,0,0,0,0,0,0,.1,0,0,.1,0,.2,.3,.3,0,.2,.3,.6,.5,0,0,0,.2];
+const START=9,SU=18.4,SA=7.93,pc=h=>(h/24*100).toFixed(2);
+const NA=SU-START,NB=24-START+SA,MN=24-START;   // Nacht und Mitternacht in Stunden ab Fensterbeginn
+const SONNE=c=>`<svg width="9" height="9" viewBox="0 0 10 10"><circle cx="5" cy="5" r="2.2" fill="${c}"/><g stroke="${c}" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>`;
+const MOND=c=>`<svg width="8" height="9" viewBox="0 0 10 10"><path d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z" fill="${c}"/></svg>`;
+const dunkel=()=>document.documentElement.classList.contains("dunkel");
+
+/* Varianten: jede liefert den Hintergrund (und ggf. Band/Symbole) */
+const V=[
+ {k:"A",t:"So wie jetzt",p:"Nacht leicht grau hinterlegt, Tag ohne Farbe.",
+  bg:()=>`<i class="seg" style="left:${pc(NA)}%;width:${pc(NB-NA)}%;background:${dunkel()?"rgba(0,0,0,.28)":"rgba(40,56,90,.10)"}"></i>`},
+ {k:"B",t:"Zwei Farben: Tag warm, Nacht blau",p:"Tag hellgelb, Nacht dunkelblau getönt. Man sieht beide Hälften, nicht nur eine.",
+  bg:()=>`<i class="seg" style="left:0;width:${pc(NA)}%;background:${dunkel()?"rgba(255,196,60,.13)":"rgba(255,190,40,.16)"}"></i>`
+        +`<i class="seg" style="left:${pc(NA)}%;width:${pc(NB-NA)}%;background:${dunkel()?"rgba(70,100,190,.30)":"rgba(45,70,150,.17)"}"></i>`
+        +`<i class="seg" style="left:${pc(NB)}%;width:${pc(24-NB)}%;background:${dunkel()?"rgba(255,196,60,.13)":"rgba(255,190,40,.16)"}"></i>`},
+ {k:"C",t:"Farbband unter den Balken",p:"Kein Hintergrund. Ein 3 px schmales Band an der Grundlinie: gelb = Tag, dunkelblau = Nacht – wie eine Zeitleiste.",band:true,
+  bg:()=>`<span class="band"><i style="left:0;width:${pc(NA)}%;background:#f2b705"></i><i style="left:${pc(NA)}%;width:${pc(NB-NA)}%;background:${dunkel()?"#7f93d6":"#27407e"}"></i><i style="left:${pc(NB)}%;width:${pc(24-NB)}%;background:#f2b705"></i></span>`},
+ {k:"D",t:"B plus Sonne und Mond",p:"Wie B, dazu ein kleines Sonnen- und Mondzeichen oben in jedem Abschnitt.",
+  bg:()=>V[1].bg()+`<span class="sym" style="left:calc(${pc(NA/2)}% - 4px)">${SONNE("#e0a100")}</span>`
+        +`<span class="sym" style="left:calc(${pc((NA+MN)/2)}% - 4px)">${MOND(dunkel()?"#c9d4f5":"#3b4f8f")}</span>`},
+];
+function grafik(v){
+  const sk=Math.max(1,...MM),bars=MM.map(x=>x>=0.1?`<i style="height:${Math.max(2,Math.round(x/sk*(v.band?18:22)))}px"></i>`:`<i class="tr"></i>`).join("");
+  return `<span class="bal${v.band?" mitband":""}">${v.bg()}<i class="mn" style="left:${pc(MN)}%"></i><b class="wt" style="left:calc(${pc(MN)}% + 2px)">Mi</b><span class="bb">${bars}</span></span>`;
+}
+function zeichnen(){
+  document.getElementById("liste").innerHTML=V.map(v=>`<div class="vari"><h2>${v.k} · ${v.t}</h2><p>${v.p}</p>
+    <div class="kz"><div class="ki"><div class="l">Regen</div><div class="v">ab 16:00</div><div class="s">heute 58 %</div></div>
+      <div class="ki"><div class="l">24 h 3,0 mm</div>${grafik(v)}</div>
+      <div class="ki"><div class="l">UV heute</div><div class="v">1,7 erw.</div><div class="s">Spitze 13:10</div></div></div>
+    <div class="kz gross" style="margin-top:8px;grid-template-columns:2fr 1fr"><div class="ki"><div class="l">24 h 3,0 mm · doppelt groß</div>${grafik(v)}</div></div></div>`).join("");
+}
+document.getElementById("hd").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  document.documentElement.classList.toggle("dunkel",b.dataset.m==="dunkel");
+  document.querySelectorAll("#hd button").forEach(x=>x.classList.toggle("an",x===b));zeichnen();});
+zeichnen();
+</script>
+</body>
+</html>
