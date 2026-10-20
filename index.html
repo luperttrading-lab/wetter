@@ -170,6 +170,21 @@ html.dunkel .kz .kzbal .kzmd{fill:#c9d4f5}
 .kz .kzbal .kzbb i.tr{height:1px;background:rgba(92,107,128,.35)}
 html.dunkel .kz .kzbal .kzbn{background:rgba(70,100,190,.30)}
 html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
+/* v5.17: Am iPhone (WebKit) schnitt das overflow:hidden der Wertzeile bzw. der
+   Wechselzelle die absolut liegende Grafik unten ab - genau dort stehen die
+   Balken (Nutzer-Screenshot 20.10. 22:23: Streifen halb so hoch, keine Balken).
+   Chromium tut das nicht. Zeilen mit Grafik schneiden deshalb nicht. */
+.kz .ki .v:has(.kzbal),.kz .ki .kzwe>span:has(.kzbal){overflow:visible}
+/* v5.17: Tagessaeulen der Kachel "7 Tage" - je Tag eine Spalte, Wochenende
+   leicht hinterlegt, ab Tag 8 blass (unsichere Vorhersage) mit Trennstrich */
+.kz .kzbal .kzbw b{flex:1 1 0;min-width:1px;height:100%;display:flex;align-items:flex-end}
+.kz .kzbal .kzbw b.we{background:rgba(45,70,150,.12)}
+.kz .kzbal .kzbw b>i{flex:1 1 auto}
+.kz .kzbal .kzbw b.un>i{opacity:.4}
+.kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(40,56,90,.45)}
+.kz .kzbal .kzbu{position:absolute;top:1px;right:1px;font-size:8px;line-height:1;font-weight:700;color:var(--muted);letter-spacing:0;z-index:1}
+html.dunkel .kz .kzbal .kzbw b.we{background:rgba(120,150,230,.16)}
+html.dunkel .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(255,255,255,.35)}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
 .kz .ki .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1005,7 +1020,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.16</span>
+      <span class="ver">v5.17</span>
     </div>
   </header>
 
@@ -4580,6 +4595,20 @@ function kzRegenGrafik(H){
   const bars=H.map(x=>x.mm>=0.1?`<i style="height:${Math.max(2,Math.round(x.mm/sk*22))}px"></i>`:`<i class="tr"></i>`).join("");
   return `&nbsp;<span class="kzbal">${bg}<span class="kzbb">${bars}</span></span>`;
 }
+/* v5.17 (Nutzer): Tagessaeulen statt "jeden Tag" / "Do–Sa" in der Kachel
+   "7 Tage". T = Tage ab heute aus _fcTage (Open-Meteo, 16 Tage). Die ersten 7
+   kraeftig, der Rest blass mit "unsicher" darueber - die Kachel heisst 7 Tage,
+   die Folgetage sind nur ein Ausblick. Volle Hoehe ab 10 mm am Tag (feste
+   Skala, damit ein nasser Tag die anderen nicht flach drueckt); darueber
+   gedeckelt. Wochenende hinterlegt, damit man die Tage zuordnen kann. */
+function kzTageGrafik(T){
+  const n=T.length,H=27,cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
+    const kl=[(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
+    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*H))}px"></i>`:`<i class="tr"></i>`;
+    return `<b${kl?` class="${kl}"`:""}>${bar}</b>`;}).join("");
+  const un=n>=14?`<b class="kzbu">unsicher</b>`:"";   // rechtsbuendig: der blasse Teil ist ~41 px breit, das Wort ~38
+  return `&nbsp;<span class="kzbal">${un}<span class="kzbb kzbw">${cols}</span></span>`;
+}
 const KZ_SONNE='<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="#e0a100"/><g stroke="#e0a100" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>';
 const KZ_MOND='<svg width="8" height="9" viewBox="0 0 10 10" aria-hidden="true"><path class="kzmd" d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z"/></svg>';
 const kzStaerke=v=>v<0.5?"sehr leicht":v<2.5?"leicht":v<10?"mäßig":"stark";
@@ -5038,11 +5067,13 @@ const KZ_DEF={
                  :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
   regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"bilanzSec",alt:"fcSec"},r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
     const w=T.filter(x=>x.t>=h).slice(0,7);if(!w.length)return null;const sum=w.reduce((a,x)=>a+(+x.mm||0),0),n=w.filter(x=>(+x.mm||0)>=0.5).length;
-    // v4.77: Zusatz = welche Tage nass sind, Folgen zusammengefasst ("Do–Sa, Mo"); zu lang -> kein Zusatz
-    const nass=w.map((x,i)=>(+x.mm||0)>=0.5?i:-1).filter(i=>i>=0),tg=i=>kzWtag(new Date(w[i].t+"T12:00").getTime());
-    const gr=[];nass.forEach(i=>{const g=gr[gr.length-1];if(g&&g[1]===i-1)g[1]=i;else gr.push([i,i]);});
-    const txt=gr.map(([a,b])=>a===b?tg(a):tg(a)+"–"+tg(b)).join(", ");
-    return {l:"7 Tage",v:`${kzF1(sum)} mm`,s:n?`${n} ${n===1?"Regentag":"Regentage"}`:"trocken",s2:n===w.length&&n>1?"jeden Tag":n&&txt.length<=12?txt:null};}}
+    const a={l:"7 Tage",v:`${kzF1(sum)} mm`,s:n?`${n} ${n===1?"Regentag":"Regentage"}`:"trocken"};
+    /* v5.17 (Nutzer): zweite Ansicht Saeulen je Tag statt der Wochentage; dazu
+       die unsicheren Folgetage, soweit die Vorhersage reicht (bis 16).
+       v4.77-v5.16 stand hier "Do–Sa, Mo" bzw. "jeden Tag". */
+    const W=T.filter(x=>x.t>=h).slice(0,16);
+    if(W.some(x=>(+x.mm||0)>=0.1))a.alt=[{l:`${W.length} Tage`,v:kzTageGrafik(W),s:""}];
+    return a;}}
 };
 function kzOrdnung(){return _kzWahl.filter(id=>KZ_DEF[id]);}
 function kzGesperrt(){return false;}   // v3.90: keine festen Plaetze mehr

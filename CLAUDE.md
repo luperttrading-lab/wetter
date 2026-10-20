@@ -1361,3 +1361,22 @@ Ort abweichen (`apStand()`, bei `schritt("haupt")`, am Ende von `show()` und
 bei jeder Eingabe); sonst nur ein breiter Knopf "Schliessen". Suche, GPS und
 Einfuegen haben ihren eigenen Knopf im Bestaetigungsschritt. Ortsknoepfe
 (`.loc-go`) etwas blauer: hell #dcebf9 / Rand #9fc5ea, dunkel #1d3550 / #3a5f88.
+
+## Kachel "7 Tage" mit Tagessaeulen (v5.17)
+
+Nutzer: statt "jeden Tag" / "Do–Sa" Saeulen, dazu die unsicheren Folgetage.
+Zweite Ansicht `kzTageGrafik(W)`: bis 16 Tage aus `_fcTage` (Open-Meteo
+`precipitation_sum`, forecast_days=16), Beschriftung "16 Tage". Je Tag eine
+Spalte (`.kzbw b`), Wochenende hinterlegt (`.we`), ab Tag 8 blass (`.un`,
+Deckkraft .4) mit Trennstrich (`.ab`) und "unsicher" rechtsbuendig (8 px;
+Platz ~41 px, Wort ~39 px - nur ab 14 Tagen). Feste Skala: volle Hoehe ab
+10 mm/Tag, darueber gedeckelt. Ansicht 1 unveraendert (Summe 7 Tage, Regentage).
+IPHONE-FEHLER dabei behoben (Nutzer-Screenshot 20.10. 22:23): Die Stundenbalken
+der Kachel "24 h" fehlten, der Streifen war halb so hoch - WebKit schnitt die
+absolut liegende `.kzbal` am overflow:hidden der Wertzeile `.v` bzw. der
+Wechselzelle ab, genau dort stehen die Balken. Chromium tut das nicht, darum
+fiel es im Test nie auf. Jetzt `.v:has(.kzbal)` und `.kzwe>span:has(.kzbal)`
+mit overflow:visible. Am iPhone noch nicht bestaetigt (kein WebKit im Pruefstand).
+Pruefstand: Chromium kommt nicht selbst ins Netz; `netz.py` im Scratchpad leitet
+alle Abrufe per `page.route` ueber Python (Proxy + CA-Bundle) - so laeuft die
+App mit ECHTEN Daten.
