@@ -215,6 +215,8 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-x{margin-left:24px;display:grid;gap:1px;padding:0 1px;height:14px;margin-top:3px}
 .kzs-x span{position:relative}
 .kzs-x b{position:absolute;left:-.5px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
+.kzs-x0 span:first-child b{transform:none;left:0}   /* "jetzt" am linken Rand, nicht halb davor */
+.kzs-bb i.bl{opacity:.4}
 .kzs-x b.kzs-wt{font-weight:800;color:var(--ink,#17202e)}
 html.dunkel .kzs-d{background:rgba(255,196,60,.13)}
 html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
@@ -1067,7 +1069,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.25</span>
+      <span class="ver">v5.26</span>
     </div>
   </header>
 
@@ -4685,6 +4687,31 @@ function kzNowGrafik(n){
   const i1=n.zeit?n.zeit.findIndex(t=>t>=n.zeit[0]+36e5-6e4):12,p=(i1>0?i1:12)/k*100;
   return `&nbsp;<span class="kzbal kznow"><i class="kzbm" style="left:${p.toFixed(1)}%"></i><b class="kzbt" style="left:calc(${p.toFixed(1)}% + 2px)">1 h</b><span class="kzbb">${bars}</span></span>`;
 }
+/* v5.26: Grossansicht der 2 Radarstunden - dieselben Werte und Regeln wie Kachel
+   und Abschnitt (nass ab roher TH, Hoehe/Farbe = geeichte Bodenrate, erster
+   Balken blass unter der Jetzt-Schwelle). Feste Skala 1/2/5/10... mm/h statt
+   relativ zur Spitze: gross ist Platz fuer eine Achse, und dann zeigt die Hoehe
+   die echte Staerke. Text = Ueberschrift und Zeile des Abschnitts. */
+function kzNowGross(n){
+  const B=n.serieB||n.serie,k=n.serie.length,TJ=n.THjetzt!=null?n.THjetzt:n.TH;
+  const nass=n.serie.map(v=>v>=n.TH),mx=Math.max(0,...B.filter((_,i)=>nass[i]));
+  const sk=mx<=1?1:mx<=2?2:mx<=5?5:Math.ceil(mx/10)*10,st=sk/2;
+  const W0=n.zeit[0],W1=n.zeit[k-1]+3e5,{tag,nacht}=kzTagNacht(W0,W1);
+  const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(2)}%;width:${(b-a).toFixed(2)}%"></i>`;
+  let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
+  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v%1?kzF1(v):v}</b>`;   // 2,5 nicht als "3"
+  const bars=n.serie.map((v,i)=>!nass[i]?`<i class="tr"></i>`:`<i${i===0&&v<TJ?' class="bl"':""} style="height:${Math.max(2,Math.min(100,B[i]/sk*100)).toFixed(1)}%;background:${regenFarbe(B[i])}"></i>`).join("");
+  const xl=n.zeit.map((t,i)=>i%6?"<span></span>":`<span><b>${i===0?"jetzt":kzHM(t)}</b></span>`).join("");
+  const mm=B.reduce((q,b,i)=>q+(nass[i]?b*5/60:0),0),min=nass.filter(Boolean).length*5;
+  const z1=`${n.summary||""}${n.detail?" \u00b7 "+n.detail:""}`;
+  const z2=!min?"":nass.every(Boolean)?`<br>Durchgehend Regen, zusammen ~${kzF1(mm)} mm`:`<br>In den 2 Stunden ${min} min Regen, zusammen ~${kzF1(mm)} mm`;
+  return `<div class="kzg-titel">Regen \u00b7 n\u00e4chste 2 Stunden</div>
+    <div class="kzg-sub">${z1}${z2}</div>
+    <div class="kzs">${bg}${gl}<div class="kzs-bb" style="grid-template-columns:repeat(${k},1fr)">${bars}</div></div>
+    <div class="kzs-x kzs-x0" style="grid-template-columns:repeat(${k},1fr)">${xl}</div>
+    ${min?regenLegende():""}
+    <div class="kzg-leg">S\u00e4ule = Regenst\u00e4rke je 5 Minuten (mm/h), Farbe wie auf der Radarkarte \u00b7 Radar-Kurzfristvorhersage des DWD${n.geeicht?", an der Station geeicht":""}</div>`;
+}
 function kzRegenGrafik(H){
   const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
   /* v5.12 (Nutzer, Variante D aus nachttest.html): Tag hellgelb, Nacht blaugrau,
@@ -5054,7 +5081,11 @@ const KZ_DEF={
        Die Kachel wechselt damit nicht mehr, Unterzeile nur die waermste Stunde. */
     return {l:"Heute",v:`<span class="dn">${kzR0(lo)}°</span> / <span class="up">${kzR0(hi)}°</span>`,
             s:tm!=null?`max ${tm} Uhr`:"Prognose"};}},
-  regen:{name:"Regen · nächste 2 Std",ziel:{id:"nowcastSec",alt:"rainHrSec"},r(){const n=_kz.nowcast;if(!n)return {l:"Regen",v:"–",s:"kein Radar"};
+  regen:{name:"Regen · nächste 2 Std",ziel:{id:"nowcastSec",alt:"rainHrSec"},
+    // v5.26 (Nutzer: "auf Regen tippen soll das Diagramm oben aufgehen, nicht nach unten verweisen")
+    gross(){const n=_kz.nowcast;if(!n||!n.zeit||!n.zeit.length)return null;
+      return {html:kzNowGross(n),ziel:{id:"radarSec",alt:"nowcastSec"},knopf:"Radarkarte"};},
+    r(){const n=_kz.nowcast;if(!n)return {l:"Regen",v:"–",s:"kein Radar"};
     const {serie,TH,peak}=n;const TJ=n.THjetzt!=null?n.THjetzt:TH;
     const pB=n.peakB!=null?n.peakB:peak;   // v4.27: Staerke aus der geeichten Bodenrate
     if(peak<TH)return Object.assign({l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"},kzRegenDanach());
@@ -5619,7 +5650,7 @@ function renderNowcast(j){
     const N=NE.E.filter(x=>x.st>0&&x.sum>H.sum).sort((a,b)=>b.sum-a.sum)[0];
     detail=H.bisEnde?`anhaltend · bis ${f1(H.peakB)} mm/h`:N?`lässt in ~${H.e*5} Min nach · in ${N.st*5} Min ${strength(N.peakB)}`:`lässt in ~${H.e*5} Min nach · bis ${f1(H.peakB)} mm/h`;}
   else{summary=`Regen in ${H.st*5} Min · ${strength(H.peakB)}`;detail=H.bisEnde?`hält über 2 Std an · bis ${f1(H.peakB)} mm/h`:`~${(H.e-H.st)*5} Min lang · bis ${f1(H.peakB)} mm/h`;}
-  _kz.nowcast={serie:series.map(q=>q.mmh),serieB:series.map(q=>q.b),zeit:series.map(q=>q.t),TH,peak,peakB,
+  _kz.nowcast={serie:series.map(q=>q.mmh),serieB:series.map(q=>q.b),zeit:series.map(q=>q.t),TH,peak,peakB,summary,detail,
                THjetzt:radarSchwelleJetzt(),geeicht:!!_radarEich};kzStandSetzen("radar");kzRender();   // v3.89: Kachel "Regen"
   // v5.13: 24-Stunden-Ansicht und "bis 24 Uhr" nehmen die ersten 2 Stunden aus dem Radar - neu zeichnen
   if(_rainHrD)try{renderRainHours(_rainHrD);}catch(e){}
