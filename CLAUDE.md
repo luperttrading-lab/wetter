@@ -1507,6 +1507,19 @@ unveraendert); "wie auf der Radarkarte" (`.rpal-karte`) ist bei B/D/E per
 in der Grossansicht, Fenster bleibt offen, Kacheln/Abschnitte folgen, Wahl ueberlebt
 Neuladen, hell und dunkel. AUFRAEUMEN nach der Wahl: Gewinner in REGEN_FARB, `.rpal`,
 `REGEN_PAL`, `regenPal*`, den Klick-Listener und die CSS-Regeln entfernen.
+VORBILD-APP ENTSCHLUESSELT (21.10. 16:08, Nutzer-Screenshot Erlental/Wettenberg,
+Reiter Wahrscheinlichkeit|Intensitaet|Regenradar|Wind - vermutlich "RegenVorschau"):
+15-min-Balken, 2 h, Achse Null/Schwach/Mittel/Stark in Dritteln. Bright Sky
+(radar_erl.json, 16:11 geholt) hat denselben Verlauf: 16:00-17:15 0,12 mm/h (kleinste
+Radarstufe) -> dort Balken GENAU auf "Schwach" (1/3); 17:45 ~0,44 (15-min-Mittel) ->
+0,427; 18:00 ~1,0 -> 0,567. Hoehenskala damit noch offen (log: Mittel ~2,4, Stark
+~50 mm/h; linear: Mittel ~1,4) - braucht einen Screenshot mit >= 3 mm/h. FARBE ist
+exakt eine Funktion der Hoehe, linear gemischt zwischen Ankern auf den Achslinien:
+Schwach = teal (0,128,128), Mittel = blau (0,0,255) - gemessen auf 1 Einheit genau
+(h 0,357/0,427/0,567 -> (0,119,136)/(0,92,163)/(0,38,217)); darueber Richtung Rot
+~(212,34,43) bei Stark (aus dem Froendenberg-Bild, 2 Punkte) - die Violetttoene sind
+Blau-Rot-Mischungen. Unter Schwach Gruen (nur JPEG, unsicher). Niesel 0,12 mm/h steht
+dort auf 1/3 Hoehe, bei uns (Grossansicht, Skala 2) auf 6 %.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
