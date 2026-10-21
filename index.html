@@ -196,6 +196,27 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzg-t{font-size:10.5px;font-weight:800;margin-top:4px;line-height:1.1}
 .kzg-c.we .kzg-t{color:#d33a3a}
 .kzg-d{font-size:9px;color:var(--muted);line-height:1.3}
+/* v5.23: 24-Stunden-Grossansicht */
+.kzs{position:relative;margin-left:24px;height:130px;border-radius:5px}
+.kzs-d,.kzs-n{position:absolute;top:0;bottom:0}
+.kzs-d{background:rgba(255,190,40,.16)}
+.kzs-n{background:rgba(45,70,150,.17)}
+.kzs-s{position:absolute;top:3px;margin-left:-4.5px;line-height:0;z-index:1}
+.kzs-g{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(92,107,128,.35)}
+.kzs-gl{position:absolute;left:-24px;width:20px;text-align:right;font-size:9.5px;font-weight:600;color:var(--muted);transform:translateY(50%);line-height:1}
+.kzs-m{position:absolute;top:0;bottom:0;width:1.5px;margin-left:-.75px;background:rgba(40,56,90,.45)}
+.kzs-bb{position:absolute;inset:0;display:grid;gap:1px;align-items:end;padding:0 1px}
+.kzs-bb i{display:block;background:#3a8fd8;border-radius:2px 2px 0 0;z-index:1}
+.kzs-bb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.kzs-x{margin-left:24px;display:grid;gap:1px;padding:0 1px;height:14px;margin-top:3px}
+.kzs-x span{position:relative}
+.kzs-x b{position:absolute;left:-.5px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
+.kzs-x b.kzs-wt{font-weight:800;color:var(--ink,#17202e)}
+html.dunkel .kzs-d{background:rgba(255,196,60,.13)}
+html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
+html.dunkel .kzs-m{background:rgba(255,255,255,.35)}
+.kzs .kzmd{fill:#3b4f8f}
+html.dunkel .kzs .kzmd{fill:#c9d4f5}
 .kzg-leg{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 .kzg-leg b{color:#d33a3a}
 html.dunkel .kzg-c.we .kzg-t,html.dunkel .kzg-leg b{color:#ff8080}
@@ -1040,7 +1061,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.22</span>
+      <span class="ver">v5.23</span>
     </div>
   </header>
 
@@ -4585,17 +4606,57 @@ function kzRegen24H(){
    H[23].t. Hintergrund: Nacht (Sonne unter dem Horizont) leicht dunkler,
    Mitternacht als Strich mit dem Wochentag. Volle Hoehe ab 1 mm/h, damit
    Niesel flach bleibt. HTML statt SVG - ein gestrecktes SVG verzerrt Schrift. */
-function kzRegenGrafik(H){
-  const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
-  /* v5.12 (Nutzer, Variante D aus nachttest.html): Tag hellgelb, Nacht blaugrau,
-     dazu ein kleines Sonnen- bzw. Mondzeichen je Abschnitt. Die Sonne steht fuer
-     TAGESLICHT, nicht fuer Sonnenschein (Nutzer: "sollte verstaendlich sein"). */
-  const nacht=[];
+/* Tag- und Nachtabschnitte zwischen W0 und W1 in Prozent (Nacht = Untergang bis
+   naechster Aufgang). Von der Kachel (kzRegenGrafik) und der Grossansicht
+   (kzStundenGross) gemeinsam genutzt, seit v5.23 ausgelagert. */
+function kzTagNacht(W0,W1){
+  const D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100)),nacht=[];
   try{const ev=[];for(let k=-1;k<=2;k++){const d=new Date(W0+k*864e5),r=sunMoment(d,true),u=sunMoment(d,false);if(r!=null&&u!=null)ev.push([r,u]);}
     ev.sort((a,b)=>a[0]-b[0]);
     for(let i=0;i+1<ev.length;i++){const a=ev[i][1],b=ev[i+1][0];   // Untergang bis naechster Aufgang
       if(b>W0&&a<W1)nacht.push([pc(a),pc(b)]);}}catch(e){}
   const tag=[];let x0=0;nacht.forEach(([a,b])=>{if(a>x0)tag.push([x0,a]);x0=Math.max(x0,b);});if(x0<100)tag.push([x0,100]);
+  return {tag,nacht};
+}
+/* v5.23 (Nutzer: "auf die 24-Stunden-Prognose gedrueckt kommt die Regenbilanz
+   der letzten 30 Tage - da muss auch das kleine Fenster aufgehen"): Grossansicht
+   der 24 Stunden. Dieselben Stunden wie Kachel und Abschnitt (kzRegen24H, Wert
+   mit Stempel t = Regen von t-1h bis t, erste 2 h aus dem Radar). 24 Saeulen
+   sind ~11 px breit - zu schmal fuer Zahlen je Saeule; dafuer eine Skala links,
+   Uhrzeiten alle 3 Stunden (Stundenbeginn), an Mitternacht der Wochentag, und
+   die staerkste Stunde im Text. */
+function kzStundenGross(H,gef,rest){
+  const n=H.length,W0=H[0].t-36e5,W1=H[n-1].t,{tag,nacht}=kzTagNacht(W0,W1);
+  const mx=Math.max(0,...H.map(x=>x.mm)),sk=mx<=1?1:mx<=2?2:Math.ceil(mx/2)*2,st=sk/2,tot=H.reduce((q,x)=>q+x.mm,0);
+  const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(2)}%;width:${(b-a).toFixed(2)}%"></i>`;
+  let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
+  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v<1?kzF1(v):Math.round(v)}</b>`;
+  let mnI=-1;const bars=H.map((x,i)=>{const b=x.t-36e5;if(mnI<0&&b>W0&&ortsStunde(b)===0)mnI=i;
+    return x.mm>=0.1?`<i style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%"></i>`:`<i class="tr"></i>`;}).join("");
+  const mn=mnI>0?`<i class="kzs-m" style="left:${(mnI/n*100).toFixed(2)}%"></i>`:"",mnP=mnI>0?mnI/n*100:null;
+  // Sonne/Mond mittig im Abschnitt, aber nicht auf dem Mitternachtsstrich (sonst 6 % daneben, im Abschnitt)
+  [...tag.map(x=>[x,KZ_SONNE]),...nacht.map(x=>[x,KZ_MOND])].forEach(([[a,b],z])=>{if(b-a<8)return;let m=(a+b)/2;
+    if(mnP!=null&&Math.abs(m-mnP)<5){const r=mnP+6,l=mnP-6;m=(r<=b-2&&b-mnP>=mnP-a)?r:l>=a+2?l:m;}
+    bg+=`<span class="kzs-s" style="left:${m.toFixed(1)}%">${z}</span>`;});
+  const hh=ms=>String(ortsStunde(ms)).padStart(2,"0");
+  const xl=H.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0||h%3)return "<span></span>";
+    return `<span><b${h===0?' class="kzs-wt"':""}>${h===0?kzWtag(b):hh(b)}</b></span>`;}).join("");
+  const iMx=H.reduce((m,x,i)=>x.mm>H[m].mm?i:m,0);
+  const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`24 Stunden ab jetzt <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
+  const z2=gef!=null?`<br>Heute bis 24 Uhr ${kzF1(gef+(rest||0))} mm${gef>=0.05?`, davon ${kzF1(gef)} gefallen`:""}`:"";
+  const n2=(typeof _kz!=="undefined"&&_kz.nowcast&&_kz.nowcast.zeit)?" \u00b7 erste 2 Stunden aus dem Radar, danach Wettermodell":"";
+  return `<div class="kzg-titel">Regen \u00b7 n\u00e4chste 24 Stunden</div>
+    <div class="kzg-sub">${z1}${z2}</div>
+    <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div></div>
+    <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
+    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde (Skala mm je Stunde) \u00b7 gelb = Tag, blau = Nacht${n2}</div>`;
+}
+function kzRegenGrafik(H){
+  const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
+  /* v5.12 (Nutzer, Variante D aus nachttest.html): Tag hellgelb, Nacht blaugrau,
+     dazu ein kleines Sonnen- bzw. Mondzeichen je Abschnitt. Die Sonne steht fuer
+     TAGESLICHT, nicht fuer Sonnenschein (Nutzer: "sollte verstaendlich sein"). */
+  const {tag,nacht}=kzTagNacht(W0,W1);
   let mn=null,mnMs=null;for(const x of H){const b=x.t-36e5;if(b>W0&&ortsStunde(b)===0){mn=pc(b);mnMs=b;break;}}
   let bg="";
   const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(1)}%;width:${(b-a).toFixed(1)}%"></i>`;
@@ -4640,7 +4701,7 @@ function kzTageGross(T){
     <div class="kzg-ch" style="grid-template-columns:repeat(${n},1fr)">${cols}</div>
     <div class="kzg-leg"><b>Rot</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Zahlen in mm${sk>10?"":" \u00b7 volle H\u00f6he 10 mm"}</div>`;
 }
-function kzGrossZeigen(html,ziel){
+function kzGrossZeigen(html,ziel,knopf){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
     ov.innerHTML='<div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn" id="kzGrossZiel">Vorhersage</button><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>';
@@ -4651,7 +4712,7 @@ function kzGrossZeigen(html,ziel){
     el("kzGrossZu").onclick=zu;
     el("kzGrossZiel").onclick=()=>{zu();if(ov._ziel)kzSpring(ov._ziel);};
     document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
-  el("kzGrossIn").innerHTML=html;ov._ziel=ziel;ov._auf=Date.now();ov.classList.remove("hidden");
+  el("kzGrossIn").innerHTML=html;el("kzGrossZiel").textContent=knopf||"Vorhersage";ov._ziel=ziel;ov._auf=Date.now();ov.classList.remove("hidden");
   return true;
 }
 function kzTageGrafik(T){
@@ -4967,9 +5028,15 @@ const KZ_DEF={
     if(H&&H.st===0)return {l:"Regen",v:'<span class="warn">jetzt</span>',s:!H.bisEnde?`bis ~${kzHM(Date.now()+H.e*3e5)}`:kzStaerke(H.peakB)};   // v4.66: kuerzer
     if(!H)return Object.assign({l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"},kzRegenDanach());
     return {l:"Regen",v:`in ${H.st*5} min`,s:kzStaerke(H.peakB)};}},
-  regenHeute:{name:"Regen bis 24 Uhr + 24 Std",kurz:"Bis 24 Uhr",ziel:{id:"bilanzSec",alt:"Heute gesamt"},r(){let gef=_kz.radHeute;
-    if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
-    let rest=null;try{if(typeof _rainHourly!=="undefined"&&_rainHourly&&typeof bilanzRest==="function")rest=bilanzRest();}catch(e){}
+  regenHeute:{name:"Regen bis 24 Uhr + 24 Std",kurz:"Bis 24 Uhr",ziel:{id:"bilanzSec",alt:"Heute gesamt"},
+    zahlen(){let gef=_kz.radHeute;
+      if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
+      let rest=null;try{if(typeof _rainHourly!=="undefined"&&_rainHourly&&typeof bilanzRest==="function")rest=bilanzRest();}catch(e){}
+      return {gef,rest};},
+    // v5.23: Tipp oeffnet die 24 Stunden gross, der Knopf fuehrt zum Abschnitt "Regen · naechste 24 Std" (vorher sprang er zur Regenbilanz)
+    gross(){const H=kzRegen24H();if(!H)return null;const {gef,rest}=this.zahlen();
+      return {html:kzStundenGross(H,gef,rest),ziel:{id:"rainHrSec",alt:"bilanzSec"},knopf:"Regen je Stunde"};},
+    r(){const {gef,rest}=this.zahlen();
     if(gef==null)return null;const erw=rest!=null?gef+rest:null;
     /* v4.66 (Nutzer: "zu lang, zu viel Text"): fuenf Zeilen in der Kachel. Oben nur
        das Gefallene, darunter die Erwartung fuer den ganzen Tag. */
@@ -5334,7 +5401,7 @@ function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;
       if(t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
     if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){const d=KZ_DEF[tile.dataset.id];
       let g=null;try{g=d&&d.gross?d.gross():null;}catch(x){}   // v5.21: Kacheln mit Grossansicht oeffnen sie statt zu springen
-      if(g){kzGrossZeigen(g,d.ziel);_kzP0=null;return;}
+      if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html,o.ziel||d.ziel,o.knopf);_kzP0=null;return;}
       if(d)kzSpring(d.ziel);}
     _kzP0=null;};
   document.addEventListener("pointerup",ende);
