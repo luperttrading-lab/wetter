@@ -1495,6 +1495,18 @@ E Tuerkis -> Blau -> Violett, F Blau mit Rot/Violett erst ab 20 mm/h bzw. 30 mm/
 Umschalter Hell/Dunkel und Stufen/Fliessend (Fliessend = in log(mm) zwischen den
 Stufen interpoliert), je Palette L* der Stufen. Beispieldaten, keine echten. Wahl
 steht aus; mit ihr klaeren, ob die Radarkarte (RK_STUFEN) mitzieht.
+v5.27 (Nutzer: "B, D, E in der echten App ansehen, zum Auswaehlen, spaeter eins
+fest"): FARBTEST in der App. `REGEN_PAL` {A (= REGEN_FARB), B, D, E} mit den Farben
+aus farbtest.html; unter JEDER Regenlegende (`regenLegende`: Abschnitte 2 h/24 h,
+alle drei Grossansichten) die Zeile "Farbtest A B D E" mit Mini-Verlauf, gemerkt als
+`regenPalette`. `regenFarbe` liefert `var(--rf0..7, Fallback A)`, `regenPalSetzen`
+setzt die acht Variablen auf <html> - ein Tipp faerbt alles sofort um, auch die
+offene Grossansicht, ohne neu zu zeichnen. Radarkarte bleibt A (RK_STUFEN
+unveraendert); "wie auf der Radarkarte" (`.rpal-karte`) ist bei B/D/E per
+`html[data-rpal]` ausgeblendet. Geprueft (Playwright, eingespielte Daten): Wechsel
+in der Grossansicht, Fenster bleibt offen, Kacheln/Abschnitte folgen, Wahl ueberlebt
+Neuladen, hell und dunkel. AUFRAEUMEN nach der Wahl: Gewinner in REGEN_FARB, `.rpal`,
+`REGEN_PAL`, `regenPal*`, den Klick-Listener und die CSS-Regeln entfernen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
