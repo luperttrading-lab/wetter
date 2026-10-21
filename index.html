@@ -168,6 +168,10 @@ html.dunkel .kz .kzbal .kzmd{fill:#c9d4f5}
 .kz .kzbal .kzbb{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
 .kz .kzbal .kzbb i{flex:1 1 0;min-width:1px;background:#3a8fd8;border-radius:1px 1px 0 0}
 .kz .kzbal .kzbb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.kz .kzbal .kzbb i.bl{opacity:.4}   /* v5.24: Radarbalken "jetzt" unter der Jetzt-Schwelle */
+.kz .kznow .kzbm{opacity:.6}
+.kz .kznow .kzbt{text-shadow:0 0 2px #fff,0 0 2px #fff,0 0 3px #fff}   /* "1 h" bleibt ueber hohen Balken lesbar */
+html.dunkel .kz .kznow .kzbt{text-shadow:0 0 2px #1a212c,0 0 2px #1a212c,0 0 3px #1a212c}
 html.dunkel .kz .kzbal .kzbn{background:rgba(70,100,190,.30)}
 html.dunkel .kz .kzbal .kzbm{background:rgba(255,255,255,.3)}
 /* v5.17: Am iPhone (WebKit) schnitt das overflow:hidden der Wertzeile bzw. der
@@ -1061,7 +1065,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.23</span>
+      <span class="ver">v5.24</span>
     </div>
   </header>
 
@@ -4651,6 +4655,17 @@ function kzStundenGross(H,gef,rest){
     <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
     <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde (Skala mm je Stunde) \u00b7 gelb = Tag, blau = Nacht${n2}</div>`;
 }
+/* v5.24: die 2 Radarstunden als Balken in der Kachel "Regen" - dieselben Werte
+   und dieselbe Skala wie der Abschnitt "Niederschlag · naechste 2 Std"
+   (renderNowcast): nass ab roher Schwelle TH, Hoehe = geeichte Bodenrate
+   relativ zu max(Spitze, 0,5 mm/h); der erste Balken blass, wenn er nur ueber
+   TH, aber unter der Jetzt-Schwelle liegt. Ein Strich markiert +1 h. */
+function kzNowGrafik(n){
+  const TJ=n.THjetzt!=null?n.THjetzt:n.TH,B=n.serieB||n.serie,sc=Math.max(n.peakB!=null?n.peakB:n.peak,0.5),k=n.serie.length;
+  const bars=n.serie.map((v,i)=>v<n.TH?'<i class="tr"></i>':`<i${i===0&&v<TJ?' class="bl"':""} style="height:${Math.max(2,Math.round(B[i]/sc*27))}px"></i>`).join("");
+  const i1=n.zeit?n.zeit.findIndex(t=>t>=n.zeit[0]+36e5-6e4):12,p=(i1>0?i1:12)/k*100;
+  return `&nbsp;<span class="kzbal kznow"><i class="kzbm" style="left:${p.toFixed(1)}%"></i><b class="kzbt" style="left:calc(${p.toFixed(1)}% + 2px)">1 h</b><span class="kzbb">${bars}</span></span>`;
+}
 function kzRegenGrafik(H){
   const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
   /* v5.12 (Nutzer, Variante D aus nachttest.html): Tag hellgelb, Nacht blaugrau,
@@ -5025,9 +5040,11 @@ const KZ_DEF={
     if(peak<TH)return Object.assign({l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"},kzRegenDanach());
     // v4.88: dieselben Ereignisse wie die Ueberschrift (Luecken <= 15 min ueberbrueckt, groesstes zaehlt)
     const NE=nowEreignisse(serie,n.serieB||serie,TH,TJ),H=NE.haupt;
-    if(H&&H.st===0)return {l:"Regen",v:'<span class="warn">jetzt</span>',s:!H.bisEnde?`bis ~${kzHM(Date.now()+H.e*3e5)}`:kzStaerke(H.peakB)};   // v4.66: kuerzer
     if(!H)return Object.assign({l:"Regen",v:'<span class="ok">Trocken</span>',s:"nächste 2 h"},kzRegenDanach());
-    return {l:"Regen",v:`in ${H.st*5} min`,s:kzStaerke(H.peakB)};}},
+    // v5.24 (Nutzer: "sehen, ob es 2 Stunden durchregnet oder nur 5 Minuten"): zweite Ansicht Radarbalken
+    const alt=[{l:"Regen 2 h",v:kzNowGrafik(n),s:""}];
+    if(H.st===0)return {l:"Regen",v:'<span class="warn">jetzt</span>',s:!H.bisEnde?`bis ~${kzHM(Date.now()+H.e*3e5)}`:kzStaerke(H.peakB),alt};   // v4.66: kuerzer
+    return {l:"Regen",v:`in ${H.st*5} min`,s:kzStaerke(H.peakB),alt};}},
   regenHeute:{name:"Regen bis 24 Uhr + 24 Std",kurz:"Bis 24 Uhr",ziel:{id:"bilanzSec",alt:"Heute gesamt"},
     zahlen(){let gef=_kz.radHeute;
       if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
