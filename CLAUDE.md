@@ -1565,6 +1565,15 @@ Die log-Eichung oben (Schwach 0,2 / Mittel 2,3 / Stark 25) ist damit HINFAELLIG.
 Unter Schwach wird gemischt Gruen (0,255,0) bei Null -> teal; gemessen (0,157,98)
 bei h 0,257 und (0,222,33) bei 0,087. Unter Schwach liegen Balken nur am Rand eines
 Regengebiets (P < 70 %). Nicht weiter verfolgen, solange wir nichts uebernehmen.
+FUENFTE RUNDE (21.10. 20:26, beide Reiter fuer Frankfurt, Erlental, Huettenberg):
+die Formel von 18:09 gilt NICHT fest - P lag 3-14 Punkte darunter. Linear bis
+"Schwach": 18:09 P = 24,5 + 134*h (rmse 0,7), 20:26 P = 15,0 + 147*h (rmse 2,6,
+je Ort 12,9 / 15,3 / 16,1 Grundwert). Die STEIGUNG bleibt (~45-50 Punkte je
+Drittel), der GRUNDWERT wandert mit der Lage (flaechiger Regen 25 %, ausklingende
+Schauer ~15 %) und ist innerhalb eines Laufs an allen drei Orten gleich. Trockene
+Balken (h = 0) haben 12-16 %, nicht 25 %. Also: P = Grundwert der Lage + Anteil aus
+demselben Wert wie der Balken; der Balken selbst kennt den Grundwert nicht.
+Herkunft des Grundwerts unbekannt (Vermutung: Modell- oder Flaechenwert).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
