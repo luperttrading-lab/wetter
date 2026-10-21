@@ -1485,3 +1485,11 @@ Legende). NICHT die Regenbilanz - dort heisst dunkel/hell gefallen/erwartet.
 Unsichere Tage 8-16 blasser (.55 Kachel, .6 gross) - bei .4 waren Rot/Orange/
 Violett nicht mehr zu trennen. Legende 16 Tage: "Rote Wochentage = Wochenende",
 weil Rot jetzt auch 30 mm heisst. RK_STUFEN und REGEN_FARB gemeinsam aendern.
+v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
+unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
+gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
+Abschnitt - gross ist Platz fuer eine Achse), Farben `regenFarbe`, Uhrzeiten alle
+30 min ("jetzt" linksbuendig), Tag/Nacht-Hintergrund, Text = Ueberschrift und Zeile
+des Abschnitts (`_kz.nowcast.summary/detail`, neu mitgegeben) plus "In den 2 Stunden
+40 min Regen, zusammen ~1,1 mm" bzw. "Durchgehend Regen". Knopf "Radarkarte" ->
+`radarSec`. Auch bei "Trocken" geht das Fenster auf (flache Linie, Text "Kein Regen").
