@@ -1471,3 +1471,17 @@ roher TH, Hoehe = geeichte Bodenrate / max(Spitze, 0,5), erster Balken blass
 unter der Jetzt-Schwelle), Strich und "1 h" bei +1 Stunde (mit hellem Saum, sonst
 bei Dauerregen unlesbar). Bei "Trocken" bleibt es beim Zusatz `kzRegenDanach`.
 Tipp springt weiter zum Abschnitt (der zeigt dieselben Balken gross).
+v5.25 (Nutzer, Vorbild andere App: "Farbe der Balken nach der Regenmenge, mit
+sinnvollen Stufen"): `regenFarbe(mm,tag)` / `regenLegende(tag)`, Farben
+`REGEN_FARB` = die acht Stufen der Radarkarte (RK_STUFEN, deckend). STUNDEN
+(Radar-Rate, Modell je Stunde): Schwellen wie die Karte 0,1/0,5/1/2/5/10/20/50
+mm/h - Rot ab 20 liegt in DWD-Starkregen "markant" (15-25 l/m2 in 1 h), Violett
+ab 50 ueber "extrem" (> 40). TAGE: eigene Schwellen 0,1/1/3/5/10/20/30/50 mm in
+denselben Farben - Rot ab 30, Violett ab 50 = DWD-Dauerregen markant (30-50 l/m2
+in 24 h) bzw. Unwetter. DWD-Schwellen per Websuche geprueft (nur Portale, nicht
+dwd.de selbst; Stufe 2 dort einheitlich). Gefaerbt: Kacheln Regen 2 h, 24 h,
+16 Tage; Abschnitte 2 h und 24 h (mit Legende); beide Grossansichten (mit
+Legende). NICHT die Regenbilanz - dort heisst dunkel/hell gefallen/erwartet.
+Unsichere Tage 8-16 blasser (.55 Kachel, .6 gross) - bei .4 waren Rot/Orange/
+Violett nicht mehr zu trennen. Legende 16 Tage: "Rote Wochentage = Wochenende",
+weil Rot jetzt auch 30 mm heisst. RK_STUFEN und REGEN_FARB gemeinsam aendern.
