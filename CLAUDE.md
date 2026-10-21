@@ -1463,3 +1463,11 @@ Kachel, `regenHeute.zahlen()`), Hinweis Radar fuer die ersten 2 h. Knopf
 liefern (regen7 weiter nur HTML, Knopf "Vorhersage"). Tag/Nacht gemeinsam in
 `kzTagNacht(W0,W1)`. Geprueft mit eingespielter Open-Meteo-Antwort (Pruefstand
 holt sie per curl; Chromium kommt zu langsam durchs Netz), hell und dunkel.
+v5.24 (Nutzer: "bei der 2-Stunden-Kachel die Grafik, damit man sieht, ob es 2 Stunden
+durchregnet oder nur 5 Minuten"): Kachel "Regen" bekommt, sobald in den 2 h Regen
+kommt, die zweite Ansicht "Regen 2 h" (`kzNowGrafik(_kz.nowcast)`): die 25
+Radarschritte als Balken, gleiche Regeln wie der Abschnitt `nowcastSec` (nass ab
+roher TH, Hoehe = geeichte Bodenrate / max(Spitze, 0,5), erster Balken blass
+unter der Jetzt-Schwelle), Strich und "1 h" bei +1 Stunde (mit hellem Saum, sonst
+bei Dauerregen unlesbar). Bei "Trocken" bleibt es beim Zusatz `kzRegenDanach`.
+Tipp springt weiter zum Abschnitt (der zeigt dieselben Balken gross).
