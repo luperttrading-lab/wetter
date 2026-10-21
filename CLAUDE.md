@@ -1485,6 +1485,16 @@ Legende). NICHT die Regenbilanz - dort heisst dunkel/hell gefallen/erwartet.
 Unsichere Tage 8-16 blasser (.55 Kachel, .6 gross) - bei .4 waren Rot/Orange/
 Violett nicht mehr zu trennen. Legende 16 Tage: "Rote Wochentage = Wochenende",
 weil Rot jetzt auch 30 mm heisst. RK_STUFEN und REGEN_FARB gemeinsam aendern.
+VARIANTENSEITE `farbtest.html` (Nutzer, 21.10.: "nicht so bunt, eher Farbverlauf,
+ohne Gelb und Orange", Vorbild Screenshot einer anderen App - Balken Hellgruen ->
+Gruen -> Stahlblau -> Blau -> Indigo -> Violett, Farbe an die Hoehe gekoppelt, Achse
+Null/Gering/Mittel/Stark; welche App, liess sich per Websuche nicht klaeren). Sechs
+Paletten mit je 8 Stufen an den Schwellen REGEN_STD/REGEN_TAG: A jetzt, B wie die
+andere App (Farben aus dem Screenshot gemessen), C nur Blau, D Blau -> Violett,
+E Tuerkis -> Blau -> Violett, F Blau mit Rot/Violett erst ab 20 mm/h bzw. 30 mm/Tag.
+Umschalter Hell/Dunkel und Stufen/Fliessend (Fliessend = in log(mm) zwischen den
+Stufen interpoliert), je Palette L* der Stufen. Beispieldaten, keine echten. Wahl
+steht aus; mit ihr klaeren, ob die Radarkarte (RK_STUFEN) mitzieht.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

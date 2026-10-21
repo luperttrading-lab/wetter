@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Regenfarben — Varianten</title>
+<style>
+/* Vergleichsseite (21.10.2026): Farbverlauf der Regenbalken ohne Gelb und
+   Orange. Kachelmasse wie in der App (v5.26): Kachelraster bei 375 pt 305 px
+   breit, Grafik links 8 / rechts 13 / oben 25 / unten 7 px. Die Varianten
+   haben je 8 Stufen an denselben Schwellen wie die App (REGEN_STD, REGEN_TAG). */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee;--ki:rgba(255,255,255,.72);--karte:#fffdf9;--gitter:rgba(40,56,90,.13)}
+html.dunkel{--ink:#e7edf5;--muted:#9aa7b8;--line:#33405a;--bg:#0d1219;--ki:rgba(255,255,255,.07);--karte:#1a212c;--gitter:rgba(255,255,255,.12)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding:16px 0 calc(28px + env(safe-area-inset-bottom))}
+.rand{padding:0 16px}
+h1{font-size:20px;margin:4px 0 2px}
+.info{font-size:13px;color:var(--muted);margin:0 0 8px}
+.knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+.knoepfe .grp{display:flex;gap:0}
+.knoepfe button{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:var(--karte);color:var(--ink);padding:7px 12px}
+.knoepfe .grp button:first-child{border-radius:10px 0 0 10px}
+.knoepfe .grp button:last-child{border-radius:0 10px 10px 0;border-left:0}
+.knoepfe button.an{background:#1e293b;color:#fff;border-color:#1e293b}
+html.dunkel .knoepfe button.an{background:#e7edf5;color:#121821;border-color:#e7edf5}
+.vari{margin:22px auto 0;width:calc(100vw - 70px);max-width:420px}
+.vari h2{font-size:15px;margin:0}
+.vari p{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+/* Leiter: alle 8 Stufen */
+.leiter{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin:4px 0 2px}
+.leiter i{display:block;height:16px;border-radius:3px}
+.leiter b{display:block;font-size:10px;font-weight:600;color:var(--muted);text-align:center;line-height:1.3}
+.verlauf{height:10px;border-radius:3px;margin:4px 0 0}
+.lstar{font-size:11px;color:var(--muted);margin:2px 0 8px}
+/* Kacheln */
+.kz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ki{background:var(--ki);border:1px solid var(--line);border-radius:13px;padding:8px 7px 7px 8px;position:relative;height:61px;line-height:1.3;min-width:0}
+.l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden}
+.bal{position:absolute;left:8px;right:13px;top:25px;bottom:7px;border-radius:4px;overflow:hidden}
+.bal .bb{position:absolute;inset:0;display:flex;align-items:flex-end;gap:1px;padding:0 1px}
+.bal .bb i{flex:1 1 0;min-width:1px;border-radius:1px 1px 0 0}
+.bal .bb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.bal .bm{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(40,56,90,.35)}
+html.dunkel .bal .bm{background:rgba(255,255,255,.3)}
+.bal .bt{position:absolute;top:1px;font-size:8.5px;line-height:1;font-weight:700;color:var(--muted);z-index:1;text-shadow:0 0 2px var(--karte),0 0 2px var(--karte)}
+.bal .bd,.bal .bn{position:absolute;top:0;bottom:0}
+.bal .bd{background:rgba(255,190,40,.16)}
+.bal .bn{background:rgba(45,70,150,.17)}
+html.dunkel .bal .bd{background:rgba(255,196,60,.13)}
+html.dunkel .bal .bn{background:rgba(70,100,190,.30)}
+.bal .bw{position:absolute;inset:0;display:flex;gap:1px;padding:0 1px}
+.bal .bw b{flex:1 1 0;min-width:1px;height:100%;display:flex;align-items:flex-end;padding-bottom:6px}
+.bal .bw b>i{flex:1 1 auto;border-radius:1px 1px 0 0}
+.bal .bw b>i.tr{height:1px;background:rgba(92,107,128,.35)}
+.bal .bw b.un>i{opacity:.55}
+.bal .bw b.ab{box-shadow:-1px 0 0 rgba(40,56,90,.45)}
+html.dunkel .bal .bw b.ab{box-shadow:-1px 0 0 rgba(255,255,255,.35)}
+.bal .wp{position:absolute;bottom:1px;height:3px;border-radius:1.5px;background:#d93a3a;z-index:1}
+html.dunkel .bal .wp{background:#ff6b6b}
+.dots{position:absolute;top:50%;right:2px;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--muted);opacity:.3}.dots i.an{opacity:1}
+/* gross: 2 Stunden Gewitter, feste Skala wie kzNowGross */
+.gross{background:var(--karte);border:1px solid var(--line);border-radius:13px;padding:10px 10px 6px;margin-top:8px}
+.gross .t{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.gfl{position:relative;height:130px;margin-left:22px}
+.gfl .g{position:absolute;left:0;right:0;height:1px;background:var(--gitter)}
+.gfl .gl{position:absolute;left:-22px;width:18px;text-align:right;font-size:10px;font-weight:600;color:var(--muted);transform:translateY(50%)}
+.gfl .gb{position:absolute;inset:0;display:grid;gap:2px;align-items:end}
+.gfl .gb i{display:block;border-radius:2px 2px 0 0}
+.gfl .gb i.tr{height:1px;background:rgba(92,107,128,.35)}
+.gx{display:grid;margin-left:22px;font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}
+.gx span{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="rand">
+<h1>Regenfarben ohne Gelb und Orange</h1>
+<p class="info">Sechs Farbverläufe, je 8 Stufen an denselben Schwellen wie jetzt in der App
+(Stunde: 0,1 · 0,5 · 1 · 2 · 5 · 10 · 20 · 50 mm/h, Tag: 0,1 · 1 · 3 · 5 · 10 · 20 · 30 · 50 mm).
+Beispieldaten: oben ein gewöhnlicher Regentag, unten groß eine Gewitterzelle mit allen Stufen.
+„Fließend“ blendet zwischen den Stufen über, wie in der App aus deinem Screenshot.</p>
+<div class="knoepfe">
+  <span class="grp" id="hd"><button type="button" data-m="hell" class="an">Hell</button><button type="button" data-m="dunkel">Dunkel</button></span>
+  <span class="grp" id="sf"><button type="button" data-m="stufen" class="an">Stufen</button><button type="button" data-m="fliessend">Fließend</button></span>
+</div>
+</div>
+<div id="liste"></div>
+
+<script>
+"use strict";
+const STD=[0.1,0.5,1,2,5,10,20,50], TAG=[0.1,1,3,5,10,20,30,50];
+const V=[
+ {k:"A",t:"Wie jetzt (v5.25)",p:"Hellblau, Blau, Dunkelblau, Grün, Gelb, Orange, Rot, Violett – die Farben der Radarkarte. Zum Vergleich.",
+  f:[[150,205,255],[80,160,255],[40,110,235],[30,185,120],[250,215,40],[250,140,20],[230,40,40],[200,40,200]]},
+ {k:"B",t:"Wie die App aus deinem Screenshot",p:"Hellgrün → Grün → Stahlblau → Blau → Indigo → Violett. Die mittleren sechs Farben sind aus dem Screenshot gemessen. Wenig Regen ist grün, viel Regen dunkel-violett.",
+  f:[[170,240,140],[105,228,77],[72,160,121],[50,116,162],[10,40,230],[60,10,190],[105,17,150],[140,20,120]]},
+ {k:"C",t:"Nur Blau, hell → dunkel",p:"Ein einziger Farbton, nur die Helligkeit ändert sich. Am ruhigsten, aber die oberen Stufen sind schwer auseinanderzuhalten und im Dunkeln kaum zu sehen.",
+  f:[[198,224,250],[150,195,245],[100,160,238],[60,125,225],[38,95,205],[30,70,178],[26,50,150],[24,34,118]]},
+ {k:"D",t:"Blau → Violett",p:"Beginnt wie heute hellblau, geht über Königsblau und Indigo in Violett und Purpur. Kein Grün.",
+  f:[[175,215,250],[120,180,245],[70,140,235],[50,100,220],[75,70,205],[110,50,190],[145,35,170],[180,25,140]]},
+ {k:"E",t:"Türkis → Blau → Violett",p:"Kühler Verlauf: wenig Regen türkis, mittel blau, viel violett-purpur.",
+  f:[[160,230,220],[90,200,200],[40,165,195],[35,120,205],[45,80,205],[90,50,195],[135,35,175],[180,25,140]]},
+ {k:"F",t:"Blau – Rot erst bei Unwetter",p:"Sechs Blaustufen für alles Gewöhnliche; Rot ab 20 mm/h bzw. 30 mm am Tag (DWD „markant“), Violett ab 50. Farbe als Warnung, sonst ruhig.",
+  f:[[175,215,250],[120,180,245],[70,140,235],[40,100,220],[30,70,190],[25,45,150],[225,45,45],[170,35,175]]},
+];
+let FLIESSEND=false;
+const rgb=c=>`rgb(${c.map(Math.round).join(",")})`;
+function farbe(v,mm,tag){
+  const S=tag?TAG:STD;let i=0;while(i<S.length-1&&mm>=S[i+1])i++;
+  if(!FLIESSEND||i===S.length-1||mm<S[0])return rgb(v.f[i]);
+  const t=(Math.log(mm)-Math.log(S[i]))/(Math.log(S[i+1])-Math.log(S[i]));
+  return rgb(v.f[i].map((a,j)=>a+(v.f[i+1][j]-a)*t));
+}
+/* Helligkeit L* (CIELAB, D65) - zeigt, ob der Verlauf gleichmaessig dunkler wird */
+function lstar(c){const lin=x=>{x/=255;return x<=0.04045?x/12.92:Math.pow((x+0.055)/1.055,2.4);};
+  const Y=0.2126*lin(c[0])+0.7152*lin(c[1])+0.0722*lin(c[2]);return Y>0.008856?116*Math.cbrt(Y)-16:903.3*Y;}
+
+/* Beispieldaten */
+const N2=[0.2,0.3,0.4,0.6,0.8,1.0,1.3,1.1,0.9,0.7,0.5,0.6,0.9,1.4,1.8,2.2,1.6,1.0,0.6,0.4,0.2,0.1,0,0,0];          // 2 h Landregen, mm/h je 5 min
+const H24=[0,0,0.1,0.2,0.4,0.8,1.5,0.6,0.2,0,0,0,0.3,1.1,2.8,6,12,3,0.8,0.2,0,0,0,0.1];                          // 24 h ab 10 Uhr, mm je Stunde
+const T16=[0.4,2.5,6,12,0,0,1.2,24,35,8,0.3,0,0,4,55,2];                                                       // 16 Tage ab Mi 21.10., mm je Tag
+const GEW=[0,0,0.1,0.3,0.6,1.2,2.5,4,7,12,24,55,38,18,9,5,3,1.8,1,0.6,0.3,0.15,0,0,0];                           // 2 h Gewitterzelle
+
+function k2h(v){
+  const sc=Math.max(...N2,0.5);
+  const bars=N2.map(x=>x<0.1?'<i class="tr"></i>':`<i style="height:${Math.max(2,Math.round(x/sc*27))}px;background:${farbe(v,x)}"></i>`).join("");
+  const p=12/25*100;
+  return `<span class="bal"><i class="bm" style="left:${p}%"></i><b class="bt" style="left:calc(${p}% + 2px)">1 h</b><span class="bb">${bars}</span></span>`;
+}
+function k24(v){
+  /* 10 Uhr bis 10 Uhr: Tag bis 18 Uhr (33 %), Nacht bis 7:30 (89,6 %), dann Tag */
+  const bg=`<i class="bd" style="left:0;width:33.3%"></i><i class="bn" style="left:33.3%;width:56.3%"></i><i class="bd" style="left:89.6%;width:10.4%"></i>`;
+  const mn=14/24*100,sk=Math.max(1,...H24);
+  const bars=H24.map(x=>x<0.1?'<i class="tr"></i>':`<i style="height:${Math.max(2,Math.round(x/sk*22))}px;background:${farbe(v,x)}"></i>`).join("");
+  return `<span class="bal">${bg}<i class="bm" style="left:${mn}%"></i><b class="bt" style="left:calc(${mn}% + 2px)">Do</b><span class="bb">${bars}</span></span>`;
+}
+function k16(v){
+  const n=T16.length,wd=i=>(3+i)%7;   // 21.10.2026 = Mittwoch
+  const cols=T16.map((mm,i)=>{const d=wd(i),kl=[i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
+    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*21))}px;background:${farbe(v,mm,1)}"></i>`:'<i class="tr"></i>';
+    return `<b${kl?` class="${kl}"`:""}>${bar}</b>`;}).join("");
+  let we="";
+  for(let i=0;i<n;i++){if(wd(i)!==6)continue;const b=Math.min(n-1,i+1);
+    we+=`<i class="wp" style="left:calc(${1+i}px + (100% - ${n+1}px) * ${(i/n).toFixed(4)});width:calc(${b-i}px + (100% - ${n+1}px) * ${((b-i+1)/n).toFixed(4)})"></i>`;}
+  return `<span class="bal"><span class="bw">${cols}</span>${we}</span>`;
+}
+function gross(v){
+  const k=GEW.length,mx=Math.max(...GEW),sk=mx<=1?1:mx<=2?2:mx<=5?5:Math.ceil(mx/10)*10,st=sk/2;
+  let gl="";for(let x=st;x<=sk+1e-9;x+=st)gl+=`<i class="g" style="bottom:${x/sk*100}%"></i><b class="gl" style="bottom:${x/sk*100}%">${x}</b>`;
+  const bars=GEW.map(x=>x<0.1?'<i class="tr"></i>':`<i style="height:${Math.max(2,Math.min(100,x/sk*100)).toFixed(1)}%;background:${farbe(v,x)}"></i>`).join("");
+  const xl=GEW.map((_,i)=>i%6?"<span></span>":`<span>${["jetzt","30 min","1 h","1½ h","2 h"][i/6]}</span>`).join("");
+  return `<div class="gross"><div class="t">Gewitterzelle · 2 Stunden · mm/h</div>
+    <div class="gfl">${gl}<div class="gb" style="grid-template-columns:repeat(${k},1fr)">${bars}</div></div>
+    <div class="gx" style="grid-template-columns:repeat(${k},1fr)">${xl}</div></div>`;
+}
+function leiter(v){
+  const sw=STD.map((s,i)=>`<span><i style="background:${rgb(v.f[i])}"></i><b>${String(s).replace(".",",")}</b></span>`).join("");
+  const stops=[];for(let j=0;j<=40;j++){const mm=Math.exp(Math.log(0.1)+(Math.log(60)-Math.log(0.1))*j/40);stops.push(farbe({f:v.f},mm));}
+  const L=v.f.map(c=>Math.round(lstar(c))).join(" · ");
+  return `<div class="leiter">${sw}</div>${FLIESSEND?`<div class="verlauf" style="background:linear-gradient(90deg,${stops.join(",")})"></div>`:""}
+    <div class="lstar">mm/h · Helligkeit L* je Stufe: ${L}</div>`;
+}
+function zeichnen(){
+  document.getElementById("liste").innerHTML=V.map(v=>`<div class="vari"><h2>${v.k} · ${v.t}</h2><p>${v.p}</p>
+    ${leiter(v)}
+    <div class="kz">
+      <div class="ki"><div class="dots"><i></i><i class="an"></i></div><div class="l">Regen 2 h</div>${k2h(v)}</div>
+      <div class="ki"><div class="dots"><i></i><i class="an"></i></div><div class="l">24 h 30 mm</div>${k24(v)}</div>
+      <div class="ki"><div class="dots"><i></i><i class="an"></i></div><div class="l">16 Tage</div>${k16(v)}</div>
+    </div>
+    ${gross(v)}</div>`).join("");
+}
+function schalter(id,fn){document.getElementById(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle("an",x===b));fn(b.dataset.m);zeichnen();});}
+schalter("hd",m=>document.documentElement.classList.toggle("dunkel",m==="dunkel"));
+schalter("sf",m=>{FLIESSEND=m==="fliessend";});
+zeichnen();
+</script>
+</body>
+</html>
