@@ -1574,6 +1574,15 @@ Schauer ~15 %) und ist innerhalb eines Laufs an allen drei Orten gleich. Trocken
 Balken (h = 0) haben 12-16 %, nicht 25 %. Also: P = Grundwert der Lage + Anteil aus
 demselben Wert wie der Balken; der Balken selbst kennt den Grundwert nicht.
 Herkunft des Grundwerts unbekannt (Vermutung: Modell- oder Flaechenwert).
+v5.29 (Nutzer-Screenshot 20:28: "0,1 auf grau (Nacht) kann man kaum erkennen"):
+gemessen (WCAG-Kontrast) hellste Stufe (160,230,220) auf hellem Nachtgrund 1,07:1,
+auf Weiss 1,41, Tag 1,30. Dunklere Stufen allein brachten nur ~1,4 (Nachtgrund und
+Tuerkis sind fast gleich hell). Jetzt im HELLEN Modus eine feine Kontur um jeden
+Regenbalken und die Legendenfelder (inset 1px rgba(0,60,80,.22); .kzs-bb, .kzg-a,
+Kachelbalken, .nowcard .bar, .rleg i), Farben E unveraendert. Varianten verglichen
+(kontrast_varianten.png: A jetzt, B dunklere Hellstufen, C Kontur, D beides) - C
+gewaehlt, weil es die vom Nutzer gewaehlten Farben laesst. Dunkler Modus ohne Kontur
+(hellste Stufe dort 9:1); dort sind eher die violetten Stufen schwach (1,7-2,0:1).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
