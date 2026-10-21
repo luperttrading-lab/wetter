@@ -1529,6 +1529,16 @@ Farben bei gleichen Schwellen, der Satz "wie auf der Radarkarte" ist weg. Kein
 Gruen (Nutzer fragte): in der Vorbild-App steht Hellgruen fuer Werte UNTER der
 kleinsten Radarstufe, bei uns ist das trocken. Offen: feste (log) Hoehe und
 fliessende Farbe wie die Vorbild-App - Nutzer hat noch nicht entschieden.
+ZWEITER SCREENSHOT (Frankfurt 16:26, Radar 16:29 geholt, radar_ffm.json): FARBE
+an allen 9 Balken bestaetigt (teal -> blau bis Mittel, darueber blau -> rot, Rest
+<= 2 Einheiten). HOEHE: von 5 Zuordnungen (Punkt, 15 min vor/um/nach, Max) passt
+das Mittel der 15 min AB Balkenzeit am besten (Auswahl nach Guete - Vorsicht).
+Gemeinsam mit Erlental (n=8, ohne Plateau): h = 0,551 + 0,321*log10(R), r2 0,88,
+rmse 0,038 (linear r2 0,77, setzte "Stark" auf 4,7 mm/h - unplausibel). Damit
+Schwach ~0,2 / Mittel ~2,3 / Stark ~25 mm/h, rund eine Dekade je Drittel (95 %:
+Faktor 6-46). Dazu ein BODEN: 4 Frankfurter Balken mit 0,24-0,44 mm/h stehen genau
+auf "Schwach" - erkannter Regen steht dort mindestens auf 1/3. Welcher Punkt
+"Frankfurt" ist, weiss ich nicht (Zentrum 50,111/8,682 angenommen).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
