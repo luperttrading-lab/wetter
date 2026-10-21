@@ -1583,6 +1583,23 @@ Kachelbalken, .nowcard .bar, .rleg i), Farben E unveraendert. Varianten verglich
 (kontrast_varianten.png: A jetzt, B dunklere Hellstufen, C Kontur, D beides) - C
 gewaehlt, weil es die vom Nutzer gewaehlten Farben laesst. Dunkler Modus ohne Kontur
 (hellste Stufe dort 9:1); dort sind eher die violetten Stufen schwach (1,7-2,0:1).
+v5.30 (Nutzer: "alle Kombinationen selbst kontrollieren", 16 Tage "Regenmenge
+obendrueber zu eng - links daneben", "in den Grafikfenstern nur Schliessen"):
+(1) KONTRASTPRUEFUNG aller 8 Stufen gegen 12 Hintergruende (Grossansicht hell/dunkel
+x weiss/Tag/Nacht, Kachel hell/dunkel x Nacht, Abschnitt, unsicher .6): schwach waren
+hell die Stufen 0-1 (1,04-1,5:1, seit v5.29 Kontur) und DUNKEL die Stufen 4-7 auf
+Nachtgrund 1,5-2,1:1, unsicher .6 1,5-1,7:1 -> im dunklen Modus jetzt helle Kontur
+(inset 1px rgba(255,255,255,.22)). Nachbarstufen 4/5/6 sind gleich hell (1,08-1,2:1),
+unterscheiden sich nur im Farbton. Visuell geprueft: alle Stufen in 2 h, 24 h (Tag und
+Nacht), 16 Tage (sicher und unsicher), Kacheln, hell und dunkel.
+(2) `kzTageGross`: Skala links (Hilfslinien halbe/volle Hoehe, 10 mm, sonst naechste
+Zehnerstufe; `.kzg-pl` 24 px Rand, `.kzg-gr` im Saeulenbereich) statt Zahlen ueber den
+Saeulen; Wochentag 9,5 px (<= 350 px Breite 8 px) - bei 375 pt sonst 0,8 px zu breit,
+gemessen per Range: 320/375/430 pt passen jetzt.
+(3) `kzGrossZeigen(html)`: nur noch "Schliessen" (volle Breite); ziel/knopf aus gross()
+werden nicht mehr benutzt.
+(4) 24-h-Grossansicht: Skala glatt 1/2/5/10/20... wie bei 2 h (vorher ceil(mx/2)*2 =
+"56 / 28"), 2,5 nicht mehr als "3".
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
