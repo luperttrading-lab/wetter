@@ -1553,6 +1553,18 @@ Balken kleben 45-75 min EXAKT auf "Schwach", waehrend die Kurve 67-99 % durchlae
 Naechster Test: beide Reiter fuer DENSELBEN Ort zur selben Minute. Auf ihrer KARTE
 ist Gruen die schwaechste Regenstufe; in den Balken liegt dieselbe Stufe auf Tuerkis
 ("Schwach"), Gruen nur darunter.
+VIERTE RUNDE (21.10. 18:09, beide Reiter fuer Frankfurt UND Erlental, Radar 18:10
+geholt - radar_ffm3/erl3.json): Wahrscheinlichkeit P und Balkenhoehe h sind eine
+FESTE Funktion voneinander: P = 25 + 135*h bis "Schwach", darueber 70 + 82*(h-1/3);
+16 Paare an beiden Orten, Rest <= 1,8 Punkte (Null = 25 %, Schwach = 70 %, Mittel
+~97 %). Beide Reiter zeigen also DIESELBE Groesse in zwei Skalen; P saettigt bei
+100 %, die Balken gehen darueber hinaus (Froendenberg 0,83). Und die Balken sind
+KEINE reine mm/h-Skala: Bright Sky ~0,7 mm/h ergab in Erlental "Mittel", in
+Frankfurt "Schwach"; Erlental 18:50 Einbruch auf Schwach bei 0,96 mm/h im Radar.
+Die log-Eichung oben (Schwach 0,2 / Mittel 2,3 / Stark 25) ist damit HINFAELLIG.
+Unter Schwach wird gemischt Gruen (0,255,0) bei Null -> teal; gemessen (0,157,98)
+bei h 0,257 und (0,222,33) bei 0,087. Unter Schwach liegen Balken nur am Rand eines
+Regengebiets (P < 70 %). Nicht weiter verfolgen, solange wir nichts uebernehmen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
