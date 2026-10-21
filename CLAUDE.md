@@ -85,6 +85,30 @@ ONLINE liegt, nicht die geladene.
   Nie `daten` nach `main` mergen und nie Daten dieser Pipeline auf `main`
   committen - sonst waechst das Repo um etwa 1 GB im Jahr.
 
+### ICON-D2-RUC-Vergleich (seit 21.10.2026)
+
+Nutzer: "erst messen, dann in die App" - RUC kommt nur in index.html, wenn es
+an der Station Giessen/Wettenberg (01639) messbar gewinnt. `ruc.py` (Workflow
+`ruc.yml`, Schleife, Abruf stuendlich um :42 UTC; ein RUC-Lauf ist ~37 min
+nach der vollen Stunde vollstaendig) holt den neuesten Lauf vom DWD
+(`opendata.dwd.de/weather/nwp/v1/m/icon-d2-ruc/p/<VAR>/r/<Lauf>/s/PT0hhH00M.grib2`,
+TOT_PREC und T_2M fuer +1..+14 h, ~17 MB je Lauf) und schreibt zum SELBEN
+Zeitpunkt die Vergleichsvorhersagen mit: Open-Meteo best_match (= was die App
+zeigt) und icon_d2, MOSMIX ueber Bright Sky. Nachholen geht nicht - Open-Meteo
+liefert nur den neuesten Lauf. Daten: Branch `ruc-daten` (mit Historie, NICHT
+nach main mergen), `ruc/JJJJ-MM-TT.jsonl` je UTC-Tag, `ruc/stand.json`,
+`ruc/gitter.json`. FALLE: "r" ist beim DWD das NATIVE ICON-Dreiecksgitter
+(542 040 Zellen, CCSDS-gepackt), kein Laenge/Breite-Raster - eccodes noetig,
+Zellmitten aus CLAT/CLON; naechste Zelle 0,4 km neben der Station, 16 Zellen
+bis 5 km (gespeichert: Zelle, Mittel und Max der 5 km). TOT_PREC ist ab
+Laufbeginn aufsummiert -> Stundenwert = Differenz, Stempel = Stundenende.
+`ruc_auswertung.py` (einmal je Workflow-Lauf) holt die Stationsmessung von
+Bright Sky und schreibt `ruc/auswertung.md` / `.json`: je Vorlauf (Stunden
+nach dem Abruf) POD/FAR/CSI ab 0,1 und 0,5 mm/h, Regen-MAE, Temperatur
+MAE/Bias - nur auf der GEMEINSAMEN Stichprobe aller Modelle. Dazu ein
+Tagesvergleich RUC gegen App mit Vorzeichentest (Stunden sind abhaengig).
+Erste Auswertung sinnvoll nach ~2 Wochen mit mehreren Regentagen.
+
 ## Bright Sky: "sunshine" ist die VORANGEGANGENE Stunde
 
 Der Wert mit Stempel 14:00 beschreibt 13 bis 14 Uhr (ebenso `precipitation`
