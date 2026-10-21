@@ -1,0 +1,95 @@
+name: ICON-D2-RUC Vergleich
+
+# Messreihe (Nutzer, 21.10.2026): ICON-D2-RUC gegen das, was die App zeigt
+# (Open-Meteo best_match), ICON-D2 und MOSMIX - an der Station Giessen/
+# Wettenberg. Erst messen, dann vielleicht in die App. Details in ruc.py und
+# ruc_auswertung.py.
+#
+# Schleife statt Zeitplan wie radolan.yml: RUC rechnet stuendlich, ein Lauf ist
+# rund 37 min nach der vollen Stunde vollstaendig (gemessen 21.10.: 05:35,
+# 06:37, 07:37 UTC). Abruf deshalb um :42. Die Vergleichsvorhersagen lassen
+# sich NICHT nachholen (Open-Meteo liefert nur den neuesten Lauf) - fehlt eine
+# Stunde, fehlt sie. Am Ende startet der Lauf seinen Nachfolger.
+#
+# Daten auf eigenem Branch "ruc-daten" (mit Historie, eine Datei je UTC-Tag,
+# rund 2 KB je Stunde) - nicht auf main, damit main nicht stuendlich Commits
+# bekommt. Download je Lauf rund 17 MB (28 GRIB2-Dateien), am Tag ~400 MB.
+
+on:
+  schedule:
+    - cron: "47 */4 * * *"     # Rueckfall alle 4 h, falls die Kette reisst
+  workflow_dispatch:
+
+concurrency:
+  group: ruc
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  ruc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: eccodes und numpy installieren
+        run: pip install --quiet eccodes numpy
+
+      - name: Daten-Branch bereitstellen
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if git fetch -q origin ruc-daten; then
+            git worktree add -q -B ruc-daten daten origin/ruc-daten
+          else
+            git worktree add -q --detach daten
+            cd daten && git checkout -q --orphan ruc-daten && git rm -rfq . && cd ..
+            printf 'Messreihe ICON-D2-RUC (ruc.py, Workflow ruc.yml). Nicht nach main mergen.\n' > daten/LIESMICH.txt
+            git -C daten add LIESMICH.txt && git -C daten commit -qm "ruc-daten angelegt"
+            git -C daten push -q origin ruc-daten
+          fi
+
+      - name: Auswertung (einmal je Lauf)
+        continue-on-error: true
+        run: |
+          python ruc_auswertung.py daten || echo "Auswertung fehlgeschlagen"
+          git -C daten add -A ruc
+          git -C daten diff --staged --quiet || { git -C daten commit -qm "RUC Auswertung"; git -C daten push -q origin ruc-daten; }
+
+      - name: Stuendlich erfassen
+        run: |
+          set -u
+          ENDE=$(( $(date -u +%s) + 330*60 ))
+          while : ; do
+            echo "::group::$(date -u +%H:%M)Z"
+            python ruc.py daten || echo "Erfassung fehlgeschlagen"
+            git -C daten add -A ruc
+            if ! git -C daten diff --staged --quiet; then
+              git -C daten commit -qm "RUC $(date -u +%Y-%m-%dT%H:%MZ)"
+              for i in 1 2 3 4 5; do git -C daten push -q origin ruc-daten && break; sleep $(( i * 5 )); done
+            fi
+            echo "::endgroup::"
+            JETZT=$(date -u +%s)
+            M=$(date -u +%-M); S=$(date -u +%-S)
+            if [ "$M" -lt 42 ]; then W=$(( (42-M)*60 - S )); else W=$(( (102-M)*60 - S )); fi
+            if [ $(( JETZT + W )) -ge "$ENDE" ]; then echo "naechster Abruf liegt nach dem Ende - Ende"; break; fi
+            sleep "$W"
+          done
+
+      # Nur nach regulaerem Ende (success) - ein abgeloester Lauf startet keinen.
+      - name: Nachfolger starten
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -o /dev/null -w "Nachfolger: HTTP %{http_code}\n" -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/ruc.yml/dispatches" \
+            -d '{"ref":"main"}'
