@@ -1539,6 +1539,20 @@ Schwach ~0,2 / Mittel ~2,3 / Stark ~25 mm/h, rund eine Dekade je Drittel (95 %:
 Faktor 6-46). Dazu ein BODEN: 4 Frankfurter Balken mit 0,24-0,44 mm/h stehen genau
 auf "Schwach" - erkannter Regen steht dort mindestens auf 1/3. Welcher Punkt
 "Frankfurt" ist, weiss ich nicht (Zentrum 50,111/8,682 angenommen).
+DRITTE RUNDE (21.10. 17:06, Ausgewertet erst 17:34 - Vorhersagelauf der App da
+schon ersetzt): Die App heisst auf dem Home-Bildschirm "Regen?" (Pro) = RegenVorschau
+Pro von CH-Software (App Store id327754661; Reiter Wahrscheinlichkeit, Intensitaet,
+Regenradar mit Zugpfeil +1h/+2h, Wind). Beschreibung sagt nichts zur Berechnung.
+WAHRSCHEINLICHKEIT (Kurve Huettenberg): ist NICHT der Anteil nasser Radarzellen im
+Umkreis - gegen Radien 0,5-25 km und Schwellen 0,12-0,36 mm/h stets ~+20 Punkte
+daneben (Radar 95-100 % nass, App 67-79 %). Form: ~98 % bis +15 min, Absturz auf
+~67 % bei +25-30 min, dann flach 70-79 % -> vermutlich Vorlaufzeit-Vertrauen, nicht
+Flaechenanteil. Ob sie in die BALKEN eingeht: nicht pruefbar, weil Kurve
+(Huettenberg) und Balken (Frankfurt) verschiedene Orte sind. Dagegen spricht: die
+Balken kleben 45-75 min EXAKT auf "Schwach", waehrend die Kurve 67-99 % durchlaeuft.
+Naechster Test: beide Reiter fuer DENSELBEN Ort zur selben Minute. Auf ihrer KARTE
+ist Gruen die schwaechste Regenstufe; in den Balken liegt dieselbe Stufe auf Tuerkis
+("Schwach"), Gruen nur darunter.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
