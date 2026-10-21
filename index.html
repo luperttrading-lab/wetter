@@ -195,7 +195,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzg-a{height:110px;width:100%;display:flex;align-items:flex-end}
 .kzg-a i{width:100%;background:#3a8fd8;border-radius:2px 2px 0 0}
 .kzg-a i.tr{height:1px;background:rgba(92,107,128,.35)}
-.kzg-c.un .kzg-a i,.kzg-c.un .kzg-w{opacity:.45}
+.kzg-c.un .kzg-a i,.kzg-c.un .kzg-w{opacity:.6}   /* v5.25: .45 -> .6, sonst Rot/Orange/Violett kaum zu unterscheiden */
 .kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(40,56,90,.3)}
 .kzg-t{font-size:10.5px;font-weight:800;margin-top:4px;line-height:1.1}
 .kzg-c.we .kzg-t{color:#d33a3a}
@@ -221,13 +221,15 @@ html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
 html.dunkel .kzs-m{background:rgba(255,255,255,.35)}
 .kzs .kzmd{fill:#3b4f8f}
 html.dunkel .kzs .kzmd{fill:#c9d4f5}
+.rleg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:11px;color:var(--muted);margin-top:8px;align-items:center}   /* v5.25 Farbstufen */
+.rleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:-1px}
 .kzg-leg{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 .kzg-leg b{color:#d33a3a}
 html.dunkel .kzg-c.we .kzg-t,html.dunkel .kzg-leg b{color:#ff8080}
 html.dunkel .kzg-c.ab .kzg-a,html.dunkel .kzg-kopf span:last-child{border-color:rgba(255,255,255,.3)}
 html.dunkel .kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(255,255,255,.3)}
 .kz .kzbal .kzbw b>i{flex:1 1 auto}
-.kz .kzbal .kzbw b.un>i{opacity:.4}
+.kz .kzbal .kzbw b.un>i{opacity:.55}
 .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(40,56,90,.45)}
 html.dunkel .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(255,255,255,.35)}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
@@ -1065,7 +1067,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.24</span>
+      <span class="ver">v5.25</span>
     </div>
   </header>
 
@@ -4610,6 +4612,22 @@ function kzRegen24H(){
    H[23].t. Hintergrund: Nacht (Sonne unter dem Horizont) leicht dunkler,
    Mitternacht als Strich mit dem Wochentag. Volle Hoehe ab 1 mm/h, damit
    Niesel flach bleibt. HTML statt SVG - ein gestrecktes SVG verzerrt Schrift. */
+/* v5.25 (Nutzer: "Farbe der Balken nach der Regenmenge, mit sinnvollen Stufen"):
+   STUNDENWERTE (Radar 5 min als Rate, Modell je Stunde) bekommen DIESELBEN
+   Stufen und Farben wie die Radarkarte (RK_STUFEN, deckend statt durchscheinend)
+   - eine Farbe bedeutet in der ganzen App dasselbe. Rot ab 20 mm/h liegt in der
+   DWD-Warnstufe "Starkregen" (15-25 l/m2 in 1 h), Violett ab 50 bei "extrem"
+   (> 40). TAGESSUMMEN haben eigene Schwellen in denselben Farben - 5 mm am Tag
+   ist ein gewoehnlicher Regentag, 5 mm in einer Stunde nicht. Anker: Rot ab
+   30 mm, Violett ab 50 mm = DWD "Dauerregen" markant (30-50 l/m2 in 24 h) bzw.
+   Unwetter (> 50). Gleiche Farben wie RK_STUFEN - aendert sich die Radarkarte,
+   hier mitziehen. */
+const REGEN_FARB=["rgb(150,205,255)","rgb(80,160,255)","rgb(40,110,235)","rgb(30,185,120)","rgb(250,215,40)","rgb(250,140,20)","rgb(230,40,40)","rgb(200,40,200)"];
+const REGEN_STD=[0.1,0.5,1,2,5,10,20,50];      // mm/h
+const REGEN_TAG=[0.1,1,3,5,10,20,30,50];       // mm am Tag
+function regenFarbe(mm,tag){const S=tag?REGEN_TAG:REGEN_STD;let i=0;while(i<S.length-1&&mm>=S[i+1])i++;return REGEN_FARB[i];}
+function regenLegende(tag){const S=tag?REGEN_TAG:REGEN_STD,f=v=>String(v).replace(".",",");
+  return `<div class="rleg">${S.map((v,i)=>`<span><i style="background:${REGEN_FARB[i]}"></i>${f(v)}</span>`).join("")}<span class="rleg-e">${tag?"mm am Tag":"mm/h"}</span></div>`;}
 /* Tag- und Nachtabschnitte zwischen W0 und W1 in Prozent (Nacht = Untergang bis
    naechster Aufgang). Von der Kachel (kzRegenGrafik) und der Grossansicht
    (kzStundenGross) gemeinsam genutzt, seit v5.23 ausgelagert. */
@@ -4636,7 +4654,7 @@ function kzStundenGross(H,gef,rest){
   let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
   let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v<1?kzF1(v):Math.round(v)}</b>`;
   let mnI=-1;const bars=H.map((x,i)=>{const b=x.t-36e5;if(mnI<0&&b>W0&&ortsStunde(b)===0)mnI=i;
-    return x.mm>=0.1?`<i style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%"></i>`:`<i class="tr"></i>`;}).join("");
+    return x.mm>=0.1?`<i style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%;background:${regenFarbe(x.mm)}"></i>`:`<i class="tr"></i>`;}).join("");
   const mn=mnI>0?`<i class="kzs-m" style="left:${(mnI/n*100).toFixed(2)}%"></i>`:"",mnP=mnI>0?mnI/n*100:null;
   // Sonne/Mond mittig im Abschnitt, aber nicht auf dem Mitternachtsstrich (sonst 6 % daneben, im Abschnitt)
   [...tag.map(x=>[x,KZ_SONNE]),...nacht.map(x=>[x,KZ_MOND])].forEach(([[a,b],z])=>{if(b-a<8)return;let m=(a+b)/2;
@@ -4653,7 +4671,8 @@ function kzStundenGross(H,gef,rest){
     <div class="kzg-sub">${z1}${z2}</div>
     <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div></div>
     <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
-    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde (Skala mm je Stunde) \u00b7 gelb = Tag, blau = Nacht${n2}</div>`;
+    ${regenLegende()}
+    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke wie auf der Radarkarte \u00b7 Hintergrund gelb = Tag, blau = Nacht${n2}</div>`;
 }
 /* v5.24: die 2 Radarstunden als Balken in der Kachel "Regen" - dieselben Werte
    und dieselbe Skala wie der Abschnitt "Niederschlag · naechste 2 Std"
@@ -4662,7 +4681,7 @@ function kzStundenGross(H,gef,rest){
    TH, aber unter der Jetzt-Schwelle liegt. Ein Strich markiert +1 h. */
 function kzNowGrafik(n){
   const TJ=n.THjetzt!=null?n.THjetzt:n.TH,B=n.serieB||n.serie,sc=Math.max(n.peakB!=null?n.peakB:n.peak,0.5),k=n.serie.length;
-  const bars=n.serie.map((v,i)=>v<n.TH?'<i class="tr"></i>':`<i${i===0&&v<TJ?' class="bl"':""} style="height:${Math.max(2,Math.round(B[i]/sc*27))}px"></i>`).join("");
+  const bars=n.serie.map((v,i)=>v<n.TH?'<i class="tr"></i>':`<i${i===0&&v<TJ?' class="bl"':""} style="height:${Math.max(2,Math.round(B[i]/sc*27))}px;background:${regenFarbe(B[i])}"></i>`).join("");
   const i1=n.zeit?n.zeit.findIndex(t=>t>=n.zeit[0]+36e5-6e4):12,p=(i1>0?i1:12)/k*100;
   return `&nbsp;<span class="kzbal kznow"><i class="kzbm" style="left:${p.toFixed(1)}%"></i><b class="kzbt" style="left:calc(${p.toFixed(1)}% + 2px)">1 h</b><span class="kzbb">${bars}</span></span>`;
 }
@@ -4688,7 +4707,7 @@ function kzRegenGrafik(H){
   /* Mitternacht */
   if(mn!=null)bg+=`<i class="kzbm" style="left:${mn.toFixed(1)}%"></i><b class="kzbt" style="${mn>78?`right:${(100-mn+3).toFixed(1)}%`:`left:calc(${mn.toFixed(1)}% + 2px)`}">${kzWtag(mnMs)}</b>`;
   const sk=Math.max(1,...H.map(x=>x.mm));
-  const bars=H.map(x=>x.mm>=0.1?`<i style="height:${Math.max(2,Math.round(x.mm/sk*22))}px"></i>`:`<i class="tr"></i>`).join("");
+  const bars=H.map(x=>x.mm>=0.1?`<i style="height:${Math.max(2,Math.round(x.mm/sk*22))}px;background:${regenFarbe(x.mm)}"></i>`:`<i class="tr"></i>`).join("");
   return `&nbsp;<span class="kzbal">${bg}<span class="kzbb">${bars}</span></span>`;
 }
 /* v5.17 (Nutzer): Tagessaeulen statt "jeden Tag" / "Do–Sa" in der Kachel
@@ -4708,13 +4727,14 @@ function kzTageGross(T){
   const s7=T.slice(0,7).reduce((a,x)=>a+(+x.mm||0),0),r7=T.slice(0,7).filter(x=>(+x.mm||0)>=0.5).length,s9=T.slice(7).reduce((a,x)=>a+(+x.mm||0),0);
   const cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
     const kl=["kzg-c",(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
-    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(mm/sk*110))}px"></i>`:`<i class="tr"></i>`;
+    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(mm/sk*110))}px;background:${regenFarbe(mm,1)}"></i>`:`<i class="tr"></i>`;
     return `<div class="${kl}"><div class="kzg-w">${f(mm)}</div><div class="kzg-a">${bar}</div><div class="kzg-t">${KZ_WT[wd]}</div><div class="kzg-d">${+x.t.slice(8,10)}.</div></div>`;}).join("");
   return `<div class="kzg-titel">Regen \u00b7 ${n} Tage</div>
     <div class="kzg-sub">N\u00e4chste 7 Tage ${kzF1(s7)} mm${r7?` \u00b7 ${r7} ${r7===1?"Regentag":"Regentage"}`:""}${n>7?`<br>Tag 8\u2013${n}: ${kzF1(s9)} mm (unsicher)`:""}</div>
     ${n>7?`<div class="kzg-kopf" style="grid-template-columns:7fr ${n-7}fr"><span>7 Tage</span><span>unsicher</span></div>`:""}
     <div class="kzg-ch" style="grid-template-columns:repeat(${n},1fr)">${cols}</div>
-    <div class="kzg-leg"><b>Rot</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Zahlen in mm${sk>10?"":" \u00b7 volle H\u00f6he 10 mm"}</div>`;
+    ${regenLegende(1)}
+    <div class="kzg-leg"><b>Rote Wochentage</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Zahlen in mm${sk>10?"":" \u00b7 volle H\u00f6he 10 mm"}</div>`;
 }
 function kzGrossZeigen(html,ziel,knopf){
   let ov=el("kzGrossOv");
@@ -4737,7 +4757,7 @@ function kzTageGrafik(T){
      erklaert in der Grossansicht (kzTageGross). Saeulen 21 px, darunter 6 px. */
   const n=T.length,H=21,cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
     const kl=[(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
-    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*H))}px"></i>`:`<i class="tr"></i>`;
+    const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(Math.min(1,mm/10)*H))}px;background:${regenFarbe(mm,1)}"></i>`:`<i class="tr"></i>`;
     return `<b${kl?` class="${kl}"`:""}>${bar}</b>`;}).join("");
   /* v5.19 (Nutzer): kein "unsicher" mehr - blass genuegt, die 16-Tage-Liste
      unten blendet dieselben Tage ebenfalls ab (.fc-row.far) */
@@ -5607,8 +5627,8 @@ function renderNowcast(j){
      Wert - sonst wuerde ein Balken auftauchen, wo die Erkennung "kein Regen"
      sagt. Die Skala richtet sich nach demselben Massstab wie die Zahl darueber. */
   const sc=Math.max(peakB,0.5);
-  const bars=series.map((s,i)=>`<div class="bar${s.mmh<TH?" dry":""}${i===0&&s.mmh>=TH&&s.mmh<TJ?" blass":""}" style="height:${s.mmh<TH?2:Math.max(3,Math.round(s.b/sc*48))}px"></div>`).join("");
-  el("nowcard").innerHTML=`<div class="nh"><div class="nt">${summary}</div><div class="ns">${detail}</div></div><div class="bars">${bars}</div><div class="ax"><span>jetzt</span><span>+1 Std</span><span>+2 Std</span></div>`;
+  const bars=series.map((s,i)=>`<div class="bar${s.mmh<TH?" dry":""}${i===0&&s.mmh>=TH&&s.mmh<TJ?" blass":""}" style="height:${s.mmh<TH?2:Math.max(3,Math.round(s.b/sc*48))}px${s.mmh<TH?"":";background:"+regenFarbe(s.b)}"></div>`).join("");
+  el("nowcard").innerHTML=`<div class="nh"><div class="nt">${summary}</div><div class="ns">${detail}</div></div><div class="bars">${bars}</div><div class="ax"><span>jetzt</span><span>+1 Std</span><span>+2 Std</span></div>${peak>=TH?regenLegende():""}`;
   sec.classList.remove("hidden");
 }
 
@@ -5652,10 +5672,10 @@ function renderRainHours(d){
   else{summary=`Regen ab ${hLbl(H[fr].t)}`;detail=`~${f1(total)} mm gesamt · Spitze ${f1(peak)} mm/h`;}
   if(mitRadar)detail+=" · erste 2 Std aus dem Radar";
   const sc=Math.max(peak,0.5);let prevD=new Date(H[0].t).getDate();
-  const bars=H.map(x=>{const dd=new Date(x.t),db=dd.getDate()!==prevD;prevD=dd.getDate();const ht=x.mm<TH?2:Math.max(3,Math.round(x.mm/sc*46));return `<div class="bar${x.mm<TH?" dry":""}${db?" daybreak":""}" style="height:${ht}px"></div>`;}).join("");
+  const bars=H.map(x=>{const dd=new Date(x.t),db=dd.getDate()!==prevD;prevD=dd.getDate();const ht=x.mm<TH?2:Math.max(3,Math.round(x.mm/sc*46));return `<div class="bar${x.mm<TH?" dry":""}${db?" daybreak":""}" style="height:${ht}px${x.mm<TH?"":";background:"+regenFarbe(x.mm)}"></div>`;}).join("");
   const last=H.length-1,idx=[0,Math.round(last*0.25),Math.round(last*0.5),Math.round(last*0.75),last];
   const ax=idx.map((ix,i)=>`<span>${i===0?"jetzt":hLbl(H[ix].t)}</span>`).join("");
-  el("rainHrCard").innerHTML=`<div class="nh"><div class="nt">${summary}</div><div class="ns">${detail}</div></div><div class="bars">${bars}</div><div class="ax">${ax}</div>`;
+  el("rainHrCard").innerHTML=`<div class="nh"><div class="nt">${summary}</div><div class="ns">${detail}</div></div><div class="bars">${bars}</div><div class="ax">${ax}</div>${H.some(x=>x.mm>=TH)?regenLegende():""}`;
   sec.classList.remove("hidden");
 }
 
