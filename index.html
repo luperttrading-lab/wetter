@@ -189,7 +189,10 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzg-sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
 .kzg-kopf{display:grid;grid-template-columns:7fr 9fr;gap:2px;font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:2px}
 .kzg-kopf span:last-child{opacity:.7;border-left:1.5px solid rgba(40,56,90,.3);padding-left:4px}
-.kzg-ch{display:grid;gap:2px;align-items:end}
+.kzg-ch{display:grid;gap:2px;align-items:end;position:relative}
+.kzg-pl{margin-left:24px}   /* v5.30: Platz fuer die Skala links */
+.kzg-gr{position:absolute;left:0;right:0;top:0;height:110px;pointer-events:none}
+.kzg-a i{position:relative;z-index:1}
 .kzg-c{display:flex;flex-direction:column;align-items:center;min-width:0}
 .kzg-w{font-size:8.5px;font-weight:700;color:var(--muted);height:12px;line-height:12px;white-space:nowrap;letter-spacing:-.02em}
 .kzg-a{height:110px;width:100%;display:flex;align-items:flex-end}
@@ -197,7 +200,8 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzg-a i.tr{height:1px;background:rgba(92,107,128,.35)}
 .kzg-c.un .kzg-a i,.kzg-c.un .kzg-w{opacity:.6}   /* v5.25: .45 -> .6, sonst Rot/Orange/Violett kaum zu unterscheiden */
 .kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(40,56,90,.3)}
-.kzg-t{font-size:10.5px;font-weight:800;margin-top:4px;line-height:1.1}
+.kzg-t{font-size:9.5px;font-weight:800;margin-top:4px;line-height:1.1;letter-spacing:-.02em}   /* v5.30: 10,5 -> 9,5 px, die Skala links nimmt 24 px; bei 375 pt sonst 0,8 px zu breit */
+@media (max-width:350px){.kzg-t{font-size:8px}.kzg-d{font-size:8px}}
 .kzg-c.we .kzg-t{color:#d33a3a}
 .kzg-d{font-size:9px;color:var(--muted);line-height:1.3}
 /* v5.23: 24-Stunden-Grossansicht */
@@ -230,6 +234,11 @@ html.dunkel .kzs .kzmd{fill:#c9d4f5}
    Kontur um jeden Regenbalken im hellen Modus - die Farben (Palette E) bleiben. */
 html:not(.dunkel) .kzs-bb i:not(.tr),html:not(.dunkel) .kzg-a i:not(.tr),html:not(.dunkel) .kz .kzbal .kzbb i:not(.tr),
 html:not(.dunkel) .kz .kzbal .kzbw b>i:not(.tr),html:not(.dunkel) .nowcard .bar:not(.dry),html:not(.dunkel) .rleg i{box-shadow:inset 0 0 0 1px rgba(0,60,80,.22)}
+/* v5.30 (Nutzer: "alle Kombinationen selbst kontrollieren"): im DUNKLEN Modus sind die
+   violetten Stufen schwach - auf dem dunklen Nachtgrund 1,5-2,1:1, als unsichere Tage
+   (Deckkraft .6) 1,5-1,7:1. Dort eine helle Kontur. */
+html.dunkel .kzs-bb i:not(.tr),html.dunkel .kzg-a i:not(.tr),html.dunkel .kz .kzbal .kzbb i:not(.tr),
+html.dunkel .kz .kzbal .kzbw b>i:not(.tr),html.dunkel .nowcard .bar:not(.dry){box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
 .kzg-leg{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 .kzg-leg b{color:#d33a3a}
 html.dunkel .kzg-c.we .kzg-t,html.dunkel .kzg-leg b{color:#ff8080}
@@ -1074,7 +1083,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.29</span>
+      <span class="ver">v5.30</span>
     </div>
   </header>
 
@@ -4662,10 +4671,11 @@ function kzTagNacht(W0,W1){
    die staerkste Stunde im Text. */
 function kzStundenGross(H,gef,rest){
   const n=H.length,W0=H[0].t-36e5,W1=H[n-1].t,{tag,nacht}=kzTagNacht(W0,W1);
-  const mx=Math.max(0,...H.map(x=>x.mm)),sk=mx<=1?1:mx<=2?2:Math.ceil(mx/2)*2,st=sk/2,tot=H.reduce((q,x)=>q+x.mm,0);
+  // v5.30: glatte Skala wie bei 2 h (1/2/5/10/20...) - vorher ceil(mx/2)*2, das ergab "56 / 28"
+  const mx=Math.max(0,...H.map(x=>x.mm)),sk=mx<=1?1:mx<=2?2:mx<=5?5:Math.ceil(mx/10)*10,st=sk/2,tot=H.reduce((q,x)=>q+x.mm,0);
   const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(2)}%;width:${(b-a).toFixed(2)}%"></i>`;
   let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
-  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v<1?kzF1(v):Math.round(v)}</b>`;
+  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v%1?kzF1(v):v}</b>`;   // 2,5 nicht als "3"
   let mnI=-1;const bars=H.map((x,i)=>{const b=x.t-36e5;if(mnI<0&&b>W0&&ortsStunde(b)===0)mnI=i;
     return x.mm>=0.1?`<i style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%;background:${regenFarbe(x.mm)}"></i>`:`<i class="tr"></i>`;}).join("");
   const mn=mnI>0?`<i class="kzs-m" style="left:${(mnI/n*100).toFixed(2)}%"></i>`:"",mnP=mnI>0?mnI/n*100:null;
@@ -4760,32 +4770,39 @@ function kzRegenGrafik(H){
    geht es zur 16-Tage-Vorhersage. In der Kachel ein roter STRICH je
    Wochenende statt zweier 3-px-Punkte. */
 const KZ_WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+/* v5.30 (Nutzer: "Regenmenge obendrueber ungünstig, zu eng - links daneben wie bei
+   den anderen Grafiken"): Skala links mit gestrichelten Hilfslinien wie in der
+   24-h-Grossansicht (.kzs-g/.kzs-gl), keine Zahlen mehr ueber den Saeulen. Volle
+   Hoehe = 10 mm, darueber die naechste Zehnerstufe; Linien bei halber und voller Hoehe. */
 function kzTageGross(T){
-  const n=T.length,sk=Math.max(10,...T.map(x=>+x.mm||0)),f=v=>v<0.1?"":v<10?kzF1(v):String(Math.round(v));
+  const n=T.length,mx=Math.max(0,...T.map(x=>+x.mm||0)),sk=mx<=10?10:Math.ceil(mx/10)*10,st=sk/2;
   const s7=T.slice(0,7).reduce((a,x)=>a+(+x.mm||0),0),r7=T.slice(0,7).filter(x=>(+x.mm||0)>=0.5).length,s9=T.slice(7).reduce((a,x)=>a+(+x.mm||0),0);
   const cols=T.map((x,i)=>{const mm=+x.mm||0,d=new Date(x.t+"T12:00"),wd=d.getDay();
     const kl=["kzg-c",(wd===0||wd===6)?"we":"",i>=7?"un":"",i===7?"ab":""].filter(Boolean).join(" ");
     const bar=mm>=0.1?`<i style="height:${Math.max(2,Math.round(mm/sk*110))}px;background:${regenFarbe(mm,1)}"></i>`:`<i class="tr"></i>`;
-    return `<div class="${kl}"><div class="kzg-w">${f(mm)}</div><div class="kzg-a">${bar}</div><div class="kzg-t">${KZ_WT[wd]}</div><div class="kzg-d">${+x.t.slice(8,10)}.</div></div>`;}).join("");
+    return `<div class="${kl}"><div class="kzg-a">${bar}</div><div class="kzg-t">${KZ_WT[wd]}</div><div class="kzg-d">${+x.t.slice(8,10)}.</div></div>`;}).join("");
+  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v}</b>`;
   return `<div class="kzg-titel">Regen \u00b7 ${n} Tage</div>
     <div class="kzg-sub">N\u00e4chste 7 Tage ${kzF1(s7)} mm${r7?` \u00b7 ${r7} ${r7===1?"Regentag":"Regentage"}`:""}${n>7?`<br>Tag 8\u2013${n}: ${kzF1(s9)} mm (unsicher)`:""}</div>
-    ${n>7?`<div class="kzg-kopf" style="grid-template-columns:7fr ${n-7}fr"><span>7 Tage</span><span>unsicher</span></div>`:""}
-    <div class="kzg-ch" style="grid-template-columns:repeat(${n},1fr)">${cols}</div>
+    <div class="kzg-pl">${n>7?`<div class="kzg-kopf" style="grid-template-columns:7fr ${n-7}fr"><span>7 Tage</span><span>unsicher</span></div>`:""}
+    <div class="kzg-ch" style="grid-template-columns:repeat(${n},1fr)"><div class="kzg-gr">${gl}</div>${cols}</div></div>
     ${regenLegende(1)}
-    <div class="kzg-leg"><b>Rote Wochentage</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Zahlen in mm${sk>10?"":" \u00b7 volle H\u00f6he 10 mm"}</div>`;
+    <div class="kzg-leg"><b>Rote Wochentage</b> = Wochenende (in der Kachel der rote Strich unter den S\u00e4ulen) \u00b7 Skala in mm am Tag</div>`;
 }
-function kzGrossZeigen(html,ziel,knopf){
+/* v5.30 (Nutzer: "in den aufgeklappten Grafikfenstern unten nur Schliessen, nicht
+   noch woanders hin verweisen"): nur noch EIN Knopf. Die Kacheln liefern in gross()
+   weiter ziel/knopf (v5.23) - wird nicht mehr benutzt. */
+function kzGrossZeigen(html){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
-    ov.innerHTML='<div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn" id="kzGrossZiel">Vorhersage</button><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>';
+    ov.innerHTML='<div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>';
     document.body.appendChild(ov);
     const zu=()=>ov.classList.add("hidden");
     // iOS schickt den Klick zum oeffnenden Tipp erst NACH pointerup - dann laege er auf dem Hintergrund
     ov.addEventListener("click",e=>{if(e.target===ov&&Date.now()-ov._auf>450)zu();});
     el("kzGrossZu").onclick=zu;
-    el("kzGrossZiel").onclick=()=>{zu();if(ov._ziel)kzSpring(ov._ziel);};
     document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
-  el("kzGrossIn").innerHTML=html;el("kzGrossZiel").textContent=knopf||"Vorhersage";ov._ziel=ziel;ov._auf=Date.now();ov.classList.remove("hidden");
+  el("kzGrossIn").innerHTML=html;ov._auf=Date.now();ov.classList.remove("hidden");
   return true;
 }
 function kzTageGrafik(T){
@@ -5480,7 +5497,7 @@ function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;
       if(t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
     if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){const d=KZ_DEF[tile.dataset.id];
       let g=null;try{g=d&&d.gross?d.gross():null;}catch(x){}   // v5.21: Kacheln mit Grossansicht oeffnen sie statt zu springen
-      if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html,o.ziel||d.ziel,o.knopf);_kzP0=null;return;}
+      if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html);_kzP0=null;return;}
       if(d)kzSpring(d.ziel);}
     _kzP0=null;};
   document.addEventListener("pointerup",ende);
