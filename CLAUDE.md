@@ -1520,6 +1520,15 @@ Schwach = teal (0,128,128), Mittel = blau (0,0,255) - gemessen auf 1 Einheit gen
 ~(212,34,43) bei Stark (aus dem Froendenberg-Bild, 2 Punkte) - die Violetttoene sind
 Blau-Rot-Mischungen. Unter Schwach Gruen (nur JPEG, unsicher). Niesel 0,12 mm/h steht
 dort auf 1/3 Hoehe, bei uns (Grossansicht, Skala 2) auf 6 %.
+v5.28 (Nutzer: "eher E"): Palette E (Tuerkis -> Blau -> Violett) fest in
+`REGEN_FARB`; Farbtest-Zeile, `REGEN_PAL`, `regenPal*`, CSS-Variablen `--rf*` und
+`.rpal*` entfernt, ein gespeichertes `regenPalette` wird beim Start geloescht. Die
+RADARKARTE behaelt ihre bunten Farben (RK_STUFEN): Tuerkis/Blau gingen auf dem
+Satellitenbild (Wald, Wasser) unter - Balken und Karte haben seitdem verschiedene
+Farben bei gleichen Schwellen, der Satz "wie auf der Radarkarte" ist weg. Kein
+Gruen (Nutzer fragte): in der Vorbild-App steht Hellgruen fuer Werte UNTER der
+kleinsten Radarstufe, bei uns ist das trocken. Offen: feste (log) Hoehe und
+fliessende Farbe wie die Vorbild-App - Nutzer hat noch nicht entschieden.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

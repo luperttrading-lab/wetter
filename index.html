@@ -225,12 +225,6 @@ html.dunkel .kzs-m{background:rgba(255,255,255,.35)}
 html.dunkel .kzs .kzmd{fill:#c9d4f5}
 .rleg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:11px;color:var(--muted);margin-top:8px;align-items:center}   /* v5.25 Farbstufen */
 .rleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:-1px}
-/* v5.27 Farbtest: Wahl der Palette unter der Legende (voruebergehend) */
-.rpal{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
-.rpal button{font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:3px 6px;display:inline-flex;align-items:center;gap:4px;line-height:1.2}
-.rpal button i{display:inline-block;width:26px;height:8px;border-radius:2px}
-.rpal button.an{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-html[data-rpal]:not([data-rpal="A"]) .rpal-karte{display:none}
 .kzg-leg{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 .kzg-leg b{color:#d33a3a}
 html.dunkel .kzg-c.we .kzg-t,html.dunkel .kzg-leg b{color:#ff8080}
@@ -1075,7 +1069,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.27</span>
+      <span class="ver">v5.28</span>
     </div>
   </header>
 
@@ -4621,43 +4615,27 @@ function kzRegen24H(){
    Mitternacht als Strich mit dem Wochentag. Volle Hoehe ab 1 mm/h, damit
    Niesel flach bleibt. HTML statt SVG - ein gestrecktes SVG verzerrt Schrift. */
 /* v5.25 (Nutzer: "Farbe der Balken nach der Regenmenge, mit sinnvollen Stufen"):
-   STUNDENWERTE (Radar 5 min als Rate, Modell je Stunde) bekommen DIESELBEN
-   Stufen und Farben wie die Radarkarte (RK_STUFEN, deckend statt durchscheinend)
-   - eine Farbe bedeutet in der ganzen App dasselbe. Rot ab 20 mm/h liegt in der
-   DWD-Warnstufe "Starkregen" (15-25 l/m2 in 1 h), Violett ab 50 bei "extrem"
-   (> 40). TAGESSUMMEN haben eigene Schwellen in denselben Farben - 5 mm am Tag
-   ist ein gewoehnlicher Regentag, 5 mm in einer Stunde nicht. Anker: Rot ab
-   30 mm, Violett ab 50 mm = DWD "Dauerregen" markant (30-50 l/m2 in 24 h) bzw.
-   Unwetter (> 50). Gleiche Farben wie RK_STUFEN - aendert sich die Radarkarte,
-   hier mitziehen. */
-const REGEN_FARB=["rgb(150,205,255)","rgb(80,160,255)","rgb(40,110,235)","rgb(30,185,120)","rgb(250,215,40)","rgb(250,140,20)","rgb(230,40,40)","rgb(200,40,200)"];
+   STUNDENWERTE (Radar 5 min als Rate, Modell je Stunde) und TAGESSUMMEN je
+   8 Stufen. Stunden wie die Radarkarte 0,1/0,5/1/2/5/10/20/50 mm/h - ab 20 liegt
+   die DWD-Warnstufe "Starkregen" (15-25 l/m2 in 1 h), ab 50 "extrem" (> 40).
+   Tage eigene Schwellen - 5 mm am Tag ist ein gewoehnlicher Regentag, 5 mm in
+   einer Stunde nicht: ab 30 / 50 mm = DWD "Dauerregen" markant (30-50 l/m2 in
+   24 h) bzw. Unwetter (> 50).
+   v5.28 FARBEN (Nutzer nach dem Farbtest v5.27: "eher E"): Tuerkis -> Blau ->
+   Violett statt der bunten Radarfarben (Gelb, Orange, Rot). Die RADARKARTE
+   behaelt ihre Farben (RK_STUFEN) - Tuerkis und Blau gingen auf dem
+   Satellitenbild (Wald, Wasser) unter; Balken und Karte haben seitdem
+   verschiedene Farben, gleiche Schwellen. Vorbild war eine andere Regen-App
+   (CLAUDE.md, "Vorbild-App"): dort gelbgruen fuer Werte UNTER der kleinsten
+   Radarstufe (Mittelwert-Auslaeufer), die es bei uns nicht gibt (unter 0,1 =
+   trocken) - darum kein Gruen. */
+const REGEN_FARB=["rgb(160,230,220)","rgb(90,200,200)","rgb(40,165,195)","rgb(35,120,205)","rgb(45,80,205)","rgb(90,50,195)","rgb(135,35,175)","rgb(180,25,140)"];
 const REGEN_STD=[0.1,0.5,1,2,5,10,20,50];      // mm/h
 const REGEN_TAG=[0.1,1,3,5,10,20,30,50];       // mm am Tag
-/* v5.27 FARBTEST (Nutzer nach farbtest.html: "B, D, E in der echten App
-   ansehen, zum Auswaehlen, spaeter machen wir eins fest"): vier Paletten,
-   Wahl unter jeder Regenlegende ("Farbtest A B D E"), gemerkt als
-   regenPalette. Die Balken tragen var(--rf0..7) statt fester Farben - ein
-   Wechsel faerbt alles sofort um, auch eine offene Grossansicht, ohne neu zu
-   zeichnen. Die RADARKARTE bleibt bei A (RK_STUFEN); "wie auf der Radarkarte"
-   blendet sich bei B/D/E aus (html[data-rpal]). Nach der Wahl: Gewinner fest
-   in REGEN_FARB, Umschalter und REGEN_PAL entfernen. */
-const REGEN_PAL={
-  A:REGEN_FARB,
-  B:["rgb(170,240,140)","rgb(105,228,77)","rgb(72,160,121)","rgb(50,116,162)","rgb(10,40,230)","rgb(60,10,190)","rgb(105,17,150)","rgb(140,20,120)"],   // wie die App im Nutzer-Screenshot
-  D:["rgb(175,215,250)","rgb(120,180,245)","rgb(70,140,235)","rgb(50,100,220)","rgb(75,70,205)","rgb(110,50,190)","rgb(145,35,170)","rgb(180,25,140)"],   // Blau -> Violett
-  E:["rgb(160,230,220)","rgb(90,200,200)","rgb(40,165,195)","rgb(35,120,205)","rgb(45,80,205)","rgb(90,50,195)","rgb(135,35,175)","rgb(180,25,140)"]};  // Tuerkis -> Blau -> Violett
-function regenPal(){let k="A";try{k=localStorage.getItem("regenPalette")||"A";}catch(e){}return REGEN_PAL[k]?k:"A";}
-function regenPalSetzen(k){if(!REGEN_PAL[k])k="A";const r=document.documentElement;
-  REGEN_PAL[k].forEach((c,i)=>r.style.setProperty("--rf"+i,c));r.setAttribute("data-rpal",k);
-  try{localStorage.setItem("regenPalette",k);}catch(e){}
-  document.querySelectorAll(".rpal button").forEach(b=>b.classList.toggle("an",b.dataset.p===k));}
-regenPalSetzen(regenPal());
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".rpal button");if(!b)return;e.stopPropagation();regenPalSetzen(b.dataset.p);});
-function regenFarbe(mm,tag){const S=tag?REGEN_TAG:REGEN_STD;let i=0;while(i<S.length-1&&mm>=S[i+1])i++;return `var(--rf${i},${REGEN_FARB[i]})`;}
-function regenLegende(tag){const S=tag?REGEN_TAG:REGEN_STD,f=v=>String(v).replace(".",","),p=regenPal();
-  const wahl=Object.keys(REGEN_PAL).map(k=>`<button type="button" data-p="${k}"${k===p?' class="an"':""}>${k}<i style="background:linear-gradient(90deg,${REGEN_PAL[k].join(",")})"></i></button>`).join("");
-  return `<div class="rleg">${S.map((v,i)=>`<span><i style="background:var(--rf${i},${REGEN_FARB[i]})"></i>${f(v)}</span>`).join("")}<span class="rleg-e">${tag?"mm am Tag":"mm/h"}</span></div>
-    <div class="rpal">Farbtest${wahl}</div>`;}
+try{localStorage.removeItem("regenPalette");}catch(e){}   // v5.27 Farbtest, nach der Wahl entfernt
+function regenFarbe(mm,tag){const S=tag?REGEN_TAG:REGEN_STD;let i=0;while(i<S.length-1&&mm>=S[i+1])i++;return REGEN_FARB[i];}
+function regenLegende(tag){const S=tag?REGEN_TAG:REGEN_STD,f=v=>String(v).replace(".",",");
+  return `<div class="rleg">${S.map((v,i)=>`<span><i style="background:${REGEN_FARB[i]}"></i>${f(v)}</span>`).join("")}<span class="rleg-e">${tag?"mm am Tag":"mm/h"}</span></div>`;}
 /* Tag- und Nachtabschnitte zwischen W0 und W1 in Prozent (Nacht = Untergang bis
    naechster Aufgang). Von der Kachel (kzRegenGrafik) und der Grossansicht
    (kzStundenGross) gemeinsam genutzt, seit v5.23 ausgelagert. */
@@ -4702,7 +4680,7 @@ function kzStundenGross(H,gef,rest){
     <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div></div>
     <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
     ${regenLegende()}
-    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke<span class="rpal-karte"> wie auf der Radarkarte</span> \u00b7 Hintergrund gelb = Tag, blau = Nacht${n2}</div>`;
+    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht${n2}</div>`;
 }
 /* v5.24: die 2 Radarstunden als Balken in der Kachel "Regen" - dieselben Werte
    und dieselbe Skala wie der Abschnitt "Niederschlag · naechste 2 Std"
@@ -4738,7 +4716,7 @@ function kzNowGross(n){
     <div class="kzs">${bg}${gl}<div class="kzs-bb" style="grid-template-columns:repeat(${k},1fr)">${bars}</div></div>
     <div class="kzs-x kzs-x0" style="grid-template-columns:repeat(${k},1fr)">${xl}</div>
     ${min?regenLegende():""}
-    <div class="kzg-leg">S\u00e4ule = Regenst\u00e4rke je 5 Minuten (mm/h), Farbe nach St\u00e4rke<span class="rpal-karte"> wie auf der Radarkarte</span> \u00b7 Radar-Kurzfristvorhersage des DWD${n.geeicht?", an der Station geeicht":""}</div>`;
+    <div class="kzg-leg">S\u00e4ule = Regenst\u00e4rke je 5 Minuten (mm/h), Farbe nach St\u00e4rke \u00b7 Radar-Kurzfristvorhersage des DWD${n.geeicht?", an der Station geeicht":""}</div>`;
 }
 function kzRegenGrafik(H){
   const W0=H[0].t-36e5,W1=H[H.length-1].t,D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100));
