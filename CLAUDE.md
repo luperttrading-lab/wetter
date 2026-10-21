@@ -1427,3 +1427,15 @@ v5.22 (Nutzer: "Heute bisher brauchen wir in der ersten Kachel nicht, steht oben
 drueber"): Kachel "Heute" zeigt nur noch "max 15 Uhr" (waermste Stunde), kein
 "bisher 4–11" mehr und damit keinen Wechsel. Nebenbei verschwindet ein
 Widerspruch: die Zeile darueber zeigt 3,5°, die Kachel rundete auf "bisher 4".
+v5.23 (Nutzer: "auf die 24-Stunden-Prognose gedrueckt kommt die Regenbilanz der
+letzten 30 Tage - da muss das kleine Fenster aufgehen"): `regenHeute.gross()`
+oeffnet `kzStundenGross(H,gef,rest)` - dieselben 24 Stunden wie Kachel und
+Abschnitt (`kzRegen24H`), 24 Saeulen auf Tag/Nacht-Hintergrund mit Sonne/Mond
+(nicht auf dem Mitternachtsstrich), Skala links (volle Hoehe 1/2/gerade mm je
+Stunde), Uhrzeiten alle 3 Stunden (Stundenbeginn), an Mitternacht der Wochentag;
+Text: Summe 24 h, staerkste Stunde, "Heute bis 24 Uhr" (gleiche Zahlen wie die
+Kachel, `regenHeute.zahlen()`), Hinweis Radar fuer die ersten 2 h. Knopf
+"Regen je Stunde" -> `rainHrSec`. `gross()` darf jetzt {html,ziel,knopf}
+liefern (regen7 weiter nur HTML, Knopf "Vorhersage"). Tag/Nacht gemeinsam in
+`kzTagNacht(W0,W1)`. Geprueft mit eingespielter Open-Meteo-Antwort (Pruefstand
+holt sie per curl; Chromium kommt zu langsam durchs Netz), hell und dunkel.
