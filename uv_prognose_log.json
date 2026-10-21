@@ -431,6 +431,16 @@
   }
  },
  "2026-10-22": {
+  "morgens": {
+   "erw": 1.2,
+   "erw_tag": 1.2,
+   "erw_zeit": "2026-10-22T10:34:58.619Z",
+   "gueltig": true,
+   "klar": 1.89,
+   "mess": null,
+   "uhr": "00:44",
+   "version": "v5.30"
+  },
   "vortag": {
    "erw": 1.18,
    "erw_zeit": "2026-10-22T11:00:00.000Z",
