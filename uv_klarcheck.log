@@ -1,31 +1,31 @@
-UV-Klarhimmel-Pruefung fuer 2026-10-20 (43 Stationen)
+UV-Klarhimmel-Pruefung fuer 2026-10-21 (43 Stationen)
 
 
-=== Modellpruefung 2026-10-20: Messspitze gegen die schwarze Kurve der App ===
+=== Modellpruefung 2026-10-21: Messspitze gegen die schwarze Kurve der App ===
 Klarheit aus der DWD-Sonnenscheindauer 11-15 Uhr (naechste Station <= 50 km)
 
 Giessen-Gruppe         Breite Hoehe  Sonne | schwarz   Mess  Verh.
-Gießen                  50.60   203   79 % |    2.04   2.03   -0 %
-Bonn                    50.70    67   42 % |    2.02   1.64  -19 %
-Andernach               50.44    71    2 % |    2.06   1.31  -36 %
-Fichtelberg             50.43  1212    3 % |    2.09   1.29  -38 %
-Kulmbach                50.11   308   73 % |    2.13   1.98   -7 %
-Görlitz                 51.15   212   10 % |    1.81   1.27  -30 %
-Schweinfurt (Wasserlos  50.05   274   10 % |    2.22   0.75  -66 %
-Langen                  49.99   141   21 % |    2.20   1.70  -23 %
-Kassel                  51.31   174    -   |    1.95   1.56  -20 %
-Duderstadt              51.51   185  100 % |    1.86   1.42  -24 %  klar
-Dortmund                51.51    95   86 % |    1.90   1.78   -6 %
-Melpitz                 51.53    86   21 % |    1.71   1.46  -14 %
+Gießen                  50.60   203    0 % |    1.94   0.74  -62 %
+Bonn                    50.70    67    1 % |    1.88   1.32  -30 %
+Andernach               50.44    71    0 % |    1.97   1.30  -34 %
+Fichtelberg             50.43  1212   75 % |    2.20   1.78  -19 %
+Kulmbach                50.11   308    0 % |    1.99   1.55  -22 %
+Görlitz                 51.15   212   95 % |    1.90   1.73   -9 %  klar
+Schweinfurt (Wasserlos  50.05   274    0 % |    1.88   0.21  -89 %
+Langen                  49.99   141    0 % |    2.01   0.69  -66 %
+Kassel                  51.31   174    -   |    1.81   0.45  -75 %
+Duderstadt              51.51   185    0 % |    1.76   0.89  -50 %
+Dortmund                51.51    95    0 % |    1.80   1.10  -39 %
+Melpitz                 51.53    86    0 % |    1.80   1.13  -38 %
 
-Klare Stationen der Gruppe heute: 1, Messung/schwarz im Mittel -23.8 %
+Klare Stationen der Gruppe heute: 1, Messung/schwarz im Mittel -8.9 %
 
-Protokoll seit 2026-09-04: 123 klare Stationstage in der Giessen-Gruppe, Messung/schwarz -8.6 % (Streuung 12.6 Pp)
+Protokoll seit 2026-09-04: 124 klare Stationstage in der Giessen-Gruppe, Messung/schwarz -8.6 % (Streuung 12.6 Pp)
   Giessen selbst an 10 klaren Tagen: +2.8 %
 
-Protokoll: 1804 Stationstage, 566 genommen, 1238 verworfen (uv-station-protokoll.json)
+Protokoll: 1845 Stationstage, 568 genommen, 1277 verworfen (uv-station-protokoll.json)
 uv-station.json: 19 Stationen mit Faktor (von 34 mit Daten)
-  Fichtelberg              x0.800  (roh 0.767, 15 Tage = 11 klar + 4 teils, Streuung 0.097)
+  Fichtelberg              x0.800  (roh 0.780, 16 Tage = 11 klar + 5 teils, Streuung 0.095)
   Schweinfurt_Wasserlosen  x0.800  (roh 0.696, 12 Tage = 12 klar + 0 teils, Streuung 0.165)
   Wurmberg_B               x1.129  (roh 1.134, 11 Tage = 11 klar + 0 teils, Streuung 0.040)
   Lindenberg               x1.124  (roh 1.127, 16 Tage = 12 klar + 4 teils, Streuung 0.049)
@@ -41,36 +41,38 @@ uv-station.json: 19 Stationen mit Faktor (von 34 mit Daten)
   Eckernfoerde             x1.063  (roh 1.072, 3 Tage = 3 klar + 0 teils, Streuung 0.037)
   Bonn                     x0.939  (roh 0.937, 12 Tage = 12 klar + 0 teils, Streuung 0.040)
   Stuttgart                x0.940  (roh 0.939, 24 Tage = 19 klar + 5 teils, Streuung 0.023)
+  Goerlitz                 x0.944  (roh 0.943, 19 Tage = 13 klar + 6 teils, Streuung 0.040)
   Giessen-Wettenberg       x1.055  (roh 1.056, 23 Tage = 11 klar + 12 teils, Streuung 0.048)
   Belm-Osnabrueck          x0.947  (roh 0.945, 14 Tage = 8 klar + 6 teils, Streuung 0.038)
-  Goerlitz                 x0.948  (roh 0.947, 18 Tage = 12 klar + 6 teils, Streuung 0.040)
 
-Waechter (34 Stationen): Breite +0.0063 je Grad (t = +0.7), Hoehe +0.0136 je km (t = +0.3)
+Waechter (34 Stationen): Breite +0.0065 je Grad (t = +0.7), Hoehe +0.0153 je km (t = +0.4)
   kein Trend - die Faktoren messen die Geraete
   ohne Faktor (Abweichung unter 5 %): 15 Stationen
 
   klar         4799   1.031   1.100    0.957     99%   10.0 | 4325   1.029   1.075
-  hoch         2692   1.040   1.124    0.884     90%   10.0 | 2156   1.037   1.099
-  mittel       5421   1.049   1.151    0.808     70%    7.0 | 2602   1.042   1.132
-  tief        18045   1.086   1.267    0.629     50%    0.0 | 4539   1.058   1.193
-  gemischt     2446   1.047   1.159    0.881     89%   10.0 | 1618   1.038   1.126
+  hoch         2712   1.040   1.124    0.884     90%   10.0 | 2159   1.037   1.099
+  mittel       5561   1.049   1.150    0.803     69%    7.0 | 2634   1.042   1.132
+  tief        18373   1.086   1.266    0.622     49%    0.0 | 4542   1.058   1.193
+  gemischt     2452   1.047   1.157    0.881     89%   10.0 | 1618   1.038   1.126
 
-uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 42 Tage im Log)
+uv-durchlass.json geschrieben (2 von 3 Klassen belegt, 43 Tage im Log)
 Eine Klasse ist leer; die App liest ohnehin nur p_gesamt.
 Station                     DWD Messung Verhaeltnis
-Salzgitter                 1.68   1.64     0.98  klar
-Dortmund                   1.91   1.78     0.93  klar
-Kulmbach                   2.14   1.98     0.92  klar
-Schauinsland               2.81   2.56     0.91
-Bonn                       1.91   1.64     0.86
-Melpitz                    1.77   1.46     0.83
-Lüneburg                   1.49   1.21     0.81
-Langen                     2.12   1.70     0.80
-Zingst                     1.38   0.96     0.69
-Sylt (Tinnum)              1.36   0.71     0.53
-Berlin                     1.64   0.79     0.48
-München                    2.43   1.12     0.46
-Lindenberg                 1.64   0.74     0.45
+Norderney                  1.44   2.65     1.84  klar
+Lindenberg                 1.71   1.44     0.84
+Kulmbach                   2.09   1.55     0.74
+Bonn                       1.80   1.32     0.73
+München                    2.49   1.65     0.66
+Berlin                     1.71   1.11     0.65
+Melpitz                    1.83   1.13     0.62
+Dortmund                   1.80   1.10     0.61
+Salzgitter                 1.76   1.05     0.60
+Zingst                     1.36   0.71     0.53
+Sylt (Tinnum)              1.31   0.60     0.46
+Zugspitze (Schneefernerh   3.09   1.33     0.43
+Langen                     2.05   0.69     0.34
+Schauinsland               2.62   0.67     0.26
+Lüneburg                   1.57   0.35     0.22
 
-3 von 13 Stationen klar (Schwelle 0.92)
+1 von 15 Stationen klar (Schwelle 0.92)
 Zu bewoelkt - keine Auswertung. Morgen erneut pruefen.

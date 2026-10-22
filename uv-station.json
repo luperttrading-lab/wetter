@@ -1,19 +1,19 @@
 {
- "stand": "2026-10-20",
+ "stand": "2026-10-21",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0063,
-   "fehler": 0.0095,
-   "t": 0.66
+   "steigung": 0.0065,
+   "fehler": 0.0094,
+   "t": 0.69
   },
   "hoehe": {
-   "steigung": 0.0136,
-   "fehler": 0.0385,
-   "t": 0.35
+   "steigung": 0.0153,
+   "fehler": 0.0382,
+   "t": 0.4
   },
-  "mittel": 0.974,
-  "reststreuung": 0.095,
+  "mittel": 0.973,
+  "reststreuung": 0.094,
   "schwelle_t": 3.0,
   "alarm": false,
   "hinweis": "kein Trend"
@@ -94,15 +94,15 @@
   },
   "Fichtelberg": {
    "faktor": 0.8,
-   "roh": 0.767,
-   "tage": 15,
+   "roh": 0.78,
+   "tage": 16,
    "vorlaeufig": false,
-   "streuung": 0.097,
+   "streuung": 0.095,
    "klare_tage": 11,
-   "teiltage": 4,
+   "teiltage": 5,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-16"
+   "bis": "2026-10-21"
   },
   "Giessen-Wettenberg": {
    "faktor": 1.055,
@@ -117,16 +117,16 @@
    "bis": "2026-10-20"
   },
   "Goerlitz": {
-   "faktor": 0.948,
-   "roh": 0.947,
-   "tage": 18,
+   "faktor": 0.944,
+   "roh": 0.943,
+   "tage": 19,
    "vorlaeufig": false,
    "streuung": 0.04,
-   "klare_tage": 12,
+   "klare_tage": 13,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-16"
+   "bis": "2026-10-21"
   },
   "Hohenpeissenberg": {
    "faktor": 1.075,
