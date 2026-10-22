@@ -1600,6 +1600,17 @@ gemessen per Range: 320/375/430 pt passen jetzt.
 werden nicht mehr benutzt.
 (4) 24-h-Grossansicht: Skala glatt 1/2/5/10/20... wie bei 2 h (vorher ceil(mx/2)*2 =
 "56 / 28"), 2,5 nicht mehr als "3".
+v5.31 (Nutzer: "zwei Kacheln Regen bis 24 Uhr und Regen naechste 24 Stunden -
+brauchen wir nur eine?"): `regen24` ist ENTFERNT (Pool, KZ_DEF, KZ_QUELLE). Neben
+`regenHeute` brachte es nichts Eigenes: dieselben 24 Stundenbalken, dieselbe 24-h-
+Summe ("~2,6 mm" = Ueberschrift "24 h 2,6 mm"), und der Beginn "ab 16:00" steht als
+Zusatz in der Kachel "Regen" (`kzRegenDanach`) - den schaltete regen24 sogar AB,
+solange es gewaehlt war. Dazu tippte regen24 zum Abschnitt statt die Grossansicht zu
+oeffnen. Migration bei jedem Start (ohne Marke): beide gewaehlt -> regen24 raus, nur
+regen24 -> an seine Stelle regenHeute. `kzRegenDanach` laeuft jetzt immer. Geprueft
+(Playwright): drei gespeicherte Auswahlen, Pool ohne "Regen · naechste 24 Std",
+Kachel "Regen" Trocken <-> "ab 13:00 / heute 70 %". Zurueckholen aus
+`wetter-giessen-v5_30.html`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
