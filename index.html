@@ -221,6 +221,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-x b{position:absolute;left:-.5px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
 .kzs-x0 span:first-child b{transform:none;left:0}   /* "jetzt" am linken Rand, nicht halb davor */
 .kzs-bb i.bl{opacity:.4}
+.kzs-x b.kzs-jz{font-weight:800;color:var(--ink,#17202e)}
 .kzs-x b.kzs-wt{font-weight:800;color:var(--ink,#17202e)}
 html.dunkel .kzs-d{background:rgba(255,196,60,.13)}
 html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
@@ -1092,7 +1093,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.32</span>
+      <span class="ver">v5.33</span>
     </div>
   </header>
 
@@ -4695,7 +4696,9 @@ function kzStundenGross(H,gef,rest){
     if(mnP!=null&&Math.abs(m-mnP)<5){const r=mnP+6,l=mnP-6;m=(r<=b-2&&b-mnP>=mnP-a)?r:l>=a+2?l:m;}
     bg+=`<span class="kzs-s" style="left:${m.toFixed(1)}%">${z}</span>`;});
   const hh=ms=>String(ortsStunde(ms)).padStart(2,"0");
-  const xl=H.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0||h%3)return "<span></span>";
+  /* v5.33 (Nutzer: "man koennte erwarten, die Grafik geht von 0 bis 24 Uhr"): am Start
+     "jetzt ->" wie im Abschnitt; Beschriftungen, die daran stossen, blendet kzAchseFrei aus */
+  const xl=H.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0)return `<span><b class="kzs-jz">jetzt →</b></span>`;if(h%3)return "<span></span>";
     return `<span><b${h===0?' class="kzs-wt"':""}>${h===0?kzWtag(b):hh(b)}</b></span>`;}).join("");
   const iMx=H.reduce((m,x,i)=>x.mm>H[m].mm?i:m,0);
   const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`24 Stunden ab jetzt <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
@@ -4704,7 +4707,7 @@ function kzStundenGross(H,gef,rest){
   return `<div class="kzg-titel">Regen \u00b7 n\u00e4chste 24 Stunden</div>
     <div class="kzg-sub">${z1}${z2}</div>
     <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div></div>
-    <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
+    <div class="kzs-x kzs-x0" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
     ${regenLegende()}
     <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht${n2}</div>`;
 }
@@ -4733,7 +4736,7 @@ function kzNowGross(n){
   let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
   let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v%1?kzF1(v):v}</b>`;   // 2,5 nicht als "3"
   const bars=n.serie.map((v,i)=>!nass[i]?`<i class="tr"></i>`:`<i${i===0&&v<TJ?' class="bl"':""} style="height:${Math.max(2,Math.min(100,B[i]/sk*100)).toFixed(1)}%;background:${regenFarbe(B[i])}"></i>`).join("");
-  const xl=n.zeit.map((t,i)=>i%6?"<span></span>":`<span><b>${i===0?"jetzt":kzHM(t)}</b></span>`).join("");
+  const xl=n.zeit.map((t,i)=>i%6?"<span></span>":`<span><b${i===0?' class="kzs-jz"':""}>${i===0?"jetzt \u2192":kzHM(t)}</b></span>`).join("");
   const mm=B.reduce((q,b,i)=>q+(nass[i]?b*5/60:0),0),min=nass.filter(Boolean).length*5;
   const z1=`${n.summary||""}${n.detail?" \u00b7 "+n.detail:""}`;
   const z2=!min?"":nass.every(Boolean)?`<br>Durchgehend Regen, zusammen ~${kzF1(mm)} mm`:`<br>In den 2 Stunden ${min} min Regen, zusammen ~${kzF1(mm)} mm`;
@@ -4803,6 +4806,14 @@ function kzTageGross(T){
 /* v5.30 (Nutzer: "in den aufgeklappten Grafikfenstern unten nur Schliessen, nicht
    noch woanders hin verweisen"): nur noch EIN Knopf. Die Kacheln liefern in gross()
    weiter ziel/knopf (v5.23) - wird nicht mehr benutzt. */
+/* v5.33: Achsenbeschriftung, die an die vorige stoesst (vor allem an "jetzt ->"), ausblenden.
+   Gemessen statt gerechnet - die Spaltenbreite haengt an der Bildschirmbreite. */
+function kzAchseFrei(root){root.querySelectorAll(".kzs-x").forEach(r=>{let re=-1e9,vor=null;
+  r.querySelectorAll("b").forEach(b=>{b.style.visibility="";const q=b.getBoundingClientRect();
+    // Wochentag stoesst an "jetzt ->": erst den Pfeil opfern (21:40 passt "Fr" dann), sonst den Wochentag
+    if(q.left<re+4&&b.classList.contains("kzs-wt")&&vor&&vor.classList.contains("kzs-jz")){const alt=vor.textContent,re0=re;vor.textContent="jetzt";re=vor.getBoundingClientRect().right;
+      if(q.left<re+4){vor.textContent=alt;re=re0;}}   // reicht auch das nicht (23:20), bleibt der Pfeil und der Wochentag faellt weg
+    if(q.left<re+4)b.style.visibility="hidden";else{re=q.right;vor=b;}});});}
 function kzGrossZeigen(html){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
@@ -4813,7 +4824,7 @@ function kzGrossZeigen(html){
     ov.addEventListener("click",e=>{if(e.target===ov&&Date.now()-ov._auf>450)zu();});
     el("kzGrossZu").onclick=zu;
     document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
-  el("kzGrossIn").innerHTML=html;ov._auf=Date.now();ov.classList.remove("hidden");
+  el("kzGrossIn").innerHTML=html;ov._auf=Date.now();ov.classList.remove("hidden");kzAchseFrei(el("kzGrossIn"));   // erst sichtbar, dann messen
   return true;
 }
 function kzTageGrafik(T){

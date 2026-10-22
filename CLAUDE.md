@@ -1633,6 +1633,17 @@ den Takt an (Wischen geht weiter), angehalten dunkler Knopf "Weiter". Nicht gesp
 nach Neuladen laeuft der Takt wieder. Symbole als SVG (U+23F8 wird am iPhone ein Emoji).
 Geprueft (Playwright, Maus): Migration, Entfernen, Verschieben in freien Platz, Tausch,
 "+" in die Luecke, Pause 9 s ohne Wechsel, hell und dunkel. Am iPhone nicht geprueft.
+v5.33 (Nutzer-Screenshot 09:44: "beim ersten Mal koennte man erwarten, die Grafik geht
+von 0 bis 24 Uhr - umstellen oder 'jetzt' mit Pfeil an den Start"): Pfeil, NICHT 0-24 Uhr -
+Kachel, Summe und Abschnitt rechnen ab jetzt, und abends zeigte eine 0-24-Grafik fast nur
+Vergangenheit. Beide Grossansichten (24 h und 2 h) beschriften den Start mit "jetzt ->"
+(`.kzs-jz`, fett, linksbuendig wie `.kzs-x0`); der Abschnitt "Regen je Stunde" hatte
+"jetzt" schon. `kzAchseFrei(root)` blendet danach jede Achsbeschriftung aus, die an die
+vorige stoesst (gemessen per getBoundingClientRect, NACH dem Einblenden - im verborgenen
+Fenster ist alles 0 breit). Stoesst der Wochentag an "jetzt ->", faellt zuerst der Pfeil
+(21:40: "jetzt  Fr" ab 375 pt), reicht das nicht (23:20, Mitternacht in Spalte 2), bleibt
+der Pfeil und der Wochentag faellt weg - der Mitternachtsstrich bleibt. Geprueft 09:44 /
+21:40 / 23:20 bei 320 / 375 / 430 pt (Playwright mit verstellter Uhr).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
