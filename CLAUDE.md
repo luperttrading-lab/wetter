@@ -1658,6 +1658,16 @@ Farbe Rot #d23a3a (Rot kommt in Palette E nicht vor). Grafik 20 px tiefer gesetz
 regnet, und springt mit der Saeulenhoehe; B und C stoeren nicht. AUFRAEUMEN nach der
 Wahl: `kzJzStil`, `kzJzSetzen`, die beiden anderen Varianten, `.kzjzw`, Klick-Listener
 in `kzGrossZeigen` und die CSS-Regeln.
+v5.35 (Nutzer waehlt B: "den jetzigen Zeitpunkt haben wir schon oft mit Strichen
+markiert"): in beiden Grossansichten nur noch der rote Strich an der genauen Uhrzeit
+(`.kzjzl`) mit Dreieck + "jetzt" ueber dem Bild (`.kzjz`, `kzJetztMarke(x)`). A, C,
+Testzeile, `kzJzStil`/`kzJzSetzen` und CSS entfernt, gespeichertes `kzJetztStil` wird
+beim Start geloescht. Nebenbei: "staerkste Stunde" nennt den Wochentag, wenn sie nicht
+heute liegt (10:05: "Fr 07-08 Uhr" - vorher las sich "08-09 Uhr" wie die vergangene
+Stunde von heute); "~0,2 mm" bricht nicht mehr zwischen Zahl und Einheit um.
+Beobachtung aus dem Nutzer-Screenshot 10:05: die erste 24-h-Spalte ist die gerade
+ABGELAUFENE Stunde (09-10, Fenster ab jetzt - 30 min, v5.09) - der Strich steht deshalb
+am Anfang der ZWEITEN Spalte. Genau dafuer ist er gut.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
