@@ -287,6 +287,15 @@ html.dunkel .kz.edit .ki{background:#2b3442;border-color:#3d4a60}
 .kz .k>.kzmin{display:none;position:absolute;top:-7px;left:-7px;width:20px;height:20px;border-radius:50%;background:#6b7280;color:#fff;font-weight:800;line-height:19px;text-align:center;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.28);z-index:2}
 .kz.edit .k>.kzmin{display:block}
 .kz .k.kzsrc .ki{opacity:.3}
+.kz .kzleer{min-width:0}   /* v5.32: freier Platz - ausserhalb des Bearbeitens unsichtbar */
+.kz.edit .kzleer{min-height:58px;border:1.5px dashed #cdbfa9;border-radius:13px;box-sizing:border-box}
+html.dunkel .kz.edit .kzleer{border-color:#4a5870}
+.kz.edit .kzleer.kzziel{background:rgba(70,130,200,.12);border-color:#4682c8}
+.kz.edit .k.kzziel .ki{outline:2px solid #4682c8;outline-offset:1px}
+.kzfoot .kzpause{display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:4px 10px;border-radius:9px;border:1px solid var(--line)}
+.kzfoot .kzpause.an{background:#1c1c1e;color:#fff;border-color:#1c1c1e}
+html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8edf3}
+.kzfoot .kzpi{width:11px;height:11px;fill:currentColor}
 .kzghost{position:fixed;z-index:60;pointer-events:none;transform:scale(1.06);box-shadow:0 10px 24px rgba(0,0,0,.22);border-radius:13px;background:#fff;border:1px solid var(--line);padding:8px 9px 7px;box-sizing:border-box}
 .kzghost .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .kzghost .v{font-size:15px;font-weight:800;margin-top:2px;white-space:nowrap}
@@ -1083,7 +1092,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.31</span>
+      <span class="ver">v5.32</span>
     </div>
   </header>
 
@@ -4597,15 +4606,15 @@ function pollenLaden(){
   fetchJSON("pollen.json?h="+Math.floor(Date.now()/36e5),9000).then(j=>{if(j&&j.r){_pollen=j;kzStandSetzen("pollen");pollenSubBauen();if(typeof kzRender==="function")kzRender();}}).catch(()=>{});
 }
 pollenLaden();setInterval(pollenLaden,3*36e5);
-const KZ_STD=["heute","regen","regenHeute","morgen","wind","sonne"];
+const KZ_STD=["heute","regen","regen24","morgen","wind","sonne"];
 let _kzWahl=(()=>{try{const a=JSON.parse(localStorage.getItem("kzWahl")||"null");if(Array.isArray(a))return a;}catch(e){}return KZ_STD.slice();})();
-/* v5.11: "Regen 24 h" steckt jetzt in der Kachel "Bis 24 Uhr" (regenHeute).
-   v5.31 (Nutzer: "brauchen wir da nur eine Kachel?"): regen24 ist ganz weg - es
-   zeigte dieselben Balken und dieselbe 24-h-Summe wie regenHeute, und solange es
-   gewaehlt war, fehlte der Kachel "Regen" der Zusatz "ab 16:00". Bei jedem Start:
-   beide gewaehlt -> regen24 raus; nur regen24 -> an seine Stelle regenHeute. */
-try{const i=_kzWahl.indexOf("regen24");
-  if(i>=0){if(_kzWahl.includes("regenHeute"))_kzWahl.splice(i,1);else _kzWahl[i]="regenHeute";localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}}catch(e){}
+/* v5.11-v5.31 gab es "Bis 24 Uhr" (regenHeute) statt "Regen 24 h".
+   v5.32 (Nutzer: "Regen in 24 Stunden macht mehr Sinn, weil die Grafik auch
+   24 Stunden zeigt und nicht bis 24 Uhr"): wieder regen24, regenHeute ist weg.
+   Bei jedem Start: regenHeute -> an seine Stelle regen24; beide gewaehlt ->
+   der Platz von regenHeute wird frei (v5.32: Luecken bleiben stehen). */
+try{const i=_kzWahl.indexOf("regenHeute");
+  if(i>=0){_kzWahl[i]=_kzWahl.includes("regen24")?null:"regen24";localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}}catch(e){}
 /* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl.
    v5.08: nur bei GESPEICHERTER Auswahl - Neue bekommen KZ_STD ohne Pollen */
 try{if(!localStorage.getItem("kzPollenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
@@ -4900,7 +4909,7 @@ let _kzWeI={};   // v4.83: je Kachel gewaehlte Ansicht (Wischen); im Auto-Modus 
 window._kzStand={};
 function kzStandSetzen(q){window._kzStand[q]=Date.now();}
 const KZ_ALT={mess:100,radar:25,om:200,fc:200,aqi:200,pollen:1800};
-const KZ_QUELLE={pollen:"pollen",heute:"mess",wind:"mess",regenHeute:"mess",taupunkt:"mess",druck:"mess",regen:"radar",regen7:"fc",morgen:"fc",luft:"aqi",uvmax:"aqi"};
+const KZ_QUELLE={pollen:"pollen",heute:"mess",wind:"mess",taupunkt:"mess",druck:"mess",regen:"radar",regen24:"om",regen7:"fc",morgen:"fc",luft:"aqi",uvmax:"aqi"};
 function kzAlter(id){
   const q=KZ_QUELLE[id];if(!q)return null;
   let t=window._kzStand[q];
@@ -4936,12 +4945,17 @@ let _kzWe=(()=>{try{const o=JSON.parse(localStorage.getItem("kzWechsel2")||"null
   const takt=isFinite(o.takt)?+o.takt:(isFinite(o.an)?+o.an:null);if(takt==null||!isFinite(o.blende))return null;
   return {takt,blende:+o.blende,farbe:isFinite(o.farbe)?+o.farbe:0,modus:o.mv===2&&o.modus==="wischen"?"wischen":"auto"};}catch(e){}return null;})();
 function kzWe(){return _kzWe||KZ_WE_STD;}
-let _kzWeT=null;
+/* v5.32 (Nutzer: "Pause, wenn die Grafiken kommen und man sie kurz laenger
+   angucken moechte"): haelt den Takt an, Wischen geht weiter. Als SVG - die
+   Zeichen U+23F8/U+25B6 werden am iPhone zu bunten Emoji. */
+const KZ_PAUSE='<svg class="kzpi" viewBox="0 0 12 12"><rect x="2" y="1.5" width="2.8" height="9" rx=".6"/><rect x="7.2" y="1.5" width="2.8" height="9" rx=".6"/></svg>';
+const KZ_WEITER='<svg class="kzpi" viewBox="0 0 12 12"><path d="M3 1.6v8.8c0 .5.5.8.9.5l6.6-4.4c.4-.3.4-.8 0-1L3.9 1.1C3.5.8 3 1.1 3 1.6z"/></svg>';
+let _kzWeT=null,_kzPause=false;   // v5.32: Pause (Knopf unten rechts), nicht gespeichert
 function kzWechselLauf(){
   clearTimeout(_kzWeT);const b=el("kz");if(!b)return;const w=kzWe();
   b.style.setProperty("--kzwd",w.blende+"s");b.style.setProperty("--kzwf",(w.farbe/100*0.16).toFixed(3));
   b.classList.toggle("kzwischen",w.modus!=="auto");
-  if(w.modus!=="auto")return;   // v4.83: im Wisch-Modus kein Timer
+  if(w.modus!=="auto"||_kzPause)return;   // v4.83: im Wisch-Modus kein Timer; v5.32: angehalten
   _kzWeT=setTimeout(()=>{
     /* v4.84: jede Kachel rueckt von IHRER aktuellen Ansicht eins weiter - eine
        gewischte Kachel springt also nicht auf den gemeinsamen Zaehler zurueck */
@@ -5014,6 +5028,7 @@ function uvTagRechnen(){
    Summe der Stunde VOR dem Stempel - Beginn also Stempel minus 1 h. Gesucht
    ab 1,5 h, damit es nicht dem trockenen Radar widerspricht. */
 function kzRegenDanach(){
+  if(_kzWahl.includes("regen24"))return {};   // v4.77 (Nutzer): steht dann schon in "Regen 24 h" - nur ohne diese Kachel
   const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time||!h.precipitation)return {};
   const now=Date.now();
   for(let i=0;i<h.time.length;i++){const t=new Date(h.time[i]).getTime(),ab=t-36e5;
@@ -5125,31 +5140,6 @@ const KZ_DEF={
     const alt=[{l:"Regen 2 h",v:kzNowGrafik(n),s:""}];
     if(H.st===0)return {l:"Regen",v:'<span class="warn">jetzt</span>',s:!H.bisEnde?`bis ~${kzHM(Date.now()+H.e*3e5)}`:kzStaerke(H.peakB),alt};   // v4.66: kuerzer
     return {l:"Regen",v:`in ${H.st*5} min`,s:kzStaerke(H.peakB),alt};}},
-  regenHeute:{name:"Regen bis 24 Uhr + 24 Std",kurz:"Bis 24 Uhr",ziel:{id:"bilanzSec",alt:"Heute gesamt"},
-    zahlen(){let gef=_kz.radHeute;
-      if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
-      let rest=null;try{if(typeof _rainHourly!=="undefined"&&_rainHourly&&typeof bilanzRest==="function")rest=bilanzRest();}catch(e){}
-      return {gef,rest};},
-    // v5.23: Tipp oeffnet die 24 Stunden gross, der Knopf fuehrt zum Abschnitt "Regen · naechste 24 Std" (vorher sprang er zur Regenbilanz)
-    gross(){const H=kzRegen24H();if(!H)return null;const {gef,rest}=this.zahlen();
-      return {html:kzStundenGross(H,gef,rest),ziel:{id:"rainHrSec",alt:"bilanzSec"},knopf:"Regen je Stunde"};},
-    r(){const {gef,rest}=this.zahlen();
-    if(gef==null)return null;const erw=rest!=null?gef+rest:null;
-    /* v4.66 (Nutzer: "zu lang, zu viel Text"): fuenf Zeilen in der Kachel. Oben nur
-       das Gefallene, darunter die Erwartung fuer den ganzen Tag. */
-    /* v5.11 (Nutzer, Variante 1 aus regentest2.html): Tagesregen und "Regen 24 h"
-       in EINER Kachel. Ansicht 1 "BIS 24 UHR" (Nutzer: "dann ist klar, bis 24 Uhr
-       sind nicht 24 Stunden"): Wert = ganzer Tag (gefallen + erwartet), darunter
-       wie viel davon schon gefallen ist. Ansicht 2: Stundenbalken der 24 Stunden
-       ab jetzt, Ueberschrift "24 h 2,6 mm". Das WANN steht in der Kachel "Regen"
-       (Zusatz "ab 16:00", kzRegenDanach) (v5.31: immer, die Kachel "Regen 24 h" gibt es nicht mehr).
-       "Regen heute" (89 px) und "24 h · ~2,6 mm" (99 px) passen nicht in 78 px. */
-    const rest2=erw!=null?erw-gef:0;
-    const a={l:"Bis 24 Uhr",v:`${kzF1(erw!=null?erw:gef)} mm`,
-      s:erw==null?"bisher":rest2<0.05?"gefallen":gef<0.05?"erwartet":`${kzF1(gef)} gefallen`};
-    const H=kzRegen24H();
-    if(H&&H.some(x=>x.mm>=0.1)){const tot=H.reduce((q,x)=>q+x.mm,0);a.alt=[{l:`24 h ${kzF1(tot)} mm`,v:kzRegenGrafik(H),s:""}];}
-    return a;}},
   wind:{name:"Wind",ziel:{label:"Wind & Böen",text:"Stündlich"},r(){const r=kzLetzte();if(!r||r.wind_speed==null)return null;const g=r.wind_gust_speed!=null?r.wind_gust_speed:r.wind_gust_speed_10;
     const gs=g!=null?kzR0(g):"–",ri=kzRichtung(r.wind_direction);
     return {l:"Wind",v:`${kzR0(r.wind_speed)} km/h`,s:`Böen ${gs}${ri?(gs.length>2?" ":" · ")+ri:""}`};}},
@@ -5284,7 +5274,21 @@ const KZ_DEF={
       return {l:"Planet",v:kzBlass(P_NAME[x.b],w),s:(x.jetzt?"jetzt im ":kzHM(x.t)+" im ")+kzRichtung(x.az)};});   // v5.07: "ab 03:33 O" - das einzelne O las sich wie eine Null; "ab 03:33 im SO" ist zu breit
     return Object.assign({},A[0],{alt:A.slice(1)});
     }catch(e){return null;}}},
-  // v5.31: regen24 ("Regen · nächste 24 Std") entfernt - Beginn steht als Zusatz in "Regen", Balken und Summe in regenHeute
+  regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},
+    // v5.32: Tipp oeffnet die 24 Stunden gross (wie bis v5.31 "Bis 24 Uhr"), darin auch "Heute bis 24 Uhr"
+    gross(){const H=kzRegen24H();if(!H)return null;const {gef,rest}=kzRegenTagZahlen();return {html:kzStundenGross(H,gef,rest)};},
+    r(){
+    const H=kzRegen24H(),now=Date.now();if(!H)return null;
+    const tot=H.reduce((a,x)=>a+x.mm,0),fr=H.findIndex(x=>x.mm>=0.1);
+    if(fr<0)return {l:"Regen 24 h",v:'<span class="ok">Trocken</span>',s:"bis morgen"};
+    // v4.76: precipitation gilt fuer die Stunde VOR dem Stempel - Beginn = Stempel - 1 h (vorher eine Stunde zu spaet)
+    // v4.82 (Nutzer): "ab 04:00" ohne Tag las sich wie heute - liegt der Beginn morgen, wechselt die Unterzeile "morgen" / Menge
+    const b0=H[fr].t-36e5,morgen=b0>now&&ymd(new Date(b0))!==ymd(new Date(now));
+    /* v5.10 (Nutzer): zweite Ansicht = Stundenbalken der 24 Stunden ab jetzt,
+       an Stelle von Wert und Unterzeile - die Kachel wird nicht hoeher. */
+    const gr={v:kzRegenGrafik(H),s:""};
+    return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`},gr]}
+                 :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
   regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"fcSec"},
     gross(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const W=T.filter(x=>x.t>=ymd(new Date())).slice(0,16);return W.length?kzTageGross(W):null;},
     r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
@@ -5297,7 +5301,20 @@ const KZ_DEF={
     if(W.some(x=>(+x.mm||0)>=0.1))a.alt=[{l:`${W.length} Tage`,v:kzTageGrafik(W),s:""}];
     return a;}}
 };
-function kzOrdnung(){return _kzWahl.filter(id=>KZ_DEF[id]);}
+/* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
+   noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
+function kzRegenTagZahlen(){let gef=_kz.radHeute;
+  if(gef==null&&typeof lastRows!=="undefined"&&lastRows)gef=lastRows.filter(r=>!r._fc&&isToday(r.timestamp)).reduce((a,r)=>a+Math.max(0,+r.precipitation||0),0);
+  let rest=null;try{if(typeof _rainHourly!=="undefined"&&_rainHourly&&typeof bilanzRest==="function")rest=bilanzRest();}catch(e){}
+  return {gef,rest};}
+/* v5.32 (Nutzer: "alle Kacheln irgendwo hin, und sie muessen dort bleiben, wo ich
+   sie hinsetze"): _kzWahl ist eine Liste von PLAETZEN, null = frei. Entfernen
+   laesst den Platz frei (vorher rueckten alle nach), Ziehen auf einen freien Platz
+   setzt die Kachel dorthin, Ziehen auf eine Kachel TAUSCHT die beiden - sonst
+   bewegt sich nichts. Getauscht wird erst beim Loslassen; ein Tausch bei jedem
+   Ueberfahren haette die Kacheln entlang des Fingerwegs verschoben. */
+function kzSlots(){const a=_kzWahl.map(id=>id&&KZ_DEF[id]?id:null);while(a.length&&!a[a.length-1])a.pop();return a;}
+function kzOrdnung(){return kzSlots().filter(Boolean);}
 function kzGesperrt(){return false;}   // v3.90: keine festen Plaetze mehr
 function kzSpeichern(){try{localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}catch(e){}}
 /* v3.97: Zwei Regler fuer die Bewegung. Die Werte liegen als CSS-Variablen am
@@ -5362,13 +5379,14 @@ function kzPassen(box){
   new ResizeObserver(en=>{const w=Math.round(en[0].contentRect.width);if(w&&w!==w0){w0=w;requestAnimationFrame(()=>kzPassen(b));}}).observe(b);})();
 function kzRender(){
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
-  const ord=kzOrdnung();
+  const S=kzSlots(),ord=S.filter(Boolean);
+  if(_kzEdit){let c=0;S.forEach(id=>{const w=id&&KZ_DEF[id].breit?2:1;if(c+w>3)c=0;c=(c+w)%3;});for(let i=c?3-c:3;i>0;i--)S.push(null);}
   box.classList.toggle("edit",_kzEdit);
-  box.innerHTML=ord.map(id=>{let x=null;try{x=KZ_DEF[id].r();}catch(e){console.warn("Kachel",id,e);}
+  box.innerHTML=S.map((id,si)=>{if(!id)return `<div class="kzleer" data-slot="${si}"></div>`;let x=null;try{x=KZ_DEF[id].r();}catch(e){console.warn("Kachel",id,e);}
     if(!x)x={l:KZ_DEF[id].kurz||KZ_DEF[id].name.split(" ·")[0],v:"–",s:"lädt"};
     const _alt=x.roh?null:kzAlter(id);if(_alt)x=Object.assign({},x,{alt:(x.alt||[]).concat([{s:"Stand "+kzHM(_alt)}]),_alt:1});   // v4.66: kurz = Beschriftung, solange Daten fehlen
     const lock=kzGesperrt(id,ord)?1:0;
-    return `<div class="k${KZ_DEF[id].breit?" breit":""}${x._alt?" kzalt":""}${_kzDrag&&_kzDrag.id===id?" kzsrc":""}" data-id="${id}" data-lock="${lock}" role="button"><span class="kzmin" data-min="${id}">−</span><div class="ki">${(V=>{const ix=kzIdx(id,V.length);return kzZeile("l",V.map(a=>a.l),ix)+(x.roh?x.roh:kzZeile("v",V.map(a=>a.v),ix)+kzZeile("s",V.map(a=>a.s),ix))
+    return `<div class="k${KZ_DEF[id].breit?" breit":""}${x._alt?" kzalt":""}${_kzDrag&&_kzDrag.id===id?" kzsrc":""}" data-id="${id}" data-slot="${si}" data-lock="${lock}" role="button"><span class="kzmin" data-min="${id}">−</span><div class="ki">${(V=>{const ix=kzIdx(id,V.length);return kzZeile("l",V.map(a=>a.l),ix)+(x.roh?x.roh:kzZeile("v",V.map(a=>a.v),ix)+kzZeile("s",V.map(a=>a.s),ix))
       +(V.length>1&&!x.roh?`<span class="kzdots">${V.map((_,j)=>`<i${j===ix?' class="an"':''}></i>`).join("")}</span>`:"");})(kzVarianten(x))}</div></div>`;}).join("");
   kzPassen(box);   // v4.65
   const reg=el("kzReg");
@@ -5396,7 +5414,7 @@ function kzRender(){
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
     ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="zahn${_kzRegAuf?" an":""}" id="kzZahn" title="Einstellungen">${KZ_GEAR}Einstellungen</span><span class="fertig" id="kzFertig">Fertig</span></span>`
-    :(ord.length?`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln wählen</span><span></span>`:`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln einblenden</span><span></span>`);
+    :(ord.length?`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln wählen</span>${kzWe().modus==="auto"&&box.querySelector(".kzdots")?`<span class="kzpause${_kzPause?" an":""}" id="kzPause" role="button">${_kzPause?KZ_WEITER+"Weiter":KZ_PAUSE+"Pause"}</span>`:"<span></span>"}`:`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln einblenden</span><span></span>`);
 }
 /* Sprungziel: {id} ein Abschnitt, {label} die Beschriftung einer Kachel im
    Detailbereich ("☀ Sonne", "Wind & Böen", "Luftdruck" ...), {text} eine
@@ -5450,8 +5468,11 @@ function kzGhost(tile,x,y){
   document.body.appendChild(g);_kzDrag={id:tile.dataset.id,dx:x-r.left,dy:y-r.top,g};kzGhostBewegen(x,y);}
 function kzGhostWeg(){document.querySelectorAll(".kzghost").forEach(q=>q.remove());_kzDrag=null;}
 function kzGhostBewegen(x,y){if(!_kzDrag)return;_kzDrag.g.style.left=(x-_kzDrag.dx)+"px";_kzDrag.g.style.top=(y-_kzDrag.dy)+"px";}
-function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;const ord=kzOrdnung();if(kzGesperrt(zielId,ord)||kzGesperrt(d,ord))return;
-  const a=_kzWahl.slice(),from=a.indexOf(d),to=a.indexOf(zielId);if(from<0||to<0)return;a.splice(from,1);a.splice(to,0,d);_kzWahl=a;kzRender();}
+function kzZielMarke(to){_kzDrag.ziel=to;document.querySelectorAll("#kz .kzziel").forEach(q=>q.classList.remove("kzziel"));
+  if(to!=null){const z=document.querySelector(`#kz [data-slot="${to}"]`);if(z&&z.dataset.id!==_kzDrag.id)z.classList.add("kzziel");}}
+function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDrag.id,a=kzSlots(),from=a.indexOf(d);if(from<0||from===to)return;
+  while(a.length<=to)a.push(null);const x=a[to];a[to]=d;a[from]=x||null;   // Kachel: Tausch; freier Platz: alter Platz wird frei
+  while(a.length&&!a[a.length-1])a.pop();_kzWahl=a;}
 (function(){
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
   box.addEventListener("contextmenu",e=>e.preventDefault());
@@ -5476,11 +5497,11 @@ function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;
     if(_kzMoved>14&&!_kzEdit)clearTimeout(_kzTimer);
     if(!_kzDrag)return;
     kzGhostBewegen(e.clientX,e.clientY);
-    const u=document.elementFromPoint(e.clientX,e.clientY),t=u&&u.closest&&u.closest("#kz .k");
-    if(t)kzVerschieben(t.dataset.id);
+    const u=document.elementFromPoint(e.clientX,e.clientY),t=u&&u.closest&&u.closest("#kz .k,#kz .kzleer");
+    kzZielMarke(t?+t.dataset.slot:null);
   });
   const ende=e=>{clearTimeout(_kzTimer);
-    if(_kzDrag){kzGhostWeg();kzSpeichern();kzRender();_kzP0=null;return;}
+    if(_kzDrag){kzVerschieben(_kzDrag.ziel);kzGhostWeg();kzSpeichern();kzRender();_kzP0=null;return;}
     const tile=e.target.closest&&e.target.closest("#kz .k");
     if(!_kzEdit&&_kzP0&&_kzP0.id&&e.type==="pointerup"){   // v4.83: Wisch waagrecht (>= 28 px, deutlich mehr als senkrecht); gemeint ist die Kachel, auf der der Finger AUFSETZTE
       const dx=e.clientX-_kzP0.x,dy=e.clientY-_kzP0.y,t0=box.querySelector(`.k[data-id="${_kzP0.id}"]`);
@@ -5497,11 +5518,11 @@ function kzVerschieben(zielId){const d=_kzDrag.id;if(!zielId||zielId===d)return;
   window.addEventListener("blur",()=>{if(_kzDrag){kzGhostWeg();kzRender();}});
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState!=="visible"&&_kzDrag){kzGhostWeg();kzRender();}});
   box.addEventListener("click",e=>{const m=e.target.closest(".kzmin");if(!m)return;e.preventDefault();e.stopPropagation();
-    _kzWahl=_kzWahl.filter(id=>id!==m.dataset.min);kzSpeichern();kzRender();});
+    const a=kzSlots(),i=a.indexOf(m.dataset.min);if(i>=0)a[i]=null;while(a.length&&!a[a.length-1])a.pop();_kzWahl=a;kzSpeichern();kzRender();});   // v5.32: Platz bleibt frei
   if(pool)pool.addEventListener("click",e=>{const p=e.target.closest(".kp");if(!p)return;const id=p.dataset.add;if(!KZ_DEF[id])return;
-    const w=_kzWahl.filter(x=>KZ_DEF[x]);
-    w.push(id);_kzWahl=w;kzSpeichern();kzRender();});
+    const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();});   // v5.32: in den ersten freien Platz
   if(foot)foot.addEventListener("click",e=>{
+    if(e.target.closest("#kzPause")){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}   // v5.32
     if(e.target.closest("#kzZahn")){_kzRegAuf=!_kzRegAuf;kzRender();if(_kzRegAuf)kzBewAnwenden(false);return;}
     if(e.target.closest("#kzFertig")){_kzRegAuf=false;kzEditSetzen(false);}
     else if(e.target.closest("#kzWahlBtn"))kzEditSetzen(true);});

@@ -1611,6 +1611,28 @@ regen24 -> an seine Stelle regenHeute. `kzRegenDanach` laeuft jetzt immer. Gepru
 (Playwright): drei gespeicherte Auswahlen, Pool ohne "Regen · naechste 24 Std",
 Kachel "Regen" Trocken <-> "ab 13:00 / heute 70 %". Zurueckholen aus
 `wetter-giessen-v5_30.html`.
+v5.32 (Nutzer: "Regen in 24 Stunden macht mehr Sinn, weil die Grafik auch 24 Stunden
+zeigt und nicht bis 24 Uhr"): v5.31 UMGEKEHRT - `regen24` ist wieder DIE 24-h-Kachel
+(in `KZ_STD`), `regenHeute` ("Bis 24 Uhr") ist entfernt. Der Kalendertag ("Heute bis 24
+Uhr X mm, davon Y gefallen") steht nur noch in der Grossansicht, die jetzt `regen24`
+oeffnet (`kzRegenTagZahlen()`). Im Vergleichsbild sprach dafuer: "Bis 24 Uhr 0,4 mm
+gefallen" neben Balken, die nur morgen Regen zeigen. `kzRegenDanach` ist wieder aus,
+solange regen24 gewaehlt ist (v4.77). Migration bei jedem Start: regenHeute -> regen24
+an derselben Stelle; beide gewaehlt -> Platz von regenHeute frei.
+FREIE PLAETZE (Nutzer: "Kacheln irgendwo hin, und sie muessen dort bleiben, wo ich sie
+hinsetze"): `_kzWahl` ist eine Liste von Plaetzen, `null` = frei (`kzSlots()`: unbekannte
+Kacheln -> null, freie Plaetze am Ende weg). Minus laesst den Platz frei, "+" setzt in den
+ersten freien Platz, Ziehen auf einen freien Platz verschiebt, auf eine Kachel TAUSCHT.
+Ausgefuehrt wird erst beim LOSLASSEN (`_kzDrag.ziel`, Markierung `.kzziel`) - ein Tausch
+bei jedem Ueberfahren haette die Kacheln entlang des Fingerwegs verschoben. Im
+Bearbeiten gestrichelte freie Plaetze (`.kzleer`) bis Reihenende, bei voller Reihe eine
+neue Reihe. Ausserhalb unsichtbar, eine Luecke bleibt als Luecke stehen.
+PAUSE (Nutzer: "die Grafiken kurz laenger angucken"): Knopf rechts in der Fusszeile neben
+"Kacheln waehlen", nur bei "Auto + Wischen" und wechselnden Kacheln. `_kzPause` haelt
+den Takt an (Wischen geht weiter), angehalten dunkler Knopf "Weiter". Nicht gespeichert -
+nach Neuladen laeuft der Takt wieder. Symbole als SVG (U+23F8 wird am iPhone ein Emoji).
+Geprueft (Playwright, Maus): Migration, Entfernen, Verschieben in freien Platz, Tausch,
+"+" in die Luecke, Pause 9 s ohne Wechsel, hell und dunkel. Am iPhone nicht geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
