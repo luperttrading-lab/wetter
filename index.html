@@ -1083,7 +1083,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.30</span>
+      <span class="ver">v5.31</span>
     </div>
   </header>
 
@@ -4599,11 +4599,13 @@ function pollenLaden(){
 pollenLaden();setInterval(pollenLaden,3*36e5);
 const KZ_STD=["heute","regen","regenHeute","morgen","wind","sonne"];
 let _kzWahl=(()=>{try{const a=JSON.parse(localStorage.getItem("kzWahl")||"null");if(Array.isArray(a))return a;}catch(e){}return KZ_STD.slice();})();
-/* v5.11: "Regen 24 h" steckt jetzt in der Kachel "Bis 24 Uhr" (regenHeute) - einmalig
-   zusammenlegen: beide gewaehlt -> regen24 raus; nur regen24 -> an seine Stelle regenHeute */
-try{if(!localStorage.getItem("kzRegenZus")){const i=_kzWahl.indexOf("regen24");
-  if(i>=0){if(_kzWahl.includes("regenHeute"))_kzWahl.splice(i,1);else _kzWahl[i]="regenHeute";localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}
-  localStorage.setItem("kzRegenZus","1");}}catch(e){}
+/* v5.11: "Regen 24 h" steckt jetzt in der Kachel "Bis 24 Uhr" (regenHeute).
+   v5.31 (Nutzer: "brauchen wir da nur eine Kachel?"): regen24 ist ganz weg - es
+   zeigte dieselben Balken und dieselbe 24-h-Summe wie regenHeute, und solange es
+   gewaehlt war, fehlte der Kachel "Regen" der Zusatz "ab 16:00". Bei jedem Start:
+   beide gewaehlt -> regen24 raus; nur regen24 -> an seine Stelle regenHeute. */
+try{const i=_kzWahl.indexOf("regen24");
+  if(i>=0){if(_kzWahl.includes("regenHeute"))_kzWahl.splice(i,1);else _kzWahl[i]="regenHeute";localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}}catch(e){}
 /* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl.
    v5.08: nur bei GESPEICHERTER Auswahl - Neue bekommen KZ_STD ohne Pollen */
 try{if(!localStorage.getItem("kzPollenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
@@ -4898,7 +4900,7 @@ let _kzWeI={};   // v4.83: je Kachel gewaehlte Ansicht (Wischen); im Auto-Modus 
 window._kzStand={};
 function kzStandSetzen(q){window._kzStand[q]=Date.now();}
 const KZ_ALT={mess:100,radar:25,om:200,fc:200,aqi:200,pollen:1800};
-const KZ_QUELLE={pollen:"pollen",heute:"mess",wind:"mess",regenHeute:"mess",taupunkt:"mess",druck:"mess",regen:"radar",regen24:"om",regen7:"fc",morgen:"fc",luft:"aqi",uvmax:"aqi"};
+const KZ_QUELLE={pollen:"pollen",heute:"mess",wind:"mess",regenHeute:"mess",taupunkt:"mess",druck:"mess",regen:"radar",regen7:"fc",morgen:"fc",luft:"aqi",uvmax:"aqi"};
 function kzAlter(id){
   const q=KZ_QUELLE[id];if(!q)return null;
   let t=window._kzStand[q];
@@ -5012,7 +5014,6 @@ function uvTagRechnen(){
    Summe der Stunde VOR dem Stempel - Beginn also Stempel minus 1 h. Gesucht
    ab 1,5 h, damit es nicht dem trockenen Radar widerspricht. */
 function kzRegenDanach(){
-  if(_kzWahl.includes("regen24"))return {};   // v4.77 (Nutzer): steht dann schon in "Regen 24 h" - nur ohne diese Kachel
   const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time||!h.precipitation)return {};
   const now=Date.now();
   for(let i=0;i<h.time.length;i++){const t=new Date(h.time[i]).getTime(),ab=t-36e5;
@@ -5141,7 +5142,7 @@ const KZ_DEF={
        sind nicht 24 Stunden"): Wert = ganzer Tag (gefallen + erwartet), darunter
        wie viel davon schon gefallen ist. Ansicht 2: Stundenbalken der 24 Stunden
        ab jetzt, Ueberschrift "24 h 2,6 mm". Das WANN steht in der Kachel "Regen"
-       (Zusatz "ab 16:00", kzRegenDanach), solange "Regen 24 h" nicht gewaehlt ist.
+       (Zusatz "ab 16:00", kzRegenDanach) (v5.31: immer, die Kachel "Regen 24 h" gibt es nicht mehr).
        "Regen heute" (89 px) und "24 h · ~2,6 mm" (99 px) passen nicht in 78 px. */
     const rest2=erw!=null?erw-gef:0;
     const a={l:"Bis 24 Uhr",v:`${kzF1(erw!=null?erw:gef)} mm`,
@@ -5283,18 +5284,7 @@ const KZ_DEF={
       return {l:"Planet",v:kzBlass(P_NAME[x.b],w),s:(x.jetzt?"jetzt im ":kzHM(x.t)+" im ")+kzRichtung(x.az)};});   // v5.07: "ab 03:33 O" - das einzelne O las sich wie eine Null; "ab 03:33 im SO" ist zu breit
     return Object.assign({},A[0],{alt:A.slice(1)});
     }catch(e){return null;}}},
-  regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},r(){
-    const H=kzRegen24H(),now=Date.now();if(!H)return null;
-    const tot=H.reduce((a,x)=>a+x.mm,0),fr=H.findIndex(x=>x.mm>=0.1);
-    if(fr<0)return {l:"Regen 24 h",v:'<span class="ok">Trocken</span>',s:"bis morgen"};
-    // v4.76: precipitation gilt fuer die Stunde VOR dem Stempel - Beginn = Stempel - 1 h (vorher eine Stunde zu spaet)
-    // v4.82 (Nutzer): "ab 04:00" ohne Tag las sich wie heute - liegt der Beginn morgen, wechselt die Unterzeile "morgen" / Menge
-    const b0=H[fr].t-36e5,morgen=b0>now&&ymd(new Date(b0))!==ymd(new Date(now));
-    /* v5.10 (Nutzer): zweite Ansicht = Stundenbalken der 24 Stunden ab jetzt,
-       an Stelle von Wert und Unterzeile - die Kachel wird nicht hoeher. */
-    const gr={v:kzRegenGrafik(H),s:""};
-    return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`},gr]}
-                 :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
+  // v5.31: regen24 ("Regen · nächste 24 Std") entfernt - Beginn steht als Zusatz in "Regen", Balken und Summe in regenHeute
   regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"fcSec"},
     gross(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const W=T.filter(x=>x.t>=ymd(new Date())).slice(0,16);return W.length?kzTageGross(W):null;},
     r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
