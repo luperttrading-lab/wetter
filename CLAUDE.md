@@ -1644,6 +1644,20 @@ Fenster ist alles 0 breit). Stoesst der Wochentag an "jetzt ->", faellt zuerst d
 (21:40: "jetzt  Fr" ab 375 pt), reicht das nicht (23:20, Mitternacht in Spalte 2), bleibt
 der Pfeil und der Wochentag faellt weg - der Mitternachtsstrich bleibt. Geprueft 09:44 /
 21:40 / 23:20 bei 320 / 375 / 430 pt (Playwright mit verstellter Uhr).
+v5.34 (Nutzer: "der Pfeil soll auf jetzt ZEIGEN, nicht nach rechts - von oben auf die
+Achse bzw. auf die Saeule; vielleicht hast du eine bessere Idee"): "jetzt ->" ist weg.
+TEST in beiden Grossansichten (24 h und 2 h), Zeile "Test jetzt: A B C" unter der
+Legende, gemerkt als `kzJetztStil` (Voreinstellung A): A Dreieck + "jetzt" von oben auf
+die Saeule der laufenden Stunde bzw. auf die Achse (Nutzervorschlag), B roter Strich
+durchs Bild mit Dreieck + "jetzt" ueber dem Bild, C Dreieck von unten an der Achse mit
+"jetzt" daneben. x = GENAUE Uhrzeit (09:44 = 73 % der ersten Stunde), nicht der
+Spaltenbeginn. Alle drei stehen im HTML (`kzJetztMarke(x,h)`), CSS zeigt die gewaehlte
+(`#kzGrossIn[data-jz]`), Umschalten ohne Neuzeichnen (`kzJzSetzen`, misst die Achse neu).
+Farbe Rot #d23a3a (Rot kommt in Palette E nicht vor). Grafik 20 px tiefer gesetzt
+(Platz fuer A/B oben). Befund im Test: A legt "jetzt" ueber die Nachbarsaeulen, wenn es
+regnet, und springt mit der Saeulenhoehe; B und C stoeren nicht. AUFRAEUMEN nach der
+Wahl: `kzJzStil`, `kzJzSetzen`, die beiden anderen Varianten, `.kzjzw`, Klick-Listener
+in `kzGrossZeigen` und die CSS-Regeln.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
