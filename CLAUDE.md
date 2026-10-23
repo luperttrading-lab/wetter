@@ -1742,6 +1742,18 @@ Rest wie gehabt, deckend), Legende folgt. Zweite Testzeile "Kleinste Stufe: zeig
 blass | aus" (`rk_schwach`, roh < 0,2 = roh 1; blass = Deckkraft .4) - NUR die Karte,
 Balken/Kachel "Regen 2 h" bleiben bei 0,1. Satellit unveraendert. Geprueft mit echten
 Daten (20:50), 375 pt einzeilig, 320 pt bricht die erste Zeile um.
+v5.41 (Nutzer: "auf jeden Fall blass oder aus, nicht mit Gelb/Gruen, eher die andere
+Farbskala, zum Umschalten - ich teste die naechsten Tage"): dritte Testzeile "Farben:
+Verlauf | Bunt" (`rk_farbe`, `rkFarbe()`, `rkPalette(grau)`), Voreinstellung VERLAUF =
+Palette E der Balken (`REGEN_FARB` -> `RK_E_RGBA`, gleiche Schwellen wie RK_STUFEN), auf
+Grau deckend, auf dem Satelliten 85 %. "Bunt" = bisher (RK_RGBA / RK_GRAU_RGBA). Kleinste
+Stufe nur noch "blass | aus", Voreinstellung blass; ein gespeichertes "zeigen" gilt als
+blass. Drei Zeilen (Untergrund / Farben / Kleinste Stufe) - in zwei brach "aus" bei 390 pt
+um. Legende folgt Untergrund UND Farbe. Gemessen: E 0,1 (160,230,220) L* 87 und E 0,5
+L* 75 liegen nahe am Grau (L* 79, Kontrast 1,24 bzw. 1,14) - sie heben sich ueber den
+Farbton ab, nicht ueber die Helligkeit; das Cyan von "Bunt" hat 1,46. Geprueft mit echten
+Daten (21:15, Bright Sky + Eichung), Grau/Relief/Satellit. AUFRAEUMEN nach der Wahl:
+Verlierer-Palette, `rk_farbe`-Zeile, ggf. `rk_schwach`/`rk_grund`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

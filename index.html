@@ -1111,7 +1111,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.40</span>
+      <span class="ver">v5.41</span>
     </div>
   </header>
 
@@ -8595,8 +8595,20 @@ const RK_GRAU_RGBA=[[165,248,255,1],[80,175,250,1],[40,110,235,1],[30,185,120,1]
    ab 0,24 mm/h nur 11 %. Laut unserer Eichung (v4.27) bleibt der Boden bei Radar
    0,10-0,25 mm/h in rund zwei Dritteln der Stunden trocken. TEST: diese Stufe zeigen /
    blass / aus (rk_schwach). Balken und Kachel "Regen 2 h" bleiben bei 0,1 - nur die Karte. */
-const RK_SCHWACH={zeigen:"zeigen",blass:"blass",aus:"aus"};
-function rkSchwach(){try{const v=localStorage.getItem("rk_schwach");if(RK_SCHWACH[v])return v;}catch(e){}return "zeigen";}
+/* v5.41 (Nutzer: "auf jeden Fall blass oder aus"): "zeigen" entfaellt, Voreinstellung blass;
+   ein gespeichertes "zeigen" gilt als blass. */
+const RK_SCHWACH={blass:"blass",aus:"aus"};
+function rkSchwach(){try{const v=localStorage.getItem("rk_schwach");if(RK_SCHWACH[v])return v;}catch(e){}return "blass";}
+/* v5.41 (Nutzer: "nicht mit Gelb/Gruen, eher die andere Farbskala", zum Umschalten):
+   FARBEN ZUM AUSPROBIEREN, gemerkt als rk_farbe. "verlauf" = Palette E der Balken
+   (REGEN_FARB, Tuerkis -> Blau -> Violett, dieselben Schwellen wie RK_STUFEN) -
+   Voreinstellung; "bunt" = bisher (RK_RGBA auf dem Satelliten, RK_GRAU_RGBA auf Grau).
+   Verlauf auf Grau deckend, auf dem Satelliten zu 85 % (v5.28: Tuerkis ging dort unter).
+   AUFRAEUMEN nach der Wahl: rkFarbe/RK_FARBE, Knopfzeile. */
+const RK_FARBE={verlauf:"Verlauf",bunt:"Bunt"};
+const RK_E_RGBA=REGEN_FARB.map(c=>c.match(/\d+/g).map(Number));
+function rkFarbe(){try{const v=localStorage.getItem("rk_farbe");if(RK_FARBE[v])return v;}catch(e){}return "verlauf";}
+function rkPalette(grau){return rkFarbe()==="bunt"?(grau?RK_GRAU_RGBA:RK_RGBA):RK_E_RGBA.map(c=>[c[0],c[1],c[2],grau?1:.85]);}
 function rkGrund(){try{const v=localStorage.getItem("rk_grund");if(RK_GRUND[v])return v;}catch(e){}return "sat";}
 function rkStereo(lat,lon){
   const a=6378137,b=6356752.3142451802,e=Math.sqrt(1-b*b/(a*a)),R=Math.PI/180;
@@ -8911,14 +8923,14 @@ function radarZeichnen(){
         RK.karte={w:w2,h:h2,idx,cols};
       }
       const oc=document.createElement("canvas");oc.width=w2;oc.height=h2;
-      const oq=oc.getContext("2d"),im=oq.createImageData(w2,h2),d=im.data,{idx,cols}=RK.karte,px=f.px;
+      const oq=oc.getContext("2d"),im=oq.createImageData(w2,h2),d=im.data,{idx,cols}=RK.karte,px=f.px,PAL=rkPalette(GR.tile!==WOLK_TILE);
       for(let i=0;i<idx.length;i++){const k=idx[i];if(k<0)continue;
         const roh=(px[(k/cols)|0][k%cols]||0)*0.12;              // 0,01 mm je 5 min -> mm/h
         if(roh<0.1)continue;
         const kl=roh<0.2;if(kl&&SW==="aus")continue;   // v5.40: kleinste Radarstufe (roh 1 = 0,12 mm/h)
         const b=radarBoden(roh);let s=0;while(s<RK_STUFEN.length-1&&b>=RK_STUFEN[s+1][0])s++;
-        const grau=GR.tile!==WOLK_TILE,c=grau?RK_GRAU_RGBA[s]:RK_RGBA[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];
-        d[i*4+3]=Math.round((grau?1:c[3])*(kl&&SW==="blass"?.4:1)*255);}   // v5.39: auf Grau deckend; v5.40: eigene Palette, Stufe blass
+        const c=PAL[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];
+        d[i*4+3]=Math.round(c[3]*(kl&&SW==="blass"?.4:1)*255);}   // v5.39: auf Grau deckend; v5.40 Stufe blass; v5.41 Palette waehlbar
       oq.putImageData(im,0,0);
       x.imageSmoothingEnabled=true;x.drawImage(oc,0,0,w2,h2,0,0,w2*q,h2*q);
     }
@@ -8949,13 +8961,16 @@ function radarText(){
   const z=el("rkZeit"),note=el("rkNote"),leg=el("rkLeg");
   // v5.39: Legende so deckend wie die Karte (auf Grau deckend)
   const grau=RK_GRUND[rkGrund()].tile!==WOLK_TILE;
-  if(leg&&leg.dataset.grau!==String(grau)){leg.dataset.grau=String(grau);leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=grau?RK_GRAU_RGBA[i]:RK_RGBA[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${c[3]})"></i>${s[2]}</span>`;}).join("");}
+  const lk=grau+"|"+rkFarbe(),PAL=rkPalette(grau);
+  if(leg&&leg.dataset.grau!==lk){leg.dataset.grau=lk;leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=PAL[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${c[3]})"></i>${s[2]}</span>`;}).join("");}
   const gs=el("rkGrund");if(gs){if(!gs.innerHTML){gs.innerHTML="<div><span>Untergrund (Test):</span>"+Object.keys(RK_GRUND).map(k=>`<button type="button" data-g="${k}">${RK_GRUND[k].n}</button>`).join("")+"</div>"
-        +"<div><span>Kleinste Stufe:</span>"+Object.keys(RK_SCHWACH).map(k=>`<button type="button" data-s="${k}">${RK_SCHWACH[k]}</button>`).join("")+"</div>";
-      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g],button[data-s]");if(!b)return;
-        try{if(b.dataset.g)localStorage.setItem("rk_grund",b.dataset.g);else localStorage.setItem("rk_schwach",b.dataset.s);}catch(_){}radarZeichnen();});}
+        +"<div><span>Farben:</span>"+Object.keys(RK_FARBE).map(k=>`<button type="button" data-f="${k}">${RK_FARBE[k]}</button>`).join("")
+        +"</div><div><span>Kleinste Stufe:</span>"+Object.keys(RK_SCHWACH).map(k=>`<button type="button" data-s="${k}">${RK_SCHWACH[k]}</button>`).join("")+"</div>";
+      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g],button[data-s],button[data-f]");if(!b)return;
+        try{if(b.dataset.g)localStorage.setItem("rk_grund",b.dataset.g);else if(b.dataset.f)localStorage.setItem("rk_farbe",b.dataset.f);else localStorage.setItem("rk_schwach",b.dataset.s);}catch(_){}radarZeichnen();});}
     gs.querySelectorAll("button[data-g]").forEach(b=>b.classList.toggle("on",b.dataset.g===rkGrund()));
-    gs.querySelectorAll("button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===rkSchwach()));}   // v5.39/v5.40
+    gs.querySelectorAll("button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===rkSchwach()));
+    gs.querySelectorAll("button[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f===rkFarbe()));}   // v5.39-v5.41
   const f=RK.frames&&RK.frames[RK.idx];
   if(z){if(!f)z.style.display="none";else{z.style.display="";
     const dm=Math.round((f.t-Date.now())/60000),hm=new Date(f.t).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
