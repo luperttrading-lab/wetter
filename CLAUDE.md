@@ -1683,6 +1683,13 @@ Stundenbeginn. Kachel "ab 16:45" statt "jetzt" fuer die ganze laufende Stunde, A
 laufenden Stunde", links vom jetzt-Strich grau = schon vorbei (`.kzjzv`). 2-h-Text:
 Zahl und Einheit mit festem Leerzeichen ("1,5 mm/h"). Geprueft 16:29 und 16:05 mit
 nachgebautem Fall (Modell 15-16 Uhr 1,0 mm, Radar trocken bis 16:45).
+v5.37 (Nutzer, 16:38: "grauer Balken bei der aktuellen Zeit - wozu?"): das Grau
+"schon vorbei" links vom jetzt-Strich (`.kzjzv`, v5.36) ist wieder entfernt. Es war
+ein dritter Hintergrundton neben Tag gelb / Nacht blau ohne eigene Legende und sah
+nach Daten aus; der rote Strich und "erste Saeule: Rest der laufenden Stunde"
+genuegen. Bekannte Kante: Ein einzelner nasser Radarschritt am Ende der laufenden
+Stunde (16:55, 0,03 mm) bleibt unter der 0,1-mm-Stundenschwelle - die Kachel sagt dann
+"ab 17:00", die 2-h-Kachel "in 20 min".
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
