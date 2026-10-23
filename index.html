@@ -222,7 +222,8 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-bb i.bl{opacity:.4}
 .kzs-x{position:relative}
 /* v5.39: Untergrund der Regenkarte (Test) */
-.rk-grund{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;margin:8px 0 4px;font-size:11px;color:var(--muted);font-weight:600}
+.rk-grund{margin:8px 0 4px;font-size:11px;color:var(--muted);font-weight:600}
+.rk-grund>div{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;margin-bottom:5px}
 .rk-grund button{font:700 11.5px system-ui;padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .rk-grund button.on{background:#2563c9;border-color:#2563c9;color:#fff}
 /* v5.38: 48-h-Grossansicht zum Wischen - Skala fest, Bild scrollt */
@@ -1110,7 +1111,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.39</span>
+      <span class="ver">v5.40</span>
     </div>
   </header>
 
@@ -8580,8 +8581,22 @@ const RK_RGBA=RK_STUFEN.map(s=>s[1].match(/[\d.]+/g).map(Number));
    AUFRAEUMEN nach der Wahl: Gewinner fest, rkGrund/RK_GRUND-Rest, .rk-grund, Klick. */
 const RK_GRUND={sat:{n:"Satellit",tile:WOLK_TILE,fill:"#5c7450"},
   // Hillshade ist in der Ebene fast weiss - per "multiply" grau getoent wie bei WetterOnline
-  relief:{n:"Relief",tile:"https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",fill:"#cfd3d8",mult:"#d3d7dc"},
-  flach:{n:"Grau",tile:null,fill:"#cdd2d8"}};
+  relief:{n:"Relief",tile:"https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",fill:"#bcc0c5",mult:"#bcc0c5"},
+  flach:{n:"Grau",tile:null,fill:"#bfc4ca"}};
+/* v5.40 (Nutzer: "das Grau ist bei den anderen dunkler, die Farben sind besser zu erkennen"):
+   gemessen in den Bildschirmfotos 20:45 - WetterOnline Grau ~190, Schwaechste Stufe Cyan
+   (170,254,255); "Regen?" Grund (193,202,210), Gruen (0,255,0). Unser Hellblau (150,205,255)
+   hat fast DIESELBE Helligkeit wie ein Grau um 190 (L* ~80 gegen ~77) - darum verschwand
+   es. Jetzt Grau ~190 und auf Grau eine eigene Palette: schwaechste Stufe helles Cyan
+   (HELLER als der Grund), danach Blau wie gehabt. Satellit unveraendert. */
+const RK_GRAU_RGBA=[[165,248,255,1],[80,175,250,1],[40,110,235,1],[30,185,120,1],[250,215,40,1],[250,140,20,1],[230,40,40,1],[200,40,200,1]];
+/* v5.40 (Nutzer: "wir haben mehr Wolken"): Bright Sky 23.10. 20:50, 120x120 km - 62 % der
+   Flaeche "nass", davon 51 Prozentpunkte die KLEINSTE Radarstufe (roh 1 = 0,12 mm/h),
+   ab 0,24 mm/h nur 11 %. Laut unserer Eichung (v4.27) bleibt der Boden bei Radar
+   0,10-0,25 mm/h in rund zwei Dritteln der Stunden trocken. TEST: diese Stufe zeigen /
+   blass / aus (rk_schwach). Balken und Kachel "Regen 2 h" bleiben bei 0,1 - nur die Karte. */
+const RK_SCHWACH={zeigen:"zeigen",blass:"blass",aus:"aus"};
+function rkSchwach(){try{const v=localStorage.getItem("rk_schwach");if(RK_SCHWACH[v])return v;}catch(e){}return "zeigen";}
 function rkGrund(){try{const v=localStorage.getItem("rk_grund");if(RK_GRUND[v])return v;}catch(e){}return "sat";}
 function rkStereo(lat,lon){
   const a=6378137,b=6356752.3142451802,e=Math.sqrt(1-b*b/(a*a)),R=Math.PI/180;
@@ -8875,7 +8890,7 @@ function radarZeichnen(){
   const P=(la,lo)=>[(_merX(lo)*N-wx0)*sc,(_merY(la)*N-wy0)*sc];
   const tok=++RK.tok;
   // Untergrund: Esri-Kacheln einmal je Groesse in ein eigenes Canvas, danach nur noch kopieren
-  const GR=RK_GRUND[rkGrund()],key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON+"|"+rkGrund();   // v5.39
+  const GR=RK_GRUND[rkGrund()],SW=rkSchwach(),key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON+"|"+rkGrund();   // v5.39/v5.40
   const malen=()=>{
     if(tok!==RK.tok)return;
     x.clearRect(0,0,W,H);
@@ -8900,8 +8915,10 @@ function radarZeichnen(){
       for(let i=0;i<idx.length;i++){const k=idx[i];if(k<0)continue;
         const roh=(px[(k/cols)|0][k%cols]||0)*0.12;              // 0,01 mm je 5 min -> mm/h
         if(roh<0.1)continue;
+        const kl=roh<0.2;if(kl&&SW==="aus")continue;   // v5.40: kleinste Radarstufe (roh 1 = 0,12 mm/h)
         const b=radarBoden(roh);let s=0;while(s<RK_STUFEN.length-1&&b>=RK_STUFEN[s+1][0])s++;
-        const c=RK_RGBA[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=Math.round((GR.tile===WOLK_TILE?c[3]:Math.max(c[3],.92))*255);}   // v5.39: auf Grau deckend
+        const grau=GR.tile!==WOLK_TILE,c=grau?RK_GRAU_RGBA[s]:RK_RGBA[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];
+        d[i*4+3]=Math.round((grau?1:c[3])*(kl&&SW==="blass"?.4:1)*255);}   // v5.39: auf Grau deckend; v5.40: eigene Palette, Stufe blass
       oq.putImageData(im,0,0);
       x.imageSmoothingEnabled=true;x.drawImage(oc,0,0,w2,h2,0,0,w2*q,h2*q);
     }
@@ -8932,10 +8949,13 @@ function radarText(){
   const z=el("rkZeit"),note=el("rkNote"),leg=el("rkLeg");
   // v5.39: Legende so deckend wie die Karte (auf Grau deckend)
   const grau=RK_GRUND[rkGrund()].tile!==WOLK_TILE;
-  if(leg&&leg.dataset.grau!==String(grau)){leg.dataset.grau=String(grau);leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=RK_RGBA[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${grau?Math.max(c[3],.92):c[3]})"></i>${s[2]}</span>`;}).join("");}
-  const gs=el("rkGrund");if(gs){if(!gs.innerHTML){gs.innerHTML="<span>Untergrund (Test):</span>"+Object.keys(RK_GRUND).map(k=>`<button type="button" data-g="${k}">${RK_GRUND[k].n}</button>`).join("");
-      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g]");if(!b)return;try{localStorage.setItem("rk_grund",b.dataset.g);}catch(_){}radarZeichnen();});}
-    gs.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.g===rkGrund()));}   // v5.39
+  if(leg&&leg.dataset.grau!==String(grau)){leg.dataset.grau=String(grau);leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=grau?RK_GRAU_RGBA[i]:RK_RGBA[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${c[3]})"></i>${s[2]}</span>`;}).join("");}
+  const gs=el("rkGrund");if(gs){if(!gs.innerHTML){gs.innerHTML="<div><span>Untergrund (Test):</span>"+Object.keys(RK_GRUND).map(k=>`<button type="button" data-g="${k}">${RK_GRUND[k].n}</button>`).join("")+"</div>"
+        +"<div><span>Kleinste Stufe:</span>"+Object.keys(RK_SCHWACH).map(k=>`<button type="button" data-s="${k}">${RK_SCHWACH[k]}</button>`).join("")+"</div>";
+      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g],button[data-s]");if(!b)return;
+        try{if(b.dataset.g)localStorage.setItem("rk_grund",b.dataset.g);else localStorage.setItem("rk_schwach",b.dataset.s);}catch(_){}radarZeichnen();});}
+    gs.querySelectorAll("button[data-g]").forEach(b=>b.classList.toggle("on",b.dataset.g===rkGrund()));
+    gs.querySelectorAll("button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===rkSchwach()));}   // v5.39/v5.40
   const f=RK.frames&&RK.frames[RK.idx];
   if(z){if(!f)z.style.display="none";else{z.style.display="";
     const dm=Math.round((f.t-Date.now())/60000),hm=new Date(f.t).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});

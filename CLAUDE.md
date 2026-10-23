@@ -1728,6 +1728,20 @@ Quellvermerk "Untergrund: Esri" nur bei Satellit/Relief. Wolkenkarte unveraender
 (Satellit). Geprueft mit ECHTEN Daten (Bright-Sky-Radar und Esri-Kacheln ueber
 `netz.py` im Scratchpad, 23.10. 20:05), hell und dunkel. AUFRAEUMEN nach der Wahl:
 Gewinner fest, `rkGrund`, `.rk-grund`, Klick-Listener, Test-Zeile.
+v5.40 (Nutzer, Vergleich 20:45 mit WetterOnline und "Regen?": "das Grau ist bei den
+anderen dunkler, wir haben mehr Wolken, deren Farben sind besser zu erkennen"). GEMESSEN
+in den Bildschirmfotos: WetterOnline Grau ~190, schwaechste Stufe Cyan (170,254,255);
+"Regen?" Grund (193,202,210), Gruen (0,255,0); unser Relief-Grau ~(208,212,215) und
+Hellblau (150,205,255) - das Hellblau hat fast dieselbe Helligkeit wie ein Grau um 190
+(L* ~80 gegen ~77), darum verschwand es. Flaechenanteil "Regen" im Bild: wir 50 %,
+WetterOnline (Mitte) 27 %. Bright Sky 20:50, 120x120 km: 62 % nass, davon 51
+Prozentpunkte roh 1 = 0,12 mm/h (kleinste Radarstufe), ab 0,24 mm/h nur 11 %.
+Aenderungen: Grau dunkler (Relief multiply #bcc0c5, flach #bfc4ca, ~190), auf Grau eigene
+Palette `RK_GRAU_RGBA` (0,1 helles Cyan 165,248,255 - HELLER als der Grund; 0,5 80,175,250;
+Rest wie gehabt, deckend), Legende folgt. Zweite Testzeile "Kleinste Stufe: zeigen |
+blass | aus" (`rk_schwach`, roh < 0,2 = roh 1; blass = Deckkraft .4) - NUR die Karte,
+Balken/Kachel "Regen 2 h" bleiben bei 0,1. Satellit unveraendert. Geprueft mit echten
+Daten (20:50), 375 pt einzeilig, 320 pt bricht die erste Zeile um.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
