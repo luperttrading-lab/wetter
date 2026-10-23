@@ -159,7 +159,7 @@ html.dunkel .kz .ki .kzmondtext .s{color:#c3cede}
 .kz .kzbal .kzbn,.kz .kzbal .kzbd{position:absolute;top:0;bottom:0}
 .kz .kzbal .kzbn{background:rgba(45,70,150,.17)}
 .kz .kzbal .kzbd{background:rgba(255,190,40,.16)}
-.kz .kzbal .kzbs{position:absolute;top:1px;line-height:0;margin-left:-4.5px;z-index:1}
+.kz .kzbal .kzbs{position:absolute;top:1px;line-height:0;margin-left:-4.5px;z-index:3}
 .kz .kzbal .kzmd{fill:#3b4f8f}
 html.dunkel .kz .kzbal .kzbd{background:rgba(255,196,60,.13)}
 html.dunkel .kz .kzbal .kzmd{fill:#c9d4f5}
@@ -209,7 +209,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-d,.kzs-n{position:absolute;top:0;bottom:0}
 .kzs-d{background:rgba(255,190,40,.16)}
 .kzs-n{background:rgba(45,70,150,.17)}
-.kzs-s{position:absolute;top:3px;margin-left:-4.5px;line-height:0;z-index:1}
+.kzs-s{position:absolute;top:3px;margin-left:-4.5px;line-height:0;z-index:3}   /* v5.38: vor den Saeulen (z 1) - der Mond verschwand hinter einer vollen Saeule */
 .kzs-g{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(92,107,128,.35)}
 .kzs-gl{position:absolute;left:-24px;width:20px;text-align:right;font-size:9.5px;font-weight:600;color:var(--muted);transform:translateY(50%);line-height:1}
 .kzs-m{position:absolute;top:0;bottom:0;width:1.5px;margin-left:-.75px;background:rgba(40,56,90,.45)}
@@ -221,6 +221,14 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-x b{position:absolute;left:-.5px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
 .kzs-bb i.bl{opacity:.4}
 .kzs-x{position:relative}
+/* v5.38: 48-h-Grossansicht zum Wischen - Skala fest, Bild scrollt */
+.kzs-sc{position:relative;margin-left:24px}
+.kzs-yl{position:absolute;left:0;top:20px;height:130px;width:0}
+.kzs-sr{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.kzs-in .kzs,.kzs-in .kzs-x{margin-left:0}
+.kzs-bb i.un{opacity:.5}
+.kzs-ab{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed rgba(92,107,128,.6);z-index:2}
+.kzs-abt{position:absolute;bottom:100%;margin:0 0 5px 6px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
 /* v5.34/35 (Nutzer, aus A/B/C gewaehlt: B): roter Strich bei jetzt, darueber Dreieck + "jetzt" */
 #kzGrossIn .kzs{margin-top:20px}
 .kzjz{position:absolute;bottom:100%;z-index:3;width:0;height:0}
@@ -1098,7 +1106,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.37</span>
+      <span class="ver">v5.38</span>
     </div>
   </header>
 
@@ -4641,9 +4649,19 @@ const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="1
    24 Stunden mit der LAUFENDEN Stunde (Stempel > jetzt), und sie zaehlt erst AB JETZT
    (Radar, wo es reicht, sonst der Modellanteil der Reststunde). Gilt fuer Kachel,
    Grossansicht und Abschnitt "Regen je Stunde" gemeinsam. */
-function regen24Stunden(h){const now=Date.now();
+/* v5.38: Open-Meteo gibt "Ortszeit" mit EINEM festen Versatz (utc_offset_seconds) fuer die
+   ganze Antwort - am 23.10. 96 Stunden fuer 4 Tage, obwohl der 25.10. (Ende der Sommerzeit)
+   25 Stunden hat, keine doppelte 2-Uhr-Stunde. new Date("2026-10-25T03:00") liest der
+   Browser aber als MEZ - alles nach der Umstellung lag damit eine Stunde zu spaet. Darum
+   bekommt jede Zeit den Versatz angehaengt ("...T03:00:00+02:00"); die ersten 16 Zeichen
+   bleiben gleich (Datumsvergleiche per slice laufen weiter). Bisher nur fuer die
+   Stundenabfrage Regen/Wolken; andere Open-Meteo-Abfragen haben dasselbe Muster. */
+function omZeitenAbsolut(d){const o=d&&d.utc_offset_seconds;if(o==null||!d.hourly||!Array.isArray(d.hourly.time))return d;
+  const a=Math.abs(o),z=(o<0?"-":"+")+String(Math.floor(a/3600)).padStart(2,"0")+":"+String(Math.floor(a%3600/60)).padStart(2,"0");
+  d.hourly.time=d.hourly.time.map(t=>typeof t==="string"&&t.length===16?t+":00"+z:t);return d;}
+function regen24Stunden(h,anz){const now=Date.now();   // v5.38: anz = 48 fuer die Grossansicht (24 h + 24 h danach)
   return h.time.map((t,i)=>({t:new Date(t).getTime(),m:Math.max(0,+h.precipitation[i]||0),pop:h.precipitation_probability?h.precipitation_probability[i]:null}))
-    .filter(x=>x.t>now).sort((a,b)=>a.t-b.t).slice(0,24)
+    .filter(x=>x.t>now).sort((a,b)=>a.t-b.t).slice(0,anz||24)
     .map(x=>({t:x.t,pop:x.pop,mm:regenIntervall(Math.max(x.t-36e5,now),x.t,x.m)}));}   // v5.13: erste 2 h aus dem Radar
 /* Beginn des Regens in der Stunde H[fr]: erster nasser Radarschritt; ist das Radar dort
    trocken, kommt der Regen aus dem Modell NACH dem Radarfenster; ohne Radar Stundenbeginn */
@@ -4688,7 +4706,7 @@ function regenLegende(tag){const S=tag?REGEN_TAG:REGEN_STD,f=v=>String(v).replac
    (kzStundenGross) gemeinsam genutzt, seit v5.23 ausgelagert. */
 function kzTagNacht(W0,W1){
   const D=W1-W0,pc=ms=>Math.max(0,Math.min(100,(ms-W0)/D*100)),nacht=[];
-  try{const ev=[];for(let k=-1;k<=2;k++){const d=new Date(W0+k*864e5),r=sunMoment(d,true),u=sunMoment(d,false);if(r!=null&&u!=null)ev.push([r,u]);}
+  try{const ev=[];for(let k=-1;k<=3;k++){const d=new Date(W0+k*864e5),r=sunMoment(d,true),u=sunMoment(d,false);if(r!=null&&u!=null)ev.push([r,u]);}   // v5.38: k bis +3 Tage (48-h-Grossansicht)
     ev.sort((a,b)=>a[0]-b[0]);
     for(let i=0;i+1<ev.length;i++){const a=ev[i][1],b=ev[i+1][0];   // Untergang bis naechster Aufgang
       if(b>W0&&a<W1)nacht.push([pc(a),pc(b)]);}}catch(e){}
@@ -4702,35 +4720,50 @@ function kzTagNacht(W0,W1){
    sind ~11 px breit - zu schmal fuer Zahlen je Saeule; dafuer eine Skala links,
    Uhrzeiten alle 3 Stunden (Stundenbeginn), an Mitternacht der Wochentag, und
    die staerkste Stunde im Text. */
-function kzStundenGross(H,gef,rest){
-  const n=H.length,W0=H[0].t-36e5,W1=H[n-1].t,{tag,nacht}=kzTagNacht(W0,W1);
+/* v5.38 (Nutzer: "ueber die 24 Stunden ausdehnen, dass man bis morgen Abend gucken kann,
+   ein bisschen rueberscrollen - weitere 24 Stunden, weniger stark gezeichnet; die ersten
+   24 NICHT blasser"): H2 = die 24 Stunden danach. Das Bild ist so breit, dass 24,4
+   Stunden sichtbar sind (Anschnitt und gestrichelte Grenze zeigen, dass es weitergeht; bei
+   24,6 lugte der erste Buchstabe von "unsicherer" als Strich hervor), der Rest per
+   Wischen; Skala links steht fest (.kzs-yl ausserhalb des Scrollbereichs). Saeulen ab
+   Stunde 25 blass (.un), gestrichelte Grenze mit "unsicherer". Skala ueber alle 48
+   Stunden, damit Hoehen beim Scrollen vergleichbar bleiben. Text: erste 24 wie bisher,
+   dazu "Danach bis So 18 Uhr ~3,4 mm" bzw. "trocken". Sonne/Mond liegen VOR den Saeulen
+   (vorher verdeckte eine volle Saeule den Mond). */
+function kzStundenGross(H,gef,rest,H2){
+  const A=H2&&H2.length?H.concat(H2):H,n=H.length,N=A.length,W0=A[0].t-36e5,W1=A[N-1].t,{tag,nacht}=kzTagNacht(W0,W1);
   // v5.30: glatte Skala wie bei 2 h (1/2/5/10/20...) - vorher ceil(mx/2)*2, das ergab "56 / 28"
-  const mx=Math.max(0,...H.map(x=>x.mm)),sk=mx<=1?1:mx<=2?2:mx<=5?5:Math.ceil(mx/10)*10,st=sk/2,tot=H.reduce((q,x)=>q+x.mm,0);
+  const mx=Math.max(0,...H.map(x=>x.mm)),mxA=Math.max(0,...A.map(x=>x.mm)),sk=mxA<=1?1:mxA<=2?2:mxA<=5?5:Math.ceil(mxA/10)*10,st=sk/2,tot=H.reduce((q,x)=>q+x.mm,0);
   const seg=(a,b,kl)=>`<i class="${kl}" style="left:${a.toFixed(2)}%;width:${(b-a).toFixed(2)}%"></i>`;
   let bg=tag.map(([a,b])=>seg(a,b,"kzs-d")).join("")+nacht.map(([a,b])=>seg(a,b,"kzs-n")).join("");
-  let gl="";for(let v=st;v<=sk+1e-9;v+=st)gl+=`<i class="kzs-g" style="bottom:${(v/sk*100).toFixed(1)}%"></i><b class="kzs-gl" style="bottom:${(v/sk*100).toFixed(1)}%">${v%1?kzF1(v):v}</b>`;   // 2,5 nicht als "3"
-  let mnI=-1;const bars=H.map((x,i)=>{const b=x.t-36e5;if(mnI<0&&b>W0&&ortsStunde(b)===0)mnI=i;
-    return x.mm>=0.1?`<i style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%;background:${regenFarbe(x.mm)}"></i>`:`<i class="tr"></i>`;}).join("");
-  const mn=mnI>0?`<i class="kzs-m" style="left:${(mnI/n*100).toFixed(2)}%"></i>`:"",mnP=mnI>0?mnI/n*100:null;
-  // Sonne/Mond mittig im Abschnitt, aber nicht auf dem Mitternachtsstrich (sonst 6 % daneben, im Abschnitt)
-  [...tag.map(x=>[x,KZ_SONNE]),...nacht.map(x=>[x,KZ_MOND])].forEach(([[a,b],z])=>{if(b-a<8)return;let m=(a+b)/2;
-    if(mnP!=null&&Math.abs(m-mnP)<5){const r=mnP+6,l=mnP-6;m=(r<=b-2&&b-mnP>=mnP-a)?r:l>=a+2?l:m;}
+  let gl="",yl="";for(let v=st;v<=sk+1e-9;v+=st){const bt=(v/sk*100).toFixed(1);gl+=`<i class="kzs-g" style="bottom:${bt}%"></i>`;yl+=`<b class="kzs-gl" style="bottom:${bt}%">${v%1?kzF1(v):v}</b>`;}   // 2,5 nicht als "3"
+  const mnP=[];const bars=A.map((x,i)=>{const b=x.t-36e5;if(b>W0&&ortsStunde(b)===0)mnP.push(i/N*100);
+    const un=i>=n?" un":"";return x.mm>=0.1?`<i class="${un.trim()}" style="height:${Math.max(2,x.mm/sk*100).toFixed(1)}%;background:${regenFarbe(x.mm)}"></i>`:`<i class="tr${un}"></i>`;}).join("");
+  const mn=mnP.map(p=>`<i class="kzs-m" style="left:${p.toFixed(2)}%"></i>`).join("");
+  const ab=N>n?`<i class="kzs-ab" style="left:${(n/N*100).toFixed(2)}%"></i><b class="kzs-abt" style="left:${(n/N*100).toFixed(2)}%">unsicherer</b>`:"";
+  // Sonne/Mond mittig im Abschnitt, aber nicht auf einem Mitternachtsstrich (sonst daneben, im Abschnitt)
+  const ab6=6*24/N;
+  [...tag.map(x=>[x,KZ_SONNE]),...nacht.map(x=>[x,KZ_MOND])].forEach(([[a,b],z])=>{if(b-a<8*24/N)return;let m=(a+b)/2;
+    const q=mnP.find(p=>Math.abs(m-p)<5*24/N);if(q!=null){const r=q+ab6,l=q-ab6;m=(r<=b-2&&b-q>=q-a)?r:l>=a+2?l:m;}
     bg+=`<span class="kzs-s" style="left:${m.toFixed(1)}%">${z}</span>`;});
   const hh=ms=>String(ortsStunde(ms)).padStart(2,"0");
-  const xl=H.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0||h%3)return "<span></span>";
+  const xl=A.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0||h%3)return "<span></span>";
     return `<span><b${h===0?' class="kzs-wt"':""}>${h===0?kzWtag(b):hh(b)}</b></span>`;}).join("");
-  const iMx=H.reduce((m,x,i)=>x.mm>H[m].mm?i:m,0);
-  const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`Ab jetzt bis ${ymd(new Date(H[n-1].t))!==ymd(new Date())?kzWtag(H[n-1].t)+" ":""}${hh(H[n-1].t)} Uhr <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${ymd(new Date(H[iMx].t-36e5))!==ymd(new Date())?kzWtag(H[iMx].t-36e5)+" ":""}${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
+  const iMx=H.reduce((m,x,i)=>x.mm>H[m].mm?i:m,0),bis=t=>`${ymd(new Date(t))!==ymd(new Date())?kzWtag(t)+" ":""}${hh(t)} Uhr`;
+  const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`Ab jetzt bis ${bis(H[n-1].t)} <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${ymd(new Date(H[iMx].t-36e5))!==ymd(new Date())?kzWtag(H[iMx].t-36e5)+" ":""}${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
+  const t2=N>n?A.slice(n).reduce((q,x)=>q+x.mm,0):null;
+  const z3=t2!=null?`<br>Danach bis ${bis(A[N-1].t)} ${t2>=0.05?`~${kzF1(t2)}\u00a0mm`:"trocken"} (unsicherer)`:"";
   const z2=gef!=null?`<br>Heute bis 24 Uhr ${kzF1(gef+(rest||0))} mm${gef>=0.05?`, davon ${kzF1(gef)} gefallen`:""}`:"";
   const n2=(typeof _kz!=="undefined"&&_kz.nowcast&&_kz.nowcast.zeit)?" \u00b7 erste 2 Stunden aus dem Radar, danach Wettermodell":"";
   // v5.34: Markierung "jetzt" an der genauen Stelle; die Saeule darunter ist die laufende Stunde
   const jz=kzJetztMarke((Date.now()-W0)/(W1-W0)*100);
   return `<div class="kzg-titel">Regen \u00b7 n\u00e4chste 24 Stunden</div>
-    <div class="kzg-sub">${z1}${z2}</div>
-    <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div>${jz}</div>
-    <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
+    <div class="kzg-sub">${z1}${z3}${z2}</div>
+    <div class="kzs-sc"><div class="kzs-yl">${yl}</div><div class="kzs-sr"><div class="kzs-in" style="width:${N>n?(N/24.4*100).toFixed(1):100}%">
+    <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${N},1fr)">${bars}</div>${ab}${jz}</div>
+    <div class="kzs-x" style="grid-template-columns:repeat(${N},1fr)">${xl}</div></div></div></div>
     ${regenLegende()}
-    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht \u00b7 erste S\u00e4ule: Rest der laufenden Stunde${n2}</div>`;
+    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht \u00b7 erste S\u00e4ule: Rest der laufenden Stunde${n2}${N>n?" \u00b7 nach links wischen: die 24 Stunden danach, blass = unsicherer":""}</div>`;
 }
 /* v5.24: die 2 Radarstunden als Balken in der Kachel "Regen" - dieselben Werte
    und dieselbe Skala wie der Abschnitt "Niederschlag · naechste 2 Std"
@@ -5314,7 +5347,8 @@ const KZ_DEF={
     }catch(e){return null;}}},
   regen24:{name:"Regen · nächste 24 Std",kurz:"Regen 24 h",ziel:{id:"rainHrSec",alt:"fcSec"},
     // v5.32: Tipp oeffnet die 24 Stunden gross (wie bis v5.31 "Bis 24 Uhr"), darin auch "Heute bis 24 Uhr"
-    gross(){const H=kzRegen24H();if(!H)return null;const {gef,rest}=kzRegenTagZahlen();return {html:kzStundenGross(H,gef,rest)};},
+    gross(){const H=kzRegen24H();if(!H)return null;const {gef,rest}=kzRegenTagZahlen();
+      const A=regen24Stunden(_rainHourly,48);return {html:kzStundenGross(H,gef,rest,A.length>H.length?A.slice(H.length):null)};},   // v5.38
     r(){
     const H=kzRegen24H(),now=Date.now();if(!H)return null;
     const tot=H.reduce((a,x)=>a+x.mm,0),fr=H.findIndex(x=>x.mm>=0.1);
@@ -9034,7 +9068,7 @@ function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
+  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{omZeitenAbsolut(d);hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
   tzNachtragen();  // v2.71: echte Zeitzone des Ortes nachziehen
   ladeSolar10();   // v3.33: 10-Minuten-Strahlung fuer die UV-Saeulen
   uvStationLaden(); // v3.84: Stationsabgleich der schwarzen Kurve
