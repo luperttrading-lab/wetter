@@ -1690,6 +1690,30 @@ nach Daten aus; der rote Strich und "erste Saeule: Rest der laufenden Stunde"
 genuegen. Bekannte Kante: Ein einzelner nasser Radarschritt am Ende der laufenden
 Stunde (16:55, 0,03 mm) bleibt unter der 0,1-mm-Stundenschwelle - die Kachel sagt dann
 "ab 17:00", die 2-h-Kachel "in 20 min".
+v5.38 (Nutzer: "nichts weniger stark zeichnen in den 24 Stunden - aber weitere 24
+Stunden zum Rueberscrollen, blass, ob ueberhaupt Regen kommt"; Mond hinter der Saeule
+beheben): Grossansicht von "Regen 24 h" zeigt 48 Stunden (`regen24Stunden(h,48)`,
+Stundenabfrage jetzt `forecast_days=3`), sichtbar 24,4 Stunden, Rest per Wischen
+(`.kzs-sr` overflow-x, Inhalt `.kzs-in` N/24,4 breit). Skala links fest (`.kzs-yl`
+ausserhalb des Scrollbereichs). Stunde 25-48 blass (`.kzs-bb i.un`, .5), gestrichelte
+Grenze `.kzs-ab` mit "unsicherer" darueber. Skala ueber ALLE 48 Stunden (Hoehen beim
+Scrollen vergleichbar; Folge: kommt danach mehr Regen, werden die ersten 24 flacher).
+Text: zusaetzlich "Danach bis So 17 Uhr ~5,7 mm (unsicherer)" bzw. "trocken"; Legende
+"nach links wischen: die 24 Stunden danach". Mitternachtsstriche jetzt alle (vorher nur
+der erste), `kzTagNacht` rechnet Sonnenzeiten bis +3 Tage. Sonne/Mond liegen VOR den
+Saeulen (`.kzs-s`, Kachel `.kzbs`: z-index 3) - in Norden 23.10. 18:44 steckte der Mond
+hinter einer 2-mm-Saeule. Kachel und Abschnitt bleiben bei 24 Stunden.
+SOMMERZEIT-FALLE (dabei gefunden): Open-Meteo liefert die Zeiten mit EINEM festen
+Versatz (`utc_offset_seconds`) fuer die ganze Antwort - am 23.10. 96 Stunden fuer
+23.-26.10., obwohl der 25.10. 25 Stunden hat, keine doppelte 2-Uhr-Stunde. Der Browser
+las "2026-10-25T03:00" als MEZ: alles nach der Umstellung eine Stunde zu spaet.
+`omZeitenAbsolut(d)` haengt den Versatz an ("...T03:00:00+02:00"), bisher NUR fuer die
+Stundenabfrage Regen/Wolken (Kachel 24 h, Abschnitt, Grossansicht, bilanzRest,
+kzRegenDanach, Wolkenschichten). Andere Open-Meteo-Abfragen (Luft/UV, Wolkenkarte,
+ISS-Wolken ...) haben dasselbe Muster und sind zweimal im Jahr fuer bis zu ~2 Tage
+eine Stunde versetzt - offen. Geprueft mit Uhr 23.10. 18:44 und Zeiten im Open-Meteo-
+Format (+02:00): 48 Stunden enden "So 17 Uhr" (die Nacht hat 25 Stunden), 320/375 pt,
+hell und dunkel, gescrollt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
