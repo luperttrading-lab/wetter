@@ -227,8 +227,6 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzjz i{position:absolute;left:-5px;bottom:0;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #d23a3a}
 .kzjz b{position:absolute;left:-6px;bottom:9px;font-size:10px;font-weight:800;color:#d23a3a;white-space:nowrap;line-height:1;padding:1px 2px}
 .kzjzl{position:absolute;top:0;bottom:0;width:1.5px;margin-left:-.75px;background:#d23a3a;z-index:3}
-.kzjzv{position:absolute;left:0;top:0;bottom:0;background:rgba(110,120,140,.22);z-index:2}
-html.dunkel .kzjzv{background:rgba(0,0,0,.35)}
 .kzs-x b.kzs-wt{font-weight:800;color:var(--ink,#17202e)}
 html.dunkel .kzs-d{background:rgba(255,196,60,.13)}
 html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
@@ -1100,7 +1098,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.36</span>
+      <span class="ver">v5.37</span>
     </div>
   </header>
 
@@ -4842,7 +4840,7 @@ function kzAchseFrei(root){root.querySelectorAll(".kzs-x").forEach(r=>{let re=-1
    sind entfernt (stehen in wetter-giessen-v5_34.html). */
 try{localStorage.removeItem("kzJetztStil");}catch(e){}
 function kzJetztMarke(x){const L=`left:${Math.max(0,Math.min(100,x)).toFixed(2)}%`;
-  return `<i class="kzjzv" style="width:${Math.max(0,Math.min(100,x)).toFixed(2)}%"></i><i class="kzjzl" style="${L}"></i><span class="kzjz" style="${L}"><b>jetzt</b><i></i></span>`;}   // v5.36: grau = schon vorbei
+  return `<i class="kzjzl" style="${L}"></i><span class="kzjz" style="${L}"><b>jetzt</b><i></i></span>`;}   // v5.37: das Grau "schon vorbei" aus v5.36 ist wieder weg (Nutzer: "wozu?")
 function kzGrossZeigen(html){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
