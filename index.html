@@ -227,6 +227,8 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzjz i{position:absolute;left:-5px;bottom:0;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #d23a3a}
 .kzjz b{position:absolute;left:-6px;bottom:9px;font-size:10px;font-weight:800;color:#d23a3a;white-space:nowrap;line-height:1;padding:1px 2px}
 .kzjzl{position:absolute;top:0;bottom:0;width:1.5px;margin-left:-.75px;background:#d23a3a;z-index:3}
+.kzjzv{position:absolute;left:0;top:0;bottom:0;background:rgba(110,120,140,.22);z-index:2}
+html.dunkel .kzjzv{background:rgba(0,0,0,.35)}
 .kzs-x b.kzs-wt{font-weight:800;color:var(--ink,#17202e)}
 html.dunkel .kzs-d{background:rgba(255,196,60,.13)}
 html.dunkel .kzs-n{background:rgba(70,100,190,.30)}
@@ -1098,7 +1100,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.35</span>
+      <span class="ver">v5.36</span>
     </div>
   </header>
 
@@ -4633,12 +4635,28 @@ const kzUvStufe=u=>u<3?"niedrig":u<6?"mäßig":u<8?"hoch":u<11?"sehr hoch":"extr
 const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="11" aria-label="Regen"><path d="M6 1C4 5 1.5 8 1.5 10.6a4.5 4.5 0 0 0 9 0C10.5 8 8 5 6 1z" fill="#3b82f6"/></svg>';
 /* v5.09: 24 Stunden wie der Abschnitt (vorher bis 25 - "~2,1 mm" gegen "~1,7 mm").
    Wert mit Stempel t = Regen von t-1h bis t (Open-Meteo precipitation). */
+/* v5.36 (Nutzer-Screenshot 23.10. 16:29: "nicht synchron - einmal kommt der staerkere
+   Regen, einmal ist er schon vorbei"): Bis v5.35 begann das Fenster bei jetzt - 30 min
+   (v5.09). Von :00 bis :30 war die erste Saeule die schon ABGELAUFENE Stunde, und zwar
+   mit dem MODELLwert: um 16:29 "staerkste Stunde 15-16 Uhr (1,0 mm)", waehrend das Radar
+   den Regen erst ab 16:50 zeigte - das Modell lag eine Stunde zu frueh. Jetzt beginnen die
+   24 Stunden mit der LAUFENDEN Stunde (Stempel > jetzt), und sie zaehlt erst AB JETZT
+   (Radar, wo es reicht, sonst der Modellanteil der Reststunde). Gilt fuer Kachel,
+   Grossansicht und Abschnitt "Regen je Stunde" gemeinsam. */
+function regen24Stunden(h){const now=Date.now();
+  return h.time.map((t,i)=>({t:new Date(t).getTime(),m:Math.max(0,+h.precipitation[i]||0),pop:h.precipitation_probability?h.precipitation_probability[i]:null}))
+    .filter(x=>x.t>now).sort((a,b)=>a.t-b.t).slice(0,24)
+    .map(x=>({t:x.t,pop:x.pop,mm:regenIntervall(Math.max(x.t-36e5,now),x.t,x.m)}));}   // v5.13: erste 2 h aus dem Radar
+/* Beginn des Regens in der Stunde H[fr]: erster nasser Radarschritt; ist das Radar dort
+   trocken, kommt der Regen aus dem Modell NACH dem Radarfenster; ohne Radar Stundenbeginn */
+function regenBeginn(H,fr){const now=Date.now(),a=Math.max(H[fr].t-36e5,now),b=H[fr].t,n=typeof _kz!=="undefined"?_kz.nowcast:null;
+  if(n&&n.zeit){let dk=false;
+    for(let i=0;i<n.zeit.length;i++){const lo=Math.max(a,n.zeit[i]),hi=Math.min(b,n.zeit[i]+3e5);if(hi<=lo)continue;dk=true;if(n.serie[i]>=n.TH)return lo;}
+    if(dk)return Math.min(b,Math.max(a,n.zeit[n.zeit.length-1]+3e5));}
+  return a;}
 function kzRegen24H(){
   const h=typeof _rainHourly!=="undefined"?_rainHourly:null;if(!h||!h.time)return null;
-  const now=Date.now(),H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0)}))
-    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24)
-    .map(x=>({t:x.t,mm:regenIntervall(x.t-36e5,x.t,x.mm)}));   // v5.13: erste 2 h aus dem Radar
-  return H.length?H:null;
+  const H=regen24Stunden(h);return H.length?H:null;
 }
 /* v5.10: Stundenbalken fuer "Regen 24 h". H = 24 Open-Meteo-Stunden, Wert mit
    Stempel t = Regen von t-1h bis t; der Streifen reicht also von H[0].t-1h bis
@@ -4704,7 +4722,7 @@ function kzStundenGross(H,gef,rest){
   const xl=H.map((x,i)=>{const b=x.t-36e5,h=ortsStunde(b);if(i===0||h%3)return "<span></span>";
     return `<span><b${h===0?' class="kzs-wt"':""}>${h===0?kzWtag(b):hh(b)}</b></span>`;}).join("");
   const iMx=H.reduce((m,x,i)=>x.mm>H[m].mm?i:m,0);
-  const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`24 Stunden ab jetzt <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${ymd(new Date(H[iMx].t-36e5))!==ymd(new Date())?kzWtag(H[iMx].t-36e5)+" ":""}${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
+  const z1=tot<0.05?"Kein Regen in den n\u00e4chsten 24 Stunden.":`Ab jetzt bis ${ymd(new Date(H[n-1].t))!==ymd(new Date())?kzWtag(H[n-1].t)+" ":""}${hh(H[n-1].t)} Uhr <b>${kzF1(tot)} mm</b> \u00b7 st\u00e4rkste Stunde ${ymd(new Date(H[iMx].t-36e5))!==ymd(new Date())?kzWtag(H[iMx].t-36e5)+" ":""}${hh(H[iMx].t-36e5)}\u2013${hh(H[iMx].t)} Uhr (${kzF1(mx)} mm)`;
   const z2=gef!=null?`<br>Heute bis 24 Uhr ${kzF1(gef+(rest||0))} mm${gef>=0.05?`, davon ${kzF1(gef)} gefallen`:""}`:"";
   const n2=(typeof _kz!=="undefined"&&_kz.nowcast&&_kz.nowcast.zeit)?" \u00b7 erste 2 Stunden aus dem Radar, danach Wettermodell":"";
   // v5.34: Markierung "jetzt" an der genauen Stelle; die Saeule darunter ist die laufende Stunde
@@ -4714,7 +4732,7 @@ function kzStundenGross(H,gef,rest){
     <div class="kzs">${bg}${gl}${mn}<div class="kzs-bb" style="grid-template-columns:repeat(${n},1fr)">${bars}</div>${jz}</div>
     <div class="kzs-x" style="grid-template-columns:repeat(${n},1fr)">${xl}</div>
     ${regenLegende()}
-    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht${n2}</div>`;
+    <div class="kzg-leg">S\u00e4ule = Regen in dieser Stunde, Farbe nach St\u00e4rke \u00b7 Hintergrund gelb = Tag, blau = Nacht \u00b7 erste S\u00e4ule: Rest der laufenden Stunde${n2}</div>`;
 }
 /* v5.24: die 2 Radarstunden als Balken in der Kachel "Regen" - dieselben Werte
    und dieselbe Skala wie der Abschnitt "Niederschlag · naechste 2 Std"
@@ -4744,7 +4762,7 @@ function kzNowGross(n){
   const xl=n.zeit.map((t,i)=>i%6||i===0?"<span></span>":`<span><b>${kzHM(t)}</b></span>`).join("");
   const jz=kzJetztMarke((Date.now()-W0)/(W1-W0)*100);   // v5.34
   const mm=B.reduce((q,b,i)=>q+(nass[i]?b*5/60:0),0),min=nass.filter(Boolean).length*5;
-  const z1=`${n.summary||""}${n.detail?" \u00b7 "+n.detail:""}`;
+  const z1=`${n.summary||""}${n.detail?" \u00b7 "+n.detail:""}`.replace(/(\d) (?=mm|min|Min|Std)/g,"$1\u00a0");   // v5.36: "1,2 mm/h" nicht trennen
   const z2=!min?"":nass.every(Boolean)?`<br>Durchgehend Regen, zusammen ~${kzF1(mm)}\u00a0mm`:`<br>In den 2 Stunden ${min}\u00a0min Regen, zusammen ~${kzF1(mm)}\u00a0mm`;   // v5.35: "mm" nicht allein in die naechste Zeile
   return `<div class="kzg-titel">Regen \u00b7 n\u00e4chste 2 Stunden</div>
     <div class="kzg-sub">${z1}${z2}</div>
@@ -4824,7 +4842,7 @@ function kzAchseFrei(root){root.querySelectorAll(".kzs-x").forEach(r=>{let re=-1
    sind entfernt (stehen in wetter-giessen-v5_34.html). */
 try{localStorage.removeItem("kzJetztStil");}catch(e){}
 function kzJetztMarke(x){const L=`left:${Math.max(0,Math.min(100,x)).toFixed(2)}%`;
-  return `<i class="kzjzl" style="${L}"></i><span class="kzjz" style="${L}"><b>jetzt</b><i></i></span>`;}
+  return `<i class="kzjzv" style="width:${Math.max(0,Math.min(100,x)).toFixed(2)}%"></i><i class="kzjzl" style="${L}"></i><span class="kzjz" style="${L}"><b>jetzt</b><i></i></span>`;}   // v5.36: grau = schon vorbei
 function kzGrossZeigen(html){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
@@ -5305,12 +5323,12 @@ const KZ_DEF={
     if(fr<0)return {l:"Regen 24 h",v:'<span class="ok">Trocken</span>',s:"bis morgen"};
     // v4.76: precipitation gilt fuer die Stunde VOR dem Stempel - Beginn = Stempel - 1 h (vorher eine Stunde zu spaet)
     // v4.82 (Nutzer): "ab 04:00" ohne Tag las sich wie heute - liegt der Beginn morgen, wechselt die Unterzeile "morgen" / Menge
-    const b0=H[fr].t-36e5,morgen=b0>now&&ymd(new Date(b0))!==ymd(new Date(now));
+    const b0=regenBeginn(H,fr),morgen=b0>now&&ymd(new Date(b0))!==ymd(new Date(now));   // v5.36: "ab 16:50" aus dem Radar statt "jetzt" fuer die ganze laufende Stunde
     /* v5.10 (Nutzer): zweite Ansicht = Stundenbalken der 24 Stunden ab jetzt,
        an Stelle von Wert und Unterzeile - die Kachel wird nicht hoeher. */
     const gr={v:kzRegenGrafik(H),s:""};
     return morgen?{l:"Regen 24 h",v:"ab "+kzHM(b0),s:"morgen",alt:[{s:`~${kzF1(tot)} mm`},gr]}
-                 :{l:"Regen 24 h",v:b0<=now?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
+                 :{l:"Regen 24 h",v:b0<=now+2*6e4?"jetzt":"ab "+kzHM(b0),s:`~${kzF1(tot)} mm`,alt:[gr]};}},
   regen7:{name:"Regen 7 Tage",kurz:"7 Tage",ziel:{id:"fcSec"},
     gross(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const W=T.filter(x=>x.t>=ymd(new Date())).slice(0,16);return W.length?kzTageGross(W):null;},
     r(){const T=(typeof _fcTage!=="undefined"&&_fcTage)?_fcTage:null;if(!T)return null;const h=ymd(new Date());
@@ -5746,9 +5764,7 @@ function renderRainHours(d){
   const h=d&&d.hourly;if(!h||!h.time||!h.precipitation){sec.classList.add("hidden");return;}
   _rainHourly=h;kzStandSetzen("om");if(_lastFcJ)renderForecast(_lastFcJ);if(typeof kzRender==="function")kzRender();   // v4.63: Kachel Regen 24 Std;// Stundendaten fuer die "Heute"-Restrechnung der Vorhersage bereitstellen
   const now=Date.now();
-  const H=h.time.map((t,i)=>({t:new Date(t).getTime(),mm:Math.max(0,+h.precipitation[i]||0),pop:h.precipitation_probability?h.precipitation_probability[i]:null}))
-    .filter(x=>x.t>=now-30*60000&&x.t<=now+24.5*3600000).sort((a,b)=>a.t-b.t).slice(0,24)
-    .map(x=>Object.assign(x,{mm:regenIntervall(x.t-36e5,x.t,x.mm)}));   // v5.13: erste 2 h aus dem Radar
+  const H=regen24Stunden(h);   // v5.36: ab der laufenden Stunde, die erst ab jetzt zaehlt
   if(H.length<4){sec.classList.add("hidden");return;}
   const mitRadar=!!(_kz.nowcast&&_kz.nowcast.zeit&&_kz.nowcast.zeit.some(t=>t>now));
   const TH=0.1,total=H.reduce((s,x)=>s+x.mm,0),peak=Math.max(...H.map(x=>x.mm)),pop=Math.max(...H.map(x=>x.pop||0));
@@ -5760,8 +5776,9 @@ function renderRainHours(d){
   const hLbl=t=>ortsStunde(new Date(t).getTime()-36e5)+" Uhr";
   let summary,detail;const fr=H.findIndex(x=>x.mm>=TH);
   if(peak<TH){summary="Trocken";detail=pop>=30?`kein nennenswerter Regen · bis ${pop}% Wahrsch.`:"die nächsten 24 Std kein Regen";}
-  else if(fr<=0){summary="Regen aktuell";detail=`~${f1(total)} mm · Spitze ${f1(peak)} mm/h`;}
-  else{summary=`Regen ab ${hLbl(H[fr].t)}`;detail=`~${f1(total)} mm gesamt · Spitze ${f1(peak)} mm/h`;}
+  else{const b0=regenBeginn(H,fr);   // v5.36: genauer Beginn (Radar), wie die Kachel
+    if(b0<=now+2*6e4){summary="Regen aktuell";detail=`~${f1(total)} mm · Spitze ${f1(peak)} mm/h`;}
+    else{summary=`Regen ab ${kzHM(b0)} Uhr`;detail=`~${f1(total)} mm gesamt · Spitze ${f1(peak)} mm/h`;}}
   if(mitRadar)detail+=" · erste 2 Std aus dem Radar";
   const sc=Math.max(peak,0.5);let prevD=new Date(H[0].t).getDate();
   const bars=H.map(x=>{const dd=new Date(x.t),db=dd.getDate()!==prevD;prevD=dd.getDate();const ht=x.mm<TH?2:Math.max(3,Math.round(x.mm/sc*46));return `<div class="bar${x.mm<TH?" dry":""}${db?" daybreak":""}" style="height:${ht}px${x.mm<TH?"":";background:"+regenFarbe(x.mm)}"></div>`;}).join("");

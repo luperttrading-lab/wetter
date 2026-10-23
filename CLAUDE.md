@@ -1668,6 +1668,21 @@ Stunde von heute); "~0,2 mm" bricht nicht mehr zwischen Zahl und Einheit um.
 Beobachtung aus dem Nutzer-Screenshot 10:05: die erste 24-h-Spalte ist die gerade
 ABGELAUFENE Stunde (09-10, Fenster ab jetzt - 30 min, v5.09) - der Strich steht deshalb
 am Anfang der ZWEITEN Spalte. Genau dafuer ist er gut.
+v5.36 (Nutzer-Screenshots 23.10. 16:29: "nicht synchron - einmal kommt der staerkere
+Regen, einmal ist er schon vorbei"): Das 24-h-Fenster begann seit v5.09 bei jetzt - 30 min.
+Von :00 bis :30 war die erste Saeule damit die ABGELAUFENE Stunde - mit dem MODELLwert:
+16:29 "staerkste Stunde 15-16 Uhr (1,0 mm)", das Radar zeigte den Regen erst ab 16:50
+(Modell eine Stunde zu frueh). Und "24 Stunden ab jetzt" zaehlte diese Vergangenheit mit.
+Jetzt `regen24Stunden(h)` fuer Kachel, Grossansicht UND Abschnitt "Regen je Stunde":
+Stempel > jetzt (erste Saeule = laufende Stunde), die laufende Stunde zaehlt erst ab
+jetzt (`regenIntervall(max(Beginn,jetzt), Ende, Modell)`). `regenBeginn(H,fr)`: genauer
+Beginn = erster nasser Radarschritt; Radar dort trocken -> Ende des Radarfensters; sonst
+Stundenbeginn. Kachel "ab 16:45" statt "jetzt" fuer die ganze laufende Stunde, Abschnitt
+"Regen ab 16:45 Uhr" statt "Regen aktuell". Grossansicht: "Ab jetzt bis Sa 16 Uhr 2,7 mm"
+(das Fenster endet mit der vollen Stunde, also 23-24 h), Legende "erste Saeule: Rest der
+laufenden Stunde", links vom jetzt-Strich grau = schon vorbei (`.kzjzv`). 2-h-Text:
+Zahl und Einheit mit festem Leerzeichen ("1,5 mm/h"). Geprueft 16:29 und 16:05 mit
+nachgebautem Fall (Modell 15-16 Uhr 1,0 mm, Radar trocken bis 16:45).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
