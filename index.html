@@ -221,6 +221,10 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzs-x b{position:absolute;left:-.5px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
 .kzs-bb i.bl{opacity:.4}
 .kzs-x{position:relative}
+/* v5.39: Untergrund der Regenkarte (Test) */
+.rk-grund{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;margin:8px 0 4px;font-size:11px;color:var(--muted);font-weight:600}
+.rk-grund button{font:700 11.5px system-ui;padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.rk-grund button.on{background:#2563c9;border-color:#2563c9;color:#fff}
 /* v5.38: 48-h-Grossansicht zum Wischen - Skala fest, Bild scrollt */
 .kzs-sc{position:relative;margin-left:24px}
 .kzs-yl{position:absolute;left:0;top:20px;height:130px;width:0}
@@ -1106,7 +1110,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.38</span>
+      <span class="ver">v5.39</span>
     </div>
   </header>
 
@@ -1142,7 +1146,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
     <div id="chartSec"><div class="sect">Temperaturverlauf</div>
     <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div></div></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
-    <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
+    <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="rk-grund" id="rkGrund"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="bilanzSec" class="hidden"><div class="sect">Regenbilanz</div><div class="nowcard" id="bilanzCard"></div></div>
@@ -8567,6 +8571,18 @@ const RK_STUFEN=[[0.1,"rgba(150,205,255,.55)","0,1"],[0.5,"rgba(80,160,255,.70)"
   [2,"rgba(30,185,120,.85)","2"],[5,"rgba(250,215,40,.90)","5"],[10,"rgba(250,140,20,.92)","10"],
   [20,"rgba(230,40,40,.94)","20"],[50,"rgba(200,40,200,.95)","50 mm/h"]];
 const RK_RGBA=RK_STUFEN.map(s=>s[1].match(/[\d.]+/g).map(Number));
+/* v5.39 (Nutzer: "die anderen Regenradare haben einen grauen Untergrund, bei uns ist der
+   schwaechste Regen blaugrau auf gruen"): UNTERGRUND ZUM AUSPROBIEREN, gemerkt als rk_grund.
+   Satellit (bisher), graues Relief (Esri World Hillshade, wie WetterOnline) oder grau
+   flach ohne Kartenbild (wie "Regen?", nur Grenzen und Orte - ohne Esri). Auf Grau sind
+   die Regenfarben deckend (mindestens .92), auf dem Satelliten wie bisher durchscheinend.
+   Die Wolkenkarte behaelt den Satelliten (weisse Wolken brauchen den dunklen Grund).
+   AUFRAEUMEN nach der Wahl: Gewinner fest, rkGrund/RK_GRUND-Rest, .rk-grund, Klick. */
+const RK_GRUND={sat:{n:"Satellit",tile:WOLK_TILE,fill:"#5c7450"},
+  // Hillshade ist in der Ebene fast weiss - per "multiply" grau getoent wie bei WetterOnline
+  relief:{n:"Relief",tile:"https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",fill:"#cfd3d8",mult:"#d3d7dc"},
+  flach:{n:"Grau",tile:null,fill:"#cdd2d8"}};
+function rkGrund(){try{const v=localStorage.getItem("rk_grund");if(RK_GRUND[v])return v;}catch(e){}return "sat";}
 function rkStereo(lat,lon){
   const a=6378137,b=6356752.3142451802,e=Math.sqrt(1-b*b/(a*a)),R=Math.PI/180;
   const t=p=>Math.tan(Math.PI/4-p/2)/Math.pow((1-e*Math.sin(p))/(1+e*Math.sin(p)),e/2);
@@ -8859,11 +8875,11 @@ function radarZeichnen(){
   const P=(la,lo)=>[(_merX(lo)*N-wx0)*sc,(_merY(la)*N-wy0)*sc];
   const tok=++RK.tok;
   // Untergrund: Esri-Kacheln einmal je Groesse in ein eigenes Canvas, danach nur noch kopieren
-  const key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON;
+  const GR=RK_GRUND[rkGrund()],key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON+"|"+rkGrund();   // v5.39
   const malen=()=>{
     if(tok!==RK.tok)return;
     x.clearRect(0,0,W,H);
-    if(_rkBg&&_rkBgKey===key)x.drawImage(_rkBg,0,0,W,H);else{x.fillStyle="#5c7450";x.fillRect(0,0,W,H);}
+    if(_rkBg&&_rkBgKey===key)x.drawImage(_rkBg,0,0,W,H);else{x.fillStyle=GR.fill;x.fillRect(0,0,W,H);}
     // v4.51: nicht mehr abdunkeln - das Satellitenbild soll aussehen wie auf der Wolkenkarte
     const f=RK.frames&&RK.frames[RK.idx];
     if(f&&RK.bbox){
@@ -8885,7 +8901,7 @@ function radarZeichnen(){
         const roh=(px[(k/cols)|0][k%cols]||0)*0.12;              // 0,01 mm je 5 min -> mm/h
         if(roh<0.1)continue;
         const b=radarBoden(roh);let s=0;while(s<RK_STUFEN.length-1&&b>=RK_STUFEN[s+1][0])s++;
-        const c=RK_RGBA[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=Math.round(c[3]*255);}
+        const c=RK_RGBA[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=Math.round((GR.tile===WOLK_TILE?c[3]:Math.max(c[3],.92))*255);}   // v5.39: auf Grau deckend
       oq.putImageData(im,0,0);
       x.imageSmoothingEnabled=true;x.drawImage(oc,0,0,w2,h2,0,0,w2*q,h2*q);
     }
@@ -8900,19 +8916,26 @@ function radarZeichnen(){
   if(!_rkBg||_rkBgKey!==key){
     const tx0=Math.floor(wx0/256),tx1=Math.floor(wx1/256),ty0=Math.floor(wy0/256),ty1=Math.floor(wy1/256);
     const bg=document.createElement("canvas");bg.width=Math.round(W*dpr);bg.height=Math.round(H*dpr);
-    const bq=bg.getContext("2d");bq.setTransform(dpr,0,0,dpr,0,0);bq.fillStyle="#5c7450";bq.fillRect(0,0,W,H);
+    const bq=bg.getContext("2d");bq.setTransform(dpr,0,0,dpr,0,0);bq.fillStyle=GR.fill;bq.fillRect(0,0,W,H);
     let offen=0,fertig=false;const ende=()=>{if(fertig)return;fertig=true;_rkBg=bg;_rkBgKey=key;malen();};
-    for(let ty=ty0;ty<=ty1;ty++)for(let tx=tx0;tx<=tx1;tx++){offen++;const im=new Image(),X0=tx,Y0=ty;
-      im.onload=()=>{bq.drawImage(im,(X0*256-wx0)*sc,(Y0*256-wy0)*sc,256*sc,256*sc);if(--offen===0)ende();};
+    if(GR.tile)for(let ty=ty0;ty<=ty1;ty++)for(let tx=tx0;tx<=tx1;tx++){offen++;const im=new Image(),X0=tx,Y0=ty;
+      im.onload=()=>{const kx=(X0*256-wx0)*sc,ky=(Y0*256-wy0)*sc;bq.drawImage(im,kx,ky,256*sc,256*sc);
+        if(GR.mult){bq.save();bq.globalCompositeOperation="multiply";bq.fillStyle=GR.mult;bq.fillRect(kx,ky,256*sc,256*sc);bq.restore();}   // v5.39
+        if(--offen===0)ende();};
       im.onerror=()=>{if(--offen===0)ende();};
-      im.src=WOLK_TILE.replace("{z}",F.z).replace("{y}",ty).replace("{x}",tx);}
-    setTimeout(ende,6000);
+      im.src=GR.tile.replace("{z}",F.z).replace("{y}",ty).replace("{x}",tx);}
+    if(!offen)ende();setTimeout(ende,6000);   // v5.39: "Grau flach" hat keine Kacheln
     malen();                                   // schon mal ohne Untergrund
   }else malen();
 }
 function radarText(){
   const z=el("rkZeit"),note=el("rkNote"),leg=el("rkLeg");
-  if(leg&&!leg.innerHTML)leg.innerHTML=RK_STUFEN.map(s=>`<span><i style="background:${s[1]}"></i>${s[2]}</span>`).join("");
+  // v5.39: Legende so deckend wie die Karte (auf Grau deckend)
+  const grau=RK_GRUND[rkGrund()].tile!==WOLK_TILE;
+  if(leg&&leg.dataset.grau!==String(grau)){leg.dataset.grau=String(grau);leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=RK_RGBA[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${grau?Math.max(c[3],.92):c[3]})"></i>${s[2]}</span>`;}).join("");}
+  const gs=el("rkGrund");if(gs){if(!gs.innerHTML){gs.innerHTML="<span>Untergrund (Test):</span>"+Object.keys(RK_GRUND).map(k=>`<button type="button" data-g="${k}">${RK_GRUND[k].n}</button>`).join("");
+      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g]");if(!b)return;try{localStorage.setItem("rk_grund",b.dataset.g);}catch(_){}radarZeichnen();});}
+    gs.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.g===rkGrund()));}   // v5.39
   const f=RK.frames&&RK.frames[RK.idx];
   if(z){if(!f)z.style.display="none";else{z.style.display="";
     const dm=Math.round((f.t-Date.now())/60000),hm=new Date(f.t).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
@@ -8922,7 +8945,7 @@ function radarText(){
     if(RK.fehler)note.textContent=RK.fehler;
     else if(RK.frames){
       note.innerHTML=(RK.trocken?"Im ganzen Ausschnitt kein Regen \u2013 eine Stunde zur\u00fcck bis zwei voraus. ":"")
-        +"DWD-Radar \u00fcber Bright Sky, 1 km, alle 5 min \u00b7 Farbe = gesch\u00e4tzte Menge am Boden (geeicht wie der Balken oben) \u00b7 Grenzen \u00a9 GeoBasis-DE / BKG (2026)"
+        +"DWD-Radar \u00fcber Bright Sky, 1 km, alle 5 min \u00b7 Farbe = gesch\u00e4tzte Menge am Boden (geeicht wie der Balken oben) \u00b7 Grenzen \u00a9 GeoBasis-DE / BKG (2026)"+(RK_GRUND[rkGrund()].tile?" \u00b7 Untergrund: Esri":"")
         +(RK.stoer?` \u00b7 ${RK.stoer} ${RK.stoer===1?"Scheinecho":"Scheinechos"} ausgeblendet (z.\u202fB. Windparks)`:"")
         +(RK.zug&&RK.zug.v<3?`<br><b>Kein Pfeil</b>: der Regen bewegt sich kaum (unter 3\u202fkm/h${RK.zug.quelle==="radar"?", gemessen aus dem Radar":""}) \u2013 er entsteht und vergeht an Ort und Stelle.`
         :RK.zug?`<br><b>Pfeil</b>: Zug nach ${["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(RK.zug.ri/22.5)%16]}, ${Math.round(RK.zug.v)}\u202fkm/h, ${RK.zug.quelle==="radar"?"aus dem Radar (gemessene Stunde, "+RK.zug.paare+" Messungen)"

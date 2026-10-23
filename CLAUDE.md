@@ -1714,6 +1714,20 @@ ISS-Wolken ...) haben dasselbe Muster und sind zweimal im Jahr fuer bis zu ~2 Ta
 eine Stunde versetzt - offen. Geprueft mit Uhr 23.10. 18:44 und Zeiten im Open-Meteo-
 Format (+02:00): 48 Stunden enden "So 17 Uhr" (die Nacht hat 25 Stunden), 320/375 pt,
 hell und dunkel, gescrollt.
+v5.39 (Nutzer: "die anderen Regenradare haben grauen Untergrund, bei uns ist der
+schwaechste Regen blaugrau auf gruen" -> "bau den Umschalter zum Ausprobieren"): TEST
+"Untergrund (Test): Satellit | Relief | Grau" unter der Regenkarte (`#rkGrund`, gemerkt
+`rk_grund`, Voreinstellung Satellit). `RK_GRUND`: Satellit = WOLK_TILE wie bisher;
+Relief = Esri World_Hillshade (`services.arcgisonline.com/.../Elevation/World_Hillshade`),
+in der Ebene fast weiss, darum je Kachel per `multiply` mit #d3d7dc grau getoent (wie
+WetterOnline); Grau = keine Kacheln, Flaeche #cdd2d8, nur Grenzen und Orte (wie "Regen?",
+ohne Esri - der Lizenzpunkt in LIZENZEN.md fiele fuer die Regenkarte weg). Auf Grau sind
+die Regenfarben deckend (Alpha >= .92), Legende ebenso (`leg.dataset.grau`); auf dem
+Satelliten wie bisher durchscheinend. Hintergrund-Cache-Schluessel enthaelt den Untergrund.
+Quellvermerk "Untergrund: Esri" nur bei Satellit/Relief. Wolkenkarte unveraendert
+(Satellit). Geprueft mit ECHTEN Daten (Bright-Sky-Radar und Esri-Kacheln ueber
+`netz.py` im Scratchpad, 23.10. 20:05), hell und dunkel. AUFRAEUMEN nach der Wahl:
+Gewinner fest, `rkGrund`, `.rk-grund`, Klick-Listener, Test-Zeile.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
