@@ -2,7 +2,7 @@
   "datum": "2026-10-23",
   "summe_mm": 3.14,
   "stunden_ok": 18,
-  "stunden_erwartet": 18,
+  "stunden_erwartet": 19,
   "stunden": [
     {
       "stunde": "01:00",
@@ -75,6 +75,11 @@
     {
       "stunde": "18:00",
       "mm": 0.06
+    },
+    {
+      "stunde": "19:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -161,7 +166,7 @@
     "datum": "2026-10-23",
     "mm": 3.14
   },
-  "aktualisiert": "2026-10-23T16:37:01+00:00",
+  "aktualisiert": "2026-10-23T17:07:00+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -172,7 +177,7 @@
       "datum": "2026-10-23",
       "summe_mm": 3.14,
       "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -245,6 +250,11 @@
         {
           "stunde": "18:00",
           "mm": 0.06
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -340,7 +350,7 @@
       "datum": "2026-10-23",
       "summe_mm": 3.57,
       "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -413,6 +423,11 @@
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -508,7 +523,7 @@
       "datum": "2026-10-23",
       "summe_mm": 2.45,
       "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -581,6 +596,11 @@
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
