@@ -1030,6 +1030,26 @@ Bild A, dieselbe fuer B). Alle 11 Paare dann (-7,5) Zellen je 10 min =
 52 km/h nach 33 Grad; 700 hPa 44 km/h nach 28 Grad. Unter 600 nassen Zellen
 unveraendert 0,1 mm/h. Stichprobe jetzt bis 1500 Kernzellen; 88 ms.
 
+v5.43 (Nutzer, Bildschirmfilm 24.10. 21:56: "Macht der Pfeil Sinn, so wie die Wolken
+ziehen?"): Pfeil "nach NO, 28 km/h aus dem Radar", im Film rueckte ein Nord-Sued-Band von
+WESTEN heran (Ostkante ~40 km/h nach O, nachgemessen je Zeile). ZWEI Fehler der Messung:
+(1) Sie zaehlt nur, wie viele nasse Zellen aus A in B landen. Schiebt sich ein Band von
+aussen ins Bild, waechst die nasse Flaeche und A landet bei JEDER kleinen Verschiebung ganz
+in B - Gleichstand, 0 gewinnt (22:20: "0 km/h", verworfen, Hoehenwind 59 km/h NO). (2) In
+der Stunde davor stand nur schwaches Gekruemel im Bild, das mit dem Wind nach NO zog.
+Jetzt ZUERST `rkZugVorhersage(fr)`: die DWD-Vorhersage verschiebt das Feld selbst (= der
+Film ab jetzt), gemessen wird nur der Versatz - normierte Korrelation von log(1+10 mm/h),
+15-min-Schritte ab dem Bild "jetzt" (bis 7), grob auf 3-km-Bloecken +-10 (bis 120 km/h),
+fein +-3 Zellen, je Schritt Korrelation >= 0,5, Median ab 2 Schritten. Messung der
+gemessenen Stunde und der alte 30-min-Rueckfall bleiben dahinter, die Gegenprobe mit dem
+Hoehenwind (v4.57) bleibt. Geprueft 24.10. 22:20 an 15 Orten (Bright Sky direkt):
+Korrelation 0,82-0,99, gleich der vollen Suche (Wettenberg 40/83 Grad gegen 40/86, Koeln
+40/93 gegen 44/92, Freiburg 20/99 gegen 20/99); alte Messung dort 0 km/h (Wettenberg,
+Freiburg), 69 statt 44 (Koeln). Live Wettenberg 44 km/h nach O, im Film erreicht die Kante
+am "1 h"-Strich den Ort nach ~1 h. 36-88 ms je Aufruf (Chromium). Bei langen Baendern
+zeigt der Pfeil die Bewegung QUER zum Band - Zellen IM Band ziehen oft mit dem Wind
+schraeg (hier NO), fuer "wann kommt der Regen" zaehlt nur die Querbewegung.
+
 **Bewusst NICHT gemacht (04.10.2026, Nutzer):** Zugpfeil in der Wolkenkarte.
 Wolken ziehen je Hoehe verschieden (tief 850 hPa, mittel 700, Cirrus 300 hPa -
 oft doppelt so schnell und 30-90 Grad anders), ein zweiter Pfeil neben dem
