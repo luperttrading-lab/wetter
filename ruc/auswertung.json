@@ -1,7 +1,7 @@
 {
- "stand": "2026-10-24 12:55 UTC",
- "saetze": 78,
- "messstunden": 74,
+ "stand": "2026-10-24 17:42 UTC",
+ "saetze": 83,
+ "messstunden": 79,
  "ausgelassen_fehlend": {
   "RUC": 0,
   "RUC 5 km": 0,
@@ -12,165 +12,267 @@
  "gruppen": {
   "1 h": {
    "RUC": {
-    "n": 74,
-    "regen_stunden_gemessen": 19,
+    "n": 79,
+    "regen_stunden_gemessen": 20,
     "ab_0,1": {
      "treffer": 15,
      "fehlalarm": 8,
-     "verpasst": 4,
-     "trocken_richtig": 47,
-     "POD": 0.789,
+     "verpasst": 5,
+     "trocken_richtig": 51,
+     "POD": 0.75,
      "FAR": 0.348,
+     "CSI": 0.536
+    },
+    "ab_0,5": {
+     "treffer": 1,
+     "fehlalarm": 4,
+     "verpasst": 4,
+     "trocken_richtig": 70,
+     "POD": 0.2,
+     "FAR": 0.8,
+     "CSI": 0.111
+    },
+    "regen_MAE": 0.097,
+    "t2m_MAE": 0.36,
+    "t2m_bias": 0.13
+   },
+   "RUC 5 km": {
+    "n": 79,
+    "regen_stunden_gemessen": 20,
+    "ab_0,1": {
+     "treffer": 15,
+     "fehlalarm": 7,
+     "verpasst": 5,
+     "trocken_richtig": 52,
+     "POD": 0.75,
+     "FAR": 0.318,
      "CSI": 0.556
     },
     "ab_0,5": {
      "treffer": 1,
      "fehlalarm": 4,
      "verpasst": 4,
-     "trocken_richtig": 65,
+     "trocken_richtig": 70,
      "POD": 0.2,
      "FAR": 0.8,
      "CSI": 0.111
     },
-    "regen_MAE": 0.099,
-    "t2m_MAE": 0.36,
-    "t2m_bias": 0.13
-   },
-   "RUC 5 km": {
-    "n": 74,
-    "regen_stunden_gemessen": 19,
-    "ab_0,1": {
-     "treffer": 15,
-     "fehlalarm": 7,
-     "verpasst": 4,
-     "trocken_richtig": 48,
-     "POD": 0.789,
-     "FAR": 0.318,
-     "CSI": 0.577
-    },
-    "ab_0,5": {
-     "treffer": 1,
-     "fehlalarm": 4,
-     "verpasst": 4,
-     "trocken_richtig": 65,
-     "POD": 0.2,
-     "FAR": 0.8,
-     "CSI": 0.111
-    },
-    "regen_MAE": 0.099,
+    "regen_MAE": 0.096,
     "t2m_MAE": 0.36,
     "t2m_bias": 0.13
    },
    "App (best_match)": {
-    "n": 74,
-    "regen_stunden_gemessen": 19,
+    "n": 79,
+    "regen_stunden_gemessen": 20,
     "ab_0,1": {
-     "treffer": 18,
+     "treffer": 19,
      "fehlalarm": 12,
      "verpasst": 1,
-     "trocken_richtig": 43,
-     "POD": 0.947,
-     "FAR": 0.4,
-     "CSI": 0.581
+     "trocken_richtig": 47,
+     "POD": 0.95,
+     "FAR": 0.387,
+     "CSI": 0.594
     },
     "ab_0,5": {
      "treffer": 4,
      "fehlalarm": 7,
      "verpasst": 1,
-     "trocken_richtig": 62,
+     "trocken_richtig": 67,
      "POD": 0.8,
      "FAR": 0.636,
      "CSI": 0.333
     },
-    "regen_MAE": 0.128,
-    "t2m_MAE": 0.34,
+    "regen_MAE": 0.123,
+    "t2m_MAE": 0.33,
     "t2m_bias": -0.03
    },
    "ICON-D2": {
-    "n": 74,
-    "regen_stunden_gemessen": 19,
+    "n": 79,
+    "regen_stunden_gemessen": 20,
     "ab_0,1": {
-     "treffer": 18,
+     "treffer": 19,
      "fehlalarm": 12,
      "verpasst": 1,
-     "trocken_richtig": 43,
-     "POD": 0.947,
-     "FAR": 0.4,
-     "CSI": 0.581
+     "trocken_richtig": 47,
+     "POD": 0.95,
+     "FAR": 0.387,
+     "CSI": 0.594
     },
     "ab_0,5": {
      "treffer": 3,
      "fehlalarm": 7,
      "verpasst": 2,
-     "trocken_richtig": 62,
+     "trocken_richtig": 67,
      "POD": 0.6,
      "FAR": 0.7,
      "CSI": 0.25
     },
-    "regen_MAE": 0.127,
-    "t2m_MAE": 0.35,
+    "regen_MAE": 0.122,
+    "t2m_MAE": 0.33,
     "t2m_bias": -0.03
    },
    "MOSMIX": {
-    "n": 74,
-    "regen_stunden_gemessen": 19,
+    "n": 79,
+    "regen_stunden_gemessen": 20,
     "ab_0,1": {
-     "treffer": 17,
-     "fehlalarm": 25,
+     "treffer": 18,
+     "fehlalarm": 26,
      "verpasst": 2,
-     "trocken_richtig": 30,
-     "POD": 0.895,
-     "FAR": 0.595,
-     "CSI": 0.386
+     "trocken_richtig": 33,
+     "POD": 0.9,
+     "FAR": 0.591,
+     "CSI": 0.391
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 2,
      "verpasst": 3,
-     "trocken_richtig": 67,
+     "trocken_richtig": 72,
      "POD": 0.4,
      "FAR": 0.5,
      "CSI": 0.286
     },
-    "regen_MAE": 0.115,
+    "regen_MAE": 0.114,
     "t2m_MAE": 0.49,
-    "t2m_bias": 0.02
+    "t2m_bias": 0.0
    }
   },
   "2 h": {
    "RUC": {
-    "n": 73,
-    "regen_stunden_gemessen": 18,
+    "n": 78,
+    "regen_stunden_gemessen": 19,
     "ab_0,1": {
-     "treffer": 15,
+     "treffer": 16,
      "fehlalarm": 12,
      "verpasst": 3,
-     "trocken_richtig": 43,
-     "POD": 0.833,
-     "FAR": 0.444,
-     "CSI": 0.5
+     "trocken_richtig": 47,
+     "POD": 0.842,
+     "FAR": 0.429,
+     "CSI": 0.516
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 8,
      "verpasst": 2,
-     "trocken_richtig": 61,
+     "trocken_richtig": 66,
      "POD": 0.5,
      "FAR": 0.8,
      "CSI": 0.167
     },
-    "regen_MAE": 0.142,
-    "t2m_MAE": 0.36,
+    "regen_MAE": 0.136,
+    "t2m_MAE": 0.35,
     "t2m_bias": 0.05
    },
    "RUC 5 km": {
-    "n": 73,
+    "n": 78,
+    "regen_stunden_gemessen": 19,
+    "ab_0,1": {
+     "treffer": 17,
+     "fehlalarm": 12,
+     "verpasst": 2,
+     "trocken_richtig": 47,
+     "POD": 0.895,
+     "FAR": 0.414,
+     "CSI": 0.548
+    },
+    "ab_0,5": {
+     "treffer": 2,
+     "fehlalarm": 8,
+     "verpasst": 2,
+     "trocken_richtig": 66,
+     "POD": 0.5,
+     "FAR": 0.8,
+     "CSI": 0.167
+    },
+    "regen_MAE": 0.133,
+    "t2m_MAE": 0.35,
+    "t2m_bias": 0.05
+   },
+   "App (best_match)": {
+    "n": 78,
+    "regen_stunden_gemessen": 19,
+    "ab_0,1": {
+     "treffer": 17,
+     "fehlalarm": 11,
+     "verpasst": 2,
+     "trocken_richtig": 48,
+     "POD": 0.895,
+     "FAR": 0.393,
+     "CSI": 0.567
+    },
+    "ab_0,5": {
+     "treffer": 4,
+     "fehlalarm": 8,
+     "verpasst": 0,
+     "trocken_richtig": 66,
+     "POD": 1.0,
+     "FAR": 0.667,
+     "CSI": 0.333
+    },
+    "regen_MAE": 0.096,
+    "t2m_MAE": 0.39,
+    "t2m_bias": -0.11
+   },
+   "ICON-D2": {
+    "n": 78,
+    "regen_stunden_gemessen": 19,
+    "ab_0,1": {
+     "treffer": 17,
+     "fehlalarm": 11,
+     "verpasst": 2,
+     "trocken_richtig": 48,
+     "POD": 0.895,
+     "FAR": 0.393,
+     "CSI": 0.567
+    },
+    "ab_0,5": {
+     "treffer": 3,
+     "fehlalarm": 8,
+     "verpasst": 1,
+     "trocken_richtig": 66,
+     "POD": 0.75,
+     "FAR": 0.727,
+     "CSI": 0.25
+    },
+    "regen_MAE": 0.094,
+    "t2m_MAE": 0.4,
+    "t2m_bias": -0.11
+   },
+   "MOSMIX": {
+    "n": 78,
+    "regen_stunden_gemessen": 19,
+    "ab_0,1": {
+     "treffer": 18,
+     "fehlalarm": 29,
+     "verpasst": 1,
+     "trocken_richtig": 30,
+     "POD": 0.947,
+     "FAR": 0.617,
+     "CSI": 0.375
+    },
+    "ab_0,5": {
+     "treffer": 0,
+     "fehlalarm": 3,
+     "verpasst": 4,
+     "trocken_richtig": 71,
+     "POD": 0.0,
+     "FAR": 1.0,
+     "CSI": 0.0
+    },
+    "regen_MAE": 0.115,
+    "t2m_MAE": 0.59,
+    "t2m_bias": 0.03
+   }
+  },
+  "3 h": {
+   "RUC": {
+    "n": 77,
     "regen_stunden_gemessen": 18,
     "ab_0,1": {
      "treffer": 16,
      "fehlalarm": 12,
      "verpasst": 2,
-     "trocken_richtig": 43,
+     "trocken_richtig": 47,
      "POD": 0.889,
      "FAR": 0.429,
      "CSI": 0.533
@@ -178,724 +280,622 @@
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 8,
-     "verpasst": 2,
-     "trocken_richtig": 61,
-     "POD": 0.5,
-     "FAR": 0.8,
-     "CSI": 0.167
-    },
-    "regen_MAE": 0.14,
-    "t2m_MAE": 0.36,
-    "t2m_bias": 0.05
-   },
-   "App (best_match)": {
-    "n": 73,
-    "regen_stunden_gemessen": 18,
-    "ab_0,1": {
-     "treffer": 16,
-     "fehlalarm": 11,
-     "verpasst": 2,
-     "trocken_richtig": 44,
-     "POD": 0.889,
-     "FAR": 0.407,
-     "CSI": 0.552
-    },
-    "ab_0,5": {
-     "treffer": 4,
-     "fehlalarm": 8,
      "verpasst": 0,
-     "trocken_richtig": 61,
-     "POD": 1.0,
-     "FAR": 0.667,
-     "CSI": 0.333
-    },
-    "regen_MAE": 0.103,
-    "t2m_MAE": 0.4,
-    "t2m_bias": -0.11
-   },
-   "ICON-D2": {
-    "n": 73,
-    "regen_stunden_gemessen": 18,
-    "ab_0,1": {
-     "treffer": 16,
-     "fehlalarm": 11,
-     "verpasst": 2,
-     "trocken_richtig": 44,
-     "POD": 0.889,
-     "FAR": 0.407,
-     "CSI": 0.552
-    },
-    "ab_0,5": {
-     "treffer": 3,
-     "fehlalarm": 8,
-     "verpasst": 1,
-     "trocken_richtig": 61,
-     "POD": 0.75,
-     "FAR": 0.727,
-     "CSI": 0.25
-    },
-    "regen_MAE": 0.1,
-    "t2m_MAE": 0.41,
-    "t2m_bias": -0.1
-   },
-   "MOSMIX": {
-    "n": 73,
-    "regen_stunden_gemessen": 18,
-    "ab_0,1": {
-     "treffer": 17,
-     "fehlalarm": 28,
-     "verpasst": 1,
-     "trocken_richtig": 27,
-     "POD": 0.944,
-     "FAR": 0.622,
-     "CSI": 0.37
-    },
-    "ab_0,5": {
-     "treffer": 0,
-     "fehlalarm": 3,
-     "verpasst": 4,
-     "trocken_richtig": 66,
-     "POD": 0.0,
-     "FAR": 1.0,
-     "CSI": 0.0
-    },
-    "regen_MAE": 0.118,
-    "t2m_MAE": 0.6,
-    "t2m_bias": 0.05
-   }
-  },
-  "3 h": {
-   "RUC": {
-    "n": 72,
-    "regen_stunden_gemessen": 17,
-    "ab_0,1": {
-     "treffer": 15,
-     "fehlalarm": 12,
-     "verpasst": 2,
-     "trocken_richtig": 43,
-     "POD": 0.882,
-     "FAR": 0.444,
-     "CSI": 0.517
-    },
-    "ab_0,5": {
-     "treffer": 2,
-     "fehlalarm": 8,
-     "verpasst": 0,
-     "trocken_richtig": 62,
+     "trocken_richtig": 67,
      "POD": 1.0,
      "FAR": 0.8,
      "CSI": 0.2
     },
-    "regen_MAE": 0.11,
-    "t2m_MAE": 0.41,
+    "regen_MAE": 0.103,
+    "t2m_MAE": 0.39,
     "t2m_bias": -0.02
    },
    "RUC 5 km": {
-    "n": 72,
-    "regen_stunden_gemessen": 17,
+    "n": 77,
+    "regen_stunden_gemessen": 18,
     "ab_0,1": {
-     "treffer": 15,
+     "treffer": 16,
      "fehlalarm": 11,
      "verpasst": 2,
-     "trocken_richtig": 44,
-     "POD": 0.882,
-     "FAR": 0.423,
-     "CSI": 0.536
+     "trocken_richtig": 48,
+     "POD": 0.889,
+     "FAR": 0.407,
+     "CSI": 0.552
     },
     "ab_0,5": {
      "treffer": 1,
      "fehlalarm": 7,
      "verpasst": 1,
-     "trocken_richtig": 63,
+     "trocken_richtig": 68,
      "POD": 0.5,
      "FAR": 0.875,
      "CSI": 0.111
     },
-    "regen_MAE": 0.106,
-    "t2m_MAE": 0.41,
+    "regen_MAE": 0.1,
+    "t2m_MAE": 0.39,
     "t2m_bias": -0.02
    },
    "App (best_match)": {
-    "n": 72,
-    "regen_stunden_gemessen": 17,
+    "n": 77,
+    "regen_stunden_gemessen": 18,
     "ab_0,1": {
-     "treffer": 14,
+     "treffer": 15,
      "fehlalarm": 13,
      "verpasst": 3,
-     "trocken_richtig": 42,
-     "POD": 0.824,
-     "FAR": 0.481,
-     "CSI": 0.467
+     "trocken_richtig": 46,
+     "POD": 0.833,
+     "FAR": 0.464,
+     "CSI": 0.484
+    },
+    "ab_0,5": {
+     "treffer": 2,
+     "fehlalarm": 10,
+     "verpasst": 0,
+     "trocken_richtig": 65,
+     "POD": 1.0,
+     "FAR": 0.833,
+     "CSI": 0.167
+    },
+    "regen_MAE": 0.114,
+    "t2m_MAE": 0.41,
+    "t2m_bias": -0.16
+   },
+   "ICON-D2": {
+    "n": 77,
+    "regen_stunden_gemessen": 18,
+    "ab_0,1": {
+     "treffer": 15,
+     "fehlalarm": 13,
+     "verpasst": 3,
+     "trocken_richtig": 46,
+     "POD": 0.833,
+     "FAR": 0.464,
+     "CSI": 0.484
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 9,
      "verpasst": 0,
-     "trocken_richtig": 61,
+     "trocken_richtig": 66,
      "POD": 1.0,
      "FAR": 0.818,
      "CSI": 0.182
     },
-    "regen_MAE": 0.119,
+    "regen_MAE": 0.106,
     "t2m_MAE": 0.41,
-    "t2m_bias": -0.15
-   },
-   "ICON-D2": {
-    "n": 72,
-    "regen_stunden_gemessen": 17,
-    "ab_0,1": {
-     "treffer": 14,
-     "fehlalarm": 13,
-     "verpasst": 3,
-     "trocken_richtig": 42,
-     "POD": 0.824,
-     "FAR": 0.481,
-     "CSI": 0.467
-    },
-    "ab_0,5": {
-     "treffer": 2,
-     "fehlalarm": 8,
-     "verpasst": 0,
-     "trocken_richtig": 62,
-     "POD": 1.0,
-     "FAR": 0.8,
-     "CSI": 0.2
-    },
-    "regen_MAE": 0.111,
-    "t2m_MAE": 0.41,
-    "t2m_bias": -0.14
+    "t2m_bias": -0.16
    },
    "MOSMIX": {
-    "n": 72,
-    "regen_stunden_gemessen": 17,
+    "n": 77,
+    "regen_stunden_gemessen": 18,
     "ab_0,1": {
-     "treffer": 16,
-     "fehlalarm": 28,
+     "treffer": 17,
+     "fehlalarm": 29,
      "verpasst": 1,
-     "trocken_richtig": 27,
-     "POD": 0.941,
-     "FAR": 0.636,
-     "CSI": 0.356
+     "trocken_richtig": 30,
+     "POD": 0.944,
+     "FAR": 0.63,
+     "CSI": 0.362
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 3,
      "verpasst": 2,
-     "trocken_richtig": 67,
+     "trocken_richtig": 72,
      "POD": 0.0,
      "FAR": 1.0,
      "CSI": 0.0
     },
-    "regen_MAE": 0.111,
-    "t2m_MAE": 0.69,
-    "t2m_bias": 0.03
+    "regen_MAE": 0.109,
+    "t2m_MAE": 0.67,
+    "t2m_bias": 0.02
    }
   },
   "4-6 h": {
    "RUC": {
-    "n": 210,
-    "regen_stunden_gemessen": 45,
+    "n": 225,
+    "regen_stunden_gemessen": 48,
     "ab_0,1": {
-     "treffer": 36,
+     "treffer": 39,
      "fehlalarm": 40,
      "verpasst": 9,
-     "trocken_richtig": 125,
-     "POD": 0.8,
-     "FAR": 0.526,
-     "CSI": 0.424
+     "trocken_richtig": 137,
+     "POD": 0.812,
+     "FAR": 0.506,
+     "CSI": 0.443
+    },
+    "ab_0,5": {
+     "treffer": 2,
+     "fehlalarm": 9,
+     "verpasst": 4,
+     "trocken_richtig": 210,
+     "POD": 0.333,
+     "FAR": 0.818,
+     "CSI": 0.133
+    },
+    "regen_MAE": 0.088,
+    "t2m_MAE": 0.41,
+    "t2m_bias": -0.14
+   },
+   "RUC 5 km": {
+    "n": 225,
+    "regen_stunden_gemessen": 48,
+    "ab_0,1": {
+     "treffer": 40,
+     "fehlalarm": 40,
+     "verpasst": 8,
+     "trocken_richtig": 137,
+     "POD": 0.833,
+     "FAR": 0.5,
+     "CSI": 0.455
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 8,
      "verpasst": 4,
-     "trocken_richtig": 196,
+     "trocken_richtig": 211,
      "POD": 0.333,
      "FAR": 0.8,
      "CSI": 0.143
     },
-    "regen_MAE": 0.092,
+    "regen_MAE": 0.089,
     "t2m_MAE": 0.41,
-    "t2m_bias": -0.13
-   },
-   "RUC 5 km": {
-    "n": 210,
-    "regen_stunden_gemessen": 45,
-    "ab_0,1": {
-     "treffer": 37,
-     "fehlalarm": 40,
-     "verpasst": 8,
-     "trocken_richtig": 125,
-     "POD": 0.822,
-     "FAR": 0.519,
-     "CSI": 0.435
-    },
-    "ab_0,5": {
-     "treffer": 2,
-     "fehlalarm": 7,
-     "verpasst": 4,
-     "trocken_richtig": 197,
-     "POD": 0.333,
-     "FAR": 0.778,
-     "CSI": 0.154
-    },
-    "regen_MAE": 0.092,
-    "t2m_MAE": 0.41,
-    "t2m_bias": -0.13
+    "t2m_bias": -0.14
    },
    "App (best_match)": {
-    "n": 210,
-    "regen_stunden_gemessen": 45,
+    "n": 225,
+    "regen_stunden_gemessen": 48,
     "ab_0,1": {
-     "treffer": 33,
+     "treffer": 36,
      "fehlalarm": 29,
      "verpasst": 12,
-     "trocken_richtig": 136,
-     "POD": 0.733,
-     "FAR": 0.468,
-     "CSI": 0.446
+     "trocken_richtig": 148,
+     "POD": 0.75,
+     "FAR": 0.446,
+     "CSI": 0.468
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 6,
      "verpasst": 4,
-     "trocken_richtig": 198,
+     "trocken_richtig": 213,
      "POD": 0.333,
      "FAR": 0.75,
      "CSI": 0.167
     },
-    "regen_MAE": 0.074,
-    "t2m_MAE": 0.47,
-    "t2m_bias": -0.26
+    "regen_MAE": 0.072,
+    "t2m_MAE": 0.46,
+    "t2m_bias": -0.27
    },
    "ICON-D2": {
-    "n": 210,
-    "regen_stunden_gemessen": 45,
+    "n": 225,
+    "regen_stunden_gemessen": 48,
     "ab_0,1": {
-     "treffer": 34,
+     "treffer": 37,
      "fehlalarm": 29,
      "verpasst": 11,
-     "trocken_richtig": 136,
-     "POD": 0.756,
-     "FAR": 0.46,
-     "CSI": 0.459
+     "trocken_richtig": 148,
+     "POD": 0.771,
+     "FAR": 0.439,
+     "CSI": 0.481
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 5,
      "verpasst": 4,
-     "trocken_richtig": 199,
+     "trocken_richtig": 214,
      "POD": 0.333,
      "FAR": 0.714,
      "CSI": 0.182
     },
-    "regen_MAE": 0.072,
-    "t2m_MAE": 0.47,
-    "t2m_bias": -0.26
+    "regen_MAE": 0.07,
+    "t2m_MAE": 0.46,
+    "t2m_bias": -0.27
    },
    "MOSMIX": {
-    "n": 210,
-    "regen_stunden_gemessen": 45,
+    "n": 225,
+    "regen_stunden_gemessen": 48,
     "ab_0,1": {
-     "treffer": 42,
-     "fehlalarm": 78,
+     "treffer": 45,
+     "fehlalarm": 81,
      "verpasst": 3,
-     "trocken_richtig": 87,
-     "POD": 0.933,
-     "FAR": 0.65,
-     "CSI": 0.341
+     "trocken_richtig": 96,
+     "POD": 0.938,
+     "FAR": 0.643,
+     "CSI": 0.349
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 8,
      "verpasst": 6,
-     "trocken_richtig": 196,
+     "trocken_richtig": 211,
      "POD": 0.0,
      "FAR": 1.0,
      "CSI": 0.0
     },
-    "regen_MAE": 0.113,
-    "t2m_MAE": 0.78,
-    "t2m_bias": 0.03
+    "regen_MAE": 0.111,
+    "t2m_MAE": 0.75,
+    "t2m_bias": 0.02
    }
   },
   "7-9 h": {
    "RUC": {
-    "n": 201,
-    "regen_stunden_gemessen": 37,
+    "n": 216,
+    "regen_stunden_gemessen": 40,
     "ab_0,1": {
-     "treffer": 29,
+     "treffer": 30,
      "fehlalarm": 34,
-     "verpasst": 8,
-     "trocken_richtig": 130,
-     "POD": 0.784,
-     "FAR": 0.54,
-     "CSI": 0.408
+     "verpasst": 10,
+     "trocken_richtig": 142,
+     "POD": 0.75,
+     "FAR": 0.531,
+     "CSI": 0.405
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 1,
      "verpasst": 5,
-     "trocken_richtig": 193,
+     "trocken_richtig": 208,
+     "POD": 0.286,
+     "FAR": 0.333,
+     "CSI": 0.25
+    },
+    "regen_MAE": 0.081,
+    "t2m_MAE": 0.51,
+    "t2m_bias": -0.31
+   },
+   "RUC 5 km": {
+    "n": 216,
+    "regen_stunden_gemessen": 40,
+    "ab_0,1": {
+     "treffer": 30,
+     "fehlalarm": 34,
+     "verpasst": 10,
+     "trocken_richtig": 142,
+     "POD": 0.75,
+     "FAR": 0.531,
+     "CSI": 0.405
+    },
+    "ab_0,5": {
+     "treffer": 2,
+     "fehlalarm": 1,
+     "verpasst": 5,
+     "trocken_richtig": 208,
      "POD": 0.286,
      "FAR": 0.333,
      "CSI": 0.25
     },
     "regen_MAE": 0.083,
-    "t2m_MAE": 0.53,
-    "t2m_bias": -0.32
-   },
-   "RUC 5 km": {
-    "n": 201,
-    "regen_stunden_gemessen": 37,
-    "ab_0,1": {
-     "treffer": 29,
-     "fehlalarm": 34,
-     "verpasst": 8,
-     "trocken_richtig": 130,
-     "POD": 0.784,
-     "FAR": 0.54,
-     "CSI": 0.408
-    },
-    "ab_0,5": {
-     "treffer": 2,
-     "fehlalarm": 1,
-     "verpasst": 5,
-     "trocken_richtig": 193,
-     "POD": 0.286,
-     "FAR": 0.333,
-     "CSI": 0.25
-    },
-    "regen_MAE": 0.085,
-    "t2m_MAE": 0.53,
-    "t2m_bias": -0.32
+    "t2m_MAE": 0.51,
+    "t2m_bias": -0.31
    },
    "App (best_match)": {
-    "n": 201,
-    "regen_stunden_gemessen": 37,
+    "n": 216,
+    "regen_stunden_gemessen": 40,
     "ab_0,1": {
-     "treffer": 26,
+     "treffer": 28,
      "fehlalarm": 40,
-     "verpasst": 11,
-     "trocken_richtig": 124,
-     "POD": 0.703,
-     "FAR": 0.606,
-     "CSI": 0.338
+     "verpasst": 12,
+     "trocken_richtig": 136,
+     "POD": 0.7,
+     "FAR": 0.588,
+     "CSI": 0.35
     },
     "ab_0,5": {
      "treffer": 4,
      "fehlalarm": 6,
      "verpasst": 3,
-     "trocken_richtig": 188,
+     "trocken_richtig": 203,
      "POD": 0.571,
      "FAR": 0.6,
      "CSI": 0.308
     },
-    "regen_MAE": 0.095,
-    "t2m_MAE": 0.58,
-    "t2m_bias": -0.4
+    "regen_MAE": 0.093,
+    "t2m_MAE": 0.56,
+    "t2m_bias": -0.39
    },
    "ICON-D2": {
-    "n": 201,
-    "regen_stunden_gemessen": 37,
+    "n": 216,
+    "regen_stunden_gemessen": 40,
     "ab_0,1": {
-     "treffer": 26,
+     "treffer": 28,
      "fehlalarm": 40,
-     "verpasst": 11,
-     "trocken_richtig": 124,
-     "POD": 0.703,
-     "FAR": 0.606,
-     "CSI": 0.338
+     "verpasst": 12,
+     "trocken_richtig": 136,
+     "POD": 0.7,
+     "FAR": 0.588,
+     "CSI": 0.35
     },
     "ab_0,5": {
      "treffer": 3,
      "fehlalarm": 6,
      "verpasst": 4,
-     "trocken_richtig": 188,
+     "trocken_richtig": 203,
      "POD": 0.429,
      "FAR": 0.667,
      "CSI": 0.231
     },
-    "regen_MAE": 0.097,
-    "t2m_MAE": 0.58,
-    "t2m_bias": -0.41
+    "regen_MAE": 0.095,
+    "t2m_MAE": 0.56,
+    "t2m_bias": -0.39
    },
    "MOSMIX": {
-    "n": 201,
-    "regen_stunden_gemessen": 37,
+    "n": 216,
+    "regen_stunden_gemessen": 40,
     "ab_0,1": {
-     "treffer": 34,
-     "fehlalarm": 84,
+     "treffer": 37,
+     "fehlalarm": 87,
      "verpasst": 3,
-     "trocken_richtig": 80,
-     "POD": 0.919,
-     "FAR": 0.712,
-     "CSI": 0.281
+     "trocken_richtig": 89,
+     "POD": 0.925,
+     "FAR": 0.702,
+     "CSI": 0.291
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 8,
      "verpasst": 7,
-     "trocken_richtig": 186,
+     "trocken_richtig": 201,
      "POD": 0.0,
      "FAR": 1.0,
      "CSI": 0.0
     },
-    "regen_MAE": 0.128,
-    "t2m_MAE": 0.81,
+    "regen_MAE": 0.125,
+    "t2m_MAE": 0.79,
     "t2m_bias": 0.04
    }
   },
   "10-13 h": {
    "RUC": {
-    "n": 254,
-    "regen_stunden_gemessen": 38,
+    "n": 274,
+    "regen_stunden_gemessen": 42,
     "ab_0,1": {
      "treffer": 22,
      "fehlalarm": 52,
-     "verpasst": 16,
-     "trocken_richtig": 164,
-     "POD": 0.579,
+     "verpasst": 20,
+     "trocken_richtig": 180,
+     "POD": 0.524,
      "FAR": 0.703,
-     "CSI": 0.244
+     "CSI": 0.234
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 6,
      "verpasst": 0,
-     "trocken_richtig": 248,
-     "POD": null,
-     "FAR": 1.0,
-     "CSI": 0.0
-    },
-    "regen_MAE": 0.095,
-    "t2m_MAE": 0.63,
-    "t2m_bias": -0.49
-   },
-   "RUC 5 km": {
-    "n": 254,
-    "regen_stunden_gemessen": 38,
-    "ab_0,1": {
-     "treffer": 23,
-     "fehlalarm": 52,
-     "verpasst": 15,
-     "trocken_richtig": 164,
-     "POD": 0.605,
-     "FAR": 0.693,
-     "CSI": 0.256
-    },
-    "ab_0,5": {
-     "treffer": 0,
-     "fehlalarm": 7,
-     "verpasst": 0,
-     "trocken_richtig": 247,
+     "trocken_richtig": 268,
      "POD": null,
      "FAR": 1.0,
      "CSI": 0.0
     },
     "regen_MAE": 0.094,
-    "t2m_MAE": 0.63,
-    "t2m_bias": -0.49
+    "t2m_MAE": 0.6,
+    "t2m_bias": -0.45
    },
-   "App (best_match)": {
-    "n": 254,
-    "regen_stunden_gemessen": 38,
+   "RUC 5 km": {
+    "n": 274,
+    "regen_stunden_gemessen": 42,
     "ab_0,1": {
-     "treffer": 19,
-     "fehlalarm": 48,
+     "treffer": 23,
+     "fehlalarm": 52,
      "verpasst": 19,
-     "trocken_richtig": 168,
-     "POD": 0.5,
-     "FAR": 0.716,
-     "CSI": 0.221
+     "trocken_richtig": 180,
+     "POD": 0.548,
+     "FAR": 0.693,
+     "CSI": 0.245
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 7,
      "verpasst": 0,
-     "trocken_richtig": 247,
+     "trocken_richtig": 267,
+     "POD": null,
+     "FAR": 1.0,
+     "CSI": 0.0
+    },
+    "regen_MAE": 0.093,
+    "t2m_MAE": 0.6,
+    "t2m_bias": -0.45
+   },
+   "App (best_match)": {
+    "n": 274,
+    "regen_stunden_gemessen": 42,
+    "ab_0,1": {
+     "treffer": 19,
+     "fehlalarm": 48,
+     "verpasst": 23,
+     "trocken_richtig": 184,
+     "POD": 0.452,
+     "FAR": 0.716,
+     "CSI": 0.211
+    },
+    "ab_0,5": {
+     "treffer": 0,
+     "fehlalarm": 7,
+     "verpasst": 0,
+     "trocken_richtig": 267,
      "POD": null,
      "FAR": 1.0,
      "CSI": 0.0
     },
     "regen_MAE": 0.079,
-    "t2m_MAE": 0.69,
-    "t2m_bias": -0.58
+    "t2m_MAE": 0.65,
+    "t2m_bias": -0.53
    },
    "ICON-D2": {
-    "n": 254,
-    "regen_stunden_gemessen": 38,
+    "n": 274,
+    "regen_stunden_gemessen": 42,
     "ab_0,1": {
      "treffer": 19,
      "fehlalarm": 47,
-     "verpasst": 19,
-     "trocken_richtig": 169,
-     "POD": 0.5,
+     "verpasst": 23,
+     "trocken_richtig": 185,
+     "POD": 0.452,
      "FAR": 0.712,
-     "CSI": 0.224
+     "CSI": 0.213
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 7,
      "verpasst": 0,
-     "trocken_richtig": 247,
+     "trocken_richtig": 267,
      "POD": null,
      "FAR": 1.0,
      "CSI": 0.0
     },
-    "regen_MAE": 0.076,
-    "t2m_MAE": 0.69,
-    "t2m_bias": -0.58
+    "regen_MAE": 0.077,
+    "t2m_MAE": 0.65,
+    "t2m_bias": -0.53
    },
    "MOSMIX": {
-    "n": 254,
-    "regen_stunden_gemessen": 38,
+    "n": 274,
+    "regen_stunden_gemessen": 42,
     "ab_0,1": {
-     "treffer": 34,
-     "fehlalarm": 124,
+     "treffer": 38,
+     "fehlalarm": 126,
      "verpasst": 4,
-     "trocken_richtig": 92,
-     "POD": 0.895,
-     "FAR": 0.785,
-     "CSI": 0.21
+     "trocken_richtig": 106,
+     "POD": 0.905,
+     "FAR": 0.768,
+     "CSI": 0.226
     },
     "ab_0,5": {
      "treffer": 0,
      "fehlalarm": 6,
      "verpasst": 0,
-     "trocken_richtig": 248,
+     "trocken_richtig": 268,
      "POD": null,
      "FAR": 1.0,
      "CSI": 0.0
     },
-    "regen_MAE": 0.111,
-    "t2m_MAE": 0.86,
-    "t2m_bias": 0.01
+    "regen_MAE": 0.107,
+    "t2m_MAE": 0.83,
+    "t2m_bias": 0.03
    }
   },
   "1-13 h": {
    "RUC": {
-    "n": 884,
-    "regen_stunden_gemessen": 174,
+    "n": 949,
+    "regen_stunden_gemessen": 187,
     "ab_0,1": {
-     "treffer": 132,
+     "treffer": 138,
      "fehlalarm": 158,
-     "verpasst": 42,
-     "trocken_richtig": 552,
-     "POD": 0.759,
-     "FAR": 0.545,
-     "CSI": 0.398
+     "verpasst": 49,
+     "trocken_richtig": 604,
+     "POD": 0.738,
+     "FAR": 0.534,
+     "CSI": 0.4
     },
     "ab_0,5": {
      "treffer": 9,
-     "fehlalarm": 35,
+     "fehlalarm": 36,
      "verpasst": 15,
-     "trocken_richtig": 825,
+     "trocken_richtig": 889,
      "POD": 0.375,
-     "FAR": 0.795,
-     "CSI": 0.153
+     "FAR": 0.8,
+     "CSI": 0.15
     },
-    "regen_MAE": 0.097,
-    "t2m_MAE": 0.49,
-    "t2m_bias": -0.23
+    "regen_MAE": 0.094,
+    "t2m_MAE": 0.48,
+    "t2m_bias": -0.22
    },
    "RUC 5 km": {
-    "n": 884,
-    "regen_stunden_gemessen": 174,
+    "n": 949,
+    "regen_stunden_gemessen": 187,
     "ab_0,1": {
-     "treffer": 135,
+     "treffer": 141,
      "fehlalarm": 156,
-     "verpasst": 39,
-     "trocken_richtig": 554,
-     "POD": 0.776,
-     "FAR": 0.536,
-     "CSI": 0.409
+     "verpasst": 46,
+     "trocken_richtig": 606,
+     "POD": 0.754,
+     "FAR": 0.525,
+     "CSI": 0.411
     },
     "ab_0,5": {
      "treffer": 8,
-     "fehlalarm": 34,
+     "fehlalarm": 35,
      "verpasst": 16,
-     "trocken_richtig": 826,
+     "trocken_richtig": 890,
      "POD": 0.333,
-     "FAR": 0.81,
-     "CSI": 0.138
+     "FAR": 0.814,
+     "CSI": 0.136
     },
-    "regen_MAE": 0.097,
-    "t2m_MAE": 0.49,
-    "t2m_bias": -0.23
+    "regen_MAE": 0.094,
+    "t2m_MAE": 0.48,
+    "t2m_bias": -0.22
    },
    "App (best_match)": {
-    "n": 884,
-    "regen_stunden_gemessen": 174,
+    "n": 949,
+    "regen_stunden_gemessen": 187,
     "ab_0,1": {
-     "treffer": 126,
+     "treffer": 134,
      "fehlalarm": 153,
-     "verpasst": 48,
-     "trocken_richtig": 557,
-     "POD": 0.724,
-     "FAR": 0.548,
-     "CSI": 0.385
+     "verpasst": 53,
+     "trocken_richtig": 609,
+     "POD": 0.717,
+     "FAR": 0.533,
+     "CSI": 0.394
     },
     "ab_0,5": {
      "treffer": 16,
-     "fehlalarm": 43,
+     "fehlalarm": 44,
      "verpasst": 8,
-     "trocken_richtig": 817,
+     "trocken_richtig": 881,
      "POD": 0.667,
-     "FAR": 0.729,
-     "CSI": 0.239
+     "FAR": 0.733,
+     "CSI": 0.235
     },
-    "regen_MAE": 0.091,
-    "t2m_MAE": 0.54,
-    "t2m_bias": -0.34
+    "regen_MAE": 0.088,
+    "t2m_MAE": 0.52,
+    "t2m_bias": -0.33
    },
    "ICON-D2": {
-    "n": 884,
-    "regen_stunden_gemessen": 174,
+    "n": 949,
+    "regen_stunden_gemessen": 187,
     "ab_0,1": {
-     "treffer": 127,
+     "treffer": 135,
      "fehlalarm": 152,
-     "verpasst": 47,
-     "trocken_richtig": 558,
-     "POD": 0.73,
-     "FAR": 0.545,
-     "CSI": 0.39
+     "verpasst": 52,
+     "trocken_richtig": 610,
+     "POD": 0.722,
+     "FAR": 0.53,
+     "CSI": 0.398
     },
     "ab_0,5": {
      "treffer": 13,
-     "fehlalarm": 41,
+     "fehlalarm": 42,
      "verpasst": 11,
-     "trocken_richtig": 819,
+     "trocken_richtig": 883,
      "POD": 0.542,
-     "FAR": 0.759,
-     "CSI": 0.2
+     "FAR": 0.764,
+     "CSI": 0.197
     },
-    "regen_MAE": 0.089,
-    "t2m_MAE": 0.54,
-    "t2m_bias": -0.34
+    "regen_MAE": 0.087,
+    "t2m_MAE": 0.52,
+    "t2m_bias": -0.33
    },
    "MOSMIX": {
-    "n": 884,
-    "regen_stunden_gemessen": 174,
+    "n": 949,
+    "regen_stunden_gemessen": 187,
     "ab_0,1": {
-     "treffer": 160,
-     "fehlalarm": 367,
+     "treffer": 173,
+     "fehlalarm": 378,
      "verpasst": 14,
-     "trocken_richtig": 343,
-     "POD": 0.92,
-     "FAR": 0.696,
-     "CSI": 0.296
+     "trocken_richtig": 384,
+     "POD": 0.925,
+     "FAR": 0.686,
+     "CSI": 0.306
     },
     "ab_0,5": {
      "treffer": 2,
      "fehlalarm": 30,
      "verpasst": 22,
-     "trocken_richtig": 830,
+     "trocken_richtig": 895,
      "POD": 0.083,
      "FAR": 0.938,
      "CSI": 0.037
     },
-    "regen_MAE": 0.116,
-    "t2m_MAE": 0.76,
+    "regen_MAE": 0.114,
+    "t2m_MAE": 0.74,
     "t2m_bias": 0.03
    }
   }
