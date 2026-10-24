@@ -2,7 +2,7 @@
   "datum": "2026-10-24",
   "summe_mm": 0.37,
   "stunden_ok": 4,
-  "stunden_erwartet": 4,
+  "stunden_erwartet": 5,
   "stunden": [
     {
       "stunde": "01:00",
@@ -19,6 +19,11 @@
     {
       "stunde": "04:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "05:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -105,7 +110,7 @@
     "datum": "2026-10-24",
     "mm": 0.37
   },
-  "aktualisiert": "2026-10-24T02:37:00+00:00",
+  "aktualisiert": "2026-10-24T03:07:00+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -116,7 +121,7 @@
       "datum": "2026-10-24",
       "summe_mm": 0.37,
       "stunden_ok": 4,
-      "stunden_erwartet": 4,
+      "stunden_erwartet": 5,
       "stunden": [
         {
           "stunde": "01:00",
@@ -133,6 +138,11 @@
         {
           "stunde": "04:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "05:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -228,7 +238,7 @@
       "datum": "2026-10-24",
       "summe_mm": 0.0,
       "stunden_ok": 4,
-      "stunden_erwartet": 4,
+      "stunden_erwartet": 5,
       "stunden": [
         {
           "stunde": "01:00",
@@ -245,6 +255,11 @@
         {
           "stunde": "04:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "05:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -340,7 +355,7 @@
       "datum": "2026-10-24",
       "summe_mm": 1.52,
       "stunden_ok": 4,
-      "stunden_erwartet": 4,
+      "stunden_erwartet": 5,
       "stunden": [
         {
           "stunde": "01:00",
@@ -357,6 +372,11 @@
         {
           "stunde": "04:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "05:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
