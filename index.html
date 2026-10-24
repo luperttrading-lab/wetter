@@ -1111,7 +1111,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.42</span>
+      <span class="ver">v5.43</span>
     </div>
   </header>
 
@@ -8768,6 +8768,51 @@ function rkEntstoeren(fr){
    Ausreisser (90 km/h nach Sueden, Deckung 20 %) faellt durch die
    Deckungsschwelle und den Median. 10 min = 1 Zelle je 6 km/h - grob je
    Paar, der Median ueber mehrere glaettet. */
+/* v5.43 (Nutzer, Film 24.10. 21:56: "Macht der Pfeil Sinn, so wie die Wolken ziehen?"):
+   Pfeil "nach NO, 28 km/h", im Film rueckte ein Regenband von WESTEN heran - Ostkante
+   ~40 km/h nach O. ZWEI Ursachen: (1) Die Messung zaehlt nur, wie viele nasse Zellen
+   aus A in B landen. Waechst die nasse Flaeche (Band schiebt sich von aussen ins Bild),
+   landet A bei JEDER kleinen Verschiebung ganz in B - Gleichstand, gewonnen hat 0
+   (22:20: Radar "0 km/h", Pfeil fiel auf den Hoehenwind 59 km/h NO zurueck). (2) In der
+   Stunde davor stand nur schwaches Gekruemel im Bild, das mit dem Wind nach NO zog.
+   Jetzt ZUERST die Vorhersage: der DWD verschiebt das Feld selbst (das ist der Film ab
+   jetzt), wir messen nur, um wie viel - normierte Korrelation von log(1+10 mm/h) in
+   15-min-Schritten (bis 7, ab dem Bild "jetzt"), grob auf 3-km-Bloecken +-10 (bis
+   120 km/h), dann fein +-3 Zellen; je Schritt Korrelation >= 0,5, Median ab 2 Schritten.
+   Am 24.10. 22:20 an 13 Orten mit Regen im Bild 0,82-0,99 Korrelation, Ergebnis wie die
+   volle Suche (Wettenberg 40 km/h nach 83 Grad, voll 40/86; Koeln 40/93 gegen 44/92;
+   Freiburg 20/99 gegen 20/99). Die Messung der vergangenen Stunde bleibt Rueckfall. */
+function rkZugVorhersage(fr){
+  const n=Date.now(),R=fr[0].px.length,C=fr[0].px[0].length;
+  let j=0;fr.forEach((f,i)=>{if(Math.abs(f.t-n)<Math.abs(fr[j].t-n))j=i;});
+  const cache={},feld=i=>{if(cache[i])return cache[i];const a=new Float32Array(R*C);let nass=0;
+    for(let r=0;r<R;r++){const z=fr[i].px[r];for(let c=0;c<C;c++){const v=(z[c]||0)*0.12;if(v>=0.1)nass++;a[r*C+c]=Math.log1p(10*v);}}
+    return cache[i]={a,nass};};
+  const ab3=a=>{const R3=Math.floor(R/3),C3=Math.floor(C/3),b=new Float32Array(R3*C3);
+    for(let r=0;r<R3*3;r++)for(let c=0;c<C3*3;c++)b[((r/3)|0)*C3+((c/3)|0)]+=a[r*C+c]/9;return {b,R3,C3};};
+  // A-Zelle (r,c) landet bei (r+dr,c+dc); verglichen wird nur, wo beide Bilder Daten haben
+  const suche=(a,b,RR,CC,dr0,dc0,ms)=>{let best=-2,bd=null;
+    for(let dr=dr0-ms;dr<=dr0+ms;dr++)for(let dc=dc0-ms;dc<=dc0+ms;dc++){
+      const r0=Math.max(0,-dr),r1=Math.min(RR,RR-dr),c0=Math.max(0,-dc),c1=Math.min(CC,CC-dc);
+      if(r1-r0<RR/2||c1-c0<CC/2)continue;
+      let k=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
+      for(let r=r0;r<r1;r++){const ia=r*CC,ib=(r+dr)*CC+dc;
+        for(let c=c0;c<c1;c++){const x=a[ia+c],y=b[ib+c];k++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}}
+      const va=saa-sa*sa/k,vb=sbb-sb*sb/k;if(va<=0||vb<=0)continue;
+      const s=(sab-sa*sb/k)/Math.sqrt(va*vb);
+      if(s>best+1e-9||(bd&&Math.abs(s-best)<=1e-9&&dr*dr+dc*dc<bd.dr*bd.dr+bd.dc*bd.dc)){best=s;bd={dr,dc,s};}}
+    return bd;};
+  const vs=[];
+  for(let k=0;k<7;k++){const i0=j+3*k,i1=i0+3;if(i1>=fr.length)break;
+    if(Math.abs(fr[i1].t-fr[i0].t-15*60e3)>60e3)continue;
+    const A=feld(i0),B=feld(i1);if(A.nass<30||B.nass<30)continue;
+    const a3=ab3(A.a),b3=ab3(B.a),g=suche(a3.b,b3.b,a3.R3,a3.C3,0,0,10);if(!g)continue;
+    const f=suche(A.a,B.a,R,C,3*g.dr,3*g.dc,3);if(!f||f.s<0.5)continue;
+    const min=(fr[i1].t-fr[i0].t)/60e3;vs.push({vn:-f.dr*60/min,ve:f.dc*60/min});}
+  if(vs.length<2)return null;
+  const med=a=>{a=a.slice().sort((x,y)=>x-y);const k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;};
+  return {vn:med(vs.map(v=>v.vn)),ve:med(vs.map(v=>v.ve)),paare:vs.length};
+}
 function rkZug(fr){
   if(!fr||fr.length<4)return null;
   const n=Date.now(),R=fr[0].px.length,C=fr[0].px[0].length;
@@ -8798,12 +8843,14 @@ function rkZug(fr){
       if(s>best){best=s;bdr=dr;bdc=dc;}}
     if(best/wa.length<0.3)return null;
     const min=(B.t-A.t)/60e3;return {vn:-bdr*60/min,ve:bdc*60/min};};   // km/h Gitter-Nord/-Ost
-  const gem=fr.filter(f=>f.t<=n+60e3),vs=[];
+  const zv=rkZugVorhersage(fr);   // v5.43: zuerst die Vorhersage (= der Film)
+  const gem=zv?[]:fr.filter(f=>f.t<=n+60e3),vs=[];
   for(let i=0;i+2<gem.length;i++){const A=gem[i],B=gem[i+2];
     if(Math.abs(B.t-A.t-10*60e3)>60e3)continue;
     const v=versatz(A,B,20);if(v)vs.push(v);}
-  let quelle="radar",vn,ve;
-  if(vs.length){const med=a=>{a=a.slice().sort((x,y)=>x-y);const k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;};
+  let quelle="radar",vn,ve,paare=vs.length;
+  if(zv){vn=zv.vn;ve=zv.ve;paare=zv.paare;quelle="vorhersage";}
+  else if(vs.length){const med=a=>{a=a.slice().sort((x,y)=>x-y);const k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;};
     vn=med(vs.map(v=>v.vn));ve=med(vs.map(v=>v.ve));}
   else{   // Rueckfall: die DWD-Vorhersage verschiebt das Feld selbst, jetzt -> +30 min
     const jetzt=fr.reduce((a,f)=>Math.abs(f.t-n)<Math.abs(a.t-n)?f:a,fr[0]),
@@ -8813,7 +8860,7 @@ function rkZug(fr){
   // Gitter -> geografisch: Nordrichtung am Ort aus rkStereo
   const [x0,y0]=rkStereo(HOME_LAT,HOME_LON),[x1,y1]=rkStereo(HOME_LAT+0.05,HOME_LON);
   const nordGitter=Math.atan2(x1-x0,y1-y0);
-  return {v:Math.hypot(vn,ve),ri:((Math.atan2(ve,vn)-nordGitter)*180/Math.PI+360)%360,quelle,paare:vs.length};
+  return {v:Math.hypot(vn,ve),ri:((Math.atan2(ve,vn)-nordGitter)*180/Math.PI+360)%360,quelle,paare};
 }
 let _rkWind=null,_rkWindZeit=0;
 /* v4.57: Gegenprobe der Radarmessung mit dem Wind in 3 km Hoehe. Anlass Norden,
@@ -8992,7 +9039,7 @@ function radarText(){
         +(RK.stoer?` \u00b7 ${RK.stoer} ${RK.stoer===1?"Scheinecho":"Scheinechos"} ausgeblendet (z.\u202fB. Windparks)`:"")
         +(RK.zug&&RK.zug.v<3?`<br><b>Kein Pfeil</b>: der Regen bewegt sich kaum (unter 3\u202fkm/h${RK.zug.quelle==="radar"?", gemessen aus dem Radar":""}) \u2013 er entsteht und vergeht an Ort und Stelle.`
         :RK.zug?`<br><b>Pfeil</b>: Zug nach ${["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(RK.zug.ri/22.5)%16]}, ${Math.round(RK.zug.v)}\u202fkm/h, ${RK.zug.quelle==="radar"?"aus dem Radar (gemessene Stunde, "+RK.zug.paare+" Messungen)"
-            :RK.zug.quelle==="vorhersage"?"aus der Radar-Vorhersage"
+            :RK.zug.quelle==="vorhersage"?"aus der Radar-Vorhersage des DWD \u2013 so zieht der Regen im Film"
             :RK.zug.verworfen?"der Wolken (Wind in 3\u202fkm H\u00f6he \u2013 das Radar ma\u00df "+Math.round(RK.zug.verworfen.v)+"\u202fkm/h, vermutlich stehende Echos wie Windparks)"
             :"der Wolken (Wind in 3\u202fkm H\u00f6he \u2013 "+(RK.trocken?"kein Regen im Bild":"zu wenig Regen f\u00fcr eine Messung")+")"} \u00b7 Striche: was dort ist, erreicht dich nach dieser Zeit`:"");}
   }
