@@ -1111,7 +1111,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.41</span>
+      <span class="ver">v5.42</span>
     </div>
   </header>
 
@@ -8867,12 +8867,20 @@ function rkZugZeichnen(x,P,W,H,nurFlaechen){
   const drin=km=>{const px=s[0]-ux*km*pxKm,py=s[1]-uy*km*pxKm;return px>=14&&px<=W-14&&py>=14&&py<=H-14;};
   // Stunden, solange mindestens zwei Striche ins Bild passen; sonst halbe, dann Viertelstunden
   let schritt=60;if(!drin(z.v*2))schritt=30;if(!drin(z.v))schritt=15;
-  const marken=[];for(let k=1;k<=4;k++){const km=z.v*schritt*k/60;if(drin(km))marken.push([k*schritt,km]);}
-  const hinten=marken.length?marken[marken.length-1][1]:15;
-  const ax=s[0]-ux*hinten*pxKm,ay=s[1]-uy*hinten*pxKm,bx=s[0]+ux*18,by=s[1]+uy*18;
+  /* v5.42 (Nutzer, Vergleich mit "Regen?": "Pfeil im Punkt enden lassen statt dahinter"):
+     die Spitze endet AM Standort - weiss bis an den weissen Ring des Punkts (R0 vor der
+     Mitte), die Kontur reicht unter den Punkt. Vorher lief der Pfeil durch den Punkt und
+     endete 27 px dahinter. Zeitstriche naeher als 42 px stiessen jetzt an die Spitze
+     (Spitze 8-26 px vor der Mitte) - sie entfallen, ebenso Striche keine 24 px hinter dem
+     vorigen (Beschriftungen ueberlappten); das betrifft nur langsamen Zug. */
+  const R0=8,KS=9.35;   // KS = Laenge der weissen Spitze vor ihrem Ansatzpunkt b (sp(8.5): 8,5 x 1,1)
+  const marken=[];for(let k=1;k<=4;k++){const km=z.v*schritt*k/60,vor=marken.length?marken[marken.length-1][1]*pxKm:0;
+    if(drin(km)&&km*pxKm>=42&&km*pxKm-vor>=24)marken.push([k*schritt,km]);}
+  const hinten=marken.length?marken[marken.length-1][1]:Math.max(15,48/pxKm);
+  const ax=s[0]-ux*hinten*pxKm,ay=s[1]-uy*hinten*pxKm,bx=s[0]-ux*(R0+KS),by=s[1]-uy*(R0+KS);
   // Linie und Spitze als Folge kleiner Kaestchen (alle 6 px, +-8 px)
-  {const L=Math.hypot(bx+ux*12-ax,by+uy*12-ay),n=Math.max(1,Math.ceil(L/6));
-   for(let i=0;i<=n;i++){const px=ax+(bx+ux*12-ax)*i/n,py=ay+(by+uy*12-ay)*i/n;fl.push([px-8,py-8,px+8,py+8]);}}
+  {const tx=s[0]-ux*R0,ty=s[1]-uy*R0,L=Math.hypot(tx-ax,ty-ay),n=Math.max(1,Math.ceil(L/6));
+   for(let i=0;i<=n;i++){const px=ax+(tx-ax)*i/n,py=ay+(ty-ay)*i/n;fl.push([px-8,py-8,px+8,py+8]);}}
   marken.forEach(([min,km])=>{const mx=s[0]-ux*km*pxKm,my=s[1]-uy*km*pxKm;fl.push([mx-10,my-10,mx+10,my+10]);});
   if(nurFlaechen){marken.forEach(([min,km])=>{const mx=s[0]-ux*km*pxKm,my=s[1]-uy*km*pxKm;
       txt(min%60?min+" min":(min/60)+" h",mx+uy*20,my-ux*20);});x.restore();return fl;}
@@ -8936,9 +8944,9 @@ function radarZeichnen(){
     }
     grenzenZeichnen(x,P,W,H,F);   // v4.89: ueber dem Regen, unter Pfeil und Orten
     wolkOrteZeichnen(x,P,W,H,rkZugZeichnen(x,P,W,H,true));   // v4.49/v4.53: Orte ohne die unter dem Pfeil
-    rkZugZeichnen(x,P,W,H);
     const s=P(HOME_LAT,HOME_LON);
     x.fillStyle="rgba(232,0,11,.22)";x.beginPath();x.arc(s[0],s[1],12,0,7);x.fill();
+    rkZugZeichnen(x,P,W,H);   // v5.42: Hof unter, Punkt ueber dem Pfeil - die Spitze endet am Punkt
     x.fillStyle="#e8000b";x.beginPath();x.arc(s[0],s[1],6,0,7);x.fill();x.lineWidth=2;x.strokeStyle="#fff";x.stroke();
     radarText();
   };

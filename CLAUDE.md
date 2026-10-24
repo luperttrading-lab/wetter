@@ -1754,6 +1754,18 @@ L* 75 liegen nahe am Grau (L* 79, Kontrast 1,24 bzw. 1,14) - sie heben sich uebe
 Farbton ab, nicht ueber die Helligkeit; das Cyan von "Bunt" hat 1,46. Geprueft mit echten
 Daten (21:15, Bright Sky + Eichung), Grau/Relief/Satellit. AUFRAEUMEN nach der Wahl:
 Verlierer-Palette, `rk_farbe`-Zeile, ggf. `rk_schwach`/`rk_grund`.
+v5.42 (Nutzer, Screenshot "Regen?" 18:07: "Pfeil in der Mitte des Punkts enden lassen
+statt dahinter"): Die Spitze des Zugpfeils endet AM Standort - die weisse Spitze reicht bis
+an den weissen Ring des Punkts (`R0` = 8 px vor der Mitte), die dunkle Kontur darunter;
+vorher lief der Pfeil durch den Punkt und endete 27 px dahinter. Nicht exakt in der Mitte:
+der Punkt liegt obenauf und haette die Spitze verdeckt. Reihenfolge jetzt Hof (rot, 22 %) ->
+Pfeil -> Punkt, damit der Hof die Spitze nicht rosa toent. Zeitstriche unter 42 px vor der
+Mitte (stiessen an die Spitze, 8-26 px) und keine 24 px hinter dem vorigen (Beschriftungen
+ueberlappten, z. B. 6 km/h "1 h 2 h 3 h 4 h") entfallen - nur bei langsamem Zug. Ohne Strich
+ist der Pfeil mindestens 48 px lang. Freiflaechen fuer die Orte folgen der neuen Lage (der
+Ort hinter dem Punkt, z. B. "Giessen", erscheint wieder). Geprueft mit echtem Zug (44 km/h
+nach 73 Grad, 24.10. 18:10) und gesetzten 6/25/57/110 km/h. Offen, schon vorher so: kommt
+der Regen aus N/NO, kann eine Strichbeschriftung unter dem Zeitkasten oben rechts liegen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
