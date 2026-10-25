@@ -211,6 +211,17 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-r{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:18px}
 .rz-r i,.rz-leg i{display:block;border-radius:2px}
 .rz-r.verg i{opacity:.75}
+.rz-r i.zu,.rz-leg i.zu{opacity:.3}
+.rz-r i.zu2,.rz-leg i.zu2{position:relative}.rz-r i.zu2::after,.rz-leg i.zu2::after{content:"";position:absolute;inset:0;border-radius:2px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.78) 0 2px,transparent 2px 4.5px)}
+html.dunkel .rz-r i.zu2::after,html.dunkel .rz-leg i.zu2::after{background:repeating-linear-gradient(135deg,rgba(20,26,35,.8) 0 2px,transparent 2px 4.5px)}
+.rz-vl{position:absolute;top:-1px;bottom:-1px;width:2px;background:rgba(31,42,55,.62);pointer-events:none;z-index:2}
+.rz-vd{background:repeating-linear-gradient(to bottom,rgba(31,42,55,.62) 0 3px,transparent 3px 5px)}
+html.dunkel .rz-vl{background:rgba(227,234,243,.62)}html.dunkel .rz-vd{background:repeating-linear-gradient(to bottom,rgba(227,234,243,.62) 0 3px,transparent 3px 5px)}
+.rz-band{position:relative;height:13px}
+.rz-bs{position:absolute;top:1px;bottom:0;background:#5b6b80;color:#fff;border-radius:3px 3px 0 0;font:700 8.5px/12px system-ui;text-align:center;overflow:hidden;white-space:nowrap}
+.rz-bp{position:absolute;top:1px;bottom:0;font:600 8.5px/12px system-ui;color:var(--muted);text-align:center;white-space:nowrap}
+html.dunkel .rz-bs{background:#8193aa;color:#101820}
+.rz-dt{font-size:11px;color:var(--muted);align-items:center;margin-top:8px}.rz-dt button{width:34px;padding:4px 0}
 .rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
 .rz-jz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none}
 .rz-r1{background:#9cc7ee}.rz-r2{background:#5a9fe0}.rz-r3{background:#2f6fc0}
@@ -1191,7 +1202,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.51</span>
+      <span class="ver">v5.52</span>
     </div>
   </header>
 
@@ -5545,7 +5556,7 @@ function rzGrossHtml(){
       :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(RASEN.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
   if(RASEN.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
-  h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+'</div><div class="rz-seg rz-dt">Darstellung (Test):'+RZ_DARST.map(x=>'<button type="button" data-rzd="'+x+'"'+(x===rzDarst()?' class="an"':"")+">"+x+"</button>").join("")+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
@@ -5577,20 +5588,32 @@ function rzLeiste(P){
   RASEN.Z.forEach(c=>{if(c.h>=H0&&c.h<H1)(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
   let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div><div class="rz-tl"><div class="rz-det" id="rzDet" hidden></div><div></div><div class="rz-ax">';
   for(let x=H0;x<H1;x++)h+="<span>"+(x%3===0?x:"")+"</span>";h+="</div>";
+  /* v5.52 (Nutzer: "in der Mittagspause ist gruen weiss - Pause, Maehbeginn und -ende anders deutlich machen,
+     ueber alle Tage"): jedes Kaestchen zeigt das WETTER; "nicht deine Zeit" (Pause, ausserhalb, Sonn-/Feiertag,
+     abgewaehlter Tag) liegt darueber - A blass, B blass + Linien/Band, C schraffiert + Linien/Band (Test). */
+  const E=rzE(),D=rzDarst(),lin=D!=="A",zuK=D==="C"?"zu2":"zu",x16=i=>"calc((100% + 1px) * "+i+" / 16",
+        pz=E.pause&&E.pVon>E.von&&E.pBis<E.bis,
+        grenz=[[E.von,0],[E.bis,0]].concat(pz?[[E.pVon,1],[E.pBis,1]]:[]).filter(([x])=>x>H0&&x<H1),
+        linien=lin?grenz.map(([x,d])=>'<span class="rz-vl'+(d?" rz-vd":"")+'" style="left:'+x16(x-H0)+' - 1.5px)"></span>').join(""):"";
+  if(lin){const seg=(a,b)=>{a=Math.max(a,H0);b=Math.min(b,H1);return b>a?'<span class="rz-bs" style="left:'+x16(a-H0)+');width:'+x16(b-a)+' - 1px)">'+(b-a>=3?"Mähzeit":"")+"</span>":"";};
+    h+='<div></div><div class="rz-band">'+(pz?seg(E.von,E.pVon)+seg(E.pBis,E.bis)+'<span class="rz-bp" style="left:'+x16(E.pVon-H0)+');width:'+x16(E.pBis-E.pVon)+' - 1px)">'+(E.pBis-E.pVon>=2?"Pause":"")+"</span>":seg(E.von,E.bis))+linien+"</div>";}
   for(let n=-1;n<7;n++){const tag=rzTagPlus(heute,n),row=idx[tag];if(!row)continue;
     const frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),so=rzWtag(tag)===0;
     h+='<div class="rz-k'+(frist?" frist":"")+(n<0?" verg":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===-1?"gestern":ft?ft:so?"Sonntag":n===0?"heute":"")+"</small></div>";
     h+='<div class="rz-r'+(n<0?" verg":"")+'">';
     for(let x=H0;x<H1;x++){const c=row[x];if(!c){h+="<i></i>";continue;}
-      const k=c.z==="regen"?(c.p<0.5?"rz-r1":c.p<2?"rz-r2":"rz-r3"):c.z==="nass"?"rz-nass":c.z==="weich"?"rz-weich":c.z==="tau"?"rz-tau":c.z==="kalt"?"rz-kalt"
-        :c.frei?"rz-aus":!c.hell?"rz-dunkel":c.gut?"rz-gut":c.unsicher?"rz-uns":c.riskant?"rz-risk":"rz-frei";
-      h+='<i class="'+k+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'"></i>';}
+      const pp=c.pp==null?0:c.pp,k=c.z==="regen"?(c.p<0.5?"rz-r1":c.p<2?"rz-r2":"rz-r3"):c.z==="nass"?"rz-nass":c.z==="weich"?"rz-weich":c.z==="tau"?"rz-tau":c.z==="kalt"?"rz-kalt"
+        :!c.hell?"rz-dunkel":pp<=E.risiko?"rz-gut":pp<=60?"rz-uns":"rz-risk";   // Wetter - unabhaengig von deiner Zeit
+      h+='<i class="'+k+(c.hell&&!c.erlaubt?" "+zuK:"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'"></i>';}
+    h+=linien;
     if(n===0){const t=rzTeile(jetzt),pos=(t.h+t.m/60-H0)/(H1-H0);if(pos>=0&&pos<=1)h+='<span class="rz-jz" style="left:calc('+(pos*100).toFixed(2)+'% - 1px)"></span>';}
     h+="</div>";}
   h+='</div><div class="rz-leg">'
-    +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-frei","nicht deine Zeit / Pause"],["rz-aus","Sonn-/Feiertag"],["rz-dunkel","dunkel"]]
+    +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"],["rz-gut "+zuK,D==="C"?"schraffiert: nicht deine Zeit":"blass: nicht deine Zeit"]]
       .map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
+const RZ_DARST=["A","B","C"];
+function rzDarst(){let v="B";try{v=localStorage.getItem("rz_darst")||"B";}catch(e){}return RZ_DARST.includes(v)?v:"B";}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
   return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
@@ -5614,7 +5637,8 @@ function rzGrossBinden(root){
       RASEN.mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
     RASEN.mMin=Math.max(RASEN.mMin,m.offsetHeight);m.style.minHeight=RASEN.mMin+"px";}}
   const detZu=()=>{const d=el("rzDet");if(d)d.hidden=true;root.querySelectorAll(".rz-r i.sel").forEach(x=>x.classList.remove("sel"));};
-  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b){detZu();return;}
+  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs],[data-rzd]");if(!b){detZu();return;}
+    if(b.dataset.rzd){try{localStorage.setItem("rz_darst",b.dataset.rzd);}catch(e){}rzGrossNeu();return;}
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){RASEN.einst=!RASEN.einst;rzGrossNeu();}
