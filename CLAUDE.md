@@ -2025,6 +2025,15 @@ Flaechen bleiben so breit wie ihre Spalten (v5.65), der Tipp erklaert weiter. Pa
 Datenende galten als "dunkel" (Kopffeld zu breit, Kaestchen dunkel) - jetzt leer und nicht mitgezaehlt. Gemessen
 (Testdaten): 393 pt Maehzeit bis 20 "dunkel" in 70,7 px, 320 pt bis 19 in 38,3 px, 393 pt bis 18 (eine Stunde,
 28,6 px) leer; Stundenspalten bei 393 pt 21,5 px (vorher ~22,5).
+v5.69 (Nutzer, 20:04: "heute gemaeht, 7 Tage eingestellt - Empfehlung Donnerstag macht keinen Sinn"): Die Wertung
+`rzPlanen` zog 5 % je Tag AB JETZT ab (Optimal Stopping aus v5.44) - vor der Faelligkeit gewann damit immer der frueheste
+Tag, den "Fruehestens vor Faelligkeit" zuliess (So gemaeht, faellig Sa -> Do). Jetzt 5 % je Tag ABSTAND ZUR FAELLIGKEIT
+(`w.ad`, beide Richtungen), unter den fast gleich guten (3 Punkte) das mit dem kleinsten Abstand, dann das frueheste.
+Ist der Rasen faellig/ueberfaellig oder "sofort", waechst der Abstand mit jedem Tag - dann wie bisher das frueheste.
+"Moeglich waere schon ..." nur noch, wenn faellig oder sofort. Verschobener Termin kuerzer: "faellig Sa 31.10. (statt So)"
+(v5.67 "(eigentlich So 1.11.)" brach am iPhone um). Geprueft (Testdaten): So gemaeht -> Sa 31.10. 10-13; Mo gemaeht ->
+Mo 2.11. 9-13 (Risiko 11 % gegen Sa 3 %, Sa waere 2 Tage zu frueh); faellig heute/ueberfaellig -> heute; Sa ab 11 Uhr
+Regen, Sa Risiko 40 % oder Sa ganz nass -> Fr 30.10. 15-17.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
