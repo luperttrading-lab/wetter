@@ -218,7 +218,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-leg i{width:12px;height:10px}
 .rz-det{font-size:11.5px;min-height:16px;margin-top:6px;line-height:1.4}
 .rz-einst{margin-top:10px;padding:2px 10px 6px;border:1px solid var(--line);border-radius:12px}
-.rz-reg{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;margin:9px 0}
+.rz-reg{display:grid;grid-template-columns:1fr auto;gap:0 8px;align-items:center;margin:7px 0}
 .rz-reg label{font-size:13px;font-weight:600}
 .rz-reg output{font-size:13px;font-weight:800;color:#2563c9}
 .rz-reg input[type=range]{grid-column:1/-1;width:100%}
@@ -232,7 +232,16 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-seg button.an,.rz-tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
 /* v5.45: das Fenster ist eine .loc-box - deren Eingabefeld-Stil (volle Breite, appearance:none, 12-px-Labels)
    machte Haekchen unsichtbar und Regler zu dicken Kaesten. Hier wieder normale Bedienelemente. */
-.loc-box .rz input[type=range]{width:100%;height:auto;padding:0;margin:4px 0 0;border:0;border-radius:0;background:none;-webkit-appearance:auto;appearance:auto;accent-color:#2563c9}
+/* v5.46 (Nutzer-Screenshot: "Regler kaum zu erkennen und viel zu hoch"): eigene flache Regler statt der
+   System-Regler - 28 px Flaeche, 5-px-Bahn mit blauer Fuellung bis zum Knopf (--p, gesetzt in rzEinstHtml
+   und beim Ziehen), weisser 24-px-Knopf mit Schatten. Gleich in WebKit und Chromium. */
+.loc-box .rz input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;padding:0;border:0;border-radius:0;background:transparent;--p:50%}
+.loc-box .rz input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
+.loc-box .rz input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9.5px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.loc-box .rz input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
+.loc-box .rz input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+html.dunkel .loc-box .rz input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
+html.dunkel .loc-box .rz input[type=range]::-moz-range-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
 .loc-box .rz input[type=checkbox]{width:18px;height:18px;padding:0;margin:1px 0 0;border:0;background:none;-webkit-appearance:checkbox;appearance:auto;accent-color:#2563c9;flex:0 0 auto}
 .loc-box .rz input[type=date]{width:auto;font-size:14px;padding:4px 6px;border-radius:8px}
 .loc-box .rz .rz-reg label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0}
@@ -1169,7 +1178,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.45</span>
+      <span class="ver">v5.46</span>
     </div>
   </header>
 
@@ -5261,6 +5270,7 @@ function rzE(){
   if(!Array.isArray(E.tage6)||E.tage6.length!==6)E.tage6=RZ_STD.tage6.slice();
   ["quelle","ort","vorabend","maehen","mittag"].forEach(k=>delete E[k]);
   if(!(E.pBis>E.pVon)){E.pVon=13;E.pBis=15;}
+  E.gd=Math.min(120,Math.max(30,Math.round((+E.gd||60)/10)*10));   // v5.46: Schritte von 10 = ganze Tage bei 15 °C
   return RASEN.E=E;}
 function rzSpeichern(){try{localStorage.setItem("rasen",JSON.stringify(RASEN.E));}catch(e){}}
 /* ---- Zeit in der Zone des Orts (TZ der App) ---- */
@@ -5389,7 +5399,7 @@ function rzFenster(ab){const E=rzE(),W=[];let cur=null;const zu=()=>{if(cur&&(cu
 function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
   if(E.hoch||!letzt)return {tag:heute,sofort:true};   // hohes Gras / Datum unbekannt: die naechste gute Gelegenheit
   if(E.modus==="tage")return {tag:rzTagPlus(letzt,E.tage)};
-  const tm={};for(const c of RASEN.Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);   // Gradtage ueber 5 °C
+  const tm={};for(const c of RASEN.Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);   // Waermesumme ueber 5 °C (Tagesmittel), Ziel gd
   const erster=RASEN.Z.length?rzTeile(RASEN.Z[0].s).tag:heute;let sum=0,bisher=0;
   for(let n=1;n<=28;n++){const tag=rzTagPlus(letzt,n),a=tm[tag];if(!a){if(tag<erster)continue;return {tag:null,sum,bisher,ende:tag};}
     sum+=Math.max(0,a.reduce((x,y)=>x+y,0)/a.length-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return {tag,sum,bisher};}
@@ -5447,7 +5457,7 @@ function rzKachel(){
   if(P.rec){const n=rzTageZw(heute,P.rec.tag),tag=n===0?"heute":n===1?"morgen":RZ_WT[rzWtag(P.rec.tag)]+" "+rzTagTxt(P.rec.tag).slice(3);
     alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
     const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
-  else alt.push({l:"Mähen",v:"–",s:"kein Fenster"});
+  else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"später",s:"wächst kaum"});
   a.alt=alt;return a;}
 /* ---- Grossansicht ---- */
 function rzGross(){rzE();if(!rzBereit())return {html:'<div data-rz="1"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>"};
@@ -5473,8 +5483,8 @@ function rzGrossHtml(){
   if(f.sofort)h+='<div class="rz-z">'+(E.hoch?"Gras ist schon hoch – gesucht ist die nächste Gelegenheit, bei der es richtig trocken ist.":"Wann zuletzt gemäht? Unter Einstellungen eintragen, dann rechnet der Planer mit einer Frist.")+"</div>";
   else if(f.tag){const n=rzTageZw(rzE().letzt,heute),nf=rzTageZw(heute,f.tag);
     h+='<div class="rz-z">Zuletzt gemäht '+rzTagTxt(E.letzt)+" ("+(n===0?"heute":n===1?"gestern":"vor "+n+" Tagen")+") · fällig <b>"+rzTagTxt(f.tag)+"</b> ("+(nf<0?"seit "+(-nf)+(nf===-1?" Tag":" Tagen"):nf===0?"heute":"in "+nf+(nf===1?" Tag":" Tagen"))+")"
-      +(E.modus==="wuchs"?" · Wuchs "+Math.round(f.bisher||0)+" von "+E.gd+" Gradtagen":"")+"</div>";}
-  else h+='<div class="rz-z">Noch lange nicht fällig – der Rasen wächst gerade kaum.</div>';
+      +(E.modus==="wuchs"?" · seither gewachsen: "+Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%":"")+"</div>";}
+  else h+='<div class="rz-z">Zuletzt gemäht '+rzTagTxt(E.letzt)+" · seither gewachsen: "+Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%. Bis "+rzTagTxt(rzTagPlus(f.ende,-1))+" wird es nicht fällig – bei der Kälte wächst der Rasen langsam.</div>";
   if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
     h+='<div class="rz-emp">'+(P.ueber?"Erst nach der Frist: ":f.sofort?"Nächste Gelegenheit: ":"Empfehlung: ")+rzRel(P.rec.tag).replace(/^./,x=>x.toUpperCase())+(n>2?" "+rzTagTxt(P.rec.tag).slice(3):"")+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr</div>"
       +'<div class="rz-z">Trocken, Regenrisiko höchstens '+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt)+"</div>";}
@@ -5503,11 +5513,15 @@ function rzLeiste(P){
     +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-frei","nicht deine Zeit / Pause"],["rz-aus","Sonn-/Feiertag"],["rz-dunkel","dunkel"]]
       .map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
-function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
+const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
+function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
   return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
-    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>gleich die nächste Gelegenheit; Abtrocknen 50 % länger, Tau 5 % früher</small></span></label>'
+    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>gleich die nächste Gelegenheit; Abtrocknen 50\u202f% länger, Tau 5\u202f% früher</small></span></label>'
     +'<div class="rz-seg" data-rzseg="modus"><button type="button" data-v="tage"'+(E.modus==="tage"?' class="an"':"")+'>fällig nach Tagen</button><button type="button" data-v="wuchs"'+(E.modus==="wuchs"?' class="an"':"")+">nach Wuchs</button></div>"
-    +(E.modus==="tage"?r("tage","Abstand",4,14,1,v=>v+" Tage"):r("gd","Wuchs bis zum Mähen",30,120,5,v=>v+" Gradtage","Tagesmittel über 5 °C summiert: 15 °C zählt 10"))
+    /* v5.46 (Nutzer: "Gradtage ist ein komischer Begriff"): eingestellt wird der Abstand bei 15 °C im
+       Tagesmittel, gerechnet wird weiter mit der Waermesumme ueber 5 °C (gd = Tage x 10). */
+    +(E.modus==="tage"?r("tage","Abstand",4,14,1,v=>v+" Tage"):r("gd","Abstand bei 15\u202f°C",30,120,10,v=>(v/10)+" Tage",
+      "Wärmer geht es schneller, kälter langsamer: bei 10\u202f°C "+Math.round(E.gd/5)+" Tage, bei 20\u202f°C "+Math.round(E.gd/15)+" Tage. Unter 5\u202f°C wächst Rasen kaum."))
     +r("frueh","Frühestens vor Fälligkeit",0,5,1,v=>v?v+(v===1?" Tag":" Tage"):"erst am Tag")
     +r("von","Mähzeit ab",7,15,1,v=>v+" Uhr")+r("bis","Mähzeit bis",12,20,1,v=>v+" Uhr","Gesetz (Wohngebiet): Mo–Sa 7–20 Uhr, Sonn- und Feiertage nie; nur bei Tageslicht")
     +'<div class="rz-tage">'+["Mo","Di","Mi","Do","Fr","Sa"].map((t,i)=>'<button type="button" data-rzt="'+i+'"'+(E.tage6[i]?' class="an"':"")+">"+t+"</button>").join("")+"</div>"
@@ -5527,7 +5541,7 @@ function rzGrossBinden(root){
       d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Feuchte "+Math.round(c.rh)+" %"
         +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);}};
   root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;
-    if(inp.type==="range"){inp.oninput=()=>{const o=el("rzo_"+k);RASEN.E[k]=+inp.value;
+    if(inp.type==="range"){inp.oninput=()=>{const o=el("rzo_"+k);RASEN.E[k]=+inp.value;inp.style.setProperty("--p",rzP(+inp.value,+inp.min,+inp.max));
         if(k==="von"&&RASEN.E.von>=RASEN.E.bis)RASEN.E.von=RASEN.E.bis-1;if(k==="bis"&&RASEN.E.bis<=RASEN.E.von)RASEN.E.bis=RASEN.E.von+1;
         if(k==="pVon"&&RASEN.E.pVon>=RASEN.E.pBis)RASEN.E.pBis=RASEN.E.pVon+1;if(k==="pBis"&&RASEN.E.pBis<=RASEN.E.pVon)RASEN.E.pVon=RASEN.E.pBis-1;
         if(o)o.textContent=o.textContent.replace(/^[\d,]+/,String(RASEN.E[k]));};

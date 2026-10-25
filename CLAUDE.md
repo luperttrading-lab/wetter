@@ -1829,6 +1829,16 @@ Wettenberg fand die Websuche nicht. Pausenstunden zaehlen als "nicht deine Zeit"
 wird dort geteilt (9-13 und 15-17). Dabei behoben (seit v5.44): im Fenster (.loc-box) griff
 `.loc-box input` (volle Breite, appearance:none, Feldrahmen) - Haekchen waren unsichtbar,
 Regler dicke Kaesten; jetzt `.loc-box .rz input[type=...]` mit normalen Bedienelementen.
+v5.46 (Nutzer-Screenshot v5.44: "Regler kaum zu erkennen und viel zu hoch"; "Gradtage ist ein
+komischer Begriff"): Regler im Rasen-Fenster jetzt EIGENE flache Form (`.loc-box .rz
+input[type=range]`): 28 px Flaeche, 5-px-Bahn mit blauer Fuellung bis zum Knopf (CSS-Variable `--p`,
+gesetzt in `rzEinstHtml` und in `oninput` per `rzP`), weisser 24-px-Knopf mit Schatten, hell und
+dunkel - nicht mehr die System-Regler (v5.45), deren Aussehen am iPhone nicht pruefbar war.
+"Gradtage" ist weg: im Wuchs-Modus stellt man den "Abstand bei 15 Grad" in ganzen Tagen ein
+(intern weiter `gd` = Tage x 10, Waermesumme der Tagesmittel ueber 5 Grad; gespeicherte Werte auf
+Zehner gerundet), darunter "bei 10 Grad 12 Tage, bei 20 Grad 4 Tage". Im Fenster "seither gewachsen:
+48 %" statt "34 von 60 Gradtagen"; nicht faellig in der Vorhersage -> Kachel "Maehen / spaeter /
+waechst kaum" statt "kein Fenster". Testseite rasentest.html gleich umbenannt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
