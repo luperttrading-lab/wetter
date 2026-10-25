@@ -215,12 +215,12 @@ html.dunkel .rz-frei2{background:#262d38}
 .rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
 /* v5.63 (Nutzer: "Pause und dunkel wie im hellen Modus mit eigener Farbe statt Rahmen, Pause darf anders sein"):
    Flaechen statt Rahmen - Pause sandfarben, dunkel in Nachtfarbe, beide Modi */
-/* v5.64 (Nutzer: "die Farbe 1-2 px weiter aussen rum, ohne andere Abstaende zu aendern"): gleichfarbiger Schatten
-   verbreitert die Flaeche links/rechts/oben um 2 px, unten um 1 px - das Raster bleibt, wie es ist */
-.rz-eband{height:13px;margin-bottom:1px}.rz-elab{--lb:#eee7d8;justify-self:center;align-self:stretch;font:600 9px/13px system-ui;white-space:nowrap;text-align:center;padding:0 4px;border-radius:3px 3px 0 0;color:#7b6a4a;
-  background:var(--lb);box-shadow:-1px -1px 0 1px var(--lb),1px -1px 0 1px var(--lb),0 0 0 1px var(--lb)}
-.rz-elab.rz-ebn{--lb:#dfe4ef;justify-self:stretch;color:#5a6a8c}
-html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb:#26324d;color:#a9b6d2}
+/* v5.64/v5.65 (Nutzer: "Farbe etwas weiter aussen rum - rechts und links nicht, sonst zu breit"; "Button ohne Text"):
+   Felder ohne Schrift, so breit wie ihre Spalten; gleichfarbiger Schatten nur oben +2 px und unten +1 px */
+.rz-eband{height:13px;margin-bottom:1px}.rz-elab{--lb:#eee7d8;justify-self:stretch;align-self:stretch;border-radius:3px 3px 0 0;cursor:pointer;
+  background:var(--lb);box-shadow:0 -2px 0 var(--lb),0 1px 0 var(--lb)}
+.rz-elab.rz-ebn{--lb:#dfe4ef}
+html.dunkel .rz-elab{--lb:#3b3427}html.dunkel .rz-elab.rz-ebn{--lb:#26324d}
 .rz-r2{background:#5a9fe0}
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
@@ -1196,7 +1196,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.64</span>
+      <span class="ver">v5.65</span>
     </div>
   </header>
 
@@ -5609,9 +5609,10 @@ function rzLeisteEinfach(P){
   const luecke=i=>i>0&&std[i]!==std[i-1]+1?"<span></span>":"";
   const dunkel=i=>tage.some(t=>{const c=idx[t][std[i]];return !c||!c.hell;});
   // Kopfzeile: "Pause" ueber der Luecke, "dunkel" ueber jeder dunklen Strecke
-  let kopf="";lu.forEach(g=>{kopf+='<span class="rz-elab" style="grid-column:'+g+'">Pause</span>';});
+  // v5.65 (Nutzer: "oben den Button ohne Text, der kommt nur, wenn man drauf tippt"): Felder ohne Schrift, Tipp -> Blase
+  let kopf="";lu.forEach(g=>{kopf+='<span class="rz-elab" data-rzb="p" style="grid-column:'+g+'"></span>';});
   for(let i=0;i<std.length;){if(!dunkel(i)){i++;continue;}let j=i+1;while(j<std.length&&std[j]===std[j-1]+1&&dunkel(j))j++;
-    kopf+='<span class="rz-elab rz-ebn" style="grid-column:'+spalte[i]+" / "+(spalte[j-1]+1)+'">'+(j-i>=2?"dunkel":"\u263E")+"</span>";i=j;}
+    kopf+='<span class="rz-elab rz-ebn" data-rzb="'+(i===0?"m":"a")+'" style="grid-column:'+spalte[i]+" / "+(spalte[j-1]+1)+'"></span>';i=j;}
   h+='<div class="rz-el"><div class="rz-det" id="rzDet" hidden></div>';
   if(kopf)h+='<div class="rz-er rz-eband"'+st+">"+kopf+"</div>";
   h+='<div class="rz-er rz-eax"'+st+"><span></span>"+std.map((x,i)=>luecke(i)+"<span>"+x+"</span>").join("")+"</div>";
@@ -5621,14 +5622,14 @@ function rzLeisteEinfach(P){
     if(wd===0||ft||!E.tage6[wd-1]){h+='<div class="rz-er"'+st+">"+lab+'<b class="rz-frei2">'+(wd===0?"Sonntag":ft||"kein Mähtag")+" – kein Mähen</b></div>";continue;}
     h+='<div class="rz-er"'+st+">"+lab;
     std.forEach((x,i)=>{h+=luecke(i);const c=row[x];
-      if(!c||!c.hell){h+='<i class="rz-dunkel"'+(c?' data-rzs="'+c.s+'"':"")+"></i>";return;}
+      if(!c||!c.hell){h+='<i class="rz-dunkel"'+(c?' data-rzs="'+c.s+'"':"")+"></i>";if(!c||c.e>jetzt)da.add("rz-dunkel");return;}
       const pp=c.pp==null?0:c.pp,k=c.z==="regen"?"rz-r2":c.z==="nass"||c.z==="weich"||c.z==="tau"?"rz-nass":c.z==="kalt"?"rz-kalt":pp<=E.risiko?"rz-gut":"rz-risk";
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
       h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+="</div>";}
   h+="</div>";
   h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
-  h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"]]
+  h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
@@ -5653,8 +5654,16 @@ function rzGrossBinden(root){
   {const m=root.querySelector(".rz-m");if(m&&m.offsetHeight){if(!root._mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
       root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
     root._mMin=Math.max(root._mMin,m.offsetHeight);m.style.minHeight=root._mMin+"px";}}
-  const detZu=()=>{const d=root.querySelector("#rzDet");if(d)d.hidden=true;root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
-  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b){detZu();return;}
+  const detZu=()=>{const d=root.querySelector("#rzDet");if(d){d.hidden=true;d._von=null;}root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
+  const blase=(b,html)=>{const d=root.querySelector("#rzDet");if(!d)return;d.innerHTML=html;d.hidden=false;
+    const r=b.parentElement,o=r.offsetTop-d.offsetHeight-4;d.style.top=(o>=0?o:r.offsetTop+r.offsetHeight+4)+"px";};
+  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs],[data-rzb]");if(!b){detZu();return;}
+    if(b.dataset.rzb){const E=rzE(),d=root.querySelector("#rzDet");if(d&&!d.hidden&&d._von===b){detZu();return;}detZu();
+      let t;if(b.dataset.rzb==="p")t="<b>Mittagspause "+E.pVon+"–"+E.pBis+" Uhr</b> · in den Einstellungen änderbar oder abschaltbar";
+      else{const tage=Object.keys(RASEN.SONNE).filter(x=>x>=rzTeile(Date.now()).tag).sort().slice(0,7),mo=b.dataset.rzb==="m",
+        z=x=>{const so=RASEN.SONNE[x];return so?rzHH(mo?so.auf:so.unter):"–";},a=tage[0],e2=tage[tage.length-1];
+        t="<b>Dunkel</b> · Sonnen"+(mo?"aufgang":"untergang")+" heute "+z(a)+" Uhr"+(e2&&e2!==a?", "+rzTagTxt(e2)+" "+z(e2)+" Uhr":"")+" · gemäht wird nur bei Tageslicht";}
+      blase(b,t);if(d)d._von=b;return;}
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
