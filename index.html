@@ -217,10 +217,13 @@ html.dunkel .rz-frei2{background:#262d38}
    Flaechen statt Rahmen - Pause sandfarben, dunkel in Nachtfarbe, beide Modi */
 /* v5.64/v5.65 (Nutzer: "Farbe etwas weiter aussen rum - rechts und links nicht, sonst zu breit"; "Button ohne Text"):
    Felder ohne Schrift, so breit wie ihre Spalten; gleichfarbiger Schatten nur oben +2 px und unten +1 px */
+/* v5.68 (Nutzer: "wenn dunkel hinpasst, hinschreiben, Pause auch - die Pause-Spalte breit genug"): Schrift wieder da,
+   Pausenluecke 34 statt 24 px; passt "dunkel" nicht in seine Strecke, bleibt das Feld leer (rzGrossBinden misst) */
 .rz-eband{height:13px;margin-bottom:1px}.rz-elab{--lb:#eee7d8;justify-self:stretch;align-self:stretch;border-radius:3px 3px 0 0;cursor:pointer;
-  background:var(--lb);box-shadow:0 -2px 0 var(--lb),0 1px 0 var(--lb)}
-.rz-elab.rz-ebn{--lb:#dfe4ef}
-html.dunkel .rz-elab{--lb:#3b3427}html.dunkel .rz-elab.rz-ebn{--lb:#26324d}
+  background:var(--lb);box-shadow:0 -2px 0 var(--lb),0 1px 0 var(--lb);font:600 9px/13px system-ui,sans-serif;color:#7b6a4a;
+  text-align:center;white-space:nowrap;overflow:hidden}.rz-elab b{font-weight:inherit}
+.rz-elab.rz-ebn{--lb:#dfe4ef;color:#5a6a8c}
+html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb:#26324d;color:#a9b6d2}
 .rz-r2{background:#5a9fe0}
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
@@ -1196,7 +1199,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.67</span>
+      <span class="ver">v5.68</span>
     </div>
   </header>
 
@@ -5620,7 +5623,7 @@ function rzLeisteBis(P){return [P.f&&!P.f.sofort&&P.f.tag,P.rec&&P.rec.tag].filt
    Sonn-/Feiertag und abgewaehlte Tage als EIN grauer Balken; fuenf Farben (gut, Regenrisiko, Regen, noch nass =
    Tau/trocknet ab/Boden weich, zu kalt). v5.59: Zeitachse fest (immer die ganze Maehzeit). v5.62 (Nutzer: "die einfache
    Variante, aber die Mittagspause oben drueber und dunkel auch oben drueber, darunter alle kleinen Kacheln dunkel"):
-   Kopfzeile ueber den Stunden mit "Pause" ueber der Luecke (24 px breit) und "dunkel" ueber den Stunden, die an
+   Kopfzeile ueber den Stunden mit "Pause" ueber der Luecke (24 px breit, seit v5.68 34 px mit Schrift) und "dunkel" ueber den Stunden, die an
    mindestens einem der Tage dunkel sind; in den Zeilen jedes dunkle Kaestchen in Nachtfarbe (`.rz-dunkel`).
    Die ausfuehrliche Leiste (v5.44-v5.57, Band/Linien/blass) und der Testumschalter sind entfernt. */
 function rzLeisteEinfach(P,mehr){
@@ -5634,14 +5637,14 @@ function rzLeisteEinfach(P,mehr){
   if(!std.length)return h+'<div class="rz-z">Keine Mähzeit eingestellt.</div>';
   // Rasterspalten: 1 = Datum, danach Stunden; vor einem Sprung (Pause) eine Lueckenspalte
   const spalte=[];let sp=2;const lu=[];std.forEach((x,i)=>{if(i>0&&x!==std[i-1]+1){lu.push(sp);sp++;}spalte.push(sp++);});
-  const tpl="46px "+std.map((x,i)=>(i>0&&x!==std[i-1]+1?"24px ":"")+"1fr").join(" "),st=' style="grid-template-columns:'+tpl+'"';
+  const tpl="46px "+std.map((x,i)=>(i>0&&x!==std[i-1]+1?"34px ":"")+"1fr").join(" "),st=' style="grid-template-columns:'+tpl+'"';
   const luecke=i=>i>0&&std[i]!==std[i-1]+1?"<span></span>":"";
-  const dunkel=i=>tage.some(t=>{const c=idx[t][std[i]];return !c||!c.hell;});
+  const dunkel=i=>tage.some(t=>{const c=idx[t][std[i]];return c&&!c.hell;});   // v5.68: fehlende Stunden (Datenende) sind nicht dunkel
   // Kopfzeile: "Pause" ueber der Luecke, "dunkel" ueber jeder dunklen Strecke
   // v5.65 (Nutzer: "oben den Button ohne Text, der kommt nur, wenn man drauf tippt"): Felder ohne Schrift, Tipp -> Blase
-  let kopf="";lu.forEach(g=>{kopf+='<span class="rz-elab" data-rzb="p" style="grid-column:'+g+'"></span>';});
+  let kopf="";lu.forEach(g=>{kopf+='<span class="rz-elab" data-rzb="p" style="grid-column:'+g+'"><b>Pause</b></span>';});
   for(let i=0;i<std.length;){if(!dunkel(i)){i++;continue;}let j=i+1;while(j<std.length&&std[j]===std[j-1]+1&&dunkel(j))j++;
-    kopf+='<span class="rz-elab rz-ebn" data-rzb="'+(i===0?"m":"a")+'" style="grid-column:'+spalte[i]+" / "+(spalte[j-1]+1)+'"></span>';i=j;}
+    kopf+='<span class="rz-elab rz-ebn" data-rzb="'+(i===0?"m":"a")+'" style="grid-column:'+spalte[i]+" / "+(spalte[j-1]+1)+'"><b>dunkel</b></span>';i=j;}
   h+='<div class="rz-el"><div class="rz-det" id="rzDet" hidden></div>';
   if(kopf)h+='<div class="rz-er rz-eband"'+st+">"+kopf+"</div>";
   h+='<div class="rz-er rz-eax"'+st+"><span></span>"+std.map((x,i)=>luecke(i)+"<span>"+x+"</span>").join("")+"</div>";
@@ -5651,7 +5654,8 @@ function rzLeisteEinfach(P,mehr){
     if(wd===0||ft||!E.tage6[wd-1]){h+='<div class="rz-er"'+st+">"+lab+'<b class="rz-frei2">'+(wd===0?"Sonntag":ft||"kein Mähtag")+" – kein Mähen</b></div>";continue;}
     h+='<div class="rz-er"'+st+">"+lab;
     std.forEach((x,i)=>{h+=luecke(i);const c=row[x];
-      if(!c||!c.hell){h+='<i class="rz-dunkel"'+(c?' data-rzs="'+c.s+'"':"")+"></i>";if(!c||c.e>jetzt)da.add("rz-dunkel");return;}
+      if(!c){h+="<span></span>";return;}   // v5.68: keine Daten (Ende der Vorhersage) - leer statt dunkel
+      if(!c.hell){h+='<i class="rz-dunkel" data-rzs="'+c.s+'"></i>';if(c.e>jetzt)da.add("rz-dunkel");return;}
       const pp=c.pp==null?0:c.pp,k=c.z==="regen"?"rz-r2":c.z==="nass"||c.z==="weich"||c.z==="tau"?"rz-nass":c.z==="kalt"?"rz-kalt":pp<=E.risiko?"rz-gut":"rz-risk";
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
       h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
@@ -5683,6 +5687,8 @@ function rzGrossBinden(root){
   {const m=root.querySelector(".rz-m");if(m&&m.offsetHeight){if(!root._mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
       root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
     root._mMin=Math.max(root._mMin,m.offsetHeight);m.style.minHeight=root._mMin+"px";}}
+  // v5.68: Kopffelder - Schrift nur, wenn sie mit 2 px Rand hineinpasst (verborgen = 0 breit: nicht anfassen)
+  root.querySelectorAll(".rz-elab b").forEach(b=>{const w=b.parentElement.getBoundingClientRect().width;if(w&&b.getBoundingClientRect().width+4>w)b.remove();});
   const detZu=()=>{const d=root.querySelector("#rzDet");if(d){d.hidden=true;d._von=null;}root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
   const blase=(b,html)=>{const d=root.querySelector("#rzDet");if(!d)return;d.innerHTML=html;d.hidden=false;
     const r=b.parentElement,o=r.offsetTop-d.offsetHeight-4;d.style.top=(o>=0?o:r.offsetTop+r.offsetHeight+4)+"px";};

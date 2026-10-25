@@ -2017,6 +2017,14 @@ zwei Tage nach dem Maehen - es nahm die erste trockene Stunde ueberhaupt. Jetzt 
 Zustaende von "Heute gemaeht" (`rzMitAlt`) - sonst kaeme beim Tippen eine Zeile hinzu. Geprueft (Playwright, Testdaten):
 So "heute gemaeht" -> Sa 31.10. faellig in der Leiste, Empfehlung Do 29.10.; Mo 26.10. 10:00 vorher/nachher/zurueck je
 8 Zeilen, Quelle auf demselben Pixel. Fehlen am letzten Tag Stunden (Datenende), erscheinen sie als dunkel.
+v5.68 (Nutzer, Screenshot 19:36: "wenn dunkel hinpasst, bitte hinschreiben, Pause auch - die Pause-Spalte breit
+genug formatieren"): Kopffelder der Leiste tragen wieder Schrift ("Pause", "dunkel", 9 px, Farben wie v5.64), die
+Flaechen bleiben so breit wie ihre Spalten (v5.65), der Tipp erklaert weiter. Pausenluecke 34 statt 24 px ("Pause"
+26,7 px). Passt "dunkel" nicht mit 2 px Rand je Seite in seine Strecke (eine Stunde: 21-29 px), entfernt
+`rzGrossBinden` die Schrift - das Feld bleibt leer (verborgen = 0 breit: nicht anfassen). Dabei: fehlende Stunden am
+Datenende galten als "dunkel" (Kopffeld zu breit, Kaestchen dunkel) - jetzt leer und nicht mitgezaehlt. Gemessen
+(Testdaten): 393 pt Maehzeit bis 20 "dunkel" in 70,7 px, 320 pt bis 19 in 38,3 px, 393 pt bis 18 (eine Stunde,
+28,6 px) leer; Stundenspalten bei 393 pt 21,5 px (vorher ~22,5).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
