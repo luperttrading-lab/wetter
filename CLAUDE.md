@@ -1903,6 +1903,13 @@ blasses Gruen aus wie "Regenrisiko erhoeht" (hellgruen), schwache Farben (trockn
 fast. Legende: "Sonn-/Feiertag" und "nicht deine Zeit / Pause" ersetzt durch "blass/schraffiert: nicht deine
 Zeit". Die Testzeile kostet ~30 px (Oktober-Daten: 781 px Inhalt bei 753 sichtbar). AUFRAEUMEN nach der Wahl:
 Gewinner fest, `RZ_DARST`/`rzDarst`/`rz_darst`, `.rz-dt`, `data-rzd`-Zweig, nicht gewaehlte CSS (`.zu` bzw. `.zu2`).
+v5.53 (Nutzer: "B ist am einfachsten zu verstehen"; "fuer Fruehjahr und Herbst noch dunkel anzeigen, im Sommer
+nicht noetig"): B fest - A/C, `RZ_DARST`/`rzDarst`, Testzeile, `data-rzd`, `.zu2`, `.rz-dt` entfernt, ein gespeichertes
+`rz_darst` wird geloescht. Dunkle Stunden in Nachtfarbe (`.rz-dunkel` #b9c2d8, dunkel #26324d; vorher beige-grau
+#ddd7cc, sah aus wie "nicht deine Zeit"). Band: je Stunde m/n/p (Maehzeit / Maehzeit aber dunkel / Pause) aus der
+HEUTIGEN Zeile (`hell` der Stundenwerte, sonst morgen); "dunkel"-Stueck `.rz-bn` (#9aa6c0, dunkel #2c3a5c) - im
+Oktober 17-19 Uhr, im Sommer (Untergang 21:35, Maehzeit bis 19) gar nicht. Ein Band-Stueck unter 3 Stunden bleibt
+ohne "Maehzeit"-Text (passt nicht, ~31 px). Geprueft Oktober (echte Daten) und Sommer-Simulation, hell und dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
