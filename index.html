@@ -258,18 +258,18 @@ html.dunkel .rz-ok button{background:rgba(143,224,168,.16)}
 /* v5.46 (Nutzer-Screenshot: "Regler kaum zu erkennen und viel zu hoch"): eigene flache Regler statt der
    System-Regler - 28 px Flaeche, 5-px-Bahn mit blauer Fuellung bis zum Knopf (--p, gesetzt in rzEinstHtml
    und beim Ziehen), weisser 24-px-Knopf mit Schatten. Gleich in WebKit und Chromium. */
-.loc-box .rz input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;padding:0;border:0;border-radius:0;background:transparent;--p:50%}
-.loc-box .rz input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
-.loc-box .rz input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9.5px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.loc-box .rz input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
-.loc-box .rz input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-html.dunkel .loc-box .rz input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
-html.dunkel .loc-box .rz input[type=range]::-moz-range-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
-.loc-box .rz input[type=checkbox]{width:18px;height:18px;padding:0;margin:1px 0 0;border:0;background:none;-webkit-appearance:checkbox;appearance:auto;accent-color:#2563c9;flex:0 0 auto}
-.loc-box .rz input[type=date]{width:auto;font-size:14px;padding:4px 6px;border-radius:8px}
-.loc-box .rz .rz-reg label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0}
-.loc-box .rz label.rz-hk{display:flex;font-size:13px;font-weight:600;color:var(--ink);margin:9px 0}
-.loc-box .rz label.rz-hk small{font-weight:500}
+:is(.loc-box,.nowcard) .rz input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;padding:0;border:0;border-radius:0;background:transparent;--p:50%}
+:is(.loc-box,.nowcard) .rz input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
+:is(.loc-box,.nowcard) .rz input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9.5px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+:is(.loc-box,.nowcard) .rz input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:linear-gradient(to right,#2563c9 var(--p),#d3dae4 var(--p))}
+:is(.loc-box,.nowcard) .rz input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+html.dunkel :is(.loc-box,.nowcard) .rz input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
+html.dunkel :is(.loc-box,.nowcard) .rz input[type=range]::-moz-range-track{background:linear-gradient(to right,#4f8ff0 var(--p),#3a4452 var(--p))}
+:is(.loc-box,.nowcard) .rz input[type=checkbox]{width:18px;height:18px;padding:0;margin:1px 0 0;border:0;background:none;-webkit-appearance:checkbox;appearance:auto;accent-color:#2563c9;flex:0 0 auto}
+:is(.loc-box,.nowcard) .rz input[type=date]{width:auto;font-size:14px;padding:4px 6px;border-radius:8px}
+:is(.loc-box,.nowcard) .rz .rz-reg label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0}
+:is(.loc-box,.nowcard) .rz label.rz-hk{display:flex;font-size:13px;font-weight:600;color:var(--ink);margin:9px 0}
+:is(.loc-box,.nowcard) .rz label.rz-hk small{font-weight:500}
 html.dunkel .rz-aus{background:#2a313c}html.dunkel .rz-dunkel{background:#26324d}html.dunkel .rz-frei{background:#38414e;box-shadow:none}
 html.dunkel .rz-nass{background:repeating-linear-gradient(135deg,#3a5675 0 3px,#2b3c50 3px 6px)}
 html.dunkel .rz-weich{background:repeating-linear-gradient(135deg,#6b5a3c 0 3px,#4a3f2c 3px 6px)}
@@ -1201,7 +1201,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.55</span>
+      <span class="ver">v5.56</span>
     </div>
   </header>
 
@@ -1242,6 +1242,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="bilanzSec" class="hidden"><div class="sect">Regenbilanz</div><div class="nowcard" id="bilanzCard"></div></div>
     <div id="fcSec" class="hidden"><div class="sect">16-Tage-Vorhersage</div><div class="card-list" id="fcList"></div></div>
+    <div id="rasenSec"><div class="sect">Rasen mähen</div><div class="nowcard" id="rasenBox"></div></div>
     <div id="detailSec"><div class="sect">Details</div>
     <div class="grid" id="grid"></div></div>
     <!-- v4.24: "UV & Mond" ist aufgeloest. Aus den Unterabschnitten sind
@@ -4468,7 +4469,7 @@ function mjBinden(){
    Abschnitt, der es braucht, ueber KLAPP_NACH zurueck und zeichnet neu. */
 const KLAPP_ABS=[["stdSec","stuendlich"],["chartSec","verlauf"],
   ["nowcastSec","regen2"],["radarSec","radar"],["rainHrSec","regen24"],["umkreisSec","umkreis"],
-  ["bilanzSec","bilanz"],["fcSec","fc16"],
+  ["bilanzSec","bilanz"],["fcSec","fc16"],["rasenSec","rasen"],
   ["uvSec","uvvitd"],["pvSec","pv"],["mondSec","mond"],
   ["planetenSec","planeten"],["issSec","iss"],
   ["metSec","meteore"],["evtSec","ereignisse"],["detailSec","details"]];
@@ -4486,6 +4487,7 @@ const KLAPP_NACH={
                 else if(typeof mjZeigen==="function")mjZeigen(new Date().getFullYear()); } },
   planetenSec:()=>{ if(typeof drawPlaneten==="function"&&el("planetenCv"))drawPlaneten(); },
   radarSec:()=>{ if(typeof radarOeffnen==="function")radarOeffnen(); },
+  rasenSec:()=>{ if(typeof rzAbschnitt==="function")rzAbschnitt(); },   // v5.56: laedt erst beim Aufklappen
   /* Die Kurve haengt an einem Canvas, das versteckt keine Breite hat; die
      Stundenleiste an einer Scrollposition, die im Verborgenen nicht gesetzt
      werden kann. Beides deshalb nach dem Aufklappen nachholen. */
@@ -4497,7 +4499,7 @@ const KLAPP_NACH={
 function klappZu(id){const e=el(id);return !!(e&&e.classList.contains("kzu"));}
 
 /* v5.08: fuer NEUE Nutzer zu - alles, was nicht unmittelbar Wetter ist */
-const KLAPP_ZU_NEU=new Set(["umkreis","bilanz","pv","mond","planeten","iss","meteore","ereignisse"]);
+const KLAPP_ZU_NEU=new Set(["umkreis","bilanz","rasen","pv","mond","planeten","iss","meteore","ereignisse"]);
 function klappBauen(){
   KLAPP_ABS.forEach(([id,key])=>{
     const sec=el(id); if(!sec||sec._klapp)return;
@@ -5527,13 +5529,22 @@ function rzKachel(){
   if(rzHeuteFrei())return Object.assign({},alt[0],{alt:alt.slice(1)});
   a.alt=alt;return a;}
 /* ---- Grossansicht ---- */
-function rzGross(){rzE();if(!rzBereit())return {html:'<div data-rz="1"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>"};
-  RASEN.mMin=0;return {html:rzGrossHtml(),nach:rzGrossBinden};}
-function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");if(!ov||ov.classList.contains("hidden")||!inn||!inn.querySelector("[data-rz]"))return;
-  const box=inn.parentElement,y=box?box.scrollTop:0;inn.innerHTML=rzBereit()?rzGrossHtml():rzGross().html;if(RASEN.Z.length)rzGrossBinden(inn);if(box)box.scrollTop=y;}
-function rzGrossHtml(){
+/* v5.56 (Nutzer: "Maehen auch unten hinzufuegen"): derselbe Inhalt ein zweites Mal als Abschnitt `rasenSec`
+   (nach der 16-Tage-Vorhersage). Darum haengt alles, was je Ansicht gilt, am Behaelter: _einst (Einstellungen
+   offen), _mMin (reservierte Hoehe); Blase und Regler-Zahlen werden im Behaelter gesucht, nicht per id. */
+function rzLaedt(ab){return '<div data-rz="1">'+(ab?"":'<div class="kzg-titel">Rasen</div>')+'<div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>";}
+function rzGross(){rzE();const inn=el("kzGrossIn");if(inn){inn._mMin=0;inn._einst=false;}
+  if(!rzBereit())return {html:rzLaedt(false)};
+  return {html:rzGrossHtml({}),nach:rzGrossBinden};}
+function rzZeichne(root){const ab=root.id==="rasenBox";if(!rzBereit()){root.innerHTML=rzLaedt(ab);return;}
+  const box=ab?null:root.parentElement,y=box?box.scrollTop:0;root.innerHTML=rzGrossHtml({einst:!!root._einst,abschnitt:ab});rzGrossBinden(root);if(box)box.scrollTop=y;}
+function rzAbschnitt(){const box=el("rasenBox");if(!box||klappZu("rasenSec"))return;rzE();rzZeichne(box);}
+function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");
+  if(ov&&!ov.classList.contains("hidden")&&inn&&inn.querySelector("[data-rz]"))rzZeichne(inn);
+  rzAbschnitt();}
+function rzGrossHtml(o){o=o||{};
   const E=rzE();rzBewerten();const J=rzJetzt(),P=rzPlanen(Date.now()),jetzt=Date.now(),heute=rzTeile(jetzt).tag;
-  let h='<div data-rz="1" class="rz"><div class="rz-kopf"><span class="kzg-titel">Rasen</span><span class="rz-stand">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</span></div>";
+  let h='<div data-rz="1" class="rz"><div class="rz-kopf">'+(o.abschnitt?"":'<span class="kzg-titel">Rasen</span>')+'<span class="rz-stand">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</span></div>";
   if(J){const kl={regen:"nass",nass:"nass",weich:"weich",tau:"tau",kalt:"trocken",trocken:"trocken"}[J.z];
     h+='<div class="rz-zust '+kl+'">'+RZ_ZUST[J.z]+(J.regnet?" (Radar)":"")+"</div>";
     if(J.regen)h+='<div class="rz-z">Letzter Regen bis <b>'+rzWann(J.regen.ende)+"</b>: "+rzMM(J.regen.sum)+" in "+J.regen.std+(J.regen.std===1?" Stunde":" Stunden")+" ("+J.regen.quelle+")."
@@ -5552,8 +5563,8 @@ function rzGrossHtml(){
   h+='<div class="rz-h">Mähen'+(fr?"<span>· heute "+(fr==="vorbei"?"vorbei":"nicht – "+fr)+"</span>":"")+"</div>";
   const gem=E.letzt===heute;   // v5.47: gruenes Feld mit x statt Knopf
   h+='<div class="loc-row">'+(gem?'<span class="rz-ok">\u2713 Heute gemäht<button type="button" data-rzk="zurueck" aria-label="Zurücknehmen">\u00d7</button></span>'
-      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(RASEN.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
-  if(RASEN.einst)h+=rzEinstHtml();
+      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
+  if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
@@ -5642,17 +5653,17 @@ function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="r
 function rzGrossBinden(root){
   const neu=()=>{rzSpeichern();rzGrossNeu();if(typeof kzRender==="function")kzRender();};
   // v5.49: Hoehe fuer BEIDE Zustaende von "Heute gemaeht" reservieren - beim Umschalten rueckt die Leiste nicht
-  {const m=root.querySelector(".rz-m");if(m){if(!RASEN.mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
-      RASEN.mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
-    RASEN.mMin=Math.max(RASEN.mMin,m.offsetHeight);m.style.minHeight=RASEN.mMin+"px";}}
-  const detZu=()=>{const d=el("rzDet");if(d)d.hidden=true;root.querySelectorAll(".rz-r i.sel").forEach(x=>x.classList.remove("sel"));};
+  {const m=root.querySelector(".rz-m");if(m&&m.offsetHeight){if(!root._mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
+      root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
+    root._mMin=Math.max(root._mMin,m.offsetHeight);m.style.minHeight=root._mMin+"px";}}
+  const detZu=()=>{const d=root.querySelector("#rzDet");if(d)d.hidden=true;root.querySelectorAll(".rz-r i.sel").forEach(x=>x.classList.remove("sel"));};
   root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b){detZu();return;}
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
-    else if(b.dataset.rzk==="einst"){RASEN.einst=!RASEN.einst;rzGrossNeu();}
+    else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
     else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
     else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}
-    else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=el("rzDet");if(!c||!d)return;
+    else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=root.querySelector("#rzDet");if(!c||!d)return;
       if(b.classList.contains("sel")){detZu();return;}detZu();b.classList.add("sel");
       const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
       d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Feuchte "+Math.round(c.rh)+" %"
@@ -5660,7 +5671,7 @@ function rzGrossBinden(root){
       // v5.49: als Blase ueber (bzw. unter) der Zeile - im Fluss schob sie Legende und Quelle hin und her
       d.hidden=false;const r=b.parentElement,o=r.offsetTop-d.offsetHeight-4;d.style.top=(o>=0?o:r.offsetTop+r.offsetHeight+4)+"px";}};
   root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;
-    if(inp.type==="range"){inp.oninput=()=>{const o=el("rzo_"+k);RASEN.E[k]=+inp.value;inp.style.setProperty("--p",rzP(+inp.value,+inp.min,+inp.max));
+    if(inp.type==="range"){inp.oninput=()=>{const o=root.querySelector("#rzo_"+k);RASEN.E[k]=+inp.value;inp.style.setProperty("--p",rzP(+inp.value,+inp.min,+inp.max));
         if(k==="von"&&RASEN.E.von>=RASEN.E.bis)RASEN.E.von=RASEN.E.bis-1;if(k==="bis"&&RASEN.E.bis<=RASEN.E.von)RASEN.E.bis=RASEN.E.von+1;
         if(k==="pVon"&&RASEN.E.pVon>=RASEN.E.pBis)RASEN.E.pBis=RASEN.E.pVon+1;if(k==="pBis"&&RASEN.E.pBis<=RASEN.E.pVon)RASEN.E.pVon=RASEN.E.pBis-1;
         if(o)o.textContent=o.textContent.replace(/^[\d,]+/,String(RASEN.E[k]));};
@@ -10766,6 +10777,7 @@ function updateStripJump(){}
    ein Doppeltipp auf die Leiste oder die Kurve zentriert weiterhin auf
    die aktuelle Stunde (siehe recenterStrip und recenterChart). */
 klappBauen();   // v4.18: Titelzeilen zu Schaltern machen, bevor etwas gezeichnet wird
+setTimeout(()=>{try{rzAbschnitt();}catch(e){}},0);setInterval(()=>{try{rzAbschnitt();}catch(e){}},5*6e4);   // v5.56: Abschnitt "Rasen maehen"
 el("demoBtn").onclick=()=>{const full=DEMO(),obs=full.filter(r=>new Date(r.timestamp)<=Date.now());fullRows=obs;chartRows=full;chartInit=false;stripInit=false;stripUserScrolled=false;render(obs.slice(-WINDOW_HOURS),obs,{station_name:"Gießen/Wettenberg",dwd_station_id:"01639",distance:600},true);DEMO_EXTRAS();};
 load();
 

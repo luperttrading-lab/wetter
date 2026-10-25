@@ -1920,6 +1920,15 @@ v5.55 (Nutzer: "du musst die Kachel oben hinzufuegen" - als KASTEN im Band verst
 "dunkel" wieder als Kasten in Nachtfarbe (`.rz-bs.rz-bn`), aber ueber die ganze dunkle Strecke (17-22 Uhr), der
 Maehzeit-Kasten endet bei Dunkelheit. Die Rasen-Kachel der Startseite war vorhanden (live geprueft, Bestandsauswahl:
 "MAEHEN ~2.4. / Winterpause"); fuer NEUE Nutzer ist sie weiterhin NICHT in `KZ_STD`.
+v5.56 (Nutzer: "v5.55-Satz war nicht fuer dich"; "Maehen auch unten hinzufuegen - als letztes zum Aufklappen?"):
+Abschnitt `rasenSec` "Rasen maehen" (Klapp-Schluessel `rasen`) NACH der 16-Tage-Vorhersage, nicht ganz unten - dort
+endet der Wetterblock, danach kommen Details/Sonne/Astro. Fuer neue Nutzer zu (`KLAPP_ZU_NEU`); Daten werden nur
+geholt, wenn der Abschnitt offen ist oder die Kachel gewaehlt (zu + ohne Kachel: RASEN.Z bleibt leer, geprueft).
+Gleicher Inhalt wie das Fenster (`rzGrossHtml({abschnitt:true})`, ohne Titel "Rasen"). Weil es jetzt ZWEI Ansichten
+gibt, haengt alles je Ansicht am Behaelter (`#kzGrossIn` bzw. `#rasenBox`): `_einst`, `_mMin`, Blase `#rzDet` und
+Regler-Zahlen `#rzo_*` per `root.querySelector`. `rzZeichne(root)`, `rzAbschnitt()`, `rzGrossNeu()` zeichnet beide.
+Auffrischen alle 5 min (Jetzt-Linie; Daten weiter alle 30 min). CSS der Bedienelemente `:is(.loc-box,.nowcard) .rz`.
+v5.55 ("dunkel" als Kasten) beruhte auf dem Missverstaendnis - bleibt, bis der Nutzer entscheidet (v5.54 = ohne Kasten).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
