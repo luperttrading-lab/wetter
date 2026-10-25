@@ -155,7 +155,7 @@ input[type=date]{font:600 14px system-ui;padding:5px 8px;border:1px solid var(--
     <button type="button" data-m="wuchs">Wuchs (Temperatur)</button>
   </div>
   <div class="reihe" id="rTage"><label for="eTage">Abstand</label><output id="oTage"></output><input type="range" id="eTage" min="4" max="14" step="1"></div>
-  <div class="reihe" id="rGd"><label for="eGd">Wuchs bis zum nächsten Mähen</label><output id="oGd"></output><input type="range" id="eGd" min="30" max="120" step="5"><small>Gradtage über 5 °C: ein Tag mit 15 °C im Mittel zählt 10. Im Sommer ist das Ziel nach 4–5 Tagen erreicht, im Spätherbst erst nach Wochen.</small></div>
+  <div class="reihe" id="rGd"><label for="eGd">Abstand bei 15 °C</label><output id="oGd"></output><input type="range" id="eGd" min="30" max="120" step="10"><small>Wärmer geht es schneller, kälter langsamer (Tagesmittel): bei 6 Tagen für 15 °C sind es bei 10 °C 12 Tage, bei 20 °C 4 Tage. Unter 5 °C wächst Rasen kaum.</small></div>
   <div class="reihe"><label for="eFrueh">Frühestens vor Fälligkeit</label><output id="oFrueh"></output><input type="range" id="eFrueh" min="0" max="5" step="1"><small>So viele Tage vorher darf der Planer schon ein gutes Fenster empfehlen.</small></div>
   <div class="reihe"><label>Mähzeit</label><output id="oZeit"></output><input type="range" id="eVon" min="7" max="15" step="1"><input type="range" id="eBis" min="12" max="20" step="1"><small>Gesetzlich (32. BImSchV, Wohngebiet): Mo–Sa 7–20 Uhr, Sonn- und Feiertage nie. Nur bei Tageslicht.</small></div>
   <div class="tage" id="eTage6"></div>
@@ -469,7 +469,7 @@ function status(){
     else h+='<div class="st2">Kein trockenes Fenster in Sicht</div><div class="st3">In den nächsten Tagen gibt es keine Stunde, die trocken, hell und in deiner Mähzeit liegt.</div>';
     el.innerHTML=h;return P;}
   let h='<h2>Stand jetzt</h2><div class="st1">Zuletzt gemäht '+tagTxt(E.letzt)+" ("+(n===0?"heute":n===1?"gestern":"vor "+n+" Tagen")+")";
-  if(E.modus==="wuchs")h+=" · Wuchs seither "+Math.round(f.bisher||0)+" von "+E.gd+" Gradtagen";
+  if(E.modus==="wuchs")h+=" · seither gewachsen: "+Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+" %";
   h+="</div>";
   if(!f.tag){h+='<div class="st2">Noch lange nicht fällig</div><div class="st3">Der Wuchs reicht bis '+tagTxt(tagPlus(f.ende,-1))+" nicht – im Moment wächst kaum etwas.</div>";el.innerHTML=h;return P;}
   const nf=tageZw(heute,f.tag);
@@ -559,7 +559,7 @@ function bedienung(){
   const modus=()=>{document.querySelectorAll("#eModus button").forEach(b=>b.classList.toggle("an",b.dataset.m===E.modus));
     $("rTage").style.display=E.modus==="tage"?"":"none";$("rGd").style.display=E.modus==="wuchs"?"":"none";};
   document.querySelectorAll("#eModus button").forEach(b=>b.onclick=()=>{E.modus=b.dataset.m;modus();speichern();alles();});modus();
-  regler("eTage","tage",v=>v+" Tage");regler("eGd","gd",v=>v+" Gradtage");
+  regler("eTage","tage",v=>v+" Tage");regler("eGd","gd",v=>(v/10)+" Tage");
   regler("eFrueh","frueh",v=>v?v+(v===1?" Tag":" Tage"):"erst am Tag");
   regler("eDauer","dauer",v=>v+(v===1?" Stunde":" Stunden"));regler("eRisiko","risiko",v=>v+" %");
   regler("eRh","rh",v=>v+" %");regler("eTmin","tmin",v=>v+" °C");
