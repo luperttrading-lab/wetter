@@ -1891,6 +1891,18 @@ Fenstern (bis 3 Punkte unter dem besten) gewinnt das FRUEHESTE (5 % gegen 7 % Re
 hinter "15-17"). "Moeglich waere schon ..." erst ab 1 h Vorsprung. SOMMER-SONNTAG (Simulation, Uhr per
 page.clock, `om_sommer.json` im Scratchpad): Kachel "Maehen morgen 9-13 Uhr", Fenster "heute nicht - Sonntag",
 Sonntagszeile ganz "Sonn-/Feiertag"; Mittagspause = die weissen Spalten 13-15 an Werktagen.
+v5.52 (Nutzer: "in der Mittagspause ist gutes Wetter weiss - Pause, Maehbeginn und -ende anders deutlich machen,
+ueber alle Tage"): Leiste im Rasen-Fenster zeigt in JEDEM Kaestchen das Wetter (Klasse aus z/pp/hell, unabhaengig
+von `erlaubt`); "nicht deine Zeit" (Pause, ausserhalb von/bis, Sonn-/Feiertag, abgewaehlter Tag; nur bei
+Tageslicht) liegt darueber. TEST "Darstellung (Test): A | B | C" unter der Quelle (`rz_darst`, `rzDarst()`,
+Voreinstellung B): A blass (.3), B blass + Band "Maehzeit | Pause | Maehzeit" ueber der Leiste + senkrechte
+Linien durch alle Zeilen (Beginn/Ende durchgezogen, Pause gestrichelt; je Zeile `.rz-vl`, top/bottom -1 px
+ueberbrueckt die 2-px-Zeilenluecke), C schraffiert (`::after`, weisse bzw. dunkle Streifen) + Band + Linien.
+Linien gemessen: Mitte auf 0,0 px in der Spaltenluecke (`calc((100% + 1px) * i / 16 - 1.5px)`). Befund: in A sieht
+blasses Gruen aus wie "Regenrisiko erhoeht" (hellgruen), schwache Farben (trocknet ab, Boden weich) verschwinden
+fast. Legende: "Sonn-/Feiertag" und "nicht deine Zeit / Pause" ersetzt durch "blass/schraffiert: nicht deine
+Zeit". Die Testzeile kostet ~30 px (Oktober-Daten: 781 px Inhalt bei 753 sichtbar). AUFRAEUMEN nach der Wahl:
+Gewinner fest, `RZ_DARST`/`rzDarst`/`rz_darst`, `.rz-dt`, `data-rzd`-Zweig, nicht gewaehlte CSS (`.zu` bzw. `.zu2`).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
