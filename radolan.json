@@ -1,7 +1,7 @@
 {
   "datum": "2026-10-25",
   "summe_mm": 28.71,
-  "stunden_ok": 19,
+  "stunden_ok": 20,
   "stunden_erwartet": 20,
   "stunden": [
     {
@@ -82,8 +82,7 @@
     },
     {
       "stunde": "19:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -170,7 +169,7 @@
     "datum": "2026-10-25",
     "mm": 28.71
   },
-  "aktualisiert": "2026-10-25T18:07:00+00:00",
+  "aktualisiert": "2026-10-25T18:37:00+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -180,7 +179,7 @@
       "lon": 8.6740943,
       "datum": "2026-10-25",
       "summe_mm": 28.71,
-      "stunden_ok": 19,
+      "stunden_ok": 20,
       "stunden_erwartet": 20,
       "stunden": [
         {
@@ -261,8 +260,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -357,7 +355,7 @@
       "lon": 8.6226918,
       "datum": "2026-10-25",
       "summe_mm": 27.08,
-      "stunden_ok": 19,
+      "stunden_ok": 20,
       "stunden_erwartet": 20,
       "stunden": [
         {
@@ -438,8 +436,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -534,7 +531,7 @@
       "lon": 7.2066,
       "datum": "2026-10-25",
       "summe_mm": 9.48,
-      "stunden_ok": 19,
+      "stunden_ok": 20,
       "stunden_erwartet": 20,
       "stunden": [
         {
@@ -615,8 +612,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -634,7 +630,7 @@
               755,
               332
             ],
-            "mm": 11.5,
+            "mm": 11.6,
             "eigenes": false
           },
           {
@@ -642,7 +638,7 @@
               755,
               333
             ],
-            "mm": 10.3,
+            "mm": 10.4,
             "eigenes": false
           }
         ],
