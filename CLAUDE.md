@@ -1951,6 +1951,14 @@ Maehzeit ohne Pause (kein Weglassen dunkler Stunden mehr). Dunkle Stunden einer 
 (`.rz-dunkel2`, `grid-column: span n`, bis zur naechsten Luecke; 1 Stunde = Mond), wie der Sonntag-Balken. Satz unter
 der Leiste nur noch Maehzeit und Pause. Geprueft 9-20 Uhr: Oktober "dunkel" 17-20 in jeder Zeile, Sommer alles Kaestchen
 bis 19 Uhr - gleiche Achse 9-12 | 15-19.
+v5.60 (Nutzer, Norden 17:13): Blase im Rasen-Fenster "Luftfeuchte" statt "Feuchte". WARNKARTEN im dunklen Modus
+(Nutzer: "Sturmboeen geht unter"): bis v5.59 hatte `html.dunkel .alert.*` nur einen dunklen Hintergrund, die Schrift blieb
+die dunkle Farbe des hellen Modus (#9a3d12 auf #33210f). Jetzt helle Schrift, kraeftiger Rand 1,5 px und 6-px-Farbbalken
+links (minor #fcd34d/#b08d1c, moderate #fdba74/#ea7a2f, severe #fecaca/#ef4444, extreme #f5d0fe/#d946ef). Heller Modus
+unveraendert. OFFEN: Warnung als Nachricht aufs Handy mit einstellbarer Stufe - Empfehlung an den Nutzer: DWD-App
+WarnWetter (Standort per GPS, Stufen und Alarm einstellbar, offiziell) statt Eigenbau; Eigenbau ginge ueber ntfy (App +
+geheimer Topic) und eine GitHub-Schleife, die Bright Sky /alerts pollt - Haken: GitHub-Zeitplaene unzuverlaessig, der Ort
+der App ist dem Server unbekannt (Reise nach Norden!). Entscheidung steht aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
