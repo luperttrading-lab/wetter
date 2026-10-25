@@ -1787,6 +1787,38 @@ Ort hinter dem Punkt, z. B. "Giessen", erscheint wieder). Geprueft mit echtem Zu
 nach 73 Grad, 24.10. 18:10) und gesetzten 6/25/57/110 km/h. BEWUSST SO GELASSEN (Nutzer:
 "macht nichts, wenn es drunter steht - besser als drueber"): kommt der Regen aus N/NO, kann
 eine Strichbeschriftung unter dem Zeitkasten oben rechts liegen. Nicht "reparieren".
+v5.44 RASEN-PLANER (Nutzer 25.10.: Erinnerung zum Rasenmaehen; "erst mal integrieren", Kachel
+mit dem Wichtigsten, Tipp oeffnet ein Fenster, Einstellungen separat). Vorlauf: Testseite
+`rasentest.html` (bleibt, mit Beispiel-Lagen und simulierten Nachrichten). In der App: Kachel
+`rasen` ("Rasen maehen", NICHT in KZ_STD; Bestandsnutzer einmalig per `kzRasenNeu` angehaengt),
+Ansicht 1 "RASEN trocken/nass/weich/Tau + seit/bis", Ansicht 2 "MAEHEN heute|morgen|Mi 28. +
+09-17 Uhr", Ansicht 3 "DANACH nass bis Sa", wenn danach >= 2 Tage kein Fenster kommt. Tipp ->
+`rzGross()` (kzGrossZeigen + neues Feld `nach` = Knoepfe verdrahten): Gras jetzt, Empfehlung,
+"Heute gemaeht", "Einstellungen" (Regler zeichnen erst beim Loslassen neu), Stundenleiste
+gestern..+6 Tage (Kaestchen antippen = Werte). Code-Block `RASEN`/`rz*` vor KZ_DEF, CSS `.rz-*`.
+Speicher `rasen` (beim ersten Mal aus `rasenTest` der Testseite uebernommen).
+DATEN (eigene Abrufe, nur wenn die Kachel gewaehlt ist, alle 30 min bzw. bei Ortswechsel):
+Open-Meteo stuendlich past_days=14/forecast_days=8/timeformat=unixtime (Rueckfall: Bright Sky
+MOSMIX, Luftfeuchte aus Taupunkt); Messungen der naechsten DWD-Station 74 h (Bright Sky
+/weather, nur observation_type != forecast) ueberschreiben die Modellstunden; Radar am Ort
+(Bright Sky /radar 3 km, Mittelzelle) fuellt die Stunden seit der letzten Messung und 2 h
+voraus. Anlass: 25.10. MOSMIX meldete fuer 13-14 Uhr 2 mm, Station und Radar blieben trocken.
+REGELN (geschaetzt, nicht belegt - am Garten nachpruefen): Regen >= 0,1 mm/h nass; Abtrocknen
+2/3/5/8 h nach <0,5/<2/<5/mehr mm in 6 h, Sonne/Wind >= 15 km/h doppelt, Luftfeuchte ueber der
+Tau-Grenze halb so schnell; nach >= 10 mm in 24 h Boden 18 h weich (>= 25 mm: 24 h); Tau ab 90 %
+Luftfeuchte; zu kalt unter 4 Grad. Erlaubt Mo-Sa in der Maehzeit (Voreinstellung 9-19),
+nur bei Tageslicht (Sonnenzeiten Open-Meteo bzw. eigene Formel, gegen PyEphem 1 min), nie an
+Sonn- und Feiertagen (bundesweit + Fronleichnam; 32. BImSchV laut Ratgebern Mo-Sa 7-20 Uhr).
+Fenster = zusammenhaengende gute Stunden >= Dauer, Sicherheit 1 - max. Regenrisiko. Empfehlung
+= hoechste Sicherheit vor der Frist mit 5 % Abschlag je Tag Vorlauf (Optimal Stopping: gut heute
+schlaegt besser in 4 Tagen); "Gras ist schon hoch" oder unbekanntes Datum = erste gute
+Gelegenheit, hohes Gras trocknet 50 % langsamer und ist 5 % frueher taunass. Faellig nach Tagen
+oder nach Wuchs (Gradtage ueber 5 Grad). OFFEN: Erinnerung aufs Handy - Kanal nicht gewaehlt
+(ntfy: App plant beim Oeffnen zeitversetzte Nachrichten, bis 3 Tage, ersetzbar; oder Web-Push mit
+Service Worker); zweite Stufe waere eine GitHub-Schleife, die bei Vorhersageaenderung korrigiert.
+Geprueft (Playwright, 25.10. 14:4x): Bestandsauswahl bekommt "rasen", Bright-Sky-Rueckfall und
+Open-Meteo-Weg (nachgebaute Antwort), Kachel nass/bis 17 Uhr <-> morgen 9-17 Uhr, Fenster,
+Regler speichert, Heute gemaeht setzt die Frist neu, hell und dunkel, 390 pt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
