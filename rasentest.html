@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Rasen-Planer — Simulation</title>
+<style>
+/* Simulation (25.10.2026): Erinnerung zum Rasenmaehen. Rechnet mit der echten
+   Open-Meteo-Vorhersage fuer den Ort aus der App (locProfile) oder mit
+   Beispiel-Lagen und zeigt, welche Nachrichten man bekaeme. Es wird NICHTS
+   verschickt - die Seite dient nur dazu, die Regeln am Telefon zu pruefen. */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee;--gruen:#2e8b47}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
+h1{font-size:20px;margin:4px 0 2px}
+.info{font-size:13px;color:var(--muted);margin:0 0 6px}
+.karte{background:#fffdf9;border:1px solid var(--line);border-radius:18px;padding:12px 12px 14px;margin:14px 0}
+.karte h2{font-size:16px;margin:0 0 6px}
+.karte p{font-size:13px;color:var(--muted);margin:0 0 8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.knopf{font:600 13px system-ui,-apple-system,sans-serif;padding:7px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.seg button.an{background:#2563c9;border-color:#2563c9;color:#fff}
+.knopf.gruen{background:var(--gruen);border-color:var(--gruen);color:#fff}
+/* Status */
+.st1{font-size:13px;color:var(--muted)}
+.st2{font-size:17px;font-weight:800;margin:6px 0 2px;line-height:1.3}
+.st3{font-size:13.5px;margin:2px 0}
+.st3 b{font-weight:700}
+.warn{color:#b0441e;font-weight:700}
+/* Zeitleiste */
+.tl{display:grid;grid-template-columns:58px 1fr;gap:3px 6px;align-items:center;margin-top:6px}
+.tlk{font-size:11.5px;font-weight:700;white-space:nowrap;line-height:1.1}
+.tlk small{display:block;font-weight:700;font-size:9.5px;color:var(--muted);letter-spacing:.02em}
+.tlk.frist small{color:#c0392b}
+.tlr{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:22px}
+.tlr i{display:block;border-radius:2px;position:relative;cursor:pointer}
+.tla{display:grid;grid-template-columns:repeat(16,1fr);font-size:9.5px;color:var(--muted);font-weight:700;height:12px}
+.tla span{white-space:nowrap;margin-left:-3px}
+.z-regen1{background:#9cc7ee}.z-regen2{background:#5a9fe0}.z-regen3{background:#2f6fc0}
+.z-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
+.z-tau{background:radial-gradient(circle,#8fb8b2 1.1px,transparent 1.4px) 0 0/5px 5px,#e9f2f0}
+.z-kalt{background:#e2dbf3}
+.z-aus{background:#efeae1}
+.z-dunkel{background:#ddd7cc}
+.z-gut{background:#43a047}
+.z-unsicher{background:#b7da8c}
+.z-riskant{background:#f1dfa8}
+.z-frei{background:#fff;box-shadow:inset 0 0 0 1px #e6dfd2}
+.tlr i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
+.tlr .jetzt{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none;z-index:2}
+.tlr.sonn i{opacity:.55}
+.leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:var(--muted);margin-top:10px}
+.leg span{display:inline-flex;align-items:center;gap:4px}
+.leg i{display:inline-block;width:13px;height:11px;border-radius:2px}
+.detail{font-size:12.5px;min-height:18px;margin-top:8px;color:var(--ink)}
+/* Nachrichten im Stil der iOS-Banner */
+.push{display:flex;gap:10px;background:rgba(245,245,247,.96);border-radius:16px;padding:10px 12px;margin:8px 0;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.push .ic{flex:0 0 38px;height:38px;border-radius:9px;background:linear-gradient(160deg,#5ab0f0,#2563c9);display:flex;align-items:center;justify-content:center;font-size:21px}
+.push .pk{flex:1;min-width:0}
+.push .pz{display:flex;justify-content:space-between;font-size:12px;color:#6b6b70}
+.push .pz b{font-weight:600;color:#3a3a3c;letter-spacing:.02em}
+.push .pt{font-weight:700;font-size:14.5px;margin-top:1px}
+.push .pb{font-size:13.5px;line-height:1.35}
+.push.gemaeht{background:#e9f5ea}
+.push.gemaeht .ic{background:linear-gradient(160deg,#7cc883,#2e8b47)}
+.leer{font-size:13px;color:var(--muted);font-style:italic}
+/* Einstellungen */
+.reihe{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:10px 0 2px}
+.reihe label{font-size:13.5px;font-weight:600}
+.reihe output{font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;color:#2563c9}
+.reihe input[type=range]{grid-column:1/-1;width:100%;margin:2px 0 0}
+.reihe small{grid-column:1/-1;font-size:11.5px;color:var(--muted)}
+.tage{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.tage button{width:40px;padding:6px 0;font:700 13px system-ui;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted)}
+.tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
+.haken{display:flex;gap:8px;align-items:flex-start;margin:9px 0;font-size:13.5px}
+.haken input{margin-top:3px;width:17px;height:17px;flex:0 0 auto}
+.haken small{display:block;color:var(--muted);font-size:11.5px}
+input[type=date]{font:600 14px system-ui;padding:5px 8px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.regeln{font-size:13px;line-height:1.5}
+.regeln li{margin:3px 0}
+</style>
+</head>
+<body>
+<h1>Rasen-Planer · Simulation</h1>
+<p class="info">Testseite: Sie rechnet mit der Vorhersage für deinen Ort aus der App und zeigt, welche Nachrichten du bekommen würdest. <b>Es wird nichts verschickt.</b></p>
+
+<div class="karte">
+  <h2>Daten</h2>
+  <div class="seg" id="quelle">
+    <button type="button" data-q="echt">Echte Vorhersage</button>
+    <button type="button" data-q="letzte">Beispiel: letzte Chance</button>
+    <button type="button" data-q="regenwoche">Regenwoche</button>
+    <button type="button" data-q="nebel">Herbstnebel</button>
+    <button type="button" data-q="trocken">Trockene Woche</button>
+  </div>
+  <p id="quelleInfo" style="margin-top:8px"></p>
+</div>
+
+<div class="karte" id="status"></div>
+
+<div class="karte">
+  <h2>Die nächsten Tage</h2>
+  <p>Jede Zeile ein Tag, jedes Kästchen eine Stunde (6–22 Uhr). Antippen zeigt die Werte.</p>
+  <div id="tl"></div>
+  <div class="detail" id="detail"></div>
+  <div class="leg">
+    <span><i class="z-gut"></i>gut zum Mähen</span>
+    <span><i class="z-unsicher"></i>trocken, Regenrisiko erhöht</span>
+    <span><i class="z-riskant"></i>trocken, Risiko über 60 %</span>
+    <span><i class="z-regen2"></i>Regen</span>
+    <span><i class="z-nass"></i>trocknet ab</span>
+    <span><i class="z-tau"></i>Tau / Nebel</span>
+    <span><i class="z-kalt"></i>zu kalt</span>
+    <span><i class="z-frei"></i>trocken, nicht deine Zeit</span>
+    <span><i class="z-aus"></i>Sonn-/Feiertag</span>
+    <span><i class="z-dunkel"></i>dunkel</span>
+    <span><i style="box-shadow:inset 0 0 0 2px #0d4d1f"></i>Empfehlung</span>
+  </div>
+</div>
+
+<div class="karte">
+  <h2>Nachrichten, die du bekommen würdest</h2>
+  <p>Geprüft wird jeden Morgen um 7:30 und, wenn eingeschaltet, abends um 18:00. Die Simulation nimmt an, dass die heutige Vorhersage stimmt.</p>
+  <label class="haken"><input type="checkbox" id="oVorabend"><span>Hinweis am Vorabend<small>„Morgen mähen“ um 18:00, zusätzlich zum Morgen-Hinweis</small></span></label>
+  <label class="haken"><input type="checkbox" id="oMaehen"><span>In der Simulation beim ersten Hinweis mähen<small>danach beginnt die Frist neu – ohne Haken siehst du, was kommt, wenn du nicht reagierst</small></span></label>
+  <div id="pushes"></div>
+</div>
+
+<div class="karte">
+  <h2>Einstellungen</h2>
+  <div class="reihe"><label for="eLetzt">Zuletzt gemäht</label><span><input type="date" id="eLetzt"> <button type="button" class="knopf gruen" id="eHeute">Heute</button></span></div>
+  <div class="reihe" style="margin-top:14px"><label>Fällig nach</label><span></span></div>
+  <div class="seg" id="eModus">
+    <button type="button" data-m="tage">festen Tagen</button>
+    <button type="button" data-m="wuchs">Wuchs (Temperatur)</button>
+  </div>
+  <div class="reihe" id="rTage"><label for="eTage">Abstand</label><output id="oTage"></output><input type="range" id="eTage" min="4" max="14" step="1"></div>
+  <div class="reihe" id="rGd"><label for="eGd">Wuchs bis zum nächsten Mähen</label><output id="oGd"></output><input type="range" id="eGd" min="30" max="120" step="5"><small>Gradtage über 5 °C: ein Tag mit 15 °C im Mittel zählt 10. Im Sommer ist das Ziel nach 4–5 Tagen erreicht, im Spätherbst erst nach Wochen.</small></div>
+  <div class="reihe"><label for="eFrueh">Frühestens vor Fälligkeit</label><output id="oFrueh"></output><input type="range" id="eFrueh" min="0" max="5" step="1"><small>So viele Tage vorher darf der Planer schon ein gutes Fenster empfehlen.</small></div>
+  <div class="reihe"><label>Mähzeit</label><output id="oZeit"></output><input type="range" id="eVon" min="7" max="15" step="1"><input type="range" id="eBis" min="12" max="20" step="1"><small>Gesetzlich (32. BImSchV, Wohngebiet): Mo–Sa 7–20 Uhr, Sonn- und Feiertage nie. Nur bei Tageslicht.</small></div>
+  <div class="tage" id="eTage6"></div>
+  <label class="haken"><input type="checkbox" id="eMittag"><span>Mittagsruhe 13–15 Uhr<small>wenn deine Gemeinde sie vorschreibt</small></span></label>
+  <div class="reihe"><label for="eDauer">Dauer des Mähens</label><output id="oDauer"></output><input type="range" id="eDauer" min="1" max="4" step="1"></div>
+  <div class="reihe"><label for="eRisiko">Regenrisiko höchstens</label><output id="oRisiko"></output><input type="range" id="eRisiko" min="10" max="50" step="5"><small>Regenwahrscheinlichkeit je Stunde (Open-Meteo). Darüber gilt die Stunde als „erhöht“, über 60 % als „riskant“.</small></div>
+  <div class="reihe"><label for="eRh">Tau / Nebel ab Luftfeuchte</label><output id="oRh"></output><input type="range" id="eRh" min="80" max="98" step="1"></div>
+  <div class="reihe"><label for="eTmin">Zu kalt unter</label><output id="oTmin"></output><input type="range" id="eTmin" min="0" max="8" step="1"></div>
+  <button type="button" class="knopf" id="eReset" style="margin-top:10px">Voreinstellungen</button>
+</div>
+
+<div class="karte regeln">
+  <h2>So rechnet der Planer</h2>
+  <ol>
+    <li><b>Nass oder trocken</b> – jede Stunde: Regen (ab 0,1 mm) macht das Gras nass. Danach braucht es Zeit zum Abtrocknen: 2 Stunden nach weniger als 0,5 mm, 3 bis 2 mm, 5 bis 5 mm, sonst 8 Stunden; nach 10 mm in 24 Stunden 18 Stunden (weicher Boden). Sonne oder Wind ab 15 km/h trocknen doppelt so schnell, sehr feuchte Luft halb so schnell. Liegt die Luftfeuchte über der Tau-Grenze, ist das Gras taunass.</li>
+    <li><b>Erlaubt</b> – Mo–Sa in deiner Mähzeit, bei Tageslicht, nicht an Sonn- und Feiertagen (bundesweite plus Fronleichnam).</li>
+    <li><b>Fenster</b> – zusammenhängende gute Stunden, mindestens so lang wie das Mähen dauert. Sicherheit = 100 % minus das höchste Regenrisiko im Fenster.</li>
+    <li><b>Empfehlung</b> – das Fenster mit der höchsten Sicherheit vor der Frist. Spätere Tage bekommen 5 % Abschlag je Tag, weil die Vorhersage dann unsicherer ist: ein gutes Fenster heute schlägt ein etwas besseres in vier Tagen. Gibt es vor der Frist keins, das erste danach.</li>
+    <li><b>Nachrichten</b> – morgens „heute mähen“, wenn die Empfehlung heute liegt; „letzte Chance“, wenn danach mindestens 2 Tage kein Fenster kommt; am Fälligkeitstag ohne Fenster „nächste Chance“. Höchstens eine je Prüfung.</li>
+    <li><b>Nicht simuliert</b>: Ändert sich die Vorhersage und ein angekündigtes Fenster wird nass, käme eine Korrektur. Dafür bräuchte es mehrere Vorhersagen über die Zeit.</li>
+  </ol>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const STD={letzt:null,modus:"tage",tage:7,gd:60,frueh:2,von:9,bis:19,tage6:[1,1,1,1,1,1],mittag:false,dauer:1,rh:90,tmin:4,risiko:30,vorabend:true,maehen:true,quelle:"echt"};
+let E=laden(),Z=[],SONNE={},TZ="Europe/Berlin",ORT=null,AUSWAHL=null;
+function laden(){try{const o=JSON.parse(localStorage.getItem("rasenTest")||"null");if(o&&typeof o==="object")return Object.assign({},STD,o);}catch(e){}return Object.assign({},STD);}
+function speichern(){try{localStorage.setItem("rasenTest",JSON.stringify(E));}catch(e){}}
+function ortLesen(){try{const p=JSON.parse(localStorage.getItem("locProfile")||"null");
+  if(p&&isFinite(+p.lat)&&isFinite(+p.lon))return {lat:+p.lat,lon:+p.lon,name:p.name||"Eigener Ort",tz:p.tz||"Europe/Berlin"};}catch(e){}
+  return {lat:50.6481,lon:8.6743,name:"Wettenberg",tz:"Europe/Berlin"};}
+
+/* ---------- Zeit in der Zeitzone des Orts ---------- */
+const _fmt={};
+function teile(ms){
+  let f=_fmt[TZ];if(!f)f=_fmt[TZ]=new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hourCycle:"h23"});
+  const o={};for(const p of f.formatToParts(new Date(ms)))o[p.type]=p.value;
+  return {tag:o.year+"-"+o.month+"-"+o.day,h:+o.hour,m:+o.minute,wd:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(o.weekday)};
+}
+function tzOff(ms){const t=teile(ms),[y,m,d]=t.tag.split("-").map(Number);return Date.UTC(y,m-1,d,t.h,t.m)-Math.floor(ms/6e4)*6e4;}
+function lokal(tag,h,mi){const [y,m,d]=tag.split("-").map(Number),g=Date.UTC(y,m-1,d,h,mi||0);let ms=g-tzOff(g);return g-tzOff(ms);}
+function tagPlus(tag,n){const [y,m,d]=tag.split("-").map(Number);return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10);}
+function tageZw(a,b){const f=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)/864e5;};return Math.round(f(b)-f(a));}
+function wtag(tag){const [y,m,d]=tag.split("-").map(Number);return new Date(Date.UTC(y,m-1,d)).getUTCDay();}
+function tagTxt(tag){const [,m,d]=tag.split("-").map(Number);return WT[wtag(tag)]+" "+d+"."+m+".";}
+function hhmm(ms){const t=teile(ms);return t.m?String(t.h).padStart(2,"0")+":"+String(t.m).padStart(2,"0"):String(t.h);}
+function relTag(tag,heute){const n=tageZw(heute,tag);return n===0?"heute":n===1?"morgen":n===2?"übermorgen":WT[wtag(tag)];}
+
+/* ---------- Feiertage (bundesweit + Fronleichnam) ---------- */
+function ostern(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+  h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;
+  return y+"-"+String(mo).padStart(2,"0")+"-"+String(da).padStart(2,"0");}
+const FEST={"01-01":"Neujahr","05-01":"1. Mai","10-03":"Tag der Einheit","12-25":"Weihnachten","12-26":"Weihnachten"};
+function feiertag(tag){if(FEST[tag.slice(5)])return FEST[tag.slice(5)];const o=ostern(+tag.slice(0,4));
+  const B={"-2":"Karfreitag","1":"Ostermontag","39":"Himmelfahrt","50":"Pfingstmontag","60":"Fronleichnam"};
+  for(const n in B)if(tagPlus(o,+n)===tag)return B[n];return "";}
+
+/* ---------- Daten ---------- */
+async function echteDaten(){
+  ORT=ortLesen();TZ=ORT.tz;
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+ORT.lat+"&longitude="+ORT.lon
+    +"&hourly=precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m"
+    +"&daily=sunrise,sunset&past_days=14&forecast_days=8&timezone=auto&timeformat=unixtime";
+  const r=await fetch(u);if(!r.ok)throw new Error("Open-Meteo antwortet "+r.status);
+  const d=await r.json();TZ=d.timezone||TZ;
+  const h=d.hourly,neu=[];
+  // Open-Meteo: precipitation = Summe der Stunde VOR dem Stempel; Temperatur/Feuchte gelten zum Stempel -> Mittel
+  for(let i=1;i<h.time.length;i++){const e=h.time[i]*1000;
+    neu.push({s:e-36e5,e,p:+h.precipitation[i]||0,pp:h.precipitation_probability[i],
+      T:(h.temperature_2m[i-1]+h.temperature_2m[i])/2,rh:(h.relative_humidity_2m[i-1]+h.relative_humidity_2m[i])/2,
+      sun:+h.sunshine_duration[i]||0,wind:+h.wind_speed_10m[i]||0});}
+  const so={};d.daily.time.forEach((t,i)=>{so[teile(t*1000+12*36e5).tag]={auf:d.daily.sunrise[i]*1000,unter:d.daily.sunset[i]*1000};});
+  Z=neu;SONNE=so;
+}
+/* Beispiel-Lagen: 14 Tage zurueck trocken (fuer den Wuchs), dann 8 Tage nach Drehbuch.
+   n = Tag ab heute, h = Ortsstunde. Temperatur 3-13 °C, Luftfeuchte 57-93 % im Tagesgang. */
+function beispiel(art){
+  ORT=ortLesen();TZ=ORT.tz;Z=[];SONNE={};
+  const heute=teile(Date.now()).tag,start=lokal(tagPlus(heute,-14),0,0),ende=lokal(tagPlus(heute,8),0,0);
+  for(let n=-14;n<=8;n++){const tag=tagPlus(heute,n);SONNE[tag]={auf:lokal(tag,7,40),unter:lokal(tag,17,15)};}
+  for(let s=start;s<ende;s+=36e5){const t=teile(s),n=tageZw(heute,t.tag),h=t.h,w=Math.cos(2*Math.PI*(h-15)/24);
+    const c={s,e:s+36e5,p:0,pp:5,T:8+5*w,rh:75-18*w,sun:h>=10&&h<=15?2400:0,wind:8};
+    if(n>=0){
+      if(art==="letzte"){ if(n<=1){c.pp=10;} else if(n<=5){ if(h>=4&&h<=21){c.p=0.8;c.pp=85;c.sun=0;c.rh=94;} else c.pp=60; } else c.pp=25; }
+      if(art==="regenwoche"){ if(n===3){ if(h<6){c.p=0.4;c.pp=80;c.sun=0;} else c.pp=15; } else { if((h>=10&&h<=13)||h>=18){c.p=0.6;c.pp=75;c.sun=0;} else c.pp=55; } }
+      if(art==="nebel"){ c.T=5+3*w;c.sun=0; c.rh=(n===2||n===5)?97:(h>=13&&h<=16?82:96); }
+      if(art==="trocken"){ c.pp=3; }
+    }
+    Z.push(c);}
+}
+
+/* ---------- Bewertung je Stunde ---------- */
+function trockenStd(acc){return acc<0.5?2:acc<2?3:acc<5?5:8;}
+function bewerten(){
+  let need=0;
+  for(let i=0;i<Z.length;i++){const c=Z[i];let s6=0,s24=0;
+    for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
+    if(c.p>=0.1){need=Math.max(need,trockenStd(s6));if(s24>=10)need=Math.max(need,18);c.z="regen";}
+    else if(need>0){c.z="nass";need=Math.max(0,need-(c.sun>=1800||c.wind>=15?2:c.rh>=E.rh?0.5:1));}
+    else if(c.rh>=E.rh)c.z="tau";
+    else if(c.T<E.tmin)c.z="kalt";
+    else c.z="trocken";
+    const t=teile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
+    const so=SONNE[c.tag],hell=so?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=feiertag(c.tag);
+    const zeit=c.h>=E.von&&c.h+1<=E.bis&&!(E.mittag&&c.h>=13&&c.h<15);
+    c.frei=c.wd===0||!!ft;c.hell=hell;
+    c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeit&&hell;
+    c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":!zeit?"außerhalb deiner Mähzeit":"";
+    const pp=c.pp==null?0:c.pp;
+    c.gut=c.erlaubt&&c.z==="trocken"&&pp<=E.risiko;
+    c.unsicher=c.erlaubt&&c.z==="trocken"&&pp>E.risiko&&pp<=60;
+    c.riskant=c.erlaubt&&c.z==="trocken"&&pp>60;
+  }
+}
+/* Fenster = zusammenhaengende gute Stunden ab "ab", mindestens E.dauer lang */
+function fenster(ab){
+  const W=[];let cur=null;
+  const zu=()=>{if(cur&&(cur.e-cur.s)/36e5>=E.dauer-1e-6)W.push(cur);cur=null;};
+  for(const c of Z){if(c.e<=ab+5*6e4)continue;
+    if(c.gut){if(cur&&cur.e===c.s&&cur.tag===c.tag){cur.e=c.e;cur.pp=Math.max(cur.pp,c.pp||0);}
+      else{zu();cur={s:Math.max(c.s,ab),e:c.e,tag:c.tag,pp:c.pp||0};}}
+    else zu();}
+  zu();W.forEach(w=>{w.P=1-w.pp/100;});return W;
+}
+/* Faelligkeit: feste Tage oder Gradtage ueber 5 °C (Tagesmittel aus den Stunden) */
+function faellig(letzt){
+  if(E.modus==="tage")return {tag:tagPlus(letzt,E.tage)};
+  const tm={};for(const c of Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);
+  const heute=teile(Date.now()).tag,erster=Z.length?teile(Z[0].s).tag:heute;let sum=0,bisher=0;
+  for(let n=1;n<=28;n++){const tag=tagPlus(letzt,n),a=tm[tag];
+    if(!a){if(tag<erster)continue;return {tag:null,sum,bisher,ende:tag};}
+    const g=Math.max(0,a.reduce((x,y)=>x+y,0)/a.length-5);sum+=g;if(tag<=heute)bisher=sum;
+    if(sum>=E.gd)return {tag,sum,bisher};}
+  return {tag:tagPlus(letzt,28),sum,bisher};
+}
+function planen(jetzt,letzt){
+  const f=faellig(letzt);
+  if(!f.tag)return {f,W:[],rec:null};
+  const fruehMs=lokal(tagPlus(f.tag,-E.frueh),0,0),fristMs=lokal(tagPlus(f.tag,1),0,0),ab=Math.max(jetzt,fruehMs);
+  const W=fenster(ab);
+  W.forEach(w=>{const tage=(w.s-jetzt)/864e5,lang=(w.e-w.s)/36e5;
+    w.score=w.P*Math.max(.6,1-.05*tage)*(.9+.1*Math.min(1,(lang-E.dauer)/3));});
+  const vor=W.filter(w=>w.s<fristMs);
+  let rec=null;for(const w of (vor.length?vor:W))if(!rec||w.score>rec.score+1e-9)rec=w;
+  const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag)||fenster(rec.e).find(w=>w.tag!==rec.tag):null;
+  return {f,fruehMs,fristMs,W,rec,danach,ueber:rec&&rec.s>=fristMs};
+}
+function fTxt(w){return hhmm(w.s)+"–"+hhmm(w.e)+" Uhr";}
+function nachTxt(P,heute){
+  const r=P.rec,d=P.danach,dEnde=Z[Z.length-1].e;
+  // Reicht die Vorhersage keine 2 Tage mehr, ist "kein Fenster danach" nur das Ende der Daten - keine letzte Chance
+  if(!d)return (dEnde-r.e)/864e5<2?{txt:"Weiter reicht die Vorhersage nicht.",letzte:false}
+    :{txt:"Danach bis zum Ende der Vorhersage ("+tagTxt(teile(dEnde-1).tag)+") kein trockenes Fenster.",letzte:true};
+  const lucke=(d.s-r.e)/864e5;
+  if(lucke>=2)return {txt:"Danach "+Math.floor(lucke)+" Tage kein trockenes Fenster – nächstes "+tagTxt(d.tag)+" ab "+hhmm(d.s)+" Uhr.",letzte:true};
+  return {txt:"Nächste Gelegenheit "+relTag(d.tag,heute)+" ab "+hhmm(d.s)+" Uhr.",letzte:false};
+}
+
+/* ---------- Anzeige ---------- */
+function status(){
+  const jetzt=Date.now(),heute=teile(jetzt).tag,el=$("status");
+  if(!E.letzt)E.letzt=tagPlus(heute,-5);
+  const P=planen(jetzt,E.letzt),f=P.f,n=tageZw(E.letzt,heute);
+  let h='<h2>Stand jetzt</h2><div class="st1">Zuletzt gemäht '+tagTxt(E.letzt)+" ("+(n===0?"heute":n===1?"gestern":"vor "+n+" Tagen")+")";
+  if(E.modus==="wuchs")h+=" · Wuchs seither "+Math.round(f.bisher||0)+" von "+E.gd+" Gradtagen";
+  h+="</div>";
+  if(!f.tag){h+='<div class="st2">Noch lange nicht fällig</div><div class="st3">Der Wuchs reicht bis '+tagTxt(tagPlus(f.ende,-1))+" nicht – im Moment wächst kaum etwas.</div>";el.innerHTML=h;return P;}
+  const nf=tageZw(heute,f.tag);
+  h+='<div class="st3">Fällig <b>'+tagTxt(f.tag)+"</b> ("+(nf<0?"seit "+(-nf)+(nf===-1?" Tag":" Tagen"):nf===0?"heute":"in "+nf+(nf===1?" Tag":" Tagen"))+")"
+    +(E.frueh&&nf>E.frueh?" · Hinweise ab "+tagTxt(tagPlus(f.tag,-E.frueh)):"")+"</div>";
+  if(P.rec){const nt=nachTxt(P,heute);
+    h+='<div class="st2">'+(P.ueber?"Erst nach der Frist: ":"Empfehlung: ")+relTag(P.rec.tag,heute).replace(/^./,x=>x.toUpperCase())+(tageZw(heute,P.rec.tag)>2?" "+tagTxt(P.rec.tag).slice(3):"")+", "+fTxt(P.rec)+"</div>"
+      +'<div class="st3">Trocken, Regenrisiko höchstens '+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<span class="warn">'+nt.txt+"</span>":nt.txt)+"</div>";
+    const besser=P.W.filter(w=>w!==P.rec&&w.P>P.rec.P+1e-9&&w.s<P.fristMs);
+    if(besser.length)h+='<div class="st3" style="color:var(--muted)">'+tagTxt(besser[0].tag)+" wäre sicherer ("+Math.round(besser[0].pp)+" %), liegt aber weiter weg – die Vorhersage ist dort unsicherer.</div>";
+  }else h+='<div class="st2">Kein trockenes Fenster in Sicht</div><div class="st3">In den nächsten Tagen gibt es keine Stunde, die trocken, hell und in deiner Mähzeit liegt.</div>';
+  el.innerHTML=h;return P;
+}
+function zeitleiste(P){
+  const jetzt=Date.now(),heute=teile(jetzt).tag,H0=6,H1=22;
+  const idx={};Z.forEach(c=>{if(c.h>=H0&&c.h<H1)(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
+  let h='<div class="tl"><div></div><div class="tla">';
+  for(let x=H0;x<H1;x++)h+="<span>"+(x%3===0?x:"")+"</span>";
+  h+="</div>";
+  for(let n=0;n<8;n++){const tag=tagPlus(heute,n),row=idx[tag];if(!row)continue;
+    const frist=P.f&&P.f.tag===tag,ft=feiertag(tag),so=wtag(tag)===0;
+    h+='<div class="tlk'+(frist?" frist":"")+'">'+tagTxt(tag)+"<small>"+(frist?"fällig":ft?ft:so?"Sonntag":n===0?"heute":"")+"</small></div>";
+    h+='<div class="tlr'+(so||ft?" sonn":"")+'">';
+    for(let x=H0;x<H1;x++){const c=row[x];if(!c){h+="<i></i>";continue;}
+      let k;
+      if(c.z==="regen")k=c.p<0.5?"z-regen1":c.p<2?"z-regen2":"z-regen3";
+      else if(c.z==="nass")k="z-nass";else if(c.z==="tau")k="z-tau";else if(c.z==="kalt")k="z-kalt";
+      else if(c.frei)k="z-aus";else if(!c.hell)k="z-dunkel";
+      else if(c.gut)k="z-gut";else if(c.unsicher)k="z-unsicher";else if(c.riskant)k="z-riskant";else k="z-frei";
+      const rec=P.rec&&c.s<P.rec.e&&c.e>P.rec.s;
+      h+='<i class="'+k+(rec?" rec":"")+'" data-s="'+c.s+'"></i>';}
+    if(n===0){const t=teile(jetzt),pos=(t.h+t.m/60-H0)/(H1-H0);if(pos>=0&&pos<=1)h+='<span class="jetzt" style="left:calc('+(pos*100).toFixed(2)+'% - 1px)"></span>';}
+    h+="</div>";}
+  h+="</div>";$("tl").innerHTML=h;
+}
+function detailZeigen(s){
+  const c=Z.find(x=>x.s===s);if(!c)return;
+  const zust={regen:"Regen",nass:"trocknet noch ab",tau:"Tau / Nebel",kalt:"zu kalt",trocken:"trocken"}[c.z];
+  $("detail").innerHTML="<b>"+tagTxt(c.tag)+" "+hhmm(c.s)+"–"+hhmm(c.e)+" Uhr</b> · "+zust+" · Regen "+c.p.toFixed(1).replace(".",",")+" mm · Risiko "+(c.pp==null?"–":c.pp+" %")
+    +" · "+c.T.toFixed(0)+" °C · Feuchte "+Math.round(c.rh)+" %"+(c.sun>=1800?" · sonnig":"")+(c.erlaubt?" · <span style='color:var(--gruen);font-weight:700'>Mähzeit</span>":" · "+c.grund);
+}
+/* Nachrichten: je Tag Prüfung 7:30 (und 18:00), Empfehlung wie oben aus Sicht des Prüfzeitpunkts */
+function simulieren(){
+  const jetzt=Date.now(),heute=teile(jetzt).tag,ende=Z[Z.length-1].e,out=[];
+  let letzt=E.letzt,gemaehtBis=-Infinity,faelligGemeldet=false;
+  for(let n=0;n<8;n++){const tag=tagPlus(heute,n);
+    for(const [hh,mi,art] of [[7,30,"morgen"],[18,0,"abend"]]){
+      const t=lokal(tag,hh,mi);if(t<jetzt||t>ende-12*36e5||t<gemaehtBis)continue;
+      if(art==="abend"&&!E.vorabend)continue;
+      const P=planen(t,letzt);if(!P.f.tag)continue;
+      const r=P.rec;
+      if(art==="morgen"){
+        if(t<P.fruehMs)continue;
+        if(r&&r.tag===tag){const nt=nachTxt(P,tag);
+          out.push({t,titel:P.ueber?"Rasen: heute nachholen":nt.letzte?"Rasen: letzte Chance heute":"Rasen: heute mähen",
+            text:"Trocken "+fTxt(r)+", Regenrisiko "+Math.round(r.pp)+" %. "+nt.txt+(P.ueber?"":" Fällig "+relTag(P.f.tag,tag)+".")});
+          if(E.maehen){letzt=tag;gemaehtBis=r.e;out.push({t:r.e,gemaeht:true,titel:"Gemäht",text:"Simuliert: du mähst "+fTxt(r)+". Nächste Frist "+(E.modus==="tage"?tagTxt(tagPlus(tag,E.tage)):"nach Wuchs")});}
+        }else if(tag===P.f.tag&&!faelligGemeldet&&(!r||r.s>=P.fristMs)){faelligGemeldet=true;
+          out.push({t,titel:"Rasen ist heute fällig",text:"Bis heute Abend kein trockenes Fenster."+(r?" Nächste Chance "+relTag(r.tag,tag)+" "+fTxt(r)+".":" In der Vorhersage ist keins in Sicht.")});}
+      }else{
+        if(t<P.fruehMs-864e5)continue;
+        const morgen=tagPlus(tag,1);
+        if(r&&r.tag===morgen){const nt=nachTxt(P,morgen);
+          out.push({t,titel:"Rasen: morgen mähen",text:tagTxt(morgen)+" trocken "+fTxt(r)+", Regenrisiko "+Math.round(r.pp)+" %."+(nt.letzte?" "+nt.txt:"")});}
+      }
+    }
+  }
+  const el=$("pushes");
+  if(!out.length){el.innerHTML='<div class="leer">Keine Nachricht in den nächsten Tagen – '+(planen(jetzt,E.letzt).f.tag?"noch nicht fällig oder kein Fenster.":"der Rasen wächst kaum.")+"</div>";return;}
+  out.sort((a,b)=>a.t-b.t);
+  el.innerHTML=out.map(p=>'<div class="push'+(p.gemaeht?" gemaeht":"")+'"><div class="ic">'+(p.gemaeht?"✓":"🌱")+'</div><div class="pk"><div class="pz"><b>'+(p.gemaeht?"SIMULATION":"WETTER")+"</b><span>"
+    +tagTxt(teile(p.t).tag)+" "+String(teile(p.t).h).padStart(2,"0")+":"+String(teile(p.t).m).padStart(2,"0")+'</span></div><div class="pt">'+p.titel+'</div><div class="pb">'+p.text+"</div></div></div>").join("");
+}
+function alles(){
+  if(!Z.length)return;
+  bewerten();const P=status();zeitleiste(P);simulieren();
+  if(AUSWAHL)detailZeigen(AUSWAHL);
+}
+
+/* ---------- Bedienung ---------- */
+function regler(id,key,fmt){const r=$(id);r.value=E[key];const o=$("o"+id.slice(1));
+  const zeig=()=>{if(o)o.textContent=fmt(E[key]);};zeig();
+  r.oninput=()=>{E[key]=+r.value;zeig();speichern();alles();};}
+function bedienung(){
+  $("eLetzt").value=E.letzt;$("eLetzt").onchange=e=>{if(e.target.value){E.letzt=e.target.value;speichern();alles();}};
+  $("eHeute").onclick=()=>{E.letzt=teile(Date.now()).tag;$("eLetzt").value=E.letzt;speichern();alles();};
+  const modus=()=>{document.querySelectorAll("#eModus button").forEach(b=>b.classList.toggle("an",b.dataset.m===E.modus));
+    $("rTage").style.display=E.modus==="tage"?"":"none";$("rGd").style.display=E.modus==="wuchs"?"":"none";};
+  document.querySelectorAll("#eModus button").forEach(b=>b.onclick=()=>{E.modus=b.dataset.m;modus();speichern();alles();});modus();
+  regler("eTage","tage",v=>v+" Tage");regler("eGd","gd",v=>v+" Gradtage");
+  regler("eFrueh","frueh",v=>v?v+(v===1?" Tag":" Tage"):"erst am Tag");
+  regler("eDauer","dauer",v=>v+(v===1?" Stunde":" Stunden"));regler("eRisiko","risiko",v=>v+" %");
+  regler("eRh","rh",v=>v+" %");regler("eTmin","tmin",v=>v+" °C");
+  const zeit=()=>{$("oZeit").textContent=E.von+"–"+E.bis+" Uhr";};
+  $("eVon").value=E.von;$("eBis").value=E.bis;zeit();
+  $("eVon").oninput=e=>{E.von=Math.min(+e.target.value,E.bis-1);e.target.value=E.von;zeit();speichern();alles();};
+  $("eBis").oninput=e=>{E.bis=Math.max(+e.target.value,E.von+1);e.target.value=E.bis;zeit();speichern();alles();};
+  const t6=$("eTage6");t6.innerHTML=["Mo","Di","Mi","Do","Fr","Sa"].map((n,i)=>'<button type="button" data-i="'+i+'">'+n+"</button>").join("")+'<button type="button" disabled style="opacity:.5">So</button>';
+  const t6z=()=>t6.querySelectorAll("button[data-i]").forEach(b=>b.classList.toggle("an",!!E.tage6[+b.dataset.i]));t6z();
+  t6.onclick=e=>{const b=e.target.closest("button[data-i]");if(!b)return;const i=+b.dataset.i;E.tage6[i]=E.tage6[i]?0:1;t6z();speichern();alles();};
+  $("eMittag").checked=E.mittag;$("eMittag").onchange=e=>{E.mittag=e.target.checked;speichern();alles();};
+  $("oVorabend").checked=E.vorabend;$("oVorabend").onchange=e=>{E.vorabend=e.target.checked;speichern();alles();};
+  $("oMaehen").checked=E.maehen;$("oMaehen").onchange=e=>{E.maehen=e.target.checked;speichern();alles();};
+  $("eReset").onclick=()=>{const q=E.quelle,l=E.letzt;E=Object.assign({},STD,{quelle:q,letzt:l,tage6:STD.tage6.slice()});speichern();bedienung();alles();};
+  $("tl").onclick=e=>{const i=e.target.closest("i[data-s]");if(!i)return;AUSWAHL=+i.dataset.s;detailZeigen(AUSWAHL);};
+  document.querySelectorAll("#quelle button").forEach(b=>b.onclick=()=>{E.quelle=b.dataset.q;speichern();quelleLaden();});
+}
+async function quelleLaden(){
+  document.querySelectorAll("#quelle button").forEach(b=>b.classList.toggle("an",b.dataset.q===E.quelle));
+  const info=$("quelleInfo");AUSWAHL=null;$("detail").textContent="";
+  if(E.quelle==="echt"){info.textContent="Lade die Vorhersage …";
+    try{await echteDaten();info.textContent="Open-Meteo für "+ORT.name+", stündlich, 8 Tage voraus (geladen "+hhmm(Date.now())+" Uhr).";}
+    catch(err){info.textContent="Vorhersage nicht erreichbar ("+err.message+") – zeige das Beispiel „letzte Chance“.";beispiel("letzte");}
+  }else{beispiel(E.quelle);
+    info.textContent={letzte:"Erfunden: heute und morgen trocken, dann vier Tage Regen.",regenwoche:"Erfunden: jeden Tag Schauer, nur in drei Tagen nach nächtlichem Regen eine Lücke.",
+      nebel:"Erfunden: Nebel bis Mittag, an zwei Tagen ganztägig, kein Regen.",trocken:"Erfunden: eine trockene Woche, morgens Tau."}[E.quelle];}
+  alles();
+}
+if(!E.letzt){TZ=ortLesen().tz;E.letzt=tagPlus(teile(Date.now()).tag,-5);}
+bedienung();quelleLaden();
+</script>
+</body>
+</html>
