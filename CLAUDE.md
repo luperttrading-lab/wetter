@@ -2066,6 +2066,14 @@ unsicherer". `rzLeisteBis`/`mehr` entfernt - die Zeilenzahl haengt nicht mehr vo
 Zustand ("Nass - es regnet"), die Begruendung (Letzter Regen, Abtrocknen, Radar) steht unter der Leiste als "Gras
 jetzt". 393 x 779: beide Wochen und die Legende ohne Scrollen sichtbar. Geprueft mit verlaengerten Testdaten
 (`om_synth15.json`, zweite Woche = Kopie der ersten), hell und dunkel.
+v5.74 (Nutzer-Screenshot 20:59 mit echter 15-Tage-Vorhersage: "8 Tage als Fenster lassen, die anderen zum Hochscrollen
+- aber die gleichen Farben"): Die Tageszeilen liegen in einem eigenen Scrollbereich `.rz-sc` (Kopf "Pause/dunkel" und
+Stundenzahlen bleiben stehen), Hoehe in `rzGrossBinden` gemessen = genau 8 Zeilen + 1 px, so lugt die gestrichelte Linie vor
+Tag 9 unten hervor (ab dort "Vorhersage unsicherer"). KEIN Abblassen mehr (v5.73 .55 machte auf dunkel Beige zu Khaki und
+Blau zu Stahlblau). `overscroll-behavior:contain`, Scrollstand bleibt beim Neuzeichnen. Blasen jetzt per
+getBoundingClientRect relativ zu `.rz-el` (`rzBlasePlatz`) - offsetTop kennt das innere Scrollen nicht. Legende: "Weitere
+Tage: in der Leiste nach oben wischen". Geprueft 393/320 pt: 202 px hoch, 8 von 14 Zeilen ganz sichtbar, Blase an Zeile 12
+nach dem Scrollen 3-4 px ueber der Zelle.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
