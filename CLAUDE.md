@@ -1983,6 +1983,10 @@ oben den Button ohne Text, der kommt nur beim Tippen"): Kopffelder "Pause"/"dunk
 Schatten nur oben +2 / unten +1 px. Tipp (`data-rzb` p / m = morgens / a = abends) -> Blase "Mittagspause 13-15 Uhr - in den
 Einstellungen aenderbar oder abschaltbar" bzw. "Dunkel - Sonnenuntergang heute 17:13 Uhr, Sa 31.10. 17:02 Uhr - gemaeht wird
 nur bei Tageslicht" (aus RASEN.SONNE); zweiter Tipp schliesst. Legende zeigt "dunkel", sobald dunkle Kaestchen vorkommen.
+v5.66 (Nutzer: "koennen wir den Warnhinweis testen?"): `?warntest` in der Adresse -> `warnTest()` haengt unter die echten
+Warnungen vier Testkarten (Stufe 1-4, "TEST - ... - keine echte Warnung"), auch wenn der Abruf scheitert. Nur im Browser
+nutzbar (die Home-Bildschirm-App nimmt keine Adress-Zusaetze). Geprueft mit echter Lage 25.10. 17:45: Norden
+"SCHWERE STURMBOEEN" (moderate) bis 21 Uhr + Testkarten; ohne Zusatz keine Testkarten.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
