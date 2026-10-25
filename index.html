@@ -1196,7 +1196,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.66</span>
+      <span class="ver">v5.67</span>
     </div>
   </header>
 
@@ -5451,9 +5451,17 @@ function rzFenster(ab){const E=rzE(),W=[];let cur=null;const zu=()=>{if(cur&&(cu
     if(c.gut){if(cur&&cur.e===c.s&&cur.tag===c.tag){cur.e=c.e;cur.pp=Math.max(cur.pp,c.pp||0);}else{zu();cur={s:Math.max(c.s,ab),e:c.e,tag:c.tag,pp:c.pp||0};}}
     else zu();}
   zu();W.forEach(w=>w.P=1-w.pp/100);return W;}
+/* v5.67 (Nutzer, So 25.10.: "Heute gemaeht" ergab "faellig So 1.11." - ein Tag ohne Maehen, und eine Zeile hinter
+   der Leiste): faellt der Termin auf Sonntag, Feiertag oder einen abgewaehlten Tag, gilt der letzte Maehtag davor
+   (nicht der Maehtag selbst oder frueher - dann der naechste danach). eig = der rechnerische Tag, fuer den Text. */
+function rzMaehtag(tag){const wd=rzWtag(tag);return wd!==0&&!rzFeiertag(tag)&&!!rzE().tage6[wd-1];}
+function rzFrist(f,letzt){if(!f.tag||rzMaehtag(f.tag))return f;
+  for(let k=1;k<=6;k++){const t=rzTagPlus(f.tag,-k);if(t<=letzt)break;if(rzMaehtag(t))return Object.assign(f,{eig:f.tag,tag:t});}
+  for(let k=1;k<=7;k++){const t=rzTagPlus(f.tag,k);if(rzMaehtag(t))return Object.assign(f,{eig:f.tag,tag:t});}
+  return f;}
 function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
   if(E.hoch||!letzt)return {tag:heute,sofort:true};   // hohes Gras / Datum unbekannt: die naechste gute Gelegenheit
-  if(E.modus==="tage")return {tag:rzTagPlus(letzt,E.tage)};
+  if(E.modus==="tage")return rzFrist({tag:rzTagPlus(letzt,E.tage)},letzt);
   const tm={};for(const c of RASEN.Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);   // Waermesumme ueber 5 °C (Tagesmittel), Ziel gd
   // v5.51: nach den Stundenwerten die Tagesvorhersage (bis 16 Tage), danach das langjaehrige Mittel; q merkt die
   // unsicherste benutzte Quelle (0 Stunden, 1 Tagesvorhersage, 2 Mittel). Keine 28-Tage-Grenze mehr - im Winter
@@ -5462,7 +5470,7 @@ function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
   for(let n=1;n<=400;n++){const tag=rzTagPlus(letzt,n),a=tm[tag];let T=null,qn=0;
     if(a)T=a.reduce((x,y)=>x+y,0)/a.length;else if(RASEN.TAGT[tag]!=null){T=RASEN.TAGT[tag];qn=tag>zEnde?1:0;}else if(tag>zEnde&&K&&K[tag.slice(5)]!=null){T=K[tag.slice(5)];qn=2;}
     if(T==null){if(tag<=heute)continue;return {tag:null,sum,bisher,ende:tag};}
-    q=Math.max(q,qn);sum+=Math.max(0,T-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return {tag,sum,bisher,grob:q};}
+    q=Math.max(q,qn);sum+=Math.max(0,T-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return rzFrist({tag,sum,bisher,grob:q},letzt);}
   return {tag:null,sum,bisher,ende:rzTagPlus(letzt,401)};}
 function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,W:[],rec:null};
   const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs);
@@ -5572,18 +5580,23 @@ function rzGrossHtml(o){o=o||{};
       :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
-  h+=rzLeisteEinfach(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte
+  h+=rzLeisteEinfach(P,rzMitAlt(()=>rzLeisteBis(rzPlanen(Date.now()))))+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
 function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%";
   const tagK=tag=>{const n=rzTageZw(tag,heute);return n===0?"heute":n===1?"gestern":rzTagTxt(tag);},
-        tagV=tag=>{const n=rzTageZw(heute,tag);return n===0?"heute":n===1?"morgen":rzTagTxt(tag);},
-        frueh=J&&J.maehbar&&(!P.rec||Math.max(J.maehbar.s,Date.now())<P.rec.s-36e5)?J.maehbar:null;   // v5.51: erst ab 1 h Vorsprung
+        tagV=tag=>{const n=rzTageZw(heute,tag);return n===0?"heute":n===1?"morgen":rzTagTxt(tag);};
+  /* v5.51: "Moeglich waere schon" erst ab 1 h Vorsprung. v5.67: nur ein Fenster AB "Fruehestens vor Faelligkeit"
+     (P.W beginnt dort) - vorher nahm es die erste trockene Stunde ueberhaupt und schrieb nach "Heute gemaeht" (7 Tage)
+     "Moeglich waere schon Di 27.10.". "Trocken genug ab" nur bei faelligem Termin ohne Fenster. */
+  const frueh=P.rec?(P.W||[]).find(w=>w.s<P.rec.s-36e5)||null
+        :J&&J.maehbar&&f.tag&&!P.spaet&&(f.sofort||J.maehbar.e>P.fruehMs)?J.maehbar:null;
   let z1,z2,z3="";
   if(f.sofort)z1=E.hoch?"Gras ist schon hoch – lieber bald mähen.":"Wann zuletzt gemäht? → Einstellungen";
   else if(f.tag&&!P.spaet){const nf=rzTageZw(heute,f.tag);
-    z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
+    z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(f.eig?" (eigentlich "+rzTagTxt(f.eig)+")":nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
   else z1="Gemäht "+tagK(E.letzt)+" · seither gewachsen "+pct();
   if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
     z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr";
@@ -5596,9 +5609,12 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
   if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";
   return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"+(z3?'<div class="rz-z">'+z3+"</div>":"")+"</div>";
 }
-function rzMaehAlt(){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
+function rzMitAlt(fn){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
   if(E.letzt===heute){const v=E.vor;E.letzt=v&&v.letzt!==E.letzt?v.letzt:null;E.hoch=!!(v&&v.hoch);}else{E.letzt=heute;E.hoch=false;}
-  try{return rzMaehHtml(E,rzPlanen(Date.now()),rzJetzt(),heute);}finally{E.letzt=alt.letzt;E.hoch=alt.hoch;}}
+  try{return fn(E,heute);}finally{E.letzt=alt.letzt;E.hoch=alt.hoch;}}
+function rzMaehAlt(){return rzMitAlt((E,heute)=>rzMaehHtml(E,rzPlanen(Date.now()),rzJetzt(),heute));}
+/* v5.67: letzter Tag, den die Leiste zeigen muss - Faelligkeit und Empfehlung (bis heute + 7, so weit die Stunden reichen) */
+function rzLeisteBis(P){return [P.f&&!P.f.sofort&&P.f.tag,P.rec&&P.rec.tag].filter(Boolean);}
 /* Leiste "Die naechsten Tage". v5.58 (Nutzer: "nochmal ueberlegen, was in die Grafik muss - zu unuebersichtlich"):
    nur was fuer "wann kann ich maehen" zaehlt. Spalten = deine Maehzeit ohne Pause; Zeilen = heute + 6 Tage;
    Sonn-/Feiertag und abgewaehlte Tage als EIN grauer Balken; fuenf Farben (gut, Regenrisiko, Regen, noch nass =
@@ -5607,10 +5623,12 @@ function rzMaehAlt(){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.le
    Kopfzeile ueber den Stunden mit "Pause" ueber der Luecke (24 px breit) und "dunkel" ueber den Stunden, die an
    mindestens einem der Tage dunkel sind; in den Zeilen jedes dunkle Kaestchen in Nachtfarbe (`.rz-dunkel`).
    Die ausfuehrliche Leiste (v5.44-v5.57, Band/Linien/blass) und der Testumschalter sind entfernt. */
-function rzLeisteEinfach(P){
+function rzLeisteEinfach(P,mehr){
   const E=rzE(),jetzt=Date.now(),heute=rzTeile(jetzt).tag,idx={},pa=x=>E.pause&&x>=E.pVon&&x<E.pBis;
   RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
-  const tage=[];for(let n=0;n<7;n++){const t=rzTagPlus(heute,n);if(idx[t])tage.push(t);}
+  // v5.67: heute + 6, laenger, wenn Faelligkeit oder Empfehlung (auch im anderen Zustand, `mehr`) auf heute + 7 liegt
+  const bis=rzLeisteBis(P).concat(mehr||[]).reduce((a,b)=>b>a?b:a,rzTagPlus(heute,6));
+  const tage=[];for(let n=0;n<8;n++){const t=rzTagPlus(heute,n);if(t>bis)break;if(idx[t])tage.push(t);}
   const std=[];for(let x=E.von;x<E.bis;x++)if(!pa(x))std.push(x);
   let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div>';
   if(!std.length)return h+'<div class="rz-z">Keine Mähzeit eingestellt.</div>';
