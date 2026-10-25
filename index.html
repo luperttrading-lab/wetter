@@ -1199,7 +1199,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.68</span>
+      <span class="ver">v5.69</span>
     </div>
   </header>
 
@@ -5480,11 +5480,16 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   if(f.grob&&RASEN.Z.length&&fruehMs>=RASEN.Z[RASEN.Z.length-1].e)return {f,W:[],rec:null,spaet:true};   // v5.51: Termin hinter den Stundenwerten
   const W=rzFenster(ab);
   // v5.51: Laengen-Bonus nur bis Dauer + 1 h (vorher + 3 h) - sonst schlug "heute 15-19 Uhr" das Fenster jetzt bis 13 Uhr
-  W.forEach(w=>{const tg=(w.s-jetzt)/864e5,lg=(w.e-w.s)/36e5;w.score=w.P*Math.max(.6,1-.05*tg)*(.9+.1*Math.min(1,lg-E.dauer));});
+  // v5.69 (Nutzer: "heute gemaeht, 7 Tage, Empfehlung Donnerstag - macht keinen Sinn"): 5 % Abschlag je Tag ABSTAND
+  // ZUR FAELLIGKEIT statt je Tag ab jetzt. Vorher gewann immer der frueheste Tag, den "Fruehestens vor Faelligkeit"
+  // zuliess; jetzt der Faelligkeitstag selbst, frueher nur, wenn er schlechter ist (Regenrisiko). Ist der Rasen schon
+  // faellig (oder sofort), waechst der Abstand mit jedem Tag - dann gewinnt wie bisher das frueheste gute Fenster.
+  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag)),lg=(w.e-w.s)/36e5;w.ad=ad;w.score=w.P*Math.max(.6,1-.05*ad)*(.9+.1*Math.min(1,lg-E.dauer));});
   // v5.51: unter fast gleich guten Fenstern (bis 3 Punkte unter dem besten) das FRUEHESTE - 5 % statt 7 %
   // Regenrisiko ist Rauschen und schob "morgen 9-13" hinter "morgen 15-17" (W ist zeitlich sortiert)
   const vor=W.filter(w=>w.s<fristMs),kand=vor.length?vor:W;let rec=null;
-  if(f.sofort)rec=W[0]||null;else{const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.find(w=>w.score>=best-0.03)||null;}
+  // v5.69: unter den fast gleich guten das mit dem kleinsten Abstand zur Faelligkeit, dann das frueheste
+  if(f.sofort)rec=W[0]||null;else{const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.filter(w=>w.score>=best-0.03).sort((a,b)=>a.ad-b.ad||a.s-b.s)[0]||null;}
   const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag):null;
   return {f,fruehMs,fristMs,W,rec,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
@@ -5594,12 +5599,13 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
   /* v5.51: "Moeglich waere schon" erst ab 1 h Vorsprung. v5.67: nur ein Fenster AB "Fruehestens vor Faelligkeit"
      (P.W beginnt dort) - vorher nahm es die erste trockene Stunde ueberhaupt und schrieb nach "Heute gemaeht" (7 Tage)
      "Moeglich waere schon Di 27.10.". "Trocken genug ab" nur bei faelligem Termin ohne Fenster. */
-  const frueh=P.rec?(P.W||[]).find(w=>w.s<P.rec.s-36e5)||null
+  // v5.69: nur wenn faellig (oder sofort) - vor der Faelligkeit ist "schon Do moeglich" kein Rat, sondern Laerm
+  const frueh=P.rec?(f.sofort||rzTageZw(heute,f.tag)<=0?(P.W||[]).find(w=>w.s<P.rec.s-36e5)||null:null)
         :J&&J.maehbar&&f.tag&&!P.spaet&&(f.sofort||J.maehbar.e>P.fruehMs)?J.maehbar:null;
   let z1,z2,z3="";
   if(f.sofort)z1=E.hoch?"Gras ist schon hoch – lieber bald mähen.":"Wann zuletzt gemäht? → Einstellungen";
   else if(f.tag&&!P.spaet){const nf=rzTageZw(heute,f.tag);
-    z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(f.eig?" (eigentlich "+rzTagTxt(f.eig)+")":nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
+    z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(f.eig?" (statt "+RZ_WT[rzWtag(f.eig)]+")":nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
   else z1="Gemäht "+tagK(E.letzt)+" · seither gewachsen "+pct();
   if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
     z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr";
