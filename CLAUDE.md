@@ -1945,6 +1945,12 @@ mit feinem Rand, vergangene Stunden blass, Jetzt-Strich in der laufenden Stunde,
 Linien ein Satz: "Spalten: deine Maehzeit 9-19 Uhr, Luecke = Pause 13-15 - ab 17 Uhr dunkel." Legende nur mit Farben,
 die vorkommen. Blase wie gehabt (Zeile = eigenes Grid `.rz-er`, Huelle `.rz-el` relativ). AUFRAEUMEN nach der Wahl:
 Verlierer-Funktion + CSS, `rz_leiste`, `data-rzl`, `.rz-dt`.
+v5.59 (Nutzer zur einfachen Leiste, Maehzeit 9-20: "sollte bis zum Maehzeit-Ende gehen ... dunkel anzeigen, wenn die
+Maehzeit laenger ist - nur Oktober/April - aber nicht die Zeitachse wechseln, das verwirrt"): Spalten IMMER die ganze
+Maehzeit ohne Pause (kein Weglassen dunkler Stunden mehr). Dunkle Stunden einer Zeile werden EIN Balken "dunkel"
+(`.rz-dunkel2`, `grid-column: span n`, bis zur naechsten Luecke; 1 Stunde = Mond), wie der Sonntag-Balken. Satz unter
+der Leiste nur noch Maehzeit und Pause. Geprueft 9-20 Uhr: Oktober "dunkel" 17-20 in jeder Zeile, Sommer alles Kaestchen
+bis 19 Uhr - gleiche Achse 9-12 | 15-19.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

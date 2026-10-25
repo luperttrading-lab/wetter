@@ -225,6 +225,8 @@ html.dunkel .rz-bs{background:#8193aa;color:#101820}
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
 .rz-frei2{grid-column:2/-1;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
 html.dunkel .rz-frei2{background:#262d38}
+.rz-dunkel2{height:22px;border-radius:3px;background:#cdd4e4;color:#4a5878;font:600 11px/22px system-ui;text-align:center;overflow:hidden;white-space:nowrap}
+html.dunkel .rz-dunkel2{background:#202c45;color:#9fb0d2}
 .rz-jz2{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#d23a3a;border-radius:1px}
 .rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
 .rz-leg i.rz-leer{box-shadow:inset 0 0 0 1px rgba(120,130,150,.35)}
@@ -1209,7 +1211,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.58</span>
+      <span class="ver">v5.59</span>
     </div>
   </header>
 
@@ -5657,7 +5659,8 @@ function rzLeisteEinfach(P){
   RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
   const tage=[];for(let n=0;n<7;n++){const t=rzTagPlus(heute,n);if(idx[t])tage.push(t);}
   const roh=[];for(let x=E.von;x<E.bis;x++)if(!pa(x))roh.push(x);
-  const hellIrgendwo=x=>tage.some(t=>idx[t][x]&&idx[t][x].hell),std=roh.filter(hellIrgendwo);
+  // v5.59 (Nutzer: "nicht die Zeitachse wechseln, das verwirrt"): immer die ganze Maehzeit, Dunkelheit als Balken
+  const std=roh;
   let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div>';
   if(!std.length)return h+'<div class="rz-z">In deiner Mähzeit ist es an allen Tagen dunkel.</div>';
   const tpl="46px "+std.map((x,i)=>(i>0&&x!==std[i-1]+1?"7px ":"")+"1fr").join(" "),sp=' style="grid-template-columns:'+tpl+'"';
@@ -5668,18 +5671,17 @@ function rzLeisteEinfach(P){
     const lab='<div class="rz-k'+(frist?" frist":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===0?"heute":"")+"</small></div>";
     if(wd===0||ft||!E.tage6[wd-1]){h+='<div class="rz-er"'+sp+">"+lab+'<b class="rz-frei2">'+(wd===0?"Sonntag":ft||"kein Mähtag")+" – kein Mähen</b></div>";continue;}
     h+='<div class="rz-er"'+sp+">"+lab;
-    std.forEach((x,i)=>{h+=luecke(i);const c=row[x];if(!c||!c.hell){h+='<i class="rz-nacht"></i>';leer=true;return;}
+    for(let i=0;i<std.length;i++){const x=std[i];h+=luecke(i);const c=row[x];
+      if(!c||!c.hell){let j=i+1;while(j<std.length&&std[j]===std[j-1]+1&&(!row[std[j]]||!row[std[j]].hell))j++;   // dunkle Stunden bis zur naechsten Luecke: EIN Balken
+        h+='<b class="rz-dunkel2" style="grid-column:span '+(j-i)+'">'+(j-i>=2?"dunkel":"\u263E")+"</b>";i=j-1;continue;}
       const pp=c.pp==null?0:c.pp,k=c.z==="regen"?"rz-r2":c.z==="nass"||c.z==="weich"||c.z==="tau"?"rz-nass":c.z==="kalt"?"rz-kalt":pp<=E.risiko?"rz-gut":"rz-risk";
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
-      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";}
     h+="</div>";}
   h+="</div>";
-  // Satz statt Band: Maehzeit, Pause, Dunkelheit
-  const dunkelAb=roh.find(x=>x>=12&&!hellIrgendwo(x)),hellAb=roh.filter(x=>x<12&&!hellIrgendwo(x)).pop();
-  h+='<div class="rz-esatz">Spalten: deine Mähzeit '+E.von+"–"+E.bis+" Uhr"+(E.pause&&E.pVon>E.von&&E.pBis<E.bis?", Lücke = Pause "+E.pVon+"–"+E.pBis:"")
-    +(dunkelAb!=null?" · ab "+dunkelAb+" Uhr dunkel":"")+(hellAb!=null?" · bis "+(hellAb+1)+" Uhr dunkel":"")+".</div>";
+  h+='<div class="rz-esatz">Spalten: deine Mähzeit '+E.von+"–"+E.bis+" Uhr"+(E.pause&&E.pVon>E.von&&E.pBis<E.bis?", Lücke = Pause "+E.pVon+"–"+E.pBis:"")+".</div>";
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"]]
-      .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+(leer?'<span><i class="rz-leer"></i>leer = dunkel</span>':"")+"</div>";
+      .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
