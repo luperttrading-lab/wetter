@@ -1910,6 +1910,12 @@ nicht noetig"): B fest - A/C, `RZ_DARST`/`rzDarst`, Testzeile, `data-rzd`, `.zu2
 HEUTIGEN Zeile (`hell` der Stundenwerte, sonst morgen); "dunkel"-Stueck `.rz-bn` (#9aa6c0, dunkel #2c3a5c) - im
 Oktober 17-19 Uhr, im Sommer (Untergang 21:35, Maehzeit bis 19) gar nicht. Ein Band-Stueck unter 3 Stunden bleibt
 ohne "Maehzeit"-Text (passt nicht, ~31 px). Geprueft Oktober (echte Daten) und Sommer-Simulation, hell und dunkel.
+v5.54 (Nutzer zum Bild v5.53: "ist es nur bis 19 Uhr dunkel? Dunkel als Kasten oder oben drueber wie die
+Mittagspause?"): Das "dunkel"-Stueck endete an der 19-Uhr-Linie (Ende der Maehzeit) und las sich wie "bis 19 Uhr
+dunkel". Jetzt endet der Maehzeit-KASTEN, wo es dunkel wird; "dunkel" steht OHNE Kasten wie "Pause" ueber der
+GANZEN dunklen Strecke der heutigen Zeile (17-22 Uhr), darunter ein 3-px-Strich in Nachtfarbe, Text mit
+Hintergrund ueber der 19-Uhr-Linie (`.rz-bp.rz-bn`). Gezeigt nur, wenn die Strecke die Maehzeit beruehrt (morgens
+6-8 dunkel bei Maehbeginn 9: kein Hinweis). Die Kaestchen bleiben blaugrau (Dunkelheit aendert sich je Tag).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
