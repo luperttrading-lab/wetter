@@ -215,9 +215,12 @@ html.dunkel .rz-frei2{background:#262d38}
 .rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
 /* v5.63 (Nutzer: "Pause und dunkel wie im hellen Modus mit eigener Farbe statt Rahmen, Pause darf anders sein"):
    Flaechen statt Rahmen - Pause sandfarben, dunkel in Nachtfarbe, beide Modi */
-.rz-eband{height:13px;margin-bottom:1px}.rz-elab{justify-self:center;align-self:stretch;font:600 9px/13px system-ui;white-space:nowrap;text-align:center;padding:0 4px;border-radius:3px 3px 0 0;background:#eee7d8;color:#7b6a4a}
-.rz-elab.rz-ebn{justify-self:stretch;color:#5a6a8c;background:#dfe4ef}
-html.dunkel .rz-elab{background:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{background:#26324d;color:#a9b6d2}
+/* v5.64 (Nutzer: "die Farbe 1-2 px weiter aussen rum, ohne andere Abstaende zu aendern"): gleichfarbiger Schatten
+   verbreitert die Flaeche links/rechts/oben um 2 px, unten um 1 px - das Raster bleibt, wie es ist */
+.rz-eband{height:13px;margin-bottom:1px}.rz-elab{--lb:#eee7d8;justify-self:center;align-self:stretch;font:600 9px/13px system-ui;white-space:nowrap;text-align:center;padding:0 4px;border-radius:3px 3px 0 0;color:#7b6a4a;
+  background:var(--lb);box-shadow:-1px -1px 0 1px var(--lb),1px -1px 0 1px var(--lb),0 0 0 1px var(--lb)}
+.rz-elab.rz-ebn{--lb:#dfe4ef;justify-self:stretch;color:#5a6a8c}
+html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb:#26324d;color:#a9b6d2}
 .rz-r2{background:#5a9fe0}
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
@@ -1193,7 +1196,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.63</span>
+      <span class="ver">v5.64</span>
     </div>
   </header>
 
