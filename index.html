@@ -1100,9 +1100,12 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .hero::after{background:radial-gradient(circle,rgba(247,183,51,.10),transparent 65%)}
   html.dunkel .heat.hot{background:linear-gradient(90deg,#3a2410,#2e1c0c)}
   html.dunkel .heat.cold{background:linear-gradient(90deg,#0f2438,#0c1c2c)}
-  html.dunkel .alert.minor{background:#2c2712}
-  html.dunkel .alert.moderate{background:#33210f}
-  html.dunkel .alert.severe{background:#3a1414}
+  /* v5.60 (Nutzer: "Sturmboeen im Dunkelmodus geht unter"): bis v5.59 blieb die Schrift im Dunkeln die dunkle
+     Farbe des hellen Modus (#9a3d12 auf #33210f) - jetzt helle Schrift, kraeftiger Rand und Farbbalken links */
+  html.dunkel .alert{border-width:1.5px;border-left-width:6px}
+  html.dunkel .alert.minor{background:#3b3110;border-color:#b08d1c;color:#fcd34d}
+  html.dunkel .alert.moderate{background:#4a2410;border-color:#ea7a2f;color:#fdba74}
+  html.dunkel .alert.severe{background:#5a1717;border-color:#ef4444;color:#fecaca}
   html.dunkel .vitd-btn,html.dunkel #evtSec .evt-box,html.dunkel #metSec .met-box,html.dunkel .wpre,html.dunkel .uvdaysw button{background:var(--card);color:var(--ink);border-color:var(--line)}
   html.dunkel .vitd-btn:active{background:#2a2016}
   html.dunkel #evtSec .evt-box.soon{background:#26211a}
@@ -1136,7 +1139,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .act-btn{background:rgba(255,255,255,.07)}
   html.dunkel .cc-time,html.dunkel .cc-val{background:rgba(26,33,44,.88);color:var(--ink)}
   html.dunkel .nowcard .bar.dry{background:#232d3c}
-  html.dunkel .alert.extreme{background:#33132a}
+  html.dunkel .alert.extreme{background:#4d1342;border-color:#d946ef;color:#f5d0fe}
   html.dunkel .strip .jetzt{background:#2b2313}
   html.dunkel .upd-bar button{background:#c98a3f;color:#1a1206}
   html.dunkel .fc-row .track{background:#232d3c}
@@ -1211,7 +1214,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.59</span>
+      <span class="ver">v5.60</span>
     </div>
   </header>
 
@@ -5716,7 +5719,7 @@ function rzGrossBinden(root){
     else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=root.querySelector("#rzDet");if(!c||!d)return;
       if(b.classList.contains("sel")){detZu();return;}detZu();b.classList.add("sel");
       const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
-      d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Feuchte "+Math.round(c.rh)+" %"
+      d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Luftfeuchte "+Math.round(c.rh)+" %"
         +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);
       // v5.49: als Blase ueber (bzw. unter) der Zeile - im Fluss schob sie Legende und Quelle hin und her
       d.hidden=false;const r=b.parentElement,o=r.offsetTop-d.offsetHeight-4;d.style.top=(o>=0?o:r.offsetTop+r.offsetHeight+4)+"px";}};
