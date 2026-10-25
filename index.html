@@ -213,9 +213,11 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 html.dunkel .rz-frei2{background:#262d38}
 .rz-jz2{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#d23a3a;border-radius:1px}
 .rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
-.rz-eband{height:13px;margin-bottom:1px}.rz-elab{justify-self:center;align-self:stretch;font:600 9px/13px system-ui;color:var(--muted);white-space:nowrap;text-align:center}
-.rz-elab.rz-ebn{justify-self:stretch;color:#5a6a8c;background:#dfe4ef;border-radius:3px 3px 0 0}html.dunkel .rz-elab.rz-ebn{color:#a9b6d2;background:none}
-html.dunkel .rz-elab{box-sizing:border-box;border:1px solid rgba(151,166,198,.55);border-bottom:0;border-radius:3px 3px 0 0;line-height:12px;padding:0 3px}
+/* v5.63 (Nutzer: "Pause und dunkel wie im hellen Modus mit eigener Farbe statt Rahmen, Pause darf anders sein"):
+   Flaechen statt Rahmen - Pause sandfarben, dunkel in Nachtfarbe, beide Modi */
+.rz-eband{height:13px;margin-bottom:1px}.rz-elab{justify-self:center;align-self:stretch;font:600 9px/13px system-ui;white-space:nowrap;text-align:center;padding:0 4px;border-radius:3px 3px 0 0;background:#eee7d8;color:#7b6a4a}
+.rz-elab.rz-ebn{justify-self:stretch;color:#5a6a8c;background:#dfe4ef}
+html.dunkel .rz-elab{background:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{background:#26324d;color:#a9b6d2}
 .rz-r2{background:#5a9fe0}
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
@@ -1191,7 +1193,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.62</span>
+      <span class="ver">v5.63</span>
     </div>
   </header>
 

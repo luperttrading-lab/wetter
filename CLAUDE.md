@@ -1971,6 +1971,9 @@ jedes dunkle Kaestchen einzeln in Nachtfarbe (`.rz-dunkel` #c3cbdd / #24304a, an
 Testumschalter (`rz_leiste`, `data-rzl`, `.rz-dt`), 27 CSS-Regeln (.rz-tl/.rz-ax/.rz-r/.rz-vl/.rz-band/.rz-bs/.rz-bp/
 .rz-dunkel2/.rz-weich/.rz-tau/.rz-aus/.rz-frei/.rz-uns/.rz-r1/.rz-r3 ...); gespeicherte `rz_darst`/`rz_leiste` werden geloescht.
 Zurueckholen aus `wetter-giessen-v5_61.html`.
+v5.63 (Nutzer: "Pause und dunkel wie im hellen Modus mit eigener Farbe, Pause darf anders sein - dann keinen Rahmen"):
+Kopfzeile der Leiste mit FLAECHEN statt Rahmen, beide Modi: Pause sandfarben (#eee7d8 / dunkel #3b3427), dunkel in
+Nachtfarbe (#dfe4ef / #26324d); Rahmen aus v5.61/v5.62 entfernt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
