@@ -1929,6 +1929,12 @@ gibt, haengt alles je Ansicht am Behaelter (`#kzGrossIn` bzw. `#rasenBox`): `_ei
 Regler-Zahlen `#rzo_*` per `root.querySelector`. `rzZeichne(root)`, `rzAbschnitt()`, `rzGrossNeu()` zeichnet beide.
 Auffrischen alle 5 min (Jetzt-Linie; Daten weiter alle 30 min). CSS der Bedienelemente `:is(.loc-box,.nowcard) .rz`.
 v5.55 ("dunkel" als Kasten) beruhte auf dem Missverstaendnis - bleibt, bis der Nutzer entscheidet (v5.54 = ohne Kasten).
+v5.57 (Nutzer klaert: "Kasten" meinte die KAESTCHEN je Tag und Stunde - "dunkel weglassen und nur oben drueber
+schreiben"): dunkle Stunden haben kein Kaestchen mehr (`.rz-nacht`, leer; auch Regen/Tau in der Nacht entfaellt -
+zeigt sich morgens als nass/trocknet ab). Im Band steht "dunkel" als Text (kein Kasten) ueber JEDER dunklen
+Strecke der heutigen Zeile, 1 Stunde = Mond-Zeichen; die Linien laufen nicht durch das Wort. Legende ohne "dunkel".
+Damit ist v5.55 (Kasten im Band) ueberholt. Jede Zeile endet an IHRER Dunkelheit (24.10. Sommerzeit bis 18 Uhr,
+ab 25.10. bis 17 Uhr). Oktober: "dunkel" 6-8 und 17-22 Uhr; Sommer: nur Mond bei 21 Uhr.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
