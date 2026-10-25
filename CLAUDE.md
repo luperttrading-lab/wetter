@@ -2034,6 +2034,17 @@ Ist der Rasen faellig/ueberfaellig oder "sofort", waechst der Abstand mit jedem 
 (v5.67 "(eigentlich So 1.11.)" brach am iPhone um). Geprueft (Testdaten): So gemaeht -> Sa 31.10. 10-13; Mo gemaeht ->
 Mo 2.11. 9-13 (Risiko 11 % gegen Sa 3 %, Sa waere 2 Tage zu frueh); faellig heute/ueberfaellig -> heute; Sa ab 11 Uhr
 Regen, Sa Risiko 40 % oder Sa ganz nass -> Fr 30.10. 15-17.
+v5.70 (Nutzer-Screenshot 20:29, "Gras ist schon hoch": "eine Zahl hinten dran, wie gut die gewichtete Maehqualitaet
+ist - evtl. waere Freitag besser als Mittwoch"): Spalte "Wert" (20 px) rechts in der Leiste = Wertung x 100 des Fensters,
+das die Empfehlung an diesem Tag waehlen wuerde (`rzTagFenster`: am Empfehlungstag die Empfehlung, sonst bis 3 Punkte
+unter dem besten das frueheste). Empfehlungstag gruen. "–" = kein Fenster, leer = vor "Fruehestens" (dort wird nicht
+gesucht). Tipp auf die Zahl -> Blase mit der Rechnung (`rzWertText`): trocken mit 97 % (Regenrisiko 3 %) · Abstand zum
+Termin -5 % je Tag (hoechstens -40 %) · Fenster lang genug bzw. -10 % · Regel 3 Punkte. "SOFORT" (Gras hoch / Datum
+unbekannt) waehlt jetzt ebenfalls nach der Wertung (Abstand = Tage ab heute) statt das erste Fenster ueberhaupt - sonst
+haette die Zahl der Empfehlung widersprechen koennen; Erklaertext beim Haekchen angepasst. Achte Zeile nur, wenn sie ein
+Maehtag ist (die Nutzer-Leiste zeigte "So 1.11. Sonntag" als achte Zeile). Befund zur Frage Mi/Fr: bei "Gras hoch"
+verliert jeder Tag Warten 5 Punkte - Fr gewinnt nur, wenn Mi deutlich riskanter ist. Stundenspalten 393 pt 21,8 px,
+320 pt 12,8 px (vorher 15,3).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
