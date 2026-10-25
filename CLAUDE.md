@@ -2074,6 +2074,9 @@ Blau zu Stahlblau). `overscroll-behavior:contain`, Scrollstand bleibt beim Neuze
 getBoundingClientRect relativ zu `.rz-el` (`rzBlasePlatz`) - offsetTop kennt das innere Scrollen nicht. Legende: "Weitere
 Tage: in der Leiste nach oben wischen". Geprueft 393/320 pt: 202 px hoch, 8 von 14 Zeilen ganz sichtbar, Blase an Zeile 12
 nach dem Scrollen 3-4 px ueber der Zelle.
+v5.75 (Nutzer: "20 % als Voreinstellung"): Rasen "Regenrisiko hoechstens" Voreinstellung 20 statt 30 % (`RZ_STD.risiko`).
+Einmalig: gespeichert 30 ohne Marke `rv` -> 20 (das war die alte Voreinstellung, der Speicher schreibt immer alle Werte);
+danach `rv:2`, ein spaeter bewusst gewaehltes 30 bleibt. Geprueft: neu 20, alt 30 -> 20, eigene 10 bleibt, 30 mit rv bleibt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
