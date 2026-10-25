@@ -1,35 +1,35 @@
-Radar-Eichung an den Bodenmessern, 25.10.2026 17:12 UTC
-  Giessen/Wettenberg        2 Paare  (GIESSEN)
-  Frankfurt/Main            4 Paare  (FRANKFURT/M)
-  Kassel                    2 Paare  (SCHAUENBURG-ELGERSH.)
-  Koeln/Bonn                0 Paare  (KOELN/BONN)
-  Dortmund                  4 Paare  (WALTROP-ABDINGHOF)
-  Muenster/Osnabrueck       2 Paare  (MUENSTER/OSNABR.)
+Radar-Eichung an den Bodenmessern, 25.10.2026 22:00 UTC
+  Giessen/Wettenberg        1 Paare  (GIESSEN)
+  Frankfurt/Main            2 Paare  (FRANKFURT/M)
+  Kassel                    3 Paare  (SCHAUENBURG-ELGERSH.)
+  Koeln/Bonn                2 Paare  (KOELN/BONN)
+  Dortmund                  2 Paare  (WALTROP-ABDINGHOF)
+  Muenster/Osnabrueck       1 Paare  (MUENSTER/OSNABR.)
   Hamburg-Fuhlsbuettel      4 Paare  (HAMBURG-FU.)
-  Bremen                    3 Paare  (BREMEN)
-  Hannover                  2 Paare  (HANNOVER)
+  Bremen                    2 Paare  (BREMEN)
+  Hannover                  3 Paare  (HANNOVER)
   Berlin-Tegel              1 Paare  (BERLIN-TEGEL)
   Leipzig/Halle             2 Paare  (LEIPZIG/SCHKEUDITZ)
-  Dresden-Klotzsche         4 Paare  (DRESDEN/FLUGHAFEN)
-  Erfurt-Weimar             1 Paare  (ERFURT)
-  Nuernberg                 4 Paare  (NUERNBERG)
-  Muenchen-Flughafen        4 Paare  (MUENCHEN-FL.)
-  Stuttgart-Echterdingen    4 Paare  (STUTTGART-ECHT.)
-  Karlsruhe/Rheinstetten    4 Paare  (RHEINSTETTEN)
-  Trier-Petrisberg          4 Paare  (TRIER)
-  Saarbruecken              4 Paare  (SAARBRUECKEN)
-  Freiburg                  3 Paare  (FREIBURG)
-gesammelt: 58 Paare
+  Dresden-Klotzsche         1 Paare  (DRESDEN/FLUGHAFEN)
+  Erfurt-Weimar             3 Paare  (ERFURT)
+  Nuernberg                 2 Paare  (NUERNBERG)
+  Muenchen-Flughafen        3 Paare  (MUENCHEN-FL.)
+  Stuttgart-Echterdingen    3 Paare  (STUTTGART-ECHT.)
+  Karlsruhe/Rheinstetten    1 Paare  (RHEINSTETTEN)
+  Trier-Petrisberg          2 Paare  (TRIER)
+  Saarbruecken              0 Paare  (SAARBRUECKEN)
+  Freiburg                  1 Paare  (FREIBURG)
+gesammelt: 39 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       302   1560     1.91      1.11      3.75     0.40 mm     0.23 mm
-leicht       349    401     0.93      0.56      1.31     0.90 mm     0.98 mm
-regen         63     63     0.78      0.47      1.17     2.80 mm     3.55 mm
+niesel       308   1593     1.91      1.11      4.00     0.40 mm     0.23 mm
+leicht       353    405     0.93      0.56      1.29     0.90 mm     0.98 mm
+regen         64     64     0.78      0.48      1.17     2.80 mm     3.58 mm
 
-Radar sah nichts, Station mass etwas: 39 von 2063 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 40 von 2102 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      902 Stunden, davon 767 trocken (85 %)
-  Radarsumme 0 1 bis  0 25 418 Stunden, davon 245 trocken (59 %)
-  Radarsumme 0 25 bis  0 5 240 Stunden, davon  58 trocken (24 %)
-  Radarsumme ab 0 5        464 Stunden, davon  31 trocken (7 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 37 Tage, 2063 Paare)
+  Radarsumme bis  0 1      926 Stunden, davon 787 trocken (85 %)
+  Radarsumme 0 1 bis  0 25 426 Stunden, davon 246 trocken (58 %)
+  Radarsumme 0 25 bis  0 5 241 Stunden, davon  59 trocken (24 %)
+  Radarsumme ab 0 5        469 Stunden, davon  31 trocken (7 %)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 37 Tage, 2102 Paare)
