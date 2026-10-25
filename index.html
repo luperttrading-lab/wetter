@@ -1191,7 +1191,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.49</span>
+      <span class="ver">v5.50</span>
     </div>
   </header>
 
@@ -5476,7 +5476,8 @@ function rzKachel(){
   if(P.rec){const n=rzTageZw(heute,P.rec.tag),tag=n===0?"heute":n===1?"morgen":RZ_WT[rzWtag(P.rec.tag)]+" "+rzTagTxt(P.rec.tag).slice(3);
     alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
     const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
-  else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"später",s:"wächst kaum"});
+  // v5.50 (Nutzer: "spaeter - heute spaeter oder irgendwann?"): das Datum, bis zu dem es sicher nicht faellig wird
+  else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"nach "+rzTagTxt(rzTagPlus(P.f.ende,-1)).slice(3),s:"wächst kaum"});
   // v5.48: darf heute nicht (mehr) gemaeht werden, zaehlt nur die naechste Gelegenheit - kein "nass bis 17 Uhr"
   if(rzHeuteFrei())return Object.assign({},alt[0],{alt:alt.slice(1)});
   a.alt=alt;return a;}

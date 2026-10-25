@@ -1870,6 +1870,11 @@ Fluss - die schob Legende und Quelle), Leistenzeilen fest 18 px, Quelle kuerzer 
 (`.loc-ovl`, auch Standort-Dialog): Abstand oben = Statusleiste + 8 px (env(safe-area-inset-top)) - wegen
 viewport-fit=cover lag der obere Rand des Fensters unter der Statusleiste, "Rasen" war dort verdeckt. Unten
 Home-Balken - 8 px. Am iPhone nicht geprueft (Chromium kennt die Raender nicht, gerechnet mit 59/34 pt).
+v5.50 (Nutzer, Kachel "MAEHEN spaeter / waechst kaum": "heute spaeter oder irgendwann?"): Im Wuchs-Modus,
+wenn die Waermesumme bis zum Ende der Vorhersage nicht reicht, steht jetzt das Datum: "nach 1.11." (= letzter
+Vorhersagetag, wie "Nicht faellig bis So 1.11." im Fenster). Gemessen: "nach 1.11." 74 px, Platz 79 (375 pt);
+"nach 12.11." auf 13,5 px verkleinert. Keine Hochrechnung ueber die Vorhersage hinaus (waere eine Annahme
+gleichbleibender Temperatur).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
