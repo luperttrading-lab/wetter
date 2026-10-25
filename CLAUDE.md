@@ -1962,6 +1962,15 @@ der App ist dem Server unbekannt (Reise nach Norden!). Entscheidung steht aus.
 v5.61 (Nutzer, ausfuehrliche Leiste im Dunkelmodus: "oben bei dunkel und Pause den Button umranden"): `html.dunkel
 .rz-bp` mit 1-px-Rahmen (oben und seitlich, Ecken oben rund) - gefuellt bleibt nur der Maehzeit-Kasten. Heller Modus
 unveraendert. Die Wahl einfach/ausfuehrlich steht weiter aus.
+v5.62 (Nutzer: "nimm die einfache Variante, aber die Mittagspause oben drueber und dunkel auch oben drueber, unten unter
+dunkel alle kleinen Kacheln dunkel"): `rzLeisteEinfach` ist DIE Leiste. Kopfzeile `.rz-eband` ueber den Stundenzahlen:
+"Pause" ueber der Pausen-Luecke (Luecke jetzt 24 px), "dunkel" ueber jeder Strecke von Stunden, die an mindestens einem der
+7 Tage dunkel sind (heller Modus mit Nachtfarben-Flaeche, dunkler Modus beide Woerter umrandet wie v5.61). In den Zeilen
+jedes dunkle Kaestchen einzeln in Nachtfarbe (`.rz-dunkel` #c3cbdd / #24304a, antippbar), kein Balken mehr. Satz darunter
+"Spalten = deine Maehzeit 9-20 Uhr." AUFGERAEUMT: ausfuehrliche Leiste `rzLeiste` (Band, Linien, blass, gestern, 6-22 Uhr),
+Testumschalter (`rz_leiste`, `data-rzl`, `.rz-dt`), 27 CSS-Regeln (.rz-tl/.rz-ax/.rz-r/.rz-vl/.rz-band/.rz-bs/.rz-bp/
+.rz-dunkel2/.rz-weich/.rz-tau/.rz-aus/.rz-frei/.rz-uns/.rz-r1/.rz-r3 ...); gespeicherte `rz_darst`/`rz_leiste` werden geloescht.
+Zurueckholen aus `wetter-giessen-v5_61.html`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
