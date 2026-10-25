@@ -1,0 +1,88 @@
+name: Warnung aufs Handy
+
+# v5.67 (Nutzer 25.10.2026: "wenn die Warnung reinkommt, eine Mitteilung aufs Handy - nur bei schweren, einstellbar").
+# warnung.py fragt alle 5 Minuten die DWD-Warnungen (Bright Sky /alerts) fuer die Orte in warnung.json ab und
+# schickt neue ab der dort eingestellten Stufe ueber ntfy.sh an die ntfy-App. Der Kanal steht im Secret
+# NTFY_TOPIC (das Repo ist oeffentlich). Ohne Secret laeuft die Schleife leer.
+#
+# Schleife statt Zeitplan wie radolan.yml: GitHub fuehrt "schedule" nur nach bestem Bemuehen aus (gemessen bis
+# 3-5 h zu spaet) - fuer Warnungen untauglich. Ein Lauf haelt 5,5 h und startet dann seinen Nachfolger; der
+# Zeitplan ist nur der Rueckfall, falls die Kette reisst. Gemeldetes merkt sich der Zweig warn-stand (stand.json),
+# damit ein neuer Lauf nichts doppelt schickt. Handstart mit test=true schickt zuerst eine Testnachricht.
+
+on:
+  schedule:
+    - cron: "23 */4 * * *"     # Rueckfall, falls die Kette reisst
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Zuerst eine Testnachricht schicken"
+        type: boolean
+        default: false
+
+concurrency:
+  group: warnung
+  cancel-in-progress: true
+
+permissions:
+  contents: write              # Zweig warn-stand schreiben
+  actions: write               # eigenen Nachfolger starten
+
+jobs:
+  warnung:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Stand holen
+        run: |
+          git fetch -q origin warn-stand 2>/dev/null && git show origin/warn-stand:stand.json > /tmp/stand.json \
+            || echo '{}' > /tmp/stand.json
+          cat /tmp/stand.json
+
+      - name: Testnachricht
+        if: ${{ inputs.test }}
+        run: python warnung.py --test
+
+      - name: Alle 5 Minuten pruefen
+        run: |
+          set -u
+          ENDE=$(( $(date -u +%s) + 330*60 ))
+          RUNDE=0
+          while : ; do
+            RUNDE=$(( RUNDE + 1 ))
+            echo "::group::Runde $RUNDE - $(date -u +%H:%M)Z"
+            git pull -q origin main || echo "pull fehlgeschlagen"   # geaenderte Orte/Stufe sofort uebernehmen
+            cp /tmp/stand.json /tmp/stand.alt
+            python warnung.py --stand /tmp/stand.json || echo "Pruefung fehlgeschlagen"
+            if ! cmp -s /tmp/stand.json /tmp/stand.alt; then
+              D=$(mktemp -d); cp /tmp/stand.json "$D/"
+              ( cd "$D" && git init -q && git add stand.json \
+                && git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -q -m "Warnstand" \
+                && git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:warn-stand ) \
+                && echo "Stand gesichert" || echo "Stand sichern fehlgeschlagen"
+            fi
+            echo "::endgroup::"
+            JETZT=$(date -u +%s)
+            if [ "$JETZT" -ge "$ENDE" ]; then echo "Laufzeit erreicht - Ende"; break; fi
+            W=$(( 300 - JETZT % 300 + 20 ))          # naechste volle 5 Minuten (+20 s)
+            if [ $(( JETZT + W )) -ge "$ENDE" ]; then echo "naechste Runde liegt nach dem Ende - Ende"; break; fi
+            sleep "$W"
+          done
+
+      # Nur nach regulaerem Ende (success), siehe radolan.yml
+      - name: Nachfolger starten
+        run: |
+          curl -sS -o /dev/null -w "Nachfolger: HTTP %{http_code}\n" -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/warnung.yml/dispatches" \
+            -d '{"ref":"main"}'

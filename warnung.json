@@ -1,0 +1,8 @@
+{
+ "_hinweis": "Orte und Mindeststufe fuer warnung.py. ab: minor (Stufe 1), moderate (2, markant), severe (3, Unwetter), extreme (4). Der Kanal steht im GitHub-Secret NTFY_TOPIC.",
+ "ab": "moderate",
+ "orte": [
+  {"name": "Wettenberg", "lat": 50.62, "lon": 8.65},
+  {"name": "Norden", "lat": 53.596, "lon": 7.206}
+ ]
+}
