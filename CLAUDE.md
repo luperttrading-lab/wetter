@@ -2045,6 +2045,9 @@ haette die Zahl der Empfehlung widersprechen koennen; Erklaertext beim Haekchen 
 Maehtag ist (die Nutzer-Leiste zeigte "So 1.11. Sonntag" als achte Zeile). Befund zur Frage Mi/Fr: bei "Gras hoch"
 verliert jeder Tag Warten 5 Punkte - Fr gewinnt nur, wenn Mi deutlich riskanter ist. Stundenspalten 393 pt 21,8 px,
 320 pt 12,8 px (vorher 15,3).
+v5.71 (Nutzer: "um die Zahl einen Kreis - eine Flaeche als Kreis"): Wertung als runde Flaeche 20 px (`.rz-w`), hell
+#e3e7ed / dunkel #2b3442, Empfehlungstag gruen gefuellt (#2e9e4a weisse Schrift / dunkel #3fae5a dunkle Schrift), "–" ohne
+Kreis. Schrift 9,5 px, ab 100 8,5 px (`.w3`): "100" 13,9 px, "99" 12,0 px im 20-px-Kreis.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
