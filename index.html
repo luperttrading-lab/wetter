@@ -188,20 +188,27 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .kzg-titel{font-size:17px;font-weight:800;margin:0 0 3px}
 .kzg-sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
 /* v5.44 Rasen-Planer (Kachel "rasen", Grossansicht rzGrossHtml) */
-.rz-zust{font-size:17px;font-weight:800;margin:4px 0 6px;line-height:1.3}
+.rz-zust{font-size:16.5px;font-weight:800;margin:2px 0 3px;line-height:1.3}
 .rz-zust.nass{color:#2f6fc0}.rz-zust.tau{color:#3d7f77}.rz-zust.trocken{color:#2e8b47}.rz-zust.weich{color:#8a6a2f}
-.rz-z{font-size:13px;line-height:1.42;margin:3px 0}
-.rz-h{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
-.rz-emp{font-size:15.5px;font-weight:800;margin:6px 0 2px;line-height:1.3}
+.rz-z{font-size:13px;line-height:1.38;margin:2px 0}
+.rz-h{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:11px 0 5px;display:flex;align-items:baseline;gap:4px}
+.rz-h span{text-transform:none;letter-spacing:0;font-weight:600;font-size:11.5px}.rz-h .rz-hint{margin-left:auto;font-size:10.5px}
+.rz-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}.rz-kopf .kzg-titel{margin:0}
+.rz-stand{font-size:12px;color:var(--muted);text-align:right}
+.rz .loc-row{display:grid;grid-template-columns:1.12fr 1fr;gap:8px;margin-top:0}
+.rz .loc-row .loc-btn,.rz-ok{min-height:42px;min-width:0;box-sizing:border-box;padding-top:7px;padding-bottom:7px}
+@media (max-width:359px){.rz .loc-row{grid-template-columns:1fr}.rz-hw{display:none}}
+.rz-m{margin-top:7px}
+.rz-emp{font-size:15px;font-weight:800;margin:4px 0 1px;line-height:1.3}
 .rz-warn{color:var(--warn)}
-.rz-q{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.4}
-.rz-tl{display:grid;grid-template-columns:46px 1fr;gap:3px 5px;align-items:center}
-.rz-k{font-size:10.5px;font-weight:700;white-space:nowrap;line-height:1.05}
-.rz-k small{display:block;font-size:8.5px;color:var(--muted)}
+.rz-q{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.38}
+.rz-tl{position:relative;display:grid;grid-template-columns:46px 1fr;gap:2px 5px;align-items:center}
+.rz-k{font-size:10.5px;font-weight:700;white-space:nowrap;line-height:1;height:18px;display:flex;flex-direction:column;justify-content:center}
+.rz-k small{display:block;font-size:8px;line-height:1;color:var(--muted)}
 .rz-k.frist small{color:#c0392b}.rz-k.verg{color:var(--muted)}
 .rz-ax{display:grid;grid-template-columns:repeat(16,1fr);font-size:9px;color:var(--muted);font-weight:700}
 .rz-ax span{margin-left:-3px}
-.rz-r{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:19px}
+.rz-r{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:18px}
 .rz-r i,.rz-leg i{display:block;border-radius:2px}
 .rz-r.verg i{opacity:.75}
 .rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
@@ -213,10 +220,12 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-kalt{background:#e2dbf3}.rz-aus{background:#efeae1}.rz-dunkel{background:#ddd7cc}
 .rz-gut{background:#43a047}.rz-uns{background:#b7da8c}.rz-risk{background:#f1dfa8}
 .rz-frei{background:#fff;box-shadow:inset 0 0 0 1px #e6dfd2}
-.rz-leg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:10.5px;color:var(--muted);margin-top:8px}
+.rz-leg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:10.5px;color:var(--muted);margin-top:7px}
 .rz-leg span{display:inline-flex;align-items:center;gap:4px}
 .rz-leg i{width:12px;height:10px}
-.rz-det{font-size:11.5px;min-height:16px;margin-top:6px;line-height:1.4}
+.rz-det{position:absolute;left:0;right:0;z-index:5;font-size:11.5px;line-height:1.4;padding:6px 9px;border-radius:9px;background:#1f2a37;color:#f3f6fa;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none}
+.rz-det[hidden]{display:none}.rz-r i.sel{outline:2px solid #1f2a37;outline-offset:0;position:relative;z-index:2}
+html.dunkel .rz-det{background:#e3eaf3;color:#111a24}html.dunkel .rz-r i.sel{outline-color:#e3eaf3}
 .rz-einst{margin-top:10px;padding:2px 10px 6px;border:1px solid var(--line);border-radius:12px}
 .rz-reg{display:grid;grid-template-columns:1fr auto;gap:0 8px;align-items:center;margin:7px 0}
 .rz-reg label{font-size:13px;font-weight:600}
@@ -230,8 +239,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-seg button,.rz-tage button{font:700 12.5px system-ui;padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:var(--stufe);color:var(--muted)}
 .rz-tage button{width:38px;padding:6px 0}
 .rz-seg button.an,.rz-tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
-.rz .loc-row{flex-wrap:wrap}.rz .loc-row .loc-btn{flex:1 0 110px}
-.rz-ok{flex:1 0 auto;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;padding:6px 5px 6px 8px;border-radius:11px;background:#e3f3e6;border:1.5px solid #9fd3a8;color:#1e6b33}
+.rz-ok{white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;padding:6px 5px 6px 8px;border-radius:11px;background:#e3f3e6;border:1.5px solid #9fd3a8;color:#1e6b33}
 .rz-ok button{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:0;padding:0;background:rgba(30,107,51,.14);color:inherit;font-size:18px;line-height:28px;font-weight:700;cursor:pointer}
 html.dunkel .rz-ok{background:#173322;border-color:#2f6b40;color:#8fe0a8}
 html.dunkel .rz-ok button{background:rgba(143,224,168,.16)}
@@ -999,9 +1007,9 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 .ansicht-hint{font-size:11px;font-weight:700;color:var(--muted);opacity:0;
   transition:opacity .2s;text-align:right;margin-top:-3px;pointer-events:none;height:0;overflow:hidden}
 .ansicht-hint.an{opacity:1;height:auto}
-.loc-ovl{position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px}
+.loc-ovl{position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px;padding:max(14px,calc(env(safe-area-inset-top,0px) + 8px)) 18px max(12px,calc(env(safe-area-inset-bottom,0px) - 8px))}
 .loc-ovl.hidden{display:none}
-.loc-box{background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(20,35,60,.35);padding:20px 18px 16px;width:100%;max-width:340px;color:#1c2a3a;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.loc-box{background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(20,35,60,.35);padding:20px 18px 16px;width:100%;max-width:340px;color:#1c2a3a;max-height:calc(100vh - 36px);max-height:calc(100dvh - max(14px,calc(env(safe-area-inset-top,0px) + 8px)) - max(12px,calc(env(safe-area-inset-bottom,0px) - 8px)));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .loc-h{font-size:17px;font-weight:800;margin-bottom:12px}
 .loc-box label{display:block;font-size:12px;font-weight:700;color:#5c6b80;margin:9px 0 3px}
 .loc-box input{width:100%;box-sizing:border-box;font-size:16px;padding:9px 11px;border:1.5px solid #dbe3ee;border-radius:10px;background:#f7fafd;color:#1c2a3a;-webkit-appearance:none}
@@ -1183,7 +1191,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.48</span>
+      <span class="ver">v5.49</span>
     </div>
   </header>
 
@@ -5444,9 +5452,9 @@ function rzJetzt(){const Z=RASEN.Z,jetzt=Date.now(),i=Z.findIndex(c=>c.s<=jetzt&
   let r=i+1;while(r<Z.length&&Z[r].p<0.1)r++;J.naechster=r<Z.length?Z[r]:null;
   return J;}
 const RZ_ZUST={regen:"Nass – es regnet",nass:"Gras ist noch nass",weich:"Halme trocken, Boden noch weich",tau:"Gras ist taunass",kalt:"Trocken, aber kalt",trocken:"Gras ist trocken"};
-function rzQuelle(){const vh=RASEN.SRC==="bs"?"DWD-Vorhersage MOSMIX (Open-Meteo war nicht erreichbar)":"Vorhersage Open-Meteo";
-  const M=RASEN.MESS;return M?"Bis "+rzHH(M.bis)+" Uhr gemessen an der DWD-Station "+M.name+" ("+M.km+" km), danach Radar am Ort bis zwei Stunden voraus, dann "+vh+". Abtrocknen, Boden und Tau sind gerechnet."
-    :"Keine Stationsmessung in der Nähe – "+vh+", Radar am Ort. Abtrocknen, Boden und Tau sind gerechnet.";}
+function rzQuelle(){const vh=RASEN.SRC==="bs"?"DWD-Vorhersage MOSMIX (Open-Meteo nicht erreichbar)":"Open-Meteo";
+  const M=RASEN.MESS;return M?"Gemessen bis "+rzHH(M.bis)+" Uhr (DWD-Station "+M.name+", "+M.km+" km), danach Radar am Ort (2 Std.), dann "+vh+". Abtrocknen, Boden und Tau sind geschätzt."
+    :"Keine Stationsmessung in der Nähe – "+vh+", Radar am Ort. Abtrocknen, Boden und Tau sind geschätzt.";}
 /* v5.48 (Nutzer, So 25.10. 15:00: "nass bis 17 Uhr ist irrelevant, heute ist Sonntag"): Grund, warum
    heute nicht (mehr) gemaeht werden kann - "" solange heute noch eine erlaubte Stunde kommt. */
 function rzHeuteFrei(){const jetzt=Date.now(),heute=rzTeile(jetzt).tag,E=rzE();
@@ -5474,12 +5482,12 @@ function rzKachel(){
   a.alt=alt;return a;}
 /* ---- Grossansicht ---- */
 function rzGross(){rzE();if(!rzBereit())return {html:'<div data-rz="1"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>"};
-  return {html:rzGrossHtml(),nach:rzGrossBinden};}
+  RASEN.mMin=0;return {html:rzGrossHtml(),nach:rzGrossBinden};}
 function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");if(!ov||ov.classList.contains("hidden")||!inn||!inn.querySelector("[data-rz]"))return;
   const box=inn.parentElement,y=box?box.scrollTop:0;inn.innerHTML=rzBereit()?rzGrossHtml():rzGross().html;if(RASEN.Z.length)rzGrossBinden(inn);if(box)box.scrollTop=y;}
 function rzGrossHtml(){
   const E=rzE();rzBewerten();const J=rzJetzt(),P=rzPlanen(Date.now()),jetzt=Date.now(),heute=rzTeile(jetzt).tag;
-  let h='<div data-rz="1" class="rz"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</div>";
+  let h='<div data-rz="1" class="rz"><div class="rz-kopf"><span class="kzg-titel">Rasen</span><span class="rz-stand">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</span></div>";
   if(J){const kl={regen:"nass",nass:"nass",weich:"weich",tau:"tau",kalt:"trocken",trocken:"trocken"}[J.z];
     h+='<div class="rz-zust '+kl+'">'+RZ_ZUST[J.z]+(J.regnet?" (Radar)":"")+"</div>";
     if(J.regen)h+='<div class="rz-z">Letzter Regen bis <b>'+rzWann(J.regen.ende)+"</b>: "+rzMM(J.regen.sum)+" in "+J.regen.std+(J.regen.std===1?" Stunde":" Stunden")+" ("+J.regen.quelle+")."
@@ -5489,33 +5497,46 @@ function rzGrossHtml(){
     else h+='<div class="rz-z">'+(J.etappen.length?"Nach der Rechnung: "+J.etappen.map(e=>e[0]+" ab "+rzWann(e[1])).join(" · "):"In der Vorhersage wird es nicht mehr trocken")+(J.fertig||J.regenDazwischen||!J.etappen.length?".":" …")+"</div>";
     if(J.tauBis)h+='<div class="rz-z">Morgen früh taunass bis etwa '+rzHH(J.tauBis)+" Uhr.</div>";
     if(J.rNext&&!J.regnet)h+='<div class="rz-z">Radar: Regen ab <b>'+rzWann(J.rNext)+"</b>.</div>";
-    else h+='<div class="rz-z">'+(J.naechster?"Nächster Regen: "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":""):"In der Vorhersage kein Regen mehr")+".</div>";}
-  // Maehen
-  h+='<div class="rz-h">Mähen</div>';
-  {const fr=rzHeuteFrei();if(fr)h+='<div class="rz-z">'+(fr==="vorbei"?"Für heute ist die Mähzeit vorbei.":"Heute kein Mähen – "+fr+".")+"</div>";}
-  const f=P.f;
-  if(f.sofort)h+='<div class="rz-z">'+(E.hoch?"Gras ist schon hoch – gesucht ist die nächste Gelegenheit, bei der es richtig trocken ist.":"Wann zuletzt gemäht? Unter Einstellungen eintragen, dann rechnet der Planer mit einer Frist.")+"</div>";
-  else if(f.tag){const n=rzTageZw(rzE().letzt,heute),nf=rzTageZw(heute,f.tag);
-    h+='<div class="rz-z">Zuletzt gemäht '+rzTagTxt(E.letzt)+" ("+(n===0?"heute":n===1?"gestern":"vor "+n+" Tagen")+") · fällig <b>"+rzTagTxt(f.tag)+"</b> ("+(nf<0?"seit "+(-nf)+(nf===-1?" Tag":" Tagen"):nf===0?"heute":"in "+nf+(nf===1?" Tag":" Tagen"))+")"
-      +(E.modus==="wuchs"?" · seither gewachsen: "+Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%":"")+"</div>";}
-  else h+='<div class="rz-z">Zuletzt gemäht '+rzTagTxt(E.letzt)+" · seither gewachsen: "+Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%. Bis "+rzTagTxt(rzTagPlus(f.ende,-1))+" wird es nicht fällig – bei der Kälte wächst der Rasen langsam.</div>";
-  if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
-    h+='<div class="rz-emp">'+(P.ueber?"Erst nach der Frist: ":f.sofort?"Nächste Gelegenheit: ":"Empfehlung: ")+rzRel(P.rec.tag).replace(/^./,x=>x.toUpperCase())+(n>2?" "+rzTagTxt(P.rec.tag).slice(3):"")+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr</div>"
-      +'<div class="rz-z">Trocken, Regenrisiko höchstens '+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt)+"</div>";}
-  else if(f.tag)h+='<div class="rz-emp">Kein trockenes Fenster in Sicht</div>';
-  if(J&&J.maehbar&&(!P.rec||J.maehbar.s<P.rec.s))h+='<div class="rz-z">Frühestens mähbar: '+rzWann(J.maehbar.s)+".</div>";
-  /* v5.47 (Nutzer: "erkennen, ob man es geklickt hat, und ein kleines X zum Loeschen"): nach dem Tipp
-     gruenes Feld "Heute gemaeht" mit x; x stellt den Stand davor wieder her (Datum und "Gras hoch"). */
-  const gem=E.letzt===heute;
+    else if(!J.regenDazwischen)h+='<div class="rz-z">'+(J.naechster?"Nächster Regen: "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":""):"In der Vorhersage kein Regen mehr")+".</div>";}
+  /* Maehen. v5.49 (Nutzer-Screenshots 25.10. 15:03: "Heute gemaeht" an/aus liess die Anzeige springen, das
+     Fenster passte nicht aufs Display): Knoepfe DIREKT unter der Ueberschrift - ueber ihnen aendert sich beim
+     Tippen nichts, sie bleiben unter dem Finger. Darunter immer dieselben drei Zeilen (Stand / Termin /
+     Begruendung); .rz-m merkt sich seine groesste Hoehe, solange das Fenster offen ist (rzGrossBinden). */
+  const fr=rzHeuteFrei();
+  h+='<div class="rz-h">Mähen'+(fr?"<span>· heute "+(fr==="vorbei"?"vorbei":"nicht – "+fr)+"</span>":"")+"</div>";
+  const gem=E.letzt===heute;   // v5.47: gruenes Feld mit x statt Knopf
   h+='<div class="loc-row">'+(gem?'<span class="rz-ok">\u2713 Heute gemäht<button type="button" data-rzk="zurueck" aria-label="Zurücknehmen">\u00d7</button></span>'
       :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(RASEN.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
   if(RASEN.einst)h+=rzEinstHtml();
+  h+=rzMaehHtml(E,P,J,heute);
   h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
+/* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
+   den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
+function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%";
+  const tagK=tag=>{const n=rzTageZw(tag,heute);return n===0?"heute":n===1?"gestern":rzTagTxt(tag);},
+        tagV=tag=>{const n=rzTageZw(heute,tag);return n===0?"heute":n===1?"morgen":rzTagTxt(tag);},
+        frueh=J&&J.maehbar&&(!P.rec||J.maehbar.s<P.rec.s)?J.maehbar:null;
+  let z1,z2,z3="";
+  if(f.sofort)z1=E.hoch?"Gras ist schon hoch – lieber bald mähen.":"Wann zuletzt gemäht? → Einstellungen";
+  else if(f.tag){const nf=rzTageZw(heute,f.tag);
+    z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
+  else z1="Gemäht "+tagK(E.letzt)+" · seither gewachsen "+pct();
+  if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
+    z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr";
+    z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt);}
+  else if(f.tag)z2="Kein trockenes Fenster in Sicht";
+  else{z2="Nicht fällig bis "+rzTagTxt(rzTagPlus(f.ende,-1));z3="Bei der Kälte wächst der Rasen langsam.";}
+  if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";
+  return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"+(z3?'<div class="rz-z">'+z3+"</div>":"")+"</div>";
+}
+function rzMaehAlt(){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
+  if(E.letzt===heute){const v=E.vor;E.letzt=v&&v.letzt!==E.letzt?v.letzt:null;E.hoch=!!(v&&v.hoch);}else{E.letzt=heute;E.hoch=false;}
+  try{return rzMaehHtml(E,rzPlanen(Date.now()),rzJetzt(),heute);}finally{E.letzt=alt.letzt;E.hoch=alt.hoch;}}
 function rzLeiste(P){
   const jetzt=Date.now(),heute=rzTeile(jetzt).tag,H0=6,H1=22,idx={};
   RASEN.Z.forEach(c=>{if(c.h>=H0&&c.h<H1)(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
-  let h='<div class="rz-h">Die nächsten Tage</div><div class="rz-tl"><div></div><div class="rz-ax">';
+  let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div><div class="rz-tl"><div class="rz-det" id="rzDet" hidden></div><div></div><div class="rz-ax">';
   for(let x=H0;x<H1;x++)h+="<span>"+(x%3===0?x:"")+"</span>";h+="</div>";
   for(let n=-1;n<7;n++){const tag=rzTagPlus(heute,n),row=idx[tag];if(!row)continue;
     const frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),so=rzWtag(tag)===0;
@@ -5527,7 +5548,7 @@ function rzLeiste(P){
       h+='<i class="'+k+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'"></i>';}
     if(n===0){const t=rzTeile(jetzt),pos=(t.h+t.m/60-H0)/(H1-H0);if(pos>=0&&pos<=1)h+='<span class="rz-jz" style="left:calc('+(pos*100).toFixed(2)+'% - 1px)"></span>';}
     h+="</div>";}
-  h+='</div><div class="rz-det" id="rzDet">Kästchen antippen zeigt die Werte.</div><div class="rz-leg">'
+  h+='</div><div class="rz-leg">'
     +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-frei","nicht deine Zeit / Pause"],["rz-aus","Sonn-/Feiertag"],["rz-dunkel","dunkel"]]
       .map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
@@ -5549,16 +5570,24 @@ function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="r
     +r("rh","Tau ab Luftfeuchte",80,98,1,v=>v+" %")+r("tmin","Zu kalt unter",0,8,1,v=>v+" °C")+"</div>";}
 function rzGrossBinden(root){
   const neu=()=>{rzSpeichern();rzGrossNeu();if(typeof kzRender==="function")kzRender();};
-  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b)return;
+  // v5.49: Hoehe fuer BEIDE Zustaende von "Heute gemaeht" reservieren - beim Umschalten rueckt die Leiste nicht
+  {const m=root.querySelector(".rz-m");if(m){if(!RASEN.mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
+      RASEN.mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
+    RASEN.mMin=Math.max(RASEN.mMin,m.offsetHeight);m.style.minHeight=RASEN.mMin+"px";}}
+  const detZu=()=>{const d=el("rzDet");if(d)d.hidden=true;root.querySelectorAll(".rz-r i.sel").forEach(x=>x.classList.remove("sel"));};
+  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b){detZu();return;}
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){RASEN.einst=!RASEN.einst;rzGrossNeu();}
     else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
     else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}
     else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=el("rzDet");if(!c||!d)return;
+      if(b.classList.contains("sel")){detZu();return;}detZu();b.classList.add("sel");
       const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
       d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Feuchte "+Math.round(c.rh)+" %"
-        +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);}};
+        +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);
+      // v5.49: als Blase ueber (bzw. unter) der Zeile - im Fluss schob sie Legende und Quelle hin und her
+      d.hidden=false;const r=b.parentElement,o=r.offsetTop-d.offsetHeight-4;d.style.top=(o>=0?o:r.offsetTop+r.offsetHeight+4)+"px";}};
   root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;
     if(inp.type==="range"){inp.oninput=()=>{const o=el("rzo_"+k);RASEN.E[k]=+inp.value;inp.style.setProperty("--p",rzP(+inp.value,+inp.min,+inp.max));
         if(k==="von"&&RASEN.E.von>=RASEN.E.bis)RASEN.E.von=RASEN.E.bis-1;if(k==="bis"&&RASEN.E.bis<=RASEN.E.von)RASEN.E.bis=RASEN.E.von+1;

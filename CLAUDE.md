@@ -1855,6 +1855,21 @@ Grases nicht. Das Fenster sagt unter "Maehen" "Heute kein Maehen - Sonntag." bzw
 ist die Maehzeit vorbei."; der Abschnitt "Gras jetzt" bleibt (fuer morgen nuetzlich).
 Geprueft So 15:06 echt sowie Mo 10:00 (Zustand + Maehen heute), Mo 16:50 ("vorbei", Sonne
 17:13), Di 07:00 (Tau bis 9 Uhr + heute 9-13).
+v5.49 (Nutzer-Screenshots 25.10. 15:03, Norden: "Heute gemaeht" an/aus laesst die Anzeige springen, beide
+Ansichten passen nicht aufs Display): Rasen-Fenster umgebaut. (1) Knoepfe "Heute gemaeht" / "Einstellungen"
+DIREKT unter der Ueberschrift "Maehen" - darueber aendert sich beim Tippen nichts, der Knopf bleibt unter dem
+Finger (vorher 17 px Sprung). Darunter immer drei Zeilen (`rzMaehHtml`: Stand / Termin / Begruendung);
+`rzMaehAlt()` rechnet beim Oeffnen den ANDEREN Zustand mit, `rzGrossBinden` setzt `.rz-m` auf die groessere
+Hoehe (`RASEN.mMin`, beim Oeffnen 0) - Leiste und Quelle stehen in allen Zustaenden auf demselben Pixel
+(gemessen 320/375/393 pt). Knopfreihe als Grid 1,12fr/1fr (beide Zustaende gleich breit), unter 360 pt
+untereinander. (2) Kompakter: Kopf "Rasen" + Ort/Stand in einer Zeile, "Heute kein Maehen - Sonntag" als Zusatz
+in der Ueberschrift, "Naechster Regen" entfaellt, wenn die Etappen schon mit "wieder Regen" enden, Hinweis
+"Kaestchen antippen = Werte" in der Leistenueberschrift, die Werte erscheinen als Blase UEBER der Zeile (statt im
+Fluss - die schob Legende und Quelle), Leistenzeilen fest 18 px, Quelle kuerzer ("geschaetzt" statt "gerechnet").
+393 x 779 (= iPhone 15/16 Pro nach Statusleiste): 874-894 px Inhalt -> 728-743, sichtbar 759. (3) ALLE Fenster
+(`.loc-ovl`, auch Standort-Dialog): Abstand oben = Statusleiste + 8 px (env(safe-area-inset-top)) - wegen
+viewport-fit=cover lag der obere Rand des Fensters unter der Statusleiste, "Rasen" war dort verdeckt. Unten
+Home-Balken - 8 px. Am iPhone nicht geprueft (Chromium kennt die Raender nicht, gerechnet mit 59/34 pt).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
