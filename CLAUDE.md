@@ -1839,6 +1839,13 @@ dunkel - nicht mehr die System-Regler (v5.45), deren Aussehen am iPhone nicht pr
 Zehner gerundet), darunter "bei 10 Grad 12 Tage, bei 20 Grad 4 Tage". Im Fenster "seither gewachsen:
 48 %" statt "34 von 60 Gradtagen"; nicht faellig in der Vorhersage -> Kachel "Maehen / spaeter /
 waechst kaum" statt "kein Fenster". Testseite rasentest.html gleich umbenannt.
+v5.47 (Nutzer: bei "Heute gemaeht" erkennen, ob man getippt hat, und ein kleines X zum Loeschen):
+nach dem Tipp steht statt des Knopfs ein gruenes Feld "Heute gemaeht" mit rundem x (`.rz-ok`,
+`data-rzk="zurueck"`); x stellt Datum UND "Gras ist schon hoch" von davor wieder her (gemerkt in
+`E.vor`; ohne Vorwert: Datum unbekannt). Erkennbar bleibt es, solange "zuletzt gemaeht" = heute.
+Bei 320 pt bricht "Einstellungen" in eine eigene Zeile um (`.rz .loc-row` flex-wrap). Dabei:
+Abtrocknungs-Etappen brechen bei neuem Regen ab ("... wieder Regen ab 16 Uhr.") statt "Regen
+vorbei ab 11 Uhr - wieder Regen ab 12 Uhr" zu reihen (Nutzer-Screenshot v5.44), kein "...." mehr.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
