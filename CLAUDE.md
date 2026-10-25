@@ -1916,6 +1916,10 @@ dunkel". Jetzt endet der Maehzeit-KASTEN, wo es dunkel wird; "dunkel" steht OHNE
 GANZEN dunklen Strecke der heutigen Zeile (17-22 Uhr), darunter ein 3-px-Strich in Nachtfarbe, Text mit
 Hintergrund ueber der 19-Uhr-Linie (`.rz-bp.rz-bn`). Gezeigt nur, wenn die Strecke die Maehzeit beruehrt (morgens
 6-8 dunkel bei Maehbeginn 9: kein Hinweis). Die Kaestchen bleiben blaugrau (Dunkelheit aendert sich je Tag).
+v5.55 (Nutzer: "du musst die Kachel oben hinzufuegen" - als KASTEN im Band verstanden, Rueckfrage abgelehnt):
+"dunkel" wieder als Kasten in Nachtfarbe (`.rz-bs.rz-bn`), aber ueber die ganze dunkle Strecke (17-22 Uhr), der
+Maehzeit-Kasten endet bei Dunkelheit. Die Rasen-Kachel der Startseite war vorhanden (live geprueft, Bestandsauswahl:
+"MAEHEN ~2.4. / Winterpause"); fuer NEUE Nutzer ist sie weiterhin NICHT in `KZ_STD`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
