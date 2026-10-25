@@ -1183,7 +1183,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.47</span>
+      <span class="ver">v5.48</span>
     </div>
   </header>
 
@@ -5447,6 +5447,12 @@ const RZ_ZUST={regen:"Nass – es regnet",nass:"Gras ist noch nass",weich:"Halme
 function rzQuelle(){const vh=RASEN.SRC==="bs"?"DWD-Vorhersage MOSMIX (Open-Meteo war nicht erreichbar)":"Vorhersage Open-Meteo";
   const M=RASEN.MESS;return M?"Bis "+rzHH(M.bis)+" Uhr gemessen an der DWD-Station "+M.name+" ("+M.km+" km), danach Radar am Ort bis zwei Stunden voraus, dann "+vh+". Abtrocknen, Boden und Tau sind gerechnet."
     :"Keine Stationsmessung in der Nähe – "+vh+", Radar am Ort. Abtrocknen, Boden und Tau sind gerechnet.";}
+/* v5.48 (Nutzer, So 25.10. 15:00: "nass bis 17 Uhr ist irrelevant, heute ist Sonntag"): Grund, warum
+   heute nicht (mehr) gemaeht werden kann - "" solange heute noch eine erlaubte Stunde kommt. */
+function rzHeuteFrei(){const jetzt=Date.now(),heute=rzTeile(jetzt).tag,E=rzE();
+  if(RASEN.Z.some(c=>c.tag===heute&&c.erlaubt&&c.e>jetzt+15*6e4))return "";
+  const wd=rzWtag(heute),ft=rzFeiertag(heute);
+  return wd===0?"Sonntag":ft?ft:!E.tage6[wd-1]?"kein Mähtag":"vorbei";}
 /* ---- Kachel ---- */
 function rzKachel(){
   rzE();if(!rzBereit())return {l:"Rasen",v:"–",s:RASEN.fehler?"keine Daten":"lädt"};
@@ -5463,6 +5469,8 @@ function rzKachel(){
     alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
     const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
   else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"später",s:"wächst kaum"});
+  // v5.48: darf heute nicht (mehr) gemaeht werden, zaehlt nur die naechste Gelegenheit - kein "nass bis 17 Uhr"
+  if(rzHeuteFrei())return Object.assign({},alt[0],{alt:alt.slice(1)});
   a.alt=alt;return a;}
 /* ---- Grossansicht ---- */
 function rzGross(){rzE();if(!rzBereit())return {html:'<div data-rz="1"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>"};
@@ -5484,6 +5492,7 @@ function rzGrossHtml(){
     else h+='<div class="rz-z">'+(J.naechster?"Nächster Regen: "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":""):"In der Vorhersage kein Regen mehr")+".</div>";}
   // Maehen
   h+='<div class="rz-h">Mähen</div>';
+  {const fr=rzHeuteFrei();if(fr)h+='<div class="rz-z">'+(fr==="vorbei"?"Für heute ist die Mähzeit vorbei.":"Heute kein Mähen – "+fr+".")+"</div>";}
   const f=P.f;
   if(f.sofort)h+='<div class="rz-z">'+(E.hoch?"Gras ist schon hoch – gesucht ist die nächste Gelegenheit, bei der es richtig trocken ist.":"Wann zuletzt gemäht? Unter Einstellungen eintragen, dann rechnet der Planer mit einer Frist.")+"</div>";
   else if(f.tag){const n=rzTageZw(rzE().letzt,heute),nf=rzTageZw(heute,f.tag);

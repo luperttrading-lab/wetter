@@ -1846,6 +1846,15 @@ nach dem Tipp steht statt des Knopfs ein gruenes Feld "Heute gemaeht" mit rundem
 Bei 320 pt bricht "Einstellungen" in eine eigene Zeile um (`.rz .loc-row` flex-wrap). Dabei:
 Abtrocknungs-Etappen brechen bei neuem Regen ab ("... wieder Regen ab 16 Uhr.") statt "Regen
 vorbei ab 11 Uhr - wieder Regen ab 12 Uhr" zu reihen (Nutzer-Screenshot v5.44), kein "...." mehr.
+v5.48 (Nutzer, So 25.10. 15:00, Kachel "RASEN nass bis 17 Uhr": "irrelevant, heute ist
+Sonntag, sowieso kein Maehen erlaubt"): `rzHeuteFrei()` liefert "" solange heute noch eine
+ERLAUBTE Stunde kommt (`c.erlaubt`, Ende > jetzt + 15 min), sonst den Grund ("Sonntag",
+Feiertagsname, "kein Maehtag", "vorbei"). Ist er gesetzt, zeigt die Kachel nur die naechste
+Gelegenheit ("MAEHEN morgen 9-13 Uhr", ggf. im Wechsel "Danach nass") - den Zustand des
+Grases nicht. Das Fenster sagt unter "Maehen" "Heute kein Maehen - Sonntag." bzw. "Fuer heute
+ist die Maehzeit vorbei."; der Abschnitt "Gras jetzt" bleibt (fuer morgen nuetzlich).
+Geprueft So 15:06 echt sowie Mo 10:00 (Zustand + Maehen heute), Mo 16:50 ("vorbei", Sonne
+17:13), Di 07:00 (Tau bis 9 Uhr + heute 9-13).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
