@@ -1211,7 +1211,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.74</span>
+      <span class="ver">v5.75</span>
     </div>
   </header>
 
@@ -5300,14 +5300,14 @@ function kzMerk(k,ms,fn){const m=_kzMerk[k],n=Date.now();if(m&&n-m.t<ms)return m
 /* ==== v5.44 RASEN (Nutzer 25.10.2026: "erst mal integrieren" - Kachel mit dem Wichtigsten,
    Tipp oeffnet ein Fenster, Einstellungen separat). Erprobt auf rasentest.html; Regeln dort
    unter "So rechnet der Planer" und in CLAUDE.md. Eigene Abrufe, nur solange die Kachel gewaehlt
-   ist: Open-Meteo stuendlich (14 Tage zurueck, 8 voraus; Rueckfall DWD-MOSMIX ueber Bright Sky),
+   ist: Open-Meteo stuendlich (14 Tage zurueck, seit v5.73 15 voraus; Rueckfall DWD-MOSMIX ueber Bright Sky),
    Messungen der naechsten DWD-Station (Bright Sky, 74 h), Radar am Ort (2,5 h zurueck, 2 h voraus).
    Erinnerung aufs Handy fehlt noch - der Kanal ist offen (ntfy oder Web-Push). */
 /* v5.45 (Nutzer: "eventuell noch eine Mittagspause einplanen"): Pause einstellbar, Voreinstellung AN 13-15 Uhr.
    Pflicht ist sie in Hessen nicht - die Laermschutzverordnung des Landes ist seit 01.01.2005 aufgehoben -,
    aber "aus Ruecksicht auf die Nachbarn" ueblich (Infoblatt Laermschutz der Stadt Neu-Anspach). Ersetzt
    den festen Schalter "Mittagsruhe 13-15" aus v5.44 (mittag). */
-const RZ_STD={letzt:null,hoch:false,modus:"tage",tage:7,gd:60,frueh:2,von:9,bis:19,tage6:[1,1,1,1,1,1],pause:true,pVon:13,pBis:15,dauer:1,rh:90,tmin:4,risiko:30};
+const RZ_STD={letzt:null,hoch:false,modus:"tage",tage:7,gd:60,frueh:2,von:9,bis:19,tage6:[1,1,1,1,1,1],pause:true,pVon:13,pBis:15,dauer:1,rh:90,tmin:4,risiko:20};   // v5.75: Risiko 20 statt 30 (Nutzer)
 const RASEN={E:null,Z:[],SONNE:{},MESS:null,RSTEPS:{},SRC:"",t:0,laeuft:false,fehler:"",ort:"",einst:false,wahl:null,TAGT:{},TAGT_BIS:"",KLIMA:null};
 function rzE(){
   if(RASEN.E)return RASEN.E;let o=null;try{localStorage.removeItem("rz_darst");localStorage.removeItem("rz_leiste");}catch(e){}   // Tests v5.52 (B) und v5.58 (einfach) entschieden
@@ -5316,6 +5316,7 @@ function rzE(){
   if(!Array.isArray(E.tage6)||E.tage6.length!==6)E.tage6=RZ_STD.tage6.slice();
   ["quelle","ort","vorabend","maehen","mittag"].forEach(k=>delete E[k]);
   if(!(E.pBis>E.pVon)){E.pVon=13;E.pBis=15;}
+  if(o&&o.risiko===30&&!o.rv)E.risiko=20;E.rv=2;   // v5.75: alte Voreinstellung 30 -> 20, selbst gewaehlte Werte bleiben
   E.gd=Math.min(120,Math.max(30,Math.round((+E.gd||60)/10)*10));   // v5.46: Schritte von 10 = ganze Tage bei 15 °C
   return RASEN.E=E;}
 function rzSpeichern(){try{localStorage.setItem("rasen",JSON.stringify(RASEN.E));}catch(e){}}
