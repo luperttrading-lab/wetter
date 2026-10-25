@@ -2056,6 +2056,16 @@ frueh/risk "nicht empfohlen", bei 0 "kein trockenes Fenster" bzw. "fuer heute is
 ohne Zahl (Balken). Die Leiste reicht bis Empfehlung/Faelligkeit, soweit Stunden da sind (vorher hoechstens heute + 7;
 MOSMIX reicht weiter), Termine ueber heute + 10 zaehlen dafuer nicht. Geprueft (Testdaten): 8 Tage -> Mo 2.11. faellig
 und empfohlen (90), davor 56-87; Wuchs April -> 51-59; Mo 17:30 heute 0.
+v5.73 (Nutzer: "was ist, wenn der Index nicht die Dringlichkeit beruecksichtigt?" + "Grafik etwas nach oben schieben
+und noch eine Woche sichtbar"): (1) Die ZAHL ist nur noch das Wetter (`rzWetterWert` = trocken-Chance x Laenge, je Tag
+das Fenster mit dem besten Wetter); die EMPFEHLUNG waegt weiter den Abstand zum Termin (rzPlanen, 5 % je Tag). Darum
+kann ein Tag mit hoeherer Zahl hinter der Empfehlung liegen - die Blase sagt "Empfohlen ist Di - fuer die Wahl zaehlt
+auch der Abstand zum Termin (5 Tage ab heute: -25 %)". (2) Leiste 14 Tage (Open-Meteo `forecast_days=15`, Bright Sky
+bis +15 Tage), zweite Woche blasser (.55) mit gestrichelter Linie davor, Legende "blasser: zweite Woche, Vorhersage
+unsicherer". `rzLeisteBis`/`mehr` entfernt - die Zeilenzahl haengt nicht mehr vom Zustand ab. (3) Oben nur noch der
+Zustand ("Nass - es regnet"), die Begruendung (Letzter Regen, Abtrocknen, Radar) steht unter der Leiste als "Gras
+jetzt". 393 x 779: beide Wochen und die Legende ohne Scrollen sichtbar. Geprueft mit verlaengerten Testdaten
+(`om_synth15.json`, zweite Woche = Kopie der ersten), hell und dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
