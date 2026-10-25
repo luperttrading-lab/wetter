@@ -1935,6 +1935,16 @@ zeigt sich morgens als nass/trocknet ab). Im Band steht "dunkel" als Text (kein 
 Strecke der heutigen Zeile, 1 Stunde = Mond-Zeichen; die Linien laufen nicht durch das Wort. Legende ohne "dunkel".
 Damit ist v5.55 (Kasten im Band) ueberholt. Jede Zeile endet an IHRER Dunkelheit (24.10. Sommerzeit bis 18 Uhr,
 ab 25.10. bis 17 Uhr). Oktober: "dunkel" 6-8 und 17-22 Uhr; Sommer: nur Mond bei 21 Uhr.
+v5.58 (Nutzer: "nochmal ueberlegen, was in die Grafik muss, was Sinn macht - noch zu unuebersichtlich"): EINFACHE
+Leiste `rzLeisteEinfach` (Voreinstellung) neben der bisherigen (`rzLeiste`, "ausfuehrlich"), TEST "Grafik (Test):
+einfach | ausfuehrlich" unter der Quelle (`rz_leiste`, `rzLeisteArt()`). Einfach = nur die Entscheidung "wann maehen":
+Spalten = Maehzeit ohne Pause (7-px-Luecke) und ohne Stunden, die an ALLEN Tagen dunkel sind (Oktober: 9-12 | 15-16);
+Zeilen heute + 6 (kein "gestern"); Sonn-/Feiertag/abgewaehlter Tag = EIN grauer Balken "Sonntag - kein Maehen";
+fuenf Farben (gut, Regenrisiko = pp > Schwelle, Regen, noch nass = nass/Tau/weich, zu kalt), dunkel = leeres Feld
+mit feinem Rand, vergangene Stunden blass, Jetzt-Strich in der laufenden Stunde, Empfehlung umrandet. Statt Band und
+Linien ein Satz: "Spalten: deine Maehzeit 9-19 Uhr, Luecke = Pause 13-15 - ab 17 Uhr dunkel." Legende nur mit Farben,
+die vorkommen. Blase wie gehabt (Zeile = eigenes Grid `.rz-er`, Huelle `.rz-el` relativ). AUFRAEUMEN nach der Wahl:
+Verlierer-Funktion + CSS, `rz_leiste`, `data-rzl`, `.rz-dt`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
