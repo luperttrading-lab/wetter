@@ -1978,6 +1978,11 @@ v5.64 (Nutzer: "die Farbe 1-2 px weiter aussen rum, ohne andere Abstaende zu aen
 per gleichfarbigem Schatten (`--lb`, drei box-shadows) links/rechts/oben +2 px, unten +1 px - Elementgrenzen gemessen
 unveraendert (Pause 190,8-225,5, dunkel 274,5-348,5 px). Testfalle: die App schaltet nach Sonnenuntergang selbst auf
 dunkel - fuer helle Screenshots die Klasse `dunkel` ausdruecklich entfernen.
+v5.65 (Nutzer: "rechts und links nichts hinzufuegen, sonst zu breit; schwierig, wenn nur die letzte Stunde dunkel ist;
+oben den Button ohne Text, der kommt nur beim Tippen"): Kopffelder "Pause"/"dunkel" OHNE Schrift, so breit wie ihre Spalten,
+Schatten nur oben +2 / unten +1 px. Tipp (`data-rzb` p / m = morgens / a = abends) -> Blase "Mittagspause 13-15 Uhr - in den
+Einstellungen aenderbar oder abschaltbar" bzw. "Dunkel - Sonnenuntergang heute 17:13 Uhr, Sa 31.10. 17:02 Uhr - gemaeht wird
+nur bei Tageslicht" (aus RASEN.SONNE); zweiter Tipp schliesst. Legende zeigt "dunkel", sobald dunkle Kaestchen vorkommen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
