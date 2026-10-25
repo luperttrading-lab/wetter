@@ -2048,6 +2048,14 @@ verliert jeder Tag Warten 5 Punkte - Fr gewinnt nur, wenn Mi deutlich riskanter 
 v5.71 (Nutzer: "um die Zahl einen Kreis - eine Flaeche als Kreis"): Wertung als runde Flaeche 20 px (`.rz-w`), hell
 #e3e7ed / dunkel #2b3442, Empfehlungstag gruen gefuellt (#2e9e4a weisse Schrift / dunkel #3fae5a dunkle Schrift), "–" ohne
 Kreis. Schrift 9,5 px, ab 100 8,5 px (`.w3`): "100" 13,9 px, "99" 12,0 px im 20-px-Kreis.
+v5.72 (Nutzer-Screenshots 20:39, Wuchs-Modus "Faellig etwa 3.4.2027" nur "–", 8 Tage nur am Sa eine Zahl: "bitte immer
+eine Zahl angeben"): JEDER Maehtag bekommt eine Wertung (`rzTagWertung`, ersetzt `rzTagFenster`): Fenster aus `P.W`, sonst
+gute Fenster des Tages auch vor "Fruehestens" (`frueh`), sonst trockene ueber der Risikogrenze (`risk`), Formel wie
+`rzPlanen` (Abstand zum Termin, ohne Termin -40 %); kein trockenes Fenster von "Dauer" = 0. Die Blase sagt bei
+frueh/risk "nicht empfohlen", bei 0 "kein trockenes Fenster" bzw. "fuer heute ist deine Maehzeit vorbei". Sonn-/Feiertage
+ohne Zahl (Balken). Die Leiste reicht bis Empfehlung/Faelligkeit, soweit Stunden da sind (vorher hoechstens heute + 7;
+MOSMIX reicht weiter), Termine ueber heute + 10 zaehlen dafuer nicht. Geprueft (Testdaten): 8 Tage -> Mo 2.11. faellig
+und empfohlen (90), davor 56-87; Wuchs April -> 51-59; Mo 17:30 heute 0.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

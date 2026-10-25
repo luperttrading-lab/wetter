@@ -212,8 +212,8 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-w{justify-self:end;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 9.5px/1 system-ui,sans-serif;letter-spacing:-.2px;background:#e3e7ed;color:#4a5566;cursor:pointer}
 .rz-w.w3{font-size:8.5px;letter-spacing:-.4px}.rz-w.rec{background:#2e9e4a;color:#fff}
-.rz-w.leer{background:none;font-weight:400;color:var(--muted);cursor:default}.rz-eax .rz-wk{text-align:right;font-size:9px}
-html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10}html.dunkel .rz-w.leer{background:none}
+.rz-eax .rz-wk{text-align:right;font-size:9px}
+html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10}
 .rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}html.dunkel .rz-er>i.rec{box-shadow:inset 0 0 0 2px #e6f4e8}
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
 .rz-frei2{grid-column:2/-2;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
@@ -1206,7 +1206,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.71</span>
+      <span class="ver">v5.72</span>
     </div>
   </header>
 
@@ -5627,17 +5627,36 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
   if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";
   return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"+(z3?'<div class="rz-z">'+z3+"</div>":"")+"</div>";
 }
-/* v5.70: Rechnung hinter der Zahl in der Leiste - Wertung = Sicherheit x Abstand x Laenge (wie rzPlanen) */
-// je Tag das Fenster, das die Empfehlung an diesem Tag waehlen wuerde (bis 3 Punkte unter dem besten: das frueheste)
-function rzTagFenster(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;const ws=(P.W||[]).filter(w=>w.tag===tag);if(!ws.length)return null;
-  const best=Math.max(...ws.map(w=>w.score));return ws.find(w=>w.score>=best-0.03);}
-function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagFenster(P,tag);
-  if(!w)return "Kein Fenster an diesem Tag.";
-  const pz=v=>Math.round(v)+"\u202f%",ab=Math.min(40,5*w.ad),lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=rzTageZw(f.tag,w.tag);
+/* v5.70: Rechnung hinter der Zahl in der Leiste - Wertung = Sicherheit x Abstand x Laenge (wie rzPlanen).
+   v5.72 (Nutzer: "bitte immer eine Zahl angeben"): JEDER Maehtag bekommt eine Wertung, auch vor "Fruehestens"
+   (Tag.frueh), ueber deiner Risikogrenze (Tag.risk) und wenn der Termin noch Monate weg ist - dann nach derselben
+   Formel, nur nicht empfohlen. Kein trockenes Fenster von "Dauer" Laenge (oder heute keins mehr) = 0. */
+function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
+  const E=rzE(),f=P.f||{},jetzt=Date.now(),ad=f.tag?Math.abs(rzTageZw(f.tag,tag)):99,
+        frueh=!f.sofort&&(!f.tag||tag<rzTagPlus(f.tag,-E.frueh));
+  const fenster=gut=>{const ws=[];let cur=null;const zu=()=>{if(cur&&(cur.e-cur.s)/36e5>=E.dauer-1e-6)ws.push(cur);cur=null;};
+    for(const c of RASEN.Z){if(c.tag!==tag||c.e<=jetzt+5*6e4)continue;
+      if(c.erlaubt&&c.z==="trocken"&&(!gut||c.gut)){const pp=c.pp||0;if(cur&&cur.e===c.s){cur.e=c.e;cur.pp=Math.max(cur.pp,pp);}else{zu();cur={s:Math.max(c.s,jetzt),e:c.e,tag,pp};}}
+      else zu();}
+    zu();return ws;};
+  let ws=(P.W||[]).filter(w=>w.tag===tag),risk=false;
+  if(!ws.length){ws=fenster(true);if(!ws.length){ws=fenster(false);risk=ws.length>0;}
+    ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.score=w.P*Math.max(.6,1-.05*ad)*(.9+.1*Math.min(1,lg-E.dauer));});}
+  if(!ws.length)return {tag,score:0,leer:true,frueh};
+  const best=Math.max(...ws.map(w=>w.score)),w=ws.find(x=>x.score>=best-0.03);
+  return Object.assign({},w,{frueh:frueh&&!(P.W||[]).some(x=>x.tag===tag),risk});}
+function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertung(P,tag),pz=v=>Math.round(v)+"\u202f%";
+  const heute=rzTeile(Date.now()).tag;
+  if(w.leer){const rest=RASEN.Z.some(c=>c.tag===tag&&c.erlaubt&&c.e>Date.now()+5*6e4);
+    return "<b>"+rzTagTxt(tag)+" · Wertung 0</b> · "+(!rest&&tag===heute?"für heute ist deine Mähzeit vorbei"
+      :"kein trockenes Fenster von "+rzStd(E.dauer)+" in deiner Mähzeit (nass, Tau, Regen oder zu kalt)");}
+  const ab=Math.min(40,5*w.ad),lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null;
   const wo=f.sofort?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute (Gras ist hoch – früher ist besser)":"heute")
-    :n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
+    :n==null?"Termin nicht in Sicht":n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
   return "<b>"+rzTagTxt(tag)+" "+rzHH(w.s)+"–"+rzHH(w.e)+" Uhr · Wertung "+Math.round(w.score*100)+"</b> · trocken mit "+pz(100*w.P)+" (Regenrisiko "+pz(w.pp)+")"
     +" · "+wo+(ab?": −"+pz(ab):": kein Abzug")+" · "+(kurz?"Fenster nur "+rzStd(lg)+": −"+pz(kurz):"Fenster lang genug")
+    +(w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>":"")
+    +(w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>":"")
     +" · Bis 3 Punkte Unterschied gilt als gleich gut – dann zählt die Nähe zum Termin.";}
 function rzMitAlt(fn){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
   if(E.letzt===heute){const v=E.vor;E.letzt=v&&v.letzt!==E.letzt?v.letzt:null;E.hoch=!!(v&&v.hoch);}else{E.letzt=heute;E.hoch=false;}
@@ -5657,8 +5676,9 @@ function rzLeisteEinfach(P,mehr){
   const E=rzE(),jetzt=Date.now(),heute=rzTeile(jetzt).tag,idx={},pa=x=>E.pause&&x>=E.pVon&&x<E.pBis;
   RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
   // v5.67: heute + 6, laenger, wenn Faelligkeit oder Empfehlung (auch im anderen Zustand, `mehr`) auf heute + 7 liegt
-  const bis=rzLeisteBis(P).concat(mehr||[]).reduce((a,b)=>b>a?b:a,rzTagPlus(heute,6));
-  const tage=[];for(let n=0;n<8;n++){const t=rzTagPlus(heute,n);if(t>bis)break;if(idx[t])tage.push(t);}
+  const lim=rzTagPlus(heute,10),bis=rzLeisteBis(P).concat(mehr||[]).filter(t=>t<=lim).reduce((a,b)=>b>a?b:a,rzTagPlus(heute,6));
+  // v5.72: bis zum Empfehlungs-/Faelligkeitstag, soweit Stunden da sind (Open-Meteo heute + 7, MOSMIX laenger)
+  const tage=[];for(let n=0;n<11;n++){const t=rzTagPlus(heute,n);if(t>bis)break;if(idx[t])tage.push(t);}
   while(tage.length>7&&!rzMaehtag(tage[tage.length-1]))tage.pop();   // v5.70: eine achte Zeile nur fuer einen Maehtag
   const std=[];for(let x=E.von;x<E.bis;x++)if(!pa(x))std.push(x);
   let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div>';
@@ -5678,9 +5698,9 @@ function rzLeisteEinfach(P,mehr){
   h+='<div class="rz-er rz-eax"'+st+"><span></span>"+std.map((x,i)=>luecke(i)+"<span>"+x+"</span>").join("")+'<span class="rz-wk">Wert</span></div>';
   /* v5.70 (Nutzer: "eine Zahl hinten dran, wie gut die gewichtete Maehqualitaet ist - evtl. waere Freitag besser als
      Mittwoch"): je Tag die beste Wertung seiner Fenster (rzPlanen: Sicherheit x Abstand zum Termin x Laenge), x 100.
-     "–" = an dem Tag kein Fenster, leer = vor "Fruehestens" (dort wird nicht gesucht). Tipp -> Blase mit der Rechnung. */
-  const wZelle=tag=>{const w=rzTagFenster(P,tag);if(w){const z=Math.round(w.score*100);return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+"</b>";}
-    return P.fruehMs&&rzLokal(tag,23,0)<P.fruehMs?"<span></span>":'<b class="rz-w leer">–</b>';};
+     Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
+  const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(w.score*100);   // v5.72: immer eine Zahl
+    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+"</b>";};
   const da=new Set();
   for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
     const lab='<div class="rz-k'+(frist?" frist":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===0?"heute":"")+"</small></div>";
