@@ -1974,6 +1974,10 @@ Zurueckholen aus `wetter-giessen-v5_61.html`.
 v5.63 (Nutzer: "Pause und dunkel wie im hellen Modus mit eigener Farbe, Pause darf anders sein - dann keinen Rahmen"):
 Kopfzeile der Leiste mit FLAECHEN statt Rahmen, beide Modi: Pause sandfarben (#eee7d8 / dunkel #3b3427), dunkel in
 Nachtfarbe (#dfe4ef / #26324d); Rahmen aus v5.61/v5.62 entfernt.
+v5.64 (Nutzer: "die Farbe 1-2 px weiter aussen rum, ohne andere Abstaende zu aendern"): Flaechen "Pause"/"dunkel"
+per gleichfarbigem Schatten (`--lb`, drei box-shadows) links/rechts/oben +2 px, unten +1 px - Elementgrenzen gemessen
+unveraendert (Pause 190,8-225,5, dunkel 274,5-348,5 px). Testfalle: die App schaltet nach Sonnenuntergang selbst auf
+dunkel - fuer helle Screenshots die Klasse `dunkel` ausdruecklich entfernen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
