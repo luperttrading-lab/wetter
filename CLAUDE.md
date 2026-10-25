@@ -1819,6 +1819,16 @@ Service Worker); zweite Stufe waere eine GitHub-Schleife, die bei Vorhersageaend
 Geprueft (Playwright, 25.10. 14:4x): Bestandsauswahl bekommt "rasen", Bright-Sky-Rueckfall und
 Open-Meteo-Weg (nachgebaute Antwort), Kachel nass/bis 17 Uhr <-> morgen 9-17 Uhr, Fenster,
 Regler speichert, Heute gemaeht setzt die Frist neu, hell und dunkel, 390 pt.
+v5.45 (Nutzer: "eventuell noch eine Mittagspause einplanen"): MITTAGSPAUSE einstellbar
+(`pause`, `pVon`, `pBis`), Voreinstellung AN 13-15 Uhr; ersetzt den festen Schalter `mittag`
+(Mittagsruhe 13-15, Voreinstellung aus) aus v5.44, ein gespeichertes `mittag` wird verworfen.
+Rechtslage: in Hessen KEINE Pflicht - die Laermschutzverordnung des Landes ist seit 01.01.2005
+aufgehoben; "aus Ruecksicht auf die Nachbarn" sollen 13-15 Uhr moeglichst nur unaufschiebbare
+Arbeiten laufen (Infoblatt Laermschutz der Stadt Neu-Anspach, gelesen); eine eigene Satzung von
+Wettenberg fand die Websuche nicht. Pausenstunden zaehlen als "nicht deine Zeit", ein Fenster
+wird dort geteilt (9-13 und 15-17). Dabei behoben (seit v5.44): im Fenster (.loc-box) griff
+`.loc-box input` (volle Breite, appearance:none, Feldrahmen) - Haekchen waren unsichtbar,
+Regler dicke Kaesten; jetzt `.loc-box .rz input[type=...]` mit normalen Bedienelementen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
