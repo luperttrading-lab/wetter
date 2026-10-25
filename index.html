@@ -219,8 +219,8 @@ html.dunkel .rz-vl{background:rgba(227,234,243,.62)}html.dunkel .rz-vd{backgroun
 .rz-bs{position:absolute;top:1px;bottom:0;background:#5b6b80;color:#fff;border-radius:3px 3px 0 0;font:700 8.5px/12px system-ui;text-align:center;overflow:hidden;white-space:nowrap}
 .rz-bp{position:absolute;top:1px;bottom:0;font:600 8.5px/12px system-ui;color:var(--muted);text-align:center;white-space:nowrap}
 html.dunkel .rz-bs{background:#8193aa;color:#101820}
-.rz-bp.rz-bn{border-bottom:3px solid #b9c2d8;line-height:10px;color:#4a5878}.rz-bn span{position:relative;z-index:3;background:#fff;padding:0 3px}
-html.dunkel .rz-bp.rz-bn{border-bottom-color:#3d4f7a;color:#a9b6d2}html.dunkel .rz-bn span{background:#141a23}
+.rz-bs.rz-bn{background:#9aa6c0;color:#1f2a44}.rz-bn span{position:relative;z-index:3;background:#9aa6c0;padding:0 3px}
+html.dunkel .rz-bs.rz-bn{background:#2c3a5c;color:#c9d4ea}html.dunkel .rz-bn span{background:#2c3a5c}
 .rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
 .rz-jz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none}
 .rz-r1{background:#9cc7ee}.rz-r2{background:#5a9fe0}.rz-r3{background:#2f6fc0}
@@ -1201,7 +1201,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.54</span>
+      <span class="ver">v5.55</span>
     </div>
   </header>
 
@@ -5596,16 +5596,16 @@ function rzLeiste(P){
   const E=rzE(),x16=i=>"calc((100% + 1px) * "+i+" / 16",pz=E.pause&&E.pVon>E.von&&E.pBis<E.bis,
         grenz=[[E.von,0],[E.bis,0]].concat(pz?[[E.pVon,1],[E.pBis,1]]:[]).filter(([x])=>x>H0&&x<H1),
         linien=grenz.map(([x,d])=>'<span class="rz-vl'+(d?" rz-vd":"")+'" style="left:'+x16(x-H0)+' - 1.5px)"></span>').join("");
-  /* v5.54 (Nutzer: "ist es nur bis 19 Uhr dunkel? Dunkel als Kasten oder oben drueber wie die Pause?"): der
-     Maehzeit-Kasten endet, wo es dunkel wird; "dunkel" steht ohne Kasten wie "Pause" ueber der GANZEN dunklen
-     Strecke (mit Strich in Nachtfarbe) - vorher endete das Stueck an der 19-Uhr-Linie und las sich wie "bis 19 Uhr
-     dunkel". Nur wenn die Dunkelheit in die Maehzeit faellt (Fruehjahr/Herbst). */
+  /* v5.54 (Nutzer: "ist es nur bis 19 Uhr dunkel?"): der Maehzeit-Kasten endet, wo es dunkel wird; "dunkel"
+     liegt ueber der GANZEN dunklen Strecke - vorher endete das Stueck an der 19-Uhr-Linie und las sich wie "bis
+     19 Uhr dunkel". v5.55 (Nutzer: "die Kachel oben hinzufuegen"): wieder als KASTEN in Nachtfarbe, nicht nur Text.
+     Nur wenn die Dunkelheit in die Maehzeit faellt (Fruehjahr/Herbst). */
   {const hr=idx[heute]||idx[rzTagPlus(heute,1)]||{},art=[],mz=x=>x>=E.von&&x+1<=E.bis,pa=x=>E.pause&&x>=E.pVon&&x<E.pBis,dk=x=>!!hr[x]&&!hr[x].hell;
     for(let x=H0;x<H1;x++)art.push(mz(x)&&!pa(x)&&!dk(x)?"m":mz(x)&&pa(x)?"p":"-");
     for(let x=H0;x<H1;){if(!dk(x)){x++;continue;}let y=x;while(y<H1&&dk(y))y++;   // dunkle Strecke [x,y): ganz zeigen, wenn sie die Maehzeit beruehrt
       let rein=false;for(let z=x;z<y;z++)if(mz(z)&&!pa(z))rein=true;if(rein)for(let z=x;z<y;z++)art[z-H0]="n";x=y;}
     let b="";for(let i=0;i<art.length;){let j=i;while(j<art.length&&art[j]===art[i])j++;const t=art[i],n=j-i,st=' style="left:'+x16(i)+');width:'+x16(n)+' - 1px)">';
-      if(t==="m")b+='<span class="rz-bs"'+st+(n>=3?"Mähzeit":"")+"</span>";else if(t==="n")b+='<span class="rz-bp rz-bn"'+st+"<span>"+(n>=2?"dunkel":"\u263E")+"</span></span>";
+      if(t==="m")b+='<span class="rz-bs"'+st+(n>=3?"Mähzeit":"")+"</span>";else if(t==="n")b+='<span class="rz-bs rz-bn"'+st+"<span>"+(n>=2?"dunkel":"\u263E")+"</span></span>";
       else if(t==="p")b+='<span class="rz-bp"'+st+(n>=2?"Pause":"")+"</span>";i=j;}
     h+='<div></div><div class="rz-band">'+b+linien+"</div>";}
   for(let n=-1;n<7;n++){const tag=rzTagPlus(heute,n),row=idx[tag];if(!row)continue;
