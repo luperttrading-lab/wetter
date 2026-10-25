@@ -1196,7 +1196,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.65</span>
+      <span class="ver">v5.66</span>
     </div>
   </header>
 
@@ -4622,6 +4622,17 @@ function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.al
     div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${sub?`<div class="ad">${sub}</div>`:""}</div>`;
     box.appendChild(div);});
   if(bestHeat)el("heat").classList.remove("on");}
+
+/* v5.66 (Nutzer: "koennen wir den Warnhinweis testen?"): mit ?warntest in der Adresse haengt die App unter die echten
+   Warnungen je eine Testkarte jeder Stufe (gelb, orange, rot, violett), deutlich als TEST beschriftet. Nur fuer den Blick
+   auf Farben und Lesbarkeit - an Daten und Ablauf aendert sich nichts. */
+function warnTest(){try{if(!new URLSearchParams(location.search).has("warntest"))return;}catch(e){return;}
+  const box=el("alerts");if(!box||box.querySelector(".alert.test"))return;
+  [["minor","FROST","Stufe 1 · Wetterwarnung"],["moderate","SCHWERE STURMBÖEN","Stufe 2 · markantes Wetter"],
+   ["severe","ORKANARTIGE BÖEN","Stufe 3 · Unwetter"],["extreme","EXTREMES UNWETTER","Stufe 4 · extremes Unwetter"]].forEach(([sev,t,d])=>{
+    const div=document.createElement("div");div.className="alert test "+sev;
+    div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div><div class="at">TEST · ${t}</div><div class="ad">${d} – keine echte Warnung</div></div>`;
+    box.appendChild(div);});}
 
 /* --- Render: Regen-Nowcast --- */
 /* ===== v3.89: Kacheln in der obersten Karte =====================================
@@ -9698,7 +9709,7 @@ function loadExtras(){
   loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=${encodeURIComponent(GERAETE_TZ)}`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
   loadIss();
   loadNowcast();
-  fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(renderAlerts).catch(e=>console.warn("alerts",e.message));
+  fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(j=>{renderAlerts(j);warnTest();}).catch(e=>{console.warn("alerts",e.message);warnTest();});
 }
 
 /* --- Demo für die Zusatz-Sektionen (Vorschau) --- */
