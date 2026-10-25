@@ -192,7 +192,7 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-zust.nass{color:#2f6fc0}.rz-zust.tau{color:#3d7f77}.rz-zust.trocken{color:#2e8b47}.rz-zust.weich{color:#8a6a2f}
 .rz-z{font-size:13px;line-height:1.38;margin:2px 0}
 .rz-h{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:11px 0 5px;display:flex;align-items:baseline;gap:4px}
-.rz-h span{text-transform:none;letter-spacing:0;font-weight:600;font-size:11.5px}.rz-h .rz-hint{margin-left:auto;font-size:10.5px}
+.rz-h span{text-transform:none;letter-spacing:0;font-weight:600;font-size:11.5px}.rz-h .rz-hint{margin-left:auto;font-size:10.5px}.rz-h .rz-hint span{font-size:inherit}
 .rz-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}.rz-kopf .kzg-titel{margin:0}
 .rz-stand{font-size:12px;color:var(--muted);text-align:right}
 .rz .loc-row{display:grid;grid-template-columns:1.12fr 1fr;gap:8px;margin-top:0}
@@ -1191,7 +1191,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.50</span>
+      <span class="ver">v5.51</span>
     </div>
   </header>
 
@@ -5275,7 +5275,7 @@ function kzMerk(k,ms,fn){const m=_kzMerk[k],n=Date.now();if(m&&n-m.t<ms)return m
    aber "aus Ruecksicht auf die Nachbarn" ueblich (Infoblatt Laermschutz der Stadt Neu-Anspach). Ersetzt
    den festen Schalter "Mittagsruhe 13-15" aus v5.44 (mittag). */
 const RZ_STD={letzt:null,hoch:false,modus:"tage",tage:7,gd:60,frueh:2,von:9,bis:19,tage6:[1,1,1,1,1,1],pause:true,pVon:13,pBis:15,dauer:1,rh:90,tmin:4,risiko:30};
-const RASEN={E:null,Z:[],SONNE:{},MESS:null,RSTEPS:{},SRC:"",t:0,laeuft:false,fehler:"",ort:"",einst:false,wahl:null};
+const RASEN={E:null,Z:[],SONNE:{},MESS:null,RSTEPS:{},SRC:"",t:0,laeuft:false,fehler:"",ort:"",einst:false,wahl:null,TAGT:{},TAGT_BIS:"",KLIMA:null};
 function rzE(){
   if(RASEN.E)return RASEN.E;let o=null;
   try{o=JSON.parse(localStorage.getItem("rasen")||"null")||JSON.parse(localStorage.getItem("rasenTest")||"null");}catch(e){}   // Werte der Testseite uebernehmen
@@ -5334,6 +5334,27 @@ async function rzOpenMeteo(){
   const S={};d.daily.time.forEach((t,i)=>{S[rzTeile(t*1000+12*36e5).tag]={auf:d.daily.sunrise[i]*1000,unter:d.daily.sunset[i]*1000};});
   RASEN.Z=Z;RASEN.SONNE=S;
 }
+/* v5.51 (Nutzer: "du koenntest einen Termin ausrechnen, du hast ja die Wetterdaten"): Faelligkeit im Wuchs-Modus
+   ueber die Stundenwerte hinaus. Erst die Tagesvorhersage (Tagesmittel, 16 Tage voraus, 60 zurueck - deckt auch
+   ein "zuletzt gemaeht" vor mehr als 14 Tagen), danach das Mittel 2018-2025 je Kalendertag (Open-Meteo-Archiv,
+   ERA5, +-7 Tage geglaettet, je Ort ein Jahr im Geraet gemerkt). Das Archiv zaehlt bei Open-Meteo je 2 Wochen
+   Daten als eine Abfrage - 8 Jahre sind rund 200, darum nur einmal je Ort. */
+async function rzTagesTemp(){
+  const d=await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
+    +"&daily=temperature_2m_mean&past_days=60&forecast_days=16&timezone=auto",15000);
+  const T={};d.daily.time.forEach((t,i)=>{const v=d.daily.temperature_2m_mean[i];if(v!=null)T[t]=+v;});
+  RASEN.TAGT=T;RASEN.TAGT_BIS=Object.keys(T).sort().pop()||"";}
+const RZ_KLIMA_JAHRE=[2018,2025];
+async function rzKlimaLaden(){
+  let k=null;try{k=JSON.parse(localStorage.getItem("rzKlima")||"null");}catch(e){}
+  if(k&&k.m&&Math.abs(k.lat-LOC.lat)<0.15&&Math.abs(k.lon-LOC.lon)<0.15&&Date.now()-k.t<365*864e5){RASEN.KLIMA=k.m;return;}
+  const d=await fetchJSON("https://archive-api.open-meteo.com/v1/archive?latitude="+LOC.lat+"&longitude="+LOC.lon
+    +"&start_date="+RZ_KLIMA_JAHRE[0]+"-01-01&end_date="+RZ_KLIMA_JAHRE[1]+"-12-31&daily=temperature_2m_mean&timezone=auto",30000);
+  const sum={},n={};d.daily.time.forEach((t,i)=>{const v=d.daily.temperature_2m_mean[i];if(v==null)return;const md=t.slice(5);sum[md]=(sum[md]||0)+v;n[md]=(n[md]||0)+1;});
+  const tage=[];for(let x=Date.UTC(2024,0,1);x<Date.UTC(2025,0,1);x+=864e5)tage.push(new Date(x).toISOString().slice(5,10));   // 366 Kalendertage
+  const roh=tage.map(md=>n[md]?sum[md]/n[md]:null);if(roh.filter(v=>v!=null).length<300)throw new Error("Klima unvollstaendig");
+  const m={};tage.forEach((md,i)=>{let s=0,c=0;for(let j=-7;j<=7;j++){const v=roh[(i+j+366)%366];if(v!=null){s+=v;c++;}}m[md]=Math.round(s/c*10)/10;});
+  RASEN.KLIMA=m;try{localStorage.setItem("rzKlima",JSON.stringify({lat:LOC.lat,lon:LOC.lon,t:Date.now(),m}));}catch(e){}}
 function rzStation(d,q){const alle=(d.sources||[]).filter(x=>x.dwd_station_id===q.dwd_station_id);
   return {name:(alle.find(x=>/[a-zäöü]/.test(x.station_name))||q).station_name,km:Math.round((q.distance||0)/1000)};}
 async function rzBrightSky(){   // Rueckfall: vergangene Stunden gemessen, danach MOSMIX (Luftfeuchte aus dem Taupunkt)
@@ -5380,6 +5401,9 @@ async function rzLaden(){
     try{await rzOpenMeteo();RASEN.SRC="om";try{RASEN.MESS=await rzMessungen();}catch(e){}}
     catch(e){await rzBrightSky();RASEN.SRC="bs";}
     try{await rzRadar();}catch(e){}
+    try{await rzTagesTemp();}catch(e){RASEN.TAGT={};RASEN.TAGT_BIS="";}
+    if(RASEN.ort!==rzOrt())RASEN.KLIMA=null;
+    if(!RASEN.KLIMA)rzKlimaLaden().then(()=>{if(typeof kzRender==="function")kzRender();rzGrossNeu();}).catch(()=>{});
     RASEN.fehler="";
   }catch(e){RASEN.fehler=(e&&e.message)||"nicht erreichbar";}
   RASEN.t=Date.now();RASEN.ort=rzOrt();RASEN.laeuft=false;
@@ -5413,15 +5437,25 @@ function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
   if(E.hoch||!letzt)return {tag:heute,sofort:true};   // hohes Gras / Datum unbekannt: die naechste gute Gelegenheit
   if(E.modus==="tage")return {tag:rzTagPlus(letzt,E.tage)};
   const tm={};for(const c of RASEN.Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);   // Waermesumme ueber 5 °C (Tagesmittel), Ziel gd
-  const erster=RASEN.Z.length?rzTeile(RASEN.Z[0].s).tag:heute;let sum=0,bisher=0;
-  for(let n=1;n<=28;n++){const tag=rzTagPlus(letzt,n),a=tm[tag];if(!a){if(tag<erster)continue;return {tag:null,sum,bisher,ende:tag};}
-    sum+=Math.max(0,a.reduce((x,y)=>x+y,0)/a.length-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return {tag,sum,bisher};}
-  return {tag:rzTagPlus(letzt,28),sum,bisher};}
+  // v5.51: nach den Stundenwerten die Tagesvorhersage (bis 16 Tage), danach das langjaehrige Mittel; q merkt die
+  // unsicherste benutzte Quelle (0 Stunden, 1 Tagesvorhersage, 2 Mittel). Keine 28-Tage-Grenze mehr - im Winter
+  // waechst nichts, der Termin rutscht dann ins Fruehjahr.
+  const zEnde=RASEN.Z.length?rzTeile(RASEN.Z[RASEN.Z.length-1].s).tag:heute,K=RASEN.KLIMA;let sum=0,bisher=0,q=0;
+  for(let n=1;n<=400;n++){const tag=rzTagPlus(letzt,n),a=tm[tag];let T=null,qn=0;
+    if(a)T=a.reduce((x,y)=>x+y,0)/a.length;else if(RASEN.TAGT[tag]!=null){T=RASEN.TAGT[tag];qn=tag>zEnde?1:0;}else if(tag>zEnde&&K&&K[tag.slice(5)]!=null){T=K[tag.slice(5)];qn=2;}
+    if(T==null){if(tag<=heute)continue;return {tag:null,sum,bisher,ende:tag};}
+    q=Math.max(q,qn);sum+=Math.max(0,T-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return {tag,sum,bisher,grob:q};}
+  return {tag:null,sum,bisher,ende:rzTagPlus(letzt,401)};}
 function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,W:[],rec:null};
-  const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs),W=rzFenster(ab);
-  W.forEach(w=>{const tg=(w.s-jetzt)/864e5,lg=(w.e-w.s)/36e5;w.score=w.P*Math.max(.6,1-.05*tg)*(.9+.1*Math.min(1,(lg-E.dauer)/3));});
-  const vor=W.filter(w=>w.s<fristMs);let rec=null;
-  if(f.sofort)rec=W[0]||null;else for(const w of (vor.length?vor:W))if(!rec||w.score>rec.score+1e-9)rec=w;
+  const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs);
+  if(f.grob&&RASEN.Z.length&&fruehMs>=RASEN.Z[RASEN.Z.length-1].e)return {f,W:[],rec:null,spaet:true};   // v5.51: Termin hinter den Stundenwerten
+  const W=rzFenster(ab);
+  // v5.51: Laengen-Bonus nur bis Dauer + 1 h (vorher + 3 h) - sonst schlug "heute 15-19 Uhr" das Fenster jetzt bis 13 Uhr
+  W.forEach(w=>{const tg=(w.s-jetzt)/864e5,lg=(w.e-w.s)/36e5;w.score=w.P*Math.max(.6,1-.05*tg)*(.9+.1*Math.min(1,lg-E.dauer));});
+  // v5.51: unter fast gleich guten Fenstern (bis 3 Punkte unter dem besten) das FRUEHESTE - 5 % statt 7 %
+  // Regenrisiko ist Rauschen und schob "morgen 9-13" hinter "morgen 15-17" (W ist zeitlich sortiert)
+  const vor=W.filter(w=>w.s<fristMs),kand=vor.length?vor:W;let rec=null;
+  if(f.sofort)rec=W[0]||null;else{const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.find(w=>w.score>=best-0.03)||null;}
   const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag):null;
   return {f,fruehMs,fristMs,W,rec,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
@@ -5477,6 +5511,7 @@ function rzKachel(){
     alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
     const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
   // v5.50 (Nutzer: "spaeter - heute spaeter oder irgendwann?"): das Datum, bis zu dem es sicher nicht faellig wird
+  else if(P.spaet){const n=rzTageZw(heute,P.f.tag);alt.push({l:"Mähen",v:"~"+rzTagTxt(P.f.tag).slice(3),s:n>45?"Winterpause":"geschätzt"});}   // v5.51
   else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"nach "+rzTagTxt(rzTagPlus(P.f.ende,-1)).slice(3),s:"wächst kaum"});
   // v5.48: darf heute nicht (mehr) gemaeht werden, zaehlt nur die naechste Gelegenheit - kein "nass bis 17 Uhr"
   if(rzHeuteFrei())return Object.assign({},alt[0],{alt:alt.slice(1)});
@@ -5517,15 +5552,18 @@ function rzGrossHtml(){
 function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%";
   const tagK=tag=>{const n=rzTageZw(tag,heute);return n===0?"heute":n===1?"gestern":rzTagTxt(tag);},
         tagV=tag=>{const n=rzTageZw(heute,tag);return n===0?"heute":n===1?"morgen":rzTagTxt(tag);},
-        frueh=J&&J.maehbar&&(!P.rec||J.maehbar.s<P.rec.s)?J.maehbar:null;
+        frueh=J&&J.maehbar&&(!P.rec||Math.max(J.maehbar.s,Date.now())<P.rec.s-36e5)?J.maehbar:null;   // v5.51: erst ab 1 h Vorsprung
   let z1,z2,z3="";
   if(f.sofort)z1=E.hoch?"Gras ist schon hoch – lieber bald mähen.":"Wann zuletzt gemäht? → Einstellungen";
-  else if(f.tag){const nf=rzTageZw(heute,f.tag);
+  else if(f.tag&&!P.spaet){const nf=rzTageZw(heute,f.tag);
     z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
   else z1="Gemäht "+tagK(E.letzt)+" · seither gewachsen "+pct();
   if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
     z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr";
     z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt);}
+  else if(P.spaet){const n=rzTageZw(heute,f.tag),bis=RASEN.TAGT_BIS;
+    z2="Fällig etwa "+rzTagTxt(f.tag)+(f.tag.slice(0,4)!==heute.slice(0,4)?f.tag.slice(0,4):"")+(n>1?" (in "+n+" Tagen)":"");
+    z3=(f.grob===2?"Geschätzt: Vorhersage"+(bis?" bis "+rzTagTxt(bis):"")+", danach Mittel "+RZ_KLIMA_JAHRE.join("–")+".":"Geschätzt aus der Tagesvorhersage.")+(n>45?" Im Winter wächst der Rasen kaum.":"");}
   else if(f.tag)z2="Kein trockenes Fenster in Sicht";
   else{z2="Nicht fällig bis "+rzTagTxt(rzTagPlus(f.ende,-1));z3="Bei der Kälte wächst der Rasen langsam.";}
   if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";

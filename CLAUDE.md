@@ -1875,6 +1875,22 @@ wenn die Waermesumme bis zum Ende der Vorhersage nicht reicht, steht jetzt das D
 Vorhersagetag, wie "Nicht faellig bis So 1.11." im Fenster). Gemessen: "nach 1.11." 74 px, Platz 79 (375 pt);
 "nach 12.11." auf 13,5 px verkleinert. Keine Hochrechnung ueber die Vorhersage hinaus (waere eine Annahme
 gleichbleibender Temperatur).
+v5.51 (Nutzer: "du koenntest einen Termin ausrechnen, du hast ja die Wetterdaten"; "was waere im Sommer an
+einem schoenen Sonntag?"; "ist die Mittagspause sichtbar?"). TERMIN im Wuchs-Modus ueber die Stundenwerte hinaus:
+`rzTagesTemp()` holt Tagesmittel (Open-Meteo daily temperature_2m_mean, past_days=60, forecast_days=16 -> auch
+"zuletzt gemaeht" vor > 14 Tagen zaehlt), `rzKlimaLaden()` das Mittel 2018-2025 je Kalendertag (Archiv-API,
+ERA5, +-7 Tage geglaettet, `rzKlima` im Geraet ein Jahr je Ort; zaehlt bei Open-Meteo rund 200 Abfragen, darum
+einmalig). `rzFaellig`: Stunden -> Tagesvorhersage -> Klima, `grob` = unsicherste Quelle, keine 28-Tage-Grenze
+mehr. Liegt der Termin (minus "frueh") hinter den Stundenwerten: `P.spaet`, Kachel "MAEHEN ~2.4. / Winterpause"
+(ab 45 Tagen, sonst "geschaetzt"), Fenster "Faellig etwa Fr 2.4.2027 (in 159 Tagen)" + Quelle. Ohne Klima wie
+v5.50 "nach 9.11." (Ende der Tagesvorhersage). Beispiel 25.10. (gemaeht heute, 60er Schwelle): Vorhersage bis 9.11.
+bringt 22, ab Anfang November 1-3 Grad - Termin im April (Testklima aus genaeherten Monatsmitteln; das echte
+Archiv lieferte im Pruefstand 429). EMPFEHLUNG korrigiert (Sommer-Simulation Mo 10:30, trocken): "Heute 15-19 Uhr"
+statt jetzt - der Laengenbonus reichte bis Dauer + 3 h; jetzt bis Dauer + 1 h. Und: unter fast gleich guten
+Fenstern (bis 3 Punkte unter dem besten) gewinnt das FRUEHESTE (5 % gegen 7 % Regenrisiko schob "morgen 9-13"
+hinter "15-17"). "Moeglich waere schon ..." erst ab 1 h Vorsprung. SOMMER-SONNTAG (Simulation, Uhr per
+page.clock, `om_sommer.json` im Scratchpad): Kachel "Maehen morgen 9-13 Uhr", Fenster "heute nicht - Sonntag",
+Sonntagszeile ganz "Sonn-/Feiertag"; Mittagspause = die weissen Spalten 13-15 an Werktagen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
