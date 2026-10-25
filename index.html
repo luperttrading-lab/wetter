@@ -187,6 +187,56 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 /* v5.21: Grossansicht der 16-Tage-Grafik (Tipp auf die Kachel) */
 .kzg-titel{font-size:17px;font-weight:800;margin:0 0 3px}
 .kzg-sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+/* v5.44 Rasen-Planer (Kachel "rasen", Grossansicht rzGrossHtml) */
+.rz-zust{font-size:17px;font-weight:800;margin:4px 0 6px;line-height:1.3}
+.rz-zust.nass{color:#2f6fc0}.rz-zust.tau{color:#3d7f77}.rz-zust.trocken{color:#2e8b47}.rz-zust.weich{color:#8a6a2f}
+.rz-z{font-size:13px;line-height:1.42;margin:3px 0}
+.rz-h{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+.rz-emp{font-size:15.5px;font-weight:800;margin:6px 0 2px;line-height:1.3}
+.rz-warn{color:var(--warn)}
+.rz-q{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.4}
+.rz-tl{display:grid;grid-template-columns:46px 1fr;gap:3px 5px;align-items:center}
+.rz-k{font-size:10.5px;font-weight:700;white-space:nowrap;line-height:1.05}
+.rz-k small{display:block;font-size:8.5px;color:var(--muted)}
+.rz-k.frist small{color:#c0392b}.rz-k.verg{color:var(--muted)}
+.rz-ax{display:grid;grid-template-columns:repeat(16,1fr);font-size:9px;color:var(--muted);font-weight:700}
+.rz-ax span{margin-left:-3px}
+.rz-r{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:19px}
+.rz-r i,.rz-leg i{display:block;border-radius:2px}
+.rz-r.verg i{opacity:.75}
+.rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
+.rz-jz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none}
+.rz-r1{background:#9cc7ee}.rz-r2{background:#5a9fe0}.rz-r3{background:#2f6fc0}
+.rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
+.rz-weich{background:repeating-linear-gradient(135deg,#e6d6bb 0 3px,#f4ecdf 3px 6px)}
+.rz-tau{background:radial-gradient(circle,#8fb8b2 1.1px,transparent 1.4px) 0 0/5px 5px,#e9f2f0}
+.rz-kalt{background:#e2dbf3}.rz-aus{background:#efeae1}.rz-dunkel{background:#ddd7cc}
+.rz-gut{background:#43a047}.rz-uns{background:#b7da8c}.rz-risk{background:#f1dfa8}
+.rz-frei{background:#fff;box-shadow:inset 0 0 0 1px #e6dfd2}
+.rz-leg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:10.5px;color:var(--muted);margin-top:8px}
+.rz-leg span{display:inline-flex;align-items:center;gap:4px}
+.rz-leg i{width:12px;height:10px}
+.rz-det{font-size:11.5px;min-height:16px;margin-top:6px;line-height:1.4}
+.rz-einst{margin-top:10px;padding:2px 10px 6px;border:1px solid var(--line);border-radius:12px}
+.rz-reg{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;margin:9px 0}
+.rz-reg label{font-size:13px;font-weight:600}
+.rz-reg output{font-size:13px;font-weight:800;color:#2563c9}
+.rz-reg input[type=range]{grid-column:1/-1;width:100%}
+.rz-reg small,.rz-hk small{grid-column:1/-1;font-size:11px;color:var(--muted);display:block}
+.rz-reg input[type=date]{font:600 14px system-ui;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--feld);color:var(--ink)}
+.rz-hk{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:9px 0}
+.rz-hk input{margin-top:2px;width:17px;height:17px;flex:0 0 auto}
+.rz-seg,.rz-tage{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}
+.rz-seg button,.rz-tage button{font:700 12.5px system-ui;padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:var(--stufe);color:var(--muted)}
+.rz-tage button{width:38px;padding:6px 0}
+.rz-seg button.an,.rz-tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
+html.dunkel .rz-aus{background:#2a313c}html.dunkel .rz-dunkel{background:#1d232c}html.dunkel .rz-frei{background:#38414e;box-shadow:none}
+html.dunkel .rz-nass{background:repeating-linear-gradient(135deg,#3a5675 0 3px,#2b3c50 3px 6px)}
+html.dunkel .rz-weich{background:repeating-linear-gradient(135deg,#6b5a3c 0 3px,#4a3f2c 3px 6px)}
+html.dunkel .rz-tau{background:radial-gradient(circle,#7fb0a8 1.1px,transparent 1.4px) 0 0/5px 5px,#2b3a3a}
+html.dunkel .rz-kalt{background:#463f63}
+html.dunkel .rz-r i.rec{box-shadow:inset 0 0 0 2px #e8f5e9}
+html.dunkel .rz-zust.nass{color:#7fb6f0}html.dunkel .rz-zust.tau{color:#7fc8bd}html.dunkel .rz-zust.trocken{color:#6fcf7d}html.dunkel .rz-zust.weich{color:#d0b27a}
 .kzg-kopf{display:grid;grid-template-columns:7fr 9fr;gap:2px;font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:2px}
 .kzg-kopf span:last-child{opacity:.7;border-left:1.5px solid rgba(40,56,90,.3);padding-left:4px}
 .kzg-ch{display:grid;gap:2px;align-items:end;position:relative}
@@ -1111,7 +1161,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.43</span>
+      <span class="ver">v5.44</span>
     </div>
   </header>
 
@@ -4637,6 +4687,8 @@ try{const i=_kzWahl.indexOf("regenHeute");
 /* v5.05 (Nutzer: "Pollenflug-Kachel bitte"): einmalig ans Ende der eigenen Auswahl.
    v5.08: nur bei GESPEICHERTER Auswahl - Neue bekommen KZ_STD ohne Pollen */
 try{if(!localStorage.getItem("kzPollenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("pollen")){_kzWahl.push("pollen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzPollenNeu","1");}}catch(e){}
+/* v5.44 (Nutzer: Rasen-Planer "erst mal integrieren"): einmalig ans Ende der eigenen Auswahl */
+try{if(!localStorage.getItem("kzRasenNeu")){if(localStorage.getItem("kzWahl")&&!_kzWahl.includes("rasen")){_kzWahl.push("rasen");localStorage.setItem("kzWahl",JSON.stringify(_kzWahl));}localStorage.setItem("kzRasenNeu","1");}}catch(e){}
 let _kzEdit=false,_kzDrag=null,_kzTimer=null,_kzP0=null,_kzMoved=0,_kzRegAuf=false;
 const kzF1=v=>(v==null||isNaN(v))?"–":(Math.abs(v)<10?fmt1(v):String(Math.round(v)));
 const kzR0=v=>(v==null||isNaN(v))?"–":String(Math.round(v));
@@ -5182,6 +5234,292 @@ function kzWolke(t){
 const kzBlass=(v,w)=>(w.zu?`<span style="opacity:.45">${v}</span>`:v)+w.l;
 function kzMerk(k,ms,fn){const m=_kzMerk[k],n=Date.now();if(m&&n-m.t<ms)return m.v;const v=fn();_kzMerk[k]={t:n,v};return v;}
 // Kandidaten: Beschriftung, Sprungziel, Renderfunktion -> {l,v,s}
+/* ==== v5.44 RASEN (Nutzer 25.10.2026: "erst mal integrieren" - Kachel mit dem Wichtigsten,
+   Tipp oeffnet ein Fenster, Einstellungen separat). Erprobt auf rasentest.html; Regeln dort
+   unter "So rechnet der Planer" und in CLAUDE.md. Eigene Abrufe, nur solange die Kachel gewaehlt
+   ist: Open-Meteo stuendlich (14 Tage zurueck, 8 voraus; Rueckfall DWD-MOSMIX ueber Bright Sky),
+   Messungen der naechsten DWD-Station (Bright Sky, 74 h), Radar am Ort (2,5 h zurueck, 2 h voraus).
+   Erinnerung aufs Handy fehlt noch - der Kanal ist offen (ntfy oder Web-Push). */
+const RZ_STD={letzt:null,hoch:false,modus:"tage",tage:7,gd:60,frueh:2,von:9,bis:19,tage6:[1,1,1,1,1,1],mittag:false,dauer:1,rh:90,tmin:4,risiko:30};
+const RASEN={E:null,Z:[],SONNE:{},MESS:null,RSTEPS:{},SRC:"",t:0,laeuft:false,fehler:"",ort:"",einst:false,wahl:null};
+function rzE(){
+  if(RASEN.E)return RASEN.E;let o=null;
+  try{o=JSON.parse(localStorage.getItem("rasen")||"null")||JSON.parse(localStorage.getItem("rasenTest")||"null");}catch(e){}   // Werte der Testseite uebernehmen
+  const E=Object.assign({},RZ_STD,o&&typeof o==="object"?o:{});
+  if(!Array.isArray(E.tage6)||E.tage6.length!==6)E.tage6=RZ_STD.tage6.slice();
+  ["quelle","ort","vorabend","maehen"].forEach(k=>delete E[k]);
+  return RASEN.E=E;}
+function rzSpeichern(){try{localStorage.setItem("rasen",JSON.stringify(RASEN.E));}catch(e){}}
+/* ---- Zeit in der Zone des Orts (TZ der App) ---- */
+const _rzF={},RZ_WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+function rzTeile(ms){let f=_rzF[TZ];if(!f)f=_rzF[TZ]=new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hourCycle:"h23"});
+  const o={};for(const p of f.formatToParts(new Date(ms)))o[p.type]=p.value;
+  return {tag:o.year+"-"+o.month+"-"+o.day,h:(+o.hour)%24,m:+o.minute,wd:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(o.weekday)};}
+function rzOff(ms){const t=rzTeile(ms),[y,m,d]=t.tag.split("-").map(Number);return Date.UTC(y,m-1,d,t.h,t.m)-Math.floor(ms/6e4)*6e4;}
+function rzLokal(tag,h,mi){const [y,m,d]=tag.split("-").map(Number),g=Date.UTC(y,m-1,d,h,mi||0);return g-rzOff(g-rzOff(g));}
+function rzTagPlus(tag,n){const [y,m,d]=tag.split("-").map(Number);return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10);}
+function rzTageZw(a,b){const f=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)/864e5;};return Math.round(f(b)-f(a));}
+function rzWtag(tag){const [y,m,d]=tag.split("-").map(Number);return new Date(Date.UTC(y,m-1,d)).getUTCDay();}
+function rzTagTxt(tag){const [,m,d]=tag.split("-").map(Number);return RZ_WT[rzWtag(tag)]+" "+d+"."+m+".";}
+function rzHH(ms){const t=rzTeile(ms);return t.m?String(t.h).padStart(2,"0")+":"+String(t.m).padStart(2,"0"):String(t.h);}
+function rzRel(tag){const n=rzTageZw(rzTeile(Date.now()).tag,tag);return n===0?"heute":n===1?"morgen":n===2?"übermorgen":n===-1?"gestern":RZ_WT[rzWtag(tag)];}
+function rzWann(ms){const t=rzTeile(ms),n=rzTageZw(rzTeile(Date.now()).tag,t.tag);
+  return (n===0?"heute":n===-1?"gestern":n===1?"morgen":rzTagTxt(t.tag))+" "+rzHH(ms)+" Uhr";}
+function rzStd(h){h=Math.floor(h);if(h<1)return "weniger als eine Stunde";if(h<48)return h+(h===1?" Stunde":" Stunden");
+  const d=Math.floor(h/24),r=h%24;return d+" Tage"+(r?" und "+r+(r===1?" Stunde":" Stunden"):"");}
+const rzMM=x=>x.toFixed(1).replace(".",",")+" mm";
+/* ---- Feiertage (bundesweit + Fronleichnam) und Sonnenzeiten ---- */
+function rzOstern(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+  h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;
+  return y+"-"+String(mo).padStart(2,"0")+"-"+String(da).padStart(2,"0");}
+const RZ_FEST={"01-01":"Neujahr","05-01":"1. Mai","10-03":"Tag der Einheit","12-25":"Weihnachten","12-26":"Weihnachten"};
+function rzFeiertag(tag){if(RZ_FEST[tag.slice(5)])return RZ_FEST[tag.slice(5)];const o=rzOstern(+tag.slice(0,4));
+  const B={"-2":"Karfreitag","1":"Ostermontag","39":"Himmelfahrt","50":"Pfingstmontag","60":"Fronleichnam"};
+  for(const n in B)if(rzTagPlus(o,+n)===tag)return B[n];return "";}
+function rzSonne(tag,lat,lon){   // Sonnenstand -0,833 Grad, auf rund eine Minute (gegen PyEphem)
+  const [y,m,d]=tag.split("-").map(Number),R=Math.PI/180;
+  const n=Math.round(Date.UTC(y,m-1,d,12)/864e5+2440587.5-2451545+0.0008),Js=n-lon/360;
+  const M=(357.5291+0.98560028*Js)%360,C=1.9148*Math.sin(M*R)+0.02*Math.sin(2*M*R)+0.0003*Math.sin(3*M*R);
+  const L=(M+C+282.9372)%360,Jt=2451545+Js+0.0053*Math.sin(M*R)-0.0069*Math.sin(2*L*R);
+  const dec=Math.asin(Math.sin(L*R)*Math.sin(23.4397*R)),cw=(Math.sin(-0.833*R)-Math.sin(lat*R)*Math.sin(dec))/(Math.cos(lat*R)*Math.cos(dec));
+  if(cw<-1||cw>1)return null;const w=Math.acos(cw)/R/360,ms=j=>(j-2440587.5)*864e5;
+  return {auf:ms(Jt-w),unter:ms(Jt+w)};}
+const rzRhTd=(T,Td)=>(T==null||Td==null)?80:Math.min(100,100*Math.exp(17.625*Td/(243.04+Td))/Math.exp(17.625*T/(243.04+T)));
+/* ---- Daten ---- */
+async function rzOpenMeteo(){
+  const d=await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
+    +"&hourly=precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m"
+    +"&daily=sunrise,sunset&past_days=14&forecast_days=8&timezone=auto&timeformat=unixtime",15000);
+  const h=d.hourly,Z=[];
+  // precipitation = Summe der Stunde VOR dem Stempel; Temperatur/Feuchte gelten zum Stempel -> Mittel
+  for(let i=1;i<h.time.length;i++){const e=h.time[i]*1000;
+    Z.push({s:e-36e5,e,p:+h.precipitation[i]||0,pp:h.precipitation_probability[i],T:(h.temperature_2m[i-1]+h.temperature_2m[i])/2,
+      rh:(h.relative_humidity_2m[i-1]+h.relative_humidity_2m[i])/2,sun:+h.sunshine_duration[i]||0,wind:+h.wind_speed_10m[i]||0});}
+  const S={};d.daily.time.forEach((t,i)=>{S[rzTeile(t*1000+12*36e5).tag]={auf:d.daily.sunrise[i]*1000,unter:d.daily.sunset[i]*1000};});
+  RASEN.Z=Z;RASEN.SONNE=S;
+}
+function rzStation(d,q){const alle=(d.sources||[]).filter(x=>x.dwd_station_id===q.dwd_station_id);
+  return {name:(alle.find(x=>/[a-zäöü]/.test(x.station_name))||q).station_name,km:Math.round((q.distance||0)/1000)};}
+async function rzBrightSky(){   // Rueckfall: vergangene Stunden gemessen, danach MOSMIX (Luftfeuchte aus dem Taupunkt)
+  const n=Date.now(),d=await fetchJSON("https://api.brightsky.dev/weather?lat="+LOC.lat+"&lon="+LOC.lon+"&date="+encodeURIComponent(new Date(n-14*864e5).toISOString())
+    +"&last_date="+encodeURIComponent(new Date(n+8*864e5).toISOString())+"&tz="+encodeURIComponent(TZ),20000);
+  const src={};(d.sources||[]).forEach(q=>src[q.id]=q);
+  const W=(d.weather||[]).filter(w=>w.temperature!=null).sort((a,b)=>Date.parse(a.timestamp)-Date.parse(b.timestamp));
+  const rh=x=>x.relative_humidity!=null?x.relative_humidity:rzRhTd(x.temperature,x.dew_point),Z=[];let gem=null,bis=0;
+  for(let i=1;i<W.length;i++){const a=W[i-1],b=W[i],e=Date.parse(b.timestamp);if(e-Date.parse(a.timestamp)!==36e5)continue;
+    const q=src[b.source_id],g=!!q&&q.observation_type!=="forecast";if(g){gem=q;bis=e;}
+    Z.push({s:e-36e5,e,p:+b.precipitation||0,pp:g?null:b.precipitation_probability,T:(a.temperature+b.temperature)/2,rh:(rh(a)+rh(b))/2,sun:(+b.sunshine||0)*60,wind:+b.wind_speed||0,gem:g});}
+  if(Z.length<48)throw new Error("zu wenig Daten");
+  const S={},t0=rzTeile(Z[0].s).tag,t1=rzTeile(Z[Z.length-1].s).tag;
+  for(let t=t0;t<=t1;t=rzTagPlus(t,1)){const z=rzSonne(t,LOC.lat,LOC.lon);if(z)S[t]=z;}
+  RASEN.Z=Z;RASEN.SONNE=S;RASEN.MESS=gem?Object.assign(rzStation(d,gem),{bis}):null;
+}
+async function rzMessungen(){   // die letzten 74 Stunden der naechsten DWD-Station ueber die Modellstunden legen
+  const n=Date.now(),d=await fetchJSON("https://api.brightsky.dev/weather?lat="+LOC.lat+"&lon="+LOC.lon+"&date="+encodeURIComponent(new Date(n-74*36e5).toISOString())
+    +"&last_date="+encodeURIComponent(new Date(n).toISOString())+"&tz="+encodeURIComponent(TZ),15000);
+  const src={};(d.sources||[]).forEach(q=>src[q.id]=q);
+  const obs=(d.weather||[]).filter(w=>src[w.source_id]&&src[w.source_id].observation_type!=="forecast"&&w.precipitation!=null);
+  if(!obs.length)return null;
+  const nach={};obs.forEach(w=>nach[Date.parse(w.timestamp)]=w);let bis=0;
+  for(const c of RASEN.Z){const w=nach[c.e];if(!w)continue;
+    c.p=+w.precipitation||0;if(w.relative_humidity!=null)c.rh=w.relative_humidity;if(w.sunshine!=null)c.sun=w.sunshine*60;if(w.wind_speed!=null)c.wind=w.wind_speed;
+    c.gem=true;bis=Math.max(bis,c.e);}
+  return Object.assign(rzStation(d,src[obs[obs.length-1].source_id]),{bis});
+}
+/* Radar am Ort: fuellt die Stunden seit der letzten Messung und die naechsten zwei. Am 25.10. meldete
+   die Punktvorhersage fuer 13-14 Uhr 2 mm, Station und Radar blieben trocken. */
+async function rzRadar(){
+  const n=Date.now(),d=await fetchJSON("https://api.brightsky.dev/radar?lat="+LOC.lat+"&lon="+LOC.lon+"&distance=3000&format=plain&tz="+encodeURIComponent(TZ)
+    +"&date="+encodeURIComponent(new Date(n-150*6e4).toISOString())+"&last_date="+encodeURIComponent(new Date(n+125*6e4).toISOString()),12000);
+  const mm={};(d.radar||[]).forEach(f=>{const px=f.precipitation_5;if(!Array.isArray(px))return;
+    const rows=Array.isArray(px[0])?px:[px],row=rows[rows.length>>1]||[];mm[Date.parse(f.timestamp)]=(+row[row.length>>1]||0)/100;});
+  RASEN.RSTEPS=mm;
+  for(const c of RASEN.Z){if(c.gem)continue;let sum=0,k=0;for(let t=c.s;t<c.e;t+=3e5)if(mm[t]!=null){sum+=mm[t];k++;}
+    if(k===12){c.p=sum;c.radar=true;if(c.e<=n)c.pp=null;}}
+}
+function rzOrt(){return LOC.lat.toFixed(3)+","+LOC.lon.toFixed(3);}
+async function rzLaden(){
+  if(RASEN.laeuft)return;RASEN.laeuft=true;RASEN.MESS=null;RASEN.RSTEPS={};
+  try{
+    try{await rzOpenMeteo();RASEN.SRC="om";try{RASEN.MESS=await rzMessungen();}catch(e){}}
+    catch(e){await rzBrightSky();RASEN.SRC="bs";}
+    try{await rzRadar();}catch(e){}
+    RASEN.fehler="";
+  }catch(e){RASEN.fehler=(e&&e.message)||"nicht erreichbar";}
+  RASEN.t=Date.now();RASEN.ort=rzOrt();RASEN.laeuft=false;
+  if(typeof kzRender==="function")kzRender();
+  rzGrossNeu();
+}
+function rzBereit(){if(!RASEN.laeuft&&(Date.now()-RASEN.t>30*6e4||RASEN.ort!==rzOrt()))rzLaden();return RASEN.Z.length>0&&RASEN.ort===rzOrt();}
+/* ---- Regeln je Stunde (wie rasentest.html) ---- */
+function rzBewerten(){
+  const E=rzE(),Z=RASEN.Z,RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1);let need=0,boden=0;
+  for(let i=0;i<Z.length;i++){const c=Z[i];let s6=0,s24=0;
+    for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
+    if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
+    else if(need>0){c.z="nass";need=Math.max(0,need-(c.sun>=1800||c.wind>=15?2:c.rh>=RH?0.5:1));boden=Math.max(0,boden-1);}
+    else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
+    else if(c.rh>=RH)c.z="tau";else if(c.T<E.tmin)c.z="kalt";else c.z="trocken";
+    const t=rzTeile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
+    const so=RASEN.SONNE[c.tag],hell=so?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=rzFeiertag(c.tag);
+    const zeit=c.h>=E.von&&c.h+1<=E.bis&&!(E.mittag&&c.h>=13&&c.h<15);
+    c.frei=c.wd===0||!!ft;c.hell=hell;c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeit&&hell;
+    c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":!zeit?"außerhalb deiner Mähzeit":"";
+    const pp=c.pp==null?0:c.pp;c.gut=c.erlaubt&&c.z==="trocken"&&pp<=E.risiko;
+    c.unsicher=c.erlaubt&&c.z==="trocken"&&pp>E.risiko&&pp<=60;c.riskant=c.erlaubt&&c.z==="trocken"&&pp>60;}
+}
+function rzFenster(ab){const E=rzE(),W=[];let cur=null;const zu=()=>{if(cur&&(cur.e-cur.s)/36e5>=E.dauer-1e-6)W.push(cur);cur=null;};
+  for(const c of RASEN.Z){if(c.e<=ab+5*6e4)continue;
+    if(c.gut){if(cur&&cur.e===c.s&&cur.tag===c.tag){cur.e=c.e;cur.pp=Math.max(cur.pp,c.pp||0);}else{zu();cur={s:Math.max(c.s,ab),e:c.e,tag:c.tag,pp:c.pp||0};}}
+    else zu();}
+  zu();W.forEach(w=>w.P=1-w.pp/100);return W;}
+function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
+  if(E.hoch||!letzt)return {tag:heute,sofort:true};   // hohes Gras / Datum unbekannt: die naechste gute Gelegenheit
+  if(E.modus==="tage")return {tag:rzTagPlus(letzt,E.tage)};
+  const tm={};for(const c of RASEN.Z)(tm[c.tag]=tm[c.tag]||[]).push(c.T);   // Gradtage ueber 5 °C
+  const erster=RASEN.Z.length?rzTeile(RASEN.Z[0].s).tag:heute;let sum=0,bisher=0;
+  for(let n=1;n<=28;n++){const tag=rzTagPlus(letzt,n),a=tm[tag];if(!a){if(tag<erster)continue;return {tag:null,sum,bisher,ende:tag};}
+    sum+=Math.max(0,a.reduce((x,y)=>x+y,0)/a.length-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return {tag,sum,bisher};}
+  return {tag:rzTagPlus(letzt,28),sum,bisher};}
+function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,W:[],rec:null};
+  const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs),W=rzFenster(ab);
+  W.forEach(w=>{const tg=(w.s-jetzt)/864e5,lg=(w.e-w.s)/36e5;w.score=w.P*Math.max(.6,1-.05*tg)*(.9+.1*Math.min(1,(lg-E.dauer)/3));});
+  const vor=W.filter(w=>w.s<fristMs);let rec=null;
+  if(f.sofort)rec=W[0]||null;else for(const w of (vor.length?vor:W))if(!rec||w.score>rec.score+1e-9)rec=w;
+  const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag):null;
+  return {f,fruehMs,fristMs,W,rec,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
+function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
+  if(!d)return (ende-r.e)/864e5<2?{txt:"Weiter reicht die Vorhersage nicht.",letzte:false}:{txt:"Danach bis "+rzTagTxt(rzTeile(ende-1).tag)+" kein trockenes Fenster.",letzte:true,bis:rzTeile(ende-1).tag};
+  const l=(d.s-r.e)/864e5;
+  if(l>=2)return {txt:"Danach "+Math.floor(l)+" Tage kein trockenes Fenster – nächstes "+rzTagTxt(d.tag)+" ab "+rzHH(d.s)+" Uhr.",letzte:true,bis:d.tag};
+  return {txt:"Nächste Gelegenheit "+rzRel(d.tag)+" ab "+rzHH(d.s)+" Uhr.",letzte:false};}
+/* Zustand jetzt: die laufende Stunde enthaelt auch die Minuten NACH jetzt - kommt Regen erst noch
+   (Radar), gilt der Zustand der Stunde davor; ob es gerade regnet, sagt der Radarschritt jetzt. */
+function rzJetzt(){const Z=RASEN.Z,jetzt=Date.now(),i=Z.findIndex(c=>c.s<=jetzt&&jetzt<c.e);if(i<0)return null;
+  const t5=Math.floor(jetzt/3e5)*3e5,regnet=RASEN.RSTEPS[t5]>0,b=Z[i].z==="regen"&&!regnet&&i>0?i-1:i,z=regnet?"regen":Z[b].z;
+  const rNext=Object.keys(RASEN.RSTEPS).map(Number).filter(t=>t>t5&&RASEN.RSTEPS[t]>0).sort((x,y)=>x-y)[0];
+  const J={i,b,z,regnet,rNext,etappen:[],fertig:false};
+  const mess=Z.some(x=>x.gem||x.radar);let j=i;   // letzter Regen: nur abgeschlossene gemessene Stunden (Station/Radar), wenn es welche gibt
+  while(j>=0&&(Z[j].p<0.1||(mess&&!Z[j].gem&&!Z[j].radar)||Z[j].e>jetzt))j--;
+  if(j>=0){let k=j,a=j,sum=0,lu=0;while(k>=0){if(Z[k].p>=0.1){sum+=Z[k].p;a=k;lu=0;}else if(++lu>2)break;k--;}
+    let sonne=0;for(let q=j+1;q<i;q++)if(Z[q].sun>=1800)sonne++;
+    J.regen={ende:Z[j].e,sum,std:Math.round((Z[j].e-Z[a].s)/36e5),quelle:Z[j].gem?"Station":Z[j].radar?"Radar":"Modell",sonne};}
+  if(z==="trocken"||z==="kalt"){let k=b;while(k>0&&(Z[k-1].z==="trocken"||Z[k-1].z==="kalt"))k--;J.seit=Z[k].s;
+    let m=b+1;while(m<Z.length&&(Z[m].z==="trocken"||Z[m].z==="kalt"))m++;
+    if(m<Z.length)J.wieder={t:m===i&&rNext&&rNext<Z[i].e?rNext:Z[m].s,was:Z[m].z==="tau"?"Tau":"Regen"};}
+  else{const wort={regen:"Regen vorbei",nass:"Halme trocken",weich:"Boden fest",tau:"Tau weg"};let prev=z;
+    for(let m=Math.max(b,i)+1;m<Z.length&&J.etappen.length<4;m++){const q=Z[m].z;if(q===prev)continue;
+      if(q==="regen"){J.etappen.push(["wieder Regen",Z[m].s]);prev=q;continue;}
+      J.etappen.push([wort[prev],Z[m].s]);prev=q;if(q==="trocken"||q==="kalt"){J.fertig=true;J.trockenAb=Z[m].s;break;}}}
+  const g=Z.findIndex(x=>x.e>jetzt+15*6e4&&x.gut&&!(x===Z[i]&&regnet));J.maehbar=g<0?null:Z[g];
+  const morgen=rzTagPlus(rzTeile(jetzt).tag,1),tau=Z.filter(x=>x.tag===morgen&&x.h>=5&&x.h<14&&x.z==="tau");if(tau.length)J.tauBis=tau[tau.length-1].e;
+  let r=i+1;while(r<Z.length&&Z[r].p<0.1)r++;J.naechster=r<Z.length?Z[r]:null;
+  return J;}
+const RZ_ZUST={regen:"Nass – es regnet",nass:"Gras ist noch nass",weich:"Halme trocken, Boden noch weich",tau:"Gras ist taunass",kalt:"Trocken, aber kalt",trocken:"Gras ist trocken"};
+function rzQuelle(){const vh=RASEN.SRC==="bs"?"DWD-Vorhersage MOSMIX (Open-Meteo war nicht erreichbar)":"Vorhersage Open-Meteo";
+  const M=RASEN.MESS;return M?"Bis "+rzHH(M.bis)+" Uhr gemessen an der DWD-Station "+M.name+" ("+M.km+" km), danach Radar am Ort bis zwei Stunden voraus, dann "+vh+". Abtrocknen, Boden und Tau sind gerechnet."
+    :"Keine Stationsmessung in der Nähe – "+vh+", Radar am Ort. Abtrocknen, Boden und Tau sind gerechnet.";}
+/* ---- Kachel ---- */
+function rzKachel(){
+  rzE();if(!rzBereit())return {l:"Rasen",v:"–",s:RASEN.fehler?"keine Daten":"lädt"};
+  rzBewerten();const J=rzJetzt();if(!J)return {l:"Rasen",v:"–",s:"keine Daten"};
+  const heute=rzTeile(Date.now()).tag,bisTxt=ms=>{const t=rzTeile(ms),n=rzTageZw(heute,t.tag);return "bis "+(n===0?t.h+" Uhr":n===1?"morgen "+t.h:RZ_WT[t.wd]+" "+t.h);};
+  let a;
+  if(J.z==="trocken"||J.z==="kalt"){const h=(Date.now()-J.seit)/36e5,t=rzTeile(J.seit);
+    a={l:"Rasen",v:'<span class="ok">trocken</span>',s:h>=48?"seit "+Math.floor(h/24)+" Tagen":t.tag===heute?"seit "+t.h+" Uhr":"seit gestern"};}
+  else{const ziel=J.etappen.length?J.etappen[0][1]:null;
+    a={l:"Rasen",v:{regen:"Regen",nass:"nass",weich:"Boden weich",tau:"Tau"}[J.z]||"nass",s:ziel?bisTxt(ziel):"länger"};
+    if(J.z==="weich")a.v="weich";}
+  const P=rzPlanen(Date.now()),alt=[];
+  if(P.rec){const n=rzTageZw(heute,P.rec.tag),tag=n===0?"heute":n===1?"morgen":RZ_WT[rzWtag(P.rec.tag)]+" "+rzTagTxt(P.rec.tag).slice(3);
+    alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
+    const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
+  else alt.push({l:"Mähen",v:"–",s:"kein Fenster"});
+  a.alt=alt;return a;}
+/* ---- Grossansicht ---- */
+function rzGross(){rzE();if(!rzBereit())return {html:'<div data-rz="1"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(RASEN.fehler?"Keine Daten ("+RASEN.fehler+")":"Daten werden geladen …")+"</div></div>"};
+  return {html:rzGrossHtml(),nach:rzGrossBinden};}
+function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");if(!ov||ov.classList.contains("hidden")||!inn||!inn.querySelector("[data-rz]"))return;
+  const box=inn.parentElement,y=box?box.scrollTop:0;inn.innerHTML=rzBereit()?rzGrossHtml():rzGross().html;if(RASEN.Z.length)rzGrossBinden(inn);if(box)box.scrollTop=y;}
+function rzGrossHtml(){
+  const E=rzE();rzBewerten();const J=rzJetzt(),P=rzPlanen(Date.now()),jetzt=Date.now(),heute=rzTeile(jetzt).tag;
+  let h='<div data-rz="1" class="rz"><div class="kzg-titel">Rasen</div><div class="kzg-sub">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</div>";
+  if(J){const kl={regen:"nass",nass:"nass",weich:"weich",tau:"tau",kalt:"trocken",trocken:"trocken"}[J.z];
+    h+='<div class="rz-zust '+kl+'">'+RZ_ZUST[J.z]+(J.regnet?" (Radar)":"")+"</div>";
+    if(J.regen)h+='<div class="rz-z">Letzter Regen bis <b>'+rzWann(J.regen.ende)+"</b>: "+rzMM(J.regen.sum)+" in "+J.regen.std+(J.regen.std===1?" Stunde":" Stunden")+" ("+J.regen.quelle+")."
+      +(J.z==="trocken"||J.regnet?"":" Seitdem "+rzStd((jetzt-J.regen.ende)/36e5)+" trocken"+(J.regen.sonne?", davon "+J.regen.sonne+(J.regen.sonne===1?" Stunde":" Stunden")+" mit Sonne":"")+".")+"</div>";
+    else h+='<div class="rz-z">In den letzten 14 Tagen kein Regen.</div>';
+    if(J.seit)h+='<div class="rz-z">Trocken seit '+rzWann(J.seit)+(J.wieder?", nass wieder ab <b>"+rzWann(J.wieder.t)+"</b> ("+J.wieder.was+")":"")+".</div>";
+    else h+='<div class="rz-z">'+(J.etappen.length?"Nach der Rechnung: "+J.etappen.map(e=>e[0]+" ab "+rzWann(e[1])).join(" · "):"In der Vorhersage wird es nicht mehr trocken")+(J.fertig?"":" …")+".</div>";
+    if(J.tauBis)h+='<div class="rz-z">Morgen früh taunass bis etwa '+rzHH(J.tauBis)+" Uhr.</div>";
+    if(J.rNext&&!J.regnet)h+='<div class="rz-z">Radar: Regen ab <b>'+rzWann(J.rNext)+"</b>.</div>";
+    else h+='<div class="rz-z">'+(J.naechster?"Nächster Regen: "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":""):"In der Vorhersage kein Regen mehr")+".</div>";}
+  // Maehen
+  h+='<div class="rz-h">Mähen</div>';
+  const f=P.f;
+  if(f.sofort)h+='<div class="rz-z">'+(E.hoch?"Gras ist schon hoch – gesucht ist die nächste Gelegenheit, bei der es richtig trocken ist.":"Wann zuletzt gemäht? Unter Einstellungen eintragen, dann rechnet der Planer mit einer Frist.")+"</div>";
+  else if(f.tag){const n=rzTageZw(rzE().letzt,heute),nf=rzTageZw(heute,f.tag);
+    h+='<div class="rz-z">Zuletzt gemäht '+rzTagTxt(E.letzt)+" ("+(n===0?"heute":n===1?"gestern":"vor "+n+" Tagen")+") · fällig <b>"+rzTagTxt(f.tag)+"</b> ("+(nf<0?"seit "+(-nf)+(nf===-1?" Tag":" Tagen"):nf===0?"heute":"in "+nf+(nf===1?" Tag":" Tagen"))+")"
+      +(E.modus==="wuchs"?" · Wuchs "+Math.round(f.bisher||0)+" von "+E.gd+" Gradtagen":"")+"</div>";}
+  else h+='<div class="rz-z">Noch lange nicht fällig – der Rasen wächst gerade kaum.</div>';
+  if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
+    h+='<div class="rz-emp">'+(P.ueber?"Erst nach der Frist: ":f.sofort?"Nächste Gelegenheit: ":"Empfehlung: ")+rzRel(P.rec.tag).replace(/^./,x=>x.toUpperCase())+(n>2?" "+rzTagTxt(P.rec.tag).slice(3):"")+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr</div>"
+      +'<div class="rz-z">Trocken, Regenrisiko höchstens '+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt)+"</div>";}
+  else if(f.tag)h+='<div class="rz-emp">Kein trockenes Fenster in Sicht</div>';
+  if(J&&J.maehbar&&(!P.rec||J.maehbar.s<P.rec.s))h+='<div class="rz-z">Frühestens mähbar: '+rzWann(J.maehbar.s)+".</div>";
+  h+='<div class="loc-row"><button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button><button type="button" class="loc-btn" data-rzk="einst">'+(RASEN.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
+  if(RASEN.einst)h+=rzEinstHtml();
+  h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  return h;}
+function rzLeiste(P){
+  const jetzt=Date.now(),heute=rzTeile(jetzt).tag,H0=6,H1=22,idx={};
+  RASEN.Z.forEach(c=>{if(c.h>=H0&&c.h<H1)(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
+  let h='<div class="rz-h">Die nächsten Tage</div><div class="rz-tl"><div></div><div class="rz-ax">';
+  for(let x=H0;x<H1;x++)h+="<span>"+(x%3===0?x:"")+"</span>";h+="</div>";
+  for(let n=-1;n<7;n++){const tag=rzTagPlus(heute,n),row=idx[tag];if(!row)continue;
+    const frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),so=rzWtag(tag)===0;
+    h+='<div class="rz-k'+(frist?" frist":"")+(n<0?" verg":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===-1?"gestern":ft?ft:so?"Sonntag":n===0?"heute":"")+"</small></div>";
+    h+='<div class="rz-r'+(n<0?" verg":"")+'">';
+    for(let x=H0;x<H1;x++){const c=row[x];if(!c){h+="<i></i>";continue;}
+      const k=c.z==="regen"?(c.p<0.5?"rz-r1":c.p<2?"rz-r2":"rz-r3"):c.z==="nass"?"rz-nass":c.z==="weich"?"rz-weich":c.z==="tau"?"rz-tau":c.z==="kalt"?"rz-kalt"
+        :c.frei?"rz-aus":!c.hell?"rz-dunkel":c.gut?"rz-gut":c.unsicher?"rz-uns":c.riskant?"rz-risk":"rz-frei";
+      h+='<i class="'+k+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'"></i>';}
+    if(n===0){const t=rzTeile(jetzt),pos=(t.h+t.m/60-H0)/(H1-H0);if(pos>=0&&pos<=1)h+='<span class="rz-jz" style="left:calc('+(pos*100).toFixed(2)+'% - 1px)"></span>';}
+    h+="</div>";}
+  h+='</div><div class="rz-det" id="rzDet">Kästchen antippen zeigt die Werte.</div><div class="rz-leg">'
+    +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-frei","nicht deine Zeit"],["rz-aus","Sonn-/Feiertag"],["rz-dunkel","dunkel"]]
+      .map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
+  return h;}
+function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
+  return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
+    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>gleich die nächste Gelegenheit; Abtrocknen 50 % länger, Tau 5 % früher</small></span></label>'
+    +'<div class="rz-seg" data-rzseg="modus"><button type="button" data-v="tage"'+(E.modus==="tage"?' class="an"':"")+'>fällig nach Tagen</button><button type="button" data-v="wuchs"'+(E.modus==="wuchs"?' class="an"':"")+">nach Wuchs</button></div>"
+    +(E.modus==="tage"?r("tage","Abstand",4,14,1,v=>v+" Tage"):r("gd","Wuchs bis zum Mähen",30,120,5,v=>v+" Gradtage","Tagesmittel über 5 °C summiert: 15 °C zählt 10"))
+    +r("frueh","Frühestens vor Fälligkeit",0,5,1,v=>v?v+(v===1?" Tag":" Tage"):"erst am Tag")
+    +r("von","Mähzeit ab",7,15,1,v=>v+" Uhr")+r("bis","Mähzeit bis",12,20,1,v=>v+" Uhr","Gesetz (Wohngebiet): Mo–Sa 7–20 Uhr, Sonn- und Feiertage nie; nur bei Tageslicht")
+    +'<div class="rz-tage">'+["Mo","Di","Mi","Do","Fr","Sa"].map((t,i)=>'<button type="button" data-rzt="'+i+'"'+(E.tage6[i]?' class="an"':"")+">"+t+"</button>").join("")+"</div>"
+    +'<label class="rz-hk"><input type="checkbox" data-rze="mittag"'+(E.mittag?" checked":"")+"><span>Mittagsruhe 13–15 Uhr</span></label>"
+    +r("dauer","Dauer des Mähens",1,4,1,v=>v+(v===1?" Stunde":" Stunden"))+r("risiko","Regenrisiko höchstens",10,50,5,v=>v+" %")
+    +r("rh","Tau ab Luftfeuchte",80,98,1,v=>v+" %")+r("tmin","Zu kalt unter",0,8,1,v=>v+" °C")+"</div>";}
+function rzGrossBinden(root){
+  const neu=()=>{rzSpeichern();rzGrossNeu();if(typeof kzRender==="function")kzRender();};
+  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b)return;
+    if(b.dataset.rzk==="heute"){RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
+    else if(b.dataset.rzk==="einst"){RASEN.einst=!RASEN.einst;rzGrossNeu();}
+    else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
+    else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}
+    else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=el("rzDet");if(!c||!d)return;
+      const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
+      d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Feuchte "+Math.round(c.rh)+" %"
+        +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);}};
+  root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;
+    if(inp.type==="range"){inp.oninput=()=>{const o=el("rzo_"+k);RASEN.E[k]=+inp.value;
+        if(k==="von"&&RASEN.E.von>=RASEN.E.bis)RASEN.E.von=RASEN.E.bis-1;if(k==="bis"&&RASEN.E.bis<=RASEN.E.von)RASEN.E.bis=RASEN.E.von+1;
+        if(o)o.textContent=o.textContent.replace(/^[\d,]+/,String(RASEN.E[k]));};
+      inp.onchange=neu;}   // neu gezeichnet wird erst beim Loslassen - sonst risse der Regler unter dem Finger weg
+    else if(inp.type==="checkbox")inp.onchange=()=>{RASEN.E[k]=inp.checked;neu();};
+    else if(inp.type==="date")inp.onchange=()=>{if(inp.value){RASEN.E.letzt=inp.value;neu();}};});
+}
 const KZ_DEF={
   /* v3.99: Tiefst- und Hoechstwert fuer den GANZEN Tag. Bis v3.98 kamen sie
      aus den Stundenzeilen, und die reichen kaum in die Zukunft - in Huettenberg
@@ -5376,7 +5714,9 @@ const KZ_DEF={
        v4.77-v5.16 stand hier "Do–Sa, Mo" bzw. "jeden Tag". */
     const W=T.filter(x=>x.t>=h).slice(0,16);
     if(W.some(x=>(+x.mm||0)>=0.1))a.alt=[{l:`${W.length} Tage`,v:kzTageGrafik(W),s:""}];
-    return a;}}
+    return a;}},
+  // v5.44: Rasen-Planer - Kachel "Gras jetzt" <-> "Maehen", Tipp oeffnet die Grossansicht mit Einstellungen
+  rasen:{name:"Rasen mähen",kurz:"Rasen",ziel:{text:"Rasen"},gross(){return rzGross();},r(){return rzKachel();}}
 };
 /* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
    noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
@@ -5585,7 +5925,7 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
       if(t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
     if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){const d=KZ_DEF[tile.dataset.id];
       let g=null;try{g=d&&d.gross?d.gross():null;}catch(x){}   // v5.21: Kacheln mit Grossansicht oeffnen sie statt zu springen
-      if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html);_kzP0=null;return;}
+      if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html);if(o.nach)o.nach(el("kzGrossIn"));_kzP0=null;return;}   // v5.44: nach = Knoepfe im Fenster verdrahten
       if(d)kzSpring(d.ziel);}
     _kzP0=null;};
   document.addEventListener("pointerup",ende);
