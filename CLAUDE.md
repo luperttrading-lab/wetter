@@ -2005,6 +2005,18 @@ v5.66 (Nutzer: "koennen wir den Warnhinweis testen?"): `?warntest` in der Adress
 Warnungen vier Testkarten (Stufe 1-4, "TEST - ... - keine echte Warnung"), auch wenn der Abruf scheitert. Nur im Browser
 nutzbar (die Home-Bildschirm-App nimmt keine Adress-Zusaetze). Geprueft mit echter Lage 25.10. 17:45: Norden
 "SCHWERE STURMBOEEN" (moderate) bis 21 Uhr + Testkarten; ohne Zusatz keine Testkarten.
+v5.67 (Nutzer-Screenshot So 25.10. 19:31, Norden, 7 Tage: "nach 7 Tagen passt die Anzeige nicht, wenn ich heute
+gemaeht angeklickt habe"): drei Fehler. (1) "faellig So 1.11." - ein Sonntag. Faellt der Termin auf Sonntag, Feiertag
+oder einen abgewaehlten Tag, gilt jetzt der letzte Maehtag davor (`rzFrist`, nicht der Maehtag selbst oder frueher -
+dann der naechste danach), Text "faellig Sa 31.10. (eigentlich So 1.11.)"; gilt in beiden Modi. "Fruehestens vor
+Faelligkeit" zaehlt ab dem verschobenen Tag (Beispiel: Empfehlung Do statt Fr). (2) "Moeglich waere schon Di 27.10."
+zwei Tage nach dem Maehen - es nahm die erste trockene Stunde ueberhaupt. Jetzt nur ein Fenster aus `P.W` (beginnt bei
+"Fruehestens"), das mehr als 1 h vor der Empfehlung liegt; "Trocken genug ab" nur ohne Fenster bei faelligem Termin
+(vorher auch bei "Faellig etwa 2.4." und "Nicht faellig bis"). (3) Der Faelligkeitstag lag hinter der Leiste (heute +
+6). Die Leiste reicht jetzt bis Faelligkeit/Empfehlung, hoechstens heute + 7 (`rzLeisteBis`), und zwar fuer BEIDE
+Zustaende von "Heute gemaeht" (`rzMitAlt`) - sonst kaeme beim Tippen eine Zeile hinzu. Geprueft (Playwright, Testdaten):
+So "heute gemaeht" -> Sa 31.10. faellig in der Leiste, Empfehlung Do 29.10.; Mo 26.10. 10:00 vorher/nachher/zurueck je
+8 Zeilen, Quelle auf demselben Pixel. Fehlen am letzten Tag Stunden (Datenende), erscheinen sie als dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
