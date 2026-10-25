@@ -76,7 +76,7 @@ ONLINE liegt, nicht die geladene.
   startet am Ende seinen Nachfolger per workflow_dispatch (`actions: write`,
   concurrency mit cancel-in-progress, Nachfolger nur bei success): so
   `solar10.yml` (seit 05.09.) und `radolan.yml` (seit 20.10., Abruf :07/:37,
-  Rueckfall-Cron alle 4 h). Laeufe, die nur einmal am Tag zaehlen, pruefen
+  Rueckfall-Cron alle 4 h; seit 25.10. Takt 15 min, dazwischen nur `warnung.py`). Laeufe, die nur einmal am Tag zaehlen, pruefen
   stattdessen ihr Zeitfenster selbst (`uv_prognose.py`).
 - **Solar 10-Minuten** (`solar10.py`, alle 15 min, ~60 Stationen): schreibt
   nach Branch `daten` **ohne Historie** (jeder Lauf ersetzt den einzigen
@@ -1059,17 +1059,20 @@ ueberdenken und Dinge, die den Laien verwirren, lieber nicht bauen.
 ## Warnungen aufs Handy (ntfy, ab 25.10.2026)
 
 Nutzer: "wenn die Warnung reinkommt eine Mitteilung aufs Handy - nur bei wirklich schweren, einstellbar". Weg:
-`warnung.py` (Workflow `warnung.yml`, Schleife 5,5 h wie radolan, Pruefung alle 5 min, Rueckfall-Cron alle 4 h) holt
+`warnung.py` laeuft IN DER RADOLAN-SCHLEIFE (`radolan.yml`, Takt jetzt 15 min: :07 :22 :37 :52; RADOLAN selbst weiter
+nur :07/:37). Ein eigener Workflow `warnung.yml` (alle 5 min) war kurz gebaut und ist wieder entfernt - Nutzer:
+"verbraucht das viel Energie? wichtige Warnungen haben Vorlauf": das Handy pollt nicht (ntfy schickt per Push), auf
+GitHub kostet nicht die Pruefung (2 kleine Abrufe), sondern ein zweiter dauernd belegter Rechner. Er holt
 Bright Sky /alerts fuer die Orte in `warnung.json` (Wettenberg, Norden; `ab` = moderate, also ab Stufe 2) und schickt
 neue Warnungen per JSON-POST an ntfy.sh -> ntfy-App auf dem iPhone. Prioritaet Stufe 2 = 4 (hoch), Stufe 3/4 = 5
 (dringend); Titel "SCHWERE STURMBOEEN - Norden", Text Stufe, Zeitraum, DWD-Beschreibung (bis 220 Zeichen), Tipp oeffnet
 die App mit dem Ort. Gleiche Warnung = Ort + Ereignis + Stufe + Beginn (Verlaengerung -> keine zweite Nachricht,
 Hochstufung -> neue). Stand im Zweig `warn-stand` (stand.json, force-push nur bei Aenderung). Der KANAL steht im Secret
 `NTFY_TOPIC` - das Repo ist oeffentlich, wer den Namen kennt, kann mitlesen und Nachrichten schicken. Ohne Secret laeuft
-die Schleife leer. Handstart mit test=true schickt zuerst eine Testnachricht. Geprueft 25.10. 17:5x mit eigenem
+die Pruefung leer. Handstart von radolan.yml mit warntest=true schickt zuerst eine Testnachricht. Geprueft 25.10. 17:5x mit eigenem
 Testkanal: Test + 2 echte Norden-Warnungen angekommen, zweiter Lauf meldet nichts doppelt. GRENZEN: Orte fest in
-warnung.json (die App teilt ihren Ort dem Server nicht mit), Verzoegerung bis ~5 min plus DWD/Bright-Sky-Takt; reisst
-die Kette, uebernimmt der 4-h-Rueckfall. Offizielle Alternative mit GPS: DWD WarnWetter.
+warnung.json (die App teilt ihren Ort dem Server nicht mit), Verzoegerung bis ~15 min plus DWD/Bright-Sky-Takt; reisst
+die RADOLAN-Kette, fallen auch die Warnungen aus, bis der 4-h-Rueckfall greift. Offizielle Alternative mit GPS: DWD WarnWetter.
 
 ## Sonnenkarte im UV-Abschnitt (v4.56)
 

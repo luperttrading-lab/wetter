@@ -18,6 +18,11 @@ on:
   schedule:
     - cron: "17 */4 * * *"     # Rueckfall alle 4 h, falls die Kette reisst
   workflow_dispatch:           # Kette und Handstart
+    inputs:
+      warntest:
+        description: "Zuerst eine Testnachricht aufs Handy schicken"
+        type: boolean
+        default: false
 
 concurrency:
   group: radolan
@@ -41,7 +46,26 @@ jobs:
       - name: numpy installieren
         run: pip install --quiet numpy
 
-      - name: Alle 30 Minuten holen und committen
+      # Warnstand (welche DWD-Warnungen schon aufs Handy gingen) aus dem Zweig warn-stand
+      - name: Warnstand holen
+        run: |
+          git fetch -q origin warn-stand 2>/dev/null && git show origin/warn-stand:stand.json > /tmp/stand.json \
+            || echo '{}' > /tmp/stand.json
+
+      - name: Testnachricht
+        if: ${{ inputs.warntest }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python warnung.py --test
+
+      # v2 (25.10.2026): Takt 15 statt 30 Minuten (:07 :22 :37 :52). RADOLAN wie bisher nur um :07/:37,
+      # in JEDER Runde zusaetzlich warnung.py (DWD-Warnungen -> ntfy, siehe CLAUDE.md "Warnungen aufs Handy").
+      # Der Waechter haengt hier, weil diese Schleife ohnehin rund um die Uhr laeuft - ein eigener Workflow
+      # haette einen zweiten GitHub-Rechner dauerhaft belegt (Nutzer: "verbraucht das viel Energie?").
+      - name: Alle 15 Minuten Warnungen, alle 30 Minuten RADOLAN
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -u
           git config user.name  "github-actions[bot]"
@@ -50,29 +74,41 @@ jobs:
           RUNDE=0
           while : ; do
             RUNDE=$(( RUNDE + 1 ))
+            M=$(date -u +%-M)
             echo "::group::Runde $RUNDE - $(date -u +%H:%M)Z"
             # andere Workflows committen ebenfalls auf main - vorher nachziehen
             git pull -q --rebase origin main || echo "pull fehlgeschlagen"
-            python radolan_regen.py || echo "Abruf fehlgeschlagen"
-            git add radolan.json radolan-archiv.json
-            if git diff --staged --quiet; then
-              echo "unveraendert - kein Commit"
-            else
-              git commit -q -m "RADOLAN Tagesregen aktualisiert"
-              for i in 1 2 3 4 5; do
-                git pull -q --rebase origin main && git push -q && { echo "gepusht"; break; }
-                sleep $(( i * 5 ))
-              done
+            # Warnungen: jede Runde
+            cp /tmp/stand.json /tmp/stand.alt
+            python warnung.py --stand /tmp/stand.json || echo "Warnpruefung fehlgeschlagen"
+            if ! cmp -s /tmp/stand.json /tmp/stand.alt; then
+              D=$(mktemp -d); cp /tmp/stand.json "$D/"
+              ( cd "$D" && git init -q && git add stand.json && git commit -q -m "Warnstand" \
+                && git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:warn-stand ) \
+                && echo "Warnstand gesichert" || echo "Warnstand sichern fehlgeschlagen"
+            fi
+            # RADOLAN: erste Runde und um :07/:37 (Minute mod 30 unter 15)
+            if [ "$RUNDE" -eq 1 ] || [ $(( M % 30 )) -lt 15 ]; then
+              python radolan_regen.py || echo "Abruf fehlgeschlagen"
+              git add radolan.json radolan-archiv.json
+              if git diff --staged --quiet; then
+                echo "unveraendert - kein Commit"
+              else
+                git commit -q -m "RADOLAN Tagesregen aktualisiert"
+                for i in 1 2 3 4 5; do
+                  git pull -q --rebase origin main && git push -q && { echo "gepusht"; break; }
+                  sleep $(( i * 5 ))
+                done
+              fi
             fi
             echo "::endgroup::"
 
             JETZT=$(date -u +%s)
             if [ "$JETZT" -ge "$ENDE" ]; then echo "Laufzeit erreicht - Ende"; break; fi
-            # naechster Abruf um :07 oder :37
-            M=$(date -u +%-M); S=$(date -u +%-S)
-            if   [ "$M" -lt 7 ];  then W=$(( (7-M)*60 - S ))
-            elif [ "$M" -lt 37 ]; then W=$(( (37-M)*60 - S ))
-            else                       W=$(( (67-M)*60 - S )); fi
+            # naechste Runde um :07, :22, :37 oder :52
+            M=$(date -u +%-M); S=$(date -u +%-S); Z=7
+            for Q in 7 22 37 52 67; do if [ "$M" -lt "$Q" ]; then Z=$Q; break; fi; done
+            W=$(( (Z-M)*60 - S ))
             if [ $(( JETZT + W )) -ge "$ENDE" ]; then echo "naechste Runde liegt nach dem Ende - Ende"; break; fi
             sleep "$W"
           done
