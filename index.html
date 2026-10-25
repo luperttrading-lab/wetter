@@ -219,7 +219,16 @@ html.dunkel .rz-vl{background:rgba(227,234,243,.62)}html.dunkel .rz-vd{backgroun
 .rz-bs{position:absolute;top:1px;bottom:0;background:#5b6b80;color:#fff;border-radius:3px 3px 0 0;font:700 8.5px/12px system-ui;text-align:center;overflow:hidden;white-space:nowrap}
 .rz-bp{position:absolute;top:1px;bottom:0;font:600 8.5px/12px system-ui;color:var(--muted);text-align:center;white-space:nowrap}
 html.dunkel .rz-bs{background:#8193aa;color:#101820}
-.rz-r i.rz-nacht{background:none;box-shadow:none}.rz-bp.rz-bn{color:#5a6a8c}html.dunkel .rz-bp.rz-bn{color:#97a6c6}
+.rz-r i.rz-nacht{background:none;box-shadow:none}
+.rz-el{position:relative}.rz-er{display:grid;gap:3px;align-items:center;margin-bottom:3px}.rz-er>i{display:block;height:22px;border-radius:3px;position:relative}
+.rz-er>i.rz-nacht{background:none;box-shadow:inset 0 0 0 1px rgba(120,130,150,.18)}.rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}html.dunkel .rz-er>i.rec{box-shadow:inset 0 0 0 2px #e6f4e8}
+.rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
+.rz-frei2{grid-column:2/-1;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
+html.dunkel .rz-frei2{background:#262d38}
+.rz-jz2{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#d23a3a;border-radius:1px}
+.rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
+.rz-leg i.rz-leer{box-shadow:inset 0 0 0 1px rgba(120,130,150,.35)}
+.rz-dt{font-size:11px;color:var(--muted);align-items:center;margin-top:8px}.rz-dt button{padding:4px 9px}.rz-bp.rz-bn{color:#5a6a8c}html.dunkel .rz-bp.rz-bn{color:#97a6c6}
 .rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
 .rz-jz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none}
 .rz-r1{background:#9cc7ee}.rz-r2{background:#5a9fe0}.rz-r3{background:#2f6fc0}
@@ -1200,7 +1209,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.57</span>
+      <span class="ver">v5.58</span>
     </div>
   </header>
 
@@ -5565,7 +5574,9 @@ function rzGrossHtml(o){o=o||{};
       :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
-  h+=rzLeiste(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  const lv=rzLeisteArt();
+  h+=(lv==="einfach"?rzLeisteEinfach(P):rzLeiste(P))+'<div class="rz-q">'+rzQuelle()+'</div><div class="rz-seg rz-dt">Grafik (Test):'
+    +[["einfach","einfach"],["voll","ausführlich"]].map(([k,t])=>'<button type="button" data-rzl="'+k+'"'+(k===lv?' class="an"':"")+">"+t+"</button>").join("")+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
@@ -5634,6 +5645,42 @@ function rzLeiste(P){
     +[["rz-gut","gut zum Mähen"],["rz-uns","Regenrisiko erhöht"],["rz-r2","Regen"],["rz-nass","trocknet ab"],["rz-weich","Boden weich"],["rz-tau","Tau"],["rz-kalt","zu kalt"],["rz-gut zu","blass: nicht deine Zeit"]]
       .map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
   return h;}
+/* v5.58 (Nutzer: "nochmal ueberlegen, was in die Grafik muss - zu unuebersichtlich"): EINFACHE Leiste. Nur was
+   fuer "wann kann ich maehen" zaehlt: Spalten = deine Maehzeit ohne Pause (Luecke) und ohne Stunden, die an allen
+   Tagen dunkel sind; Zeilen = heute + 6 Tage (kein "gestern"); Sonn-/Feiertag und abgewaehlte Tage als EIN grauer
+   Balken; fuenf Farben (gut, Regenrisiko, Regen, noch nass = Tau/trocknet ab/Boden weich, zu kalt), dunkel = leer.
+   Maehzeit, Pause und Dunkelheit stehen als Satz darunter statt als Band und Linien. Test gegen die bisherige
+   ("ausfuehrlich", rzLeiste) per `rz_leiste`. */
+function rzLeisteArt(){let v="einfach";try{v=localStorage.getItem("rz_leiste")||"einfach";}catch(e){}return v==="voll"?"voll":"einfach";}
+function rzLeisteEinfach(P){
+  const E=rzE(),jetzt=Date.now(),heute=rzTeile(jetzt).tag,idx={},pa=x=>E.pause&&x>=E.pVon&&x<E.pBis;
+  RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
+  const tage=[];for(let n=0;n<7;n++){const t=rzTagPlus(heute,n);if(idx[t])tage.push(t);}
+  const roh=[];for(let x=E.von;x<E.bis;x++)if(!pa(x))roh.push(x);
+  const hellIrgendwo=x=>tage.some(t=>idx[t][x]&&idx[t][x].hell),std=roh.filter(hellIrgendwo);
+  let h='<div class="rz-h">Die nächsten Tage<span class="rz-hint"><span class="rz-hw">Kästchen </span>antippen = Werte</span></div>';
+  if(!std.length)return h+'<div class="rz-z">In deiner Mähzeit ist es an allen Tagen dunkel.</div>';
+  const tpl="46px "+std.map((x,i)=>(i>0&&x!==std[i-1]+1?"7px ":"")+"1fr").join(" "),sp=' style="grid-template-columns:'+tpl+'"';
+  const luecke=i=>i>0&&std[i]!==std[i-1]+1?"<span></span>":"";
+  h+='<div class="rz-el"><div class="rz-det" id="rzDet" hidden></div><div class="rz-er rz-eax"'+sp+"><span></span>"+std.map((x,i)=>luecke(i)+"<span>"+x+"</span>").join("")+"</div>";
+  let leer=false;const da=new Set();
+  for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
+    const lab='<div class="rz-k'+(frist?" frist":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===0?"heute":"")+"</small></div>";
+    if(wd===0||ft||!E.tage6[wd-1]){h+='<div class="rz-er"'+sp+">"+lab+'<b class="rz-frei2">'+(wd===0?"Sonntag":ft||"kein Mähtag")+" – kein Mähen</b></div>";continue;}
+    h+='<div class="rz-er"'+sp+">"+lab;
+    std.forEach((x,i)=>{h+=luecke(i);const c=row[x];if(!c||!c.hell){h+='<i class="rz-nacht"></i>';leer=true;return;}
+      const pp=c.pp==null?0:c.pp,k=c.z==="regen"?"rz-r2":c.z==="nass"||c.z==="weich"||c.z==="tau"?"rz-nass":c.z==="kalt"?"rz-kalt":pp<=E.risiko?"rz-gut":"rz-risk";
+      const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+    h+="</div>";}
+  h+="</div>";
+  // Satz statt Band: Maehzeit, Pause, Dunkelheit
+  const dunkelAb=roh.find(x=>x>=12&&!hellIrgendwo(x)),hellAb=roh.filter(x=>x<12&&!hellIrgendwo(x)).pop();
+  h+='<div class="rz-esatz">Spalten: deine Mähzeit '+E.von+"–"+E.bis+" Uhr"+(E.pause&&E.pVon>E.von&&E.pBis<E.bis?", Lücke = Pause "+E.pVon+"–"+E.pBis:"")
+    +(dunkelAb!=null?" · ab "+dunkelAb+" Uhr dunkel":"")+(hellAb!=null?" · bis "+(hellAb+1)+" Uhr dunkel":"")+".</div>";
+  h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"]]
+      .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+(leer?'<span><i class="rz-leer"></i>leer = dunkel</span>':"")+"</div>";
+  return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
   return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
@@ -5656,8 +5703,9 @@ function rzGrossBinden(root){
   {const m=root.querySelector(".rz-m");if(m&&m.offsetHeight){if(!root._mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
       root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
     root._mMin=Math.max(root._mMin,m.offsetHeight);m.style.minHeight=root._mMin+"px";}}
-  const detZu=()=>{const d=root.querySelector("#rzDet");if(d)d.hidden=true;root.querySelectorAll(".rz-r i.sel").forEach(x=>x.classList.remove("sel"));};
-  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs]");if(!b){detZu();return;}
+  const detZu=()=>{const d=root.querySelector("#rzDet");if(d)d.hidden=true;root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
+  root.onclick=e=>{const b=e.target.closest("[data-rzk],[data-rzt],[data-rzseg] button,[data-rzs],[data-rzl]");if(!b){detZu();return;}
+    if(b.dataset.rzl){try{localStorage.setItem("rz_leiste",b.dataset.rzl);}catch(e){}root._mMin=0;rzZeichne(root);return;}
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
