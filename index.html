@@ -231,6 +231,9 @@ html.dunkel .rz-dunkel2{background:#202c45;color:#9fb0d2}
 .rz-esatz{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
 .rz-leg i.rz-leer{box-shadow:inset 0 0 0 1px rgba(120,130,150,.35)}
 .rz-dt{font-size:11px;color:var(--muted);align-items:center;margin-top:8px}.rz-dt button{padding:4px 9px}.rz-bp.rz-bn{color:#5a6a8c}html.dunkel .rz-bp.rz-bn{color:#97a6c6}
+/* v5.61 (Nutzer: "oben bei dunkel und Pause den Button umranden, im Dunkelmodus"): Rahmen statt Flaeche - die
+   gefuellte Flaeche bleibt der Maehzeit vorbehalten */
+html.dunkel .rz-bp{box-sizing:border-box;border:1px solid rgba(151,166,198,.55);border-bottom:0;border-radius:3px 3px 0 0;line-height:11px}
 .rz-r i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}
 .rz-jz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#d23a3a;border-radius:1px;pointer-events:none}
 .rz-r1{background:#9cc7ee}.rz-r2{background:#5a9fe0}.rz-r3{background:#2f6fc0}
@@ -1214,7 +1217,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.60</span>
+      <span class="ver">v5.61</span>
     </div>
   </header>
 

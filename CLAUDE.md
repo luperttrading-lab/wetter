@@ -1959,6 +1959,9 @@ unveraendert. OFFEN: Warnung als Nachricht aufs Handy mit einstellbarer Stufe - 
 WarnWetter (Standort per GPS, Stufen und Alarm einstellbar, offiziell) statt Eigenbau; Eigenbau ginge ueber ntfy (App +
 geheimer Topic) und eine GitHub-Schleife, die Bright Sky /alerts pollt - Haken: GitHub-Zeitplaene unzuverlaessig, der Ort
 der App ist dem Server unbekannt (Reise nach Norden!). Entscheidung steht aus.
+v5.61 (Nutzer, ausfuehrliche Leiste im Dunkelmodus: "oben bei dunkel und Pause den Button umranden"): `html.dunkel
+.rz-bp` mit 1-px-Rahmen (oben und seitlich, Ecken oben rund) - gefuellt bleibt nur der Maehzeit-Kasten. Heller Modus
+unveraendert. Die Wahl einfach/ausfuehrlich steht weiter aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
