@@ -2366,6 +2366,15 @@ Linie, sondern ein duenner durchgehender Strich, sieht besser aus und verwirrt w
 durchgehendem Ring (hell #98a2b3, dunkel #6d7b90) statt 1,5 px gestrichelt; der Kreis der Notloesung 1,5 px durchgehend gelb.
 Die Kaestchen der Notloesung bleiben gelb GESTRICHELT (`.rz-er>i.not`). Legende "Kreis ohne Fuellung = kein trockenes
 Fenster, nur Notwert bis 30". Nach v5.99 laut Regel v6.00.
+v6.01 (Nutzer-Screenshot 16:03: "Mo 26.10." ragt ins erste Kaestchen; die vergangenen Stunden heute dunkel - "einfach so
+lassen, wir haben den roten Strich", man erkennt nicht, dass die ersten zwei Regen waren): (1) Datumsspalte nicht mehr fest
+46 px, sondern `var(--rzk)`: rzGrossBinden misst die breiteste Beschriftung (`.rz-er>.rz-k` mit justify-self:start ist so
+breit wie ihr Text) und setzt die Spalte auf Breite + 2 px - die iPhone-Schrift ist breiter als die im Pruefstand, darum
+am Geraet gemessen. Abstand Datum -> erstes Kaestchen jetzt >= 5,4 px (auch mit kuenstlich 12,5 px Schrift). Kaestchen bei
+393 pt 16,2 statt ~17 px; deshalb (2) Grenze fuer die Prozentzahlen in den Kaestchen (`rz-schmal`) 14 statt 17 px (mit
+getBoundingClientRect statt gerundetem offsetWidth) - bei 393/375 pt bleiben die Zahlen, bei 320 pt (10,6 px) nicht.
+(3) Vergangene Stunden NICHT mehr abgeblasst (`.rz-vorbei` ohne opacity, seit v5.58 waren es .3) und zaehlen fuer die
+Legende mit.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
