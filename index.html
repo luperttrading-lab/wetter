@@ -219,9 +219,9 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10}
 /* v5.73/v5.74: Tage 9-14 im Scrollbereich, gleiche Farben; gestrichelte Linie davor (ab hier unsicherer) - sie lugt
    unten am Rand hervor und zeigt, dass es weitergeht */
-.rz-sc{max-height:201px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-/* v5.79: im Abschnitt "Rasen maehen" alle Tage ohne inneren Scrollbereich - der fing den Wisch zum Seitenscrollen ab */
-.rz-sc.rz-alle{max-height:none;overflow:visible;overscroll-behavior:auto}
+/* v5.82: kein innerer Scrollbereich mehr (v5.74-v5.81) - Tag 9-14 klappen per Knopf auf (.rz-mehr / .rz-mehrk) */
+.rz-mehrk{display:flex;width:100%;align-items:center;justify-content:center;gap:7px;margin:7px 0 2px;padding:8px 10px;border-radius:10px;border:1px solid #c9d3df;background:#f3f6fa;color:#2b3a4e;font:inherit;font-size:13px;font-weight:700;line-height:1.25;cursor:pointer;text-align:center}
+.rz-mehrk svg{flex:none}.rz-mehrk .rz-mehrr{color:#237a3a}
 /* v5.79 (Nutzer: "ein kleines Kreuz, immer sichtbar"): Huelle um das Grossfenster, Kreuz liegt AUSSERHALB des
    scrollenden Kastens (.loc-box) und bleibt deshalb stehen, wenn der Inhalt scrollt */
 .kzg-wrap{position:relative;width:100%;max-width:340px}.kzg-wrap .loc-box{max-width:none}
@@ -274,6 +274,7 @@ html.dunkel .rz-det{background:#e3eaf3;color:#111a24}html.dunkel .rz-er>i.sel{ou
 .rz-seg button.an,.rz-tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
 .rz-ok{white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;padding:6px 5px 6px 8px;border-radius:11px;background:#e3f3e6;border:1.5px solid #9fd3a8;color:#1e6b33}
 .rz-ok button{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:0;padding:0;background:rgba(30,107,51,.14);color:inherit;font-size:18px;line-height:28px;font-weight:700;cursor:pointer}
+html.dunkel .rz-mehrk{background:#1f2835;border-color:#3a4658;color:#dbe3ee}html.dunkel .rz-mehrk .rz-mehrr{color:#6fcf7d}
 html.dunkel .rz-ersatz{background:#33270f;border-color:#a77a24;color:#f2d79c}html.dunkel .rz-ersatz button{background:#241b0a;border-color:#a77a24;color:#f2d79c}
 html.dunkel .rz-ok{background:#173322;border-color:#2f6b40;color:#8fe0a8}
 html.dunkel .rz-ok button{background:rgba(143,224,168,.16)}
@@ -1226,7 +1227,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.81</span>
+      <span class="ver">v5.82</span>
     </div>
   </header>
 
@@ -5604,9 +5605,9 @@ function rzGross(){rzE();const inn=el("kzGrossIn");if(inn){inn._mMin=0;inn._eins
   if(!rzBereit())return {html:rzLaedt(false)};
   return {html:rzGrossHtml({}),nach:rzGrossBinden};}
 function rzZeichne(root){const ab=root.id==="rasenBox";if(!rzBereit()){root.innerHTML=rzLaedt(ab);return;}
-  const box=ab?null:root.parentElement,y=box?box.scrollTop:0,sc0=root.querySelector(".rz-sc"),ys=sc0?sc0.scrollTop:0;
+  const box=ab?null:root.parentElement,y=box?box.scrollTop:0;
   root.innerHTML=rzGrossHtml({einst:!!root._einst,abschnitt:ab});rzGrossBinden(root);if(box)box.scrollTop=y;
-  const sc=root.querySelector(".rz-sc");if(sc)sc.scrollTop=ys;}
+}
 function rzAbschnitt(){const box=el("rasenBox");if(!box||klappZu("rasenSec"))return;rzE();rzZeichne(box);}
 function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");
   if(ov&&!ov.classList.contains("hidden")&&inn&&inn.querySelector("[data-rz]"))rzZeichne(inn);
@@ -5650,7 +5651,7 @@ function rzGrossHtml(o){o=o||{};
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte
-  h+=rzLeisteEinfach(P,o.abschnitt)+(gras?'<div class="rz-h">Gras jetzt</div>'+gras:"")+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  h+=rzLeisteEinfach(P)+(gras?'<div class="rz-h">Gras jetzt</div>'+gras:"")+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
@@ -5741,7 +5742,7 @@ function rzMaehAlt(){return rzMitAlt((E,heute)=>rzMaehHtml(E,rzPlanen(Date.now()
    Kopfzeile ueber den Stunden mit "Pause" ueber der Luecke (24 px breit, seit v5.68 34 px mit Schrift) und "dunkel" ueber den Stunden, die an
    mindestens einem der Tage dunkel sind; in den Zeilen jedes dunkle Kaestchen in Nachtfarbe (`.rz-dunkel`).
    Die ausfuehrliche Leiste (v5.44-v5.57, Band/Linien/blass) und der Testumschalter sind entfernt. */
-function rzLeisteEinfach(P,alle){
+function rzLeisteEinfach(P){
   const E=rzE(),jetzt=Date.now(),heute=rzTeile(jetzt).tag,idx={},pa=x=>E.pause&&x>=E.pVon&&x<E.pBis;
   RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
   // v5.73 (Nutzer: "noch eine Woche sichtbar"): immer 14 Tage, soweit Stunden da sind (Open-Meteo forecast_days=15);
@@ -5768,14 +5769,21 @@ function rzLeisteEinfach(P,alle){
   // v5.79 (Nutzer, Abschnitt-Screenshot: Liste stand auf So 1.11. bis So 8.11. - der Wisch zum Seitenscrollen hatte den
   // inneren Bereich bis ans Ende geschoben, overscroll-behavior:contain hielt die Seite fest): im ABSCHNITT alle Tage
   // untereinander ohne eigenes Scrollen (.rz-alle); das Fenster behaelt die 8 Tage mit Scrollbereich (v5.74)
-  h+='<div class="rz-sc'+(alle?" rz-alle":"")+'">';
+  // v5.82 (Nutzer: "im Abschnitt lieber auch scrollen? - man muss nur erkennen, dass man scrollen kann"): weder Scrollen
+  // (der innere Bereich fing am iPhone den Wisch zum Seitenscrollen ab, v5.79) noch eine halbe Zeile (wirkt abgeschnitten),
+  // sondern ein KNOPF unter Tag 8: "6 weitere Tage bis So 8.11." klappt Tag 9-14 auf, in Fenster und Abschnitt gleich,
+  // gemerkt im Geraet (rz_woche2). Liegt die Empfehlung dort, nennt der Knopf sie.
+  const woche2=(()=>{try{return localStorage.getItem("rz_woche2")==="1";}catch(e){return false;}})();
+  h+='<div class="rz-sc">';
   /* v5.70 (Nutzer: "eine Zahl hinten dran, wie gut die gewichtete Maehqualitaet ist - evtl. waere Freitag besser als
      Mittwoch"): je Tag die beste Wertung seiner Fenster (rzPlanen: Sicherheit x Abstand zum Termin x Laenge), x 100.
      Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
   const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(rzWetterWert(w)*100);   // v5.72: immer eine Zahl; v5.73: nur Wetter
     return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+"</b>";};
   const da=new Set(),recW=P.rec?(P.W||[]).filter(w=>w.tag===P.rec.tag&&w.pp<=P.rec.pp+3):[];   // v5.77: alle gleich guten Fenster des Tages
+  let mehrAuf=false;
   for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
+    if(n>=8&&!mehrAuf){mehrAuf=true;h+='<div class="rz-mehr"'+(woche2?"":" hidden")+">";}
     const lab='<div class="rz-k'+(frist?" frist":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===0?"heute":"")+"</small></div>",
           rk='<div class="rz-er'+(n===8?" rz-ab":"")+'"'+st+">";if(n>=8)da.add("rz-un");
     if(wd===0||ft||!E.tage6[wd-1]){h+=rk+lab+'<b class="rz-frei2">'+(wd===0?"Sonntag":ft||"kein Mähtag")+" – kein Mähen</b><span></span></div>";continue;}
@@ -5790,12 +5798,18 @@ function rzLeisteEinfach(P,alle){
       const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
       h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
-  h+="</div></div>";
+  if(mehrAuf)h+="</div>";
+  h+="</div>";
+  {const rest=tage.filter(t=>rzTageZw(heute,t)>=8);
+    if(rest.length){const recDa=P.rec&&rest.indexOf(P.rec.tag)>=0,pf='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="'+(woche2?"M2 8l4-4 4 4":"M2 4l4 4 4-4")+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      h+='<button type="button" class="rz-mehrk" data-rzk="mehr" aria-expanded="'+woche2+'">'+pf+"<span>"+(woche2?"Weniger Tage zeigen"
+        :rest.length+" weitere Tage"+(recDa?' · <span class="rz-mehrr">Empfehlung '+rzTagTxt(P.rec.tag)+"</span>":" bis "+rzTagTxt(rest[rest.length-1])))+"</span></button>";}}
+  h+="</div>";
   h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
       +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
-      +(da.has("rz-un")?'<span class="rz-legun">'+(alle?"":"Weitere Tage: in der Leiste nach oben wischen · ")+'unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
+      +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
@@ -5826,8 +5840,7 @@ function rzGrossBinden(root){
   // v5.68: Kopffelder - Schrift nur, wenn sie mit 2 px Rand hineinpasst (verborgen = 0 breit: nicht anfassen)
   // v5.77: Zahlen nur, wenn ein Kaestchen mindestens 17 px breit ist (320 pt: ~13 px) - gemessen, nicht geschaetzt
   {const i=root.querySelector(".rz-er>i[data-rzs]");if(i&&i.offsetWidth)root.classList.toggle("rz-schmal",i.offsetWidth<17);}
-  // v5.74: Scrollbereich genau 8 Tage hoch, plus 1 px - so lugt die gestrichelte Linie unten hervor
-  root.querySelectorAll(".rz-sc:not(.rz-alle)").forEach(sc=>{const z=sc.children;if(z.length>8&&z[0].offsetHeight)sc.style.maxHeight=(z[8].offsetTop-z[0].offsetTop+1)+"px";});
+
   root.querySelectorAll(".rz-elab b").forEach(b=>{const w=b.parentElement.getBoundingClientRect().width;if(w&&b.getBoundingClientRect().width+4>w)b.remove();});
   const detZu=()=>{const d=root.querySelector("#rzDet");if(d){d.hidden=true;d._von=null;}root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
   const blase=(b,html)=>{const d=root.querySelector("#rzDet");if(!d)return;d.innerHTML=html;d.hidden=false;
@@ -5844,6 +5857,7 @@ function rzGrossBinden(root){
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
+    else if(b.dataset.rzk==="mehr"){try{localStorage.setItem("rz_woche2",b.getAttribute("aria-expanded")==="true"?"0":"1");}catch(x){}detZu();rzGrossNeu();}
     else if(b.dataset.rzk==="omneu"){if(RASEN.laeuft)return;b.disabled=true;b.textContent="lädt …";RASEN.t=0;rzLaden();}
     else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
     else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}

@@ -2186,6 +2186,17 @@ Open-Meteo schon nach 5 statt 30 Minuten wieder. Werte bewusst NICHT blasser (v5
 Erster Entwurf (5 Zeilen) schob die Leiste zu weit nach unten - gekuerzt auf 3 Zeilen + Knopf. Geprueft (Playwright,
 `v581.py`: Open-Meteo-Stundenabfrage mit HTTP 429, Bright Sky echt): Kasten in Fenster und Abschnitt, Kachel-Ansicht
 passt ohne Verkleinerung, Knopf -> Open-Meteo antwortet -> Kasten in beiden weg, Fenster bleibt offen; hell und dunkel.
+v5.82 (Nutzer, Screenshots 09:22 Fenster/Abschnitt: "im Abschnitt sieht man zwei Wochen komplett - lieber auch scrollen?
+Man muss nur leicht erkennen, dass man scrollen kann; halbe Zeile einblenden wirkt komisch, oder ein Doppelpfeil"): KEIN
+Scrollen, sondern ein KNOPF unter Tag 8 in Fenster UND Abschnitt: "6 weitere Tage bis So 8.11." bzw., liegt die Empfehlung
+dort, "6 weitere Tage · Empfehlung Sa 7.11." (gruen) -> Tag 9-14 klappen auf (`.rz-mehr` hidden), Knopf wird "Weniger Tage
+zeigen". Gemerkt im Geraet (`rz_woche2`), Wechsel zeichnet beide Ansichten neu (`rzGrossNeu`). Begruendung: ein innerer
+Scrollbereich in einer scrollenden Seite fing am iPhone den Wisch ab (v5.79, "anderes Diagramm"); eine halbe Zeile wirkt
+abgeschnitten; ein Doppelpfeil sagt nicht, WO man wischen muss. Entfernt: `.rz-sc`-Scroll und `.rz-alle` (v5.74/v5.79), die
+Hoehenmessung in rzGrossBinden, `rzLeisteEinfach(P,alle)` -> `(P)`, Scrollstand in rzZeichne, Legende "nach oben wischen";
+"unter der gestrichelten Linie ... unsicherer" nur noch, wenn aufgeklappt. Geprueft (`v582.py`, 393 pt, hell/dunkel):
+zu 8 Zeilen (Mo 26.10.-Mo 2.11.) in beiden Ansichten, auf 14 (bis So 8.11.), wieder zu 8, Fenster bleibt offen; Empfehlung
+in Woche 2 (fällig nach 12 Tagen) -> Knopf nennt Sa 7.11., einzeilig 34 px.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
