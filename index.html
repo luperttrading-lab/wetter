@@ -1240,7 +1240,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.90</span>
+      <span class="ver">v5.91</span>
     </div>
   </header>
 
@@ -5739,16 +5739,20 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
    je Stunde): er zaehlt noch halb, sobald seither eh mm verdunsten konnten - wenig 1 / mittel 1,5 / stark 2 mm. Erlental
    Ende Oktober ~1,2 mm am Tag (halb nach gut einem Tag), Hochsommer ~4 mm (nach wenigen Stunden), nachts fast nichts.
    Hoechstens 72 h zurueck. Ohne Open-Meteo (MOSMIX-Ersatz) Monatsmittel RZ_ET0_MON, nur bei Tageslicht. */
-const RZ_VR={eh:1.5,bis:72,max:0.12};
+const RZ_VR={eh:1.5,bis:72,max:0.12,frei:24};   // v5.91: frei = so viele Stunden ohne Regen setzen zurueck
 const RZ_ET0_MON=[0.3,0.6,1.2,2.2,3.2,3.8,4.0,3.4,2.2,1.1,0.5,0.3];   // mm je Tag, Deutschland, grobe Schaetzwerte (nur Rueckfall)
 function rzVrPar(){const v=rzE().vortag;Object.assign(RZ_VR,v==="wenig"?{eh:1.0,max:0.10}:v==="stark"?{eh:2.0,max:0.15}:{eh:1.5,max:0.12});return RZ_VR;}
 function rzEt(c){if(c.et!=null&&isFinite(c.et))return Math.max(0,c.et);const m=RZ_ET0_MON[new Date(c.s).getMonth()];
   return c.hell===undefined?m/24:c.hell?m/11:0;}
 function rzVorregen(t){rzVrPar();const Z=RASEN.Z;let lo=0,hi=Z.length-1,k=-1;
   while(lo<=hi){const mi=(lo+hi)>>1;if(Z[mi].e<=t){k=mi;lo=mi+1;}else hi=mi-1;}
-  let m=0,roh=0,ev=0,evLetzt=null;   // rueckwaerts: ev = Verdunstung NACH der Stunde k bis t
+  /* v5.91 (Nutzer, Norden: "Mittwoch ist doch schon trocken - Donnerstag sehe ich keinen Unterschied zu Freitag"): Im
+     November verdunstet ~1 mm am Tag, der Regen von Di klang bis Do kaum ab und fiel erst am Fr aus den 72 h. Jetzt: ein
+     ganzer Tag ohne Regen (RZ_VR.frei = 24 h am Stueck) setzt zurueck - aelterer Regen zaehlt nicht mehr. */
+  let m=0,roh=0,ev=0,evLetzt=null,trocken=0;   // rueckwaerts: ev = Verdunstung NACH der Stunde k bis t
   for(;k>=0&&t-Z[k].e<RZ_VR.bis*36e5;k--){const c=Z[k];
-    if(c.p>=0.1){roh+=c.p;m+=c.p*Math.pow(0.5,ev/RZ_VR.eh);if(evLetzt==null)evLetzt=ev;}
+    if(c.p>=0.1){if(trocken>=RZ_VR.frei)break;trocken=0;roh+=c.p;m+=c.p*Math.pow(0.5,ev/RZ_VR.eh);if(evLetzt==null)evLetzt=ev;}
+    else trocken++;
     ev+=rzEt(c);}
   return {mm:m,roh,ev:evLetzt,st:Math.min(1,Math.log(1+m)/Math.log(11))};}
 /* v5.85 TEST (Nutzer: "nach Regen am Vortag gruene Kaestchen mit Verlauf links weiss, rechts gruen - oder eine andere Idee?"):
@@ -5774,7 +5778,7 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
   return "<b>"+rzTagTxt(tag)+" "+rzHH(w.s)+"–"+rzHH(w.e)+" Uhr · Wetter "+Math.round(rzWetterWert(w)*100)+"</b> · trocken mit "+pz(100*w.P)+" (Regenrisiko "+pz(w.pp)+")"
     +" · "+(kurz?"Fenster nur "+rzStd(lg)+": −"+pz(kurz):"Fenster lang genug")
     +" · "+tf.g+" von "+tf.n+" Mähstunden gut: "+x(tf.fA)
-    +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen in den 3 Tagen vor "+rzHH(tf.ref)+" Uhr, seit dem letzten Regen "+String(Math.round(10*(tf.ev||0))/10).replace(".",",")+" mm Verdunstung (zählt halb nach "+String(RZ_VR.eh).replace(".",",")+" mm, Einstellung „"+(rzE().vortag||"mittel")+"“): "+x(tf.fR):"kein Regen in den 3 Tagen vor "+rzHH(tf.ref)+" Uhr")
+    +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen vor "+rzHH(tf.ref)+" Uhr ohne trockenen Tag dazwischen, seit dem letzten Regen "+String(Math.round(10*(tf.ev||0))/10).replace(".",",")+" mm Verdunstung (zählt halb nach "+String(RZ_VR.eh).replace(".",",")+" mm, Einstellung „"+(rzE().vortag||"mittel")+"“): "+x(tf.fR):"vor "+rzHH(tf.ref)+" Uhr mindestens 24 Stunden kein Regen")
     +(rec?" · <b>empfohlen</b>":w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>"
       :w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>"
       :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")"
@@ -5866,7 +5870,7 @@ function rzLeisteEinfach(P){
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
       +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
       +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
-      +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen in den Tagen davor, seither wenig verdunstet</span>':"")
+      +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet</span>':"")
       +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
       +'<div class="rz-vrt">Vorregen (Test): '+[["verlauf","Verlauf"],["tropfen","Tropfen"],["aus","aus"]].map(([v,t])=>'<button type="button" data-rzk="vr:'+v+'"'+(vrArt===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>";
   return h;}
@@ -5886,7 +5890,7 @@ function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="r
     +(E.pause?r("pVon","Pause ab",11,15,1,v=>v+" Uhr")+r("pBis","Pause bis",12,16,1,v=>v+" Uhr"):"")
     +r("dauer","Dauer des Mähens",1,4,1,v=>v+(v===1?" Stunde":" Stunden"))+r("risiko","Regenrisiko höchstens",10,50,5,v=>v+" %")
     +'<div class="rz-reg"><label>Regen der Vortage zählt</label></div><div class="rz-seg" data-rzseg="vortag">'+[["wenig","wenig"],["mittel","mittel"],["stark","stark"]].map(([v,t])=>'<button type="button" data-v="'+v+'"'+((E.vortag||"mittel")===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>"
-    +'<small class="rz-segk">Regen zählt noch halb, sobald seither 1 / 1,5 / 2 mm verdunsten konnten – im Herbst nach gut einem Tag, im Hochsommer nach wenigen Stunden. Abzug höchstens 10 / 12 / 15 %.</small>'
+    +'<small class="rz-segk">Regen zählt noch halb, sobald seither 1 / 1,5 / 2 mm verdunsten konnten – im Herbst nach gut einem Tag, im Hochsommer nach wenigen Stunden. Nach 24 Stunden ohne Regen zählt er nicht mehr. Abzug höchstens 10 / 12 / 15 %.</small>'
     +r("rh","Tau ab Luftfeuchte",80,98,1,v=>v+" %")+r("tmin","Zu kalt unter",0,8,1,v=>v+" °C")+"</div>";}
 /* Blase ueber (bzw. unter) der Zeile. v5.74: per getBoundingClientRect relativ zu .rz-el - offsetTop kennt das
    Scrollen im Bereich .rz-sc nicht */
@@ -5928,7 +5932,7 @@ function rzGrossBinden(root){
       const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
       d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Luftfeuchte "+Math.round(c.rh)+" %"
         +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund)
-        +(b.classList.contains("rz-vr")?" · Regen in den 3 Tagen davor "+rzMM(rzVorregen(c.s).roh)+", seither "+String(Math.round(10*(rzVorregen(c.s).ev||0))/10).replace(".",",")+" mm Verdunstung":"");
+        +(b.classList.contains("rz-vr")?" · Regen davor ohne trockenen Tag dazwischen "+rzMM(rzVorregen(c.s).roh)+", seither "+String(Math.round(10*(rzVorregen(c.s).ev||0))/10).replace(".",",")+" mm Verdunstung":"");
       // v5.49: als Blase ueber (bzw. unter) der Zeile - im Fluss schob sie Legende und Quelle hin und her
       d.hidden=false;rzBlasePlatz(b,d);}};
   root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;

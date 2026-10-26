@@ -115,11 +115,13 @@ function bewerten(stunden,einst,sonneMap,tz){
    12 %. Ohne et0 Monatsmittel (ET0_MON) bei Tageslicht. */
 const ET0_MON=[0.3,0.6,1.2,2.2,3.2,3.8,4.0,3.4,2.2,1.1,0.5,0.3];
 function etStd(c){if(c.et!=null&&isFinite(c.et))return Math.max(0,c.et);const m=ET0_MON[new Date(c.s).getMonth()];return c.hell===undefined?m/24:c.hell?m/11:0;}
-function tagFaktoren(w,Z){const EH=1.5,BIS=72*36e5;let n=0,g=0,mm=0,mmw=0,ref=null,ev=0,evL=null;Z=Z||[];
+// r1.09 (wie Wetter-App v5.91): 24 Stunden am Stueck ohne Regen setzen zurueck - aelterer Regen zaehlt nicht mehr
+function tagFaktoren(w,Z){const EH=1.5,BIS=72*36e5,FREI=24;let n=0,g=0,mm=0,mmw=0,ref=null,ev=0,evL=null,trocken=0;Z=Z||[];
   for(const c of Z)if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut){g++;if(ref==null||c.s<ref)ref=c.s;}}
   if(ref==null)ref=w.s;
   for(let k=Z.length-1;k>=0;k--){const c=Z[k];if(c.e>ref)continue;if(ref-c.e>=BIS)break;
-    if(c.p>=0.1){mm+=c.p;mmw+=c.p*Math.pow(0.5,ev/EH);if(evL==null)evL=ev;}ev+=etStd(c);}
+    if(c.p>=0.1){if(trocken>=FREI)break;trocken=0;mm+=c.p;mmw+=c.p*Math.pow(0.5,ev/EH);if(evL==null)evL=ev;}else trocken++;
+    ev+=etStd(c);}
   const fA=n?0.5+0.5*g/n:1,fR=1-0.12*Math.min(1,Math.log(1+mmw)/Math.log(11));
   return {n,g,fA,mm,mmw,ev:evL,ref,fR};}
 function wetterWert(w,einst,Z){if(!w||w.leer)return 0;const E=einstVoll(einst);const P=w.P!=null?w.P:1-(w.pp||0)/100,f=tagFaktoren(w,Z);
