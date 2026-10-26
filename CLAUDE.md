@@ -2111,6 +2111,15 @@ Maehstunden gut: x0,83 · 2,2 mm Regen in den 24 h davor: x0,93"). Die EMPFEHLUN
 trocken-Chance und dem Abstand zum Termin - der empfohlene Tag kann eine niedrigere Zahl tragen als ein spaeterer, die Blase
 erklaert das. Dieselbe Formel in der Rasen-App (`rasen/planer.js tagFaktoren/wetterWert`, r1.03, `out[tag].faktoren`).
 Geprueft: Testdaten Mo 2,2 mm Vorregen -> 86 statt 93; Planer-Test Tag mit 6 mm Morgenregen 56 (2 von 6 gut), Folgetag 95.
+v5.77 (Nutzer: "warum sind nur die morgendlichen Kaestchen umrandet, mittags nicht?" -> "alle Fenster markieren, wenn es
+keinen Unterschied gibt; die Regenwahrscheinlichkeit in die gruenen Kacheln schreiben"): Rahmen um ALLE Fenster des
+empfohlenen Tages, deren Regenrisiko hoechstens 3 Punkte ueber dem empfohlenen Fenster liegt (`recW` in rzLeisteEinfach;
+vorher nur das eine Fenster, die Pause teilte den Tag in zwei). In gruenen und beigen Kaestchen steht das Regenrisiko in %
+(`.rz-pp`, 8,5 px, dunkle Schrift auf Gruen, braun auf Beige); `rzGrossBinden` misst die Kaestchenbreite und blendet die
+Zahlen unter 17 px aus (Klasse `rz-schmal` am Behaelter - 320 pt: 13 px; die Regel braucht hoehere Spezifitaet als
+`.rz-er>i>.rz-pp`, sonst gewinnt display:flex). Legende "Zahl im Kaestchen = Regenrisiko in % · Rahmen = empfohlene
+Fenster" als Block (`.rz-leg .rz-legun{display:block}` - als inline-flex brach der Satz in zwei Spalten). Geprueft 393 pt
+hell/dunkel (Mo 9-12 und 15-16 umrandet, Zahlen 19 px breit) und 320 pt (keine Zahlen, Legende ohne den Zahl-Satz).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
