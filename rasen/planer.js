@@ -87,17 +87,20 @@ function sonneTage(stunden,lat,lon,tz){const Zt=zeit(tz),S={};
    Erwartet aufsteigend sortierte, lueckenlose Stunden (die 6-h- und 24-h-Summen zaehlen Eintraege). */
 function bewerten(stunden,einst,sonneMap,tz){
   const E=einstVoll(einst),Zt=zeit(tz),S=sonneMap||{},Z=(stunden||[]).map(c=>Object.assign({},c));
-  const RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1);let need=0,boden=0;
+  const RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1),dMax=TAU.max*(E.hoch?1.5:1);let need=0,boden=0,dw=0;
   for(let i=0;i<Z.length;i++){const c=Z[i];c.p=+c.p||0;c.sun=+c.sun||0;c.wind=+c.wind||0;let s6=0,s24=0;
     for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
     const t=Zt.teile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
     const so=S[c.tag],hell=so&&so.auf!=null&&so.unter!=null?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=feiertag(c.tag);c.hell=hell;
     // r1.10 (wie Wetter-App v5.95): Abtrocknen nach Verdunstung - jede Stunde zieht ET0/TROCKEN_MM ab (Novembernacht
     // ~0,1, Herbsttag ~1, Sommersonne 4-6), statt 1 je Uhrstunde (Sonne/Wind 2, feucht 0,5)
+    // r1.12 (wie Wetter-App v6.02): Tau als Wassermenge dw - siehe TAU unten
+    const dd=c.p>=0.1?-dw:(c.rh>=RH?TAU.rate:0)-etStd(c),dMitte=Math.max(0,dw+dd/2);dw=Math.min(dMax,Math.max(0,dw+dd));c.dw=dw;
     if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
     else if(need>0){c.z="nass";need=Math.max(0,need-etStd(c)/TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
-    else if(c.rh>=RH)c.z="tau";else if(c.T!=null&&c.T<E.tmin)c.z="kalt";else c.z="trocken";
+    else if(dMitte>=TAU.nass)c.z="tau";else if(c.T!=null&&c.T<E.tmin)c.z="kalt";else c.z="trocken";
+    c.nw=need;
     const pause=E.pause&&c.h>=E.pVon&&c.h<E.pBis,zeitOk=c.h>=E.von&&c.h+1<=E.bis&&!pause;
     c.frei=c.wd===0||!!ft;c.hell=hell;c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeitOk&&hell;
     c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":pause?"Mittagspause":!zeitOk?"außerhalb deiner Mähzeit":"";
@@ -117,6 +120,12 @@ function bewerten(stunden,einst,sonneMap,tz){
    12 %. Ohne et0 Monatsmittel (ET0_MON) bei Tageslicht. */
 const ET0_MON=[0.3,0.6,1.2,2.2,3.2,3.8,4.0,3.4,2.2,1.1,0.5,0.3];
 const TROCKEN_MM=0.1;   // mm Verdunstung je "Standardstunde" der Abtrocknungstabelle (trueber Herbsttag ~0,1 mm/h)
+/* r1.12 (wie Wetter-App v6.02): TAU ALS WASSERMENGE statt "jede Stunde ab rh % ist Tau". Ab der Grenze kommen 0,02 mm je
+   Stunde auf die Halme, jede Stunde verdunstet ET0 (auch bei hoher Luftfeuchte), hoechstens 0,2 mm (hohes Gras 0,3), Regen
+   leert den Speicher. Taunass, wenn zur Stundenmitte noch >= 0,005 mm liegen. Taunaechte auf Gras bringen typisch
+   0,1-0,2 mm (HESS 23, 1179, 2019), hoechste gemessene Rate auf Weide 0,032 mm/h. Folge: morgens 1-2 Stunden laenger Tau
+   (Oktober bis ~11 Uhr), dafuer kein "Tau" mitten am Tag, nur weil die Luftfeuchte an der Grenze liegt. */
+const TAU={rate:0.02,max:0.2,nass:0.005};
 function etStd(c){if(c.et!=null&&isFinite(c.et))return Math.max(0,c.et);const m=ET0_MON[new Date(c.s).getMonth()];return c.hell===undefined?m/24:c.hell?m/11:0;}
 // r1.09 (wie Wetter-App v5.91): 24 Stunden am Stueck ohne Regen setzen zurueck - aelterer Regen zaehlt nicht mehr
 function tagFaktoren(w,Z){const EH=1.5,BIS=72*36e5,FREI=24;let n=0,g=0,mm=0,mmw=0,ref=null,ev=0,evL=null,trocken=0;Z=Z||[];
@@ -141,6 +150,31 @@ function fensterAus(Z,E,ab,test){const W=[];let cur=null;const a=ab==null?-Infin
 /* Gute Fenster ab Zeitpunkt ab (wie rzFenster): [{s,e,tag,pp,P,wert}] */
 function fenster(stunden,einst,ab){const E=einstVoll(einst);return fensterAus(stunden||[],E,ab,c=>c.gut);}
 
+/* r1.12 (wie Wetter-App v5.97/v6.02): NOTWERT fuer Tage ohne trockenes Fenster. Guete je erlaubter Stunde: trocken 1,
+   zu kalt 0,6, Boden weich 0,5, Tau 0,75 (fast weg) bis 0,5 (voller Speicher), noch nass 0,5 bis 0,25 nach dem Rest der
+   Abtrocknung, Regen 0 (Fenster mit Regenstunde zaehlen nicht). Fenster von "Dauer" Stunden: 0,3 x mittlere Guete x
+   (1 - Regenrisiko), kuerzer anteilig - hoechstens 30, damit ein Notwert nie wie ein guter Tag aussieht. */
+const NOT={max:0.3,q:{trocken:1,kalt:0.6,weich:0.5}};
+function notQ(c,E){if(c.z==="regen")return 0;if(c.z==="nass")return 0.5-0.25*Math.min(1,(c.nw||0)/5);
+  if(c.z==="tau")return 0.75-0.25*Math.min(1,(c.dw||0)/(TAU.max*(E.hoch?1.5:1)));return NOT.q[c.z]!=null?NOT.q[c.z]:0;}
+function notFenster(H,einst,jetzt){const E=einstVoll(einst),L=Math.max(1,E.dauer),runs=[],ok=c=>c.erlaubt&&c.z!=="regen"&&(jetzt==null||c.e>jetzt+5*6e4);
+  let cur=[],best=null;
+  for(const c of H){if(ok(c)&&(!cur.length||cur[cur.length-1].e===c.s))cur.push(c);else{if(cur.length)runs.push(cur);cur=ok(c)?[c]:[];}}
+  if(cur.length)runs.push(cur);
+  for(const r of runs){const n=Math.min(L,r.length);
+    for(let i=0;i+n<=r.length;i++){const ws=r.slice(i,i+n),q=ws.reduce((a,c)=>a+notQ(c,E),0)/n,pp=Math.max(...ws.map(c=>c.pp||0)),
+        wert=NOT.max*q*(1-pp/100)*(n/L);
+      if(!best||wert>best.wert+1e-9)best={tag:ws[0].tag,s:jetzt==null?ws[0].s:Math.max(ws[0].s,jetzt),e:ws[n-1].e,wert,pp,q,z:ws.map(c=>c.z),r,j:i+n};}}
+  if(!best||best.wert<=0)return null;
+  // gleich gute Folgestunden haengen sich an (Guete nicht schlechter, Regenrisiko hoechstens 3 Punkte hoeher)
+  for(let j=best.j;j<best.r.length;j++){const c=best.r[j];if(notQ(c,E)<best.q-1e-9||(c.pp||0)>best.pp+3)break;best.e=c.e;best.z.push(c.z);}
+  delete best.r;delete best.j;return best;}
+/* "kein Regen erwartet, aber taunass" bzw. "Regenrisiko 35 %, noch nass vom Regen davor" */
+function notTxt(nf,einst){const E=einstVoll(einst),t=[],z=new Set(nf.z);
+  if(z.has("tau"))t.push("taunass");if(z.has("nass"))t.push("noch nass vom Regen davor");if(z.has("weich"))t.push("Boden weich");if(z.has("kalt"))t.push("kalt");
+  if(nf.pp>E.risiko)return "Regenrisiko "+Math.round(nf.pp)+"\u202f%"+(t.length?", "+t.join(", "):"");
+  return "kein Regen erwartet"+(t.length?", aber "+t.join(", "):"");}
+
 /* Je Tag ab heute: Fenster, bestes Fenster und Wetterwert 0-100 (wie rzTagWertung/rzWetterWert v5.72/73).
    Reihenfolge: gute Fenster (Risiko <= Grenze); sonst trockene Fenster ueber der Grenze (risk:true, Zahl trotzdem);
    sonst wert 0 mit Grund. Sonn-/Feiertag/abgewaehlter Tag: frei:true, wert null (Balken statt Zahl), grund = Name.
@@ -154,13 +188,14 @@ function tagesFenster(stunden,einst,heute,jetzt){
     if(frei){out[tag]={datum:tag,fenster:[],best:null,wert:null,grund:frei,frei:true,risk:false};continue;}
     let ws=fensterAus(H,E,jetzt,c=>c.gut),risk=false;
     if(!ws.length){ws=fensterAus(H,E,jetzt,c=>c.erlaubt&&c.z==="trocken");risk=ws.length>0;}
-    if(!ws.length){const rest=H.some(c=>c.erlaubt&&(jetzt==null||c.e>jetzt+5*6e4));
-      out[tag]={datum:tag,fenster:[],best:null,wert:0,frei:false,risk:false,
+    if(!ws.length){const rest=H.some(c=>c.erlaubt&&(jetzt==null||c.e>jetzt+5*6e4)),nf=notFenster(H,E,jetzt);
+      // r1.12: wert bleibt 0 (kein trockenes Fenster), notwert = Notwert 1-30 (null: nur Regen bzw. nichts mehr erlaubt)
+      out[tag]={datum:tag,fenster:[],best:null,wert:0,not:nf,notwert:nf?Math.max(1,Math.round(100*nf.wert)):null,frei:false,risk:false,
         grund:!rest&&tag===heute?"für heute ist deine Mähzeit vorbei":"kein trockenes Fenster von "+stdTxt(E.dauer)+" in deiner Mähzeit (nass, Tau, Regen oder zu kalt)"};continue;}
     const best=ws.reduce((a,b)=>wetterWert(b,E,Z)>wetterWert(a,E,Z)+1e-9?b:a);   // bestes Wetter, bei Gleichstand das fruehere
     out[tag]={datum:tag,fenster:ws,best,wert:Math.round(100*wetterWert(best,E,Z)),faktoren:tagFaktoren(best,Z),frei:false,risk,
       grund:risk?"Regenrisiko über deiner Grenze ("+E.risiko+" %) – nicht empfohlen":""};}
   return out;}
 
-return {VERSION,STD,einstVoll,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert,tagFaktoren};
+return {VERSION,STD,TAU,einstVoll,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert,tagFaktoren,notFenster,notTxt};
 });

@@ -2390,6 +2390,19 @@ November bis ~11-12 Uhr), dafuer fallen "Tau"-Stunden mitten am Tag weg, die nur
 Empfehlungen verschieben sich teils (Erlental heute gemaeht: Mo 2.11. 10-13 -> 12-13; Gras hoch: Sa 31.10. 9-13 -> Di
 27.10. 15-17). Notwert: Tau-Guete nach der Menge 0,75 (fast weg) bis 0,5 (voller Speicher). Blase einer Tau-Zelle nennt
 die Menge ("Tau, noch 0,13 mm auf den Halmen"). Nicht am Rasen geprueft - Rate und Deckel sind Schaetzwerte.
+RASEN-APP r1.12 (Nutzer: "die Punkte abarbeiten, die noch fehlen" - Rasen-App war bei v5.97-v6.02 nicht nachgezogen):
+(1) Tau als Wassermenge wie v6.02 (`planer.js TAU`, `bewerten` setzt `c.dw` und `c.nw`). (2) NOTWERT: `notFenster`/`notTxt`
+(Formel wie `rzNotFenster`), `tagesFenster` liefert fuer Tage ohne trockenes Fenster `not` und `notwert` (1-30, null = nur
+Regen); die Liste zeigt ihn im Kreis ohne Fuellung (duenner Ring wie v6.00), "–" nur noch, wenn auch kein Notfenster
+existiert. (3) NOTLOESUNG in `empfehlen()`: kommt das erste Tag mit Wert > 0 erst 3 Tage nach dem Start (ueberfaellig: heute,
+sonst Beginn des Terminfensters) oder gar nicht, der beste Notwert davor x 5 % Abzug je Tag; ohne jedes trockene Fenster ist
+sie die Empfehlung (`art` "Notlösung", Termin orange), sonst `notfalls` als erster Hinweis unter dem Status. Zeile gelb
+(`.mf-row.not`), "notfalls 16–17 Uhr · noch nass vom Regen davor" NUR in dieser Zeile (an jedem nassen Tag waeren es drei
+Zeilen), die Blase jedes Tages nennt das Notfenster. (4) "Heute gemäht ?" / "Wann gemäht ?" mit geschuetztem Leerzeichen
+(v5.99). (5) Der Erklaersatz unter der Liste ist eine aufklappbare "Symbol-Erklärung" (`#mfLeg`, offen/zu `rasenLeg`), je
+Symbol eine Zeile, nur vorkommende. Geprueft: test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt, Szenario
+(`r112.py`: 6 bzw. 15 nasse Tage auf den Stub) hell/dunkel. Stub-Werte sinken durch den Tau (Stub ohne et0 -> Monatsmittel,
+Oktober 0,1 mm/h: Tau bis ~10-11 Uhr statt 9; morgen 88 -> 81, Anfang November 9-13 -> 15-17 Uhr).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -13,7 +13,7 @@ Home-Bildschirm“), unabhängig von der Wetter-App. Daten bleiben im Gerät.
 | `index.html` | Oberfläche, Speicher (`localStorage.rasenApp`), mehrere Flächen, Diagramm, Dialoge, Benachrichtigung. Version `r1.xx` oben rechts, die Skripte werden mit `?v=` geladen (Cache). |
 | `modell.js` | Wachstumsmodell – rein (kein DOM, kein Netz, keine Uhr): `tagesWachstum`, `simulieren`, `termine`, `kalibrieren`, `sicherheit`, `pruefeHoehe`, `STD`, `PARAM`. |
 | `wetter.js` | Wetterdienst: Open-Meteo Tages- und Stundenwerte, Archiv-Rückfall, Cache 30 min, Fehler auf Deutsch. |
-| `planer.js` | Stundenregeln „wann ist Mähen möglich“ – Port aus der Wetter-App (Abtrocknen, Tau, Boden weich, Mähzeit, Pause, Sonn-/Feiertage, Tageslicht), Fenster und Wetterwert 0–100. |
+| `planer.js` | Stundenregeln „wann ist Mähen möglich“ – Port aus der Wetter-App (Abtrocknen nach Verdunstung, Tau als Wassermenge, Boden weich, Mähzeit, Pause, Sonn-/Feiertage, Tageslicht), Fenster, Wetterwert 0–100 und Notwert bis 30 für Tage ohne trockenes Fenster (`notFenster`). |
 | `MODELL.md` | Vollständige Modellbeschreibung: Formeln, Parameter mit Herkunft, Eichung, Band, Grenzen, Quellen. |
 | `test_modell.js` | `node rasen/test_modell.js` – 228 Prüfungen, Exit 1 bei Fehler. |
 | `test_app.py` | Playwright-Integrationstest der Oberfläche (`python3 rasen/test_app.py stub` mit nachgebautem Open-Meteo, `… echt` mit Netz). |

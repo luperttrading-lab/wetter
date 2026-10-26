@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Rasen · Mähplaner</title>
 <style>
-/* Rasen-App r1.11 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
+/* Rasen-App r1.12 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --ink:#17202e;--muted:#5c6b80;--faint:#5e6c81;   /* --faint 5,3:1 auf Weiss, 4,7:1 auf dem Seitengrund (bis r1.00 #9aa7b8 = 2,4:1) */
@@ -126,6 +126,21 @@ html.dunkel .mf-frei{background:#262d38}
 .rz-w.w3{font-size:8.5px;letter-spacing:-.4px}.rz-w.rec{background:#237a3a;color:#fff}   /* 4,6:1 (vorher #2e9e4a 3,4:1) */.rz-w.leer{background:none;color:var(--faint)}
 html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10}
 .mf-leg{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45}
+/* r1.12 (wie Wetter-App v5.97-v6.00): Notwert im Kreis ohne Fuellung (duenner Ring), Notloesung gelb */
+.rz-w.nw{background:transparent;box-sizing:border-box;border:1px solid #98a2b3}html.dunkel .rz-w.nw{background:transparent;border-color:#6d7b90}
+.rz-w.nw.not,html.dunkel .rz-w.nw.not{border:1.5px solid #e0a800}
+.mf-row.not{background:#fff6d6;box-shadow:inset 0 0 0 1.5px #e0b400}html.dunkel .mf-row.not{background:#3a3010;box-shadow:inset 0 0 0 1.5px #8c6e12}
+/* r1.12 (wie Wetter-App v5.98): Symbol-Erklaerung zum Aufklappen, jede Zeile mit ihrem Symbol */
+.mf-legd{margin-top:8px}
+.mf-legd>summary{list-style:none;cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;padding:7px 0 3px}
+.mf-legd>summary::-webkit-details-marker{display:none}
+.mf-legd>summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+.mf-legd[open]>summary::after{transform:rotate(-135deg);margin-top:3px}
+.mf-lz{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+.mf-ls{flex:0 0 26px;display:flex;justify-content:center;align-items:center}.mf-ls .rz-w{justify-self:auto}
+.mf-lrec{display:block;width:24px;height:16px;border-radius:5px;background:var(--gras-hell);box-shadow:inset 0 0 0 1.5px var(--gras-line)}
+.mf-lnot{display:block;width:24px;height:16px;border-radius:5px;background:#fff6d6;box-shadow:inset 0 0 0 1.5px #e0b400}html.dunkel .mf-lnot{background:#3a3010;box-shadow:inset 0 0 0 1.5px #8c6e12}
+.mf-lstr{display:block;width:22px;border-top:1px dashed var(--muted)}
 
 /* Historie */
 .hi-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
@@ -224,7 +239,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 <div id="app">
   <header>
     <div class="place" id="kopf"><span id="kopfName">Mein Rasen</span><span class="pf" id="kopfPf" hidden>▾</span><small id="kopfSub">…</small></div>
-    <div class="hr"><span class="ver">r1.11</span>
+    <div class="hr"><span class="ver">r1.12</span>
       <button type="button" class="act-btn" id="btnEinst" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
@@ -245,7 +260,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
     <div class="st-text" id="stText"></div>
     <ul class="st-hin" id="stHin"></ul>
     <div class="btns">
-      <button type="button" class="loc-btn loc-gras" id="btnGemaeht">Heute gemäht?</button>
+      <button type="button" class="loc-btn loc-gras" id="btnGemaeht">Heute gemäht&nbsp;?</button>
       <button type="button" class="loc-btn" id="btnEinst2">Einstellungen</button>
     </div>
   </div>
@@ -259,7 +274,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
   <div class="sect">Wann mähen – die nächsten 14 Tage</div>
   <div class="nowcard">
     <div class="mf" id="mf"></div>
-    <div class="mf-leg">Zahl = wie gut der Tag zum Mähen ist (0–100: trocken, wenig Regenrisiko, möglichst die ganze Mähzeit gut, kein Regen am Vortag); „–“ = kein trockenes Fenster. Grün = empfohlener Tag. Gestrichelte Linie: ab hier zweite Woche, Vorhersage unsicherer. Tippen zeigt die Begründung.</div>
+    <details class="mf-legd" id="mfLeg"><summary>Symbol-Erklärung</summary><div id="mfLegIn"></div></details>
   </div>
 
   <div class="sect">Mähen – Verlauf</div>
@@ -276,15 +291,15 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 
 <div class="loc-ovl hidden" id="ovl"><div class="loc-box" role="dialog" aria-modal="true" id="ovlBox"></div></div>
 
-<script src="modell.js?v=1.11"></script>
-<script src="wetter.js?v=1.11"></script>
-<script src="planer.js?v=1.11"></script>
+<script src="modell.js?v=1.12"></script>
+<script src="wetter.js?v=1.12"></script>
+<script src="planer.js?v=1.12"></script>
 <script>
 "use strict";
-/* ===================== Rasen-App r1.11 – Oberflaeche =====================
+/* ===================== Rasen-App r1.12 – Oberflaeche =====================
    Bindet RasenModell (Wachstum, Termine, Eichung), RasenWetter (Open-Meteo) und RasenPlaner
    (Stundenregeln "wann ist Maehen moeglich") zusammen. Speicher: localStorage "rasenApp". */
-const VERSION="r1.11",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
+const VERSION="r1.12",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
 const el=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fin=x=>typeof x==="number"&&Number.isFinite(x);
@@ -456,6 +471,15 @@ function empfehlen(){
     else{const nach=tage.filter(d=>d>fen.bis);best=nach.find(d=>wert(d)>=30)||nach.find(d=>wert(d)>0)||null;
       if(best)grund="im Terminfenster kein trockener Tag – erster brauchbarer Tag danach";}
   }
+  /* r1.12 (wie Wetter-App v5.97): NOTLOESUNG. Kommt das erste trockene Fenster erst 3 Tage nach dem Start (ueberfaellig:
+     heute, sonst Beginn des Terminfensters) oder gar nicht, der beste Notwert davor mal 5 % Abzug je Tag Abstand. Ohne
+     trockenes Fenster ist sie die Empfehlung, sonst steht sie als "Notfalls" daneben. */
+  const start=T.ueberfaellig?heute:sp(heute,fen.von),erst=tage.find(d=>d>=start&&wert(d)>0);let not=null;
+  if(!erst||Zt0.tageZw(start,erst)>=3){
+    tage.filter(d=>d>=start&&(!erst||d<erst)&&TF[d]&&!TF[d].frei&&TF[d].not).forEach(d=>{
+      const sc=TF[d].not.wert*Math.max(.1,1-.05*Math.abs(Zt0.tageZw(start,d)));
+      if(!not||sc>not.sc+1e-9)not={datum:d,sc,best:TF[d].not,wert:TF[d].notwert,txt:RasenPlaner.notTxt(TF[d].not,f.einst)};});}
+  if(!best&&not)return {datum:not.datum,art:"Notlösung",grund:"kein trockenes Fenster im Vorhersagezeitraum – am wenigsten schlecht: "+not.txt,fenster:fen,wert:not.wert,best:not.best,not:true};
   if(!best)return {datum:null,art:"",grund:"kein passendes Wetter im Vorhersagezeitraum",fenster:fen};
   let art=fen.arten[best]||"Wetter";
   // auf einen Maehtag schieben
@@ -464,9 +488,9 @@ function empfehlen(){
     if(!gef){d=best;for(let i=1;i<=6;i++){d=Zt0.tagPlus(best,i);if(TF[d]&&!TF[d].frei){gef=d;break;}}}
     if(gef){grund+=" ("+datumLang(best)+" ist "+TF[best].grund+")";best=gef;art=fen.arten[best]||art;}
   }
-  return {datum:best,art,grund,fenster:fen,wert:wert(best),best:TF[best]&&TF[best].best||null};
+  return {datum:best,art,grund,fenster:fen,wert:wert(best),best:TF[best]&&TF[best].best||null,notfalls:not&&not.datum!==best?not:null};
 }
-const ART_TXT={"Ein-Drittel":"Ein-Drittel-Regel","Zielhöhe":"Zielhöhe erreicht","Wetter":"günstiges Wetter"};
+const ART_TXT={"Ein-Drittel":"Ein-Drittel-Regel","Zielhöhe":"Zielhöhe erreicht","Wetter":"günstiges Wetter","Notlösung":"Notlösung, wenn es sein muss"};
 
 /* ---------- Kopf ---------- */
 function kopfRender(){
@@ -508,7 +532,7 @@ function statusRender(){
     :"nicht eingetragen<small>gerechnet ab "+esc(datumLang(sim.start.datum))+"</small>";
   const e=D.emp,tv=el("stTermin"),ohneVorhersage=!D.wetter||!Object.keys(D.TF).length;
   if(e&&e.datum){const n=Zt().tageZw(heute,e.datum);
-    tv.className="st-v gruen";tv.innerHTML=esc(datumLang(e.datum))+"<small>"+esc(n===0?"heute":n===1?"morgen":"in "+n+" Tagen")+(e.best?" · "+esc(fensterTxt(e.best)):"")+" · "+esc(ART_TXT[e.art]||e.art)+"</small>";}   // die Annahme steht EINMAL im Satz darunter (320 pt)
+    tv.className=e.not?"st-v warn":"st-v gruen";tv.innerHTML=esc(datumLang(e.datum))+"<small>"+esc(n===0?"heute":n===1?"morgen":"in "+n+" Tagen")+(e.best?" · "+esc(fensterTxt(e.best)):"")+" · "+esc(ART_TXT[e.art]||e.art)+"</small>";}   // die Annahme steht EINMAL im Satz darunter (320 pt)
   else if(T&&T.ueberfaellig){tv.className="st-v warn";tv.innerHTML="überfällig<small>"+esc(e&&e.grund||"sobald das Wetter passt")+"</small>";}
   else{tv.className="st-v";tv.innerHTML="offen<small>"+esc(ohneVorhersage?"keine Wettervorhersage":e&&e.datum===null&&e.fenster?e.grund:T?"siehe unten":"keine Vorhersage")+"</small>";}   // T.text steht schon darunter
   // Sicherheit: ohne (aktuelles) Wetter ist die Rechnung eine Klimaschaetzung - dann "gering" und der Grund statt der Prozentzahl
@@ -519,10 +543,11 @@ function statusRender(){
     const zusatz=ohneWetter?"keine Wetterdaten":altWetter?"Wetter vom "+standTxt(D.wetter.stand):"±"+pct+" % "+(tb>=1?"am Mähtermin":"heute");
     sichTxt=esc(({hoch:"Hohe",mittel:"Mittlere",gering:"Geringe"}[stufe]||stufe)+" Sicherheit")+"<small>"+(f.kal.n||0)+(f.kal.n===1?" Eichung":" Eichungen")+" · "+esc(zusatz)+"</small>";}
   el("stSich").innerHTML=sichTxt;
-  el("stText").textContent=annahme?"Noch kein Mähen eingetragen – Höhe und Termin sind eine Annahme. Tippe auf „Wann gemäht?“ und trage ein, wann du gemäht hast.":T?T.text:"";
-  el("btnGemaeht").textContent=annahme?"Wann gemäht?":"Heute gemäht?";   // r1.08: als Frage - ohne "?" las es sich wie ein Zustand
+  el("stText").textContent=annahme?"Noch kein Mähen eingetragen – Höhe und Termin sind eine Annahme. Tippe auf „Wann gemäht\u00a0?“ und trage ein, wann du gemäht hast.":T?T.text:"";
+  el("btnGemaeht").textContent=annahme?"Wann gemäht\u00a0?":"Heute gemäht\u00a0?";   // r1.08: als Frage; r1.12: Leerzeichen davor (Wetter-App v5.99), geschuetzt - das ? bricht nie allein um
   // ohne Maeheintrag sagt der Satz schon, dass alles eine Annahme ist - der Modellhinweis "Letztes Maehen unbekannt" entfaellt (320 pt)
-  el("stHin").innerHTML=(sim.hinweise||[]).filter(x=>!(annahme&&/^Letztes Mähen unbekannt/.test(x))).map(x=>"<li>"+esc(x)+"</li>").join("");
+  const nf=e&&e.notfalls?["Notfalls: "+datumLang(e.notfalls.datum)+", "+fensterTxt(e.notfalls.best)+" – "+e.notfalls.txt+" (gelb unten in der Liste)."]:[];   // r1.12
+  el("stHin").innerHTML=nf.concat((sim.hinweise||[]).filter(x=>!(annahme&&/^Letztes Mähen unbekannt/.test(x)))).map(x=>"<li>"+esc(x)+"</li>").join("");
 }
 function fensterTxt(w){if(!w)return "";const Z=Zt();return Z.hh(w.s)+"–"+Z.hh(w.e)+" Uhr";}
 
@@ -595,16 +620,31 @@ function mfRender(){
   if(!LIB_OK){box.innerHTML='<div class="hi-leer">–</div>';return;}
   const TF=D.TF,heute=heuteTag(),Z=Zt(),f=F();
   const tage=[];for(let i=0;i<14;i++)tage.push(Z.tagPlus(heute,i));
+  const da=new Set();
   box.innerHTML=tage.map((d,i)=>{
-    const t=TF[d],rec=D.emp&&D.emp.datum===d,wd=Z.wtag(d);
+    const t=TF[d],notTag=!!(D.emp&&(D.emp.not&&D.emp.datum===d||D.emp.notfalls&&D.emp.notfalls.datum===d)),rec=!notTag&&!!(D.emp&&D.emp.datum===d),wd=Z.wtag(d);
     const kopf='<div class="mf-tag">'+(i===0?"heute":i===1?"morgen":["So","Mo","Di","Mi","Do","Fr","Sa"][wd])+"<small>"+esc(Z.tagTxt(d).slice(3))+"</small></div>";
     let mitte,kreis;
     if(!t){mitte='<div class="mf-txt"><small>keine Vorhersage</small></div>';kreis="";}
     else if(t.frei){mitte='<div class="mf-frei">'+esc(t.grund)+" – kein Mähen</div>";kreis="";}
     else{const w=t.wert;
-      mitte='<div class="mf-txt">'+(t.best?esc(fensterTxt(t.best))+(t.risk?"<small>Regenrisiko "+(t.best.pp!=null?Math.round(t.best.pp)+" % ":"")+"– über deiner Grenze</small>":t.best.pp!=null?"<small>Regenrisiko "+Math.round(t.best.pp)+" %</small>":""):"<small>"+esc(tagGrund(d,t))+"</small>")+"</div>";
-      kreis=w>0?'<div class="rz-w'+(w>=100?" w3":"")+(rec?" rec":"")+'">'+w+"</div>":'<div class="rz-w leer">–</div>';}
-    return '<div class="mf-row'+(rec?" rec":"")+(i===7?" mf-ab":"")+'" data-tag="'+d+'">'+kopf+mitte+kreis+"</div>";}).join("");
+      // r1.12: ohne trockenes Fenster der Notwert im Ring; das Notfenster als Text ("notfalls 12–13 Uhr · taunass") nur am
+      // Tag der Notloesung - an jedem nassen Tag waeren es drei Zeilen je Tag (die Blase nennt es fuer jeden Tag)
+      const nk=t.not&&notTag?RasenPlaner.notTxt(t.not,f.einst).replace(/^kein Regen erwartet(, aber )?/,""):"";
+      mitte='<div class="mf-txt">'+(t.best?esc(fensterTxt(t.best))+(t.risk?"<small>Regenrisiko "+(t.best.pp!=null?Math.round(t.best.pp)+" % ":"")+"– über deiner Grenze</small>":t.best.pp!=null?"<small>Regenrisiko "+Math.round(t.best.pp)+" %</small>":""):"<small>"+esc(tagGrund(d,t))+"</small>"+(t.not&&notTag?"<small>notfalls "+esc(fensterTxt(t.not))+(nk?" · "+esc(nk):"")+"</small>":""))+"</div>";
+      if(w>0)da.add("w");else if(t.notwert)da.add(notTag?"not":"nw");else da.add("leer");
+      kreis=w>0?'<div class="rz-w'+(w>=100?" w3":"")+(rec?" rec":"")+'">'+w+"</div>":t.notwert?'<div class="rz-w nw'+(notTag?" not":"")+'">'+t.notwert+"</div>":'<div class="rz-w leer">–</div>';}
+    return '<div class="mf-row'+(rec?" rec":"")+(notTag?" not":"")+(i===7?" mf-ab":"")+'" data-tag="'+d+'">'+kopf+mitte+kreis+"</div>";}).join("");
+  // r1.12 (wie Wetter-App v5.98): Symbol-Erklaerung zum Aufklappen, nur Zeilen fuer Symbole, die vorkommen; offen/zu gemerkt
+  const lz=(sym,t)=>'<div class="mf-lz"><span class="mf-ls">'+sym+"</span><span>"+t+"</span></div>";
+  el("mfLegIn").innerHTML=lz('<span class="rz-w">88</span>',"Zahl = wie gut der Tag zum Mähen ist (0–100): trocken, wenig Regenrisiko, möglichst die ganze Mähzeit gut, kein Regen kurz davor")
+    +(D.emp&&D.emp.datum&&!D.emp.not?lz('<span class="mf-lrec"></span>',"grün hinterlegt = empfohlener Tag"):"")
+    +(da.has("nw")||da.has("not")?lz('<span class="rz-w nw">15</span>',"Kreis ohne Füllung = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)"):"")
+    +(da.has("not")?lz('<span class="mf-lnot"></span>',"gelb = Notlösung, wenn es sein muss"):"")
+    +(da.has("leer")?lz('<span class="rz-w leer">–</span>',"kein Fenster: Regen in der ganzen Mähzeit oder Mähzeit vorbei"):"")
+    +lz('<span class="mf-lstr"></span>',"gestrichelte Linie: ab hier zweite Woche, Vorhersage unsicherer")
+    +'<div class="mf-lz"><span class="mf-ls"></span><span>Tippen auf einen Tag zeigt die Begründung.</span></div>';
+  const lg=el("mfLeg");if(!lg._an){lg._an=1;lg.open=lsGet("rasenLeg")==="1";lg.addEventListener("toggle",()=>{try{localStorage.setItem("rasenLeg",lg.open?"1":"0");}catch(e){}});}
 }
 /* Grund eines Tages ohne Fenster aus den Stunden: der haeufigste Zustand in der Maehzeit (statt "nass, Tau, Regen oder zu kalt") */
 const Z_TXT={regen:"Regen",nass:"nass nach Regen",weich:"Boden weich",tau:"Tau",kalt:"zu kalt"};
@@ -623,7 +663,11 @@ function mfText(tag){
   if(fin(t.wert)&&t.wert>0){const k=t.faktoren,x=v=>"×"+v.toFixed(2).replace(".",",");
     s+="<br>Wetterwert "+t.wert+": Chance auf trocken (Grenze "+f.einst.risiko+"\u202f% Regenrisiko) × Bonus für ein längeres Fenster"
       +(k?" · "+k.g+" von "+k.n+" Mähstunden gut: "+x(k.fA)+" · "+(k.mm>=0.1?k.mm.toFixed(1).replace(".",",")+"\u202fmm Regen vor dem ersten guten Fenster des Tages ohne trockenen Tag dazwischen (zählt halb, sobald seither 1,5\u202fmm verdunsten konnten): "+x(k.fR):"davor mindestens 24 Stunden kein Regen"):"")+".";}
-  if(D.emp&&D.emp.datum===tag)s+="<br><b>Empfohlen</b> – "+esc(D.emp.grund)+".";
+  if(t.wert===0&&t.not)s+="<br>Notwert "+t.notwert+": am wenigsten schlecht "+esc(fensterTxt(t.not))+" – "+esc(RasenPlaner.notTxt(t.not,f.einst))
+    +". Notwerte gehen höchstens bis 30 (Güte der Stunden: trocken 1, kalt 0,6, Tau 0,5–0,75, nass 0,25–0,5, mal Chance auf trocken) – ein Tag mit trockenem Fenster liegt fast immer darüber.";
+  if(D.emp&&D.emp.not&&D.emp.datum===tag)s+="<br><b>Notlösung, wenn es sein muss</b> – "+esc(D.emp.grund)+".";
+  else if(D.emp&&D.emp.notfalls&&D.emp.notfalls.datum===tag)s+="<br><b>Notlösung, wenn es sein muss</b> – das erste trockene Fenster kommt erst in 3 oder mehr Tagen.";
+  else if(D.emp&&D.emp.datum===tag)s+="<br><b>Empfohlen</b> – "+esc(D.emp.grund)+".";
   else if(D.emp&&D.emp.datum&&fin(t.wert)&&t.wert>(D.emp.wert||0))s+="<br>Empfohlen ist "+esc(Z.tagTxt(D.emp.datum))+" – "+(D.term&&D.term.ueberfaellig?"über der Zielhöhe: jeder Tag Warten kostet 5 %.":"für die Wahl zählt auch, wann der Rasen die Höhe erreicht.");
   return s;
 }
@@ -631,7 +675,7 @@ function mfText(tag){
 /* ---------- Historie ---------- */
 function histRender(){
   const f=F(),box=el("hist");
-  if(!f.historie.length){box.innerHTML='<div class="hi-leer">Noch kein Mähen eingetragen. Tippe auf „Wann gemäht?“ und trage ein, wann du gemäht hast – mit der Höhe vorher lernt die App ab dem nächsten Mähen, wie schnell dein Rasen wächst.</div>';return;}
+  if(!f.historie.length){box.innerHTML='<div class="hi-leer">Noch kein Mähen eingetragen. Tippe auf „Wann gemäht&nbsp;?“ und trage ein, wann du gemäht hast – mit der Höhe vorher lernt die App ab dem nächsten Mähen, wie schnell dein Rasen wächst.</div>';return;}
   box.innerHTML=f.historie.slice().reverse().map((h,i)=>{const log=(f.kal.log||[]).find(l=>l.bis===h.datum);
     return '<div class="hi-row"><div><b>'+esc(datumLang(h.datum))+"</b> · auf "+esc(cmTxt(h.schnitt))+"<small>"+(fin(h.hoeheVorher)?"vorher "+esc(cmTxt(h.hoeheVorher))+(fin(h.hoeheProg)?" (Modell "+esc(cmTxt(h.hoeheProg))+")":"")
       +(log?log.uebernommen?" · Eichung übernommen":" · nicht geeicht: "+esc(log.grund):""):"ohne Höhe vorher")+'</small></div><button type="button" class="hi-x" data-del="'+esc(h.datum)+'" aria-label="Eintrag löschen"><span>×</span></button></div>';}).join("");
