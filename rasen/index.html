@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Rasen · Mähplaner</title>
 <style>
-/* Rasen-App r1.09 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
+/* Rasen-App r1.10 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --ink:#17202e;--muted:#5c6b80;--faint:#5e6c81;   /* --faint 5,3:1 auf Weiss, 4,7:1 auf dem Seitengrund (bis r1.00 #9aa7b8 = 2,4:1) */
@@ -224,7 +224,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 <div id="app">
   <header>
     <div class="place" id="kopf"><span id="kopfName">Mein Rasen</span><span class="pf" id="kopfPf" hidden>▾</span><small id="kopfSub">…</small></div>
-    <div class="hr"><span class="ver">r1.09</span>
+    <div class="hr"><span class="ver">r1.10</span>
       <button type="button" class="act-btn" id="btnEinst" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
@@ -276,15 +276,15 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 
 <div class="loc-ovl hidden" id="ovl"><div class="loc-box" role="dialog" aria-modal="true" id="ovlBox"></div></div>
 
-<script src="modell.js?v=1.09"></script>
-<script src="wetter.js?v=1.09"></script>
-<script src="planer.js?v=1.09"></script>
+<script src="modell.js?v=1.10"></script>
+<script src="wetter.js?v=1.10"></script>
+<script src="planer.js?v=1.10"></script>
 <script>
 "use strict";
-/* ===================== Rasen-App r1.09 – Oberflaeche =====================
+/* ===================== Rasen-App r1.10 – Oberflaeche =====================
    Bindet RasenModell (Wachstum, Termine, Eichung), RasenWetter (Open-Meteo) und RasenPlaner
    (Stundenregeln "wann ist Maehen moeglich") zusammen. Speicher: localStorage "rasenApp". */
-const VERSION="r1.09",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
+const VERSION="r1.10",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
 const el=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fin=x=>typeof x==="number"&&Number.isFinite(x);

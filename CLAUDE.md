@@ -2302,6 +2302,20 @@ Wert-Kreis) um alle Fenster dieses Tages bis 3 Punkte Regenrisiko ueber `alt`; d
 dieser Satz (sonst zweimal derselbe Tag). Legende "dünn = fast gleich gut". Norden 26.10. (gemaeht heute, 8 Tage, faellig
 Di 3.11. mit Niesel 0,1 mm/h 7-19 Uhr bei 2-6 % Wahrscheinlichkeit): Mi 4.11. Wahlwert 83,5 (Tag 88 x 0,95), Do 84,6
 (94 x 0,90) - Gleichstand, Mi gewinnt ueber den Abstand zur Faelligkeit.
+v5.95 (Nutzer, Norden: "vor allem jetzt im Herbst, wo es wirklich schlecht abtrocknet" - Mittwoch nach Niesel-Dienstag
+erst spaeter, Donnerstag ganz): ABTROCKNEN NACH VERDUNSTUNG (`rzBewerten`, `RZ_TROCKEN_MM` 0,1). Bis v5.94 zog jede trockene
+Stunde 1 "Standardstunde" ab (Sonne >= 30 min oder Wind >= 15 km/h: 2, Luftfeuchte >= Tau-Grenze: 0,5) - die Novembernacht
+trocknete wie ein Julimittag. Jetzt zieht jede Stunde ET0 / 0,1 mm ab (`rzEt`: Open-Meteo et0, sonst Monatsmittel bei
+Tageslicht). Die Tabelle 2/3/5/8 Standardstunden (x1,5 hohes Gras) bleibt = 0,2/0,3/0,5/0,8 mm Wasser auf dem Gras. Eichung:
+trueber Herbsttag ET0 ~0,1 mm/h = wie bisher 1 je Stunde; Sommersonne 0,4-0,6 mm/h 4-6-mal schneller, Herbstnacht 0,01 mm/h
+zehnmal langsamer. `c.hell` wird jetzt VOR der Zustandsrechnung gesetzt (der Rueckfall von rzEt braucht es). Wichtig: waehrend
+Regen wird nichts abgezogen und `need` = max(need, Tabelle) - nach Starkregen haelt nachfolgender Niesel den grossen Vorrat.
+Norden 26.10. (Mo 2.11. ~5,4 mm, Di 3.11. Niesel 7-19 Uhr): Mi 4.11. alt ab 8 Uhr trocken, neu nass bis 15 Uhr -> Empfehlung
+Do 5.11. 8-13 (Tag 94) statt Mi, kein zweiter Tag. Vergleich alt/neu ueber 29 Tage Norden und Erlental: geaendert sind fast
+nur MORGENSTUNDEN nach Abend-/Nachtregen (statt "trocken"/"Tau" jetzt "trocknet noch ab" bis 10-11 Uhr); "weich" verschwindet
+oft hinter laengerem "nass" (der Boden-Zaehler laeuft parallel ab). Nicht am Rasen geprueft - Schaetzwerte. Nasse Blaetter
+verdunsten eher etwas mehr als ET0 (kein Spaltoeffnungswiderstand), nicht beruecksichtigt. Rasen-App r1.10: dasselbe in
+`planer.js bewerten()` (`TROCKEN_MM`, `etStd`).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
