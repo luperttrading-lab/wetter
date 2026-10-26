@@ -103,9 +103,16 @@ function bewerten(stunden,einst,sonneMap,tz){
     c.unsicher=c.erlaubt&&c.z==="trocken"&&pp>E.risiko&&pp<=60;c.riskant=c.erlaubt&&c.z==="trocken"&&pp>60;}
   return Z;}
 
-/* Wetterwert eines Fensters (rzWetterWert v5.73): trocken-Chance x Laengenbonus, 0..1 */
-function wetterWert(w,einst){if(!w||w.leer)return 0;const E=einstVoll(einst);const P=w.P!=null?w.P:1-(w.pp||0)/100;
-  return P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer));}
+/* Wetterwert eines Fensters, 0..1 (wie Wetter-App v5.76): trocken-Chance x Laengenbonus x Tagesanteil x Vorregen.
+   Tagesanteil = 0,5 + 0,5 x (gute Stunden / Maehstunden des Tages) - halbe nasse Maehzeit = x0,75;
+   Vorregen = Regen in den 24 h vor dem Fenster, bis -15 % (1 mm x0,96, 3 mm x0,91, 10 mm x0,85).
+   Ohne Stundenliste Z (alte Aufrufe) zaehlen nur Chance und Laenge. */
+function tagFaktoren(w,Z){let n=0,g=0,mm=0;
+  for(const c of Z||[]){if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut)g++;}if(c.e>w.s-24*36e5&&c.e<=w.s)mm+=c.p||0;}
+  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mm)/Math.log(11));
+  return {n,g,fA,mm,fR};}
+function wetterWert(w,einst,Z){if(!w||w.leer)return 0;const E=einstVoll(einst);const P=w.P!=null?w.P:1-(w.pp||0)/100,f=tagFaktoren(w,Z);
+  return P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}
 
 /* Fenster aus einer Stundenfolge (bewertete Stunden, ein Tag oder mehrere): zusammenhaengend, gleicher Tag,
    Laenge >= dauer; ab = ms, davor liegende Stunden fallen weg (Ende <= ab + 5 min), die laufende wird bei ab angeschnitten. */
@@ -114,7 +121,7 @@ function fensterAus(Z,E,ab,test){const W=[];let cur=null;const a=ab==null?-Infin
   for(const c of Z){if(c.e<=a+5*6e4)continue;
     if(test(c)){const pp=c.pp||0;if(cur&&cur.e===c.s&&cur.tag===c.tag){cur.e=c.e;cur.pp=Math.max(cur.pp,pp);}else{zu();cur={s:Math.max(c.s,a),e:c.e,tag:c.tag,pp};}}
     else zu();}
-  zu();W.forEach(w=>{w.P=1-w.pp/100;w.wert=Math.round(100*wetterWert(w,E));});return W;}
+  zu();W.forEach(w=>{w.P=1-w.pp/100;w.wert=Math.round(100*wetterWert(w,E,Z));});return W;}
 /* Gute Fenster ab Zeitpunkt ab (wie rzFenster): [{s,e,tag,pp,P,wert}] */
 function fenster(stunden,einst,ab){const E=einstVoll(einst);return fensterAus(stunden||[],E,ab,c=>c.gut);}
 
@@ -134,10 +141,10 @@ function tagesFenster(stunden,einst,heute,jetzt){
     if(!ws.length){const rest=H.some(c=>c.erlaubt&&(jetzt==null||c.e>jetzt+5*6e4));
       out[tag]={datum:tag,fenster:[],best:null,wert:0,frei:false,risk:false,
         grund:!rest&&tag===heute?"für heute ist deine Mähzeit vorbei":"kein trockenes Fenster von "+stdTxt(E.dauer)+" in deiner Mähzeit (nass, Tau, Regen oder zu kalt)"};continue;}
-    const best=ws.reduce((a,b)=>wetterWert(b,E)>wetterWert(a,E)+1e-9?b:a);   // bestes Wetter, bei Gleichstand das fruehere
-    out[tag]={datum:tag,fenster:ws,best,wert:Math.round(100*wetterWert(best,E)),frei:false,risk,
+    const best=ws.reduce((a,b)=>wetterWert(b,E,Z)>wetterWert(a,E,Z)+1e-9?b:a);   // bestes Wetter, bei Gleichstand das fruehere
+    out[tag]={datum:tag,fenster:ws,best,wert:Math.round(100*wetterWert(best,E,Z)),faktoren:tagFaktoren(best,Z),frei:false,risk,
       grund:risk?"Regenrisiko über deiner Grenze ("+E.risiko+" %) – nicht empfohlen":""};}
   return out;}
 
-return {VERSION,STD,einstVoll,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert};
+return {VERSION,STD,einstVoll,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert,tagFaktoren};
 });

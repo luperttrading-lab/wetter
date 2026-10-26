@@ -1211,7 +1211,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.75</span>
+      <span class="ver">v5.76</span>
     </div>
   </header>
 
@@ -5660,7 +5660,16 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
 /* v5.73 (Nutzer: "was ist, wenn der Index nicht die Dringlichkeit beruecksichtigt?"): die ZAHL ist nur noch das Wetter
    (trocken-Chance x Laenge), die Empfehlung waegt weiter den Abstand zum Termin (rzPlanen, 5 % je Tag). Darum kann ein Tag
    mit hoeherer Zahl hinter der Empfehlung liegen - die Blase sagt, warum. */
-function rzWetterWert(w){if(!w||w.leer)return 0;const E=rzE();return w.P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer));}
+/* v5.76 (Nutzer, Norden 26.10.: "Mittwoch 100 zu hoch, wenn es morgens noch geregnet hat; Freitag sollte schlechter sein
+   als Samstag, weil Donnerstag Regen war"): die Zahl bewertet den TAG, nicht nur das beste Fenster. Drei Faktoren:
+   trocken-Chance des Fensters (x Laengenbonus wie bisher) x Anteil der guten Stunden an den Maehstunden des Tages
+   (0,5 + 0,5 x Anteil: halbe nasse Maehzeit = x0,75) x Vorregen (Regen in den 24 h vor dem Fenster, bis -15 %:
+   1 mm x0,96, 3 mm x0,91, 10 mm x0,85). Die EMPFEHLUNG (rzPlanen) rechnet weiter mit der trocken-Chance. */
+function rzTagFaktoren(w){const Z=RASEN.Z;let n=0,g=0,mm=0;
+  for(const c of Z){if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut)g++;}if(c.e>w.s-24*36e5&&c.e<=w.s)mm+=c.p||0;}
+  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mm)/Math.log(11));
+  return {n,g,fA,mm,fR};}
+function rzWetterWert(w){if(!w||w.leer)return 0;const E=rzE(),f=rzTagFaktoren(w);return w.P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}
 function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertung(P,tag),pz=v=>Math.round(v)+"\u202f%";
   const heute=rzTeile(Date.now()).tag;
   if(w.leer){const rest=RASEN.Z.some(c=>c.tag===tag&&c.erlaubt&&c.e>Date.now()+5*6e4);
@@ -5670,8 +5679,11 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
   const wo=f.sofort?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute":"heute")
     :n==null?"Termin nicht in Sicht":n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
   const rec=P.rec&&P.rec.tag===tag;
+  const tf=rzTagFaktoren(w),x=v=>"×"+v.toFixed(2).replace(".",",");
   return "<b>"+rzTagTxt(tag)+" "+rzHH(w.s)+"–"+rzHH(w.e)+" Uhr · Wetter "+Math.round(rzWetterWert(w)*100)+"</b> · trocken mit "+pz(100*w.P)+" (Regenrisiko "+pz(w.pp)+")"
     +" · "+(kurz?"Fenster nur "+rzStd(lg)+": −"+pz(kurz):"Fenster lang genug")
+    +" · "+tf.g+" von "+tf.n+" Mähstunden gut: "+x(tf.fA)
+    +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen in den 24 h davor: "+x(tf.fR):"kein Regen in den 24 h davor")
     +(rec?" · <b>empfohlen</b>":w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>"
       :w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>"
       :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")":"");}
