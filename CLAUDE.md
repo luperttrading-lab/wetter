@@ -2316,6 +2316,19 @@ nur MORGENSTUNDEN nach Abend-/Nachtregen (statt "trocken"/"Tau" jetzt "trocknet 
 oft hinter laengerem "nass" (der Boden-Zaehler laeuft parallel ab). Nicht am Rasen geprueft - Schaetzwerte. Nasse Blaetter
 verdunsten eher etwas mehr als ET0 (kein Spaltoeffnungswiderstand), nicht beruecksichtigt. Rasen-App r1.10: dasselbe in
 `planer.js bewerten()` (`TROCKEN_MM`, `etStd`).
+v5.96 / Rasen-App r1.11 (Nutzer, Norden 12:58, zwei Screenshots: "warum ist der Maehtermin mit 'Heute gemaeht' DICHTER
+dran als ohne? Dann ist das Maehen ja laenger her"): FEHLER. Der Abschlag 5 % je Tag (v5.69/v5.78) war bei 40 % gedeckelt
+(`Math.max(.6, ...)`) - ab dem 8. Tag kostete Warten nichts mehr. Bei "Gras ist schon hoch" (sofort, Abstand = Tage ab
+heute) lagen Do 5.11. (Tag 10) und Fr 6.11. (Tag 11) beide auf x0,60, und Fr gewann mit dem besseren Wetter (92 gegen 86;
+hohes Gras trocknet langsamer, Do 8 Uhr noch nass). Nach "Heute gemaeht" (faellig Di 3.11.) war Do nur 2 Tage weg -> Do.
+Jetzt `rzAbschlag(ad)` = max(0,1; 1 - 0,05 x ad) ohne 40-%-Deckel (0,1 erst ab 18 Tagen, die Stunden reichen 15). Dazu der
+Gleichstand RELATIV: Empfehlung bis 3 % unter dem besten Wahlwert (vorher 3 Punkte), zweiter Tag (v5.94) bis 6 % (vorher 5
+Punkte) - bei Wahlwerten um 40 waeren 3 Punkte 7,5 % gewesen und haetten Mi 28.10. mit einer Stunde (Wert 45) gewinnen
+lassen. Ohne Termin (rzTagWertung, Wuchs-Modus Monate weg) bleibt der feste Abschlag 40 %. Ergebnis mit echten Daten
+Norden 13:00: Gras hoch -> Do 5.11. 9-13 (43,1), duenn Fr 6.11. (41,4), "Moeglich waere schon Sa 31.10. 12 Uhr"; heute
+gemaeht -> Do 5.11. 8-13 (84,6). Regression v5.78 (om_v578) weiter Mi 28.10. 8-13. Mathematisch: ohne Deckel kann "sofort"
+(Abzug ab heute) nie einen SPAETEREN Tag waehlen als "faellig in n Tagen" (Abzug ab Tag n) - mit Deckel ging das. Rasen-App
+r1.11: dieselbe Aenderung in `empfehlen()` fuer "ueber der Zielhoehe" (vorher Deckel 40 %, Gleichstand 3 Punkte).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

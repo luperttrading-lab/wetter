@@ -1246,7 +1246,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.95</span>
+      <span class="ver">v5.96</span>
     </div>
   </header>
 
@@ -5542,6 +5542,9 @@ function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
     if(T==null){if(tag<=heute)continue;return {tag:null,sum,bisher,ende:tag};}
     q=Math.max(q,qn);sum+=Math.max(0,T-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return rzFrist({tag,sum,bisher,grob:q},letzt);}
   return {tag:null,sum,bisher,ende:rzTagPlus(letzt,401)};}
+/* Abschlag je Tag Abstand zum Termin (bzw. ab heute, wenn sofort): 5 % je Tag, ohne Deckel bei 40 % (v5.96) - erst
+   ab 18 Tagen fest 10 %, damit der Wert nicht negativ wird (die Stunden reichen 15 Tage). */
+function rzAbschlag(ad){return Math.max(0.1,1-0.05*ad);}
 function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,W:[],rec:null};
   const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs);
   if(f.grob&&RASEN.Z.length&&fruehMs>=RASEN.Z[RASEN.Z.length-1].e)return {f,W:[],rec:null,spaet:true};   // v5.51: Termin hinter den Stundenwerten
@@ -5554,22 +5557,26 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   // v5.78 (Nutzer, Norden 26.10.: "nicht den hoechsten Wert 91 nehmen statt den frueheren, wo es noch nasser ist?"): die
   // Wahl rechnet mit der TAGESZAHL (rzWetterWert: trocken-Chance x Laenge x Anteil guter Stunden x Vorregen) statt nur mit
   // der trocken-Chance des Fensters - ein Tag mit zwei trockenen Stunden ist zerbrechlich, einer mit sieben haelt eine
-  // verschobene Vorhersage aus. Dazu weiter der Abschlag 5 % je Tag Abstand (hoechstens 40 %). Di 63 x 0,95 = 60 gegen
+  // verschobene Vorhersage aus. Dazu weiter der Abschlag 5 % je Tag Abstand (bis v5.95 hoechstens 40 %). Di 63 x 0,95 = 60 gegen
   // Mi 91 x 0,90 = 82 -> Mittwoch. Die Tie-Regel (3 Punkte -> naeher am Termin, dann frueher) bleibt.
-  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag));w.ad=ad;w.score=rzWetterWert(w)*Math.max(.6,1-.05*ad);});
+  // v5.96 (Nutzer, Norden 12:58: "warum ist der Maehtermin mit 'heute gemaeht' FRUEHER als ohne?"): der Abschlag war bei
+  // 40 % gedeckelt - ab dem 8. Tag kostete Warten nichts mehr, und bei hohem Gras gewann Fr 6.11. (92 x 0,60) gegen
+  // Do 5.11. (86 x 0,60). Jetzt waechst er weiter (rzAbschlag), der Gleichstand ist RELATIV (3 % / 6 % des Wahlwerts statt
+  // 3 / 5 Punkte) - bei Wahlwerten um 40 waeren 3 Punkte 7,5 % gewesen.
+  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag));w.ad=ad;w.score=rzWetterWert(w)*rzAbschlag(ad);});
   // v5.51: unter fast gleich guten Fenstern (bis 3 Punkte unter dem besten) das FRUEHESTE - 5 % statt 7 %
   // Regenrisiko ist Rauschen und schob "morgen 9-13" hinter "morgen 15-17" (W ist zeitlich sortiert)
   // v5.70: auch "sofort" (Gras hoch / Datum unbekannt) waehlt nach der Wertung - Abstand = Tage ab heute; vorher das
   // erste Fenster ueberhaupt, die Zahl in der Leiste haette sonst der Empfehlung widersprechen koennen
   const vor=W.filter(w=>w.s<fristMs),kand=f.sofort||!vor.length?W:vor;let rec=null;
   // v5.69: unter den fast gleich guten das mit dem kleinsten Abstand zur Faelligkeit, dann das frueheste
-  {const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.filter(w=>w.score>=best-0.03).sort((a,b)=>a.ad-b.ad||a.s-b.s)[0]||null;}
+  {const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.filter(w=>w.score>=best*0.97).sort((a,b)=>a.ad-b.ad||a.s-b.s)[0]||null;}
   const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag):null;
   // v5.94 (Nutzer, Norden: Mi 4.11. empfohlen, Do 5.11. kaum schlechter - "zwei Tage markieren, den zweiten mit duennem
   // gelbem Rahmen"): bester Tag unter den uebrigen, dessen Wahlwert hoechstens 5 Punkte unter der Empfehlung liegt
   let alt=null;
   if(rec){const bt={};for(const w of kand){if(w.tag===rec.tag)continue;if(!bt[w.tag]||w.score>bt[w.tag].score)bt[w.tag]=w;}
-    alt=Object.values(bt).filter(w=>w.score>=rec.score-0.05).sort((a,b)=>b.score-a.score||a.s-b.s)[0]||null;}
+    alt=Object.values(bt).filter(w=>w.score>=rec.score*0.94).sort((a,b)=>b.score-a.score||a.s-b.s)[0]||null;}
   return {f,fruehMs,fristMs,W,rec,alt,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
   if(!d)return (ende-r.e)/864e5<2?{txt:"Weiter reicht die Vorhersage nicht.",letzte:false}:{txt:"Danach bis "+rzTagTxt(rzTeile(ende-1).tag)+" kein trockenes Fenster.",letzte:true,bis:rzTeile(ende-1).tag};
@@ -5734,7 +5741,7 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
     zu();return ws;};
   let ws=(P.W||[]).filter(w=>w.tag===tag),risk=false;
   if(!ws.length){ws=fenster(true);if(!ws.length){ws=fenster(false);risk=ws.length>0;}
-    ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.score=w.P*Math.max(.6,1-.05*ad)*(.9+.1*Math.min(1,lg-E.dauer));});}
+    ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.score=w.P*(f.tag?rzAbschlag(ad):.6)*(.9+.1*Math.min(1,lg-E.dauer));});}
   if(!ws.length)return {tag,score:0,leer:true,frueh};
   // v5.73: die Zahl zeigt das Wetter - also das Fenster mit dem besten Wetter des Tages (bei Gleichstand das fruehere)
   const w=ws.reduce((a,b)=>rzWetterWert(b)>rzWetterWert(a)+1e-9?b:a);
@@ -5793,7 +5800,7 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
   if(w.leer){const rest=RASEN.Z.some(c=>c.tag===tag&&c.erlaubt&&c.e>Date.now()+5*6e4);
     return "<b>"+rzTagTxt(tag)+" · Wetter 0</b> · "+(!rest&&tag===heute?"für heute ist deine Mähzeit vorbei"
       :"kein trockenes Fenster von "+rzStd(E.dauer)+" in deiner Mähzeit (nass, Tau, Regen oder zu kalt)");}
-  const lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null,ab=Math.min(40,5*w.ad);
+  const lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null,ab=f.tag?Math.round(100*(1-rzAbschlag(w.ad))):40;
   const wo=f.sofort?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute":"heute")
     :n==null?"Termin nicht in Sicht":n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
   const rec=P.rec&&P.rec.tag===tag;
