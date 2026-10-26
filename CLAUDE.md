@@ -2197,6 +2197,13 @@ Hoehenmessung in rzGrossBinden, `rzLeisteEinfach(P,alle)` -> `(P)`, Scrollstand 
 "unter der gestrichelten Linie ... unsicherer" nur noch, wenn aufgeklappt. Geprueft (`v582.py`, 393 pt, hell/dunkel):
 zu 8 Zeilen (Mo 26.10.-Mo 2.11.) in beiden Ansichten, auf 14 (bis So 8.11.), wieder zu 8, Fenster bleibt offen; Empfehlung
 in Woche 2 (fällig nach 12 Tagen) -> Knopf nennt Sa 7.11., einzeilig 34 px.
+v5.83 (Nutzer, Screenshot 09:36: Kopfbalken "dunkel" ab 16 Uhr, weil Mo 2.11. und So 8.11. um 16 Uhr dunkel sind - heute
+war 16 Uhr aber noch gruen, "man wundert sich"; "die Breite soll mit dem Tag darunter uebereinstimmen, beim Dunkler- wie beim
+Hellerwerden, im Fruehjahr also laenger"): Kopfbalken "dunkel" folgt der ERSTEN Zeile (heute) statt "an mindestens einem der
+Tage dunkel" (v5.62). Spaetere Tage zeigen ihre zusaetzlich dunklen Stunden nur als Kaestchen. Geprueft (`v583.py`, Stub):
+heute dunkel 17-19, irgendein Tag 16-19 -> Balken 17-19; Maehzeit ab 7: heute 7 dunkel -> Morgenfeld nur ueber 7 (ohne
+Schrift, eine Spalte zu schmal, v5.68). Fruehjahrsfall nicht mit Daten geprueft, die Regel ist dieselbe (nur heute zaehlt).
+Nebenbei (Nutzer: "unten im Abschnitt auch die sechs Tage ausblenden"): ist seit v5.82 so, beide Ansichten teilen rz_woche2.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

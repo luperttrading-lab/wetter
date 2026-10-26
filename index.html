@@ -1227,7 +1227,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.82</span>
+      <span class="ver">v5.83</span>
     </div>
   </header>
 
@@ -5755,7 +5755,10 @@ function rzLeisteEinfach(P){
   const spalte=[];let sp=2;const lu=[];std.forEach((x,i)=>{if(i>0&&x!==std[i-1]+1){lu.push(sp);sp++;}spalte.push(sp++);});
   const tpl="46px "+std.map((x,i)=>(i>0&&x!==std[i-1]+1?"34px ":"")+"1fr").join(" ")+" 20px",st=' style="grid-template-columns:'+tpl+'"';
   const luecke=i=>i>0&&std[i]!==std[i-1]+1?"<span></span>":"";
-  const dunkel=i=>tage.some(t=>{const c=idx[t][std[i]];return c&&!c.hell;});   // v5.68: fehlende Stunden (Datenende) sind nicht dunkel
+  // v5.83 (Nutzer, 09:36: Balken "dunkel" begann bei 16 Uhr, weil Mo 2.11. und So 8.11. um 16 Uhr dunkel sind, heute aber
+  // 16 Uhr noch gruen war - "man wundert sich"): der Kopfbalken folgt der ERSTEN Zeile (heute), in beide Richtungen - im
+  // Herbst kuerzer als die spaeteren Zeilen, im Fruehjahr laenger. Dunkle Kaestchen darunter zeigen den Rest je Tag.
+  const dunkel=i=>{const c=tage.length?idx[tage[0]][std[i]]:null;return !!c&&!c.hell;};   // v5.68: fehlende Stunden (Datenende) sind nicht dunkel
   // Kopfzeile: "Pause" ueber der Luecke, "dunkel" ueber jeder dunklen Strecke
   // v5.65 (Nutzer: "oben den Button ohne Text, der kommt nur, wenn man drauf tippt"): Felder ohne Schrift, Tipp -> Blase
   let kopf="";lu.forEach(g=>{kopf+='<span class="rz-elab" data-rzb="p" style="grid-column:'+g+'"><b>Pause</b></span>';});
