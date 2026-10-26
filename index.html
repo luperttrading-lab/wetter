@@ -320,6 +320,10 @@ html.dunkel .rz-mehrk{background:#1f2835;border-color:#3a4658;color:#dbe3ee}html
 html.dunkel .rz-ersatz{background:#33270f;border-color:#a77a24;color:#f2d79c}html.dunkel .rz-ersatz button{background:#241b0a;border-color:#a77a24;color:#f2d79c}
 html.dunkel .rz-ok{background:#173322;border-color:#2f6b40;color:#8fe0a8}
 html.dunkel .rz-ok button{background:rgba(143,224,168,.16)}
+/* v5.99: offene Einstellungen als gelbes Feld mit Kreuz, geschlossen Knopf mit Pfeil */
+.rz-ok.rz-ein{cursor:pointer;background:#fff3c4;border-color:#efc23f;color:#6a4f00}.rz-ok.rz-ein button{background:rgba(106,79,0,.13)}
+html.dunkel .rz-ok.rz-ein{background:#3a3010;border-color:#8c6e12;color:#ffd866}html.dunkel .rz-ok.rz-ein button{background:rgba(255,216,102,.16)}
+.rz-einb svg{width:12px;height:12px;margin-left:7px;vertical-align:-1px}
 /* v5.45: das Fenster ist eine .loc-box - deren Eingabefeld-Stil (volle Breite, appearance:none, 12-px-Labels)
    machte Haekchen unsichtbar und Regler zu dicken Kaesten. Hier wieder normale Bedienelemente. */
 /* v5.46 (Nutzer-Screenshot: "Regler kaum zu erkennen und viel zu hoch"): eigene flache Regler statt der
@@ -1269,7 +1273,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.98</span>
+      <span class="ver">v5.99</span>
     </div>
   </header>
 
@@ -5741,7 +5745,13 @@ function rzGrossHtml(o){o=o||{};
   const gem=E.letzt===heute;   // v5.47: gruenes Feld mit x statt Knopf
   // v5.89 (Nutzer: "Heute gemaeht" ohne Haken las sich wie "ist heute gemaeht") - als Frage "Heute gemaeht?", gesetzt "✓ Heute gemaeht"
   h+='<div class="loc-row">'+(gem?'<span class="rz-ok">\u2713 Heute gemäht<button type="button" data-rzk="zurueck" aria-label="Zurücknehmen">\u00d7</button></span>'
-      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht?</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
+      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht\u00a0?</button>')
+    /* v5.99 (Nutzer: "Leerzeichen vor dem Fragezeichen, bei Einstellungen ein Pfeil; offen nicht 'Einstellungen zu',
+       sondern wie 'Heute gemaeht' ein Feld mit Kreuz, gelb"): geschuetztes Leerzeichen (das ? bricht nie allein um),
+       Pfeil nach unten wie bei "6 weitere Tage" und "Symbol-Erklaerung" (die Einstellungen klappen darunter auf),
+       offen ein gelbes Feld - Tipp aufs Feld oder aufs Kreuz klappt zu */
+    +(o.einst?'<span class="rz-ok rz-ein" data-rzk="einst" role="button" tabindex="0">Einstellungen<button type="button" data-rzk="einst" aria-label="Einstellungen schließen">\u00d7</button></span>'
+      :'<button type="button" class="loc-btn rz-einb" data-rzk="einst">Einstellungen<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>')+"</div>";
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte

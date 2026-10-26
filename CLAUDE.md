@@ -2354,6 +2354,13 @@ Farbflaechen nebeneinander, darunter je Zeile Symbol + Text (`.rz-lz`): Zahl im 
 gelb gestrichelt (Notloesung), Wert-Kreis "92", gestrichelter Kreis "15", heller Anfang, Tropfen, gestrichelte Linie. Der
 Testumschalter Vorregen liegt mit darin. Quelle bleibt sichtbar darunter. Die Leiste rueckt um die "Gras jetzt"-Zeilen nach
 unten (Norden: ~4 Zeilen).
+v5.99 (Nutzer, Screenshot 15:38: "Leerzeichen vor dem Fragezeichen, bei Einstellungen ein Pfeil; offen nicht 'Einstellungen
+zu', sondern wie 'Heute gemaeht' mit Kreis und Kreuz, gelb"): Knopf "Heute gemaeht\u00a0?" (geschuetztes Leerzeichen - das ?
+bricht nie allein um), geschlossen "Einstellungen" mit Pfeil NACH UNTEN (`.rz-einb`; der Nutzer schlug "nach rechts" vor -
+die Einstellungen klappen aber darunter auf, und "6 weitere Tage" / "Symbol-Erklaerung" zeigen schon nach unten), offen ein
+gelbes Feld `.rz-ok.rz-ein` mit rundem Kreuz wie das gruene "Heute gemaeht"; Tipp aufs Feld oder aufs Kreuz klappt zu
+(beide tragen data-rzk="einst"). Gleich gross wie die Nachbarn (393 pt 140 x 42, 320 pt untereinander 248 x 42), hell und
+dunkel geprueft. Rasen-App unveraendert ("Heute gemaeht?" ohne Leerzeichen).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
