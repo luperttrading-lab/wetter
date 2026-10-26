@@ -90,12 +90,14 @@ function bewerten(stunden,einst,sonneMap,tz){
   const RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1);let need=0,boden=0;
   for(let i=0;i<Z.length;i++){const c=Z[i];c.p=+c.p||0;c.sun=+c.sun||0;c.wind=+c.wind||0;let s6=0,s24=0;
     for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
+    const t=Zt.teile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
+    const so=S[c.tag],hell=so&&so.auf!=null&&so.unter!=null?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=feiertag(c.tag);c.hell=hell;
+    // r1.10 (wie Wetter-App v5.95): Abtrocknen nach Verdunstung - jede Stunde zieht ET0/TROCKEN_MM ab (Novembernacht
+    // ~0,1, Herbsttag ~1, Sommersonne 4-6), statt 1 je Uhrstunde (Sonne/Wind 2, feucht 0,5)
     if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
-    else if(need>0){c.z="nass";need=Math.max(0,need-(c.sun>=1800||c.wind>=15?2:c.rh>=RH?0.5:1));boden=Math.max(0,boden-1);}
+    else if(need>0){c.z="nass";need=Math.max(0,need-etStd(c)/TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
     else if(c.rh>=RH)c.z="tau";else if(c.T!=null&&c.T<E.tmin)c.z="kalt";else c.z="trocken";
-    const t=Zt.teile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
-    const so=S[c.tag],hell=so&&so.auf!=null&&so.unter!=null?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=feiertag(c.tag);
     const pause=E.pause&&c.h>=E.pVon&&c.h<E.pBis,zeitOk=c.h>=E.von&&c.h+1<=E.bis&&!pause;
     c.frei=c.wd===0||!!ft;c.hell=hell;c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeitOk&&hell;
     c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":pause?"Mittagspause":!zeitOk?"außerhalb deiner Mähzeit":"";
@@ -114,6 +116,7 @@ function bewerten(stunden,einst,sonneMap,tz){
    der Uhr - halb nach 1,5 mm (Herbst gut ein Tag, Hochsommer wenige Stunden), hoechstens 72 h zurueck, Abzug hoechstens
    12 %. Ohne et0 Monatsmittel (ET0_MON) bei Tageslicht. */
 const ET0_MON=[0.3,0.6,1.2,2.2,3.2,3.8,4.0,3.4,2.2,1.1,0.5,0.3];
+const TROCKEN_MM=0.1;   // mm Verdunstung je "Standardstunde" der Abtrocknungstabelle (trueber Herbsttag ~0,1 mm/h)
 function etStd(c){if(c.et!=null&&isFinite(c.et))return Math.max(0,c.et);const m=ET0_MON[new Date(c.s).getMonth()];return c.hell===undefined?m/24:c.hell?m/11:0;}
 // r1.09 (wie Wetter-App v5.91): 24 Stunden am Stueck ohne Regen setzen zurueck - aelterer Regen zaehlt nicht mehr
 function tagFaktoren(w,Z){const EH=1.5,BIS=72*36e5,FREI=24;let n=0,g=0,mm=0,mmw=0,ref=null,ev=0,evL=null,trocken=0;Z=Z||[];

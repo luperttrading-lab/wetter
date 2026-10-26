@@ -1246,7 +1246,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.94</span>
+      <span class="ver">v5.95</span>
     </div>
   </header>
 
@@ -5490,16 +5490,26 @@ async function rzLaden(){
 // v5.81: laeuft der Ersatz (MOSMIX), wird Open-Meteo schon nach 5 statt 30 Minuten wieder versucht
 function rzBereit(){if(!RASEN.laeuft&&(Date.now()-RASEN.t>(RASEN.SRC==="bs"?5:30)*6e4||RASEN.ort!==rzOrt()))rzLaden();return RASEN.Z.length>0&&RASEN.ort===rzOrt();}
 /* ---- Regeln je Stunde (wie rasentest.html) ---- */
+/* v5.95 (Nutzer, Norden 26.10.: "vor allem jetzt im Herbst, wo es wirklich schlecht abtrocknet"): ABTROCKNEN nach
+   VERDUNSTUNG statt nach Uhrstunden. Bis v5.94 zog jede trockene Stunde 1 ab (Sonne/Wind 2, Luftfeuchte >= Tau-Grenze
+   0,5) - eine Novembernacht trocknete so schnell wie ein Julimittag; Niesel bis 19 Uhr war um 22 Uhr "trocken".
+   Jetzt zieht jede Stunde ET0/RZ_TROCKEN_MM ab (FAO-56-Referenzverdunstung von Open-Meteo, ohne sie Monatsmittel bei
+   Tageslicht, rzEt). Die Tabelle td bleibt und meint jetzt "Standardstunden" a 0,1 mm: <0,5 mm Regen in 6 h -> 0,2 mm
+   Wasser auf dem Gras, <2 -> 0,3, <5 -> 0,5, darueber 0,8 (hohes Gras x1,5). Geeicht so, dass ein trueber Tag in
+   Fruehjahr/Herbst (ET0 ~0,1 mm/h) wie bisher 1 je Stunde abzieht; Sommersonne 0,4-0,6 mm/h trocknet 4-6-mal so schnell,
+   Herbstnacht 0,01 mm/h zehnmal langsamer. Schaetzwerte - nasse Blaetter verdunsten eher etwas MEHR als ET0 (kein
+   Spaltoeffnungswiderstand), das bleibt unberuecksichtigt. */
+const RZ_TROCKEN_MM=0.1;
 function rzBewerten(){
   const E=rzE(),Z=RASEN.Z,RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1);let need=0,boden=0;
   for(let i=0;i<Z.length;i++){const c=Z[i];let s6=0,s24=0;
     for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
+    const t=rzTeile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
+    const so=RASEN.SONNE[c.tag],hell=so?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=rzFeiertag(c.tag);c.hell=hell;
     if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
-    else if(need>0){c.z="nass";need=Math.max(0,need-(c.sun>=1800||c.wind>=15?2:c.rh>=RH?0.5:1));boden=Math.max(0,boden-1);}
+    else if(need>0){c.z="nass";need=Math.max(0,need-rzEt(c)/RZ_TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
     else if(c.rh>=RH)c.z="tau";else if(c.T<E.tmin)c.z="kalt";else c.z="trocken";
-    const t=rzTeile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
-    const so=RASEN.SONNE[c.tag],hell=so?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=rzFeiertag(c.tag);
     const pause=E.pause&&c.h>=E.pVon&&c.h<E.pBis,zeit=c.h>=E.von&&c.h+1<=E.bis&&!pause;
     c.frei=c.wd===0||!!ft;c.hell=hell;c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeit&&hell;
     c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":pause?"Mittagspause":!zeit?"außerhalb deiner Mähzeit":"";
