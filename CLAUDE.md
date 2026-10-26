@@ -2329,6 +2329,19 @@ Norden 13:00: Gras hoch -> Do 5.11. 9-13 (43,1), duenn Fr 6.11. (41,4), "Moeglic
 gemaeht -> Do 5.11. 8-13 (84,6). Regression v5.78 (om_v578) weiter Mi 28.10. 8-13. Mathematisch: ohne Deckel kann "sofort"
 (Abzug ab heute) nie einen SPAETEREN Tag waehlen als "faellig in n Tagen" (Abzug ab Tag n) - mit Deckel ging das. Rasen-App
 r1.11: dieselbe Aenderung in `empfehlen()` fuer "ueber der Zielhoehe" (vorher Deckel 40 %, Gleichstand 3 Punkte).
+v5.97 (Nutzer: "die 0 rechts, wenn kein Regen ist und es nur am Tau liegt, ist zu gering - vor allem, wenn man eine
+Alternative sucht, wenn man maehen MUSS"): NOTWERT fuer Tage ohne trockenes Fenster (`rzNotFenster`, `RZ_NOT`). Guete je
+erlaubter Stunde: trocken 1, zu kalt 0,6, Tau 0,5, Boden weich 0,5, noch nass 0,5 bis 0,25 nach dem Rest der Abtrocknung
+(`c.nw`, in rzBewerten gemerkt), Regen 0 (Fenster mit Regenstunde zaehlen nicht). Fenster von "Dauer" Stunden: 0,3 x
+mittlere Guete x (1 - Regenrisiko), kuerzer anteilig, gleich gute Folgestunden haengen sich an - hoechstens 30, echte Fenster
+liegen meist ueber 40. In der Leiste als Zahl im GESTRICHELTEN Kreis ohne Flaeche (`.rz-w.nw`), nur Regen bleibt 0 im vollen
+Kreis. NOTLOESUNG (`P.not` in rzPlanen): kommt das erste trockene Fenster erst 3 Tage nach dem Start (heute bei sofort/
+ueberfaellig, sonst Faelligkeitstag) oder gar nicht, der beste Notwert davor mal Abstandsabschlag; Text "Notfalls: Mi 28.10.,
+12-13 Uhr - kein Regen erwartet, aber noch nass vom Regen davor (gelb gestrichelt)", Kaestchen und Kreis gelb gestrichelt
+(`.not`), ohne Empfehlung in der Kachel eine Ansicht "NOTFALLS Mi 28.10. / 12-13 Uhr". Blase: "Notwert 15 - am wenigsten
+schlecht 12-13 Uhr ...". Geprueft mit echten Daten Norden 14:34 (Tau-Tage 14-15 statt 0, Empfehlungen unveraendert) und einer
+SIMULIERTEN nassen Woche (`om_nass.json`: Luftfeuchte 27.10.-5.11. +14 Punkte; `om_nass2.json`: alles ab 27.10. +25 = gar
+kein Fenster): Notfalls Mi 28.10., in der Kachel bei fehlendem Fenster. Rasen-App unveraendert (zeigt weiter 0).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

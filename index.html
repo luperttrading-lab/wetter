@@ -236,6 +236,11 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 .rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec,html.dunkel .rz-er>i.rec{box-shadow:0 0 0 2.5px #ffc21a,0 0 0 3px rgba(120,80,0,.5)}
 .rz-leg i.rec{box-shadow:0 0 0 2px #ffc21a}
 .rz-er>i.alt,html.dunkel .rz-er>i.alt{box-shadow:0 0 0 1.5px #ffc21a}.rz-w.alt,html.dunkel .rz-w.alt{box-shadow:0 0 0 1.5px #ffc21a}   /* v5.94: zweiter Tag */
+/* v5.97: Notwert (kein trockenes Fenster) im gestrichelten Kreis ohne Flaeche; Notloesung gelb gestrichelt, ausserhalb */
+.rz-w.nw,html.dunkel .rz-w.nw{background:transparent;box-sizing:border-box;border:1.5px dashed #98a2b3}
+.rz-w.nw.not,html.dunkel .rz-w.nw.not{border-color:#e0a800}
+.rz-er>i.not{outline:1.5px dashed #e0a800;outline-offset:1px}
+html.dunkel .rz-er>i.not{outline-color:#ffc21a}
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
 .rz-frei2{grid-column:2/-2;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
 html.dunkel .rz-frei2{background:#262d38}
@@ -1246,7 +1251,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.96</span>
+      <span class="ver">v5.97</span>
     </div>
   </header>
 
@@ -5510,6 +5515,7 @@ function rzBewerten(){
     else if(need>0){c.z="nass";need=Math.max(0,need-rzEt(c)/RZ_TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
     else if(c.rh>=RH)c.z="tau";else if(c.T<E.tmin)c.z="kalt";else c.z="trocken";
+    c.nw=need;
     const pause=E.pause&&c.h>=E.pVon&&c.h<E.pBis,zeit=c.h>=E.von&&c.h+1<=E.bis&&!pause;
     c.frei=c.wd===0||!!ft;c.hell=hell;c.erlaubt=!c.frei&&!!E.tage6[c.wd-1]&&zeit&&hell;
     c.grund=c.wd===0?"Sonntag":ft?ft:!E.tage6[c.wd-1]?"Tag abgewählt":!hell?"dunkel":pause?"Mittagspause":!zeit?"außerhalb deiner Mähzeit":"";
@@ -5542,6 +5548,32 @@ function rzFaellig(letzt){const E=rzE(),heute=rzTeile(Date.now()).tag;
     if(T==null){if(tag<=heute)continue;return {tag:null,sum,bisher,ende:tag};}
     q=Math.max(q,qn);sum+=Math.max(0,T-5);if(tag<=heute)bisher=sum;if(sum>=E.gd)return rzFrist({tag,sum,bisher,grob:q},letzt);}
   return {tag:null,sum,bisher,ende:rzTagPlus(letzt,401)};}
+/* v5.97 (Nutzer: "die 0 rechts, wenn kein Regen ist und es nur am Tau liegt, ist zu gering - wenn man maehen MUSS, die
+   beste Moeglichkeit trotz Wetter"): NOTWERT fuer Tage ohne trockenes Fenster. Jede erlaubte Stunde bekommt eine Guete:
+   trocken 1, zu kalt 0,6, Tau 0,5, Boden weich 0,5, noch nass 0,5 bis 0,25 (nach dem Rest der Abtrocknung, c.nw), Regen 0.
+   Ein Fenster von "Dauer" Stunden ohne Regenstunde zaehlt 0,3 x mittlere Guete x (1 - Regenrisiko), kuerzer anteilig -
+   hoechstens 30, damit ein Notwert nie wie ein guter Tag aussieht (echte Fenster liegen meist ueber 40). */
+const RZ_NOT={max:0.3,q:{trocken:1,kalt:0.6,tau:0.5,weich:0.5}};
+function rzNotQ(c){if(c.z==="regen")return 0;if(c.z==="nass")return 0.5-0.25*Math.min(1,(c.nw||0)/5);return RZ_NOT.q[c.z]!=null?RZ_NOT.q[c.z]:0;}
+function rzNotFenster(tag){const E=rzE(),jetzt=Date.now(),L=Math.max(1,E.dauer),runs=[];let cur=[],best=null;
+  for(const c of RASEN.Z){if(c.tag!==tag)continue;
+    if(c.erlaubt&&c.e>jetzt+5*6e4&&c.z!=="regen"&&(!cur.length||cur[cur.length-1].e===c.s))cur.push(c);
+    else{if(cur.length)runs.push(cur);cur=c.erlaubt&&c.e>jetzt+5*6e4&&c.z!=="regen"?[c]:[];}}
+  if(cur.length)runs.push(cur);
+  for(const r of runs){const n=Math.min(L,r.length);
+    for(let i=0;i+n<=r.length;i++){const ws=r.slice(i,i+n),q=ws.reduce((a,c)=>a+rzNotQ(c),0)/n,pp=Math.max(...ws.map(c=>c.pp||0)),
+        wert=RZ_NOT.max*q*(1-pp/100)*(n/L);
+      if(!best||wert>best.wert+1e-9)best={tag,s:Math.max(ws[0].s,jetzt),e:ws[n-1].e,wert,pp,q,z:ws.map(c=>c.z),r,j:i+n};}}
+  if(!best||best.wert<=0)return null;
+  // wie bei den echten Fenstern: gleich gute Folgestunden haengen sich an (Guete nicht schlechter, Regenrisiko hoechstens
+  // 3 Punkte hoeher)
+  for(let j=best.j;j<best.r.length;j++){const c=best.r[j];if(rzNotQ(c)<best.q-1e-9||(c.pp||0)>best.pp+3)break;best.e=c.e;best.z.push(c.z);}
+  delete best.r;delete best.j;return best;}
+/* Kurzbeschreibung eines Notfensters: "taunass", "nass vom Regen", "Boden weich", "kalt", "Regenrisiko 35 %" */
+function rzNotTxt(nf){const E=rzE(),t=[],z=new Set(nf.z);
+  if(z.has("tau"))t.push("taunass");if(z.has("nass"))t.push("noch nass vom Regen davor");if(z.has("weich"))t.push("Boden weich");if(z.has("kalt"))t.push("kalt");
+  if(nf.pp>E.risiko)return "Regenrisiko "+Math.round(nf.pp)+"\u202f%"+(t.length?", "+t.join(", "):"");
+  return "kein Regen erwartet"+(t.length?", aber "+t.join(", "):"");}
 /* Abschlag je Tag Abstand zum Termin (bzw. ab heute, wenn sofort): 5 % je Tag, ohne Deckel bei 40 % (v5.96) - erst
    ab 18 Tagen fest 10 %, damit der Wert nicht negativ wird (die Stunden reichen 15 Tage). */
 function rzAbschlag(ad){return Math.max(0.1,1-0.05*ad);}
@@ -5577,7 +5609,15 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   let alt=null;
   if(rec){const bt={};for(const w of kand){if(w.tag===rec.tag)continue;if(!bt[w.tag]||w.score>bt[w.tag].score)bt[w.tag]=w;}
     alt=Object.values(bt).filter(w=>w.score>=rec.score*0.94).sort((a,b)=>b.score-a.score||a.s-b.s)[0]||null;}
-  return {f,fruehMs,fristMs,W,rec,alt,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
+  // v5.97: NOTLOESUNG - kommt das erste trockene Fenster erst 3 Tage nach dem Start (heute, wenn sofort oder ueberfaellig;
+  // sonst der Faelligkeitstag) oder gar nicht, der beste Notwert davor (mal Abstandsabschlag wie bei der Empfehlung)
+  let not=null;
+  {const heute=rzTeile(jetzt).tag,start=f.sofort||f.tag<heute?heute:f.tag,erst=W.length?W[0].tag:null;
+    if(!erst||rzTageZw(start,erst)>=3){let bs=0;
+      for(let n=0;n<15;n++){const d=rzTagPlus(start,n);if(erst&&d>=erst)break;if(!rzMaehtag(d))continue;
+        const nf=rzNotFenster(d);if(!nf)continue;const sc=nf.wert*rzAbschlag(Math.abs(rzTageZw(f.tag,d)));
+        if(sc>bs+1e-9){bs=sc;not=Object.assign(nf,{score:sc});}}}}
+  return {f,fruehMs,fristMs,W,rec,alt,not,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
   if(!d)return (ende-r.e)/864e5<2?{txt:"Weiter reicht die Vorhersage nicht.",letzte:false}:{txt:"Danach bis "+rzTagTxt(rzTeile(ende-1).tag)+" kein trockenes Fenster.",letzte:true,bis:rzTeile(ende-1).tag};
   const l=(d.s-r.e)/864e5;
@@ -5633,6 +5673,8 @@ function rzKachel(){
   // v5.50 (Nutzer: "spaeter - heute spaeter oder irgendwann?"): das Datum, bis zu dem es sicher nicht faellig wird
   else if(P.spaet){const n=rzTageZw(heute,P.f.tag);alt.push({l:"Mähen",v:"~"+rzTagTxt(P.f.tag).slice(3),s:n>45?"Winterpause":"geschätzt"});}   // v5.51
   else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"nach "+rzTagTxt(rzTagPlus(P.f.ende,-1)).slice(3),s:"wächst kaum"});
+  // v5.97: ohne trockenes Fenster die Notloesung als eigene Ansicht
+  if(!P.rec&&P.not&&!P.spaet){const n=rzTageZw(heute,P.not.tag);alt.push({l:"Notfalls",v:n===0?"heute":n===1?"morgen":RZ_WT[rzWtag(P.not.tag)]+" "+rzTagTxt(P.not.tag).slice(3),s:rzHH(P.not.s)+"–"+rzHH(P.not.e)+" Uhr"});}
   // v5.81: im Ersatzbetrieb eine eigene Ansicht, damit man es schon auf der Startseite sieht
   if(RASEN.SRC==="bs")alt.push({l:"Rasen",v:"MOSMIX",s:"Ersatzdaten"});
   // v5.48: darf heute nicht (mehr) gemaeht werden, zaehlt nur die naechste Gelegenheit - kein "nass bis 17 Uhr"
@@ -5725,6 +5767,8 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
   else if(f.tag)z2="Kein trockenes Fenster in Sicht";
   else{z2="Nicht fällig bis "+rzTagTxt(rzTagPlus(f.ende,-1));z3="Bei der Kälte wächst der Rasen langsam.";}
   if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";
+  // v5.97: Notloesung, wenn das erste trockene Fenster weit weg ist oder keins kommt
+  if(P.not&&!P.spaet)z3+=(z3?" ":"")+"Notfalls: "+rzTagTxt(P.not.tag)+", "+rzHH(P.not.s)+"–"+rzHH(P.not.e)+" Uhr – "+rzNotTxt(P.not)+" (gelb gestrichelt).";
   return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"+(z3?'<div class="rz-z">'+z3+"</div>":"")+"</div>";
 }
 /* v5.70: Rechnung hinter der Zahl in der Leiste - Wertung = Sicherheit x Abstand x Laenge (wie rzPlanen).
@@ -5742,7 +5786,7 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
   let ws=(P.W||[]).filter(w=>w.tag===tag),risk=false;
   if(!ws.length){ws=fenster(true);if(!ws.length){ws=fenster(false);risk=ws.length>0;}
     ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.score=w.P*(f.tag?rzAbschlag(ad):.6)*(.9+.1*Math.min(1,lg-E.dauer));});}
-  if(!ws.length)return {tag,score:0,leer:true,frueh};
+  if(!ws.length)return {tag,score:0,leer:true,frueh,not:rzNotFenster(tag)};
   // v5.73: die Zahl zeigt das Wetter - also das Fenster mit dem besten Wetter des Tages (bei Gleichstand das fruehere)
   const w=ws.reduce((a,b)=>rzWetterWert(b)>rzWetterWert(a)+1e-9?b:a);
   return Object.assign({},w,{frueh:frueh&&!(P.W||[]).some(x=>x.tag===tag),risk});}
@@ -5797,9 +5841,13 @@ function rzTagFaktoren(w){const Z=RASEN.Z;let n=0,g=0,ref=null;
 function rzWetterWert(w){if(!w||w.leer)return 0;const E=rzE(),f=rzTagFaktoren(w);return w.P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}
 function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertung(P,tag),pz=v=>Math.round(v)+"\u202f%";
   const heute=rzTeile(Date.now()).tag;
-  if(w.leer){const rest=RASEN.Z.some(c=>c.tag===tag&&c.erlaubt&&c.e>Date.now()+5*6e4);
+  if(w.leer){const rest=RASEN.Z.some(c=>c.tag===tag&&c.erlaubt&&c.e>Date.now()+5*6e4),nf=w.not;
+    if(nf)return "<b>"+rzTagTxt(tag)+" · Notwert "+Math.round(100*nf.wert)+"</b> · kein trockenes Fenster von "+rzStd(E.dauer)
+      +". Am wenigsten schlecht "+rzHH(nf.s)+"–"+rzHH(nf.e)+" Uhr: "+rzNotTxt(nf)+" (Regenrisiko "+pz(nf.pp)+")"
+      +" · Notwerte gehen höchstens bis 30: Tau und weicher Boden zählen halb, nass vom Regen ein Viertel bis halb, Regen nichts"
+      +(P.not&&P.not.tag===tag?" · <b>Notlösung, wenn es sein muss</b>":"");
     return "<b>"+rzTagTxt(tag)+" · Wetter 0</b> · "+(!rest&&tag===heute?"für heute ist deine Mähzeit vorbei"
-      :"kein trockenes Fenster von "+rzStd(E.dauer)+" in deiner Mähzeit (nass, Tau, Regen oder zu kalt)");}
+      :"kein trockenes Fenster von "+rzStd(E.dauer)+" in deiner Mähzeit, nur Regen");}
   const lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null,ab=f.tag?Math.round(100*(1-rzAbschlag(w.ad))):40;
   const wo=f.sofort?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute":"heute")
     :n==null?"Termin nicht in Sicht":n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
@@ -5865,10 +5913,11 @@ function rzLeisteEinfach(P){
      Mittwoch"): je Tag die beste Wertung seiner Fenster (rzPlanen: Sicherheit x Abstand zum Termin x Laenge), x 100.
      Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
   const vrArt=rzVrArt();
-  const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(rzWetterWert(w)*100);   // v5.72: immer eine Zahl; v5.73: nur Wetter
+  // v5.97: ohne trockenes Fenster der Notwert (gestrichelter Kreis), Regen bleibt 0
+  const wZelle=tag=>{const w=rzTagWertung(P,tag),nw=w.leer&&w.not,z=nw?Math.round(100*w.not.wert):Math.round(rzWetterWert(w)*100);if(nw)da.add("rz-nw");
     let tr="";if(vrArt==="tropfen"&&w&&!w.leer&&rzTagFaktoren(w).fR<=0.97){da.add("rz-wt");
       tr='<svg class="rz-wt" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>';}
-    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":P.alt&&P.alt.tag===tag?" alt":"")+'" data-rzw="'+tag+'">'+z+tr+"</b>";};
+    return '<b class="rz-w'+(z>99?" w3":"")+(nw?" nw":"")+(P.rec&&P.rec.tag===tag?" rec":P.alt&&P.alt.tag===tag?" alt":P.not&&P.not.tag===tag?" not":"")+'" data-rzw="'+tag+'">'+z+tr+"</b>";};
   const da=new Set(),recW=P.rec?(P.W||[]).filter(w=>w.tag===P.rec.tag&&w.pp<=P.rec.pp+3):[];   // v5.77: alle gleich guten Fenster des Tages
   const altW=P.alt?(P.W||[]).filter(w=>w.tag===P.alt.tag&&w.pp<=P.alt.pp+3):[];
   let mehrAuf=false;
@@ -5885,9 +5934,9 @@ function rzLeisteEinfach(P){
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
       // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
       // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
-      const rec=recW.some(w=>c.s<w.e&&c.e>w.s),alt=!rec&&altW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
+      const rec=recW.some(w=>c.s<w.e&&c.e>w.s),alt=!rec&&altW.some(w=>c.s<w.e&&c.e>w.s),not=!rec&&!alt&&!!P.not&&c.s<P.not.e&&c.e>P.not.s,zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
       let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.5+0.45*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
-      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":alt?" alt":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":alt?" alt":not?" not":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   if(mehrAuf)h+="</div>";
   h+="</div>";
@@ -5901,6 +5950,7 @@ function rzLeisteEinfach(P){
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
       +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?'<i class="rz-gut rec" style="display:inline-block;width:12px;height:10px;vertical-align:-1px;margin:0 6px 0 3px"></i>gelber Rahmen = empfohlene Fenster'+(altW.length?", dünn = fast gleich gut":""):"")+"</span>":"")
       +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
+      +(da.has("rz-nw")||P.not?'<span class="rz-legun">'+(da.has("rz-nw")?"Zahl im gestrichelten Kreis = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)":"")+(P.not?(da.has("rz-nw")?" · ":"")+"gelb gestrichelt = Notlösung, wenn es sein muss":"")+"</span>":"")
       +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet</span>':"")
       +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
       +'<div class="rz-vrt">Vorregen (Test): '+[["verlauf","Verlauf"],["tropfen","Tropfen"],["aus","aus"]].map(([v,t])=>'<button type="button" data-rzk="vr:'+v+'"'+(vrArt===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>";
