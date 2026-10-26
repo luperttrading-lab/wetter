@@ -2263,6 +2263,13 @@ Verdunstung x3,5 als Hochsommer-Annahme: heute 87, Di 98 (x0,98, Verlauf nur noc
 der Dienstag also markiert - physikalisch richtig, der Boden ist zwei Tage nach 18 mm bei ~1,2 mm Verdunstung/Tag noch
 feucht; im Sommer waere er frei. Rasen-App: wetter.js holt et0 stuendlich, planer.js tagFaktoren gleich (eh 1,5 mm, 12 %).
 Test: test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt, Planer direkt (18 mm, 1,43 mm verdunstet) x0,893.
+v5.89 / Rasen-App r1.08 (Nutzer: "bei den Usern wird nicht verstanden: 'Heute gemaeht' ungeklickt liest sich wie 'heute
+ist gemaeht'"): Knopf heisst jetzt als FRAGE "Heute gemaeht?"; gesetzt bleibt das gruene Feld "✓ Heute gemaeht" mit x -
+Fragezeichen gegen Haken trennt Aufforderung und Zustand. Rasen-App: "Heute gemaeht?" bzw. ohne Eintrag "Wann gemaeht?"
+(vorher "Zuletzt gemaeht", las sich wie die Beschriftung eines Werts), Hinweistexte nennen den neuen Knopf. FALLE dabei: ein
+`// Kommentar` HINTER einem Ausdruck mitten in einer Codezeile kommentiert den Rest der Zeile aus - hier den Knopf
+"Einstellungen" und das schliessende </div>; der Syntaxcheck merkte es nicht (ASI), erst der Screenshot (Fenster in zwei
+Spalten). Kommentare deshalb immer auf eine eigene Zeile. Geprueft 393/320 pt, hell/dunkel, vorher und nachher je 42 px hoch.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -1239,7 +1239,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.88</span>
+      <span class="ver">v5.89</span>
     </div>
   </header>
 
@@ -5659,8 +5659,9 @@ function rzGrossHtml(o){o=o||{};
   const fr=rzHeuteFrei();
   h+='<div class="rz-h">Mähen'+(fr?"<span>· heute "+(fr==="vorbei"?"vorbei":"nicht – "+fr)+"</span>":"")+"</div>";
   const gem=E.letzt===heute;   // v5.47: gruenes Feld mit x statt Knopf
+  // v5.89 (Nutzer: "Heute gemaeht" ohne Haken las sich wie "ist heute gemaeht") - als Frage "Heute gemaeht?", gesetzt "✓ Heute gemaeht"
   h+='<div class="loc-row">'+(gem?'<span class="rz-ok">\u2713 Heute gemäht<button type="button" data-rzk="zurueck" aria-label="Zurücknehmen">\u00d7</button></span>'
-      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
+      :'<button type="button" class="loc-btn" data-rzk="heute">Heute gemäht?</button>')+'<button type="button" class="loc-btn" data-rzk="einst">'+(o.einst?"Einstellungen zu":"Einstellungen")+"</button></div>";
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte
