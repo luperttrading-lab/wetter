@@ -1214,7 +1214,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.77</span>
+      <span class="ver">v5.78</span>
     </div>
   </header>
 
@@ -5500,7 +5500,12 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   // ZUR FAELLIGKEIT statt je Tag ab jetzt. Vorher gewann immer der frueheste Tag, den "Fruehestens vor Faelligkeit"
   // zuliess; jetzt der Faelligkeitstag selbst, frueher nur, wenn er schlechter ist (Regenrisiko). Ist der Rasen schon
   // faellig (oder sofort), waechst der Abstand mit jedem Tag - dann gewinnt wie bisher das frueheste gute Fenster.
-  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag)),lg=(w.e-w.s)/36e5;w.ad=ad;w.score=w.P*Math.max(.6,1-.05*ad)*(.9+.1*Math.min(1,lg-E.dauer));});
+  // v5.78 (Nutzer, Norden 26.10.: "nicht den hoechsten Wert 91 nehmen statt den frueheren, wo es noch nasser ist?"): die
+  // Wahl rechnet mit der TAGESZAHL (rzWetterWert: trocken-Chance x Laenge x Anteil guter Stunden x Vorregen) statt nur mit
+  // der trocken-Chance des Fensters - ein Tag mit zwei trockenen Stunden ist zerbrechlich, einer mit sieben haelt eine
+  // verschobene Vorhersage aus. Dazu weiter der Abschlag 5 % je Tag Abstand (hoechstens 40 %). Di 63 x 0,95 = 60 gegen
+  // Mi 91 x 0,90 = 82 -> Mittwoch. Die Tie-Regel (3 Punkte -> naeher am Termin, dann frueher) bleibt.
+  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag));w.ad=ad;w.score=rzWetterWert(w)*Math.max(.6,1-.05*ad);});
   // v5.51: unter fast gleich guten Fenstern (bis 3 Punkte unter dem besten) das FRUEHESTE - 5 % statt 7 %
   // Regenrisiko ist Rauschen und schob "morgen 9-13" hinter "morgen 15-17" (W ist zeitlich sortiert)
   // v5.70: auch "sofort" (Gras hoch / Datum unbekannt) waehlt nach der Wertung - Abstand = Tage ab heute; vorher das
@@ -5689,7 +5694,8 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
     +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen in den 24 h davor: "+x(tf.fR):"kein Regen in den 24 h davor")
     +(rec?" · <b>empfohlen</b>":w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>"
       :w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>"
-      :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")":"");}
+      :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")"
+        +(w.score!=null&&P.rec.score!=null?": Wahlwert "+Math.round(100*w.score)+" gegen "+Math.round(100*P.rec.score):""):"");}
 function rzMitAlt(fn){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
   if(E.letzt===heute){const v=E.vor;E.letzt=v&&v.letzt!==E.letzt?v.letzt:null;E.hoch=!!(v&&v.hoch);}else{E.letzt=heute;E.hoch=false;}
   try{return fn(E,heute);}finally{E.letzt=alt.letzt;E.hoch=alt.hoch;}}
