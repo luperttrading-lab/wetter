@@ -1227,7 +1227,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.83</span>
+      <span class="ver">v5.84</span>
     </div>
   </header>
 
@@ -5586,7 +5586,7 @@ function rzKachel(){
     if(J.z==="weich")a.v="weich";}
   const P=rzPlanen(Date.now()),alt=[];
   if(P.rec){const n=rzTageZw(heute,P.rec.tag),tag=n===0?"heute":n===1?"morgen":RZ_WT[rzWtag(P.rec.tag)]+" "+rzTagTxt(P.rec.tag).slice(3);
-    alt.push({l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});
+    alt.push(n===0&&P.rec.s<=Date.now()+5*6e4?{l:"Mähen",v:"jetzt",s:"bis "+rzHH(P.rec.e)+" Uhr"}:{l:"Mähen",v:tag,s:rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr"});   // v5.84
     const nt=rzNach(P);if(nt.letzte&&nt.bis)alt.push({l:"Danach",v:"nass",s:"bis "+RZ_WT[rzWtag(nt.bis)]+" "+rzTagTxt(nt.bis).slice(3)});}
   // v5.50 (Nutzer: "spaeter - heute spaeter oder irgendwann?"): das Datum, bis zu dem es sicher nicht faellig wird
   else if(P.spaet){const n=rzTageZw(heute,P.f.tag);alt.push({l:"Mähen",v:"~"+rzTagTxt(P.f.tag).slice(3),s:n>45?"Winterpause":"geschätzt"});}   // v5.51
@@ -5670,7 +5670,9 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
     z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(f.eig?" (statt "+RZ_WT[rzWtag(f.eig)]+")":nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
   else z1="Gemäht "+tagK(E.letzt)+" · seither gewachsen "+pct();
   if(P.rec){const nt=rzNach(P),n=rzTageZw(heute,P.rec.tag);
-    z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr";
+    // v5.84: beginnt das Fenster jetzt, steht "Jetzt bis 13 Uhr" statt "Heute, 09:46–13 Uhr"
+    const sofortJ=n===0&&P.rec.s<=Date.now()+5*6e4;
+    z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(sofortJ?"Jetzt bis "+rzHH(P.rec.e)+" Uhr":(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr");
     z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt);}
   else if(P.spaet){const n=rzTageZw(heute,f.tag),bis=RASEN.TAGT_BIS;
     z2="Fällig etwa "+rzTagTxt(f.tag)+(f.tag.slice(0,4)!==heute.slice(0,4)?f.tag.slice(0,4):"")+(n>1?" (in "+n+" Tagen)":"");
@@ -5707,10 +5709,17 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
    trocken-Chance des Fensters (x Laengenbonus wie bisher) x Anteil der guten Stunden an den Maehstunden des Tages
    (0,5 + 0,5 x Anteil: halbe nasse Maehzeit = x0,75) x Vorregen (Regen in den 24 h vor dem Fenster, bis -15 %:
    1 mm x0,96, 3 mm x0,91, 10 mm x0,85). Die EMPFEHLUNG (rzPlanen) rechnet weiter mit der trocken-Chance. */
-function rzTagFaktoren(w){const Z=RASEN.Z;let n=0,g=0,mm=0;
-  for(const c of Z){if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut)g++;}if(c.e>w.s-24*36e5&&c.e<=w.s)mm+=c.p||0;}
-  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mm)/Math.log(11));
-  return {n,g,fA,mm,fR};}
+/* v5.84 (Nutzer, Erlental 09:42: "Naechste Chance heute 15-17 Uhr - ich koennte doch jetzt schon maehen"): der Vorregen
+   zaehlte die 24 h vor FENSTERBEGINN mit harter Kante - fuer 09:44 fiel der Regen von gestern 09:44-15 Uhr noch hinein
+   (2,2 mm, x0,93 -> 86), fuer 15 Uhr nicht mehr (x1,00 -> 93), also gewann der Nachmittag. Jetzt EIN Bezugspunkt je Tag
+   (die erste gute Stunde des Tages, sonst der Fensterbeginn) - alle Fenster eines Tages haben denselben Faktor -, und
+   jede Regenstunde zaehlt gleitend weniger, je laenger sie zurueckliegt (direkt davor voll, vor 24 h nicht mehr). */
+function rzTagFaktoren(w){const Z=RASEN.Z,T=24*36e5;let n=0,g=0,mm=0,mmw=0,ref=null;
+  for(const c of Z)if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut){g++;if(ref==null||c.s<ref)ref=c.s;}}
+  if(ref==null)ref=w.s;
+  for(const c of Z){const alt=ref-c.e;if(alt>=0&&alt<T&&c.p){mm+=c.p;mmw+=c.p*(1-alt/T);}}
+  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mmw)/Math.log(11));
+  return {n,g,fA,mm,mmw,ref,fR};}
 function rzWetterWert(w){if(!w||w.leer)return 0;const E=rzE(),f=rzTagFaktoren(w);return w.P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}
 function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertung(P,tag),pz=v=>Math.round(v)+"\u202f%";
   const heute=rzTeile(Date.now()).tag;
@@ -5725,7 +5734,7 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
   return "<b>"+rzTagTxt(tag)+" "+rzHH(w.s)+"–"+rzHH(w.e)+" Uhr · Wetter "+Math.round(rzWetterWert(w)*100)+"</b> · trocken mit "+pz(100*w.P)+" (Regenrisiko "+pz(w.pp)+")"
     +" · "+(kurz?"Fenster nur "+rzStd(lg)+": −"+pz(kurz):"Fenster lang genug")
     +" · "+tf.g+" von "+tf.n+" Mähstunden gut: "+x(tf.fA)
-    +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen in den 24 h davor: "+x(tf.fR):"kein Regen in den 24 h davor")
+    +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen in den 24 h vor "+rzHH(tf.ref)+" Uhr (je älter, desto weniger): "+x(tf.fR):"kein Regen in den 24 h vor "+rzHH(tf.ref)+" Uhr")
     +(rec?" · <b>empfohlen</b>":w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>"
       :w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>"
       :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")"

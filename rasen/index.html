@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Rasen · Mähplaner</title>
 <style>
-/* Rasen-App r1.04 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
+/* Rasen-App r1.05 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --ink:#17202e;--muted:#5c6b80;--faint:#5e6c81;   /* --faint 5,3:1 auf Weiss, 4,7:1 auf dem Seitengrund (bis r1.00 #9aa7b8 = 2,4:1) */
@@ -224,7 +224,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 <div id="app">
   <header>
     <div class="place" id="kopf"><span id="kopfName">Mein Rasen</span><span class="pf" id="kopfPf" hidden>▾</span><small id="kopfSub">…</small></div>
-    <div class="hr"><span class="ver">r1.04</span>
+    <div class="hr"><span class="ver">r1.05</span>
       <button type="button" class="act-btn" id="btnEinst" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
@@ -276,15 +276,15 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 
 <div class="loc-ovl hidden" id="ovl"><div class="loc-box" role="dialog" aria-modal="true" id="ovlBox"></div></div>
 
-<script src="modell.js?v=1.04"></script>
-<script src="wetter.js?v=1.04"></script>
-<script src="planer.js?v=1.04"></script>
+<script src="modell.js?v=1.05"></script>
+<script src="wetter.js?v=1.05"></script>
+<script src="planer.js?v=1.05"></script>
 <script>
 "use strict";
-/* ===================== Rasen-App r1.04 – Oberflaeche =====================
+/* ===================== Rasen-App r1.05 – Oberflaeche =====================
    Bindet RasenModell (Wachstum, Termine, Eichung), RasenWetter (Open-Meteo) und RasenPlaner
    (Stundenregeln "wann ist Maehen moeglich") zusammen. Speicher: localStorage "rasenApp". */
-const VERSION="r1.04",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
+const VERSION="r1.05",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
 const el=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fin=x=>typeof x==="number"&&Number.isFinite(x);
@@ -619,7 +619,7 @@ function mfText(tag){
   if(t.grund)s+=" · "+esc(tagGrund(tag,t));
   if(fin(t.wert)&&t.wert>0){const k=t.faktoren,x=v=>"×"+v.toFixed(2).replace(".",",");
     s+="<br>Wetterwert "+t.wert+": Chance auf trocken (Grenze "+f.einst.risiko+"\u202f% Regenrisiko) × Bonus für ein längeres Fenster"
-      +(k?" · "+k.g+" von "+k.n+" Mähstunden gut: "+x(k.fA)+" · "+(k.mm>=0.1?k.mm.toFixed(1).replace(".",",")+"\u202fmm Regen in den 24\u202fh davor: "+x(k.fR):"kein Regen in den 24\u202fh davor"):"")+".";}
+      +(k?" · "+k.g+" von "+k.n+" Mähstunden gut: "+x(k.fA)+" · "+(k.mm>=0.1?k.mm.toFixed(1).replace(".",",")+"\u202fmm Regen in den 24\u202fh vor dem ersten guten Fenster des Tages (je älter, desto weniger): "+x(k.fR):"kein Regen in den 24\u202fh davor"):"")+".";}
   if(D.emp&&D.emp.datum===tag)s+="<br><b>Empfohlen</b> – "+esc(D.emp.grund)+".";
   else if(D.emp&&D.emp.datum&&fin(t.wert)&&t.wert>(D.emp.wert||0))s+="<br>Empfohlen ist "+esc(Z.tagTxt(D.emp.datum))+" – "+(D.term&&D.term.ueberfaellig?"über der Zielhöhe: jeder Tag Warten kostet 5 %.":"für die Wahl zählt auch, wann der Rasen die Höhe erreicht.");
   return s;
