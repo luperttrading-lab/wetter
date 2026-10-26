@@ -195,6 +195,9 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 .rz-h span{text-transform:none;letter-spacing:0;font-weight:600;font-size:11.5px}.rz-h .rz-hint{margin-left:auto;font-size:10.5px}.rz-h .rz-hint span{font-size:inherit}
 .rz-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}.rz-kopf .kzg-titel{margin:0}
 .rz-stand{font-size:12px;color:var(--muted);text-align:right}
+.rz-ersatz{margin:6px 0 8px;padding:8px 10px;border-radius:11px;background:#fff3d6;border:1.5px solid #e9b949;color:#5a3f0b;font-size:12.5px;line-height:1.42}
+.rz-ersatz b{font-weight:800}.rz-ersatz button{display:block;margin-top:6px;padding:5px 10px;border-radius:9px;border:1px solid #d29a2a;background:#fff;color:#5a3f0b;font:inherit;font-weight:700;cursor:pointer}
+.rz-ersatz button:disabled{opacity:.6}
 .rz .loc-row{display:grid;grid-template-columns:1.12fr 1fr;gap:8px;margin-top:0}
 .rz .loc-row .loc-btn,.rz-ok{min-height:42px;min-width:0;box-sizing:border-box;padding-top:7px;padding-bottom:7px}
 @media (max-width:359px){.rz .loc-row{grid-template-columns:1fr}.rz-hw{display:none}}
@@ -271,6 +274,7 @@ html.dunkel .rz-det{background:#e3eaf3;color:#111a24}html.dunkel .rz-er>i.sel{ou
 .rz-seg button.an,.rz-tage button.an{background:#2563c9;border-color:#2563c9;color:#fff}
 .rz-ok{white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;padding:6px 5px 6px 8px;border-radius:11px;background:#e3f3e6;border:1.5px solid #9fd3a8;color:#1e6b33}
 .rz-ok button{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:0;padding:0;background:rgba(30,107,51,.14);color:inherit;font-size:18px;line-height:28px;font-weight:700;cursor:pointer}
+html.dunkel .rz-ersatz{background:#33270f;border-color:#a77a24;color:#f2d79c}html.dunkel .rz-ersatz button{background:#241b0a;border-color:#a77a24;color:#f2d79c}
 html.dunkel .rz-ok{background:#173322;border-color:#2f6b40;color:#8fe0a8}
 html.dunkel .rz-ok button{background:rgba(143,224,168,.16)}
 /* v5.45: das Fenster ist eine .loc-box - deren Eingabefeld-Stil (volle Breite, appearance:none, 12-px-Labels)
@@ -1222,7 +1226,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.80</span>
+      <span class="ver">v5.81</span>
     </div>
   </header>
 
@@ -5450,8 +5454,8 @@ function rzOrt(){return LOC.lat.toFixed(3)+","+LOC.lon.toFixed(3);}
 async function rzLaden(){
   if(RASEN.laeuft)return;RASEN.laeuft=true;RASEN.MESS=null;RASEN.RSTEPS={};
   try{
-    try{await rzOpenMeteo();RASEN.SRC="om";try{RASEN.MESS=await rzMessungen();}catch(e){}}
-    catch(e){await rzBrightSky();RASEN.SRC="bs";}
+    try{await rzOpenMeteo();RASEN.SRC="om";RASEN.omFehler="";try{RASEN.MESS=await rzMessungen();}catch(e){}}
+    catch(e){RASEN.omFehler=(e&&e.message)||"";RASEN.omT=Date.now();await rzBrightSky();RASEN.SRC="bs";}
     try{await rzRadar();}catch(e){}
     try{await rzTagesTemp();}catch(e){RASEN.TAGT={};RASEN.TAGT_BIS="";}
     if(RASEN.ort!==rzOrt())RASEN.KLIMA=null;
@@ -5462,7 +5466,8 @@ async function rzLaden(){
   if(typeof kzRender==="function")kzRender();
   rzGrossNeu();
 }
-function rzBereit(){if(!RASEN.laeuft&&(Date.now()-RASEN.t>30*6e4||RASEN.ort!==rzOrt()))rzLaden();return RASEN.Z.length>0&&RASEN.ort===rzOrt();}
+// v5.81: laeuft der Ersatz (MOSMIX), wird Open-Meteo schon nach 5 statt 30 Minuten wieder versucht
+function rzBereit(){if(!RASEN.laeuft&&(Date.now()-RASEN.t>(RASEN.SRC==="bs"?5:30)*6e4||RASEN.ort!==rzOrt()))rzLaden();return RASEN.Z.length>0&&RASEN.ort===rzOrt();}
 /* ---- Regeln je Stunde (wie rasentest.html) ---- */
 function rzBewerten(){
   const E=rzE(),Z=RASEN.Z,RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1);let need=0,boden=0;
@@ -5585,6 +5590,8 @@ function rzKachel(){
   // v5.50 (Nutzer: "spaeter - heute spaeter oder irgendwann?"): das Datum, bis zu dem es sicher nicht faellig wird
   else if(P.spaet){const n=rzTageZw(heute,P.f.tag);alt.push({l:"Mähen",v:"~"+rzTagTxt(P.f.tag).slice(3),s:n>45?"Winterpause":"geschätzt"});}   // v5.51
   else alt.push(P.f.tag?{l:"Mähen",v:"–",s:"kein Fenster"}:{l:"Mähen",v:"nach "+rzTagTxt(rzTagPlus(P.f.ende,-1)).slice(3),s:"wächst kaum"});
+  // v5.81: im Ersatzbetrieb eine eigene Ansicht, damit man es schon auf der Startseite sieht
+  if(RASEN.SRC==="bs")alt.push({l:"Rasen",v:"MOSMIX",s:"Ersatzdaten"});
   // v5.48: darf heute nicht (mehr) gemaeht werden, zaehlt nur die naechste Gelegenheit - kein "nass bis 17 Uhr"
   if(rzHeuteFrei())return Object.assign({},alt[0],{alt:alt.slice(1)});
   a.alt=alt;return a;}
@@ -5604,9 +5611,20 @@ function rzAbschnitt(){const box=el("rasenBox");if(!box||klappZu("rasenSec"))ret
 function rzGrossNeu(){const ov=el("kzGrossOv"),inn=el("kzGrossIn");
   if(ov&&!ov.classList.contains("hidden")&&inn&&inn.querySelector("[data-rz]"))rzZeichne(inn);
   rzAbschnitt();}
+/* v5.81 (Nutzer, 26.10.: zwei Bilder eine Stunde auseinander "sehen komplett anders aus" - 06:59 war Open-Meteo nicht
+   erreichbar, die App rechnete still mit MOSMIX, das stand nur in der Quellenzeile ganz unten): der Ersatz steht jetzt
+   als Kasten direkt unter dem Kopf, mit Grund und Knopf fuer einen neuen Versuch. Werte NICHT blasser - v5.74 hat
+   gezeigt, dass Abblassen die Farben verfaelscht (Beige -> Khaki, Blau -> Stahlblau). */
+function rzOmGrund(m){m=String(m||"");return m==="timeout"?"keine Antwort in 15 s":/429/.test(m)?"Tageslimit, HTTP\u00a0429"
+  :/^HTTP/.test(m)?"Fehler "+m.replace("HTTP ","HTTP\u00a0"):/fetch|network|load/i.test(m)?"keine Verbindung":m||"nicht erreichbar";}
+function rzErsatzHtml(){if(RASEN.SRC!=="bs")return "";
+  return '<div class="rz-ersatz"><b>Ersatz: DWD-MOSMIX</b> – Open-Meteo um '+rzHH(RASEN.omT||RASEN.t)+" nicht erreichbar ("+rzOmGrund(RASEN.omFehler)
+    +"). Ab Tag 3 weichen die Modelle oft stark ab."
+    +'<button type="button" data-rzk="omneu">Open-Meteo erneut versuchen</button></div>';}
 function rzGrossHtml(o){o=o||{};
   const E=rzE();rzBewerten();const J=rzJetzt(),P=rzPlanen(Date.now()),jetzt=Date.now(),heute=rzTeile(jetzt).tag;
   let h='<div data-rz="1" class="rz"><div class="rz-kopf">'+(o.abschnitt?"":'<span class="kzg-titel">Rasen</span>')+'<span class="rz-stand">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</span></div>";
+  h+=rzErsatzHtml();
   // v5.73 (Nutzer: "die Grafik etwas nach oben schieben"): oben nur der Zustand, die Begruendung (Regen, Abtrocknen,
   // Radar) steht unter der Leiste als "Gras jetzt"
   let gras="";
@@ -5826,6 +5844,7 @@ function rzGrossBinden(root){
     if(b.dataset.rzk==="heute"){RASEN.E.vor={letzt:RASEN.E.letzt,hoch:RASEN.E.hoch};RASEN.E.letzt=rzTeile(Date.now()).tag;RASEN.E.hoch=false;neu();}
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
+    else if(b.dataset.rzk==="omneu"){if(RASEN.laeuft)return;b.disabled=true;b.textContent="lädt …";RASEN.t=0;rzLaden();}
     else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
     else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}
     else if(b.dataset.rzs){const c=RASEN.Z.find(x=>x.s===+b.dataset.rzs),d=root.querySelector("#rzDet");if(!c||!d)return;
