@@ -1,15 +1,15 @@
 {
- "stand": "2026-10-24",
+ "stand": "2026-10-25",
  "waechter": {
   "stationen": 34,
   "breite": {
    "steigung": 0.0062,
    "fehler": 0.0093,
-   "t": 0.66
+   "t": 0.67
   },
   "hoehe": {
-   "steigung": 0.0159,
-   "fehler": 0.0379,
+   "steigung": 0.0161,
+   "fehler": 0.0378,
    "t": 0.42
   },
   "mittel": 0.973,
@@ -52,7 +52,7 @@
    "streuung": 0.04,
    "klare_tage": 12,
    "teiltage": 0,
-   "teiltage_verworfen": 5,
+   "teiltage_verworfen": 6,
    "von": "2026-09-06",
    "bis": "2026-10-19"
   },
@@ -76,7 +76,7 @@
    "streuung": 0.05,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 8,
+   "teiltage_verworfen": 9,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
@@ -103,18 +103,6 @@
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
    "bis": "2026-10-21"
-  },
-  "Giessen-Wettenberg": {
-   "faktor": 1.055,
-   "roh": 1.056,
-   "tage": 23,
-   "vorlaeufig": false,
-   "streuung": 0.048,
-   "klare_tage": 11,
-   "teiltage": 12,
-   "teiltage_verworfen": 0,
-   "von": "2026-09-05",
-   "bis": "2026-10-20"
   },
   "Goerlitz": {
    "faktor": 0.944,
@@ -220,7 +208,7 @@
    "streuung": 0.04,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 8,
+   "teiltage_verworfen": 9,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
