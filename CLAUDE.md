@@ -2375,6 +2375,21 @@ am Geraet gemessen. Abstand Datum -> erstes Kaestchen jetzt >= 5,4 px (auch mit 
 getBoundingClientRect statt gerundetem offsetWidth) - bei 393/375 pt bleiben die Zahlen, bei 320 pt (10,6 px) nicht.
 (3) Vergangene Stunden NICHT mehr abgeblasst (`.rz-vorbei` ohne opacity, seit v5.58 waren es .3) und zaehlen fuer die
 Legende mit.
+v6.02 (Nutzer: "Verlauf" auf die Frage nach der Vorregen-Anzeige; "die Punkte jetzt abarbeiten"): (1) VORREGEN
+entschieden - der Verlauf bleibt, der Gegenvorschlag Tropfen am Wert-Kreis (`.rz-wt`), der Testumschalter (`.rz-vrt`,
+`rzVrArt`, Klick `vr:`) und seine Legendenzeile sind entfernt, ein gespeichertes `rz_vr` wird beim Start geloescht.
+(2) TAU ALS WASSERMENGE (`RZ_TAU` {rate 0,02 mm/h, max 0,2 mm, hohes Gras x1,5, nass ab 0,005 mm}, in `rzBewerten`
+Speicher `dw` = `c.dw`): ab der Grenze "Tau ab Luftfeuchte" kommen 0,02 mm je Stunde dazu, jede Stunde verdunstet ET0
+(`rzEt`) - auch bei hoher Luftfeuchte -, Regen leert den Speicher (dann zaehlt der Regenvorrat); taunass ist die Stunde,
+wenn zur Stundenmitte noch >= 0,005 mm liegen. Bis v6.01 war jede Stunde ab 90 % (hohes Gras 85 %) "Tau" und darunter
+sofort trocken. Zahlen per Websuche: Taunaechte auf Gras typisch 0,1-0,2 mm (HESS 23, 1179, 2019: 0,14 +- 0,12 mm je
+Nacht), hoechste gemessene Rate auf Weide 0,032 mm/h; Blattwasser verdunstet etwa mit ET0 (Interzeption in MIKE SHE).
+Vergleich alt/neu mit echten Daten (`v602cmp.py`, Norden 14:34, Erlental 10:00): morgens Tau 1-2 Stunden laenger (Oktober/
+November bis ~11-12 Uhr), dafuer fallen "Tau"-Stunden mitten am Tag weg, die nur an der 90-%-Grenze hingen (Norden 13.10.
+".tt..t" -> trocken); hohes Gras Norden Sa 31.10. vorher ganz Tau (85-89 % den ganzen Tag), jetzt ab 13 Uhr frei.
+Empfehlungen verschieben sich teils (Erlental heute gemaeht: Mo 2.11. 10-13 -> 12-13; Gras hoch: Sa 31.10. 9-13 -> Di
+27.10. 15-17). Notwert: Tau-Guete nach der Menge 0,75 (fast weg) bis 0,5 (voller Speicher). Blase einer Tau-Zelle nennt
+die Menge ("Tau, noch 0,13 mm auf den Halmen"). Nicht am Rasen geprueft - Rate und Deckel sind Schaetzwerte.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
