@@ -107,10 +107,15 @@ function bewerten(stunden,einst,sonneMap,tz){
    Tagesanteil = 0,5 + 0,5 x (gute Stunden / Maehstunden des Tages) - halbe nasse Maehzeit = x0,75;
    Vorregen = Regen in den 24 h vor dem Fenster, bis -15 % (1 mm x0,96, 3 mm x0,91, 10 mm x0,85).
    Ohne Stundenliste Z (alte Aufrufe) zaehlen nur Chance und Laenge. */
-function tagFaktoren(w,Z){let n=0,g=0,mm=0;
-  for(const c of Z||[]){if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut)g++;}if(c.e>w.s-24*36e5&&c.e<=w.s)mm+=c.p||0;}
-  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mm)/Math.log(11));
-  return {n,g,fA,mm,fR};}
+/* r1.05 (wie Wetter-App v5.84): Vorregen mit EINEM Bezugspunkt je Tag (erste gute Stunde, sonst Fensterbeginn), jede
+   Regenstunde gleitend gewichtet (direkt davor 1, vor 24 h 0) - vorher die 24 h vor Fensterbeginn mit harter Kante, dann
+   gewann am Tag nach Regen der Nachmittag gegen den Vormittag, nur weil der Regen von gestern frueh herausfiel. */
+function tagFaktoren(w,Z){const T=24*36e5;let n=0,g=0,mm=0,mmw=0,ref=null;
+  for(const c of Z||[])if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut){g++;if(ref==null||c.s<ref)ref=c.s;}}
+  if(ref==null)ref=w.s;
+  for(const c of Z||[]){const alt=ref-c.e;if(alt>=0&&alt<T&&c.p){mm+=c.p;mmw+=c.p*(1-alt/T);}}
+  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mmw)/Math.log(11));
+  return {n,g,fA,mm,mmw,ref,fR};}
 function wetterWert(w,einst,Z){if(!w||w.leer)return 0;const E=einstVoll(einst);const P=w.P!=null?w.P:1-(w.pp||0)/100,f=tagFaktoren(w,Z);
   return P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}
 

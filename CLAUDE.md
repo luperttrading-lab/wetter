@@ -2204,6 +2204,17 @@ Tage dunkel" (v5.62). Spaetere Tage zeigen ihre zusaetzlich dunklen Stunden nur 
 heute dunkel 17-19, irgendein Tag 16-19 -> Balken 17-19; Maehzeit ab 7: heute 7 dunkel -> Morgenfeld nur ueber 7 (ohne
 Schrift, eine Spalte zu schmal, v5.68). Fruehjahrsfall nicht mit Daten geprueft, die Regel ist dieselbe (nur heute zaehlt).
 Nebenbei (Nutzer: "unten im Abschnitt auch die sechs Tage ausblenden"): ist seit v5.82 so, beide Ansichten teilen rz_woche2.
+v5.84 / Rasen-App r1.05 (Nutzer, Erlental 09:42: "Naechste Chance heute 15-17 Uhr - ich koennte doch jetzt schon
+maehen"): FEHLER im Vorregen-Faktor (v5.76). Er zaehlte den Regen der 24 h vor FENSTERBEGINN mit harter Kante: fuer
+09:44 fiel der Regen von gestern 09:44-15 Uhr noch hinein (2,2 mm, x0,927 -> Wert 86), fuer 15 Uhr nicht mehr (x1,00 ->
+93) - so gewann der Nachmittag, obwohl beide Fenster trocken waren (echte Daten nachgerechnet). Jetzt (`rzTagFaktoren`,
+planer.js `tagFaktoren`): EIN Bezugspunkt je Tag = erste gute Stunde des Tages (sonst Fensterbeginn), alle Fenster eines
+Tages haben denselben Faktor; jede Regenstunde gleitend gewichtet 1 - Alter/24 h (direkt davor voll, vor 24 h null), statt
+Kante. Erlental danach: beide Fenster heute x0,992 (gewichtet 0,13 mm) -> Gleichstand -> das fruehere: "Naechste Chance:
+Jetzt bis 13 Uhr". NEU dabei: beginnt das empfohlene Fenster jetzt (<= 5 min), steht "Jetzt bis 13 Uhr" statt "Heute,
+09:46-13 Uhr", Kachel "MAEHEN jetzt / bis 13 Uhr". Blase nennt den Bezug ("2,2 mm Regen in den 24 h vor 9 Uhr (je aelter,
+desto weniger): x0,99"). Regression: Norden-Fall v5.78 weiter Mittwoch (Di 56, Wahlwert 54 gegen 86); test_modell 228/228,
+test_app stub wie bisher.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
