@@ -2270,6 +2270,9 @@ Fragezeichen gegen Haken trennt Aufforderung und Zustand. Rasen-App: "Heute gema
 `// Kommentar` HINTER einem Ausdruck mitten in einer Codezeile kommentiert den Rest der Zeile aus - hier den Knopf
 "Einstellungen" und das schliessende </div>; der Syntaxcheck merkte es nicht (ASI), erst der Screenshot (Fenster in zwei
 Spalten). Kommentare deshalb immer auf eine eigene Zeile. Geprueft 393/320 pt, hell/dunkel, vorher und nachher je 42 px hoch.
+v5.90 (Nutzer: "den Verlauf in der dunklen Ansicht auch von Weiss nach Gruen, nicht Schwarz nach Gruen"): dunkler Modus nimmt
+denselben Verlauf wie hell (links weiss nach Staerke, Mitte Kaestchenfarbe, rechts rgba(0,45,10,.26)). Geprueft mit echten
+Daten Erlental, dunkel und hell.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
