@@ -2361,6 +2361,11 @@ die Einstellungen klappen aber darunter auf, und "6 weitere Tage" / "Symbol-Erkl
 gelbes Feld `.rz-ok.rz-ein` mit rundem Kreuz wie das gruene "Heute gemaeht"; Tipp aufs Feld oder aufs Kreuz klappt zu
 (beide tragen data-rzk="einst"). Gleich gross wie die Nachbarn (393 pt 140 x 42, 320 pt untereinander 248 x 42), hell und
 dunkel geprueft. Rasen-App unveraendert ("Heute gemaeht?" ohne Leerzeichen).
+v6.00 (Nutzer: "Pfeil nach unten bei Einstellungen sehr gut geloest, Zumachen auch gut - beim Wert keine gestrichelte
+Linie, sondern ein duenner durchgehender Strich, sieht besser aus und verwirrt weniger"): Notwert-Kreis `.rz-w.nw` mit 1 px
+durchgehendem Ring (hell #98a2b3, dunkel #6d7b90) statt 1,5 px gestrichelt; der Kreis der Notloesung 1,5 px durchgehend gelb.
+Die Kaestchen der Notloesung bleiben gelb GESTRICHELT (`.rz-er>i.not`). Legende "Kreis ohne Fuellung = kein trockenes
+Fenster, nur Notwert bis 30". Nach v5.99 laut Regel v6.00.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
