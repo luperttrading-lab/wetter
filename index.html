@@ -217,6 +217,13 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 /* v5.73/v5.74: Tage 9-14 im Scrollbereich, gleiche Farben; gestrichelte Linie davor (ab hier unsicherer) - sie lugt
    unten am Rand hervor und zeigt, dass es weitergeht */
 .rz-sc{max-height:201px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+/* v5.79: im Abschnitt "Rasen maehen" alle Tage ohne inneren Scrollbereich - der fing den Wisch zum Seitenscrollen ab */
+.rz-sc.rz-alle{max-height:none;overflow:visible;overscroll-behavior:auto}
+/* v5.79 (Nutzer: "ein kleines Kreuz, immer sichtbar"): Huelle um das Grossfenster, Kreuz liegt AUSSERHALB des
+   scrollenden Kastens (.loc-box) und bleibt deshalb stehen, wenn der Inhalt scrollt */
+.kzg-wrap{position:relative;width:100%;max-width:340px}.kzg-wrap .loc-box{max-width:none}
+.kzg-x{position:absolute;top:8px;right:10px;z-index:3;width:30px;height:30px;border-radius:50%;border:1px solid #c9d3df;background:#fff;color:#2b3a4e;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,35,60,.18);cursor:pointer}
+#kzGrossIn .rz-kopf{padding-right:34px}#kzGrossIn>.kzg-titel,#kzGrossIn>div:first-child>.kzg-titel:first-child{padding-right:34px}
 .rz-er.rz-ab{border-top:1px dashed var(--muted);padding-top:4px;margin-top:4px}
 .rz-legun{flex-basis:100%;color:var(--muted)}
 .rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}html.dunkel .rz-er>i.rec{box-shadow:inset 0 0 0 2px #e6f4e8}
@@ -1121,6 +1128,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel #bfsUv{filter:brightness(.90)}
   html.dunkel .fc-row .track{background:#222c3a}
   html.dunkel .loc-box{background:#141a23;color:var(--ink)}
+  html.dunkel .kzg-x{background:#1f2835;color:#e2e8f0;border-color:#3a4658}
   html.dunkel .loc-box input{background:var(--feld);border-color:var(--feld-line);color:var(--ink)}
   html.dunkel .loc-btn{background:var(--stufe);border-color:var(--line);color:#cfdaea}
   html.dunkel .loc-go{background:#1d3550;border-color:#3a5f88;color:#a8cdf0}
@@ -1214,7 +1222,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.78</span>
+      <span class="ver">v5.79</span>
     </div>
   </header>
 
@@ -5000,12 +5008,15 @@ function kzJetztMarke(x){const L=`left:${Math.max(0,Math.min(100,x)).toFixed(2)}
 function kzGrossZeigen(html){
   let ov=el("kzGrossOv");
   if(!ov){ov=document.createElement("div");ov.id="kzGrossOv";ov.className="loc-ovl hidden";
-    ov.innerHTML='<div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>';
+    // v5.79 (Nutzer: "ueber ein kleines Kreuz oder einen Schliessen-Knopf schliessen - immer moeglich und sichtbar"): das
+    // Kreuz liegt in einer Huelle NEBEN dem scrollenden Kasten, nicht darin - sonst scrollte es mit dem Inhalt weg
+    ov.innerHTML='<div class="kzg-wrap"><div class="loc-box" role="dialog" aria-modal="true"><div id="kzGrossIn"></div><div class="loc-row"><button type="button" class="loc-btn loc-pri" id="kzGrossZu">Schlie\u00dfen</button></div></div>'
+      +'<button type="button" class="kzg-x" id="kzGrossX" aria-label="Schlie\u00dfen"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>';
     document.body.appendChild(ov);
     const zu=()=>ov.classList.add("hidden");
     // iOS schickt den Klick zum oeffnenden Tipp erst NACH pointerup - dann laege er auf dem Hintergrund
     ov.addEventListener("click",e=>{if(e.target===ov&&Date.now()-ov._auf>450)zu();});
-    el("kzGrossZu").onclick=zu;
+    el("kzGrossZu").onclick=zu;el("kzGrossX").onclick=zu;
     document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
   el("kzGrossIn").innerHTML=html;ov._auf=Date.now();ov.classList.remove("hidden");kzAchseFrei(el("kzGrossIn"));   // erst sichtbar, dann messen
   return true;
@@ -5617,7 +5628,7 @@ function rzGrossHtml(o){o=o||{};
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte
-  h+=rzLeisteEinfach(P)+(gras?'<div class="rz-h">Gras jetzt</div>'+gras:"")+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  h+=rzLeisteEinfach(P,o.abschnitt)+(gras?'<div class="rz-h">Gras jetzt</div>'+gras:"")+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
@@ -5708,7 +5719,7 @@ function rzMaehAlt(){return rzMitAlt((E,heute)=>rzMaehHtml(E,rzPlanen(Date.now()
    Kopfzeile ueber den Stunden mit "Pause" ueber der Luecke (24 px breit, seit v5.68 34 px mit Schrift) und "dunkel" ueber den Stunden, die an
    mindestens einem der Tage dunkel sind; in den Zeilen jedes dunkle Kaestchen in Nachtfarbe (`.rz-dunkel`).
    Die ausfuehrliche Leiste (v5.44-v5.57, Band/Linien/blass) und der Testumschalter sind entfernt. */
-function rzLeisteEinfach(P){
+function rzLeisteEinfach(P,alle){
   const E=rzE(),jetzt=Date.now(),heute=rzTeile(jetzt).tag,idx={},pa=x=>E.pause&&x>=E.pVon&&x<E.pBis;
   RASEN.Z.forEach(c=>{(idx[c.tag]=idx[c.tag]||{})[c.h]=c;});
   // v5.73 (Nutzer: "noch eine Woche sichtbar"): immer 14 Tage, soweit Stunden da sind (Open-Meteo forecast_days=15);
@@ -5732,7 +5743,10 @@ function rzLeisteEinfach(P){
   h+='<div class="rz-er rz-eax"'+st+"><span></span>"+std.map((x,i)=>luecke(i)+"<span>"+x+"</span>").join("")+'<span class="rz-wk">Wert</span></div>';
   // v5.74 (Nutzer: "8 Tage als Fenster, die anderen zum Hochscrollen - aber die gleichen Farben"): die Tageszeilen liegen
   // in einem eigenen Scrollbereich (.rz-sc), sichtbar genau 8 Tage (rzGrossBinden misst); Kopf und Stunden bleiben stehen
-  h+='<div class="rz-sc">';
+  // v5.79 (Nutzer, Abschnitt-Screenshot: Liste stand auf So 1.11. bis So 8.11. - der Wisch zum Seitenscrollen hatte den
+  // inneren Bereich bis ans Ende geschoben, overscroll-behavior:contain hielt die Seite fest): im ABSCHNITT alle Tage
+  // untereinander ohne eigenes Scrollen (.rz-alle); das Fenster behaelt die 8 Tage mit Scrollbereich (v5.74)
+  h+='<div class="rz-sc'+(alle?" rz-alle":"")+'">';
   /* v5.70 (Nutzer: "eine Zahl hinten dran, wie gut die gewichtete Maehqualitaet ist - evtl. waere Freitag besser als
      Mittwoch"): je Tag die beste Wertung seiner Fenster (rzPlanen: Sicherheit x Abstand zum Termin x Laenge), x 100.
      Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
@@ -5759,7 +5773,7 @@ function rzLeisteEinfach(P){
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
       +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
-      +(da.has("rz-un")?'<span class="rz-legun">Weitere Tage: in der Leiste nach oben wischen · unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
+      +(da.has("rz-un")?'<span class="rz-legun">'+(alle?"":"Weitere Tage: in der Leiste nach oben wischen · ")+'unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
@@ -5791,7 +5805,7 @@ function rzGrossBinden(root){
   // v5.77: Zahlen nur, wenn ein Kaestchen mindestens 17 px breit ist (320 pt: ~13 px) - gemessen, nicht geschaetzt
   {const i=root.querySelector(".rz-er>i[data-rzs]");if(i&&i.offsetWidth)root.classList.toggle("rz-schmal",i.offsetWidth<17);}
   // v5.74: Scrollbereich genau 8 Tage hoch, plus 1 px - so lugt die gestrichelte Linie unten hervor
-  root.querySelectorAll(".rz-sc").forEach(sc=>{const z=sc.children;if(z.length>8&&z[0].offsetHeight)sc.style.maxHeight=(z[8].offsetTop-z[0].offsetTop+1)+"px";});
+  root.querySelectorAll(".rz-sc:not(.rz-alle)").forEach(sc=>{const z=sc.children;if(z.length>8&&z[0].offsetHeight)sc.style.maxHeight=(z[8].offsetTop-z[0].offsetTop+1)+"px";});
   root.querySelectorAll(".rz-elab b").forEach(b=>{const w=b.parentElement.getBoundingClientRect().width;if(w&&b.getBoundingClientRect().width+4>w)b.remove();});
   const detZu=()=>{const d=root.querySelector("#rzDet");if(d){d.hidden=true;d._von=null;}root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
   const blase=(b,html)=>{const d=root.querySelector("#rzDet");if(!d)return;d.innerHTML=html;d.hidden=false;

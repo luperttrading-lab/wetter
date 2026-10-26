@@ -2145,6 +2145,26 @@ Wetterwert mal Abschlag je Tag Warten, 3 Punkte Gleichstand -> frueher); im Term
 besten Wert. `rasen/test_app.py stub`: wie r1.03 (nur der bekannte Uhr-Artefakt "Erneut versuchen").
 NUTZER BESTAETIGT (26.10. 08:15, Screenshot Norden v5.78: Mi 9-12 mit 0 % umrandet, Mi 15-16 mit 4/6 % nicht):
 "so ist es ok" - die 3-Punkte-Regel fuer den Rahmen (v5.77) bleibt; bei 0-3 % nachmittags waere der Rahmen auch dort.
+v5.79 (Nutzer, zwei Screenshots 09:02: "warum ist das Diagramm anders, wenn man die Kachel antippt (Fenster) und wenn
+man runterscrollt (Abschnitt)?" + "ein kleines Kreuz oder Schliessen-Knopf, immer moeglich und sichtbar"): (1) Die Daten
+waren gleich; im ABSCHNITT stand die Tagesliste auf So 1.11. bis So 8.11., weil der Wisch zum Seitenscrollen den inneren
+Scrollbereich (.rz-sc, v5.74) bis ans Ende geschoben hatte - overscroll-behavior:contain hielt dabei die Seite fest. Jetzt
+zeigt der Abschnitt ALLE 14 Tage untereinander ohne eigenes Scrollen (`rzLeisteEinfach(P,alle)` -> `.rz-sc.rz-alle`,
+rzGrossBinden setzt dort keine Hoehe, Legende ohne "nach oben wischen"); das FENSTER behaelt 8 Tage + Scrollbereich.
+(2) KREUZ oben rechts in JEDER Grossansicht (`kzGrossZeigen`: Huelle `.kzg-wrap` um `.loc-box`, Knopf `#kzGrossX` liegt
+NEBEN dem scrollenden Kasten, nicht darin - sonst scrollte es mit dem Inhalt weg; 30 px rund, SVG-Kreuz, hell/dunkel),
+der Knopf "Schliessen" unten bleibt. Damit der Titel nicht unters Kreuz laeuft: `#kzGrossIn .rz-kopf` und `.kzg-titel`
+mit padding-right 34 px. Geprueft (Playwright 393 pt, hell/dunkel): Kreuz 10 px vom rechten, 8 px vom oberen Rand, steht
+nach dem Scrollen an derselben Stelle, "Norden · Stand" endet 12 px davor, "Regen · naechste 2 Stunden" 58 px davor, ein
+langer Titel bricht davor um (Range-Messung - die Block-Breite taugt nicht, sie reicht immer bis zum Rand); Abschnitt
+14 Zeilen, 353 px, max-height none. regen24/regen7 liessen sich im Pruefstand nicht oeffnen (Stub liefert nur
+Rasen-Daten); deren Titel sind kurz und linksbuendig.
+UNTERSCHIED DER BEIDEN BILDER 06:59/08:13 (26.10., Nutzer: "liegen 1 Stunde auseinander und sehen komplett anders aus"):
+zwei Wettermodelle. 06:59 war Open-Meteo vom Handy nicht erreichbar -> stiller Rueckfall auf MOSMIX (Fr/Sa/Mo 2.11.
+trocken), 08:13 Open-Meteo (Fr Luftfeuchte 97-100 % = Tau den ganzen Tag, Mo 2.11. 7 mm Regen). Beide Quellen um 08:40
+geholt und gegen die Bilder gehalten: Open-Meteo passt exakt auf 08:13 (Di 12/32 %, Mi 0/0/0/0 und 4/6). Der Rueckfall
+steht nur in der Quellenzeile unten (`rzQuelle`). OFFEN (Nutzer gefragt): Ersatz sichtbar kennzeichnen ("MOSMIX-Ersatz"
+neben "Stand", Werte blasser). Zweiter Unterschied: Maehzeit 8-19 (06:59) gegen 8-20 (08:13) - vom Nutzer umgestellt?
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
