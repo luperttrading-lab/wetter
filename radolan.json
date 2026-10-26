@@ -1,8 +1,8 @@
 {
   "datum": "2026-10-26",
   "summe_mm": 0.0,
-  "stunden_ok": 17,
-  "stunden_erwartet": 18,
+  "stunden_ok": 18,
+  "stunden_erwartet": 19,
   "stunden": [
     {
       "stunde": "01:00",
@@ -74,6 +74,10 @@
     },
     {
       "stunde": "18:00",
+      "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
       "mm": null,
       "status": "noch nicht verfuegbar"
     }
@@ -162,7 +166,7 @@
     "datum": "2026-10-25",
     "mm": 28.71
   },
-  "aktualisiert": "2026-10-26T17:37:01+00:00",
+  "aktualisiert": "2026-10-26T18:07:01+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -172,8 +176,8 @@
       "lon": 8.6740943,
       "datum": "2026-10-26",
       "summe_mm": 0.0,
-      "stunden_ok": 17,
-      "stunden_erwartet": 18,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -245,6 +249,10 @@
         },
         {
           "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -341,8 +349,8 @@
       "lon": 8.6226918,
       "datum": "2026-10-26",
       "summe_mm": 0.0,
-      "stunden_ok": 17,
-      "stunden_erwartet": 18,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -414,6 +422,10 @@
         },
         {
           "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
@@ -510,8 +522,8 @@
       "lon": 7.2066,
       "datum": "2026-10-26",
       "summe_mm": 7.26,
-      "stunden_ok": 17,
-      "stunden_erwartet": 18,
+      "stunden_ok": 18,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -583,6 +595,10 @@
         },
         {
           "stunde": "18:00",
+          "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
           "mm": null,
           "status": "noch nicht verfuegbar"
         }
