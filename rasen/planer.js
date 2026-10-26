@@ -110,11 +110,13 @@ function bewerten(stunden,einst,sonneMap,tz){
 /* r1.05 (wie Wetter-App v5.84): Vorregen mit EINEM Bezugspunkt je Tag (erste gute Stunde, sonst Fensterbeginn), jede
    Regenstunde gleitend gewichtet (direkt davor 1, vor 24 h 0) - vorher die 24 h vor Fensterbeginn mit harter Kante, dann
    gewann am Tag nach Regen der Nachmittag gegen den Vormittag, nur weil der Regen von gestern frueh herausfiel. */
-function tagFaktoren(w,Z){const T=24*36e5;let n=0,g=0,mm=0,mmw=0,ref=null;
+/* r1.06 (wie Wetter-App v5.86, dort Stufe "mittel"): Gewicht mit Halbwertszeit 18 h bis 72 h zurueck, Abzug hoechstens
+   12 % - das 24-h-Dreieck vergass den Regen von vorgestern ganz (Di 5,6 mm zaehlte fuer Do nicht). */
+function tagFaktoren(w,Z){const HW=18*36e5,BIS=72*36e5;let n=0,g=0,mm=0,mmw=0,ref=null;
   for(const c of Z||[])if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut){g++;if(ref==null||c.s<ref)ref=c.s;}}
   if(ref==null)ref=w.s;
-  for(const c of Z||[]){const alt=ref-c.e;if(alt>=0&&alt<T&&c.p){mm+=c.p;mmw+=c.p*(1-alt/T);}}
-  const fA=n?0.5+0.5*g/n:1,fR=1-0.15*Math.min(1,Math.log(1+mmw)/Math.log(11));
+  for(const c of Z||[]){const alt=ref-c.e;if(alt>=0&&alt<BIS&&c.p){mm+=c.p;mmw+=c.p*Math.pow(0.5,alt/HW);}}
+  const fA=n?0.5+0.5*g/n:1,fR=1-0.12*Math.min(1,Math.log(1+mmw)/Math.log(11));
   return {n,g,fA,mm,mmw,ref,fR};}
 function wetterWert(w,einst,Z){if(!w||w.leer)return 0;const E=einstVoll(einst);const P=w.P!=null?w.P:1-(w.pp||0)/100,f=tagFaktoren(w,Z);
   return P*(.9+.1*Math.min(1,(w.e-w.s)/36e5-E.dauer))*f.fA*f.fR;}

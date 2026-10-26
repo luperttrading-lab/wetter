@@ -2228,6 +2228,21 @@ Rechnung nicht hat; ob das Gras wirklich noch nass ist, entscheiden die Abtrockn
 Geprueft (`v585.py`, Stub om_v578: Mo Regen, Di bis 7 Uhr): Verlauf Di 11/12/15/16 (0,36 -> 0,29), Tropfen nur Di (56),
 "aus" nichts; hell und dunkel. Erlental 26.10. zeigt in keiner Variante etwas (Regen endete 18 h vor der ersten guten
 Stunde, gewichtet 0,13 mm). AUFRAEUMEN nach der Wahl: Verlierer-Zweig + CSS, `rz_vr`, `rzVrArt`, `.rz-vrt`, Klick `vr:`.
+v5.86 / Rasen-App r1.06 (Nutzer, Screenshot 09:58: "Do 5.11. hat einen recht hohen Wert dafuer, dass es die zwei Tage
+vorher geregnet hat - waere das nicht ein Tag fuer den Tropfen?"): ja - das Gewicht aus v5.84 (1 - Alter/24 h) vergass Regen
+nach 24 h ganz. Open-Meteo Erlental: Di 3.11. 5,6 mm (1-7 Uhr), Mi 4.11. 0,6 mm Niesel bis 13 Uhr, Do ab 8 Uhr trocken -> fuer
+Do zaehlte praktisch nichts. Jetzt Halbwertszeit mit Rueckblick 72 h (`rzVorregen`, `RZ_VR`) - und weil das einen echten
+ZIELKONFLIKT hat, waehlt der Nutzer: Einstellungen "Regen der Vortage zaehlt: wenig | mittel | stark" (`E.vortag`,
+Voreinstellung mittel; `rzVrPar`): wenig = Halbwertszeit 12 h / Abzug hoechstens 10 %, mittel = 18 h / 12 %, stark = 24 h /
+15 %. Erlental 26.10. (gestern 18 mm bis 15 Uhr), mit echten Open-Meteo-Daten im Pruefstand:
+    wenig   heute 87, Do 5.11. 97          -> Empfehlung "Jetzt bis 13 Uhr"
+    mittel  heute 84, Do 5.11. 95 Tropfen  -> Empfehlung Mi 28.10. 15-17 ("Moeglich waere schon heute 10:15")
+    stark   heute 80, Do 5.11. 93 Tropfen  -> Empfehlung Mi 28.10.
+Jede Stufe, die Do sichtbar abwertet, schiebt nach 18 mm gestern die Empfehlung von heute auf Mittwoch (Gras hoch/Datum
+unbekannt: nur 5 % je Tag Warten). Blase nennt die Stufe ("zaehlt nach 18 Stunden noch halb, Einstellung mittel").
+Rasen-App r1.06 fest auf mittel (planer.js tagFaktoren: Halbwertszeit 18 h, 12 %), keine eigene Wahl. Geprueft: alle drei
+Stufen im Fenster umgeschaltet und gespeichert, Verlauf/Tropfen folgen; test_modell 228/228, test_app stub 51 ok + bekannter
+Uhr-Artefakt. Zwischenstand lag nach einem versehentlichen Abbruch kurz als WIP-Commit auf dem Arbeitszweig.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
