@@ -251,8 +251,10 @@ html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
 .rz-gut{background:#43a047}.rz-risk{background:#f1dfa8}
 /* v5.85 TEST Vorregen: Verlauf links hell -> rechts Kaestchenfarbe; Tropfen oben rechts am Wert-Kreis */
-html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,0) 92%)}
-html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(20,26,35,var(--vr)) 0%,rgba(20,26,35,0) 92%)}
+/* v5.87 (Nutzer: "links etwas heller, rechts etwas dunkler - fast zu gleichmaessig gruen"): links hell (Staerke nach
+   Vorregen), Mitte die Kaestchenfarbe (dort steht die Zahl), rechts fest etwas dunkler */
+html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,0) 50%,rgba(0,45,10,0) 58%,rgba(0,45,10,.26) 100%)}
+html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(20,26,35,var(--vr)) 0%,rgba(20,26,35,0) 50%,rgba(255,255,255,0) 58%,rgba(255,255,255,.16) 100%)}
 .rz-w{position:relative}.rz-wt{position:absolute;top:-5px;right:-4px;width:9px;height:12px;fill:#2f7fd0;stroke:#fff;stroke-width:1.2;pointer-events:none}
 html.dunkel .rz-wt{fill:#6fb2f2;stroke:#141a23}.rz-wt.rz-wtl{position:static;display:inline-block;vertical-align:-2px;margin-right:4px}
 .rz-vrt{margin-top:6px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
@@ -1237,7 +1239,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.86</span>
+      <span class="ver">v5.87</span>
     </div>
   </header>
 
@@ -5836,7 +5838,7 @@ function rzLeisteEinfach(P){
       // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
       // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
       const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
-      let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.2+0.5*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
+      let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.3+0.55*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
       h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   if(mehrAuf)h+="</div>";

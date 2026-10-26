@@ -2243,6 +2243,12 @@ unbekannt: nur 5 % je Tag Warten). Blase nennt die Stufe ("zaehlt nach 18 Stunde
 Rasen-App r1.06 fest auf mittel (planer.js tagFaktoren: Halbwertszeit 18 h, 12 %), keine eigene Wahl. Geprueft: alle drei
 Stufen im Fenster umgeschaltet und gespeichert, Verlauf/Tropfen folgen; test_modell 228/228, test_app stub 51 ok + bekannter
 Uhr-Artefakt. Zwischenstand lag nach einem versehentlichen Abbruch kurz als WIP-Commit auf dem Arbeitszweig.
+v5.87 (Nutzer, Screenshot 10:36, Stufe mittel, Verlauf: "Montag klar wegen Sonntag-Regen, aber warum Dienstag?" + "links
+etwas heller, rechts etwas dunkler - fast zu gleichmaessig gruen"): Dienstag ist gewollt - derselbe Grund wie beim Do 5.11.
+(Regen von vor zwei Tagen): So 25.10. 17,6 mm bis 15 Uhr, fuer Di 9 Uhr 42 h alt, bei Halbwertszeit 18 h gewichtet 2,5 mm ->
+Faktor 0,937, Wert 87 (Mo 6,4 mm gewichtet -> 0,900 / 84; Do 5.11. 1,1 mm -> 0,963 / 95). VERLAUF kraeftiger: links hell
+(Deckkraft 0,3 + 0,55 x Staerke statt 0,2 + 0,5), bis 50 % Kaestchenfarbe (dort steht die Zahl), ab 58 % fest dunkler
+(hell rgba(0,45,10,.26), dunkel aufgehellt rgba(255,255,255,.16)). Geprueft mit echten Open-Meteo-Daten Erlental, hell und dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
