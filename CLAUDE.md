@@ -2249,6 +2249,20 @@ etwas heller, rechts etwas dunkler - fast zu gleichmaessig gruen"): Dienstag ist
 Faktor 0,937, Wert 87 (Mo 6,4 mm gewichtet -> 0,900 / 84; Do 5.11. 1,1 mm -> 0,963 / 95). VERLAUF kraeftiger: links hell
 (Deckkraft 0,3 + 0,55 x Staerke statt 0,2 + 0,5), bis 50 % Kaestchenfarbe (dort steht die Zahl), ab 58 % fest dunkler
 (hell rgba(0,45,10,.26), dunkel aufgehellt rgba(255,255,255,.16)). Geprueft mit echten Open-Meteo-Daten Erlental, hell und dunkel.
+v5.88 / Rasen-App r1.07 (Nutzer: "haengt an der Jahreszeit, ob der Rasen noch nass ist - Temperatur, Hochsommer oder
+Herbst - in den gruenen Kacheln mit Tropfen bzw. Verlauf beruecksichtigen?"; davor: "Dienstag?? Montag war ganz trocken"):
+Vorregen klingt jetzt nach der VERDUNSTUNG seither ab statt nach der Uhr. Open-Meteo-Stundenabfrage um
+`et0_fao_evapotranspiration` erweitert (c.et, Stunde VOR dem Stempel); `rzVorregen(t)` laeuft von t rueckwaerts (bis 72 h)
+und gewichtet jede Regenstunde mit 0,5^(Verdunstung danach / eh), eh = 1 / 1,5 / 2 mm fuer wenig / mittel / stark;
+liefert auch `ev` = Verdunstung seit dem letzten Regen (Blase: "seit dem letzten Regen 1,4 mm Verdunstung (zaehlt halb nach
+1,5 mm)"). Nachts verdunstet fast nichts -> Regen vom Sonntagnachmittag ist Montag frueh kaum "verbraucht". Ohne et
+(MOSMIX-Ersatz, alter Cache der Rasen-App) Monatsmittel `RZ_ET0_MON` bzw. `ET0_MON` (0,3 ... 4,0 mm/Tag, grob) nur bei
+Tageslicht. Verdunstung Erlental: 25.-28.10. je 1,0-1,4 mm/Tag; Juli typisch ~4 (Archiv war wegen Tageslimit nicht abrufbar).
+Gemessen (mittel, echte Daten 26.10. 11 Uhr): heute 82 (x0,88), Di 90 (x0,90), Do 5.11. 92 (x0,93); dieselben Daten mit
+Verdunstung x3,5 als Hochsommer-Annahme: heute 87, Di 98 (x0,98, Verlauf nur noch 8-9 Uhr schwach), Do 96. Im Oktober bleibt
+der Dienstag also markiert - physikalisch richtig, der Boden ist zwei Tage nach 18 mm bei ~1,2 mm Verdunstung/Tag noch
+feucht; im Sommer waere er frei. Rasen-App: wetter.js holt et0 stuendlich, planer.js tagFaktoren gleich (eh 1,5 mm, 12 %).
+Test: test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt, Planer direkt (18 mm, 1,43 mm verdunstet) x0,893.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
