@@ -2175,6 +2175,17 @@ ersten 450 ms nach dem Oeffnen ab (`ov._auf`) - gilt fuer alle Grossansichten, a
 Geisterklick sonst sofort geschlossen haette. Nachgestellt im Pruefstand (`v580.py`, Chromium mit has_touch, Seite so
 gescrollt, dass die Kachel unter dem Knopf liegt): vorher letzt = 2026-10-26 nach dem Oeffnen, nachher null; ein echter
 Tipp nach 600 ms setzt heute, das x nimmt es zurueck.
+v5.81 (Nutzer: "Ja, kennzeichne den MOSMIX-Ersatz sichtbar" - nach den Bildern 06:59/08:13, siehe v5.79): Faellt
+Open-Meteo im Rasen-Teil aus (`rzLaden` -> `rzBrightSky`, RASEN.SRC "bs"), steht direkt unter dem Kopf von Fenster UND
+Abschnitt ein gelber Kasten `.rz-ersatz` (`rzErsatzHtml`): "Ersatz: DWD-MOSMIX - Open-Meteo um 06:59 nicht erreichbar
+(<Grund>). Ab Tag 3 weichen die Modelle oft stark ab." + Knopf "Open-Meteo erneut versuchen" (`data-rzk="omneu"`, setzt
+RASEN.t = 0 und laedt; zeigt "laedt ..." und ist so lange gesperrt). Grund aus der Fehlermeldung (`rzOmGrund`: timeout ->
+"keine Antwort in 15 s", 429 -> "Tageslimit, HTTP 429", fetch/network -> "keine Verbindung"), gemerkt in RASEN.omFehler /
+omT. Kachel bekommt die zusaetzliche Ansicht "RASEN / MOSMIX / Ersatzdaten". Im Ersatzbetrieb versucht `rzBereit`
+Open-Meteo schon nach 5 statt 30 Minuten wieder. Werte bewusst NICHT blasser (v5.74: Abblassen verfaelscht Farben).
+Erster Entwurf (5 Zeilen) schob die Leiste zu weit nach unten - gekuerzt auf 3 Zeilen + Knopf. Geprueft (Playwright,
+`v581.py`: Open-Meteo-Stundenabfrage mit HTTP 429, Bright Sky echt): Kasten in Fenster und Abschnitt, Kachel-Ansicht
+passt ohne Verkleinerung, Knopf -> Open-Meteo antwortet -> Kasten in beiden weg, Fenster bleibt offen; hell und dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
