@@ -2283,6 +2283,13 @@ trockenen Tag dazwischen), Do 5.11. und Fr 6.11. x1,00; Erlental Mo 26.10. x0,88
 nachts), Do 5.11. x0,93 (Mi-Niesel + Di-Regen ohne trockenen Tag). Blase: "9,6 mm Regen vor 9 Uhr ohne trockenen Tag dazwischen,
 seit dem letzten Regen 0,2 mm Verdunstung" bzw. "vor 9 Uhr mindestens 24 Stunden kein Regen". Planer direkt: 28 h trocken ->
 0 mm, 18 h -> 15 mm (x0,895). test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
+v5.92 (Nutzer: "Verlauf etwas mehr im Hellen beginnen" + "schwarzer Rahmen sieht man im Tag-Modus schlecht, weisser auch -
+gelb, eine Farbe fuer Tag und Nacht"): Rahmen der empfohlenen Fenster in BEIDEN Modi gelb #ffc21a 3 px mit feiner dunkler
+Innenkante rgba(110,70,0,.55) (sonst verschwindet er auf dem weissen Verlaufsanfang), Wert-Kreis des empfohlenen Tages mit
+gelbem Ring 2,5 px, Legende mit gelbem Muster "gelber Rahmen = empfohlene Fenster". Verlauf: links 14 % satt weiss
+(Deckkraft 0,5 + 0,45 x Staerke statt 0,3 + 0,55), Uebergang bis 55 %, ab 60 % dunkler. Beinahe wieder die Kommentar-Falle aus
+v5.89 (Kommentar hinter ";" vor weiterem Code in derselben Zeile) - vor dem Test gefunden; Diff jetzt immer auf "//" in
+neuen Zeilen pruefen. Geprueft mit echten Daten Norden, hell und dunkel.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

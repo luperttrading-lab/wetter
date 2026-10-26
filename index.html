@@ -214,9 +214,9 @@ html.dunkel .kz .kzbal .kzbwp{background:#ff6b6b}
 /* v5.71 (Nutzer: "um die Zahl einen Kreis - eine Flaeche als Kreis"): runde Flaeche 20 px, Empfehlung gruen gefuellt */
 .rz-w{justify-self:end;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 9.5px/1 system-ui,sans-serif;letter-spacing:-.2px;background:#e3e7ed;color:#4a5566;cursor:pointer}
-.rz-w.w3{font-size:8.5px;letter-spacing:-.4px}.rz-w.rec{background:#2e9e4a;color:#fff}
+.rz-w.w3{font-size:8.5px;letter-spacing:-.4px}.rz-w.rec{background:#2e9e4a;color:#fff;box-shadow:0 0 0 2.5px #ffc21a}
 .rz-eax .rz-wk{text-align:right;font-size:9px}
-html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10}
+html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{background:#3fae5a;color:#0d1a10;box-shadow:0 0 0 2.5px #ffc21a}
 /* v5.73/v5.74: Tage 9-14 im Scrollbereich, gleiche Farben; gestrichelte Linie davor (ab hier unsicherer) - sie lugt
    unten am Rand hervor und zeigt, dass es weitergeht */
 /* v5.82: kein innerer Scrollbereich mehr (v5.74-v5.81) - Tag 9-14 klappen per Knopf auf (.rz-mehr / .rz-mehrk) */
@@ -229,7 +229,10 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 #kzGrossIn .rz-kopf{padding-right:34px}#kzGrossIn>.kzg-titel,#kzGrossIn>div:first-child>.kzg-titel:first-child{padding-right:34px}
 .rz-er.rz-ab{border-top:1px dashed var(--muted);padding-top:4px;margin-top:4px}
 .rz-legun{flex-basis:100%;color:var(--muted)}
-.rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec{box-shadow:inset 0 0 0 2px #0d4d1f}html.dunkel .rz-er>i.rec{box-shadow:inset 0 0 0 2px #e6f4e8}
+/* v5.92 (Nutzer: "schwarzer Rahmen sieht man schlecht, weisser auch - gelb, in Tag und Nacht dieselbe Farbe"): Rahmen der
+   empfohlenen Fenster gelb 3 px mit feiner dunkler Innenkante (sonst verschwindet er auf dem weissen Verlaufsanfang) */
+.rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec,html.dunkel .rz-er>i.rec{box-shadow:inset 0 0 0 3px #ffc21a,inset 0 0 0 4px rgba(110,70,0,.55)}
+.rz-leg i.rec{box-shadow:inset 0 0 0 2px #ffc21a}
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
 .rz-frei2{grid-column:2/-2;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
 html.dunkel .rz-frei2{background:#262d38}
@@ -253,9 +256,9 @@ html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb
 /* v5.85 TEST Vorregen: Verlauf links hell -> rechts Kaestchenfarbe; Tropfen oben rechts am Wert-Kreis */
 /* v5.87 (Nutzer: "links etwas heller, rechts etwas dunkler - fast zu gleichmaessig gruen"): links hell (Staerke nach
    Vorregen), Mitte die Kaestchenfarbe (dort steht die Zahl), rechts fest etwas dunkler */
-html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,0) 50%,rgba(0,45,10,0) 58%,rgba(0,45,10,.26) 100%)}
+html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
 /* v5.90 (Nutzer: "in der dunklen Ansicht auch von Weiss nach Gruen, nicht Schwarz nach Gruen"): wie hell */
-html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,0) 50%,rgba(0,45,10,0) 58%,rgba(0,45,10,.26) 100%)}
+html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
 .rz-w{position:relative}.rz-wt{position:absolute;top:-5px;right:-4px;width:9px;height:12px;fill:#2f7fd0;stroke:#fff;stroke-width:1.2;pointer-events:none}
 html.dunkel .rz-wt{fill:#6fb2f2;stroke:#141a23}.rz-wt.rz-wtl{position:static;display:inline-block;vertical-align:-2px;margin-right:4px}
 .rz-vrt{margin-top:6px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
@@ -1240,7 +1243,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.91</span>
+      <span class="ver">v5.92</span>
     </div>
   </header>
 
@@ -5855,7 +5858,7 @@ function rzLeisteEinfach(P){
       // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
       // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
       const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
-      let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.3+0.55*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
+      let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.5+0.45*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
       h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   if(mehrAuf)h+="</div>";
@@ -5868,7 +5871,7 @@ function rzLeisteEinfach(P){
   h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
-      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
+      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?'<i class="rz-gut rec" style="display:inline-block;width:12px;height:10px;vertical-align:-1px;margin-right:4px"></i>gelber Rahmen = empfohlene Fenster':"")+"</span>":"")
       +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
       +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet</span>':"")
       +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
