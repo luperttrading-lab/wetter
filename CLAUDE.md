@@ -2294,6 +2294,14 @@ v5.93 (Nutzer: "das Gelb aussen rum, dass die Kachel nicht kleiner wird"): Rahme
 Kaestchens: box-shadow 0 0 0 2,5px #ffc21a + 0 0 0 3px rgba(120,80,0,.5) - zusammen 3 px = genau die Luecke zwischen den
 Kaestchen; nebeneinander liegende Fenster ergeben einen durchgehenden Rahmen. Kaestchen gemessen gleich gross wie die
 Nachbarn (17 x 22 px bei 393 pt). Legendenmuster mit 3/6 px Abstand. Hell und dunkel mit echten Daten Norden geprueft.
+v5.94 (Nutzer, Norden 12:14: "zwei Tage markieren - Mittwoch duenner, Donnerstag dicker gelber Streifen"): ZWEITER TAG.
+`rzPlanen` liefert neben `rec` jetzt `alt` = bester Wahlwert eines ANDEREN Tages, wenn er hoechstens 5 Punkte unter `rec`
+liegt (Wahlwert = Tageszahl x Abstandsabschlag; je Tag das beste Fenster). Rahmen 1,5 px gelb (`.alt`, Kaestchen und
+Wert-Kreis) um alle Fenster dieses Tages bis 3 Punkte Regenrisiko ueber `alt`; die Empfehlung behaelt 2,5 px. Text
+"Fast gleich gut: Do 5.11., 8-13 Uhr (duenner Rahmen)." - ist `alt` zugleich die "Naechste Gelegenheit", entfaellt
+dieser Satz (sonst zweimal derselbe Tag). Legende "dünn = fast gleich gut". Norden 26.10. (gemaeht heute, 8 Tage, faellig
+Di 3.11. mit Niesel 0,1 mm/h 7-19 Uhr bei 2-6 % Wahrscheinlichkeit): Mi 4.11. Wahlwert 83,5 (Tag 88 x 0,95), Do 84,6
+(94 x 0,90) - Gleichstand, Mi gewinnt ueber den Abstand zur Faelligkeit.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

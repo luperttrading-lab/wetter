@@ -235,6 +235,7 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
    plus 0,5 px dunklere Kante, zusammen 3 px = genau die Luecke zwischen den Kaestchen */
 .rz-er>i.rz-vorbei{opacity:.3}.rz-er>i.rec,html.dunkel .rz-er>i.rec{box-shadow:0 0 0 2.5px #ffc21a,0 0 0 3px rgba(120,80,0,.5)}
 .rz-leg i.rec{box-shadow:0 0 0 2px #ffc21a}
+.rz-er>i.alt,html.dunkel .rz-er>i.alt{box-shadow:0 0 0 1.5px #ffc21a}.rz-w.alt,html.dunkel .rz-w.alt{box-shadow:0 0 0 1.5px #ffc21a}   /* v5.94: zweiter Tag */
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
 .rz-frei2{grid-column:2/-2;height:22px;border-radius:3px;background:#ebe7df;color:var(--muted);font:600 11px/22px system-ui;text-align:center}
 html.dunkel .rz-frei2{background:#262d38}
@@ -1245,7 +1246,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.93</span>
+      <span class="ver">v5.94</span>
     </div>
   </header>
 
@@ -5554,7 +5555,12 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   // v5.69: unter den fast gleich guten das mit dem kleinsten Abstand zur Faelligkeit, dann das frueheste
   {const best=Math.max(-1,...kand.map(w=>w.score));rec=kand.filter(w=>w.score>=best-0.03).sort((a,b)=>a.ad-b.ad||a.s-b.s)[0]||null;}
   const danach=rec?W.find(w=>w.s>=rec.e&&w.tag!==rec.tag):null;
-  return {f,fruehMs,fristMs,W,rec,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
+  // v5.94 (Nutzer, Norden: Mi 4.11. empfohlen, Do 5.11. kaum schlechter - "zwei Tage markieren, den zweiten mit duennem
+  // gelbem Rahmen"): bester Tag unter den uebrigen, dessen Wahlwert hoechstens 5 Punkte unter der Empfehlung liegt
+  let alt=null;
+  if(rec){const bt={};for(const w of kand){if(w.tag===rec.tag)continue;if(!bt[w.tag]||w.score>bt[w.tag].score)bt[w.tag]=w;}
+    alt=Object.values(bt).filter(w=>w.score>=rec.score-0.05).sort((a,b)=>b.score-a.score||a.s-b.s)[0]||null;}
+  return {f,fruehMs,fristMs,W,rec,alt,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
   if(!d)return (ende-r.e)/864e5<2?{txt:"Weiter reicht die Vorhersage nicht.",letzte:false}:{txt:"Danach bis "+rzTagTxt(rzTeile(ende-1).tag)+" kein trockenes Fenster.",letzte:true,bis:rzTeile(ende-1).tag};
   const l=(d.s-r.e)/864e5;
@@ -5693,7 +5699,9 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
     // v5.84: beginnt das Fenster jetzt, steht "Jetzt bis 13 Uhr" statt "Heute, 09:46–13 Uhr"
     const sofortJ=n===0&&P.rec.s<=Date.now()+5*6e4;
     z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(sofortJ?"Jetzt bis "+rzHH(P.rec.e)+" Uhr":(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr");
-    z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":nt.txt);}
+    const altDanach=P.alt&&P.danach&&P.danach.tag===P.alt.tag&&!nt.letzte;   // v5.94: sonst stuende derselbe Tag zweimal da
+    z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":altDanach?"":nt.txt)
+      +(P.alt?(altDanach?"":" ")+"Fast gleich gut: "+rzTagTxt(P.alt.tag)+", "+rzHH(P.alt.s)+"–"+rzHH(P.alt.e)+" Uhr (dünner Rahmen).":"");}
   else if(P.spaet){const n=rzTageZw(heute,f.tag),bis=RASEN.TAGT_BIS;
     z2="Fällig etwa "+rzTagTxt(f.tag)+(f.tag.slice(0,4)!==heute.slice(0,4)?f.tag.slice(0,4):"")+(n>1?" (in "+n+" Tagen)":"");
     z3=(f.grob===2?"Geschätzt: Vorhersage"+(bis?" bis "+rzTagTxt(bis):"")+", danach Mittel "+RZ_KLIMA_JAHRE.join("–")+".":"Geschätzt aus der Tagesvorhersage.")+(n>45?" Im Winter wächst der Rasen kaum.":"");}
@@ -5843,8 +5851,9 @@ function rzLeisteEinfach(P){
   const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(rzWetterWert(w)*100);   // v5.72: immer eine Zahl; v5.73: nur Wetter
     let tr="";if(vrArt==="tropfen"&&w&&!w.leer&&rzTagFaktoren(w).fR<=0.97){da.add("rz-wt");
       tr='<svg class="rz-wt" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>';}
-    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+tr+"</b>";};
+    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":P.alt&&P.alt.tag===tag?" alt":"")+'" data-rzw="'+tag+'">'+z+tr+"</b>";};
   const da=new Set(),recW=P.rec?(P.W||[]).filter(w=>w.tag===P.rec.tag&&w.pp<=P.rec.pp+3):[];   // v5.77: alle gleich guten Fenster des Tages
+  const altW=P.alt?(P.W||[]).filter(w=>w.tag===P.alt.tag&&w.pp<=P.alt.pp+3):[];
   let mehrAuf=false;
   for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
     if(n>=8&&!mehrAuf){mehrAuf=true;h+='<div class="rz-mehr"'+(woche2?"":" hidden")+">";}
@@ -5859,9 +5868,9 @@ function rzLeisteEinfach(P){
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
       // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
       // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
-      const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
+      const rec=recW.some(w=>c.s<w.e&&c.e>w.s),alt=!rec&&altW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
       let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.5+0.45*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
-      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":alt?" alt":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   if(mehrAuf)h+="</div>";
   h+="</div>";
@@ -5873,7 +5882,7 @@ function rzLeisteEinfach(P){
   h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
-      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?'<i class="rz-gut rec" style="display:inline-block;width:12px;height:10px;vertical-align:-1px;margin:0 6px 0 3px"></i>gelber Rahmen = empfohlene Fenster':"")+"</span>":"")
+      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?'<i class="rz-gut rec" style="display:inline-block;width:12px;height:10px;vertical-align:-1px;margin:0 6px 0 3px"></i>gelber Rahmen = empfohlene Fenster'+(altW.length?", dünn = fast gleich gut":""):"")+"</span>":"")
       +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
       +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet</span>':"")
       +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
