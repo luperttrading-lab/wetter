@@ -1070,8 +1070,8 @@ Nutzer am 25.10.: "wenn die Warnung reinkommt eine Mitteilung aufs Handy". Gebau
 (Takt 15 min, Bright Sky /alerts fuer feste Orte -> ntfy.sh, Stand im Zweig `warn-stand`, Kanal im Secret `NTFY_TOPIC`),
 getestet mit eigenem Testkanal. Das Secret wurde nie angelegt; am 26.10. entschied der Nutzer: "Das mit den Warnungen
 lassen wir - dafuer gibt es andere Apps, sie werden ja ganz oben angezeigt." Entfernt: `warnung.py`, `warnung.json`, die
-Schritte in `radolan.yml` (wieder der Stand vom 20.10., Abruf :07/:37). Der Zweig `warn-stand` (eine Datei) ist liegen
-geblieben. Zurueckholen aus Commit 246d49b. Die Warnkarten IN der App (Bright Sky /alerts, `?warntest`) bleiben.
+Schritte in `radolan.yml` (wieder der Stand vom 20.10., Abruf :07/:37). Einen Zweig `warn-stand` gibt es nicht - ohne
+Secret wurde nie ein Stand gesichert (am 26.10. nachgesehen). Zurueckholen aus Commit 246d49b. Die Warnkarten IN der App (Bright Sky /alerts, `?warntest`) bleiben.
 
 ## Rasen-App (Ordner `rasen/`, ab 26.10.2026)
 
