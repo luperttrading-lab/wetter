@@ -2342,6 +2342,18 @@ ueberfaellig, sonst Faelligkeitstag) oder gar nicht, der beste Notwert davor mal
 schlecht 12-13 Uhr ...". Geprueft mit echten Daten Norden 14:34 (Tau-Tage 14-15 statt 0, Empfehlungen unveraendert) und einer
 SIMULIERTEN nassen Woche (`om_nass.json`: Luftfeuchte 27.10.-5.11. +14 Punkte; `om_nass2.json`: alles ab 27.10. +25 = gar
 kein Fenster): Notfalls Mi 28.10., in der Kachel bei fehlendem Fenster. Rasen-App unveraendert (zeigt weiter 0).
+v5.98 (Nutzer, Screenshot 15:12: "gestrichelten Kreis mit Symbol in den Index, den Index als Symbol-Erklaerung zum
+Aufklappen; Text oben und 'Gras jetzt' unten - Empfehlung und Erklaerungen an EINER Stelle, leicht lesbar"): (1) `rzMaehHtml`
+schreibt unter Stand (z1) und Termin (z2) eine Liste `<dl class="rz-dl">` mit Beschriftung links: Dann / Danach / Auch gut /
+Frueher / Notfalls (bzw. Schaetzung, Wachstum), nach einem Strich der Zustand: Gras jetzt / Trocken bzw. Erwartet / Morgen
+frueh / Radar bzw. Regen. Der Block "Gras jetzt" unter der Leiste (seit v5.73) ist entfernt, rzGrossHtml zeigt oben nur noch
+die Zustandszeile. Weil "Gras jetzt" in rzMaehHtml steht, rechnet rzMaehAlt es fuer beide Zustaende mit - die Leiste steht
+beim Tippen auf "Heute gemaeht?" weiter auf demselben Pixel (gemessen 320/393 pt). (2) Legende als `<details class="rz-legd">`
+"Symbol-Erklaerung", eingeklappt, offen/zu gemerkt (`rz_leg`, Toggle in rzGrossBinden): oben Spalten/Mittagspause, die
+Farbflaechen nebeneinander, darunter je Zeile Symbol + Text (`.rz-lz`): Zahl im Kaestchen, dicker/duenner gelber Rahmen,
+gelb gestrichelt (Notloesung), Wert-Kreis "92", gestrichelter Kreis "15", heller Anfang, Tropfen, gestrichelte Linie. Der
+Testumschalter Vorregen liegt mit darin. Quelle bleibt sichtbar darunter. Die Leiste rueckt um die "Gras jetzt"-Zeilen nach
+unten (Norden: ~4 Zeilen).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

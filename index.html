@@ -238,6 +238,24 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 .rz-er>i.alt,html.dunkel .rz-er>i.alt{box-shadow:0 0 0 1.5px #ffc21a}.rz-w.alt,html.dunkel .rz-w.alt{box-shadow:0 0 0 1.5px #ffc21a}   /* v5.94: zweiter Tag */
 /* v5.97: Notwert (kein trockenes Fenster) im gestrichelten Kreis ohne Flaeche; Notloesung gelb gestrichelt, ausserhalb */
 .rz-w.nw,html.dunkel .rz-w.nw{background:transparent;box-sizing:border-box;border:1.5px dashed #98a2b3}
+/* v5.98: Liste "Dann / Danach / ... / Gras jetzt" und aufklappbare Symbol-Erklaerung */
+.rz-dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:7px 0 0;font-size:13px;line-height:1.38}
+.rz-dl dt{font-weight:700;font-size:11.5px;color:var(--muted);padding-top:1.5px;white-space:nowrap}
+.rz-dl dd{margin:0}.rz-dl dd.rz-warn{font-weight:700}
+.rz-dl .rz-dls{grid-column:1/-1;width:100%;border:0;border-top:1px solid var(--line);margin:4px 0 2px}
+.rz-legd{margin-top:6px}
+.rz-legd>summary{list-style:none;cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;padding:7px 0 3px}
+.rz-legd>summary::-webkit-details-marker{display:none}
+.rz-legd>summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+.rz-legd[open]>summary::after{transform:rotate(-135deg);margin-top:3px}
+.rz-lz{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+.rz-ls{flex:0 0 24px;display:flex;justify-content:center;align-items:center}
+.rz-lz i{position:relative;display:block;width:18px;height:15px;border-radius:3px}
+.rz-lz i>.rz-pp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 8.5px/1 system-ui,sans-serif;color:#0b2a10}
+.rz-lz i.rec{box-shadow:0 0 0 2.5px #ffc21a,0 0 0 3px rgba(120,80,0,.5)}.rz-lz i.alt{box-shadow:0 0 0 1.5px #ffc21a}
+.rz-lz i.not{outline:1.5px dashed #e0a800;outline-offset:1px}html.dunkel .rz-lz i.not{outline-color:#ffc21a}
+.rz-lz .rz-w{justify-self:auto;cursor:default}.rz-lstr{display:block;width:18px;border-top:1.5px dashed var(--muted)}
+.rz-schmal .rz-lz.rz-legpp{display:none}
 .rz-w.nw.not,html.dunkel .rz-w.nw.not{border-color:#e0a800}
 .rz-er>i.not{outline:1.5px dashed #e0a800;outline-offset:1px}
 html.dunkel .rz-er>i.not{outline-color:#ffc21a}
@@ -264,9 +282,9 @@ html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb
 /* v5.85 TEST Vorregen: Verlauf links hell -> rechts Kaestchenfarbe; Tropfen oben rechts am Wert-Kreis */
 /* v5.87 (Nutzer: "links etwas heller, rechts etwas dunkler - fast zu gleichmaessig gruen"): links hell (Staerke nach
    Vorregen), Mitte die Kaestchenfarbe (dort steht die Zahl), rechts fest etwas dunkler */
-html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
+html :is(.rz-er,.rz-leg,.rz-lz) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
 /* v5.90 (Nutzer: "in der dunklen Ansicht auch von Weiss nach Gruen, nicht Schwarz nach Gruen"): wie hell */
-html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
+html.dunkel :is(.rz-er,.rz-leg,.rz-lz) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,var(--vr)) 14%,rgba(255,255,255,0) 55%,rgba(0,45,10,0) 60%,rgba(0,45,10,.26) 100%)}
 .rz-w{position:relative}.rz-wt{position:absolute;top:-5px;right:-4px;width:9px;height:12px;fill:#2f7fd0;stroke:#fff;stroke-width:1.2;pointer-events:none}
 html.dunkel .rz-wt{fill:#6fb2f2;stroke:#141a23}.rz-wt.rz-wtl{position:static;display:inline-block;vertical-align:-2px;margin-right:4px}
 .rz-vrt{margin-top:6px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
@@ -1251,7 +1269,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.97</span>
+      <span class="ver">v5.98</span>
     </div>
   </header>
 
@@ -5710,19 +5728,10 @@ function rzGrossHtml(o){o=o||{};
   const E=rzE();rzBewerten();const J=rzJetzt(),P=rzPlanen(Date.now()),jetzt=Date.now(),heute=rzTeile(jetzt).tag;
   let h='<div data-rz="1" class="rz"><div class="rz-kopf">'+(o.abschnitt?"":'<span class="kzg-titel">Rasen</span>')+'<span class="rz-stand">'+(LOC.name||"")+" · Stand "+rzHH(RASEN.t)+" Uhr</span></div>";
   h+=rzErsatzHtml();
-  // v5.73 (Nutzer: "die Grafik etwas nach oben schieben"): oben nur der Zustand, die Begruendung (Regen, Abtrocknen,
-  // Radar) steht unter der Leiste als "Gras jetzt"
-  let gras="";
+  // v5.98 (Nutzer: Empfehlung und Erklaerungen "an einer Stelle"): oben nur die Zustandszeile, die Begruendung (Regen,
+  // Abtrocknen, Radar) steht jetzt mit in rzMaehHtml (Zeilen "Gras jetzt", "Erwartet", "Radar")
   if(J){const kl={regen:"nass",nass:"nass",weich:"weich",tau:"tau",kalt:"trocken",trocken:"trocken"}[J.z];
-    h+='<div class="rz-zust '+kl+'">'+RZ_ZUST[J.z]+(J.regnet?" (Radar)":"")+"</div>";
-    if(J.regen)gras+='<div class="rz-z">Letzter Regen bis <b>'+rzWann(J.regen.ende)+"</b>: "+rzMM(J.regen.sum)+" in "+J.regen.std+(J.regen.std===1?" Stunde":" Stunden")+" ("+J.regen.quelle+")."
-      +(J.z==="trocken"||J.regnet?"":" Seitdem "+rzStd((jetzt-J.regen.ende)/36e5)+" trocken"+(J.regen.sonne?", davon "+J.regen.sonne+(J.regen.sonne===1?" Stunde":" Stunden")+" mit Sonne":"")+".")+"</div>";
-    else gras+='<div class="rz-z">In den letzten 14 Tagen kein Regen.</div>';
-    if(J.seit)gras+='<div class="rz-z">Trocken seit '+rzWann(J.seit)+(J.wieder?", nass wieder ab <b>"+rzWann(J.wieder.t)+"</b> ("+J.wieder.was+")":"")+".</div>";
-    else gras+='<div class="rz-z">'+(J.etappen.length?"Nach der Rechnung: "+J.etappen.map(e=>e[0]+" ab "+rzWann(e[1])).join(" · "):"In der Vorhersage wird es nicht mehr trocken")+(J.fertig||J.regenDazwischen||!J.etappen.length?".":" …")+"</div>";
-    if(J.tauBis)gras+='<div class="rz-z">Morgen früh taunass bis etwa '+rzHH(J.tauBis)+" Uhr.</div>";
-    if(J.rNext&&!J.regnet)gras+='<div class="rz-z">Radar: Regen ab <b>'+rzWann(J.rNext)+"</b>.</div>";
-    else if(!J.regenDazwischen)gras+='<div class="rz-z">'+(J.naechster?"Nächster Regen: "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":""):"In der Vorhersage kein Regen mehr")+".</div>";}
+    h+='<div class="rz-zust '+kl+'">'+RZ_ZUST[J.z]+(J.regnet?" (Radar)":"")+"</div>";}
   /* Maehen. v5.49 (Nutzer-Screenshots 25.10. 15:03: "Heute gemaeht" an/aus liess die Anzeige springen, das
      Fenster passte nicht aufs Display): Knoepfe DIREKT unter der Ueberschrift - ueber ihnen aendert sich beim
      Tippen nichts, sie bleiben unter dem Finger. Darunter immer dieselben drei Zeilen (Stand / Termin /
@@ -5736,11 +5745,11 @@ function rzGrossHtml(o){o=o||{};
   if(o.einst)h+=rzEinstHtml();
   h+=rzMaehHtml(E,P,J,heute);
   // v5.67: Zeilen fuer beide Zustaende von "Heute gemaeht" - sonst kaeme beim Tippen eine Zeile hinzu und alles darunter rutschte
-  h+=rzLeisteEinfach(P)+(gras?'<div class="rz-h">Gras jetzt</div>'+gras:"")+'<div class="rz-q">'+rzQuelle()+"</div></div>";
+  h+=rzLeisteEinfach(P)+'<div class="rz-q">'+rzQuelle()+"</div></div>";
   return h;}
 /* Die drei Zeilen unter den Knoepfen (Stand / Termin / Begruendung). rzMaehAlt rechnet dieselben Zeilen fuer
    den ANDEREN Zustand von "Heute gemaeht" - rzGrossBinden reserviert damit vorab die groessere Hoehe. */
-function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+"\u202f%";
+function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100*(f.bisher||0)/E.gd))+" %";
   const tagK=tag=>{const n=rzTageZw(tag,heute);return n===0?"heute":n===1?"gestern":rzTagTxt(tag);},
         tagV=tag=>{const n=rzTageZw(heute,tag);return n===0?"heute":n===1?"morgen":rzTagTxt(tag);};
   /* v5.51: "Moeglich waere schon" erst ab 1 h Vorsprung. v5.67: nur ein Fenster AB "Fruehestens vor Faelligkeit"
@@ -5749,7 +5758,11 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
   // v5.69: nur wenn faellig (oder sofort) - vor der Faelligkeit ist "schon Do moeglich" kein Rat, sondern Laerm
   const frueh=P.rec?(f.sofort||rzTageZw(heute,f.tag)<=0?(P.W||[]).find(w=>w.s<P.rec.s-36e5)||null:null)
         :J&&J.maehbar&&f.tag&&!P.spaet&&(f.sofort||J.maehbar.e>P.fruehMs)?J.maehbar:null;
-  let z1,z2,z3="";
+  /* v5.98 (Nutzer: "die Empfehlung und die ganzen Erklaerungen an einer Stelle, leicht zu lesen"): unter Stand und
+     Termin eine Liste mit Beschriftung links (Dann / Danach / Auch gut / Frueher / Notfalls), nach einem Strich der
+     Zustand des Grases (Gras jetzt / Erwartet / Radar bzw. Regen) - vorher ein langer Satz oben und "Gras jetzt"
+     unter der Leiste. */
+  let z1,z2;const R=[],G=[];
   if(f.sofort)z1=E.hoch?"Gras ist schon hoch – lieber bald mähen.":"Wann zuletzt gemäht? → Einstellungen";
   else if(f.tag&&!P.spaet){const nf=rzTageZw(heute,f.tag);
     z1="Gemäht "+tagK(E.letzt)+" · fällig <b>"+(nf<0?"seit "+rzTagTxt(f.tag):tagV(f.tag))+"</b>"+(f.eig?" (statt "+RZ_WT[rzWtag(f.eig)]+")":nf>1?" (in "+nf+" Tagen)":"")+(E.modus==="wuchs"?" · gewachsen "+pct():"");}
@@ -5758,18 +5771,32 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
     // v5.84: beginnt das Fenster jetzt, steht "Jetzt bis 13 Uhr" statt "Heute, 09:46–13 Uhr"
     const sofortJ=n===0&&P.rec.s<=Date.now()+5*6e4;
     z2=(P.ueber?"Nach der Frist: ":f.sofort?"Nächste Chance: ":"Empfehlung: ")+(sofortJ?"Jetzt bis "+rzHH(P.rec.e)+" Uhr":(n===0?"Heute":n===1?"Morgen":rzTagTxt(P.rec.tag))+", "+rzHH(P.rec.s)+"–"+rzHH(P.rec.e)+" Uhr");
-    const altDanach=P.alt&&P.danach&&P.danach.tag===P.alt.tag&&!nt.letzte;   // v5.94: sonst stuende derselbe Tag zweimal da
-    z3="Trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" %. "+(nt.letzte?'<b class="rz-warn">'+nt.txt+"</b>":altDanach?"":nt.txt)
-      +(P.alt?(altDanach?"":" ")+"Fast gleich gut: "+rzTagTxt(P.alt.tag)+", "+rzHH(P.alt.s)+"–"+rzHH(P.alt.e)+" Uhr (dünner Rahmen).":"");}
+    // v5.94: ist der zweite Tag zugleich die naechste Gelegenheit, steht er nur einmal da
+    const altDanach=P.alt&&P.danach&&P.danach.tag===P.alt.tag&&!nt.letzte;
+    R.push(["Dann","trocken, Regenrisiko höchstens "+Math.round(P.rec.pp)+" % (dicker gelber Rahmen)"]);
+    if(!altDanach)R.push(["Danach",nt.txt.replace(/^Danach /,"").replace(/^./,c=>c.toLowerCase()),nt.letzte?"rz-warn":""]);
+    if(P.alt)R.push(["Auch gut",rzTagTxt(P.alt.tag)+", "+rzHH(P.alt.s)+"–"+rzHH(P.alt.e)+" Uhr, fast gleich gut (dünner Rahmen)"]);}
   else if(P.spaet){const n=rzTageZw(heute,f.tag),bis=RASEN.TAGT_BIS;
     z2="Fällig etwa "+rzTagTxt(f.tag)+(f.tag.slice(0,4)!==heute.slice(0,4)?f.tag.slice(0,4):"")+(n>1?" (in "+n+" Tagen)":"");
-    z3=(f.grob===2?"Geschätzt: Vorhersage"+(bis?" bis "+rzTagTxt(bis):"")+", danach Mittel "+RZ_KLIMA_JAHRE.join("–")+".":"Geschätzt aus der Tagesvorhersage.")+(n>45?" Im Winter wächst der Rasen kaum.":"");}
+    R.push(["Schätzung",(f.grob===2?"Vorhersage"+(bis?" bis "+rzTagTxt(bis):"")+", danach Mittel "+RZ_KLIMA_JAHRE.join("–")+".":"aus der Tagesvorhersage.")+(n>45?" Im Winter wächst der Rasen kaum.":"")]);}
   else if(f.tag)z2="Kein trockenes Fenster in Sicht";
-  else{z2="Nicht fällig bis "+rzTagTxt(rzTagPlus(f.ende,-1));z3="Bei der Kälte wächst der Rasen langsam.";}
-  if(frueh)z3+=(z3?" ":"")+(P.rec?"Möglich wäre schon ":"Trocken genug ab ")+rzWann(frueh.s)+".";
+  else{z2="Nicht fällig bis "+rzTagTxt(rzTagPlus(f.ende,-1));R.push(["Wachstum","Bei der Kälte wächst der Rasen langsam."]);}
+  if(frueh)R.push(P.rec?["Früher","schon "+rzWann(frueh.s)+" möglich"]:["Trocken","genug ab "+rzWann(frueh.s)]);
   // v5.97: Notloesung, wenn das erste trockene Fenster weit weg ist oder keins kommt
-  if(P.not&&!P.spaet)z3+=(z3?" ":"")+"Notfalls: "+rzTagTxt(P.not.tag)+", "+rzHH(P.not.s)+"–"+rzHH(P.not.e)+" Uhr – "+rzNotTxt(P.not)+" (gelb gestrichelt).";
-  return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"+(z3?'<div class="rz-z">'+z3+"</div>":"")+"</div>";
+  if(P.not&&!P.spaet)R.push(["Notfalls",rzTagTxt(P.not.tag)+", "+rzHH(P.not.s)+"–"+rzHH(P.not.e)+" Uhr – "+rzNotTxt(P.not)+" (gelb gestrichelt)"]);
+  // Zustand des Grases (bis v5.97 als "Gras jetzt" unter der Leiste)
+  if(J){const jetzt=Date.now();
+    if(J.regen)G.push(["Gras jetzt","letzter Regen bis <b>"+rzWann(J.regen.ende)+"</b>: "+rzMM(J.regen.sum)+" in "+J.regen.std+(J.regen.std===1?" Stunde":" Stunden")+" ("+J.regen.quelle+")"
+      +(J.z==="trocken"||J.regnet?"":", seitdem "+rzStd((jetzt-J.regen.ende)/36e5)+" trocken"+(J.regen.sonne?", davon "+J.regen.sonne+(J.regen.sonne===1?" Stunde":" Stunden")+" mit Sonne":""))+"."]);
+    else G.push(["Gras jetzt","in den letzten 14 Tagen kein Regen."]);
+    if(J.seit)G.push(["Trocken","seit "+rzWann(J.seit)+(J.wieder?", nass wieder ab <b>"+rzWann(J.wieder.t)+"</b> ("+J.wieder.was+")":"")+"."]);
+    else G.push(["Erwartet",(J.etappen.length?J.etappen.map(e=>e[0]+" ab "+rzWann(e[1])).join(" · "):"in der Vorhersage wird es nicht mehr trocken")+(J.fertig||J.regenDazwischen||!J.etappen.length?".":" …")]);
+    if(J.tauBis)G.push(["Morgen früh","taunass bis etwa "+rzHH(J.tauBis)+" Uhr."]);
+    if(J.rNext&&!J.regnet)G.push(["Radar","Regen ab <b>"+rzWann(J.rNext)+"</b>."]);
+    else if(!J.regenDazwischen)G.push(["Regen",J.naechster?"nächster "+rzWann(J.naechster.s)+(J.naechster.pp!=null?" (Risiko "+J.naechster.pp+" %)":"")+".":"in der Vorhersage keiner mehr."]);}
+  const zl=([l,t,k])=>"<dt>"+l+"</dt><dd"+(k?' class="'+k+'"':"")+">"+t+"</dd>";
+  return '<div class="rz-m"><div class="rz-z">'+z1+'</div><div class="rz-emp">'+z2+"</div>"
+    +(R.length||G.length?'<dl class="rz-dl">'+R.map(zl).join("")+(R.length&&G.length?'<hr class="rz-dls">':"")+G.map(zl).join("")+"</dl>":"")+"</div>";
 }
 /* v5.70: Rechnung hinter der Zahl in der Leiste - Wertung = Sicherheit x Abstand x Laenge (wie rzPlanen).
    v5.72 (Nutzer: "bitte immer eine Zahl angeben"): JEDER Maehtag bekommt eine Wertung, auch vor "Fruehestens"
@@ -5945,15 +5972,25 @@ function rzLeisteEinfach(P){
       h+='<button type="button" class="rz-mehrk" data-rzk="mehr" aria-expanded="'+woche2+'">'+pf+"<span>"+(woche2?"Weniger Tage zeigen"
         :rest.length+" weitere Tage"+(recDa?' · <span class="rz-mehrr">Empfehlung '+rzTagTxt(P.rec.tag)+"</span>":" bis "+rzTagTxt(rest[rest.length-1])))+"</span></button>";}}
   h+="</div>";
-  h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
-  h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
-      .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
-      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?'<i class="rz-gut rec" style="display:inline-block;width:12px;height:10px;vertical-align:-1px;margin:0 6px 0 3px"></i>gelber Rahmen = empfohlene Fenster'+(altW.length?", dünn = fast gleich gut":""):"")+"</span>":"")
-      +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
-      +(da.has("rz-nw")||P.not?'<span class="rz-legun">'+(da.has("rz-nw")?"Zahl im gestrichelten Kreis = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)":"")+(P.not?(da.has("rz-nw")?" · ":"")+"gelb gestrichelt = Notlösung, wenn es sein muss":"")+"</span>":"")
-      +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet</span>':"")
-      +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
-      +'<div class="rz-vrt">Vorregen (Test): '+[["verlauf","Verlauf"],["tropfen","Tropfen"],["aus","aus"]].map(([v,t])=>'<button type="button" data-rzk="vr:'+v+'"'+(vrArt===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>";
+  /* v5.98 (Nutzer: "den gestrichelten Kreis mit Symbol in den Index, den Index unten als Symbol-Erklaerung zum
+     Aufklappen"): jede Erklaerung mit ihrem Symbol in einer eigenen Zeile, eingeklappt; offen/zu gemerkt (rz_leg) */
+  const legOffen=(()=>{try{return localStorage.getItem("rz_leg")==="1";}catch(e){return false;}})();
+  const lz=(sym,t,k)=>'<div class="rz-lz'+(k?" "+k:"")+'"><span class="rz-ls">'+sym+"</span><span>"+t+"</span></div>";
+  const tropfen='<svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>';
+  let leg='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr"+(lu.length?", Lücke = Mittagspause "+E.pVon+"–"+E.pBis+" Uhr":"")+".</div>"
+    +'<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko über deiner Grenze"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
+      .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")+"</div>";
+  if(da.has("rz-gut")||da.has("rz-risk"))leg+=lz('<i class="rz-gut"><b class="rz-pp">3</b></i>',"Zahl im Kästchen = Regenrisiko in %","rz-legpp");
+  if(recW.length)leg+=lz('<i class="rz-gut rec"></i>',"dicker gelber Rahmen = empfohlen");
+  if(altW.length)leg+=lz('<i class="rz-gut alt"></i>',"dünner gelber Rahmen = fast gleich gut");
+  if(P.not)leg+=lz('<i class="rz-nass not"></i>',"gelb gestrichelt = Notlösung, wenn es sein muss");
+  leg+=lz('<b class="rz-w">92</b>',"Wert = Wetter des Tages von 0 bis 100, antippen zeigt die Rechnung");
+  if(da.has("rz-nw"))leg+=lz('<b class="rz-w nw">15</b>',"gestrichelter Kreis = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)");
+  if(da.has("rz-vr"))leg+=lz('<i class="rz-gut rz-vr" style="--vr:.6"></i>',"heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet");
+  if(da.has("rz-wt"))leg+=lz(tropfen,"Tropfen am Wert = Regen davor senkt den Wert");
+  if(da.has("rz-un")&&woche2)leg+=lz('<span class="rz-lstr"></span>',"unter der gestrichelten Linie ist die Vorhersage unsicherer");
+  h+='<details class="rz-legd"'+(legOffen?" open":"")+"><summary>Symbol-Erklärung</summary>"+leg
+    +'<div class="rz-vrt">Vorregen (Test): '+[["verlauf","Verlauf"],["tropfen","Tropfen"],["aus","aus"]].map(([v,t])=>'<button type="button" data-rzk="vr:'+v+'"'+(vrArt===v?' class="an"':"")+">"+t+"</button>").join("")+"</div></details>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
@@ -5979,6 +6016,8 @@ function rzBlasePlatz(b,d){const el=b.closest(".rz-el"),r=b.parentElement.getBou
   d.style.top=(o>=0?o:top+r.height+4)+"px";}
 function rzGrossBinden(root){
   const neu=()=>{rzSpeichern();rzGrossNeu();if(typeof kzRender==="function")kzRender();};
+  // v5.98: Symbol-Erklaerung offen/zu merken (gilt fuer Fenster und Abschnitt)
+  root.querySelectorAll("details.rz-legd").forEach(d=>d.addEventListener("toggle",()=>{try{localStorage.setItem("rz_leg",d.open?"1":"0");}catch(e){}}));
   // v5.49: Hoehe fuer BEIDE Zustaende von "Heute gemaeht" reservieren - beim Umschalten rueckt die Leiste nicht
   {const m=root.querySelector(".rz-m");if(m&&m.offsetHeight){if(!root._mMin){const t=document.createElement("div");t.style.visibility="hidden";t.innerHTML=rzMaehAlt();m.after(t);
       root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
