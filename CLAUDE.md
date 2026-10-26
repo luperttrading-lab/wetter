@@ -2143,6 +2143,8 @@ um Mi 8-12 und 15-16, Di ohne Rahmen; mit `om_synth15.json` (alle Tage ~95) weit
 dasselbe fuer den Fall "ueber der Zielhoehe" in `empfehlen()` (vorher erster Tag mit trockenem Fenster; jetzt bester
 Wetterwert mal Abschlag je Tag Warten, 3 Punkte Gleichstand -> frueher); im Terminfenster waehlte sie schon vorher den
 besten Wert. `rasen/test_app.py stub`: wie r1.03 (nur der bekannte Uhr-Artefakt "Erneut versuchen").
+NUTZER BESTAETIGT (26.10. 08:15, Screenshot Norden v5.78: Mi 9-12 mit 0 % umrandet, Mi 15-16 mit 4/6 % nicht):
+"so ist es ok" - die 3-Punkte-Regel fuer den Rahmen (v5.77) bleibt; bei 0-3 % nachmittags waere der Rahmen auch dort.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
