@@ -2128,6 +2128,21 @@ Zahlen unter 17 px aus (Klasse `rz-schmal` am Behaelter - 320 pt: 13 px; die Reg
 `.rz-er>i>.rz-pp`, sonst gewinnt display:flex). Legende "Zahl im Kaestchen = Regenrisiko in % · Rahmen = empfohlene
 Fenster" als Block (`.rz-leg .rz-legun{display:block}` - als inline-flex brach der Satz in zwei Spalten). Geprueft 393 pt
 hell/dunkel (Mo 9-12 und 15-16 umrandet, Zahlen 19 px breit) und 320 pt (keine Zahlen, Legende ohne den Zahl-Satz).
+v5.78 (Nutzer-Screenshot 26.10. 07:55, Norden, "Gras ist hoch"/Datum unbekannt: Di 27.10. Wert 63 empfohlen (zwei gruene
+Stunden nach nassem Vormittag), Mi 28.10. Wert 91 nicht - "nicht den hoechsten Wert nehmen statt den frueheren, wo es noch
+nasser ist?"): `rzPlanen` wertet jedes Fenster jetzt mit der TAGESZAHL `rzWetterWert` (trocken-Chance x Laenge x Anteil
+guter Stunden x Vorregen) mal dem Abstandsabschlag (5 % je Tag, hoechstens 40 %) - vorher nur trocken-Chance x Abschlag,
+und die war an beiden Tagen ~95 %, so gewann der fruehere. Jetzt Di 63 x 0,95 = 60 gegen Mi 91 x 0,90 = 82 -> Mittwoch.
+Grund, den der Nutzer nicht genannt hat, der aber traegt: ein Tag mit zwei trockenen Stunden ist zerbrechlich (Vorhersage
+eine Stunde verschoben = Fenster weg), einer mit sieben haelt das aus; der Vorregen sagt, ob der Boden weich ist.
+Gleichstandsregel (3 Punkte -> naeher am Termin, dann frueher) bleibt. Folge: auch bei faelligem/ueberfaelligem Rasen
+kann ein spaeterer, deutlich besserer Tag gewinnen (bis 8 Tage Abschlag, danach fest 40 %) - vom Nutzer so gewollt.
+Blase eines nicht empfohlenen Tages nennt jetzt "Wahlwert 51 gegen 86". Geprueft (Playwright, Stub `om_v578.json` im
+Scratchpad: Mo Regen, Di bis 8 Uhr Regen -> Fenster 11-13 Wert 54, Mi trocken Wert 95): Empfehlung Mi 8-13 Uhr, Rahmen
+um Mi 8-12 und 15-16, Di ohne Rahmen; mit `om_synth15.json` (alle Tage ~95) weiter "heute 15-17". Rasen-App r1.04:
+dasselbe fuer den Fall "ueber der Zielhoehe" in `empfehlen()` (vorher erster Tag mit trockenem Fenster; jetzt bester
+Wetterwert mal Abschlag je Tag Warten, 3 Punkte Gleichstand -> frueher); im Terminfenster waehlte sie schon vorher den
+besten Wert. `rasen/test_app.py stub`: wie r1.03 (nur der bekannte Uhr-Artefakt "Erneut versuchen").
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
