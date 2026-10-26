@@ -237,7 +237,8 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 .rz-leg i.rec{box-shadow:0 0 0 2px #ffc21a}
 .rz-er>i.alt,html.dunkel .rz-er>i.alt{box-shadow:0 0 0 1.5px #ffc21a}.rz-w.alt,html.dunkel .rz-w.alt{box-shadow:0 0 0 1.5px #ffc21a}   /* v5.94: zweiter Tag */
 /* v5.97: Notwert (kein trockenes Fenster) im gestrichelten Kreis ohne Flaeche; Notloesung gelb gestrichelt, ausserhalb */
-.rz-w.nw,html.dunkel .rz-w.nw{background:transparent;box-sizing:border-box;border:1.5px dashed #98a2b3}
+/* v6.00 (Nutzer: "keine gestrichelte Linie, sondern ein duenner durchgehender Strich - sieht besser aus, verwirrt weniger") */
+.rz-w.nw{background:transparent;box-sizing:border-box;border:1px solid #98a2b3}html.dunkel .rz-w.nw{background:transparent;border-color:#6d7b90}
 /* v5.98: Liste "Dann / Danach / ... / Gras jetzt" und aufklappbare Symbol-Erklaerung */
 .rz-dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:7px 0 0;font-size:13px;line-height:1.38}
 .rz-dl dt{font-weight:700;font-size:11.5px;color:var(--muted);padding-top:1.5px;white-space:nowrap}
@@ -256,7 +257,7 @@ html.dunkel .rz-w{background:#2b3442;color:#c9d2de}html.dunkel .rz-w.rec{backgro
 .rz-lz i.not{outline:1.5px dashed #e0a800;outline-offset:1px}html.dunkel .rz-lz i.not{outline-color:#ffc21a}
 .rz-lz .rz-w{justify-self:auto;cursor:default}.rz-lstr{display:block;width:18px;border-top:1.5px dashed var(--muted)}
 .rz-schmal .rz-lz.rz-legpp{display:none}
-.rz-w.nw.not,html.dunkel .rz-w.nw.not{border-color:#e0a800}
+.rz-w.nw.not,html.dunkel .rz-w.nw.not{border:1.5px solid #e0a800}
 .rz-er>i.not{outline:1.5px dashed #e0a800;outline-offset:1px}
 html.dunkel .rz-er>i.not{outline-color:#ffc21a}
 .rz-er>.rz-k{height:22px}.rz-eax{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px}.rz-eax span{text-align:center}
@@ -1273,7 +1274,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.99</span>
+      <span class="ver">v6.00</span>
     </div>
   </header>
 
@@ -5995,7 +5996,7 @@ function rzLeisteEinfach(P){
   if(altW.length)leg+=lz('<i class="rz-gut alt"></i>',"dünner gelber Rahmen = fast gleich gut");
   if(P.not)leg+=lz('<i class="rz-nass not"></i>',"gelb gestrichelt = Notlösung, wenn es sein muss");
   leg+=lz('<b class="rz-w">92</b>',"Wert = Wetter des Tages von 0 bis 100, antippen zeigt die Rechnung");
-  if(da.has("rz-nw"))leg+=lz('<b class="rz-w nw">15</b>',"gestrichelter Kreis = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)");
+  if(da.has("rz-nw"))leg+=lz('<b class="rz-w nw">15</b>',"Kreis ohne Füllung = kein trockenes Fenster, nur Notwert bis 30 (Tau, nass, kalt)");
   if(da.has("rz-vr"))leg+=lz('<i class="rz-gut rz-vr" style="--vr:.6"></i>',"heller Anfang = Regen kurz davor (ohne trockenen Tag dazwischen), wenig verdunstet");
   if(da.has("rz-wt"))leg+=lz(tropfen,"Tropfen am Wert = Regen davor senkt den Wert");
   if(da.has("rz-un")&&woche2)leg+=lz('<span class="rz-lstr"></span>',"unter der gestrichelten Linie ist die Vorhersage unsicherer");
