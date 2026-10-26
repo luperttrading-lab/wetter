@@ -250,6 +250,15 @@ html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
 .rz-gut{background:#43a047}.rz-risk{background:#f1dfa8}
+/* v5.85 TEST Vorregen: Verlauf links hell -> rechts Kaestchenfarbe; Tropfen oben rechts am Wert-Kreis */
+html :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(255,255,255,var(--vr)) 0%,rgba(255,255,255,0) 92%)}
+html.dunkel :is(.rz-er,.rz-leg) i.rz-vr{background-image:linear-gradient(90deg,rgba(20,26,35,var(--vr)) 0%,rgba(20,26,35,0) 92%)}
+.rz-w{position:relative}.rz-wt{position:absolute;top:-5px;right:-4px;width:9px;height:12px;fill:#2f7fd0;stroke:#fff;stroke-width:1.2;pointer-events:none}
+html.dunkel .rz-wt{fill:#6fb2f2;stroke:#141a23}.rz-wt.rz-wtl{position:static;display:inline-block;vertical-align:-2px;margin-right:4px}
+.rz-vrt{margin-top:6px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.rz-vrt button{font:inherit;font-size:11px;padding:3px 9px;border-radius:8px;border:1px solid #c9d3df;background:#fff;color:#2b3a4e;cursor:pointer}
+.rz-vrt button.an{background:#2b3a4e;color:#fff;border-color:#2b3a4e}
+html.dunkel .rz-vrt button{background:#1f2835;color:#dbe3ee;border-color:#3a4658}html.dunkel .rz-vrt button.an{background:#dbe3ee;color:#141a23}
 /* v5.77: Regenrisiko als Zahl im Kaestchen (gruen: dunkle Schrift, beige: braun); unter 17 px je Stunde ausgeblendet */
 .rz-er>i>.rz-pp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 8.5px/1 system-ui,sans-serif;letter-spacing:-.2px;color:#0b2a10;pointer-events:none}
 .rz-er>i.rz-risk>.rz-pp{color:#5c4a14}.rz-schmal .rz-er>i>.rz-pp,.rz-schmal .rz-leg .rz-legpp{display:none}.rz-leg .rz-legpp{display:inline}.rz-leg .rz-legun{display:block}
@@ -1227,7 +1236,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.84</span>
+      <span class="ver">v5.85</span>
     </div>
   </header>
 
@@ -5714,6 +5723,13 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
    (2,2 mm, x0,93 -> 86), fuer 15 Uhr nicht mehr (x1,00 -> 93), also gewann der Nachmittag. Jetzt EIN Bezugspunkt je Tag
    (die erste gute Stunde des Tages, sonst der Fensterbeginn) - alle Fenster eines Tages haben denselben Faktor -, und
    jede Regenstunde zaehlt gleitend weniger, je laenger sie zurueckliegt (direkt davor voll, vor 24 h nicht mehr). */
+// v5.85: gewichteter Regen der 24 h vor t (1 - Alter/24 h) und daraus Staerke 0..1 (dieselbe Kurve wie fR)
+function rzVorregen(t){const T=24*36e5;let m=0;for(const c of RASEN.Z){const a=t-c.e;if(a>=0&&a<T&&c.p)m+=c.p*(1-a/T);}
+  return {mm:m,st:Math.min(1,Math.log(1+m)/Math.log(11))};}
+/* v5.85 TEST (Nutzer: "nach Regen am Vortag gruene Kaestchen mit Verlauf links weiss, rechts gruen - oder eine andere Idee?"):
+   Verlauf = je Stunde, Staerke aus dem Regen der 24 h davor; Tropfen = am Wert-Kreis des Tages, wenn der Vorregen-Faktor
+   ihn um mindestens 3 % senkt (dort wirkt er seit v5.84 - ein Faktor je Tag). Gemerkt als rz_vr, Voreinstellung Verlauf. */
+function rzVrArt(){try{const v=localStorage.getItem("rz_vr");return v==="tropfen"||v==="aus"?v:"verlauf";}catch(e){return "verlauf";}}
 function rzTagFaktoren(w){const Z=RASEN.Z,T=24*36e5;let n=0,g=0,mm=0,mmw=0,ref=null;
   for(const c of Z)if(c.tag===w.tag&&c.erlaubt){n++;if(c.gut){g++;if(ref==null||c.s<ref)ref=c.s;}}
   if(ref==null)ref=w.s;
@@ -5790,8 +5806,11 @@ function rzLeisteEinfach(P){
   /* v5.70 (Nutzer: "eine Zahl hinten dran, wie gut die gewichtete Maehqualitaet ist - evtl. waere Freitag besser als
      Mittwoch"): je Tag die beste Wertung seiner Fenster (rzPlanen: Sicherheit x Abstand zum Termin x Laenge), x 100.
      Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
+  const vrArt=rzVrArt();
   const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(rzWetterWert(w)*100);   // v5.72: immer eine Zahl; v5.73: nur Wetter
-    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+"</b>";};
+    let tr="";if(vrArt==="tropfen"&&w&&!w.leer&&rzTagFaktoren(w).fR<=0.97){da.add("rz-wt");
+      tr='<svg class="rz-wt" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>';}
+    return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+tr+"</b>";};
   const da=new Set(),recW=P.rec?(P.W||[]).filter(w=>w.tag===P.rec.tag&&w.pp<=P.rec.pp+3):[];   // v5.77: alle gleich guten Fenster des Tages
   let mehrAuf=false;
   for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
@@ -5808,7 +5827,8 @@ function rzLeisteEinfach(P){
       // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
       // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
       const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
-      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+      let vr="";if(vrArt==="verlauf"&&(k==="rz-gut"||k==="rz-risk")){const v=rzVorregen(c.s);if(v.st>=0.15){vr=' rz-vr" style="--vr:'+(0.2+0.5*v.st).toFixed(2);if(!vorbei)da.add("rz-vr");}}
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+vr+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   if(mehrAuf)h+="</div>";
   h+="</div>";
@@ -5821,7 +5841,10 @@ function rzLeisteEinfach(P){
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
       +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
-      +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
+      +(da.has("rz-un")&&woche2?'<span class="rz-legun">unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")
+      +(da.has("rz-vr")?'<span class="rz-legun"><i class="rz-gut rz-vr" style="--vr:.6;display:inline-block;vertical-align:-1px;margin-right:4px"></i>heller Anfang = Regen in den 24 h davor, Boden evtl. noch weich</span>':"")
+      +(da.has("rz-wt")?'<span class="rz-legun"><svg class="rz-wt rz-wtl" viewBox="0 0 10 13" aria-hidden="true"><path d="M5 1C3.4 3.6 1.5 5.9 1.5 8.3a3.5 3.5 0 0 0 7 0C8.5 5.9 6.6 3.6 5 1z"/></svg>Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)</span>':"")+"</div>"
+      +'<div class="rz-vrt">Vorregen (Test): '+[["verlauf","Verlauf"],["tropfen","Tropfen"],["aus","aus"]].map(([v,t])=>'<button type="button" data-rzk="vr:'+v+'"'+(vrArt===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
@@ -5870,6 +5893,7 @@ function rzGrossBinden(root){
     else if(b.dataset.rzk==="zurueck"){const v=RASEN.E.vor;RASEN.E.letzt=v&&v.letzt!==RASEN.E.letzt?v.letzt:null;RASEN.E.hoch=!!(v&&v.hoch);delete RASEN.E.vor;neu();}
     else if(b.dataset.rzk==="einst"){root._einst=!root._einst;rzZeichne(root);}
     else if(b.dataset.rzk==="mehr"){try{localStorage.setItem("rz_woche2",b.getAttribute("aria-expanded")==="true"?"0":"1");}catch(x){}detZu();rzGrossNeu();}
+    else if(/^vr:/.test(b.dataset.rzk)){try{localStorage.setItem("rz_vr",b.dataset.rzk.slice(3));}catch(x){}detZu();rzGrossNeu();}
     else if(b.dataset.rzk==="omneu"){if(RASEN.laeuft)return;b.disabled=true;b.textContent="lädt …";RASEN.t=0;rzLaden();}
     else if(b.dataset.rzt!=null){const i=+b.dataset.rzt;RASEN.E.tage6[i]=RASEN.E.tage6[i]?0:1;neu();}
     else if(b.dataset.v){RASEN.E.modus=b.dataset.v;neu();}
@@ -5877,7 +5901,8 @@ function rzGrossBinden(root){
       if(b.classList.contains("sel")){detZu();return;}detZu();b.classList.add("sel");
       const zust={regen:"Regen",nass:"trocknet noch ab",weich:"Halme trocken, Boden weich",tau:"Tau",kalt:"zu kalt",trocken:"trocken"}[c.z];
       d.innerHTML="<b>"+rzTagTxt(c.tag)+" "+rzHH(c.s)+"–"+rzHH(c.e)+" Uhr</b> · "+zust+" · "+rzMM(c.p)+" · Risiko "+(c.pp==null?"–":c.pp+" %")+" · "+Math.round(c.T)+" °C · Luftfeuchte "+Math.round(c.rh)+" %"
-        +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund);
+        +(c.gem?" · gemessen":c.radar?" · Radar":"")+(c.erlaubt?" · Mähzeit":" · "+c.grund)
+        +(b.classList.contains("rz-vr")?" · Regen in den 24 h davor "+rzMM(rzVorregen(c.s).mm)+" (gewichtet, je älter, desto weniger)":"");
       // v5.49: als Blase ueber (bzw. unter) der Zeile - im Fluss schob sie Legende und Quelle hin und her
       d.hidden=false;rzBlasePlatz(b,d);}};
   root.querySelectorAll("[data-rze]").forEach(inp=>{const k=inp.dataset.rze;

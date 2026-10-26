@@ -2215,6 +2215,19 @@ Jetzt bis 13 Uhr". NEU dabei: beginnt das empfohlene Fenster jetzt (<= 5 min), s
 09:46-13 Uhr", Kachel "MAEHEN jetzt / bis 13 Uhr". Blase nennt den Bezug ("2,2 mm Regen in den 24 h vor 9 Uhr (je aelter,
 desto weniger): x0,99"). Regression: Norden-Fall v5.78 weiter Mittwoch (Di 56, Wahlwert 54 gegen 86); test_modell 228/228,
 test_app stub wie bisher.
+v5.85 TEST (Nutzer: "wenn es am Vortag geregnet hat, gruene Kacheln mit leichtem Verlauf links weiss, rechts gruen -
+eine Stunde, die sich ins Gruene vorkaempft - oder eine andere Idee?"): Umschalter "Vorregen (Test): Verlauf | Tropfen | aus"
+unter der Legende der Rasen-Leiste (`rz_vr`, `rzVrArt()`, Voreinstellung Verlauf). VERLAUF: gruene und beige Kaestchen,
+deren gewichteter Regen der 24 h davor (`rzVorregen(t)`, 1 - Alter/24 h, Kurve wie fR) Staerke >= 0,15 hat (~0,4 mm),
+bekommen `.rz-vr` = linear-gradient links hell (hell weiss, dunkel Kartenfarbe, Deckkraft 0,2 + 0,5 x Staerke) -> rechts
+Kaestchenfarbe; Zellblase nennt den Vorregen; Legende "heller Anfang = Regen in den 24 h davor, Boden evtl. noch weich".
+TROPFEN (mein Gegenvorschlag): blauer Tropfen oben rechts am Wert-Kreis, wenn der Tages-Vorregenfaktor (v5.84) den Wert um
+>= 3 % senkt (fR <= 0,97); Legende "Tropfen am Wert = Regen davor senkt den Wert (Wert antippen)". Begruendung fuer den
+Tropfen: seit v5.84 ist der Vorregen EIN Faktor je Tag - ein Verlauf je Stunde behauptet eine Stundengenauigkeit, die die
+Rechnung nicht hat; ob das Gras wirklich noch nass ist, entscheiden die Abtrocknungsregeln (schraffiert), nicht der Faktor.
+Geprueft (`v585.py`, Stub om_v578: Mo Regen, Di bis 7 Uhr): Verlauf Di 11/12/15/16 (0,36 -> 0,29), Tropfen nur Di (56),
+"aus" nichts; hell und dunkel. Erlental 26.10. zeigt in keiner Variante etwas (Regen endete 18 h vor der ersten guten
+Stunde, gewichtet 0,13 mm). AUFRAEUMEN nach der Wahl: Verlierer-Zweig + CSS, `rz_vr`, `rzVrArt`, `.rz-vrt`, Klick `vr:`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
