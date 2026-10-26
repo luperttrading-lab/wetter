@@ -2290,6 +2290,10 @@ gelbem Ring 2,5 px, Legende mit gelbem Muster "gelber Rahmen = empfohlene Fenste
 (Deckkraft 0,5 + 0,45 x Staerke statt 0,3 + 0,55), Uebergang bis 55 %, ab 60 % dunkler. Beinahe wieder die Kommentar-Falle aus
 v5.89 (Kommentar hinter ";" vor weiterem Code in derselben Zeile) - vor dem Test gefunden; Diff jetzt immer auf "//" in
 neuen Zeilen pruefen. Geprueft mit echten Daten Norden, hell und dunkel.
+v5.93 (Nutzer: "das Gelb aussen rum, dass die Kachel nicht kleiner wird"): Rahmen der empfohlenen Fenster AUSSERHALB des
+Kaestchens: box-shadow 0 0 0 2,5px #ffc21a + 0 0 0 3px rgba(120,80,0,.5) - zusammen 3 px = genau die Luecke zwischen den
+Kaestchen; nebeneinander liegende Fenster ergeben einen durchgehenden Rahmen. Kaestchen gemessen gleich gross wie die
+Nachbarn (17 x 22 px bei 393 pt). Legendenmuster mit 3/6 px Abstand. Hell und dunkel mit echten Daten Norden geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
