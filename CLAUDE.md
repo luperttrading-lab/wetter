@@ -66,6 +66,14 @@ angekommen ist. Sieht der Nutzer eine Aenderung nicht, ist die erste Frage:
 welche Fassung hat er geladen? Der Update-Balken nennt die Version, die
 ONLINE liegt, nicht die geladene.
 
+## Link ueber der Kostenzeile (Nutzer, 26.10.2026)
+
+Jede Antwort endet mit dem Link zur App, um die es gerade ging, als vorletzte Zeile DIREKT ueber der Kostenzeile -
+anklickbar, ohne Codeblock: Wetter-App <https://luperttrading-lab.github.io/wetter/>, Rasen-App
+<https://luperttrading-lab.github.io/wetter/rasen/>, bei Testseiten die Seite selbst (z. B.
+<https://luperttrading-lab.github.io/wetter/rasentest.html>). Ging es um beide Apps, beide Links in einer Zeile.
+Die Versionsnummer steht wie bisher im Text davor.
+
 ## Datenpipelines
 
 - RADOLAN, BfS-Achse, BfS-Stationen: Actions committen ihre JSON-Dateien
