@@ -1093,7 +1093,8 @@ Puls 42/90 Tage, Deckel 150 mm. Eichung = Kalman in ln k (nur k ist aus Hoehen l
 (n<2: 1/4-4), Band 80 % (+-50 % ungeeicht). Termine: Ein-Drittel (1,5 x Schnitt), Zielhoehe, Wetterfenster aus planer.js.
 BEKANNT/OFFEN: Open-Meteo aus dem Pruefstand zeitweise nicht erreichbar (SSL-EOF) - die App faellt dann auf Klima +
 "Erneut versuchen" zurueck, Bilder mit vollen Daten kommen aus `test_app.py stub`; ntfy-Erinnerung nur beim Oeffnen der App
-(Delay bis 3 Tage, nicht zuruecknehmbar); Sommerzeit-Versatz der Open-Meteo-Stunden wie in der Wetter-App; Rasentyp/
+(Delay bis 3 Tage, nicht zuruecknehmbar); Sommerzeit-Versatz der Open-Meteo-Stunden wie in der Wetter-App; `test_app.py stub`
+meldet "Fehlerfall: Erneut versuchen" rot - Artefakt der eingefrorenen Uhr, im Browser stimmt die Box (geprueft 26.10.); Rasentyp/
 Boden/Duengung nur als Stufen. Verbindlicher Bauvertrag lag im Scratchpad (vertrag.md) - Inhalt steht sinngemaess in
 README.md und MODELL.md.
 
@@ -2100,6 +2101,16 @@ nach dem Scrollen 3-4 px ueber der Zelle.
 v5.75 (Nutzer: "20 % als Voreinstellung"): Rasen "Regenrisiko hoechstens" Voreinstellung 20 statt 30 % (`RZ_STD.risiko`).
 Einmalig: gespeichert 30 ohne Marke `rv` -> 20 (das war die alte Voreinstellung, der Speicher schreibt immer alle Werte);
 danach `rv:2`, ein spaeter bewusst gewaehltes 30 bleibt. Geprueft: neu 20, alt 30 -> 20, eigene 10 bleibt, 30 mit rv bleibt.
+v5.76 (Nutzer-Screenshot Mo 26.10. 07:14, Norden: "Mittwoch 100 zu hoch, wenn es morgens noch geregnet hat; Freitag
+sollte schlechter sein als Samstag, weil Donnerstag Regen war"): Die Zahl in der Leiste bewertete nur das BESTE FENSTER
+(trocken-Chance x Laenge) - ein Tag mit einem trockenen Fenster um 11 bekam 100, obwohl die halbe Maehzeit nass war. Jetzt
+eine TAGESZAHL (`rzTagFaktoren`, `rzWetterWert`): trocken-Chance des Fensters x Laengenbonus x Anteil der guten Stunden an
+den Maehstunden des Tages (0,5 + 0,5 x Anteil; halbe nasse Maehzeit = x0,75) x Vorregen (Regen in den 24 h vor dem
+Fensterbeginn, bis -15 %: 1 mm x0,96, 3 mm x0,91, 10 mm x0,85, log-Verlauf). Die Blase nennt alle drei Teile ("4 von 6
+Maehstunden gut: x0,83 · 2,2 mm Regen in den 24 h davor: x0,93"). Die EMPFEHLUNG (`rzPlanen`) rechnet unveraendert mit der
+trocken-Chance und dem Abstand zum Termin - der empfohlene Tag kann eine niedrigere Zahl tragen als ein spaeterer, die Blase
+erklaert das. Dieselbe Formel in der Rasen-App (`rasen/planer.js tagFaktoren/wetterWert`, r1.03, `out[tag].faktoren`).
+Geprueft: Testdaten Mo 2,2 mm Vorregen -> 86 statt 93; Planer-Test Tag mit 6 mm Morgenregen 56 (2 von 6 gut), Folgetag 95.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
