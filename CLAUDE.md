@@ -1074,6 +1074,29 @@ Testkanal: Test + 2 echte Norden-Warnungen angekommen, zweiter Lauf meldet nicht
 warnung.json (die App teilt ihren Ort dem Server nicht mit), Verzoegerung bis ~15 min plus DWD/Bright-Sky-Takt; reisst
 die RADOLAN-Kette, fallen auch die Warnungen aus, bis der 4-h-Rueckfall greift. Offizielle Alternative mit GPS: DWD WarnWetter.
 
+## Rasen-App (Ordner `rasen/`, ab 26.10.2026)
+
+Nutzer: "als separate App bauen - fuer die Wetter-App wird das zu komplex" (Auftrag: Rasenwachstum in mm/Tag,
+naechster Maehtermin, Eichung aus gemessenen Hoehen). EIGENE App unter `https://luperttrading-lab.github.io/wetter/rasen/`
+(eigenes Icon/Manifest, Speicher `localStorage.rasenApp`, mehrere Flaechen). Der Rasenteil der Wetter-App (`rz*` in
+index.html) bleibt vorerst unveraendert; `planer.js` ist ein Port davon. Dateien: `index.html` (UI), `modell.js` (reines
+Wachstumsmodell, Node-testbar), `wetter.js`, `planer.js`, `MODELL.md` (Formeln, 45 Parameter mit Herkunft, Grenzen,
+Quellen), `README.md`, `test_modell.js`, `test_app.py`. Gebaut am 25./26.10. per Workflow: 3 Modellentwuerfe -> Synthese ->
+Kritik, parallele Implementierung gegen einen Vertrag, Integration, 2 Pruefrunden (Modell/Code/UX, je Fund 2 Skeptiker).
+VERSIONIERUNG: eigene Nummer `r1.xx` oben rechts in rasen/index.html UND `?v=1.xx` an den drei `<script src>` (Cache);
+KEINE Kopie-Dateien wie bei der Wetter-App, keine Aenderung an version.json. Bei jeder Aenderung an rasen/: `node
+rasen/test_modell.js` gruen, `python3 rasen/test_app.py stub` (Server 8899 in der Repo-Wurzel; Screenshots nach
+$RASEN_SHOTS), dann commit + merge nach main wie gewohnt. MODELL (Kurz): Hoehe(t+1) = Hoehe(t) + Gmax*k*fT*fW*fL*fN;
+Gmax 4 mm/Tag (Schaetzwert, Anker = Wetter-App gd 60: 10/15/20 Grad -> ~20 mm in 7 Tagen), fT Gauss Topt 19 / sigma 7
+(PACE-Turf-Form), fW FAO-56-Bodenspeicher (Sand 22 / Lehm 39 mm, p 0,45, Kc 0,9), fL Saettigung 6 MJ, fN Duengestufe mit
+Puls 42/90 Tage, Deckel 150 mm. Eichung = Kalman in ln k (nur k ist aus Hoehen lernbar), Huber 1,6, Ausreisser 0,35-2,8
+(n<2: 1/4-4), Band 80 % (+-50 % ungeeicht). Termine: Ein-Drittel (1,5 x Schnitt), Zielhoehe, Wetterfenster aus planer.js.
+BEKANNT/OFFEN: Open-Meteo aus dem Pruefstand zeitweise nicht erreichbar (SSL-EOF) - die App faellt dann auf Klima +
+"Erneut versuchen" zurueck, Bilder mit vollen Daten kommen aus `test_app.py stub`; ntfy-Erinnerung nur beim Oeffnen der App
+(Delay bis 3 Tage, nicht zuruecknehmbar); Sommerzeit-Versatz der Open-Meteo-Stunden wie in der Wetter-App; Rasentyp/
+Boden/Duengung nur als Stufen. Verbindlicher Bauvertrag lag im Scratchpad (vertrag.md) - Inhalt steht sinngemaess in
+README.md und MODELL.md.
+
 ## Sonnenkarte im UV-Abschnitt (v4.56)
 
 Die Karte "Sonne" (Bogen, Auf-/Untergang, Sonnenstunden) stand als letzte
