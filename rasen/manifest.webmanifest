@@ -1,0 +1,16 @@
+{
+  "name": "Rasen – Mähplaner",
+  "short_name": "Rasen",
+  "description": "Schätzt die Höhe deines Rasens aus dem Wetter und schlägt den nächsten Mähtermin vor.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef4e6",
+  "theme_color": "#e4f0da",
+  "lang": "de",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}
