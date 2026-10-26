@@ -240,6 +240,9 @@ html.dunkel .rz-elab{--lb:#3b3427;color:#d2c4a3}html.dunkel .rz-elab.rz-ebn{--lb
 .rz-nass{background:repeating-linear-gradient(135deg,#cfe0f0 0 3px,#e7eff7 3px 6px)}
 .rz-kalt{background:#e2dbf3}.rz-dunkel{background:#c3cbdd}
 .rz-gut{background:#43a047}.rz-risk{background:#f1dfa8}
+/* v5.77: Regenrisiko als Zahl im Kaestchen (gruen: dunkle Schrift, beige: braun); unter 17 px je Stunde ausgeblendet */
+.rz-er>i>.rz-pp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 8.5px/1 system-ui,sans-serif;letter-spacing:-.2px;color:#0b2a10;pointer-events:none}
+.rz-er>i.rz-risk>.rz-pp{color:#5c4a14}.rz-schmal .rz-er>i>.rz-pp,.rz-schmal .rz-leg .rz-legpp{display:none}.rz-leg .rz-legpp{display:inline}.rz-leg .rz-legun{display:block}
 .rz-leg{display:flex;flex-wrap:wrap;gap:3px 9px;font-size:10.5px;color:var(--muted);margin-top:7px}
 .rz-leg span{display:inline-flex;align-items:center;gap:4px}
 .rz-leg i{width:12px;height:10px}
@@ -1211,7 +1214,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.76</span>
+      <span class="ver">v5.77</span>
     </div>
   </header>
 
@@ -5729,7 +5732,7 @@ function rzLeisteEinfach(P){
      Tipp -> Blase mit der Rechnung. v5.72: jeder Maehtag hat eine Zahl (rzTagWertung), 0 = kein trockenes Fenster. */
   const wZelle=tag=>{const w=rzTagWertung(P,tag),z=Math.round(rzWetterWert(w)*100);   // v5.72: immer eine Zahl; v5.73: nur Wetter
     return '<b class="rz-w'+(z>99?" w3":"")+(P.rec&&P.rec.tag===tag?" rec":"")+'" data-rzw="'+tag+'">'+z+"</b>";};
-  const da=new Set();
+  const da=new Set(),recW=P.rec?(P.W||[]).filter(w=>w.tag===P.rec.tag&&w.pp<=P.rec.pp+3):[];   // v5.77: alle gleich guten Fenster des Tages
   for(const tag of tage){const row=idx[tag],n=rzTageZw(heute,tag),frist=P.f&&P.f.tag===tag&&!P.f.sofort,ft=rzFeiertag(tag),wd=rzWtag(tag);
     const lab='<div class="rz-k'+(frist?" frist":"")+'">'+rzTagTxt(tag)+"<small>"+(frist?"fällig":n===0?"heute":"")+"</small></div>",
           rk='<div class="rz-er'+(n===8?" rz-ab":"")+'"'+st+">";if(n>=8)da.add("rz-un");
@@ -5740,12 +5743,16 @@ function rzLeisteEinfach(P){
       if(!c.hell){h+='<i class="rz-dunkel" data-rzs="'+c.s+'"></i>';if(c.e>jetzt)da.add("rz-dunkel");return;}
       const pp=c.pp==null?0:c.pp,k=c.z==="regen"?"rz-r2":c.z==="nass"||c.z==="weich"||c.z==="tau"?"rz-nass":c.z==="kalt"?"rz-kalt":pp<=E.risiko?"rz-gut":"rz-risk";
       const vorbei=c.e<=jetzt,jetztHier=c.s<=jetzt&&jetzt<c.e;if(!vorbei)da.add(k);
-      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(P.rec&&c.s<P.rec.e&&c.e>P.rec.s?" rec":"")+'" data-rzs="'+c.s+'">'+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
+      // v5.77 (Nutzer): Rahmen um ALLE gleich guten Fenster des empfohlenen Tages (Regenrisiko hoechstens 3 Punkte ueber
+      // dem empfohlenen Fenster), dazu das Regenrisiko als Zahl in gruenen und beigen Kaestchen
+      const rec=recW.some(w=>c.s<w.e&&c.e>w.s),zahl=(k==="rz-gut"||k==="rz-risk")&&c.pp!=null?'<b class="rz-pp">'+Math.round(c.pp)+"</b>":"";
+      h+='<i class="'+k+(vorbei?" rz-vorbei":"")+(rec?" rec":"")+'" data-rzs="'+c.s+'">'+zahl+(jetztHier?'<b class="rz-jz2" style="left:'+((jetzt-c.s)/36e5*100).toFixed(1)+'%"></b>':"")+"</i>";});
     h+=wZelle(tag)+"</div>";}
   h+="</div></div>";
   h+='<div class="rz-esatz">Spalten = deine Mähzeit '+E.von+"–"+E.bis+" Uhr.</div>";
   h+='<div class="rz-leg">'+[["rz-gut","gut zum Mähen"],["rz-risk","Regenrisiko"],["rz-r2","Regen"],["rz-nass","noch nass (Tau, Boden weich)"],["rz-kalt","zu kalt"],["rz-dunkel","dunkel"]]
       .filter(([k])=>da.has(k)).map(([k,t])=>'<span><i class="'+k+'"></i>'+t+"</span>").join("")
+      +(da.has("rz-gut")||da.has("rz-risk")||recW.length?'<span class="rz-legun">'+(da.has("rz-gut")||da.has("rz-risk")?'<span class="rz-legpp">Zahl im Kästchen = Regenrisiko in %'+(recW.length?" · ":"")+"</span>":"")+(recW.length?"Rahmen = empfohlene Fenster":"")+"</span>":"")
       +(da.has("rz-un")?'<span class="rz-legun">Weitere Tage: in der Leiste nach oben wischen · unter der gestrichelten Linie ist die Vorhersage unsicherer</span>':"")+"</div>";
   return h;}
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
@@ -5775,6 +5782,8 @@ function rzGrossBinden(root){
       root._mMin=t.firstElementChild?t.firstElementChild.offsetHeight:0;t.remove();}
     root._mMin=Math.max(root._mMin,m.offsetHeight);m.style.minHeight=root._mMin+"px";}}
   // v5.68: Kopffelder - Schrift nur, wenn sie mit 2 px Rand hineinpasst (verborgen = 0 breit: nicht anfassen)
+  // v5.77: Zahlen nur, wenn ein Kaestchen mindestens 17 px breit ist (320 pt: ~13 px) - gemessen, nicht geschaetzt
+  {const i=root.querySelector(".rz-er>i[data-rzs]");if(i&&i.offsetWidth)root.classList.toggle("rz-schmal",i.offsetWidth<17);}
   // v5.74: Scrollbereich genau 8 Tage hoch, plus 1 px - so lugt die gestrichelte Linie unten hervor
   root.querySelectorAll(".rz-sc").forEach(sc=>{const z=sc.children;if(z.length>8&&z[0].offsetHeight)sc.style.maxHeight=(z[8].offsetTop-z[0].offsetTop+1)+"px";});
   root.querySelectorAll(".rz-elab b").forEach(b=>{const w=b.parentElement.getBoundingClientRect().width;if(w&&b.getBoundingClientRect().width+4>w)b.remove();});
