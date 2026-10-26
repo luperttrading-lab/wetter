@@ -2273,6 +2273,16 @@ Spalten). Kommentare deshalb immer auf eine eigene Zeile. Geprueft 393/320 pt, h
 v5.90 (Nutzer: "den Verlauf in der dunklen Ansicht auch von Weiss nach Gruen, nicht Schwarz nach Gruen"): dunkler Modus nimmt
 denselben Verlauf wie hell (links weiss nach Staerke, Mitte Kaestchenfarbe, rechts rgba(0,45,10,.26)). Geprueft mit echten
 Daten Erlental, dunkel und hell.
+v5.91 / Rasen-App r1.09 (Nutzer, Norden 11:49: "Mittwoch ist doch schon trocken - Donnerstag 5.11. hat Verlauf, ich sehe
+keinen Unterschied zu Freitag"): Im November verdunsten in Norden ~0,9-1,2 mm am Tag; der Regen von Di 3.11. (bis 19 Uhr,
+dazu Mo 2.11. ~6 mm) klang bis Do kaum ab und fiel erst am Fr aus dem 72-h-Rueckblick - ein Sprung ohne Bedeutung. Jetzt
+setzt ein GANZER TAG OHNE REGEN zurueck (`RZ_VR.frei` = 24 h am Stueck, planer.js FREI): `rzVorregen` bricht rueckwaerts ab,
+sobald vor einer Regenstunde 24 trockene Stunden liegen. Damit auch Erlental Di 27.10. frei (Montag ganz trocken) - die
+Frage "Dienstag???" von 10:55 ist so beantwortet. Gemessen (echte Daten, mittel): Norden Mi 4.11. x0,91 (9,6 mm ohne
+trockenen Tag dazwischen), Do 5.11. und Fr 6.11. x1,00; Erlental Mo 26.10. x0,88, Di 27.10. x1,00, Mi 28.10. x0,98 (0,6 mm
+nachts), Do 5.11. x0,93 (Mi-Niesel + Di-Regen ohne trockenen Tag). Blase: "9,6 mm Regen vor 9 Uhr ohne trockenen Tag dazwischen,
+seit dem letzten Regen 0,2 mm Verdunstung" bzw. "vor 9 Uhr mindestens 24 Stunden kein Regen". Planer direkt: 28 h trocken ->
+0 mm, 18 h -> 15 mm (x0,895). test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
