@@ -2165,6 +2165,16 @@ trocken), 08:13 Open-Meteo (Fr Luftfeuchte 97-100 % = Tau den ganzen Tag, Mo 2.1
 geholt und gegen die Bilder gehalten: Open-Meteo passt exakt auf 08:13 (Di 12/32 %, Mi 0/0/0/0 und 4/6). Der Rueckfall
 steht nur in der Quellenzeile unten (`rzQuelle`). OFFEN (Nutzer gefragt): Ersatz sichtbar kennzeichnen ("MOSMIX-Ersatz"
 neben "Stand", Werte blasser). Zweiter Unterschied: Maehzeit 8-19 (06:59) gegen 8-20 (08:13) - vom Nutzer umgestellt?
+v5.80 (Nutzer: "nicht 'Heute gemaeht' als Standard oben schon angeklickt lassen, wenn man die App oeffnet oder nach
+einer neuen Version neu startet"): kein Standard, ein GEISTERKLICK. Der Tipp auf die Kachel oeffnet das Fenster schon bei
+pointerup; den zugehoerigen Klick schickt iOS (und Chromium mit Touch) danach an das Element, das JETZT an der Stelle
+liegt - im frisch geoeffneten Fenster. Liegt die Kachel auf der Hoehe des Knopfs "Heute gemaeht" (Fenster: y 109-151 pt
+bei 393 pt, je nach Kachelreihe und Scrollstand), gilt der Rasen als heute gemaeht und wird gespeichert; v5.21 hatte nur
+den HINTERGRUND fuer 450 ms geschuetzt. Jetzt faengt `kzGrossZeigen` in der Capture-Phase JEDEN Klick im Fenster in den
+ersten 450 ms nach dem Oeffnen ab (`ov._auf`) - gilt fuer alle Grossansichten, auch fuers neue Kreuz (v5.79), das der
+Geisterklick sonst sofort geschlossen haette. Nachgestellt im Pruefstand (`v580.py`, Chromium mit has_touch, Seite so
+gescrollt, dass die Kachel unter dem Knopf liegt): vorher letzt = 2026-10-26 nach dem Oeffnen, nachher null; ein echter
+Tipp nach 600 ms setzt heute, das x nimmt es zurueck.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -1222,7 +1222,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v5.79</span>
+      <span class="ver">v5.80</span>
     </div>
   </header>
 
@@ -5016,6 +5016,10 @@ function kzGrossZeigen(html){
     const zu=()=>ov.classList.add("hidden");
     // iOS schickt den Klick zum oeffnenden Tipp erst NACH pointerup - dann laege er auf dem Hintergrund
     ov.addEventListener("click",e=>{if(e.target===ov&&Date.now()-ov._auf>450)zu();});
+    // v5.80 (Nutzer: "Heute gemaeht ist beim Oeffnen schon angeklickt"): derselbe Klick traf auch KNOEPFE im frisch
+    // geoeffneten Fenster - lag "Heute gemaeht" unter dem Finger, galt der Rasen als heute gemaeht (im Pruefstand mit
+    // Touch nachgestellt). In den ersten 450 ms nach dem Oeffnen zaehlt im Fenster deshalb KEIN Klick (Capture-Phase).
+    ov.addEventListener("click",e=>{if(Date.now()-ov._auf<450){e.stopPropagation();e.preventDefault();}},true);
     el("kzGrossZu").onclick=zu;el("kzGrossX").onclick=zu;
     document.addEventListener("keydown",e=>{if(e.key==="Escape")zu();});}
   el("kzGrossIn").innerHTML=html;ov._auf=Date.now();ov.classList.remove("hidden");kzAchseFrei(el("kzGrossIn"));   // erst sichtbar, dann messen
