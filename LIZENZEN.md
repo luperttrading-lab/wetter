@@ -98,8 +98,8 @@ nach etwa drei Wochen aufgebraucht (Solar-Laeufer allein ~100 min/Tag). Also: Re
 
 ## Was tatsaechlich Geld kostet
 
-Heute nicht die Daten, sondern die Entwicklung mit Claude (dieser Chat am 27.10.2026 rund 298 $
-seit Anfang Oktober). Im App-Store-Fall kaemen dazu: 99 $/Jahr Apple; bei Preis/Abo/Werbung 15 %
+Heute nicht die Daten, sondern die Entwicklung mit Claude (dieser Chat vom 21. bis 27.10.2026 rund
+298 $). Im App-Store-Fall kaemen dazu: 99 $/Jahr Apple; bei Preis/Abo/Werbung 15 %
 Provision, Open-Meteo-Abo (je nach Nutzerzahl und Zaehlweise Standard oder Professional) und ein
 eigener Server.
 
