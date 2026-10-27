@@ -1,7 +1,7 @@
 {
   "datum": "2026-10-27",
   "summe_mm": 0.0,
-  "stunden_ok": 8,
+  "stunden_ok": 9,
   "stunden_erwartet": 9,
   "stunden": [
     {
@@ -38,8 +38,7 @@
     },
     {
       "stunde": "09:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -126,7 +125,7 @@
     "datum": "2026-10-26",
     "mm": 0.07
   },
-  "aktualisiert": "2026-10-27T08:07:01+00:00",
+  "aktualisiert": "2026-10-27T08:37:01+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -136,7 +135,7 @@
       "lon": 8.6740943,
       "datum": "2026-10-27",
       "summe_mm": 0.0,
-      "stunden_ok": 8,
+      "stunden_ok": 9,
       "stunden_erwartet": 9,
       "stunden": [
         {
@@ -173,8 +172,7 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -269,7 +267,7 @@
       "lon": 8.6226918,
       "datum": "2026-10-27",
       "summe_mm": 0.0,
-      "stunden_ok": 8,
+      "stunden_ok": 9,
       "stunden_erwartet": 9,
       "stunden": [
         {
@@ -306,8 +304,7 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -402,7 +399,7 @@
       "lon": 7.2066,
       "datum": "2026-10-27",
       "summe_mm": 0.0,
-      "stunden_ok": 8,
+      "stunden_ok": 9,
       "stunden_erwartet": 9,
       "stunden": [
         {
@@ -439,8 +436,7 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
