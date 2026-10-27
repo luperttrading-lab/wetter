@@ -1,16 +1,16 @@
 {
- "stand": "2026-10-25",
+ "stand": "2026-10-26",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0062,
+   "steigung": 0.0063,
    "fehler": 0.0093,
    "t": 0.67
   },
   "hoehe": {
-   "steigung": 0.0161,
-   "fehler": 0.0378,
-   "t": 0.42
+   "steigung": 0.0166,
+   "fehler": 0.0379,
+   "t": 0.44
   },
   "mittel": 0.973,
   "reststreuung": 0.093,
@@ -117,16 +117,16 @@
    "bis": "2026-10-21"
   },
   "Hohenpeissenberg": {
-   "faktor": 1.077,
-   "roh": 1.078,
-   "tage": 26,
+   "faktor": 1.079,
+   "roh": 1.08,
+   "tage": 27,
    "vorlaeufig": false,
-   "streuung": 0.03,
+   "streuung": 0.029,
    "klare_tage": 20,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-22"
+   "bis": "2026-10-26"
   },
   "Klippeneck": {
    "faktor": 0.884,
