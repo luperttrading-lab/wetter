@@ -1128,6 +1128,12 @@ Zwei Kurven, zwei ganz verschiedene Wege:
   Saeulen und das amtliche Bild darunter dieselben Zacken zeigen, sind zwei
   unabhaengige Messgeraete an derselben Station unter denselben Wolken.
 
+**Claude-Sichtung der UV-Action (geplante Aufgabe im Konto, nicht im Repo):** lief taeglich vom 04.09. bis 28.10.2026,
+liest nur `uv_klarcheck.log` / `uv-station.json` und meldet sich bei klarem Tag, neuem Stationsfaktor, Waechter-Alarm oder
+gescheiterter Action. Am 28.10. (Nutzer: "im Winter sind die UV-Werte sowieso schwach") umgestellt auf WOECHENTLICH,
+montags 19:23 Uhr, nur April bis September (`CRON_TZ=Europe/Berlin 23 19 * 4-9 1`), erster Lauf Mo 05.04.2027; sie liest
+dann die Laeufe der ganzen Woche aus der Git-Historie. Die GitHub Action selbst rechnet weiter taeglich, auch im Winter.
+
 ### v4.70: Prognosesaeulen im UV-Bild
 
 Rechts von der Messung (ab Ende der 10-Minuten-Werte, sonst ab jetzt) blasse
