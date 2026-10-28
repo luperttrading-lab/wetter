@@ -1132,7 +1132,8 @@ Zwei Kurven, zwei ganz verschiedene Wege:
 liest nur `uv_klarcheck.log` / `uv-station.json` und meldet sich bei klarem Tag, neuem Stationsfaktor, Waechter-Alarm oder
 gescheiterter Action. Am 28.10. (Nutzer: "im Winter sind die UV-Werte sowieso schwach") umgestellt auf WOECHENTLICH,
 montags 19:23 Uhr, nur April bis September (`CRON_TZ=Europe/Berlin 23 19 * 4-9 1`), erster Lauf Mo 05.04.2027; sie liest
-dann die Laeufe der ganzen Woche aus der Git-Historie. Die GitHub Action selbst rechnet weiter taeglich, auch im Winter.
+dann die Laeufe der ganzen Woche aus der Git-Historie. Der erste Lauf im April (1.-7.) ist eine WINTERBILANZ seit 28.10.
+und meldet sich immer (Nutzer: "den ganzen Winter mit auswerten"). Die GitHub Action selbst rechnet weiter taeglich, auch im Winter.
 
 ### v4.70: Prognosesaeulen im UV-Bild
 
