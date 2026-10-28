@@ -87,7 +87,7 @@ function sonneTage(stunden,lat,lon,tz){const Zt=zeit(tz),S={};
    Erwartet aufsteigend sortierte, lueckenlose Stunden (die 6-h- und 24-h-Summen zaehlen Eintraege). */
 function bewerten(stunden,einst,sonneMap,tz){
   const E=einstVoll(einst),Zt=zeit(tz),S=sonneMap||{},Z=(stunden||[]).map(c=>Object.assign({},c));
-  const RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1),dMax=TAU.max*(E.hoch?1.5:1);let need=0,boden=0,dw=0;
+  const td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1),dMax=TAU.max*(E.hoch?1.5:1);let need=0,boden=0,dw=0;
   for(let i=0;i<Z.length;i++){const c=Z[i];c.p=+c.p||0;c.sun=+c.sun||0;c.wind=+c.wind||0;let s6=0,s24=0;
     for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
     const t=Zt.teile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
@@ -95,7 +95,8 @@ function bewerten(stunden,einst,sonneMap,tz){
     // r1.10 (wie Wetter-App v5.95): Abtrocknen nach Verdunstung - jede Stunde zieht ET0/TROCKEN_MM ab (Novembernacht
     // ~0,1, Herbsttag ~1, Sommersonne 4-6), statt 1 je Uhrstunde (Sonne/Wind 2, feucht 0,5)
     // r1.12 (wie Wetter-App v6.02): Tau als Wassermenge dw - siehe TAU unten
-    const dd=c.p>=0.1?-dw:(c.rh>=RH?TAU.rate:0)-etStd(c),dMitte=Math.max(0,dw+dd/2);dw=Math.min(dMax,Math.max(0,dw+dd));c.dw=dw;
+    // r1.14 (wie Wetter-App v6.04): Taubildung stufenlos nach Luftfeuchte, Wolken und Wind (tauRate), hohes Gras x1,5
+    const dd=c.p>=0.1?-dw:tauRate(c)*(E.hoch?1.5:1)-etStd(c),dMitte=Math.max(0,dw+dd/2);dw=Math.min(dMax,Math.max(0,dw+dd));c.dw=dw;
     if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
     else if(need>0){c.z="nass";need=Math.max(0,need-etStd(c)/TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
@@ -126,6 +127,13 @@ const TROCKEN_MM=0.1;   // mm Verdunstung je "Standardstunde" der Abtrocknungsta
    0,1-0,2 mm (HESS 23, 1179, 2019), hoechste gemessene Rate auf Weide 0,032 mm/h. Folge: morgens 1-2 Stunden laenger Tau
    (Oktober bis ~11 Uhr), dafuer kein "Tau" mitten am Tag, nur weil die Luftfeuchte an der Grenze liegt. */
 const TAU={rate:0.02,max:0.2,nass:0.005};
+/* r1.14 (wie Wetter-App v6.04): TAUBILDUNG STUFENLOS statt "ab rh % voll, darunter nichts" (vorher kippte eine Nacht
+   mit 89 % ganz trocken, eine mit 90 % ganz nass). Rate = 0,02 mm/h x s x Wolken x Wind;
+   s = (Luftfeuchte - 86) / 8 auf 0..1 (Mitte 90 %, Sentelhas et al. 2008), Wolken = 0,5 + 0,5 x (1 - Bedeckung),
+   Wind = 1 / (1 + (V / 4,4 m/s)^4) - beides abgeschwaecht nach Beysens (2016). Ohne Bewoelkung gilt halb bedeckt. */
+function tauRate(c){if(c.rh==null)return 0;
+  const s=Math.max(0,Math.min(1,(c.rh-86)/8)),N=c.cc!=null&&isFinite(c.cc)?Math.max(0,Math.min(100,c.cc))/100:0.5,V=(+c.wind||0)/3.6;
+  return TAU.rate*s*(0.5+0.5*(1-N))/(1+Math.pow(V/4.4,4));}
 function etStd(c){if(c.et!=null&&isFinite(c.et))return Math.max(0,c.et);const m=ET0_MON[new Date(c.s).getMonth()];return c.hell===undefined?m/24:c.hell?m/11:0;}
 // r1.09 (wie Wetter-App v5.91): 24 Stunden am Stueck ohne Regen setzen zurueck - aelterer Regen zaehlt nicht mehr
 function tagFaktoren(w,Z){const EH=1.5,BIS=72*36e5,FREI=24;let n=0,g=0,mm=0,mmw=0,ref=null,ev=0,evL=null,trocken=0;Z=Z||[];
@@ -197,5 +205,5 @@ function tagesFenster(stunden,einst,heute,jetzt){
       grund:risk?"Regenrisiko über deiner Grenze ("+E.risiko+" %) – nicht empfohlen":""};}
   return out;}
 
-return {VERSION,STD,TAU,einstVoll,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert,tagFaktoren,notFenster,notTxt};
+return {VERSION,STD,TAU,einstVoll,tauRate,zeit,tagPlus,tageZw,wtag,tagTxt,stdTxt,ostern,feiertag,maehtag,sonne,sonneTage,bewerten,fenster,tagesFenster,wetterWert,tagFaktoren,notFenster,notTxt};
 });

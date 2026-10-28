@@ -12,7 +12,7 @@ const VERSION="1.0";
 const API={VERSION,ZEITLIMIT:15000,CACHE_MIN:30,VORAUS:15,MAX_PAST:92,MAX_SEIT:400};   // ZEITLIMIT/CACHE_MIN sind absichtlich veraenderbar (Tests)
 const BASE="https://api.open-meteo.com/v1/forecast",ARCHIV="https://archive-api.open-meteo.com/v1/archive";
 const DAILY="temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum,et0_fao_evapotranspiration,sunshine_duration,sunrise,sunset";
-const HOURLY="precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m,et0_fao_evapotranspiration";   // r1.07: et0 fuer den Vorregen
+const HOURLY="precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m,et0_fao_evapotranspiration,cloud_cover";   // r1.07: et0 fuer den Vorregen; r1.14: cloud_cover fuer den Tau
 /* Schluessel mit "Cache": die Wetter-App auf derselben Origin zaehlt beim ersten Start alle localStorage-Eintraege
    ausser /cache/i als "Bestand" und ihr Geheimknopf (Erststart-Vorschau) raeumt sie beiseite – Zwischenspeicher der
    Rasen-App sollen dort weder als Bestand zaehlen noch verschoben werden. Alte Schluessel (rasenWetter:*) raeumt
@@ -93,9 +93,9 @@ function tageFormen(daily,heute,quelleFest,tz){const T=[];if(!daily||!Array.isAr
 /* Open-Meteo hourly (timeformat=unixtime) -> Stunden wie rzOpenMeteo: precipitation = Summe der Stunde VOR dem
    Stempel, Temperatur/Feuchte gelten zum Stempel -> Mittel aus Stempel und Vorstempel. */
 function stundenFormen(h){const Z=[];if(!h||!Array.isArray(h.time))return Z;
-  const g=k=>Array.isArray(h[k])?h[k]:[],P=g("precipitation"),PP=g("precipitation_probability"),T=g("temperature_2m"),RH=g("relative_humidity_2m"),SU=g("sunshine_duration"),W=g("wind_speed_10m"),ET=g("et0_fao_evapotranspiration");
+  const g=k=>Array.isArray(h[k])?h[k]:[],P=g("precipitation"),PP=g("precipitation_probability"),T=g("temperature_2m"),RH=g("relative_humidity_2m"),SU=g("sunshine_duration"),W=g("wind_speed_10m"),ET=g("et0_fao_evapotranspiration"),CC=g("cloud_cover");
   for(let i=1;i<h.time.length;i++){const e=(typeof h.time[i]==="number"?h.time[i]*1000:Date.parse(h.time[i]));if(!isFinite(e))continue;
-    Z.push({s:e-36e5,e,p:+P[i]||0,pp:num(PP[i]),T:mittel(T[i-1],T[i]),rh:mittel(RH[i-1],RH[i]),sun:+SU[i]||0,wind:+W[i]||0,et:ET[i]!=null?+ET[i]:null});}
+    Z.push({s:e-36e5,e,p:+P[i]||0,pp:num(PP[i]),T:mittel(T[i-1],T[i]),rh:mittel(RH[i-1],RH[i]),sun:+SU[i]||0,wind:+W[i]||0,et:ET[i]!=null?+ET[i]:null,cc:mittel(CC[i-1],CC[i])});}
   return Z;}
 /* Sonnenauf-/-untergang je Tag aus daily.sunrise/sunset (Unixzeit; Ortszeit-Strings nur noch als Rueckfall) -> {datum:{auf,unter}}.
    SOMMERZEIT-FALLE (CLAUDE.md v5.38): Open-Meteo schreibt iso8601-Zeiten mit EINEM utc_offset fuer die ganze Antwort -

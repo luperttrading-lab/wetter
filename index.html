@@ -1269,7 +1269,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.03</span>
+      <span class="ver">v6.04</span>
     </div>
   </header>
 
@@ -5423,14 +5423,15 @@ const rzRhTd=(T,Td)=>(T==null||Td==null)?80:Math.min(100,100*Math.exp(17.625*Td/
 /* ---- Daten ---- */
 async function rzOpenMeteo(){
   const d=await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
-    +"&hourly=precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m,et0_fao_evapotranspiration"
+    +"&hourly=precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m,et0_fao_evapotranspiration,cloud_cover"
     +"&daily=sunrise,sunset&past_days=14&forecast_days=15&timezone=auto&timeformat=unixtime",15000);
   const h=d.hourly,Z=[];
   // precipitation = Summe der Stunde VOR dem Stempel; Temperatur/Feuchte gelten zum Stempel -> Mittel
   for(let i=1;i<h.time.length;i++){const e=h.time[i]*1000;
     Z.push({s:e-36e5,e,p:+h.precipitation[i]||0,pp:h.precipitation_probability[i],T:(h.temperature_2m[i-1]+h.temperature_2m[i])/2,
       rh:(h.relative_humidity_2m[i-1]+h.relative_humidity_2m[i])/2,sun:+h.sunshine_duration[i]||0,wind:+h.wind_speed_10m[i]||0,
-      et:h.et0_fao_evapotranspiration&&h.et0_fao_evapotranspiration[i]!=null?+h.et0_fao_evapotranspiration[i]:null});}   // v5.88: Verdunstung der Stunde VOR dem Stempel
+      et:h.et0_fao_evapotranspiration&&h.et0_fao_evapotranspiration[i]!=null?+h.et0_fao_evapotranspiration[i]:null,
+      cc:h.cloud_cover&&h.cloud_cover[i-1]!=null&&h.cloud_cover[i]!=null?(h.cloud_cover[i-1]+h.cloud_cover[i])/2:null});}   // v5.88 et, v6.04 cc (Bewoelkung fuer den Tau)
   const S={};d.daily.time.forEach((t,i)=>{S[rzTeile(t*1000+12*36e5).tag]={auf:d.daily.sunrise[i]*1000,unter:d.daily.sunset[i]*1000};});
   RASEN.Z=Z;RASEN.SONNE=S;
 }
@@ -5465,7 +5466,8 @@ async function rzBrightSky(){   // Rueckfall: vergangene Stunden gemessen, danac
   const rh=x=>x.relative_humidity!=null?x.relative_humidity:rzRhTd(x.temperature,x.dew_point),Z=[];let gem=null,bis=0;
   for(let i=1;i<W.length;i++){const a=W[i-1],b=W[i],e=Date.parse(b.timestamp);if(e-Date.parse(a.timestamp)!==36e5)continue;
     const q=src[b.source_id],g=!!q&&q.observation_type!=="forecast";if(g){gem=q;bis=e;}
-    Z.push({s:e-36e5,e,p:+b.precipitation||0,pp:g?null:b.precipitation_probability,T:(a.temperature+b.temperature)/2,rh:(rh(a)+rh(b))/2,sun:(+b.sunshine||0)*60,wind:+b.wind_speed||0,gem:g});}
+    Z.push({s:e-36e5,e,p:+b.precipitation||0,pp:g?null:b.precipitation_probability,T:(a.temperature+b.temperature)/2,rh:(rh(a)+rh(b))/2,sun:(+b.sunshine||0)*60,wind:+b.wind_speed||0,gem:g,
+      cc:a.cloud_cover!=null&&b.cloud_cover!=null?(a.cloud_cover+b.cloud_cover)/2:null});}
   if(Z.length<48)throw new Error("zu wenig Daten");
   const S={},t0=rzTeile(Z[0].s).tag,t1=rzTeile(Z[Z.length-1].s).tag;
   for(let t=t0;t<=t1;t=rzTagPlus(t,1)){const z=rzSonne(t,LOC.lat,LOC.lon);if(z)S[t]=z;}
@@ -5479,7 +5481,7 @@ async function rzMessungen(){   // die letzten 74 Stunden der naechsten DWD-Stat
   if(!obs.length)return null;
   const nach={};obs.forEach(w=>nach[Date.parse(w.timestamp)]=w);let bis=0;
   for(const c of RASEN.Z){const w=nach[c.e];if(!w)continue;
-    c.p=+w.precipitation||0;if(w.relative_humidity!=null)c.rh=w.relative_humidity;if(w.sunshine!=null)c.sun=w.sunshine*60;if(w.wind_speed!=null)c.wind=w.wind_speed;
+    c.p=+w.precipitation||0;if(w.relative_humidity!=null)c.rh=w.relative_humidity;if(w.sunshine!=null)c.sun=w.sunshine*60;if(w.wind_speed!=null)c.wind=w.wind_speed;if(w.cloud_cover!=null)c.cc=w.cloud_cover;
     c.gem=true;bis=Math.max(bis,c.e);}
   return Object.assign(rzStation(d,src[obs[obs.length-1].source_id]),{bis});
 }
@@ -5533,14 +5535,32 @@ const RZ_TROCKEN_MM=0.1;
    verdunstet etwa mit der Referenzverdunstung (so rechnet z. B. MIKE SHE die Interzeption). Oktober: 12 h Nacht ueber 90 %
    fuellen den Speicher, morgens 0,02-0,1 mm/h Verdunstung -> Tau bis spaeter Vormittag; Juli 0,2-0,4 mm/h -> nach 1 h weg. */
 const RZ_TAU={rate:0.02,max:0.2,nass:0.005};
+/* v6.04 (Nutzer, Erlental 28.10.: "warum ist Mittwoch schon ab frueh gruen?" - die Nacht lag knapp unter 90 %, also gar
+   kein Tau, die Naechte daneben knapp darueber, also voller Tau; "Tau stufenlos, das wuerde mehr Sinn machen"): die
+   TAUBILDUNG je Stunde ist jetzt STUFENLOS statt "ab 90 % voll, darunter nichts":
+     Rate = 0,02 mm/h x s(Luftfeuchte) x Wolken x Wind
+     s      = (Luftfeuchte - 86 %) / 8, begrenzt auf 0..1  -> 86 % nichts, 90 % halb, 94 % voll
+     Wolken = 0,5 + 0,5 x (1 - Bedeckung)                    -> klar 1, ganz bedeckt 0,5
+     Wind   = 1 / (1 + (V / 4,4 m/s)^4)                      -> windstill 1, 16 km/h 0,5, 22 km/h 0,3
+   Herkunft: Fuer NASSE BLAETTER ist die 90-%-Regel in der Pflanzenschutz-Forschung gut belegt (Sentelhas et al. 2008,
+   vier Orte: feste 90-%-Schwelle am besten, 87-92 % richtig, Fehler 1,2-1,9 h); die Mitte der Rampe liegt deshalb bei
+   90 %, die Breite +-4 % ist geschaetzt. Bewoelkung und Wind wirken wie in der Taumengen-Formel von Beysens (2016,
+   Atmospheric Research 167, 146-155: Ausstrahlung x (1 - Bedeckung), Wind-Abbruch bei 4,4 m/s) - aber nur ABGESCHWAECHT:
+   Beysens beschreibt Tau auf Sammelfolien und gibt bei bedecktem Himmel null; Gras bekommt auch dann Wasser (Feuchte aus
+   dem warmen Boden, Nebel), und nasse Herbstmorgen unter Wolken sind die Regel. Mit Beysens allein waeren im Vergleich
+   (Erlental/Norden, DWD-Vorhersage 28.10.) fast alle bewoelkten Morgen ab 7-8 Uhr trocken gewesen. Ohne Bewoelkung
+   (alte Daten) gilt halb bedeckt. Hohes Gras sammelt mehr (x1,5, wie der Deckel). */
+function rzTauRate(c){if(c.rh==null)return 0;
+  const s=Math.max(0,Math.min(1,(c.rh-86)/8)),N=c.cc!=null?Math.max(0,Math.min(100,c.cc))/100:0.5,V=(c.wind||0)/3.6;
+  return RZ_TAU.rate*s*(0.5+0.5*(1-N))/(1+Math.pow(V/4.4,4));}
 function rzBewerten(){
-  const E=rzE(),Z=RASEN.Z,RH=E.rh-(E.hoch?5:0),td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1),dMax=RZ_TAU.max*(E.hoch?1.5:1);
+  const E=rzE(),Z=RASEN.Z,td=acc=>(acc<0.5?2:acc<2?3:acc<5?5:8)*(E.hoch?1.5:1),dMax=RZ_TAU.max*(E.hoch?1.5:1);
   let need=0,boden=0,dw=0;
   for(let i=0;i<Z.length;i++){const c=Z[i];let s6=0,s24=0;
     for(let k=Math.max(0,i-23);k<=i;k++){s24+=Z[k].p;if(k>i-6)s6+=Z[k].p;}
     const t=rzTeile(c.s);c.tag=t.tag;c.h=t.h;c.wd=t.wd;
     const so=RASEN.SONNE[c.tag],hell=so?c.s>=so.auf&&c.e<=so.unter:c.h>=8&&c.h<17,ft=rzFeiertag(c.tag);c.hell=hell;
-    const dd=c.p>=0.1?-dw:(c.rh>=RH?RZ_TAU.rate:0)-rzEt(c),dMitte=Math.max(0,dw+dd/2);dw=Math.min(dMax,Math.max(0,dw+dd));c.dw=dw;
+    const dd=c.p>=0.1?-dw:rzTauRate(c)*(E.hoch?1.5:1)-rzEt(c),dMitte=Math.max(0,dw+dd/2);dw=Math.min(dMax,Math.max(0,dw+dd));c.dw=dw;
     if(c.p>=0.1){need=Math.max(need,td(s6));if(s24>=10)boden=Math.max(boden,s24>=25?24:18);c.z="regen";}
     else if(need>0){c.z="nass";need=Math.max(0,need-rzEt(c)/RZ_TROCKEN_MM);boden=Math.max(0,boden-1);}
     else if(boden>0){c.z="weich";boden=Math.max(0,boden-1);}
@@ -6016,7 +6036,7 @@ function rzLeisteEinfach(P){
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
   return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
-    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>möglichst bald (je Tag Warten 10\u202f% weniger Wertung); Abtrocknen 50\u202f% länger, Tau 5\u202f% früher</small></span></label>'
+    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>möglichst bald (je Tag Warten 10\u202f% weniger Wertung); Abtrocknen 50\u202f% länger, 50\u202f% mehr Tau</small></span></label>'
     +'<div class="rz-seg" data-rzseg="modus"><button type="button" data-v="tage"'+(E.modus==="tage"?' class="an"':"")+'>fällig nach Tagen</button><button type="button" data-v="wuchs"'+(E.modus==="wuchs"?' class="an"':"")+">nach Wuchs</button></div>"
     /* v5.46 (Nutzer: "Gradtage ist ein komischer Begriff"): eingestellt wird der Abstand bei 15 °C im
        Tagesmittel, gerechnet wird weiter mit der Waermesumme ueber 5 °C (gd = Tage x 10). */
@@ -6030,7 +6050,7 @@ function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="r
     +r("dauer","Dauer des Mähens",1,4,1,v=>v+(v===1?" Stunde":" Stunden"))+r("risiko","Regenrisiko höchstens",10,50,5,v=>v+" %")
     +'<div class="rz-reg"><label>Regen der Vortage zählt</label></div><div class="rz-seg" data-rzseg="vortag">'+[["wenig","wenig"],["mittel","mittel"],["stark","stark"]].map(([v,t])=>'<button type="button" data-v="'+v+'"'+((E.vortag||"mittel")===v?' class="an"':"")+">"+t+"</button>").join("")+"</div>"
     +'<small class="rz-segk">Regen zählt noch halb, sobald seither 1 / 1,5 / 2 mm verdunsten konnten – im Herbst nach gut einem Tag, im Hochsommer nach wenigen Stunden. Nach 24 Stunden ohne Regen zählt er nicht mehr. Abzug höchstens 10 / 12 / 15 %.</small>'
-    +r("rh","Tau ab Luftfeuchte",80,98,1,v=>v+" %")+r("tmin","Zu kalt unter",0,8,1,v=>v+" °C")+"</div>";}
+    +r("tmin","Zu kalt unter",0,8,1,v=>v+" °C")+"</div>";}
 /* Blase ueber (bzw. unter) der Zeile. v5.74: per getBoundingClientRect relativ zu .rz-el - offsetTop kennt das
    Scrollen im Bereich .rz-sc nicht */
 function rzBlasePlatz(b,d){const el=b.closest(".rz-el"),r=b.parentElement.getBoundingClientRect(),top=r.top-(el?el.getBoundingClientRect().top:0),o=top-d.offsetHeight-4;
