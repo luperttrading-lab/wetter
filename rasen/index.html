@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Rasen · Mähplaner</title>
 <style>
-/* Rasen-App r1.12 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
+/* Rasen-App r1.13 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --ink:#17202e;--muted:#5c6b80;--faint:#5e6c81;   /* --faint 5,3:1 auf Weiss, 4,7:1 auf dem Seitengrund (bis r1.00 #9aa7b8 = 2,4:1) */
@@ -239,7 +239,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 <div id="app">
   <header>
     <div class="place" id="kopf"><span id="kopfName">Mein Rasen</span><span class="pf" id="kopfPf" hidden>▾</span><small id="kopfSub">…</small></div>
-    <div class="hr"><span class="ver">r1.12</span>
+    <div class="hr"><span class="ver">r1.13</span>
       <button type="button" class="act-btn" id="btnEinst" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
@@ -291,15 +291,15 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 
 <div class="loc-ovl hidden" id="ovl"><div class="loc-box" role="dialog" aria-modal="true" id="ovlBox"></div></div>
 
-<script src="modell.js?v=1.12"></script>
-<script src="wetter.js?v=1.12"></script>
-<script src="planer.js?v=1.12"></script>
+<script src="modell.js?v=1.13"></script>
+<script src="wetter.js?v=1.13"></script>
+<script src="planer.js?v=1.13"></script>
 <script>
 "use strict";
-/* ===================== Rasen-App r1.12 – Oberflaeche =====================
+/* ===================== Rasen-App r1.13 – Oberflaeche =====================
    Bindet RasenModell (Wachstum, Termine, Eichung), RasenWetter (Open-Meteo) und RasenPlaner
    (Stundenregeln "wann ist Maehen moeglich") zusammen. Speicher: localStorage "rasenApp". */
-const VERSION="r1.12",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
+const VERSION="r1.13",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
 const el=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fin=x=>typeof x==="number"&&Number.isFinite(x);
@@ -462,9 +462,11 @@ function empfehlen(){
   // (bis r1.10 hoechstens 40 %); bis 3 Punkte Gleichstand gewinnt der fruehere. Di 63 x 0,95 = 60 gegen Mi 91 x 0,90 = 82 -> Mittwoch.
   // r1.11 (wie Wetter-App v5.96): Abzug ohne Deckel bei 40 % (ab Tag 8 kostete Warten sonst nichts mehr, bei hohem Gras
   // gewann ein spaeterer Tag), erst ab 18 Tagen fest 10 %; Gleichstand relativ: bis 3 % unter dem besten der fruehere.
-  if(T.ueberfaellig){const kd=tage.filter(d=>d>=heute&&wert(d)>0).map(d=>({d,sc:wert(d)*Math.max(.1,1-.05*Zt0.tageZw(heute,d))}));
+  // r1.13 (wie Wetter-App v6.03, Nutzer: "Gras ist schon hoch heisst ja, wir sollten moeglichst bald maehen"): ueber der
+  // Zielhoehe kostet jeder Tag Warten 10 % statt 5 % - zu spaet maehen schadet mehr als zu frueh.
+  if(T.ueberfaellig){const kd=tage.filter(d=>d>=heute&&wert(d)>0).map(d=>({d,sc:wert(d)*Math.max(.1,1-.10*Zt0.tageZw(heute,d))}));
     const mx=Math.max(-1,...kd.map(k=>k.sc)),g=kd.find(k=>k.sc>=mx*0.97);best=g?g.d:null;
-    grund="über der Zielhöhe – bestes Wetter, je Tag Warten 5 % Abzug";if(best)fen.arten[best]="Zielhöhe";}
+    grund="über der Zielhöhe – bestes Wetter, je Tag Warten 10 % Abzug";if(best)fen.arten[best]="Zielhöhe";}
   else{
     tage.filter(d=>d>=fen.von&&d<=fen.bis).forEach(d=>{const w=wert(d);if(w>=50&&(best===null||w>wert(best)+3))best=d;});
     if(best)grund="bestes Wetter rund um den Termin";
@@ -477,7 +479,7 @@ function empfehlen(){
   const start=T.ueberfaellig?heute:sp(heute,fen.von),erst=tage.find(d=>d>=start&&wert(d)>0);let not=null;
   if(!erst||Zt0.tageZw(start,erst)>=3){
     tage.filter(d=>d>=start&&(!erst||d<erst)&&TF[d]&&!TF[d].frei&&TF[d].not).forEach(d=>{
-      const sc=TF[d].not.wert*Math.max(.1,1-.05*Math.abs(Zt0.tageZw(start,d)));
+      const sc=TF[d].not.wert*Math.max(.1,1-(T.ueberfaellig?.10:.05)*Math.abs(Zt0.tageZw(start,d)));
       if(!not||sc>not.sc+1e-9)not={datum:d,sc,best:TF[d].not,wert:TF[d].notwert,txt:RasenPlaner.notTxt(TF[d].not,f.einst)};});}
   if(!best&&not)return {datum:not.datum,art:"Notlösung",grund:"kein trockenes Fenster im Vorhersagezeitraum – am wenigsten schlecht: "+not.txt,fenster:fen,wert:not.wert,best:not.best,not:true};
   if(!best)return {datum:null,art:"",grund:"kein passendes Wetter im Vorhersagezeitraum",fenster:fen};
@@ -668,7 +670,7 @@ function mfText(tag){
   if(D.emp&&D.emp.not&&D.emp.datum===tag)s+="<br><b>Notlösung, wenn es sein muss</b> – "+esc(D.emp.grund)+".";
   else if(D.emp&&D.emp.notfalls&&D.emp.notfalls.datum===tag)s+="<br><b>Notlösung, wenn es sein muss</b> – das erste trockene Fenster kommt erst in 3 oder mehr Tagen.";
   else if(D.emp&&D.emp.datum===tag)s+="<br><b>Empfohlen</b> – "+esc(D.emp.grund)+".";
-  else if(D.emp&&D.emp.datum&&fin(t.wert)&&t.wert>(D.emp.wert||0))s+="<br>Empfohlen ist "+esc(Z.tagTxt(D.emp.datum))+" – "+(D.term&&D.term.ueberfaellig?"über der Zielhöhe: jeder Tag Warten kostet 5 %.":"für die Wahl zählt auch, wann der Rasen die Höhe erreicht.");
+  else if(D.emp&&D.emp.datum&&fin(t.wert)&&t.wert>(D.emp.wert||0))s+="<br>Empfohlen ist "+esc(Z.tagTxt(D.emp.datum))+" – "+(D.term&&D.term.ueberfaellig?"über der Zielhöhe: jeder Tag Warten kostet 10 %.":"für die Wahl zählt auch, wann der Rasen die Höhe erreicht.");
   return s;
 }
 

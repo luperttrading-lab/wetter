@@ -1269,7 +1269,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.02</span>
+      <span class="ver">v6.03</span>
     </div>
   </header>
 
@@ -5608,7 +5608,14 @@ function rzNotTxt(nf){const E=rzE(),t=[],z=new Set(nf.z);
   return "kein Regen erwartet"+(t.length?", aber "+t.join(", "):"");}
 /* Abschlag je Tag Abstand zum Termin (bzw. ab heute, wenn sofort): 5 % je Tag, ohne Deckel bei 40 % (v5.96) - erst
    ab 18 Tagen fest 10 %, damit der Wert nicht negativ wird (die Stunden reichen 15 Tage). */
-function rzAbschlag(ad){return Math.max(0.1,1-0.05*ad);}
+/* v6.03 (Nutzer, Norden 28.10.: "Gras ist schon hoch heisst ja, wir sollten moeglichst bald maehen" - empfohlen war
+   Di 3.11. mit 97 x 0,70 = 68 statt heute 15-17 Uhr mit 60): WARTEN NACH DEM TERMIN kostet 10 % je Tag, vor dem Termin
+   bleibt es bei 5 %. Zu spaet maehen schadet mehr als zu frueh (mehr als ein Drittel der Halmlaenge auf einmal).
+   d = Tage ab Bezugstag (vorzeichenbehaftet, rzAbstand): Bezug ist der Faelligkeitstag, bei "sofort" (Gras hoch / Datum
+   unbekannt) und bei UEBERFAELLIG heute - vorher zaehlte ueberfaellig ab dem vergangenen Termin, dann lagen alle Tage
+   schon tief im Abschlag und unterschieden sich kaum. Untergrenze 0,1 (ab 9 Tagen danach). */
+function rzAbstand(f,tag){const heute=rzTeile(Date.now()).tag,ref=!f.tag||f.tag<heute?heute:f.tag;return rzTageZw(ref,tag);}
+function rzAbschlag(d){return Math.max(0.1,d<0?1+0.05*d:1-0.10*d);}
 function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,W:[],rec:null};
   const fruehMs=rzLokal(rzTagPlus(f.tag,-E.frueh),0,0),fristMs=rzLokal(rzTagPlus(f.tag,1),0,0),ab=f.sofort?jetzt:Math.max(jetzt,fruehMs);
   if(f.grob&&RASEN.Z.length&&fruehMs>=RASEN.Z[RASEN.Z.length-1].e)return {f,W:[],rec:null,spaet:true};   // v5.51: Termin hinter den Stundenwerten
@@ -5627,7 +5634,7 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   // 40 % gedeckelt - ab dem 8. Tag kostete Warten nichts mehr, und bei hohem Gras gewann Fr 6.11. (92 x 0,60) gegen
   // Do 5.11. (86 x 0,60). Jetzt waechst er weiter (rzAbschlag), der Gleichstand ist RELATIV (3 % / 6 % des Wahlwerts statt
   // 3 / 5 Punkte) - bei Wahlwerten um 40 waeren 3 Punkte 7,5 % gewesen.
-  W.forEach(w=>{const ad=Math.abs(rzTageZw(f.tag,w.tag));w.ad=ad;w.score=rzWetterWert(w)*rzAbschlag(ad);});
+  W.forEach(w=>{const d=rzAbstand(f,w.tag);w.d=d;w.ad=Math.abs(d);w.score=rzWetterWert(w)*rzAbschlag(d);});
   // v5.51: unter fast gleich guten Fenstern (bis 3 Punkte unter dem besten) das FRUEHESTE - 5 % statt 7 %
   // Regenrisiko ist Rauschen und schob "morgen 9-13" hinter "morgen 15-17" (W ist zeitlich sortiert)
   // v5.70: auch "sofort" (Gras hoch / Datum unbekannt) waehlt nach der Wertung - Abstand = Tage ab heute; vorher das
@@ -5647,7 +5654,7 @@ function rzPlanen(jetzt){const E=rzE(),f=rzFaellig(E.letzt);if(!f.tag)return {f,
   {const heute=rzTeile(jetzt).tag,start=f.sofort||f.tag<heute?heute:f.tag,erst=W.length?W[0].tag:null;
     if(!erst||rzTageZw(start,erst)>=3){let bs=0;
       for(let n=0;n<15;n++){const d=rzTagPlus(start,n);if(erst&&d>=erst)break;if(!rzMaehtag(d))continue;
-        const nf=rzNotFenster(d);if(!nf)continue;const sc=nf.wert*rzAbschlag(Math.abs(rzTageZw(f.tag,d)));
+        const nf=rzNotFenster(d);if(!nf)continue;const sc=nf.wert*rzAbschlag(rzAbstand(f,d));
         if(sc>bs+1e-9){bs=sc;not=Object.assign(nf,{score:sc});}}}}
   return {f,fruehMs,fristMs,W,rec,alt,not,danach,ueber:!!rec&&rec.s>=fristMs&&!f.sofort};}
 function rzNach(P){const r=P.rec,d=P.danach,ende=RASEN.Z[RASEN.Z.length-1].e;
@@ -5823,7 +5830,7 @@ function rzMaehHtml(E,P,J,heute){const f=P.f,pct=()=>Math.min(100,Math.round(100
    (Tag.frueh), ueber deiner Risikogrenze (Tag.risk) und wenn der Termin noch Monate weg ist - dann nach derselben
    Formel, nur nicht empfohlen. Kein trockenes Fenster von "Dauer" Laenge (oder heute keins mehr) = 0. */
 function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
-  const E=rzE(),f=P.f||{},jetzt=Date.now(),ad=f.tag?Math.abs(rzTageZw(f.tag,tag)):99,
+  const E=rzE(),f=P.f||{},jetzt=Date.now(),dd=f.tag?rzAbstand(f,tag):null,ad=dd==null?99:Math.abs(dd),
         frueh=!f.sofort&&(!f.tag||tag<rzTagPlus(f.tag,-E.frueh));
   const fenster=gut=>{const ws=[];let cur=null;const zu=()=>{if(cur&&(cur.e-cur.s)/36e5>=E.dauer-1e-6)ws.push(cur);cur=null;};
     for(const c of RASEN.Z){if(c.tag!==tag||c.e<=jetzt+5*6e4)continue;
@@ -5832,7 +5839,7 @@ function rzTagWertung(P,tag){if(P.rec&&P.rec.tag===tag)return P.rec;
     zu();return ws;};
   let ws=(P.W||[]).filter(w=>w.tag===tag),risk=false;
   if(!ws.length){ws=fenster(true);if(!ws.length){ws=fenster(false);risk=ws.length>0;}
-    ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.score=w.P*(f.tag?rzAbschlag(ad):.6)*(.9+.1*Math.min(1,lg-E.dauer));});}
+    ws.forEach(w=>{const lg=(w.e-w.s)/36e5;w.P=1-w.pp/100;w.ad=ad;w.d=dd;w.score=w.P*(f.tag?rzAbschlag(dd):.6)*(.9+.1*Math.min(1,lg-E.dauer));});}
   if(!ws.length)return {tag,score:0,leer:true,frueh,not:rzNotFenster(tag)};
   // v5.73: die Zahl zeigt das Wetter - also das Fenster mit dem besten Wetter des Tages (bei Gleichstand das fruehere)
   const w=ws.reduce((a,b)=>rzWetterWert(b)>rzWetterWert(a)+1e-9?b:a);
@@ -5893,8 +5900,10 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
       +(P.not&&P.not.tag===tag?" · <b>Notlösung, wenn es sein muss</b>":"");
     return "<b>"+rzTagTxt(tag)+" · Wetter 0</b> · "+(!rest&&tag===heute?"für heute ist deine Mähzeit vorbei"
       :"kein trockenes Fenster von "+rzStd(E.dauer)+" in deiner Mähzeit, nur Regen");}
-  const lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null,ab=f.tag?Math.round(100*(1-rzAbschlag(w.ad))):40;
-  const wo=f.sofort?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute":"heute")
+  const lg=(w.e-w.s)/36e5,kurz=Math.round(10*(1-Math.min(1,lg-E.dauer))),n=f.tag?rzTageZw(f.tag,w.tag):null,ab=f.tag?Math.round(100*(1-rzAbschlag(w.d!=null?w.d:rzAbstand(f,w.tag)))):40,
+        ueberf=!f.sofort&&!!f.tag&&f.tag<heute;
+  // v6.03: sofort und ueberfaellig zaehlen ab heute (10 % je Tag)
+  const wo=f.sofort||ueberf?(w.ad?w.ad+(w.ad===1?" Tag":" Tage")+" ab heute":"heute")+(ueberf?", schon überfällig":"")
     :n==null?"Termin nicht in Sicht":n===0?"am Fälligkeitstag":Math.abs(n)+(Math.abs(n)===1?" Tag ":" Tage ")+(n<0?"vor":"nach")+" der Fälligkeit";
   const rec=P.rec&&P.rec.tag===tag;
   const tf=rzTagFaktoren(w),x=v=>"×"+v.toFixed(2).replace(".",",");
@@ -5904,7 +5913,7 @@ function rzWertText(tag){const E=rzE(),P=rzPlanen(Date.now()),f=P.f,w=rzTagWertu
     +" · "+(tf.mm>=0.1?rzMM(tf.mm)+" Regen vor "+rzHH(tf.ref)+" Uhr ohne trockenen Tag dazwischen, seit dem letzten Regen "+String(Math.round(10*(tf.ev||0))/10).replace(".",",")+" mm Verdunstung (zählt halb nach "+String(RZ_VR.eh).replace(".",",")+" mm, Einstellung „"+(rzE().vortag||"mittel")+"“): "+x(tf.fR):"vor "+rzHH(tf.ref)+" Uhr mindestens 24 Stunden kein Regen")
     +(rec?" · <b>empfohlen</b>":w.risk?" · <b>Regenrisiko über deiner Grenze ("+E.risiko+"\u202f%) – nicht empfohlen</b>"
       :w.frueh?" · <b>vor deinem frühesten Termin – nicht empfohlen</b>"
-      :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort?", Gras ist hoch – früher ist besser":"")+")"
+      :P.rec?" · Empfohlen ist "+rzTagTxt(P.rec.tag)+" – für die Wahl zählt auch der Abstand zum Termin ("+wo+(ab?": −"+pz(ab):": kein Abzug")+(f.sofort||ueberf?", je Tag Warten 10\u202f%":"")+")"
         +(w.score!=null&&P.rec.score!=null?": Wahlwert "+Math.round(100*w.score)+" gegen "+Math.round(100*P.rec.score):""):"");}
 function rzMitAlt(fn){const E=rzE(),heute=rzTeile(Date.now()).tag,alt={letzt:E.letzt,hoch:E.hoch};
   if(E.letzt===heute){const v=E.vor;E.letzt=v&&v.letzt!==E.letzt?v.letzt:null;E.hoch=!!(v&&v.hoch);}else{E.letzt=heute;E.hoch=false;}
@@ -6007,7 +6016,7 @@ function rzLeisteEinfach(P){
 const rzP=(v,min,max)=>Math.max(0,Math.min(100,(v-min)/(max-min)*100)).toFixed(1)+"%";
 function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="rz-reg"><label>'+t+'</label><output id="rzo_'+k+'">'+fm(E[k])+'</output><input type="range" data-rze="'+k+'" min="'+min+'" max="'+max+'" step="'+st+'" value="'+E[k]+'" style="--p:'+rzP(E[k],min,max)+'">'+(klein?"<small>"+klein+"</small>":"")+"</div>";
   return '<div class="rz-einst"><div class="rz-reg"><label>Zuletzt gemäht</label><input type="date" data-rze="letzt" value="'+(E.letzt||"")+'"></div>'
-    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>möglichst bald (je Tag Warten 5\u202f% weniger Wertung); Abtrocknen 50\u202f% länger, Tau 5\u202f% früher</small></span></label>'
+    +'<label class="rz-hk"><input type="checkbox" data-rze="hoch"'+(E.hoch?" checked":"")+'><span>Gras ist schon hoch<small>möglichst bald (je Tag Warten 10\u202f% weniger Wertung); Abtrocknen 50\u202f% länger, Tau 5\u202f% früher</small></span></label>'
     +'<div class="rz-seg" data-rzseg="modus"><button type="button" data-v="tage"'+(E.modus==="tage"?' class="an"':"")+'>fällig nach Tagen</button><button type="button" data-v="wuchs"'+(E.modus==="wuchs"?' class="an"':"")+">nach Wuchs</button></div>"
     /* v5.46 (Nutzer: "Gradtage ist ein komischer Begriff"): eingestellt wird der Abstand bei 15 °C im
        Tagesmittel, gerechnet wird weiter mit der Waermesumme ueber 5 °C (gd = Tage x 10). */

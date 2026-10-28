@@ -2394,6 +2394,19 @@ Zeilen), die Blase jedes Tages nennt das Notfenster. (4) "Heute gemäht ?" / "Wa
 Symbol eine Zeile, nur vorkommende. Geprueft: test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt, Szenario
 (`r112.py`: 6 bzw. 15 nasse Tage auf den Stub) hell/dunkel. Stub-Werte sinken durch den Tau (Stub ohne et0 -> Monatsmittel,
 Oktober 0,1 mm/h: Tau bis ~10-11 Uhr statt 9; morgen 88 -> 81, Anfang November 9-13 -> 15-17 Uhr).
+v6.03 / Rasen-App r1.13 (Nutzer, Norden 28.10. 08:58, Screenshot "Gras ist schon hoch": empfohlen Di 3.11. 8-13 Uhr,
+obwohl heute 15-17 Uhr trocken - "Gras ist schon hoch heisst ja, wir sollten moeglichst bald maehen"): ASYMMETRISCHER
+Abschlag. `rzAbschlag(d)` nimmt jetzt den VORZEICHENBEHAFTETEN Abstand `d = rzAbstand(f,tag)`: vor dem Termin 5 % je Tag,
+danach 10 % (Untergrenze 0,1 ab 9 Tagen). Bezug ist der Faelligkeitstag, bei "sofort" (Gras hoch / Datum unbekannt) und bei
+UEBERFAELLIG heute - vorher zaehlte ueberfaellig ab dem vergangenen Termin, alle Tage lagen dann schon tief im Abschlag und
+unterschieden sich kaum. Begruendung: zu spaet maehen schadet mehr als zu frueh (mehr als ein Drittel der Halmlaenge). Mit
+den Werten aus dem Screenshot: heute 60 x 1,0 = 60 gegen Di 97 x 0,40 = 39 (vorher 0,70 = 68) -> heute 15-17 Uhr. `w.d` neu
+neben `w.ad` (Gleichstandsregel sortiert weiter nach |d|). Blase: "(2 Tage ab heute, schon ueberfaellig: -20 %, je Tag Warten
+10 %)", Einstellungstext "je Tag Warten 10 %". Geprueft mit Live-Daten Norden (Open-Meteo im Pruefstand nicht erreichbar ->
+MOSMIX-Ersatz): Gras hoch -> Do 29.10. 15-17 (73 x 0,9) statt spaeter; heute faellig -> heute; 3 Tage ueberfaellig -> heute
+(Do 72 im 3-%-Gleichstand); faellig Di 3.11. -> Mo 2.11. (85 x 0,95). Rasen-App r1.13: "ueber der Zielhoehe" 10 % statt 5 % je
+Tag (`empfehlen()`, auch die Notloesung), Texte angepasst; test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
+OFFEN (angeboten, nicht beauftragt): Abschlag je Tag Vorlauf fuer die Unsicherheit der Vorhersage.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
