@@ -2407,6 +2407,21 @@ MOSMIX-Ersatz): Gras hoch -> Do 29.10. 15-17 (73 x 0,9) statt spaeter; heute fae
 (Do 72 im 3-%-Gleichstand); faellig Di 3.11. -> Mo 2.11. (85 x 0,95). Rasen-App r1.13: "ueber der Zielhoehe" 10 % statt 5 % je
 Tag (`empfehlen()`, auch die Notloesung), Texte angepasst; test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
 OFFEN (angeboten, nicht beauftragt): Abschlag je Tag Vorlauf fuer die Unsicherheit der Vorhersage.
+v6.04 / Rasen-App r1.14 (Nutzer, Erlental 28.10. 19:15: "warum ist Mittwoch schon ab frueh gruen?" -> "Tau stufenlos,
+das wuerde mehr Sinn machen"): Die Nacht zum Mi 4.11. lag laut MOSMIX knapp UNTER 90 % (gar kein Tau), die Naechte daneben
+knapp darueber (voller Tau bis 10-12 Uhr) - ein Kippschalter. Jetzt `rzTauRate(c)` (planer.js `tauRate`): Rate = 0,02 mm/h x
+s x Wolken x Wind, s = (Luftfeuchte - 86) / 8 auf 0..1 (86 % nichts, 90 % halb, 94 % voll), Wolken = 0,5 + 0,5 x (1 -
+Bedeckung), Wind = 1 / (1 + (V / 4,4 m/s)^4) (16 km/h halb). Hohes Gras x1,5 (vorher: Grenze 5 % tiefer). Der Speicher
+(v6.02: Deckel 0,2 mm, ET0 verdunstet, nass ab 0,005 mm) bleibt. Herkunft: Mitte 90 % = Blattnaesse-Regel (Sentelhas et
+al. 2008, feste 90-%-Schwelle am besten, 87-92 % richtig); Wolken/Wind ABGESCHWAECHT nach der Taumengen-Formel von Beysens
+(2016, NREL pvdeg `dew_yield`) - Beysens allein gibt bei Bedeckung null, damit waeren fast alle trueben Herbstmorgen ab 7-8
+Uhr trocken gewesen (geprueft und verworfen). Breite +-4 % und die Daempfung sind GESCHAETZT. Daten: Open-Meteo `cloud_cover`
+(Stundenmittel wie rh), MOSMIX `cloud_cover`, Stationsmessung `cloud_cover`; fehlt sie: halb bedeckt. Einstellung "Tau ab
+Luftfeuchte" in BEIDEN Apps ENTFERNT (`RZ_STD.rh` / `STD.rh` bleiben ungenutzt stehen). Vergleich (MOSMIX 28.10. abends,
+Stunden 6-16, alt -> neu): Erlental Mi 4.11. Tau 5 -> 3 h (Nachtrate 0,004-0,008 mm/h), 2.11. 8 -> 4 h, 7.11. 7 -> 5 h;
+Norden 3.11. (Wind 19 km/h) 6 -> 3 h, 5.11. 8 -> 3 h, 2.11. 0 -> 2 h (87 %, vorher gar nichts). Empfehlungen an beiden Orten
+unveraendert (Do 29.10. 10-13). Open-Meteo war aus dem Pruefstand nicht erreichbar (429) - geprueft mit MOSMIX-Ersatz;
+test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

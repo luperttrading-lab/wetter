@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Rasen · Mähplaner</title>
 <style>
-/* Rasen-App r1.13 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
+/* Rasen-App r1.14 - Gestaltung wie die Wetter-App (Farbtoken, Karten, Fenster, Knoepfe). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --ink:#17202e;--muted:#5c6b80;--faint:#5e6c81;   /* --faint 5,3:1 auf Weiss, 4,7:1 auf dem Seitengrund (bis r1.00 #9aa7b8 = 2,4:1) */
@@ -239,7 +239,7 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 <div id="app">
   <header>
     <div class="place" id="kopf"><span id="kopfName">Mein Rasen</span><span class="pf" id="kopfPf" hidden>▾</span><small id="kopfSub">…</small></div>
-    <div class="hr"><span class="ver">r1.13</span>
+    <div class="hr"><span class="ver">r1.14</span>
       <button type="button" class="act-btn" id="btnEinst" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
@@ -291,15 +291,15 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}   
 
 <div class="loc-ovl hidden" id="ovl"><div class="loc-box" role="dialog" aria-modal="true" id="ovlBox"></div></div>
 
-<script src="modell.js?v=1.13"></script>
-<script src="wetter.js?v=1.13"></script>
-<script src="planer.js?v=1.13"></script>
+<script src="modell.js?v=1.14"></script>
+<script src="wetter.js?v=1.14"></script>
+<script src="planer.js?v=1.14"></script>
 <script>
 "use strict";
-/* ===================== Rasen-App r1.13 – Oberflaeche =====================
+/* ===================== Rasen-App r1.14 – Oberflaeche =====================
    Bindet RasenModell (Wachstum, Termine, Eichung), RasenWetter (Open-Meteo) und RasenPlaner
    (Stundenregeln "wann ist Maehen moeglich") zusammen. Speicher: localStorage "rasenApp". */
-const VERSION="r1.13",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
+const VERSION="r1.14",SP_KEY="rasenApp",NTFY="https://ntfy.sh/";
 const el=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fin=x=>typeof x==="number"&&Number.isFinite(x);
@@ -698,7 +698,7 @@ function erkRender(){
     +"<p><b class='t'>Band.</b> Die Spanne „wahrscheinlich "+(sim&&sim.heute?esc(dz(sim.heute.lo/10))+"–"+esc(dz(sim.heute.hi/10)):"4,8–5,6")+" cm“ ist das Band, in dem die Höhe mit rund 80 % liegt. Ohne Eichung ist es breit (±50 %), mit 3–5 Eichungen bleiben etwa ±25 %; in die Zukunft kommt die Unsicherheit der Wettervorhersage dazu.</p>"
     +"<p><b class='t'>Ein-Drittel-Regel.</b> Nie mehr als ein Drittel der Halmlänge abschneiden – sonst leidet der Rasen. Bei "+esc(cmTxt(f.einst.schnitt))+" Schnitthöhe ist das ab "+esc(cmTxt(1.5*f.einst.schnitt))+" der Fall. "
     +"<b class='t'>Zielhöhe</b> ("+esc(cmTxt(f.einst.max))+") ist die Höhe, bei der du spätestens mähen willst.</p>"
-    +"<p><b class='t'>Wann mähen.</b> Je Stunde prüft die App: regnet es, ist das Gras noch nass (nach Regen trocknet es 2–8 Stunden, bei Sonne oder Wind doppelt so schnell), ist der Boden weich (nach über 10 mm Regen 18 Stunden), liegt Tau (ab "+f.einst.rh+" % Luftfeuchte), ist es zu kalt (unter "+f.einst.tmin+" °C). "
+    +"<p><b class='t'>Wann mähen.</b> Je Stunde prüft die App: regnet es, ist das Gras noch nass (nach Regen trocknet es je nach Verdunstung – an einem trüben Herbsttag 2–8 Stunden, in der Sommersonne viel schneller, nachts kaum), ist der Boden weich (nach über 10 mm Regen 18 Stunden), liegt Tau (bildet sich stufenlos ab etwa 86 % Luftfeuchte, mehr bei klarem Himmel und Windstille, und verdunstet morgens), ist es zu kalt (unter "+f.einst.tmin+" °C). "
     +"Dazu deine Mähzeit, Pause, Wochentage, Tageslicht und Sonn- und Feiertage. Trockene Stunden am Stück von mindestens "+f.einst.dauer+(f.einst.dauer===1?" Stunde":" Stunden")+" sind ein Fenster; die Zahl im Kreis ist die Chance, dass es trocken bleibt (100 − Regenrisiko), mit kleinem Bonus für längere Fenster. "
     +"Empfohlen wird der Tag mit dem besten Wetter rund um den Termin, an dem der Rasen die Höhe erreicht.</p>"
     +"<p class='q'>Grenzen: Die Höchstrate ist ein Schätzwert, Regen und Verdunstung kommen vom Wettermodell (Open-Meteo) für das Gitterfeld, nicht vom Garten. Die Modellhöhe sinkt nur durch Mähen – kein Blattsterben, keine Krankheit. Details: rasen/MODELL.md im Repo.</p>";
@@ -860,7 +860,7 @@ function dlgEinst(){
     +'<label class="rz-hk"><input type="checkbox" data-e="pause"'+(E.pause?" checked":"")+'><span>Mittagspause<small>Keine Pflicht in Hessen, aber aus Rücksicht üblich: 13–15 Uhr.</small></span></label>'
     +'<div id="einPause"'+(E.pause?"":" hidden")+">"+regler("pVon","Pause ab",11,15,1,FM.pVon)+regler("pBis","Pause bis",12,16,1,FM.pBis)+"</div>"
     +regler("dauer","Dauer des Mähens",1,4,1,FM.dauer)+regler("risiko","Regenrisiko höchstens",10,50,5,FM.risiko,"Stunden mit höherer Regenwahrscheinlichkeit zählen nicht als gut.")
-    +regler("rh","Tau ab Luftfeuchte",80,98,1,FM.rh)+regler("tmin","Zu kalt unter",0,8,1,FM.tmin)
+    +regler("tmin","Zu kalt unter",0,8,1,FM.tmin)
     +'<div class="ein-t">Benachrichtigung aufs Handy</div>'
     +'<label class="rz-hk"><input type="checkbox" data-b="an"'+(B.an?" checked":"")+'><span>Nachricht per ntfy<small>Installiere die App „ntfy“ und abonniere dort deinen geheimen Kanal (Topic). Beim Öffnen dieser App wird höchstens eine Nachricht je Art und Tag geplant: „Zielhöhe in 2 Tagen“ und „Morgen ist ein günstiger Mähtermin“ – und nur, wenn sich die Aussage geändert hat. Eine schon geplante Nachricht lässt sich nicht zurücknehmen, wenn sich die Vorhersage danach ändert. Wer den Kanalnamen kennt, kann mitlesen – wähle ihn lang und zufällig.</small></span></label>'
     +'<div class="ein-sel"><label>Kanal (Topic)</label><input type="text" data-b="topic" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="z. B. rasen-k7x2m9pq" value="'+esc(B.topic)+'"></div>'
