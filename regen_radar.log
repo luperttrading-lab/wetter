@@ -1,7 +1,7 @@
-Radar-Eichung an den Bodenmessern, 29.10.2026 14:38 UTC
+Radar-Eichung an den Bodenmessern, 29.10.2026 23:32 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            1 Paare  (FRANKFURT/M)
-  Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
+  Kassel                    2 Paare  (SCHAUENBURG-ELGERSH.)
   Koeln/Bonn                0 Paare  (KOELN/BONN)
   Dortmund                  0 Paare  (WALTROP-ABDINGHOF)
   Muenster/Osnabrueck       0 Paare  (MUENSTER/OSNABR.)
@@ -10,8 +10,8 @@ Radar-Eichung an den Bodenmessern, 29.10.2026 14:38 UTC
   Hannover                  0 Paare  (HANNOVER)
   Berlin-Tegel              0 Paare  (BERLIN-TEGEL)
   Leipzig/Halle             0 Paare  (LEIPZIG/SCHKEUDITZ)
-  Dresden-Klotzsche         1 Paare  (DRESDEN/FLUGHAFEN)
-  Erfurt-Weimar             0 Paare  (ERFURT)
+  Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
+  Erfurt-Weimar             2 Paare  (ERFURT)
   Nuernberg                 0 Paare  (NUERNBERG)
   Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
   Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
@@ -19,17 +19,17 @@ Radar-Eichung an den Bodenmessern, 29.10.2026 14:38 UTC
   Trier-Petrisberg          0 Paare  (TRIER)
   Saarbruecken              0 Paare  (SAARBRUECKEN)
   Freiburg                  0 Paare  (FREIBURG)
-gesammelt: 2 Paare
+gesammelt: 5 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       343   1733     2.00      1.11      4.00     0.40 mm     0.22 mm
+niesel       343   1738     2.00      1.11      4.00     0.40 mm     0.22 mm
 leicht       356    411     0.94      0.57      1.31     0.90 mm     0.98 mm
 regen         64     64     0.78      0.48      1.17     2.80 mm     3.58 mm
 
-Radar sah nichts, Station mass etwas: 40 von 2248 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 40 von 2253 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      1014 Stunden, davon 865 trocken (85 %)
+  Radarsumme bis  0 1      1019 Stunden, davon 870 trocken (85 %)
   Radarsumme 0 1 bis  0 25 465 Stunden, davon 267 trocken (57 %)
   Radarsumme 0 25 bis  0 5 254 Stunden, davon  60 trocken (24 %)
   Radarsumme ab 0 5        475 Stunden, davon  34 trocken (7 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 41 Tage, 2248 Paare)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 41 Tage, 2253 Paare)
