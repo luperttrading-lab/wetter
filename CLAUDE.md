@@ -2429,6 +2429,15 @@ Stunden 6-16, alt -> neu): Erlental Mi 4.11. Tau 5 -> 3 h (Nachtrate 0,004-0,008
 Norden 3.11. (Wind 19 km/h) 6 -> 3 h, 5.11. 8 -> 3 h, 2.11. 0 -> 2 h (87 %, vorher gar nichts). Empfehlungen an beiden Orten
 unveraendert (Do 29.10. 10-13). Open-Meteo war aus dem Pruefstand nicht erreichbar (429) - geprueft mit MOSMIX-Ersatz;
 test_modell 228/228, test_app stub 51 ok + bekannter Uhr-Artefakt.
+v6.05 (Nutzer, Screenshot vom iPhone eines Freundes 29.10. 07:47, Maehzeit 7-19 Uhr: "Pause" und "dunkel" ueber der
+Leiste halb abgeschnitten, ueber der 7 ein Stummel; "allgemein gueltig formatieren, iPhone und Android"): KEIN
+Geraeteproblem - Chromium zeigte es bei 320/360/375/393/412/430 pt genauso. Ursache: das Feld "dunkel" am MORGEN steht im
+HTML hinter "Pause", aber in einer Spalte weiter links; die automatische Grid-Platzierung (sparse) setzt so ein Feld in
+eine NEUE Zeile, die 13 px des Bands teilten sich auf zwei Zeilen (je 5 px, Schrift halbiert). Tritt auf, sobald die
+Maehzeit vor Sonnenaufgang beginnt UND eine Pause gilt - bei 8 Uhr Beginn im Oktober nie, darum fiel es im Test nicht auf.
+Jetzt `.rz-eband>.rz-elab{grid-row:1}`. Passt "dunkel" nicht in seine Strecke (eine Stunde; bei 320/360 pt auch zwei),
+steht statt eines leeren Felds ein Mond (`RZ_MOND_K`, in rzGrossBinden gemessen wie bisher). Geprueft bei allen sechs
+Breiten: alle Felder in einer Zeile, 13 px hoch, Schrift ganz drin.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

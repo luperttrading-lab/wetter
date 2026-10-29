@@ -271,7 +271,12 @@ html.dunkel .rz-frei2{background:#262d38}
    Felder ohne Schrift, so breit wie ihre Spalten; gleichfarbiger Schatten nur oben +2 px und unten +1 px */
 /* v5.68 (Nutzer: "wenn dunkel hinpasst, hinschreiben, Pause auch - die Pause-Spalte breit genug"): Schrift wieder da,
    Pausenluecke 34 statt 24 px; passt "dunkel" nicht in seine Strecke, bleibt das Feld leer (rzGrossBinden misst) */
-.rz-eband{height:13px;margin-bottom:1px}.rz-elab{--lb:#eee7d8;justify-self:stretch;align-self:stretch;border-radius:3px 3px 0 0;cursor:pointer;
+/* v6.05 (Nutzer, Screenshot vom iPhone eines Freundes, Maehzeit 7-19 Uhr: "Pause" und "dunkel" halb abgeschnitten,
+   ueber der 7 ein Stummel): das Feld "dunkel" am MORGEN stand im HTML hinter "Pause", aber in einer Spalte weiter links.
+   Die automatische Platzierung des Grids (sparse) setzt so ein Feld in eine NEUE Zeile - die 13 px des Bands teilten
+   sich auf zwei Zeilen, jede Schrift wurde halbiert. Das passiert auf jedem Geraet, sobald die Maehzeit vor
+   Sonnenaufgang beginnt und eine Mittagspause gilt. Jetzt stehen alle Felder fest in Zeile 1. */
+.rz-eband{height:13px;margin-bottom:1px}.rz-eband>.rz-elab{grid-row:1}.rz-elab svg{display:inline-block;vertical-align:-1px;fill:currentColor}.rz-elab{--lb:#eee7d8;justify-self:stretch;align-self:stretch;border-radius:3px 3px 0 0;cursor:pointer;
   background:var(--lb);box-shadow:0 -2px 0 var(--lb),0 1px 0 var(--lb);font:600 9px/13px system-ui,sans-serif;color:#7b6a4a;
   text-align:center;white-space:nowrap;overflow:hidden}.rz-elab b{font-weight:inherit}
 .rz-elab.rz-ebn{--lb:#dfe4ef;color:#5a6a8c}
@@ -1269,7 +1274,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.04</span>
+      <span class="ver">v6.05</span>
     </div>
   </header>
 
@@ -6055,6 +6060,7 @@ function rzEinstHtml(){const E=rzE(),r=(k,t,min,max,st,fm,klein)=>'<div class="r
    Scrollen im Bereich .rz-sc nicht */
 function rzBlasePlatz(b,d){const el=b.closest(".rz-el"),r=b.parentElement.getBoundingClientRect(),top=r.top-(el?el.getBoundingClientRect().top:0),o=top-d.offsetHeight-4;
   d.style.top=(o>=0?o:top+r.height+4)+"px";}
+const RZ_MOND_K='<svg width="8" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z"/></svg>';
 function rzGrossBinden(root){
   const neu=()=>{rzSpeichern();rzGrossNeu();if(typeof kzRender==="function")kzRender();};
   /* v6.01 (Nutzer-Screenshot 16:03: "Mo 26.10." ragte in das erste Kaestchen): die Datumsspalte war fest 46 px, die
@@ -6074,7 +6080,9 @@ function rzGrossBinden(root){
   // zweistellige Zahlen (8,5 px Schrift) sind ~10 px breit
   {const i=root.querySelector(".rz-er>i[data-rzs]"),bw=i?i.getBoundingClientRect().width:0;if(bw)root.classList.toggle("rz-schmal",bw<14);}
 
-  root.querySelectorAll(".rz-elab b").forEach(b=>{const w=b.parentElement.getBoundingClientRect().width;if(w&&b.getBoundingClientRect().width+4>w)b.remove();});
+  // v6.05: passt "dunkel" nicht hinein (eine Stunde), steht ein Mond im Feld statt nichts - ein leeres Feld sah aus wie ein Rest
+  root.querySelectorAll(".rz-elab b").forEach(b=>{const e=b.parentElement,w=e.getBoundingClientRect().width;
+    if(w&&b.getBoundingClientRect().width+4>w){b.remove();if(e.classList.contains("rz-ebn"))e.innerHTML=RZ_MOND_K;}});
   const detZu=()=>{const d=root.querySelector("#rzDet");if(d){d.hidden=true;d._von=null;}root.querySelectorAll("i.sel").forEach(x=>x.classList.remove("sel"));};
   const blase=(b,html)=>{const d=root.querySelector("#rzDet");if(!d)return;d.innerHTML=html;d.hidden=false;
     rzBlasePlatz(b,d);};
