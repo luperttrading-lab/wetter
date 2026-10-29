@@ -1,18 +1,18 @@
 {
- "stand": "2026-10-27",
+ "stand": "2026-10-28",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0063,
+   "steigung": 0.0065,
    "fehler": 0.0094,
-   "t": 0.67
+   "t": 0.69
   },
   "hoehe": {
-   "steigung": 0.0167,
-   "fehler": 0.0381,
-   "t": 0.44
+   "steigung": 0.0172,
+   "fehler": 0.038,
+   "t": 0.45
   },
-  "mittel": 0.973,
+  "mittel": 0.972,
   "reststreuung": 0.094,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -76,7 +76,7 @@
    "streuung": 0.05,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 9,
+   "teiltage_verworfen": 10,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
@@ -88,7 +88,7 @@
    "streuung": 0.037,
    "klare_tage": 3,
    "teiltage": 0,
-   "teiltage_verworfen": 8,
+   "teiltage_verworfen": 9,
    "von": "2026-09-22",
    "bis": "2026-10-12"
   },
@@ -189,16 +189,16 @@
    "bis": "2026-10-27"
   },
   "Stuttgart": {
-   "faktor": 0.939,
-   "roh": 0.938,
-   "tage": 26,
+   "faktor": 0.938,
+   "roh": 0.937,
+   "tage": 27,
    "vorlaeufig": false,
    "streuung": 0.024,
    "klare_tage": 20,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-27"
+   "bis": "2026-10-28"
   },
   "Wurmberg_B": {
    "faktor": 1.129,
@@ -208,21 +208,21 @@
    "streuung": 0.04,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 9,
+   "teiltage_verworfen": 10,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
   "Zingst": {
-   "faktor": 0.921,
+   "faktor": 0.92,
    "roh": 0.919,
-   "tage": 19,
+   "tage": 20,
    "vorlaeufig": false,
-   "streuung": 0.046,
-   "klare_tage": 9,
+   "streuung": 0.045,
+   "klare_tage": 10,
    "teiltage": 10,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-10-22"
+   "bis": "2026-10-28"
   },
   "Zirchow": {
    "faktor": 1.078,

@@ -10510,6 +10510,232 @@
    "grund": "nur 34 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
   },
   {
+   "d": "2026-10-28",
+   "st": "Andernach",
+   "genommen": false,
+   "sonne": 0.6,
+   "verh": 0.938,
+   "grund": "nur 60 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Belm-Osnabrueck",
+   "genommen": false,
+   "sonne": 0.4,
+   "verh": 0.887,
+   "grund": "nur 40 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Berlin",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.558,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Boesel_B",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Bonn",
+   "genommen": false,
+   "sonne": 0.68,
+   "verh": 1.068,
+   "grund": "nur 68 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Chieming",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.492,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Dortmund",
+   "genommen": false,
+   "sonne": 0.53,
+   "verh": 0.961,
+   "grund": "nur 53 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Fichtelberg",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.315,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Friedrichshafen",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.309,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Genthin",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Goerlitz",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.794,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Hamburg",
+   "genommen": false,
+   "sonne": 0.38,
+   "verh": 1.116,
+   "grund": "nur 38 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Hohenpeissenberg",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.217,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Kassel",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Klippeneck",
+   "genommen": false,
+   "sonne": 0.44,
+   "verh": 1.117,
+   "grund": "nur 44 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Kulmbach",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.405,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Lindenberg",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.485,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Lueneburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Melpitz",
+   "genommen": false,
+   "sonne": 0.05,
+   "verh": 0.411,
+   "grund": "nur 5 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Muenchen",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.3,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Salzgitter",
+   "genommen": false,
+   "sonne": 0.67,
+   "verh": 0.034,
+   "grund": "nur 67 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Schauinsland",
+   "genommen": false,
+   "sonne": 0.33,
+   "verh": 0.983,
+   "grund": "nur 33 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Schneefernerhaus",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.545,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Schweinfurt_Wasserlosen",
+   "genommen": false,
+   "sonne": 0.4,
+   "verh": 0.624,
+   "grund": "nur 40 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Sylt_Tinnum",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Todendorf",
+   "genommen": false,
+   "sonne": 0.35,
+   "verh": 0.983,
+   "grund": "nur 35 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Waldhof_Falkenstein",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Waldmuenchen",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.282,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Weissenburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Zirchow",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.613,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
    "d": "2026-09-06",
    "st": "Andernach",
    "genommen": true,
@@ -11315,7 +11541,15 @@
    "genommen": false,
    "sonne": 0.73,
    "verh": 1.058,
-   "grund": "1 Tage mit 70-90 % Sonne, Streuung 0.000 - zu wenige (mindestens 3)"
+   "grund": "2 Tage mit 70-90 % Sonne, Streuung 0.042 - zu wenige (mindestens 3)"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Cuxhaven_B",
+   "genommen": false,
+   "sonne": 0.87,
+   "verh": 0.998,
+   "grund": "2 Tage mit 70-90 % Sonne, Streuung 0.042 - zu wenige (mindestens 3)"
   },
   {
    "d": "2026-09-06",
@@ -11563,7 +11797,7 @@
    "genommen": false,
    "sonne": 0.71,
    "verh": 0.907,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-11",
@@ -11571,7 +11805,7 @@
    "genommen": false,
    "sonne": 0.72,
    "verh": 0.962,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-29",
@@ -11579,7 +11813,7 @@
    "genommen": false,
    "sonne": 0.78,
    "verh": 0.845,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-06",
@@ -11587,7 +11821,7 @@
    "genommen": false,
    "sonne": 0.82,
    "verh": 0.857,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-15",
@@ -11595,7 +11829,7 @@
    "genommen": false,
    "sonne": 0.75,
    "verh": 0.804,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-16",
@@ -11603,7 +11837,7 @@
    "genommen": false,
    "sonne": 0.81,
    "verh": 0.859,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-19",
@@ -11611,7 +11845,7 @@
    "genommen": false,
    "sonne": 0.74,
    "verh": 0.706,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-22",
@@ -11619,7 +11853,7 @@
    "genommen": false,
    "sonne": 0.77,
    "verh": 0.806,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-25",
@@ -11627,7 +11861,15 @@
    "genommen": false,
    "sonne": 0.73,
    "verh": 0.661,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.093 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Duderstadt_B",
+   "genommen": false,
+   "sonne": 0.76,
+   "verh": 0.662,
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.102 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-22",
@@ -11659,7 +11901,7 @@
    "genommen": false,
    "sonne": 0.85,
    "verh": 1.104,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-27",
@@ -11667,7 +11909,7 @@
    "genommen": false,
    "sonne": 0.88,
    "verh": 1.098,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-02",
@@ -11675,7 +11917,7 @@
    "genommen": false,
    "sonne": 0.77,
    "verh": 1.072,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-03",
@@ -11683,7 +11925,7 @@
    "genommen": false,
    "sonne": 0.84,
    "verh": 0.94,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-04",
@@ -11691,7 +11933,7 @@
    "genommen": false,
    "sonne": 0.72,
    "verh": 1.112,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-05",
@@ -11699,7 +11941,7 @@
    "genommen": false,
    "sonne": 0.84,
    "verh": 1.034,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-14",
@@ -11707,7 +11949,7 @@
    "genommen": false,
    "sonne": 0.89,
    "verh": 1.13,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-22",
@@ -11715,7 +11957,15 @@
    "genommen": false,
    "sonne": 0.89,
    "verh": 1.205,
-   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.077 - zu unruhig (hoechstens 0.06)"
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Eckernfoerde",
+   "genommen": false,
+   "sonne": 0.7,
+   "verh": 1.226,
+   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.086 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-06",
@@ -12155,7 +12405,7 @@
    "genommen": true,
    "sonne": 0.75,
    "verh": 1.084,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-09",
@@ -12163,7 +12413,7 @@
    "genommen": true,
    "sonne": 0.83,
    "verh": 1.08,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-11",
@@ -12171,7 +12421,7 @@
    "genommen": true,
    "sonne": 0.89,
    "verh": 1.169,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-15",
@@ -12179,7 +12429,7 @@
    "genommen": true,
    "sonne": 0.89,
    "verh": 1.021,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-16",
@@ -12187,7 +12437,7 @@
    "genommen": true,
    "sonne": 0.75,
    "verh": 1.06,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-19",
@@ -12195,7 +12445,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.13,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -12203,7 +12453,7 @@
    "genommen": true,
    "sonne": 0.75,
    "verh": 1.056,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-24",
@@ -12211,7 +12461,7 @@
    "genommen": true,
    "sonne": 0.87,
    "verh": 1.087,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-29",
@@ -12219,7 +12469,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.096,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-03",
@@ -12227,7 +12477,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.07,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-04",
@@ -12235,7 +12485,7 @@
    "genommen": true,
    "sonne": 0.82,
    "verh": 1.044,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-20",
@@ -12243,7 +12493,7 @@
    "genommen": true,
    "sonne": 0.79,
    "verh": 0.996,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-25",
@@ -12251,7 +12501,15 @@
    "genommen": true,
    "sonne": 0.85,
    "verh": 0.967,
-   "grund": "13 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Giessen-Wettenberg",
+   "genommen": true,
+   "sonne": 0.75,
+   "verh": 0.983,
+   "grund": "14 Tage mit 70-90 % Sonne, Streuung 0.056 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-15",
@@ -12491,7 +12749,7 @@
    "genommen": true,
    "sonne": 0.89,
    "verh": 1.095,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-09",
@@ -12499,7 +12757,7 @@
    "genommen": true,
    "sonne": 0.74,
    "verh": 1.043,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-28",
@@ -12507,7 +12765,7 @@
    "genommen": true,
    "sonne": 0.76,
    "verh": 1.011,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-02",
@@ -12515,7 +12773,7 @@
    "genommen": true,
    "sonne": 0.83,
    "verh": 1.097,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-03",
@@ -12523,7 +12781,7 @@
    "genommen": true,
    "sonne": 0.8,
    "verh": 0.958,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-10",
@@ -12531,7 +12789,7 @@
    "genommen": true,
    "sonne": 0.75,
    "verh": 1.044,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-13",
@@ -12539,7 +12797,15 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.026,
-   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.048 - stimmig, zaehlen mit"
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Groemitz",
+   "genommen": true,
+   "sonne": 0.77,
+   "verh": 1.079,
+   "grund": "8 Tage mit 70-90 % Sonne, Streuung 0.047 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -13363,7 +13629,7 @@
    "genommen": true,
    "sonne": 0.72,
    "verh": 0.976,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-05",
@@ -13371,7 +13637,7 @@
    "genommen": true,
    "sonne": 0.89,
    "verh": 1.013,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-12",
@@ -13379,7 +13645,7 @@
    "genommen": true,
    "sonne": 0.82,
    "verh": 1.176,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-17",
@@ -13387,7 +13653,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.052,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-18",
@@ -13395,7 +13661,7 @@
    "genommen": true,
    "sonne": 0.82,
    "verh": 1.065,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-19",
@@ -13403,7 +13669,7 @@
    "genommen": true,
    "sonne": 0.85,
    "verh": 1.044,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-21",
@@ -13411,7 +13677,7 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 1.03,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -13419,7 +13685,7 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 1.022,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-02",
@@ -13427,7 +13693,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.0,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-03",
@@ -13435,7 +13701,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.005,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-10",
@@ -13443,7 +13709,7 @@
    "genommen": true,
    "sonne": 0.77,
    "verh": 1.006,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-12",
@@ -13451,7 +13717,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.016,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-15",
@@ -13459,7 +13725,7 @@
    "genommen": true,
    "sonne": 0.81,
    "verh": 1.002,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-16",
@@ -13467,7 +13733,7 @@
    "genommen": true,
    "sonne": 0.76,
    "verh": 0.994,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-19",
@@ -13475,7 +13741,15 @@
    "genommen": true,
    "sonne": 0.73,
    "verh": 0.929,
-   "grund": "15 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Langen",
+   "genommen": true,
+   "sonne": 0.7,
+   "verh": 0.957,
+   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-15",
@@ -14083,6 +14357,14 @@
    "genommen": true,
    "sonne": 0.9,
    "verh": 0.97,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Norderney",
+   "genommen": true,
+   "sonne": 1.0,
+   "verh": 1.007,
    "grund": "klar"
   },
   {
@@ -15043,7 +15325,7 @@
    "genommen": true,
    "sonne": 0.79,
    "verh": 1.013,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -15051,7 +15333,7 @@
    "genommen": true,
    "sonne": 0.86,
    "verh": 0.94,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-03",
@@ -15059,7 +15341,7 @@
    "genommen": true,
    "sonne": 0.8,
    "verh": 0.953,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-16",
@@ -15067,7 +15349,7 @@
    "genommen": true,
    "sonne": 0.74,
    "verh": 0.932,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-19",
@@ -15075,7 +15357,7 @@
    "genommen": true,
    "sonne": 0.72,
    "verh": 0.963,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-22",
@@ -15083,7 +15365,15 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 0.925,
-   "grund": "6 Tage mit 70-90 % Sonne, Streuung 0.032 - stimmig, zaehlen mit"
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Stuttgart",
+   "genommen": true,
+   "sonne": 0.83,
+   "verh": 0.91,
+   "grund": "7 Tage mit 70-90 % Sonne, Streuung 0.034 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-04",
@@ -15251,7 +15541,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 0.951,
-   "grund": "4 Tage mit 70-90 % Sonne, Streuung 0.024 - stimmig, zaehlen mit"
+   "grund": "5 Tage mit 70-90 % Sonne, Streuung 0.038 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-18",
@@ -15259,7 +15549,7 @@
    "genommen": true,
    "sonne": 0.74,
    "verh": 0.972,
-   "grund": "4 Tage mit 70-90 % Sonne, Streuung 0.024 - stimmig, zaehlen mit"
+   "grund": "5 Tage mit 70-90 % Sonne, Streuung 0.038 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-24",
@@ -15267,7 +15557,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 0.988,
-   "grund": "4 Tage mit 70-90 % Sonne, Streuung 0.024 - stimmig, zaehlen mit"
+   "grund": "5 Tage mit 70-90 % Sonne, Streuung 0.038 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-28",
@@ -15275,7 +15565,15 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 0.934,
-   "grund": "4 Tage mit 70-90 % Sonne, Streuung 0.024 - stimmig, zaehlen mit"
+   "grund": "5 Tage mit 70-90 % Sonne, Streuung 0.038 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Tholey",
+   "genommen": true,
+   "sonne": 0.71,
+   "verh": 0.889,
+   "grund": "5 Tage mit 70-90 % Sonne, Streuung 0.038 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -15683,7 +15981,7 @@
    "genommen": false,
    "sonne": 0.71,
    "verh": 1.036,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-11",
@@ -15691,7 +15989,7 @@
    "genommen": false,
    "sonne": 0.72,
    "verh": 1.231,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-29",
@@ -15699,7 +15997,7 @@
    "genommen": false,
    "sonne": 0.78,
    "verh": 1.133,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-06",
@@ -15707,7 +16005,7 @@
    "genommen": false,
    "sonne": 0.82,
    "verh": 1.189,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-15",
@@ -15715,7 +16013,7 @@
    "genommen": false,
    "sonne": 0.75,
    "verh": 1.084,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-16",
@@ -15723,7 +16021,7 @@
    "genommen": false,
    "sonne": 0.81,
    "verh": 1.062,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-19",
@@ -15731,7 +16029,7 @@
    "genommen": false,
    "sonne": 0.74,
    "verh": 0.299,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-22",
@@ -15739,7 +16037,7 @@
    "genommen": false,
    "sonne": 0.77,
    "verh": 1.135,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-10-25",
@@ -15747,7 +16045,15 @@
    "genommen": false,
    "sonne": 0.73,
    "verh": 1.045,
-   "grund": "9 Tage mit 70-90 % Sonne, Streuung 0.280 - zu unruhig (hoechstens 0.06)"
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Wurmberg_B",
+   "genommen": false,
+   "sonne": 0.76,
+   "verh": 1.119,
+   "grund": "10 Tage mit 70-90 % Sonne, Streuung 0.265 - zu unruhig (hoechstens 0.06)"
   },
   {
    "d": "2026-09-22",
@@ -15819,6 +16125,14 @@
    "genommen": true,
    "sonne": 1.0,
    "verh": 0.906,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-10-28",
+   "st": "Zingst",
+   "genommen": true,
+   "sonne": 0.99,
+   "verh": 0.892,
    "grund": "klar"
   },
   {
