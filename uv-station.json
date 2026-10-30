@@ -1,19 +1,19 @@
 {
- "stand": "2026-10-28",
+ "stand": "2026-10-29",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0065,
-   "fehler": 0.0094,
-   "t": 0.69
+   "steigung": 0.0071,
+   "fehler": 0.0093,
+   "t": 0.77
   },
   "hoehe": {
-   "steigung": 0.0172,
-   "fehler": 0.038,
-   "t": 0.45
+   "steigung": 0.0205,
+   "fehler": 0.0376,
+   "t": 0.55
   },
-  "mittel": 0.972,
-  "reststreuung": 0.094,
+  "mittel": 0.97,
+  "reststreuung": 0.092,
   "schwelle_t": 3.0,
   "alarm": false,
   "hinweis": "kein Trend"
@@ -88,21 +88,21 @@
    "streuung": 0.037,
    "klare_tage": 3,
    "teiltage": 0,
-   "teiltage_verworfen": 9,
+   "teiltage_verworfen": 10,
    "von": "2026-09-22",
    "bis": "2026-10-12"
   },
   "Fichtelberg": {
    "faktor": 0.8,
-   "roh": 0.78,
-   "tage": 16,
+   "roh": 0.792,
+   "tage": 17,
    "vorlaeufig": false,
-   "streuung": 0.095,
+   "streuung": 0.093,
    "klare_tage": 11,
-   "teiltage": 5,
+   "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-21"
+   "bis": "2026-10-29"
   },
   "Goerlitz": {
    "faktor": 0.944,
@@ -129,28 +129,28 @@
    "bis": "2026-10-27"
   },
   "Klippeneck": {
-   "faktor": 0.887,
-   "roh": 0.884,
-   "tage": 15,
+   "faktor": 0.894,
+   "roh": 0.891,
+   "tage": 16,
    "vorlaeufig": false,
-   "streuung": 0.084,
-   "klare_tage": 15,
+   "streuung": 0.093,
+   "klare_tage": 16,
    "teiltage": 0,
    "teiltage_verworfen": 13,
    "von": "2026-09-04",
-   "bis": "2026-10-27"
+   "bis": "2026-10-29"
   },
   "Kulmbach": {
-   "faktor": 0.924,
-   "roh": 0.922,
-   "tage": 20,
+   "faktor": 0.922,
+   "roh": 0.92,
+   "tage": 21,
    "vorlaeufig": false,
-   "streuung": 0.043,
-   "klare_tage": 11,
+   "streuung": 0.073,
+   "klare_tage": 12,
    "teiltage": 9,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-20"
+   "bis": "2026-10-29"
   },
   "Lindenberg": {
    "faktor": 1.125,
@@ -191,14 +191,14 @@
   "Stuttgart": {
    "faktor": 0.938,
    "roh": 0.937,
-   "tage": 27,
+   "tage": 28,
    "vorlaeufig": false,
-   "streuung": 0.024,
+   "streuung": 0.027,
    "klare_tage": 20,
-   "teiltage": 7,
+   "teiltage": 8,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-28"
+   "bis": "2026-10-29"
   },
   "Wurmberg_B": {
    "faktor": 1.129,
