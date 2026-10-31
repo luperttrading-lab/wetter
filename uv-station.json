@@ -1,18 +1,18 @@
 {
- "stand": "2026-10-29",
+ "stand": "2026-10-30",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0071,
-   "fehler": 0.0093,
-   "t": 0.77
+   "steigung": 0.0075,
+   "fehler": 0.0092,
+   "t": 0.81
   },
   "hoehe": {
-   "steigung": 0.0205,
-   "fehler": 0.0376,
-   "t": 0.55
+   "steigung": 0.0231,
+   "fehler": 0.0375,
+   "t": 0.62
   },
-  "mittel": 0.97,
+  "mittel": 0.969,
   "reststreuung": 0.092,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -57,16 +57,16 @@
    "bis": "2026-10-27"
   },
   "Chieming": {
-   "faktor": 1.09,
+   "faktor": 1.091,
    "roh": 1.092,
-   "tage": 23,
+   "tage": 27,
    "vorlaeufig": false,
    "streuung": 0.047,
    "klare_tage": 23,
-   "teiltage": 0,
-   "teiltage_verworfen": 3,
+   "teiltage": 4,
+   "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-20"
+   "bis": "2026-10-30"
   },
   "Duderstadt_B": {
    "faktor": 0.891,
@@ -76,7 +76,7 @@
    "streuung": 0.05,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 10,
+   "teiltage_verworfen": 11,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
@@ -129,28 +129,28 @@
    "bis": "2026-10-27"
   },
   "Klippeneck": {
-   "faktor": 0.894,
-   "roh": 0.891,
-   "tage": 16,
+   "faktor": 0.901,
+   "roh": 0.898,
+   "tage": 17,
    "vorlaeufig": false,
-   "streuung": 0.093,
-   "klare_tage": 16,
+   "streuung": 0.099,
+   "klare_tage": 17,
    "teiltage": 0,
    "teiltage_verworfen": 13,
    "von": "2026-09-04",
-   "bis": "2026-10-29"
+   "bis": "2026-10-30"
   },
   "Kulmbach": {
-   "faktor": 0.922,
-   "roh": 0.92,
-   "tage": 21,
+   "faktor": 0.919,
+   "roh": 0.917,
+   "tage": 22,
    "vorlaeufig": false,
-   "streuung": 0.073,
+   "streuung": 0.072,
    "klare_tage": 12,
-   "teiltage": 9,
+   "teiltage": 10,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-10-29"
+   "bis": "2026-10-30"
   },
   "Lindenberg": {
    "faktor": 1.125,
@@ -191,14 +191,14 @@
   "Stuttgart": {
    "faktor": 0.938,
    "roh": 0.937,
-   "tage": 28,
+   "tage": 29,
    "vorlaeufig": false,
-   "streuung": 0.027,
-   "klare_tage": 20,
+   "streuung": 0.029,
+   "klare_tage": 21,
    "teiltage": 8,
    "teiltage_verworfen": 0,
    "von": "2026-09-04",
-   "bis": "2026-10-29"
+   "bis": "2026-10-30"
   },
   "Wurmberg_B": {
    "faktor": 1.129,
@@ -208,7 +208,7 @@
    "streuung": 0.04,
    "klare_tage": 11,
    "teiltage": 0,
-   "teiltage_verworfen": 10,
+   "teiltage_verworfen": 11,
    "von": "2026-09-06",
    "bis": "2026-10-20"
   },
