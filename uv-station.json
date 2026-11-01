@@ -1,18 +1,18 @@
 {
- "stand": "2026-10-30",
+ "stand": "2026-10-31",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0075,
+   "steigung": 0.008,
    "fehler": 0.0092,
-   "t": 0.81
+   "t": 0.87
   },
   "hoehe": {
-   "steigung": 0.0231,
-   "fehler": 0.0375,
-   "t": 0.62
+   "steigung": 0.0261,
+   "fehler": 0.0373,
+   "t": 0.7
   },
-  "mittel": 0.969,
+  "mittel": 0.967,
   "reststreuung": 0.092,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -129,16 +129,16 @@
    "bis": "2026-10-27"
   },
   "Klippeneck": {
-   "faktor": 0.901,
-   "roh": 0.898,
-   "tage": 17,
+   "faktor": 0.902,
+   "roh": 0.899,
+   "tage": 18,
    "vorlaeufig": false,
-   "streuung": 0.099,
-   "klare_tage": 17,
+   "streuung": 0.102,
+   "klare_tage": 18,
    "teiltage": 0,
    "teiltage_verworfen": 13,
    "von": "2026-09-04",
-   "bis": "2026-10-30"
+   "bis": "2026-10-31"
   },
   "Kulmbach": {
    "faktor": 0.919,
