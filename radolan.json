@@ -1,8 +1,8 @@
 {
   "datum": "2026-11-02",
   "summe_mm": 0.0,
-  "stunden_ok": 18,
-  "stunden_erwartet": 21,
+  "stunden_ok": 21,
+  "stunden_erwartet": 22,
   "stunden": [
     {
       "stunde": "01:00",
@@ -38,13 +38,11 @@
     },
     {
       "stunde": "09:00",
-      "mm": null,
-      "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+      "mm": 0.0
     },
     {
       "stunde": "10:00",
-      "mm": null,
-      "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+      "mm": 0.0
     },
     {
       "stunde": "11:00",
@@ -80,8 +78,7 @@
     },
     {
       "stunde": "19:00",
-      "mm": null,
-      "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+      "mm": 0.0
     },
     {
       "stunde": "20:00",
@@ -90,6 +87,11 @@
     {
       "stunde": "21:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "22:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -176,7 +178,7 @@
     "datum": "2026-10-28",
     "mm": 0.73
   },
-  "aktualisiert": "2026-11-02T20:37:00+00:00",
+  "aktualisiert": "2026-11-02T21:07:00+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -186,8 +188,8 @@
       "lon": 8.6740943,
       "datum": "2026-11-02",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 21,
+      "stunden_ok": 21,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -223,13 +225,11 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "11:00",
@@ -265,8 +265,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "20:00",
@@ -275,6 +274,11 @@
         {
           "stunde": "21:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -369,8 +373,8 @@
       "lon": 8.6226918,
       "datum": "2026-11-02",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 21,
+      "stunden_ok": 21,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -406,13 +410,11 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "11:00",
@@ -448,8 +450,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "20:00",
@@ -458,6 +459,11 @@
         {
           "stunde": "21:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "22:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -552,8 +558,8 @@
       "lon": 7.2066,
       "datum": "2026-11-02",
       "summe_mm": 2.31,
-      "stunden_ok": 18,
-      "stunden_erwartet": 21,
+      "stunden_ok": 21,
+      "stunden_erwartet": 22,
       "stunden": [
         {
           "stunde": "01:00",
@@ -589,13 +595,11 @@
         },
         {
           "stunde": "09:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "11:00",
@@ -631,8 +635,7 @@
         },
         {
           "stunde": "19:00",
-          "mm": null,
-          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
+          "mm": 0.0
         },
         {
           "stunde": "20:00",
@@ -641,6 +644,11 @@
         {
           "stunde": "21:00",
           "mm": 0.1
+        },
+        {
+          "stunde": "22:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -718,7 +726,7 @@
               753,
               333
             ],
-            "mm": 2.5,
+            "mm": 2.6,
             "eigenes": false
           }
         ]
