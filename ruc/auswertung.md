@@ -1,6 +1,6 @@
 # ICON-D2-RUC gegen die App - Station Giessen/Wettenberg
 
-Stand 2026-11-02 06:42 UTC · 288 Abrufe · Tagesvergleich RUC/App: besser 1, schlechter 2, gleich 10, p = 1.0
+Stand 2026-11-02 06:50 UTC · 288 Abrufe · Tagesvergleich RUC/App: besser 1, schlechter 2, gleich 10, p = 1.0
 
 ## Vorlauf 1 h
 
