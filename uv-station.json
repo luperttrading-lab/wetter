@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-31",
+ "stand": "2026-11-01",
  "waechter": {
   "stationen": 34,
   "breite": {
@@ -136,7 +136,7 @@
    "streuung": 0.102,
    "klare_tage": 18,
    "teiltage": 0,
-   "teiltage_verworfen": 13,
+   "teiltage_verworfen": 14,
    "von": "2026-09-04",
    "bis": "2026-10-31"
   },
