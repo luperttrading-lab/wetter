@@ -26,7 +26,8 @@
     },
     {
       "stunde": "06:00",
-      "mm": 0.0
+      "mm": null,
+      "fehler": "Remote end closed connection without response"
     },
     {
       "stunde": "07:00",
@@ -42,8 +43,7 @@
     },
     {
       "stunde": "10:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.0
     }
   ],
   "umgebung_3x3": [
@@ -130,7 +130,7 @@
     "datum": "2026-10-28",
     "mm": 0.73
   },
-  "aktualisiert": "2026-11-03T09:07:01+00:00",
+  "aktualisiert": "2026-11-03T09:37:00+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -165,7 +165,8 @@
         },
         {
           "stunde": "06:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "Remote end closed connection without response"
         },
         {
           "stunde": "07:00",
@@ -181,8 +182,7 @@
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -302,7 +302,8 @@
         },
         {
           "stunde": "06:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "Remote end closed connection without response"
         },
         {
           "stunde": "07:00",
@@ -318,8 +319,7 @@
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -439,7 +439,8 @@
         },
         {
           "stunde": "06:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "Remote end closed connection without response"
         },
         {
           "stunde": "07:00",
@@ -455,8 +456,7 @@
         },
         {
           "stunde": "10:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
