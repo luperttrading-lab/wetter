@@ -1,15 +1,15 @@
 {
- "stand": "2026-11-01",
+ "stand": "2026-11-02",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.008,
+   "steigung": 0.0082,
    "fehler": 0.0092,
-   "t": 0.87
+   "t": 0.89
   },
   "hoehe": {
-   "steigung": 0.0261,
-   "fehler": 0.0373,
+   "steigung": 0.0262,
+   "fehler": 0.0374,
    "t": 0.7
   },
   "mittel": 0.967,

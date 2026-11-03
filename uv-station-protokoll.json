@@ -11688,6 +11688,296 @@
    "grund": "nur 19 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
   },
   {
+   "d": "2026-11-02",
+   "st": "Andernach",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.609,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Belm-Osnabrueck",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.757,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Berlin",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.656,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Boesel_B",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Bonn",
+   "genommen": false,
+   "sonne": 0.02,
+   "verh": 0.787,
+   "grund": "nur 2 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Chieming",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.673,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Dortmund",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.447,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Duderstadt_B",
+   "genommen": false,
+   "sonne": 0.38,
+   "verh": 0.744,
+   "grund": "nur 38 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Eckernfoerde",
+   "genommen": false,
+   "sonne": 0.24,
+   "verh": 1.237,
+   "grund": "nur 24 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Fichtelberg",
+   "genommen": false,
+   "sonne": 0.01,
+   "verh": 0.504,
+   "grund": "nur 1 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Friedrichshafen",
+   "genommen": false,
+   "sonne": 0.24,
+   "verh": 0.839,
+   "grund": "nur 24 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Genthin",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Giessen-Wettenberg",
+   "genommen": false,
+   "sonne": 0.62,
+   "verh": 1.081,
+   "grund": "nur 62 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Goerlitz",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.552,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Groemitz",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.408,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Hamburg",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.329,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Hohenpeissenberg",
+   "genommen": false,
+   "sonne": 0.1,
+   "verh": 0.82,
+   "grund": "nur 10 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Kassel",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Klippeneck",
+   "genommen": false,
+   "sonne": 0.05,
+   "verh": 0.979,
+   "grund": "nur 5 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Kulmbach",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.649,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Lindenberg",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.564,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Lueneburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Melpitz",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.613,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Muenchen",
+   "genommen": false,
+   "sonne": 0.04,
+   "verh": 0.866,
+   "grund": "nur 4 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Norderney",
+   "genommen": false,
+   "sonne": 0.42,
+   "verh": 1.017,
+   "grund": "nur 42 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Salzgitter",
+   "genommen": false,
+   "sonne": 0.03,
+   "verh": 0.734,
+   "grund": "nur 3 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Schauinsland",
+   "genommen": false,
+   "sonne": 0.28,
+   "verh": 1.002,
+   "grund": "nur 28 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Schneefernerhaus",
+   "genommen": false,
+   "sonne": 0.65,
+   "verh": 1.162,
+   "grund": "nur 65 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Schweinfurt_Wasserlosen",
+   "genommen": false,
+   "sonne": 0.01,
+   "verh": 0.521,
+   "grund": "nur 1 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Stuttgart",
+   "genommen": false,
+   "sonne": 0.64,
+   "verh": 0.896,
+   "grund": "nur 64 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Sylt_Tinnum",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Todendorf",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.515,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Waldhof_Falkenstein",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Waldmuenchen",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.407,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Weissenburg",
+   "genommen": false,
+   "grund": "keine Sonnenscheindauer in Reichweite"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Wurmberg_B",
+   "genommen": false,
+   "sonne": 0.38,
+   "verh": 1.175,
+   "grund": "nur 38 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Zingst",
+   "genommen": false,
+   "sonne": 0.0,
+   "verh": 0.697,
+   "grund": "nur 0 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Zirchow",
+   "genommen": false,
+   "sonne": 0.56,
+   "verh": 1.158,
+   "grund": "nur 56 % Sonne 11-15 Uhr (Schwelle 70 %) - Maximum waere ein Wolkenrand-Ausreisser"
+  },
+  {
    "d": "2026-09-06",
    "st": "Andernach",
    "genommen": true,
@@ -12517,6 +12807,14 @@
    "genommen": true,
    "sonne": 0.91,
    "verh": 0.944,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Cuxhaven_B",
+   "genommen": true,
+   "sonne": 1.0,
+   "verh": 1.048,
    "grund": "klar"
   },
   {
@@ -14741,7 +15039,7 @@
    "genommen": true,
    "sonne": 0.72,
    "verh": 0.976,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-05",
@@ -14749,7 +15047,7 @@
    "genommen": true,
    "sonne": 0.89,
    "verh": 1.013,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-12",
@@ -14757,7 +15055,7 @@
    "genommen": true,
    "sonne": 0.82,
    "verh": 1.176,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-17",
@@ -14765,7 +15063,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.052,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-18",
@@ -14773,7 +15071,7 @@
    "genommen": true,
    "sonne": 0.82,
    "verh": 1.065,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-19",
@@ -14781,7 +15079,7 @@
    "genommen": true,
    "sonne": 0.85,
    "verh": 1.044,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-21",
@@ -14789,7 +15087,7 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 1.03,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-22",
@@ -14797,7 +15095,7 @@
    "genommen": true,
    "sonne": 0.84,
    "verh": 1.022,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-02",
@@ -14805,7 +15103,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.0,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-03",
@@ -14813,7 +15111,7 @@
    "genommen": true,
    "sonne": 0.78,
    "verh": 1.005,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-10",
@@ -14821,7 +15119,7 @@
    "genommen": true,
    "sonne": 0.77,
    "verh": 1.006,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-12",
@@ -14829,7 +15127,7 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 1.016,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-15",
@@ -14837,7 +15135,7 @@
    "genommen": true,
    "sonne": 0.81,
    "verh": 1.002,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-16",
@@ -14845,7 +15143,7 @@
    "genommen": true,
    "sonne": 0.76,
    "verh": 0.994,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-19",
@@ -14853,7 +15151,7 @@
    "genommen": true,
    "sonne": 0.73,
    "verh": 0.929,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-10-28",
@@ -14861,7 +15159,15 @@
    "genommen": true,
    "sonne": 0.7,
    "verh": 0.957,
-   "grund": "16 Tage mit 70-90 % Sonne, Streuung 0.054 - stimmig, zaehlen mit"
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Langen",
+   "genommen": true,
+   "sonne": 0.82,
+   "verh": 1.059,
+   "grund": "17 Tage mit 70-90 % Sonne, Streuung 0.053 - stimmig, zaehlen mit"
   },
   {
    "d": "2026-09-15",
@@ -16757,6 +17063,14 @@
    "genommen": true,
    "sonne": 1.0,
    "verh": 0.874,
+   "grund": "klar"
+  },
+  {
+   "d": "2026-11-02",
+   "st": "Tholey",
+   "genommen": true,
+   "sonne": 0.98,
+   "verh": 0.851,
    "grund": "klar"
   },
   {
