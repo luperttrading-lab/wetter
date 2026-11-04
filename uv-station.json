@@ -1,18 +1,18 @@
 {
- "stand": "2026-11-02",
+ "stand": "2026-11-03",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0082,
+   "steigung": 0.0084,
    "fehler": 0.0092,
-   "t": 0.89
+   "t": 0.92
   },
   "hoehe": {
-   "steigung": 0.0262,
+   "steigung": 0.0281,
    "fehler": 0.0374,
-   "t": 0.7
+   "t": 0.75
   },
-  "mittel": 0.967,
+  "mittel": 0.966,
   "reststreuung": 0.092,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -23,14 +23,14 @@
   "Belm-Osnabrueck": {
    "faktor": 0.947,
    "roh": 0.945,
-   "tage": 14,
+   "tage": 15,
    "vorlaeufig": false,
    "streuung": 0.038,
    "klare_tage": 8,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-12",
-   "bis": "2026-10-20"
+   "bis": "2026-11-03"
   },
   "Berlin": {
    "faktor": 1.071,
@@ -165,16 +165,16 @@
    "bis": "2026-10-27"
   },
   "Salzgitter": {
-   "faktor": 0.936,
-   "roh": 0.935,
-   "tage": 21,
+   "faktor": 0.943,
+   "roh": 0.942,
+   "tage": 22,
    "vorlaeufig": false,
-   "streuung": 0.053,
+   "streuung": 0.052,
    "klare_tage": 14,
-   "teiltage": 7,
+   "teiltage": 8,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-10-27"
+   "bis": "2026-11-03"
   },
   "Schweinfurt_Wasserlosen": {
    "faktor": 0.8,
