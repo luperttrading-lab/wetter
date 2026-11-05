@@ -1,8 +1,8 @@
 {
   "datum": "2026-11-05",
   "summe_mm": 0.0,
-  "stunden_ok": 18,
-  "stunden_erwartet": 18,
+  "stunden_ok": 15,
+  "stunden_erwartet": 19,
   "stunden": [
     {
       "stunde": "01:00",
@@ -22,7 +22,8 @@
     },
     {
       "stunde": "05:00",
-      "mm": 0.0
+      "mm": null,
+      "fehler": "<urlopen error _ssl.c:994: The handshake operation timed out>"
     },
     {
       "stunde": "06:00",
@@ -58,7 +59,8 @@
     },
     {
       "stunde": "14:00",
-      "mm": 0.0
+      "mm": null,
+      "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
     },
     {
       "stunde": "15:00",
@@ -70,11 +72,17 @@
     },
     {
       "stunde": "17:00",
-      "mm": 0.0
+      "mm": null,
+      "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
     },
     {
       "stunde": "18:00",
       "mm": 0.0
+    },
+    {
+      "stunde": "19:00",
+      "mm": null,
+      "status": "noch nicht verfuegbar"
     }
   ],
   "umgebung_3x3": [
@@ -161,7 +169,7 @@
     "datum": "2026-10-28",
     "mm": 0.73
   },
-  "aktualisiert": "2026-11-05T17:37:28+00:00",
+  "aktualisiert": "2026-11-05T18:07:01+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -171,8 +179,8 @@
       "lon": 8.6740943,
       "datum": "2026-11-05",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_ok": 15,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -192,7 +200,8 @@
         },
         {
           "stunde": "05:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error _ssl.c:994: The handshake operation timed out>"
         },
         {
           "stunde": "06:00",
@@ -228,7 +237,8 @@
         },
         {
           "stunde": "14:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "15:00",
@@ -240,11 +250,17 @@
         },
         {
           "stunde": "17:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -339,8 +355,8 @@
       "lon": 8.6226918,
       "datum": "2026-11-05",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_ok": 15,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -360,7 +376,8 @@
         },
         {
           "stunde": "05:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error _ssl.c:994: The handshake operation timed out>"
         },
         {
           "stunde": "06:00",
@@ -396,7 +413,8 @@
         },
         {
           "stunde": "14:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "15:00",
@@ -408,11 +426,17 @@
         },
         {
           "stunde": "17:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
@@ -507,8 +531,8 @@
       "lon": 7.2066,
       "datum": "2026-11-05",
       "summe_mm": 0.0,
-      "stunden_ok": 18,
-      "stunden_erwartet": 18,
+      "stunden_ok": 15,
+      "stunden_erwartet": 19,
       "stunden": [
         {
           "stunde": "01:00",
@@ -528,7 +552,8 @@
         },
         {
           "stunde": "05:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error _ssl.c:994: The handshake operation timed out>"
         },
         {
           "stunde": "06:00",
@@ -564,7 +589,8 @@
         },
         {
           "stunde": "14:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "15:00",
@@ -576,11 +602,17 @@
         },
         {
           "stunde": "17:00",
-          "mm": 0.0
+          "mm": null,
+          "fehler": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of "
         },
         {
           "stunde": "18:00",
           "mm": 0.0
+        },
+        {
+          "stunde": "19:00",
+          "mm": null,
+          "status": "noch nicht verfuegbar"
         }
       ],
       "umgebung_3x3": [
