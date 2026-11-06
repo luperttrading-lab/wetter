@@ -2438,6 +2438,17 @@ Maehzeit vor Sonnenaufgang beginnt UND eine Pause gilt - bei 8 Uhr Beginn im Okt
 Jetzt `.rz-eband>.rz-elab{grid-row:1}`. Passt "dunkel" nicht in seine Strecke (eine Stunde; bei 320/360 pt auch zwei),
 steht statt eines leeren Felds ein Mond (`RZ_MOND_K`, in rzGrossBinden gemessen wie bisher). Geprueft bei allen sechs
 Breiten: alle Felder in einer Zeile, 13 px hoch, Schrift ganz drin.
+WETTER-ANIMATION (06.11.2026, Nutzer nach einem YouTube-Video, in dem eine KI-gebaute App bei Regen "regnet":
+"nur fuer Regen macht es keinen Sinn - wenn, dann auch andere Wetterlagen"): VARIANTENSEITE `wettertest.html`. Die echte
+App laeuft darin in einem Rahmen (gleiche Herkunft), die Seite haengt eine Leinwand `#wtCv` als erstes Kind in `#hero`
+und zeichnet: Regen leicht/stark, Niesel, Schnee, Schneeregen, Gewitter (alle 6-14 s weiches Aufhellen, zwei Stoesse,
+0,6 s), Nebel (5 ziehende weiche Flecken), Sturm (Windstriche), Sturm + Regen (schraeg, tan = Wind/90 <= 0,75). Waehlbar:
+Staerke dezent/kraeftig, Ebene "hinter den Kacheln" (Kacheln sind halbdurchsichtig, im dunklen Modus .07 - Flocken
+sieht man dort voll), "nur oben" (bis 4 px ueber #kz), "ueber allem"; Ansicht hell/dunkel/wie die App; "Bewegung
+reduzieren" = stehendes Bild. Grundsatz (mein Vorschlag, Nutzer zugestimmt): animiert wird nur, was gerade draussen
+PASSIERT; Sonne, Wolken, klare Nacht bleiben ruhig. Zeichnen kostet im Pruefstand < 0,1 ms je Bild (101 Tropfen).
+Wahl steht aus. Fuer die App spaeter: Ausloeser aus Radar am Ort/Station (wie Kachel "Regen") bzw. Bright-Sky-
+`condition`, Pause bei unsichtbarem Startbereich (IntersectionObserver), `?wettertest` zum Erzwingen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
