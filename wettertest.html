@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Wetter-Animation — Varianten</title>
+<style>
+/* Vergleichsseite (06.11.2026, Nutzer nach einem Video mit "die App regnet": "nur fuer Regen macht es
+   keinen Sinn - wenn, dann auch andere Wetterlagen"). Die echte App laeuft unten in einem Rahmen; diese
+   Seite legt eine Leinwand in deren Startbereich (#hero) und zeichnet dort die gewaehlte Wetterlage.
+   Animiert wird nur, was gerade draussen PASSIERT (Regen, Niesel, Schnee, Schneeregen, Gewitter, Nebel,
+   Sturm) - Sonne, Wolken und klare Nacht bleiben ruhig, sonst bewegte sich der Kopf fast immer.
+   Gewaehlt werden: Wetterlage, Staerke (dezent/kraeftig) und Ebene (hinter den Kacheln, nur oben, ueber
+   allem). "Bewegung reduzieren" zeigt das stehende Bild, das die App dann zeigen wuerde. */
+:root{--ink:#17202e;--muted:#5c6b80;--line:#e7dfd4;--bg:#fbf6ee;--karte:#fffdf9}
+@media (prefers-color-scheme:dark){:root{--ink:#e7edf5;--muted:#9aa7b8;--line:#33405a;--bg:#121821;--karte:#1a212c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding:12px 0 calc(16px + env(safe-area-inset-bottom))}
+.rand{padding:0 16px}
+h1{font-size:19px;margin:2px 0 2px}
+.info{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.zeile{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0;align-items:center}
+.zeile b{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);width:100%;margin-bottom:-2px}
+.zeile button{font:inherit;font-size:13.5px;font-weight:700;border:1px solid var(--line);background:var(--karte);color:var(--ink);
+  border-radius:10px;padding:6px 10px;cursor:pointer}
+.zeile button.an{background:#1e293b;color:#fff;border-color:#1e293b}
+@media (prefers-color-scheme:dark){.zeile button.an{background:#e7edf5;color:#121821;border-color:#e7edf5}}
+#stand{font-size:12.5px;color:var(--muted);margin:8px 0 6px;min-height:18px}
+iframe{display:block;width:100%;height:max(560px,74vh);border:0;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="rand">
+  <h1>Wetter-Animation im Startbereich</h1>
+  <p class="info">Unten läuft die echte App. Wähle Wetterlage, Stärke und Ebene – die Animation liegt im obersten Kasten (Temperatur und Kacheln). In der App liefe sie nur, solange das Wetter <i>jetzt</i> so ist.</p>
+  <div class="zeile" id="zLage"><b>Wetterlage</b>
+    <button data-v="leicht">Regen leicht</button><button data-v="stark">Regen stark</button><button data-v="niesel">Niesel</button>
+    <button data-v="schnee">Schnee</button><button data-v="schneeregen">Schneeregen</button><button data-v="gewitter">Gewitter</button>
+    <button data-v="nebel">Nebel</button><button data-v="sturm">Sturm</button><button data-v="sturmregen">Sturm + Regen</button><button data-v="aus">aus</button>
+  </div>
+  <div class="zeile" id="zStaerke"><b>Stärke</b><button data-v="dezent">dezent</button><button data-v="kraeftig">kräftig</button></div>
+  <div class="zeile" id="zEbene"><b>Ebene</b><button data-v="hinter">hinter den Kacheln</button><button data-v="oben">nur oben</button><button data-v="ueber">über allem</button></div>
+  <div class="zeile" id="zAnsicht"><b>Ansicht</b><button data-v="auto">wie die App</button><button data-v="hell">hell</button><button data-v="dunkel">dunkel</button>
+    <button data-v="still" id="bStill">Bewegung reduzieren</button></div>
+  <div id="stand">App lädt …</div>
+</div>
+<iframe id="app" src="index.html" title="Wetter-App"></iframe>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+/* Wetterlagen. regen: n = Tropfen je 10 000 px², v = Fallgeschwindigkeit px/s, l = Strichlaenge px, w = Strichbreite px.
+   schnee: n = Flocken je 10 000 px², v = Sinken px/s. wind in km/h kippt Regen (tan = wind/90, hoechstens 0,75)
+   und treibt Schnee seitlich. Die mm/h-Angaben sind nur die Absicht hinter den Zahlen, gezeichnet wird nach n. */
+const LAGEN={
+  leicht:{txt:"Regen leicht (~1 mm/h), Wind 8 km/h",regen:{n:1.6,v:560,l:13,w:1},wind:8},
+  stark:{txt:"Regen stark (~8 mm/h), Wind 15 km/h",regen:{n:6,v:860,l:22,w:1.3},wind:15},
+  niesel:{txt:"Niesel (~0,2 mm/h), Wind 5 km/h",regen:{n:7,v:240,l:5,w:.9},wind:5},
+  schnee:{txt:"Schnee, Wind 8 km/h",schnee:{n:2.4,v:42},wind:8},
+  schneeregen:{txt:"Schneeregen, Wind 10 km/h",regen:{n:1.4,v:600,l:12,w:1},schnee:{n:1.2,v:70},wind:10},
+  gewitter:{txt:"Gewitter mit Regen (~5 mm/h), Wind 20 km/h - seltenes, weiches Aufhellen",regen:{n:4.5,v:800,l:20,w:1.2},blitz:true,wind:20},
+  nebel:{txt:"Nebel - langsam ziehende Schleier",nebel:true,wind:6},
+  sturm:{txt:"Sturm ohne Niederschlag (Böen ~70 km/h) - Windstriche",streifen:true,wind:70},
+  sturmregen:{txt:"Sturm mit Regen (Böen ~65 km/h) - schräger Regen",regen:{n:3.5,v:820,l:20,w:1.2},wind:65},
+  aus:{txt:"keine Animation"}
+};
+const W={lage:"stark",staerke:"dezent",ebene:"hinter",ansicht:"auto",still:false};
+try{Object.assign(W,JSON.parse(localStorage.getItem("wettertest")||"{}"));}catch(e){}
+function merken(){try{localStorage.setItem("wettertest",JSON.stringify(W));}catch(e){}}
+
+/* ---- Knoepfe ---- */
+function knoepfe(){
+  [["zLage","lage"],["zStaerke","staerke"],["zEbene","ebene"]].forEach(([id,k])=>$(id).querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===W[k])));
+  $("zAnsicht").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v==="still"?W.still:b.dataset.v===W.ansicht));
+  const L=LAGEN[W.lage];$("stand").textContent=L.txt+" · "+(W.staerke==="dezent"?"dezent":"kräftig")+" · "+
+    ({hinter:"hinter den Kacheln",oben:"nur oben",ueber:"über allem"})[W.ebene]+(W.still?" · Bewegung reduziert (stehendes Bild)":"");
+}
+[["zLage","lage"],["zStaerke","staerke"],["zEbene","ebene"]].forEach(([id,k])=>$(id).addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;W[k]=b.dataset.v;merken();knoepfe();neu();}));
+$("zAnsicht").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.v==="still")W.still=!W.still;else W.ansicht=b.dataset.v;merken();knoepfe();ansicht();neu();});
+
+/* ---- Leinwand im Startbereich der App ---- */
+let F=null,doc=null,hero=null,cv=null,ctx=null,raf=0,sichtbar=true,T={};
+function ansicht(){
+  if(!doc)return;const h=doc.documentElement;
+  if(W.ansicht==="hell")h.classList.remove("dunkel");else if(W.ansicht==="dunkel")h.classList.add("dunkel");
+  else if(F.ansichtAnwenden)try{F.ansichtAnwenden(true);}catch(e){}
+}
+function einhaengen(){
+  F=$("app").contentWindow;doc=$("app").contentDocument;hero=doc&&doc.getElementById("hero");
+  if(!hero||!hero.offsetHeight){setTimeout(einhaengen,250);return;}
+  const st=doc.createElement("style");
+  st.textContent="#wtCv{position:absolute;left:0;top:0;pointer-events:none;border-radius:inherit}";
+  doc.head.appendChild(st);
+  cv=doc.createElement("canvas");cv.id="wtCv";hero.insertBefore(cv,hero.firstChild);ctx=cv.getContext("2d");
+  // Geschwister ueber die Leinwand heben (nur statische - absolut liegende Teile behalten ihre Lage)
+  [...hero.children].forEach(c=>{if(c===cv)return;const s=F.getComputedStyle(c);if(s.position==="static"){c.style.position="relative";}
+    if(s.zIndex==="auto")c.style.zIndex="1";});
+  new F.IntersectionObserver(es=>{sichtbar=es[0].isIntersecting;if(sichtbar)lauf();},{}).observe(hero);
+  ansicht();neu();
+}
+$("app").addEventListener("load",()=>setTimeout(einhaengen,300));
+
+/* Farben je Ansicht (hell: dunkleres Blau auf Creme; dunkel: helles Blau auf Nachtblau) */
+function farben(){
+  const d=doc.documentElement.classList.contains("dunkel"),a=W.staerke==="dezent"?.38:.62;
+  return d?{regen:`rgba(170,205,245,${a})`,schnee:`rgba(238,244,255,${Math.min(1,a+.3)})`,nebel:"205,212,224",strich:`rgba(205,220,240,${a*1.05})`,blitz:"205,220,255",d}
+         :{regen:`rgba(55,105,175,${a})`,schnee:`rgba(120,145,182,${Math.min(1,a+.25)})`,nebel:"150,158,172",strich:`rgba(70,95,130,${a*1.1})`,blitz:"170,195,255",d};
+}
+/* Bereich, in dem gezeichnet wird: ganzer Kasten oder (nur oben) bis knapp ueber die Kacheln */
+function bereich(){
+  const r=hero.getBoundingClientRect(),w=hero.clientWidth,h=hero.clientHeight;let hb=h;
+  if(W.ebene==="oben"){const kz=doc.getElementById("kz");if(kz&&kz.offsetHeight){hb=Math.max(60,kz.getBoundingClientRect().top-r.top-4);}}
+  return {w,h,hb};
+}
+function neu(){
+  if(!cv)return;cancelAnimationFrame(raf);raf=0;
+  cv.style.zIndex=W.ebene==="ueber"?"30":"0";
+  const B=bereich(),dpr=Math.min(2,F.devicePixelRatio||1);
+  cv.width=Math.round(B.w*dpr);cv.height=Math.round(B.h*dpr);cv.style.width=B.w+"px";cv.style.height=B.h+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const L=LAGEN[W.lage],k=W.staerke==="dezent"?.55:1,fl=B.w*B.hb/1e4,R=Math.random;
+  T={L,B,k,t0:performance.now(),last:performance.now(),regen:[],schnee:[],nebel:[],strich:[],blitz:null};
+  const kipp=Math.min(.75,(L.wind||0)/90),ext=B.hb*kipp;   // schraeger Regen kommt von links ins Bild
+  if(L.regen)for(let i=0;i<Math.round(L.regen.n*fl*k);i++)T.regen.push({x:R()*(B.w+ext)-ext,y:R()*B.hb,f:.8+R()*.4});
+  if(L.schnee)for(let i=0;i<Math.round(L.schnee.n*fl*k);i++)T.schnee.push({x:R()*B.w,y:R()*B.hb,r:1+R()*1.8,p:R()*6.3,f:.7+R()*.6});
+  if(L.nebel)for(let i=0;i<5;i++)T.nebel.push({x:R()*B.w,y:B.hb*(.15+R()*.75),r:110+R()*120,v:5+R()*9,a:.18+R()*.17});
+  if(L.streifen)for(let i=0;i<Math.max(6,Math.round(1*fl*k));i++)T.strich.push(strichNeu(B,true));
+  if(L.blitz)T.blitzNext=performance.now()+1500+R()*3000;
+  T.kipp=kipp;zeichne(performance.now(),true);
+  if(!W.still&&W.lage!=="aus")lauf();
+}
+function strichNeu(B,start){const R=Math.random;return {x:start?R()*B.w:-110-R()*B.w*.5,y:R()*B.hb,len:45+R()*70,v:420+R()*360,ph:R()*6.3};}
+function lauf(){if(!raf&&cv&&!W.still&&W.lage!=="aus"&&sichtbar)raf=F.requestAnimationFrame(schritt);}
+function schritt(now){raf=0;if(!sichtbar)return;zeichne(now,false);lauf();}
+
+function zeichne(now,still){
+  const {L,B}=T,c=ctx,col=farben();let dt=Math.min(.05,(now-T.last)/1000);T.last=now;if(still)dt=0;
+  c.clearRect(0,0,B.w,B.h);c.save();c.beginPath();c.rect(0,0,B.w,B.hb);c.clip();
+  // Nebel: weiche Flecken, langsam nach rechts
+  for(const n of T.nebel){n.x+=n.v*dt;if(n.x-n.r>B.w)n.x=-n.r;
+    const g=c.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);const a=n.a*(W.staerke==="dezent"?.75:1.25)*(col.d?.85:1.7);
+    g.addColorStop(0,`rgba(${col.nebel},${a})`);g.addColorStop(1,`rgba(${col.nebel},0)`);c.fillStyle=g;c.fillRect(n.x-n.r,n.y-n.r,2*n.r,2*n.r);}
+  // Regen: ein Strich je Tropfen, schraeg nach Wind
+  if(L.regen){const r=L.regen,vx=r.v*T.kipp,ext=B.hb*T.kipp;c.strokeStyle=col.regen;c.lineWidth=r.w;c.lineCap="round";c.beginPath();
+    for(const p of T.regen){p.y+=r.v*p.f*dt;p.x+=vx*p.f*dt;
+      if(p.y>B.hb+r.l){p.y=-r.l-Math.random()*20;p.x=Math.random()*(B.w+ext)-ext;}
+      const lx=r.l*T.kipp,ly=r.l;c.moveTo(p.x,p.y);c.lineTo(p.x-lx,p.y-ly);}
+    c.stroke();}
+  // Schnee: Flocken sinken, pendeln und treiben mit dem Wind
+  if(L.schnee){const s=L.schnee,drift=6+(L.wind||0)*1.1;c.fillStyle=col.schnee;c.beginPath();
+    for(const p of T.schnee){p.y+=s.v*p.f*dt;p.p+=dt*1.3;p.x+=(drift+Math.sin(p.p)*14)*dt;
+      if(p.y>B.hb+4){p.y=-4;p.x=Math.random()*B.w;}if(p.x>B.w+4)p.x=-4;
+      c.moveTo(p.x+p.r,p.y);c.arc(p.x,p.y,p.r,0,6.283);}
+    c.fill();}
+  // Sturm ohne Niederschlag: feine Windstriche von links nach rechts
+  if(L.streifen){c.strokeStyle=col.strich;c.lineWidth=1.2;c.lineCap="round";c.beginPath();
+    for(const s of T.strich){s.x+=s.v*dt;s.ph+=dt*3;if(s.x-s.len>B.w)Object.assign(s,strichNeu(B,false));
+      const y=s.y+Math.sin(s.ph)*3;c.moveTo(s.x,y);c.quadraticCurveTo(s.x-s.len/2,y-2,s.x-s.len,y+1);}
+    c.stroke();}
+  c.restore();
+  // Gewitter: alle 6-14 s ein weiches Aufhellen (zwei kurze Stoesse, dann Ausklingen) - nie bei "Bewegung reduzieren"
+  if(L.blitz&&!still&&!W.still){
+    if(!T.blitz&&now>=T.blitzNext){T.blitz=now;T.blitzNext=now+6000+Math.random()*8000;}
+    if(T.blitz){const e=now-T.blitz;let a=e<70?.38:e<150?.08:e<230?.26:e<600?.26*(1-(e-230)/370):0;
+      if(e>600)T.blitz=null;if(a>0){c.fillStyle=`rgba(${col.blitz},${a*(W.staerke==="dezent"?.65:1)})`;c.fillRect(0,0,B.w,B.hb);}}}
+}
+/* Groesse des Kastens aendert sich (Daten kommen, Kacheln wechseln): neu aufbauen */
+setInterval(()=>{if(!cv||!hero)return;const B=bereich();if(Math.abs(B.w-T.B.w)>1||Math.abs(B.h-T.B.h)>1||Math.abs(B.hb-T.B.hb)>1)neu();},1000);
+matchMedia("(prefers-reduced-motion: reduce)").matches&&(W.still=true);
+knoepfe();
+</script>
+</body>
+</html>
