@@ -1,4 +1,4 @@
-Radar-Eichung an den Bodenmessern, 06.11.2026 20:03 UTC
+Radar-Eichung an den Bodenmessern, 07.11.2026 07:43 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            0 Paare  (FRANKFURT/M)
   Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
@@ -13,23 +13,23 @@ Radar-Eichung an den Bodenmessern, 06.11.2026 20:03 UTC
   Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
   Erfurt-Weimar             0 Paare  (ERFURT)
   Nuernberg                 0 Paare  (NUERNBERG)
-  Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
+  Muenchen-Flughafen        1 Paare  (MUENCHEN-FL.)
   Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
   Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
   Trier-Petrisberg          0 Paare  (TRIER)
-  Saarbruecken              2 Paare  (SAARBRUECKEN)
-  Freiburg                  4 Paare  (FREIBURG)
-gesammelt: 6 Paare
+  Saarbruecken              0 Paare  (SAARBRUECKEN)
+  Freiburg                  1 Paare  (FREIBURG)
+gesammelt: 2 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       350   1789     2.00      1.11      4.00     0.40 mm     0.22 mm
+niesel       350   1791     2.00      1.11      4.00     0.40 mm     0.22 mm
 leicht       357    413     0.95      0.57      1.31     0.90 mm     0.98 mm
 regen         64     65     0.78      0.48      1.17     2.80 mm     3.58 mm
 
-Radar sah nichts, Station mass etwas: 51 von 2318 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 51 von 2320 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      1054 Stunden, davon 902 trocken (86 %)
+  Radarsumme bis  0 1      1056 Stunden, davon 904 trocken (86 %)
   Radarsumme 0 1 bis  0 25 478 Stunden, davon 274 trocken (57 %)
   Radarsumme 0 25 bis  0 5 257 Stunden, davon  62 trocken (24 %)
   Radarsumme ab 0 5        478 Stunden, davon  36 trocken (8 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 48 Tage, 2318 Paare)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 49 Tage, 2320 Paare)
