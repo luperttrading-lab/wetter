@@ -1,7 +1,7 @@
 {
  "stand": "2026-11-07",
  "tage": 49,
- "paare": 2323,
+ "paare": 2324,
  "regel": "Faktor = Median(Stationssumme / Radarsumme) je Stunde, Klasse nach der Radarrate, ab 30 Paaren; gezaehlt werden nur Stunden mit mindestens 0.2 mm an der Station - darunter loest die Kippwaage nicht auf und der Quotient waere Quantisierungsrauschen (Feld \"roh\": Paare ohne diese Bedingung)",
  "klassen": {
   "niesel": {
@@ -20,7 +20,7 @@
  "faktor": {
   "niesel": {
    "paare": 350,
-   "roh": 1794,
+   "roh": 1795,
    "faktor": 2.0,
    "q25": 1.11,
    "q75": 4.0,
@@ -47,13 +47,13 @@
   },
   "_radar_blind": {
    "faelle": 51,
-   "von": 2323,
+   "von": 2324,
    "mm_median": 0.1
   },
   "_boden_trocken": {
    "bis_0_1": {
-    "stunden": 1058,
-    "boden_trocken": 906,
+    "stunden": 1059,
+    "boden_trocken": 907,
     "anteil": 0.86
    },
    "0_1_bis_0_25": {
