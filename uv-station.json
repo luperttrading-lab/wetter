@@ -1,18 +1,18 @@
 {
- "stand": "2026-11-06",
+ "stand": "2026-11-07",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0096,
+   "steigung": 0.0097,
    "fehler": 0.0097,
-   "t": 0.99
+   "t": 1.0
   },
   "hoehe": {
-   "steigung": 0.0289,
-   "fehler": 0.0393,
-   "t": 0.74
+   "steigung": 0.0299,
+   "fehler": 0.0394,
+   "t": 0.76
   },
-  "mittel": 0.964,
+  "mittel": 0.963,
   "reststreuung": 0.097,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -76,32 +76,32 @@
    "streuung": 0.078,
    "klare_tage": 4,
    "teiltage": 0,
-   "teiltage_verworfen": 10,
+   "teiltage_verworfen": 11,
    "von": "2026-09-22",
    "bis": "2026-11-05"
   },
   "Fichtelberg": {
    "faktor": 0.8,
-   "roh": 0.782,
-   "tage": 19,
+   "roh": 0.787,
+   "tage": 20,
    "vorlaeufig": false,
-   "streuung": 0.088,
+   "streuung": 0.092,
    "klare_tage": 13,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-05",
-   "bis": "2026-11-06"
+   "bis": "2026-11-07"
   },
   "Goerlitz": {
-   "faktor": 0.943,
-   "roh": 0.942,
-   "tage": 21,
+   "faktor": 0.914,
+   "roh": 0.912,
+   "tage": 15,
    "vorlaeufig": false,
-   "streuung": 0.045,
+   "streuung": 0.044,
    "klare_tage": 15,
-   "teiltage": 6,
-   "teiltage_verworfen": 0,
-   "von": "2026-09-05",
+   "teiltage": 0,
+   "teiltage_verworfen": 7,
+   "von": "2026-09-15",
    "bis": "2026-11-05"
   },
   "Hohenpeissenberg": {
@@ -141,16 +141,16 @@
    "bis": "2026-11-06"
   },
   "Lindenberg": {
-   "faktor": 1.125,
-   "roh": 1.127,
-   "tage": 18,
+   "faktor": 1.129,
+   "roh": 1.132,
+   "tage": 19,
    "vorlaeufig": false,
-   "streuung": 0.052,
-   "klare_tage": 12,
+   "streuung": 0.051,
+   "klare_tage": 13,
    "teiltage": 6,
    "teiltage_verworfen": 0,
    "von": "2026-09-15",
-   "bis": "2026-10-27"
+   "bis": "2026-11-07"
   },
   "Salzgitter": {
    "faktor": 0.943,
@@ -201,28 +201,28 @@
    "bis": "2026-11-06"
   },
   "Zingst": {
-   "faktor": 0.92,
-   "roh": 0.918,
-   "tage": 21,
+   "faktor": 0.918,
+   "roh": 0.916,
+   "tage": 22,
    "vorlaeufig": false,
    "streuung": 0.044,
-   "klare_tage": 11,
+   "klare_tage": 12,
    "teiltage": 10,
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
-   "bis": "2026-11-05"
+   "bis": "2026-11-07"
   },
   "Zirchow": {
-   "faktor": 1.078,
-   "roh": 1.082,
-   "tage": 8,
+   "faktor": 1.075,
+   "roh": 1.079,
+   "tage": 9,
    "vorlaeufig": false,
-   "streuung": 0.044,
-   "klare_tage": 8,
+   "streuung": 0.055,
+   "klare_tage": 9,
    "teiltage": 0,
    "teiltage_verworfen": 1,
    "von": "2026-09-22",
-   "bis": "2026-10-19"
+   "bis": "2026-11-07"
   }
  }
 }
