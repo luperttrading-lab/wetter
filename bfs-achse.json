@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-08T16:20:51+00:00",
+ "stand": "2026-11-08T20:46:51+00:00",
  "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
  "achsen": {
   "Andernach": {
@@ -2067,7 +2067,9 @@
    "2026-11-08": 3
   }
  },
- "gelesen": 86,
- "nicht_lesbar": 0,
- "gruende": {}
+ "gelesen": 85,
+ "nicht_lesbar": 1,
+ "gruende": {
+  "Schneefernerhaus|2026-11-08": "Leiste nicht gefunden (640x480; Proben bei y=30%: x38:#ffffff x58:#ffffff x77:#ffffff)"
+ }
 }
