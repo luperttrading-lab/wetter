@@ -1,18 +1,18 @@
 {
- "stand": "2026-11-07",
+ "stand": "2026-11-08",
  "waechter": {
   "stationen": 34,
   "breite": {
-   "steigung": 0.0097,
+   "steigung": 0.0099,
    "fehler": 0.0097,
-   "t": 1.0
+   "t": 1.02
   },
   "hoehe": {
-   "steigung": 0.0299,
+   "steigung": 0.0323,
    "fehler": 0.0394,
-   "t": 0.76
+   "t": 0.82
   },
-  "mittel": 0.963,
+  "mittel": 0.962,
   "reststreuung": 0.097,
   "schwelle_t": 3.0,
   "alarm": false,
@@ -94,15 +94,15 @@
   },
   "Goerlitz": {
    "faktor": 0.914,
-   "roh": 0.912,
-   "tage": 15,
+   "roh": 0.911,
+   "tage": 16,
    "vorlaeufig": false,
-   "streuung": 0.044,
-   "klare_tage": 15,
+   "streuung": 0.046,
+   "klare_tage": 16,
    "teiltage": 0,
    "teiltage_verworfen": 7,
    "von": "2026-09-15",
-   "bis": "2026-11-05"
+   "bis": "2026-11-08"
   },
   "Hohenpeissenberg": {
    "faktor": 1.079,
@@ -117,16 +117,16 @@
    "bis": "2026-10-27"
   },
   "Klippeneck": {
-   "faktor": 0.903,
-   "roh": 0.901,
-   "tage": 19,
+   "faktor": 0.905,
+   "roh": 0.903,
+   "tage": 20,
    "vorlaeufig": false,
-   "streuung": 0.099,
-   "klare_tage": 19,
+   "streuung": 0.096,
+   "klare_tage": 20,
    "teiltage": 0,
    "teiltage_verworfen": 14,
    "von": "2026-09-04",
-   "bis": "2026-11-05"
+   "bis": "2026-11-08"
   },
   "Kulmbach": {
    "faktor": 0.915,
@@ -141,16 +141,16 @@
    "bis": "2026-11-06"
   },
   "Lindenberg": {
-   "faktor": 1.129,
-   "roh": 1.132,
-   "tage": 19,
+   "faktor": 1.128,
+   "roh": 1.131,
+   "tage": 20,
    "vorlaeufig": false,
-   "streuung": 0.051,
+   "streuung": 0.049,
    "klare_tage": 13,
-   "teiltage": 6,
+   "teiltage": 7,
    "teiltage_verworfen": 0,
    "von": "2026-09-15",
-   "bis": "2026-11-07"
+   "bis": "2026-11-08"
   },
   "Salzgitter": {
    "faktor": 0.943,
@@ -163,6 +163,18 @@
    "teiltage_verworfen": 0,
    "von": "2026-09-06",
    "bis": "2026-11-06"
+  },
+  "Schneefernerhaus": {
+   "faktor": 1.053,
+   "roh": 1.054,
+   "tage": 33,
+   "vorlaeufig": false,
+   "streuung": 0.167,
+   "klare_tage": 33,
+   "teiltage": 0,
+   "teiltage_verworfen": 4,
+   "von": "2026-09-04",
+   "bis": "2026-11-08"
   },
   "Schweinfurt_Wasserlosen": {
    "faktor": 0.8,
