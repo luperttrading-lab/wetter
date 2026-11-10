@@ -2700,6 +2700,22 @@ Himmel die Kopfhoehe + 6, damit der Sprung von einer Kachel UNTER dem Kopf lande
 breit, Tag und Nacht): Kopf bei Scroll 0/180/420/1400 an derselben Stelle (91 px hoch), keine Kante, Sprung landet 6 px
 unter dem Kopf, klassische Ansichten unveraendert. NICHT pruefbar ohne iPhone: Hoehe mit Statusleiste (59 pt), Verhalten
 beim Gummiband-Ziehen (der Kopf wandert mit der Seite, der Himmel dahinter steht - kurz versetzt).
+v6.14 (Nutzer, iPhone-Bild 10.11. 22:45 nach v6.13: "0,3 Grad | Bewoelkt etwas groesser, wenn es oben stehen bleibt -
+oder wird das unruhig?"): (1) TEST Groesse der kleinen Zeile `#hiMini`: Einstellungen > "Zeile unter dem Ort beim
+Scrollen (Test): 14 | 16 | 18 | 20" (`hiMiniGr`, CSS-Variable `--hmg`, Voreinstellung 18, vorher fest 14). Unruhig wird es
+nicht, solange die Hoehe der Zeile IMMER freigehalten ist (`.plz{min-height}`): Kopfhoehe oben und gescrollt gemessen
+gleich (134 / 134,3 / 136,7 / 139,1 px bei 14/16/18/20). Zu lange Texte kuerzt `text-overflow`. AUFRAEUMEN nach der Wahl:
+`HI_MINI_GR`, `hiMiniGr/hiMiniSetzen`, `#hmSeg`, Wert fest in die CSS. (2) STATUSLEISTE: im Bild ist sie ein DECKENDER
+Balken (59 pt) mit harter Kante - iOS legt ihn bei `apple-mobile-web-app-status-bar-style: default` in der Farbe
+`theme-color` ueber die Seite, obwohl die Seite darunter weiterlaeuft (`env(safe-area-inset-top)` = 59: der Ortsname
+sass im Bild bei 63 pt). Der Himmel kann dort also NICHT durchscheinen. Bis v6.13 war `theme-color` die obere Farbe des
+Verlaufs; bei bedecktem Himmel liegen hellere Wolken davor -> Kante. Jetzt `hiRand(C,L,B)`: mittlere Farbe des obersten
+Streifens (64 px) mit beiden Wolkenlagen (Mittel ueber die Texturbreite, alpha-gewichtet), in `HI.rand`, `themaFarbe()`
+nimmt sie. Im Pruefstand mit vorgelegtem Balken: bedeckt und klare Nacht ohne sichtbare Kante, teils bewoelkt bleibt
+ein schwacher Streifen (der Balken ist einfarbig, der Himmel nicht). ECHTE Loesung waere `black-translucent` (Himmel bis
+zur Kante, weisse Uhr): dann braucht die klassische helle Ansicht einen eigenen dunklen Streifen, und iOS liest die
+Angabe vermutlich nur beim Hinzufuegen zum Home-Bildschirm (App loeschen und neu anlegen) - nicht gemacht, dem Nutzer
+angeboten.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
