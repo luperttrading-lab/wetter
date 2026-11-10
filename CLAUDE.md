@@ -2456,7 +2456,7 @@ Staerke dezent/kraeftig, Ebene "hinter den Kacheln" (Kacheln sind halbdurchsicht
 sieht man dort voll), "nur oben" (bis 4 px ueber #kz), "ueber allem"; Ansicht hell/dunkel/wie die App; "Bewegung
 reduzieren" = stehendes Bild. Grundsatz (mein Vorschlag, Nutzer zugestimmt): animiert wird nur, was gerade draussen
 PASSIERT; Sonne, Wolken, klare Nacht bleiben ruhig. Zeichnen kostet im Pruefstand < 0,1 ms je Bild (101 Tropfen).
-Wahl steht aus. Fuer die App spaeter: Ausloeser aus Radar am Ort/Station (wie Kachel "Regen") bzw. Bright-Sky-
+EINGEBAUT in v6.07 (nur oben, dezent) - siehe dort. Damals geplant: Ausloeser aus Radar am Ort/Station (wie Kachel "Regen") bzw. Bright-Sky-
 `condition`, Pause bei unsichtbarem Startbereich (IntersectionObserver), `?wettertest` zum Erzwingen.
 v6.06 (Nutzer 10.11.: "1-5 durchfuehren" nach einer Durchsicht der App): (1) STARTFEHLER. `typeof X!=="undefined"`
 schuetzt NICHT vor einem top-level `let`/`const`, dessen Zeile noch nicht gelaufen ist (TDZ -> ReferenceError). `kzRender()`
@@ -2481,6 +2481,26 @@ eine Extrapolation (10.11.: morgen roh 0,21 -> erw. 0,43 bei klar 1,26). Nur Her
 Sommer haelt, ist offen. `uv_prognose.py` schreibt deshalb `erw_roh` mit und `_auswertung.korrektur` nennt `p_fit` neben
 `p_app` - weicht p_fit ab ~30 neuen Tagen deutlich von 0,6 ab, `UV_ERW_P` nachziehen. FALLE im Pruefstand: ein Sperrfilter
 "api.open-meteo.com" trifft als Teilwort auch "air-quality-api.open-meteo.com" - "//api.open-meteo.com" nehmen.
+v6.07 WETTER-ANIMATION in der App (Nutzer: "nur oben im kleinen Kopfbereich, nicht auf dem ganzen Bildschirm", alle Lagen
+statt nur Regen; Vorlage `wettertest.html`, bleibt als Archiv). Leinwand `#waCv` als erstes Kind von `#hero`, z-index -1
+(`.hero{isolation:isolate}` - ueber dem Hintergrund des Kastens, unter Text und Kacheln), von der Oberkante bis 4 px ueber
+`#kz`, unten per mask-image weich auslaufend. AUSLOESER = das Symbol, das oben steht: `zustandZeigen()` merkt `_zuIc`
+(Symbol) und `_zuMb` (Bodenrate aus dem Radar, sonst null) und ruft `waPruefen()`. rain -> `waRegen(mm/h)` (unter 0,5 Niesel =
+viele kurze Tropfen, 0,5-8 mm/h in vier Stufen dichter/laenger/schneller), snow, sleet, hail, thunderstorm (Regen + weiches
+Aufhellen alle 6-14 s, zwei Stoesse in 0,25 s), fog (5 ziehende Flecken); Windstriche bei trockenem Symbol ab Boeen 62 km/h
+(`WA_STURM`, Bft 8) oder Symbol "wind". Wind kippt den Regen (tan = Wind/90, hoechstens 0,75; bei Sturm die Boe). Sonne,
+Wolken, klare Nacht: nichts. Meldet nur die Station etwas (kein Radar), muss sie juenger als 2 h sein. Dichte `WA_K` 0,9,
+Deckkraft `WA_A` 0,4 - bei 390 pt 28-52 Tropfen bzw. 18 Flocken; Zeichnen 0,015 ms je Bild. Laeuft nur, solange der Kasten
+zu sehen (IntersectionObserver) und die Seite im Vordergrund ist. EINSTELLUNG unter Kacheln waehlen > Einstellungen:
+"Wetter-Animation oben" Aus | Standbild | Bewegt (`wetterAnim`); ohne eigene Wahl entscheidet "Bewegung reduzieren"
+(dann Standbild, der Hilfetext sagt es - siehe v3.94), "Bewegt" schaltet ausdruecklich ein. VORSCHAU-Knoepfe Regen /
+Schnee / Gewitter / Nebel / Sturm: 12 s, scrollt nach oben (an trockenen Tagen saehe man sonst nichts; die
+Home-Bildschirm-App nimmt keine Adress-Zusaetze). Im Browser `?wettertest=regen|niesel|schnee|schneeregen|gewitter|nebel|
+sturm|sturmregen`. Modul steht bei `_condIcon` und nutzt nur `var`/Funktionen (v6.06-Regel). Geprueft (Playwright): alle
+Lagen hell/dunkel, Ausloeser ueber `zustandZeigen` (Radar 0,3/3/15 mm/h -> Niesel/Regen/Starkregen, Station Schnee,
+Schneeregen, Gewitter, Nebel, Boeen 70 trocken und mit Regen, Boeen 30 nichts, Station 5 h alt nichts), Einstellung,
+Vorschau, Pause beim Wegscrollen, reduzierte Bewegung, 320/390/430 pt. Nicht am iPhone geprueft; Staerke und Dichte sind
+meine Wahl ("dezent") - bei Bedarf Regler nachruesten.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
