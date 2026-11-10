@@ -45,7 +45,7 @@ const ENTW={
   B:{ruhig:1,txt:"eine Schriftfarbe, leichtere Schrift, keine Rahmen, Technik-Zeilen weg"},
   C:{ruhig:1,himmel:"kraeftig",flaeche:"oben",txt:"wie B, dazu der Himmel oben in der Karte"},
   D:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"seite",txt:"Himmel hinter dem ganzen Kopf, kein Kasten, weiße dünne Zahl, Kacheln als Glas – immer dunkel"},
-  E:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"fest",txt:"wie Apple: der Himmel ist der Hintergrund für alles und bleibt beim Scrollen stehen, alle Karten sind Glas"}
+  E:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"fest",txt:"wie Apple: der Himmel ist der Hintergrund für alles und bleibt stehen, der Ort bleibt oben, alle Karten sind Glas"}
 };
 const LAGEN={
   jetzt:{name:"Wie jetzt"},
@@ -63,6 +63,7 @@ const LAGEN={
 const E={entwurf:"C",lage:"jetzt",ansicht:""};
 try{Object.assign(E,JSON.parse(localStorage.getItem("designtest")||"{}"));}catch(e){}
 if(!LAGEN[E.lage])E.lage="jetzt";if(!ENTW[E.entwurf])E.entwurf="C";
+if(!E.ev2){E.entwurf="E";E.ev2=1;}
 const merken=()=>{try{localStorage.setItem("designtest",JSON.stringify(E));}catch(e){}};
 const P=()=>ENTW[E.entwurf];
 
@@ -116,7 +117,7 @@ function passen(c,dunkel,st,wolke,apple){
 }
 function himmel(L,dunkel,st,apple){
   const h=L.h,N=L.N,tag=sm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=sm(.5,1,N)*(L.nass?1:.88);
-  let top=mix([9,13,38],[46,112,208],tag),bot=mix([34,40,92],[152,202,246],tag);
+  let top=mix([9,13,38],[46,112,208],tag),bot=mix(apple?[54,62,112]:[34,40,92],[152,202,246],tag);
   top=mix(top,[72,70,134],daem*.6);bot=mix(bot,[244,164,118],daem*.8);
   const gt=mix([22,26,36],L.nass?[92,102,118]:[112,124,142],tag),gb=mix([44,50,66],L.nass?[138,148,162]:[172,182,196],tag);
   top=mix(top,gt,g);bot=mix(bot,gb,g);
@@ -201,6 +202,16 @@ html.dz-fest{--card:rgba(26,34,54,.42)}
 html.dz-fest .strip-card,html.dz-fest .chart-card,html.dz-fest .nowcard{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:none}
 html.dz-fest .ksect .sect,html.dz-fest .kalle button,html.dz-fest .ksect .kknopf{text-shadow:0 1px 8px rgba(0,0,0,.45)}
 html.dz-fest .loc-box{background:#141a23}
+/* wie bei Apple: der Ortsname bleibt oben stehen, die Karten verschwinden darunter. Hinter dem Kopf liegt ein
+   Ausschnitt desselben Himmels (#hiKopf) - so ist er dicht, ohne dass man eine Kante sieht. */
+html.dz-fest header{position:sticky;top:0;z-index:40;isolation:isolate;margin:-16px -16px -4px;padding:16px 16px 20px}
+html.dz-fest .hero{padding-top:14px}
+#hiKopf{display:none}
+html.dz-fest #hiKopf{display:block;position:absolute;left:0;top:0;width:100%;height:calc(100% + 10px);z-index:-1;pointer-events:none;
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 12px),transparent);mask-image:linear-gradient(#000 calc(100% - 12px),transparent)}
+#dzMini{display:none}
+html.dz-fest #dzMini{display:block;position:absolute;left:16px;bottom:2px;font-size:14px;font-weight:500;color:rgba(255,255,255,.9);opacity:0;transition:opacity .25s}
+html.dz-fest.dz-mini #dzMini{opacity:1}
 `;
 
 /* ---------- Einhaengen in die App ---------- */
@@ -218,6 +229,10 @@ function einhaengen(){
   if(!hero||!hero.offsetHeight||typeof F.icon!=="function"){setTimeout(einhaengen,250);return;}
   const st=doc.createElement("style");st.textContent=CSS;doc.head.appendChild(st);
   cv=doc.createElement("canvas");cv.id="hiCv";hero.insertBefore(cv,hero.firstChild);ctx=cv.getContext("2d");
+  kopfEl=doc.querySelector("header");
+  if(kopfEl){kcv=doc.createElement("canvas");kcv.id="hiKopf";kopfEl.insertBefore(kcv,kopfEl.firstChild);kctx=kcv.getContext("2d");
+    const m=doc.createElement("div");m.id="dzMini";kopfEl.appendChild(m);
+    F.addEventListener("scroll",miniPruefen,{passive:true});}
   new F.IntersectionObserver(es=>{sichtbar=es[0].isIntersecting;if(sichtbar)lauf();},{}).observe(hero);
   new F.ResizeObserver(()=>neu()).observe(hero);
   F.addEventListener("resize",()=>neu());
@@ -258,7 +273,7 @@ function neu(){
   if(cv.parentNode!==soll){soll.insertBefore(cv,soll.firstChild);_key="";Z=null;}
   cv.style.display=an?"":"none";
   const txt=`${E.entwurf}: ${p.txt}`;
-  if(!an){F.cancelAnimationFrame(raf);raf=0;_key="";Z=null;$("stand").textContent=txt;return;}
+  if(!an){F.cancelAnimationFrame(raf);raf=0;_key="";Z=null;miniPruefen();$("stand").textContent=txt;return;}
   const L=E.lage==="jetzt"?jetztLage():LAGEN[E.lage],dunkel=doc.documentElement.classList.contains("dunkel"),B=bereich();
   const key=[E.entwurf,E.lage,dunkel,B.w,B.h,Math.round(L.h),Math.round(L.N*20)].join("|");
   if(key===_key)return;_key=key;
@@ -275,12 +290,14 @@ function neu(){
     const s=doc.createElement("canvas");s.width=bw;s.height=bh;const c=s.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);
     let z=7;const R=()=>{z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;};
     const n=Math.round(B.w*B.h/900);
-    for(let i=0;i<n;i++){const x=R()*B.w,y=R()*B.h,g=R(),r=g>.97?1.5:g>.8?1:.6,a=.35+R()*.65;
+    const fest=p.flaeche==="fest";
+    for(let i=0;i<n;i++){const x=R()*B.w,y=R()*B.h,g=R(),r=g>.97?1.5:g>.8?1:.6,a=(.35+R()*.65)*(fest?1-sm(.5,.85,y/B.h):1);   /* ganzer Bildschirm: Sterne nur oben */
+      if(a<.03)continue;
       c.fillStyle=`rgba(${g>.9?"255,236,214":"236,240,255"},${a})`;c.beginPath();c.arc(x,y,r,0,6.3);c.fill();
       if(g>.97){c.fillStyle="rgba(236,240,255,.12)";c.beginPath();c.arc(x,y,4,0,6.3);c.fill();}}
     Z.sterne=s;
   }
-  zeichne(performance.now());lauf();
+  zeichne(performance.now());kopfZeichnen();miniPruefen();lauf();
   $("stand").textContent=`${txt} · ${LAGEN[E.lage].name}: Sonne ${L.h>=0?"+":""}${L.h.toFixed(0)}°, Bedeckung ${Math.round(L.N*100)} %`;
 }
 function schicht(tex,sc,v,t,a,B,dy){
@@ -302,9 +319,24 @@ function zeichne(now){
   if(Z.alt){const a=1-(now-Z.altT)/BLENDE;
     if(a>0){c.globalAlpha=a*a*(3-2*a);c.drawImage(Z.alt,0,0,B.w,B.h);c.globalAlpha=1;}else Z.alt=null;}
 }
+/* Ausschnitt des Himmels hinter dem stehenden Kopf: dieselben Pixel wie dahinter, darum keine Kante */
+let kopfEl=null,kcv=null,kctx=null;
+function kopfZeichnen(){
+  if(!kcv||!Z||P().flaeche!=="fest")return;
+  const r=kopfEl.getBoundingClientRect(),k=cv.width/Z.B.w,w=Math.round(r.width*k),h=Math.round((r.height+10)*k);
+  if(kcv.width!==w||kcv.height!==h){kcv.width=w;kcv.height=h;}
+  kctx.clearRect(0,0,w,h);kctx.drawImage(cv,Math.round(r.left*k),Math.round(r.top*k),w,h,0,0,w,h);
+}
+/* ist die grosse Temperatur unter dem Kopf verschwunden, steht sie klein neben dem Ort (bei Apple "5° | Wolkenlos") */
+function miniPruefen(){
+  if(!kopfEl)return;const h=doc.documentElement,t=doc.getElementById("temp"),m=doc.getElementById("dzMini");
+  const an=P().flaeche==="fest"&&!!t&&t.getBoundingClientRect().bottom<kopfEl.getBoundingClientRect().bottom-10;
+  if(an&&m){const z=(t.firstChild&&t.firstChild.textContent||"").trim(),l=(doc.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"°  |  "+l;}
+  h.classList.toggle("dz-mini",an);
+}
 const zuSehen=()=>sichtbar||P().flaeche==="fest";      /* E: der Himmel ist immer im Bild, auch weiter unten */
 function lauf(){if(!raf&&cv&&Z&&zuSehen()&&P().himmel)raf=F.requestAnimationFrame(schritt);}
-function schritt(now){raf=0;if(!zuSehen())return;if(now-letzt>=100||(Z&&Z.alt)){letzt=now;zeichne(now);}lauf();}
+function schritt(now){raf=0;if(!zuSehen())return;if(now-letzt>=100||(Z&&Z.alt)){letzt=now;zeichne(now);kopfZeichnen();}lauf();}
 
 const REIHEN=[["zEntwurf","entwurf"],["zLage","lage"],["zAnsicht","ansicht"]];
 function knoepfe(){

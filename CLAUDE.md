@@ -2606,6 +2606,17 @@ untereinander - vorher wurde sie auf hohen Flaechen 1,7-fach in die Hoehe gezoge
 23 %, E 18,5 % / 34 % (ganzes Fenster + Weichzeichner hinter jeder Karte). Fuer einen Einbau von E: Himmel STEHEND oder
 als zwei fertig gemalte Lagen per CSS-transform, Weichzeichner sparsam. Zeichnungen auf Canvas, die mit der Kartenfarbe
 "radieren" (FLAECHE), muessten bei durchsichtigen Karten geprueft werden. Nicht am iPhone geprueft.
+Nachtrag 10.11. 21:14 (Nutzer, Bildschirmfilm Apple "Tokio" beim Scrollen; er sah bei uns Entwurf D: "bei Apple bleibt
+beim Scrollen oben die Ortschaft stehen und der Hintergrund mit den Sternen; der Hintergrund ist etwa drei Viertel vom
+Bildschirm - entweder komplett bis unten oder 75 %, dann weiss ich nicht, welche Farbe der Rest bekommt"). Im Film
+gemessen: EIN Verlauf ueber den ganzen Bildschirm, oben dunkel, unten heller; die Sterne stehen nur im oberen Teil - es
+gibt keine Restfarbe. Der Kopf schrumpft auf "Tokio / 5 Grad | Wolkenlos" und bleibt stehen, die Karten verschwinden
+darunter. Entwurf E entsprechend: Sterne blenden zwischen 50 und 85 % der Hoehe aus, Nacht unten heller (54,62,112);
+`header` sticky (Rand -16 px, damit er die ganze Breite deckt), dahinter `#hiKopf` = AUSSCHNITT derselben Himmel-Leinwand an
+der Stelle des Kopfs (`kopfZeichnen`, nach jedem Himmelbild) - so ist der Kopf dicht und man sieht keine Kante, unten 12 px
+weich; `#dzMini` "2,8 Grad | Klar" erscheint, sobald die grosse Zahl unter dem Kopf liegt (`miniPruefen` am Scroll-Ereignis,
+absolut gesetzt, damit nichts springt). Die Testseite stellt einmalig auf E (Marke `ev2`). Geprueft bei Scroll 0/330/1200,
+Tag und Nacht; C und D unveraendert (Kopf nicht sticky).
 v6.09 (Nutzer-Screenshot 10.11. 19:02, Bild "Mond im Jahr": "das Kaestchen mit den Stunden kann auf jeden Fall
 groesser"): Kasten mit den beiden Dauern in `mjZeichnen` Schrift 14 statt 10 px (800), 46 statt 32 px hoch, Mond-/
 Sonnenzeichen Radius 7 / 4,8 statt 5 / 3,4, Ecken 10 px; Breite = Text + 43 (bei 393 pt rund 118 statt 85 px). Die Suche
