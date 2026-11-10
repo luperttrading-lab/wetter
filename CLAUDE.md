@@ -2544,6 +2544,25 @@ Compositor. FOLGERUNG fuer einen Einbau: nicht SMIL, sondern Ebenen + CSS-transf
 noch die sichtbaren Zellen), Schalter wie die Wetter-Animation (Aus | Standbild | Bewegt; die Kill-Regel braucht dann
 eine Ausnahme fuer diese Klasse). Vorbilder (Websuche): Meteocons (meteocons.com, MIT, bewegte SVG/Lottie) und amCharts
 (CC BY 4.0, CSS). Nicht am iPhone geprueft (kein WebKit im Pruefstand). Wahl der Staerke und des Orts steht aus.
+VARIANTENSEITE `himmeltest.html` (Nutzer 10.11., sieben Screenshots der Apple-Wetter-App: "in anderen Apps gibt es
+halt ein richtiges schoenes Bild als Hintergrund und keine Symbole"): die echte App im Rahmen, dazu eine Leinwand `#hiCv`
+als erstes Kind von `#hero` (z-index -2, also UNTER `#waCv` - Regen/Schnee der App fallen davor). GEMALT, kein Foto:
+Verlauf nach Sonnenhoehe (`sonnenhoehe(ms,lat,lon)`, Naeherung ~1 Grad; Tag blau, um den Horizont violett/orange, Nacht
+marineblau), mit der Bedeckung ins Grau gezogen (ab 50 %, Regenwolken dunkler); Wolken = Rauschen in 5 Oktaven
+(`rauschen`, `feld(seed)` 320x200, links/rechts nahtlos, leicht verzogen), Schwelle = QUANTIL, damit wirklich N der
+Flaeche Wolke ist (`textur`), zwei Lagen, die verschieden schnell ziehen (3 und 7 px/s, 10 Bilder/s); Sterne nur in der
+dunklen Ansicht unter -3 Grad Sonnenhoehe. `passen()` haelt die Schrift lesbar: helle Ansicht Himmel mindestens 62 %
+hell (mit Weiss gemischt), dunkle hoechstens 34 % (abgedunkelt) - ein Nachthimmel in der hellen Ansicht wird darum
+blass-lila. Schalter: Lage (wie jetzt aus `snap.cloud`/`_zuIc`, sonst zehn feste Faelle; Regen/Schnee schalten
+`_wa.test` der App dazu), Staerke aus/dezent/mittel/kraeftig (Voreinstellung kraeftig), Flaeche "oben, laeuft aus"
+(Maske, Kacheln bleiben auf der Karte) | "ganze Karte" (Kacheln dann staerker hinterlegt, unten ein Schleier in
+Kartenfarbe), Symbol zeigen | weglassen (`#condIc`), Ansicht. Text im Kopf bekommt einen Schein in Kartenfarbe.
+GEMESSEN (Chromium ohne GPU, 5 s): aus 2 % Hauptfaden / 6 % eines Kerns, Himmel bei 10 Bildern/s 8,5 % / 17,8 %
+(bei 15: 12,2 % / 22,6 %). Fuer einen Einbau: Wolkenlagen einmal zeichnen und per CSS-transform schieben (wie bei den
+Symbolen gemessen), oder ganz stehen lassen. GRENZE, dem Nutzer gesagt: Apples Bilder sind gestaltete, in Echtzeit
+gerechnete Szenen ueber den GANZEN Bildschirm mit duenner weisser Schrift; unsere Karte traegt farbige Temperatur,
+Pfeile und neun Kacheln - das Bild kann nur dahinter liegen. Kleine Symbole hat Apple auch (Stundenleiste, Tagesliste:
+weisse Glyphen). Nicht am iPhone geprueft. Wahl steht aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
