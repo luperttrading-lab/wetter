@@ -2544,6 +2544,15 @@ Compositor. FOLGERUNG fuer einen Einbau: nicht SMIL, sondern Ebenen + CSS-transf
 noch die sichtbaren Zellen), Schalter wie die Wetter-Animation (Aus | Standbild | Bewegt; die Kill-Regel braucht dann
 eine Ausnahme fuer diese Klasse). Vorbilder (Websuche): Meteocons (meteocons.com, MIT, bewegte SVG/Lottie) und amCharts
 (CC BY 4.0, CSS). Nicht am iPhone geprueft (kein WebKit im Pruefstand). Wahl der Staerke und des Orts steht aus.
+Nachtrag 10.11. (Nutzer am iPhone, dunkle Ansicht - die Seite LAEUFT dort): "Teils, Nacht ist ja Quatsch" (als
+Beschriftung verstanden -> "Klare Nacht" / "Nacht, teils bewoelkt"), "bei klarer Nacht koennten noch ein paar Sterne
+funkeln", "beim Regen und allen 4 statt 3 und etwas filigraner, so dass man den Schnee noch als Schnee erkennt auf dem
+kleinen Bild - evtl. werden 4 auch zu klein - Apple hat das aber so". Eingebaut: drei Funkelsterne neben dem Mond
+(`stern(x,y,r,i)`, vierzackig, Deckkraft 1 -> 0,15 -> 1, je Stern anderer Takt); Schalter "Regen, Schnee" (`NIED`,
+gemerkt `nied`, Voreinstellung "4"): "3 wie jetzt" | "4 fein" (vier Tropfen Massstab 0,46 statt 0,62-0,68 in W-Form
+`P4`, Schnee vier Sterne Radius 1,75 mit Strich 0,8 statt drei mit 1,15, Hagel vier Koerner r 1,2) | "4 Striche" (Regen
+als vier schraege Striche 1,15 breit wie bei Apple, Schnee wie "4 fein"). Befund: bei 28 px bleibt der Schnee in allen
+drei Fassungen klein (Stern ~4 px); in der hellen Ansicht ist er auf der cremefarbenen Karte blass. Wahl steht aus.
 VARIANTENSEITE `himmeltest.html` (Nutzer 10.11., sieben Screenshots der Apple-Wetter-App: "in anderen Apps gibt es
 halt ein richtiges schoenes Bild als Hintergrund und keine Symbole"): die echte App im Rahmen, dazu eine Leinwand `#hiCv`
 als erstes Kind von `#hero` (z-index -2, also UNTER `#waCv` - Regen/Schnee der App fallen davor). GEMALT, kein Foto:
