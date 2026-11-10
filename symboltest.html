@@ -1,0 +1,301 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wettersymbole – Entwürfe</title>
+<style>
+:root{--bg:#f3f1ec;--karte:#fff;--karte2:#fffaf4;--tx:#17202e;--mu:#5c6b80;--li:#e6e2da;--wahl:#2f6fd0}
+html.dunkel{--bg:#0d1219;--karte:#202a38;--karte2:#1b232f;--tx:#e7edf5;--mu:#a3b2c6;--li:#2c3848}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);
+     padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 70px;-webkit-text-size-adjust:100%}
+h1{font-size:20px;margin:4px 0 4px}
+h2{font-size:16px;margin:26px 0 6px}
+.hin{color:var(--mu);font-size:13.5px;margin:0 0 12px}
+.leiste{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 9px;display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--li);margin-bottom:14px}
+button{font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--li);background:var(--karte);color:var(--tx);cursor:pointer}
+button.an{background:var(--wahl);border-color:var(--wahl);color:#fff}
+.var{background:linear-gradient(180deg,var(--karte),var(--karte2));border:1px solid var(--li);border-radius:20px;padding:13px 13px 12px;margin-bottom:16px}
+.vk{display:flex;align-items:baseline;gap:9px}
+.vk b{font-size:17px}.vk span{color:var(--mu);font-size:13px}
+.vb{color:var(--mu);font-size:13px;margin:2px 0 10px}
+.kopf{display:flex;align-items:center;gap:10px;padding:2px 2px 10px}
+.kopf .t{font-size:58px;font-weight:830;letter-spacing:-.05em;line-height:.9;color:#6fcf3c}
+.kopf .t small{font-size:20px;font-weight:700;vertical-align:top;margin-left:2px}
+.kopf .c{margin-left:auto;text-align:center;font-size:13px;font-weight:650;color:var(--mu)}
+.kopf .c .ic{width:54px;height:54px;margin:0 auto 3px}
+.strip{display:flex;overflow-x:auto;gap:0;border-top:1px solid var(--li);border-bottom:1px solid var(--li);padding:8px 0 9px;-webkit-overflow-scrolling:touch}
+.cell{flex:0 0 58px;text-align:center}
+.cell .z{font-size:11.5px;color:var(--mu)}
+.cell .ic{width:28px;height:28px;margin:6px auto 5px}
+.cell .n{font-size:10.5px;color:var(--mu);line-height:1.15}
+.gr{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:10px}
+.ik{text-align:center;padding:7px 2px 6px}
+.ik .ic{width:54px;height:54px;margin:0 auto}
+.ik .n{font-size:11px;color:var(--mu);margin-top:2px}
+.liste{margin-top:8px;border-top:1px solid var(--li)}
+.zeile{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--li);font-size:14px}
+.zeile .wd{flex:0 0 30px;font-weight:650}
+.zeile .ic{width:26px;height:26px;flex:none}
+.zeile .tx{color:var(--mu);font-size:13px}
+.zeile .r{margin-left:auto;font-variant-numeric:tabular-nums}
+.ic svg{display:block}
+iframe{width:100%;height:680px;border:1px solid var(--li);border-radius:18px;background:var(--karte)}
+.stand{font-size:13px;color:var(--mu);margin:6px 0 8px}
+</style></head><body>
+
+<h1>Wettersymbole – fünf Entwürfe</h1>
+<p class="hin">A ist der Stand der App, B bis E sind neu. Jeder Entwurf zeigt alle zwölf Symbole: oben wie im Kopf (54&nbsp;px),
+darunter wie in der Stundenleiste (28&nbsp;px, seitlich wischen) und wie in der 16-Tage-Liste (26&nbsp;px). Bitte hell <b>und</b> dunkel ansehen.
+Ganz unten läuft die echte App mit dem gewählten Entwurf.</p>
+
+<div class="leiste" id="zThema"><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
+
+<div id="liste"></div>
+
+<h2>In der echten App ansehen</h2>
+<div class="leiste" id="zApp" style="position:static;border:0;margin:0;padding:4px 0 2px"></div>
+<div class="stand" id="stand">lädt …</div>
+<iframe id="app" src="index.html" title="Wetter-App"></iframe>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const NAMEN=[["clear-day","Klar"],["partly-cloudy-day","Teils bewölkt"],["cloudy","Bewölkt"],["rain","Regen"],["thunderstorm","Gewitter"],["snow","Schnee"],
+             ["sleet","Schneeregen"],["hail","Hagel"],["fog","Nebel"],["wind","Wind"],["clear-night","Klar, Nacht"],["partly-cloudy-night","Teils, Nacht"]];
+let _g=0;
+const f=n=>+n.toFixed(2);
+
+/* ---------- Geometrie: Wolke und Mondsichel als EIN Pfad (fuer Flaeche, Kontur und Maske) ---------- */
+function schnitt(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),l=(a.r*a.r-b.r*b.r+d*d)/(2*d),h=Math.sqrt(Math.max(0,a.r*a.r-l*l));
+  const mx=a.x+l*dx/d,my=a.y+l*dy/d;return [{x:mx+h*dy/d,y:my-h*dx/d},{x:mx-h*dy/d,y:my+h*dx/d}];}
+/* Bogen auf Kreis c von p nach q; ok(mitte) waehlt, welche der beiden Richtungen gemeint ist */
+function bogen(c,p,q,ok){const a=Math.atan2(p.y-c.y,p.x-c.x);let s=Math.atan2(q.y-c.y,q.x-c.x)-a;while(s<=0)s+=2*Math.PI;
+  const m={x:c.x+c.r*Math.cos(a+s/2),y:c.y+c.r*Math.sin(a+s/2)};
+  return ok(m)?`A${c.r} ${c.r} 0 ${s>Math.PI?1:0} 1 ${f(q.x)} ${f(q.y)}`:`A${c.r} ${c.r} 0 ${(2*Math.PI-s)>Math.PI?1:0} 0 ${f(q.x)} ${f(q.y)}`;}
+const WL={x:6.3,y:14.9,r:3.6},WM={x:11.5,y:11.3,r:5.2},WR={x:17.3,y:14.7,r:3.8},WB=18.5;
+const WOLKE=(()=>{const ob=(a,b)=>schnitt(a,b).sort((p,q)=>p.y-q.y)[0],P1=ob(WL,WM),P2=ob(WM,WR),A={x:WL.x,y:WB},B={x:WR.x,y:WB};
+  const aussen=m=>m.y<WB-.2;
+  return `M${A.x} ${A.y}${bogen(WL,A,P1,aussen)}${bogen(WM,P1,P2,aussen)}${bogen(WR,P2,B,aussen)}Z`;})();
+function sichel(cx,cy,r,ox,oy,rk){const O={x:cx,y:cy,r},K={x:cx+ox,y:cy+oy,r:rk},[p,q]=schnitt(O,K);
+  const fern=m=>Math.hypot(m.x-K.x,m.y-K.y)>K.r,innen=m=>Math.hypot(m.x-O.x,m.y-O.y)<O.r;
+  return `M${f(p.x)} ${f(p.y)}${bogen(O,p,q,fern)}${bogen(K,q,p,innen)}Z`;}
+const MOND=sichel(11.4,12.3,6.7,3.9,-2.7,5.9);
+const wolke=(tx,ty,s,attr)=>`<path d="${WOLKE}" transform="translate(${tx} ${ty}) scale(${s})" ${attr}/>`;
+const strahlen=(cx,cy,r1,r2,w,col,n)=>[...Array(n||8)].map((_,i)=>`<line x1="${cx}" y1="${f(cy-r1)}" x2="${cx}" y2="${f(cy-r2)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round" transform="rotate(${i*360/(n||8)} ${cx} ${cy})"/>`).join("");
+const stern=(x,y,s,col)=>`<path d="M${x} ${f(y-s)}Q${x} ${y} ${f(x+s)} ${y}Q${x} ${y} ${x} ${f(y+s)}Q${x} ${y} ${f(x-s)} ${y}Q${x} ${y} ${x} ${f(y-s)}Z" fill="${col}"/>`;
+const tropfen=(x,y,s,fill,rot)=>`<path d="M0-2.7C1.6-.7 2.1.4 2.1 1.2A2.1 2.1 0 0 1-2.1 1.2C-2.1.4-1.6-.7 0-2.7Z" transform="translate(${x} ${y}) rotate(${rot==null?16:rot}) scale(${s})" fill="${fill}"/>`;
+const flocke=(x,y,r,col,w)=>[0,60,120].map(a=>`<line x1="${f(x-r)}" y1="${y}" x2="${f(x+r)}" y2="${y}" stroke="${col}" stroke-width="${w||1.1}" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+const BLITZ="M13.7 13.4l-4.2 5.5h2.9l-1.5 4.3 5.4-6.5h-3.1l1.6-3.3z";
+const windband=(y,x0,x1,r,attr)=>`<path d="M${x0} ${y}H${x1}a${r} ${r} 0 1 0 ${-r} ${-r}" fill="none" stroke-linecap="round" ${attr}/>`;
+const svg=(size,defs,body)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}"><defs>${defs}</defs>${body}</svg>`;
+/* Lage der Wolke je Zustand (tx, ty, Massstab) - fuer alle neuen Entwuerfe gleich */
+const LAGE={allein:[-.1,-.2,1],vorn:[-.75,3.6,.9],hinten:[6.5,-.9,.74],tief:[-.9,4.3,.86],oben:[1,-3.1,.92],nebel:[1.6,-3.9,.88]};
+
+/* ---------- A: Stand der App (v6.08), unveraendert uebernommen ---------- */
+function iconA(name,size){_g++;const id="a"+_g;
+  const defsSun=`<radialGradient id="${id}s" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fffbe8"/><stop offset="46%" stop-color="#ffd447"/><stop offset="100%" stop-color="#f4a01c"/></radialGradient>
+    <filter id="${id}gs" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#c47a00" flood-opacity="0.3"/></filter>`;
+  const defsCloud=`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e2ec"/></linearGradient>
+    <filter id="${id}f" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.25" flood-color="#1c2b40" flood-opacity="0.16"/></filter>`;
+  const defsDark=`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c2cbd8"/><stop offset="1" stop-color="#7f8c9e"/></linearGradient>`;
+  const defsDrop=`<linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fb4ea"/><stop offset="1" stop-color="#2f74c0"/></linearGradient>`;
+  const defsWind=`<linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="22" y2="0"><stop offset="0" stop-color="#9fb2c8" stop-opacity="0"/><stop offset="38%" stop-color="#8aa2bd"/><stop offset="100%" stop-color="#6d88a8"/></linearGradient>
+    <filter id="${id}wf" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy=".9" stdDeviation=".7" flood-color="#25384f" flood-opacity="0.18"/></filter>`;
+  const defsMoon=`<linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6cf"/><stop offset="100%" stop-color="#e8cf82"/></linearGradient>`;
+  const sun=(cx,cy,r,rays)=>`<g filter="url(#${id}gs)">${rays?[...Array(8)].map((_,i)=>
+      `<path d="M${cx} ${cy-r-6.6} l1.5 4.2 h-3 z" fill="#ffc528" transform="rotate(${i*45} ${cx} ${cy})"/>`).join(""):""}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)"/></g>`;
+  const moon=`<path d="M16.6 13.6A6.2 6.2 0 1 1 10.8 5.6 4.9 4.9 0 0 0 16.6 13.6Z" fill="url(#${id}m)"/>`;
+  const cloud=(x,y,sc,fill)=>`<g filter="url(#${id}f)"><path d="M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z" fill="${fill||`url(#${id}c)`}"/></g>`;
+  const drop=(x,y,sc)=>`<path d="M${x} ${y} c${1.9*sc} ${2.4*sc} ${2.7*sc} ${3.4*sc} ${2.7*sc} ${4.5*sc} a${2.7*sc} ${2.7*sc} 0 0 1 ${-5.4*sc} 0 c0 ${-1.1*sc} ${.8*sc} ${-2.1*sc} ${2.7*sc} ${-4.5*sc}z" fill="url(#${id}r)"/>`;
+  const drops=[[8.4,16.6],[12.4,17.9],[16.4,16.6]].map(([x,y],i)=>drop(x,y,.62+(i%2)*.06)).join("");
+  const flake=(x,y,r)=>[0,60,120].map(a=>`<line x1="${x-r}" y1="${y}" x2="${x+r}" y2="${y}" stroke="#a9cdeb" stroke-width="1.15" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+  const flakes=[[8.1,19.4],[12.5,20.7],[16.9,19.4]].map(([x,y])=>flake(x,y,1.55)).join("");
+  const bolt=`<path d="M13.2 15.4l-3.4 4.9h2.4l-1.4 3.9 4.4-5.5h-2.6l1.4-3.3z" fill="#f7a81b" stroke="#e08c00" stroke-width=".35" stroke-linejoin="round"/>`;
+  const band=(y,len,w)=>`<path d="M${13.6-len} ${y}h${len-2.4}a${w} ${w} 0 1 0 ${-w} ${-w}" fill="none" stroke="url(#${id}w)" stroke-width="2.25" stroke-linecap="round"/>`;
+  let defs="",body="";
+  switch(name){
+    case "clear-day": defs=defsSun; body=sun(12,12,6.6,true); break;
+    case "clear-night": defs=defsMoon; body=moon; break;
+    case "partly-cloudy-day": defs=defsSun+defsCloud; body=`<g transform="translate(3.6,-2.6)">${sun(11,9,5.2,true)}</g>`+cloud(2,3,.92); break;
+    case "partly-cloudy-night": defs=defsCloud+defsMoon; body=`<g transform="translate(3,-3) scale(.8)">${moon}</g>`+cloud(2,3,.92); break;
+    case "cloudy": defs=defsCloud; body=cloud(1.5,2.5,1); break;
+    case "fog": defs=defsCloud+defsWind; body=cloud(1.5,-1.4,.95)+[[18.6,15.2],[21.8,11.2]].map(([y,len])=>`<path d="M${19.2-len} ${y}h${len}" fill="none" stroke="url(#${id}w)" stroke-width="2.1" stroke-linecap="round"/>`).join(""); break;
+    case "rain": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)+drops; break;
+    case "sleet": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)+drop(8.6,16.4,.6)+drop(16.4,16.4,.6)+flake(12.5,19.9,1.6); break;
+    case "snow": defs=defsCloud; body=cloud(1.5,0,1)+flakes; break;
+    case "hail": defs=defsCloud+defsDrop; body=cloud(1.5,0,1)+[[8.6,19.4],[12.5,20.4],[16.4,19.4]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.5" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".5"/>`).join(""); break;
+    case "thunderstorm": defs=defsCloud+defsDark; body=cloud(1.5,0,1,`url(#${id}d)`)+bolt; break;
+    case "wind": defs=defsWind; body=`<g filter="url(#${id}wf)">`+band(8.9,13.2,2.2)+band(13,16.4,2.45)+band(17.1,11.4,2)+`</g>`; break;
+    default: defs=defsCloud; body=cloud(1.5,2.5,1);
+  }
+  return svg(size,defs,body);
+}
+
+/* ---------- B: plastisch - Sonne mit Lichthof, Wolken in zwei Lagen, runde Strahlen ---------- */
+function iconB(name,size){const id="b"+(++_g);
+  const defs=`<radialGradient id="${id}s" cx="40%" cy="33%" r="72%"><stop offset="0" stop-color="#fff8c9"/><stop offset=".5" stop-color="#ffd040"/><stop offset="1" stop-color="#ff9b1c"/></radialGradient>
+   <radialGradient id="${id}h"><stop offset=".42" stop-color="#ffc533" stop-opacity=".55"/><stop offset="1" stop-color="#ffc533" stop-opacity="0"/></radialGradient>
+   <linearGradient id="${id}c" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#eef3f8"/><stop offset="1" stop-color="#c2d0df"/></linearGradient>
+   <linearGradient id="${id}k" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#cbd6e2"/><stop offset="1" stop-color="#93a4b9"/></linearGradient>
+   <linearGradient id="${id}d" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#a9b5c6"/><stop offset="1" stop-color="#66758b"/></linearGradient>
+   <linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86cbff"/><stop offset="1" stop-color="#2a78e2"/></linearGradient>
+   <linearGradient id="${id}z" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe76e"/><stop offset="1" stop-color="#ff9f1a"/></linearGradient>
+   <linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe0"/><stop offset="1" stop-color="#efc95e"/></linearGradient>
+   <radialGradient id="${id}e" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9cc6ec"/></radialGradient>
+   <linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="1" y1="0" x2="22" y2="0"><stop offset="0" stop-color="#9db0c6" stop-opacity="0"/><stop offset=".35" stop-color="#90a6bf"/><stop offset="1" stop-color="#6a84a4"/></linearGradient>
+   <filter id="${id}f" x="-30%" y="-30%" width="160%" height="190%"><feDropShadow dx="0" dy="1.1" stdDeviation=".95" flood-color="#1d2f49" flood-opacity=".3"/></filter>
+   <filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy=".8" stdDeviation=".9" flood-color="#c87400" flood-opacity=".35"/></filter>`;
+  const sonne=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${f(r*2.15)}" fill="url(#${id}h)"/>${strahlen(cx,cy,r*1.5,r*1.86,f(r*.27),"#ffb42a")}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)" filter="url(#${id}g)"/>`;
+  const W=(l,fill)=>`<g filter="url(#${id}f)">${wolke(...LAGE[l],`fill="url(#${id}${fill||"c"})"`)}</g>`;
+  const mond=(t)=>`<g ${t||""} filter="url(#${id}g)"><path d="${MOND}" fill="url(#${id}m)"/></g>`;
+  const R=`url(#${id}r)`;
+  switch(name){
+    case "clear-day": return svg(size,defs,sonne(12,12,5.4));
+    case "clear-night": return svg(size,defs,mond()+stern(18.4,6.3,2.1,"#ffe9a6")+stern(20.6,12.2,1.2,"#ffe9a6"));
+    case "partly-cloudy-day": return svg(size,defs,sonne(15.4,8.8,4)+W("tief"));
+    case "partly-cloudy-night": return svg(size,defs,mond(`transform="translate(7.6 -1.6) scale(.66)"`)+stern(8.2,5.2,1.3,"#ffe9a6")+W("tief"));
+    case "cloudy": return svg(size,defs,W("hinten","k")+W("vorn"));
+    case "rain": return svg(size,defs,W("oben")+tropfen(7.7,17.9,.82,R)+tropfen(12.1,19.3,.9,R)+tropfen(16.5,17.9,.82,R));
+    case "thunderstorm": return svg(size,defs,W("oben","d")+`<path d="${BLITZ}" fill="url(#${id}z)" stroke="#e58a00" stroke-width=".35" stroke-linejoin="round"/>`+tropfen(6.9,18.2,.66,R)+tropfen(18.1,18.2,.66,R));
+    case "snow": return svg(size,defs,W("oben")+flocke(7.6,18.3,1.75,"#84c1f0",1.15)+flocke(12.2,20.6,1.95,"#84c1f0",1.15)+flocke(16.8,18.3,1.75,"#84c1f0",1.15));
+    case "sleet": return svg(size,defs,W("oben")+tropfen(7.7,17.9,.8,R)+flocke(12.2,20.5,1.9,"#84c1f0",1.15)+tropfen(16.7,17.9,.8,R));
+    case "hail": return svg(size,defs,W("oben")+[[7.7,18.2],[12.2,20.4],[16.7,18.2]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.65" fill="url(#${id}e)" stroke="#6f9fce" stroke-width=".45"/>`).join(""));
+    case "fog": return svg(size,defs,W("nebel")+[[15.9,3.6,17.6],[18.8,6.6,20.6],[21.7,4.6,15.2]].map(([y,a,b])=>`<path d="M${a} ${y}H${b}" stroke="url(#${id}w)" stroke-width="1.75" stroke-linecap="round" fill="none"/>`).join(""));
+    case "wind": return svg(size,defs,`<g filter="url(#${id}f)">`+windband(8.9,2.2,12.6,2.3,`stroke="url(#${id}w)" stroke-width="2"`)+windband(13.1,1.2,17.6,2.6,`stroke="url(#${id}w)" stroke-width="2"`)+`<path d="M3.4 17.2H12a2.1 2.1 0 1 1-2.1 2.1" fill="none" stroke="url(#${id}w)" stroke-width="2" stroke-linecap="round"/></g>`);
+  }
+  return svg(size,defs,W("allein"));
+}
+
+/* ---------- C: Linie - Kontur in Schriftfarbe, Farbe nur fuer Sonne, Regen, Blitz ---------- */
+function iconC(name,size){const id="c"+(++_g),S=1.55,GE="#f2a01e",BL="#3a8fe3",HB="#63b0ee";
+  const lin=`stroke="currentColor" stroke-width="${S}" stroke-linejoin="round" stroke-linecap="round" fill="none"`;
+  /* Maske: schneidet die Sonne bzw. den Mond dort weg, wo die Wolke davor liegt (mit Luft) */
+  const maske=(l)=>`<mask id="${id}k" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/>${wolke(...LAGE[l],`fill="#000" stroke="#000" stroke-width="4"`)}</mask>`;
+  const W=(l,o)=>wolke(...LAGE[l],`stroke="currentColor" stroke-width="${f(S/LAGE[l][2])}" stroke-linejoin="round" fill="none"${o?` opacity="${o}"`:""}`);
+  const sonne=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffd866" fill-opacity=".35" stroke="${GE}" stroke-width="${S}"/>${strahlen(cx,cy,r+2.1,r+3.9,S,GE)}`;
+  const mond=(t)=>`<path d="${MOND}" ${t||""} fill="#ffe08a" fill-opacity=".3" stroke="${GE}" stroke-width="${S}" stroke-linejoin="round"/>`;
+  const strich=(x,y,l,col)=>`<line x1="${x}" y1="${y}" x2="${f(x-l*.34)}" y2="${f(y+l)}" stroke="${col}" stroke-width="${S}" stroke-linecap="round"/>`;
+  switch(name){
+    case "clear-day": return svg(size,"",sonne(12,12,4.2));
+    case "clear-night": return svg(size,"",mond()+stern(18.6,6.4,2,GE)+stern(20.7,12.3,1.15,GE));
+    case "partly-cloudy-day": return svg(size,maske("tief"),`<g mask="url(#${id}k)">${sonne(16,8.2,3.3)}</g>`+W("tief"));
+    case "partly-cloudy-night": return svg(size,maske("tief"),`<g mask="url(#${id}k)">${mond(`transform="translate(7.6 -1.8) scale(.66)" stroke-width="2.2"`)}</g>`+W("tief"));
+    case "cloudy": return svg(size,maske("vorn"),`<g mask="url(#${id}k)">${W("hinten",.55)}</g>`+W("vorn"));
+    case "rain": return svg(size,"",W("oben")+strich(8.6,17.4,3.6,BL)+strich(12.8,18,4.2,BL)+strich(17,17.4,3.6,BL));
+    case "thunderstorm": return svg(size,"",W("oben")+`<path d="${BLITZ}" fill="#ffd866" stroke="${GE}" stroke-width="1.1" stroke-linejoin="round"/>`);
+    case "snow": return svg(size,"",W("oben")+flocke(7.6,18.4,1.8,HB,1.3)+flocke(12.2,20.7,1.95,HB,1.3)+flocke(16.8,18.4,1.8,HB,1.3));
+    case "sleet": return svg(size,"",W("oben")+strich(8.6,17.4,3.6,BL)+flocke(12.6,20.6,1.9,HB,1.3)+strich(17.4,17.4,3.6,BL));
+    case "hail": return svg(size,"",W("oben")+[[7.7,18.3],[12.2,20.5],[16.7,18.3]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.35" fill="none" stroke="${HB}" stroke-width="1.25"/>`).join(""));
+    case "fog": return svg(size,"",W("nebel")+[[15.9,4.2,17.4],[18.8,7,20.2],[21.7,5.2,14.8]].map(([y,a,b])=>`<path d="M${a} ${y}H${b}" ${lin} opacity=".6"/>`).join(""));
+    case "wind": return svg(size,"",windband(8.9,2.6,12.6,2.3,lin)+windband(13.1,2,17.6,2.6,lin)+`<path d="M4 17.2H12a2.1 2.1 0 1 1-2.1 2.1" ${lin}/>`);
+  }
+  return svg(size,"",W("allein"));
+}
+
+/* ---------- D: flach - volle Flaechen in zwei Toenen, keine Verlaeufe, keine Schatten ---------- */
+function iconD(name,size){const id="d"+(++_g),GE="#ffbf2b",GE2="#ffd564",W1="#dae2eb",W2="#bdc9d7",G1="#a7b5c6",G2="#8c9cb0",DK1="#7f8da2",DK2="#66748a",BL="#429aec",HB="#7cc0f2";
+  /* zweiter Ton: untere Haelfte der Wolke, per Ausschnitt */
+  const W=(l,a,b)=>{const [tx,ty,s]=LAGE[l],y=f(ty+s*14.4),k=id+l;
+    return `<clipPath id="${k}"><rect x="0" y="${y}" width="24" height="24"/></clipPath>`+wolke(tx,ty,s,`fill="${a||W1}"`)+`<g clip-path="url(#${k})">${wolke(tx,ty,s,`fill="${b||W2}"`)}</g>`;};
+  const sonne=(cx,cy,r)=>strahlen(cx,cy,r+1.9,r+3.7,f(r*.36),GE)+`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${GE}"/><circle cx="${f(cx-r*.22)}" cy="${f(cy-r*.22)}" r="${f(r*.6)}" fill="${GE2}"/>`;
+  const mond=(t)=>`<path d="${MOND}" ${t||""} fill="#f6cf5a"/>`;
+  switch(name){
+    case "clear-day": return svg(size,"",sonne(12,12,5));
+    case "clear-night": return svg(size,"",mond()+stern(18.5,6.3,2.1,"#f6cf5a")+stern(20.6,12.2,1.2,"#f6cf5a"));
+    case "partly-cloudy-day": return svg(size,"",sonne(16,8.2,3.9)+W("tief"));
+    case "partly-cloudy-night": return svg(size,"",mond(`transform="translate(7.6 -1.6) scale(.66)"`)+W("tief"));
+    case "cloudy": return svg(size,"",W("hinten",G1,G2)+W("vorn"));
+    case "rain": return svg(size,"",W("oben")+tropfen(7.7,17.9,.84,BL)+tropfen(12.1,19.3,.92,BL)+tropfen(16.5,17.9,.84,BL));
+    case "thunderstorm": return svg(size,"",W("oben",DK1,DK2)+`<path d="${BLITZ}" fill="${GE}"/>`);
+    case "snow": return svg(size,"",W("oben")+flocke(7.6,18.3,1.8,HB,1.35)+flocke(12.2,20.6,1.95,HB,1.35)+flocke(16.8,18.3,1.8,HB,1.35));
+    case "sleet": return svg(size,"",W("oben")+tropfen(7.7,17.9,.82,BL)+flocke(12.2,20.5,1.9,HB,1.35)+tropfen(16.7,17.9,.82,BL));
+    case "hail": return svg(size,"",W("oben")+[[7.7,18.2],[12.2,20.4],[16.7,18.2]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.7" fill="${HB}"/>`).join(""));
+    case "fog": return svg(size,"",W("nebel")+[[15.9,3.6,17.6,G1],[18.8,6.6,20.6,W2],[21.7,4.6,15.2,G1]].map(([y,a,b,c])=>`<path d="M${a} ${y}H${b}" stroke="${c}" stroke-width="1.9" stroke-linecap="round"/>`).join(""));
+    case "wind": return svg(size,"",windband(8.9,2.6,12.6,2.3,`stroke="${G1}" stroke-width="2.1"`)+windband(13.1,2,17.6,2.6,`stroke="${G2}" stroke-width="2.1"`)+`<path d="M4 17.2H12a2.1 2.1 0 1 1-2.1 2.1" fill="none" stroke="${G1}" stroke-width="2.1" stroke-linecap="round"/>`);
+  }
+  return svg(size,"",W("allein"));
+}
+
+/* ---------- E: kraeftig - satte Verlaeufe, Sonne mit Lichtringen statt Strahlen, blaeuliche Wolken ---------- */
+function iconE(name,size){const id="e"+(++_g);
+  const defs=`<linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe65c"/><stop offset="1" stop-color="#ff8a17"/></linearGradient>
+   <linearGradient id="${id}c" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#bdd3f2"/></linearGradient>
+   <linearGradient id="${id}k" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#a9bfe6"/><stop offset="1" stop-color="#7790c2"/></linearGradient>
+   <linearGradient id="${id}d" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="18.5"><stop offset="0" stop-color="#8f9dc4"/><stop offset="1" stop-color="#4c5a86"/></linearGradient>
+   <linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fc3ff"/><stop offset="1" stop-color="#2463e6"/></linearGradient>
+   <linearGradient id="${id}z" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff27a"/><stop offset="1" stop-color="#ff9412"/></linearGradient>
+   <linearGradient id="${id}m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6c9"/><stop offset="1" stop-color="#f2b93b"/></linearGradient>
+   <linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="1" y1="0" x2="22" y2="0"><stop offset="0" stop-color="#8fb2e6" stop-opacity="0"/><stop offset=".35" stop-color="#84a8e0"/><stop offset="1" stop-color="#4f7fd0"/></linearGradient>
+   <filter id="${id}f" x="-30%" y="-30%" width="160%" height="190%"><feDropShadow dx="0" dy="1.2" stdDeviation="1" flood-color="#1b4aa3" flood-opacity=".28"/></filter>
+   <filter id="${id}g" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="1.3" flood-color="#ff9a1a" flood-opacity=".55"/></filter>`;
+  const sonne=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${f(r*1.78)}" fill="#ffc02e" opacity=".16"/><circle cx="${cx}" cy="${cy}" r="${f(r*1.38)}" fill="#ffc02e" opacity=".3"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)" filter="url(#${id}g)"/>`;
+  const W=(l,fill)=>`<g filter="url(#${id}f)">${wolke(...LAGE[l],`fill="url(#${id}${fill||"c"})" stroke="#ffffff" stroke-opacity=".75" stroke-width=".5"`)}</g>`;
+  const mond=(t)=>`<g ${t||""} filter="url(#${id}g)"><path d="${MOND}" fill="url(#${id}m)"/></g>`;
+  const kapsel=(x,y,l)=>`<line x1="${x}" y1="${y}" x2="${f(x-l*.34)}" y2="${f(y+l)}" stroke="url(#${id}r)" stroke-width="1.9" stroke-linecap="round"/>`;
+  switch(name){
+    case "clear-day": return svg(size,defs,sonne(12,12,6.2));
+    case "clear-night": return svg(size,defs,mond()+stern(18.5,6.3,2.2,"#ffe08a")+stern(20.6,12.2,1.25,"#ffe08a"));
+    case "partly-cloudy-day": return svg(size,defs,sonne(15.3,8.9,4.6)+W("tief"));
+    case "partly-cloudy-night": return svg(size,defs,mond(`transform="translate(7.6 -1.6) scale(.66)"`)+stern(8.2,5.2,1.3,"#ffe08a")+W("tief"));
+    case "cloudy": return svg(size,defs,W("hinten","k")+W("vorn"));
+    case "rain": return svg(size,defs,W("oben")+kapsel(8.6,17.2,3.7)+kapsel(12.9,17.9,4.4)+kapsel(17.2,17.2,3.7));
+    case "thunderstorm": return svg(size,defs,W("oben","d")+`<path d="${BLITZ}" fill="url(#${id}z)" filter="url(#${id}g)"/>`);
+    case "snow": return svg(size,defs,W("oben")+flocke(7.6,18.3,1.8,"#6db6ff",1.25)+flocke(12.2,20.6,2,"#6db6ff",1.25)+flocke(16.8,18.3,1.8,"#6db6ff",1.25));
+    case "sleet": return svg(size,defs,W("oben")+kapsel(8.6,17.2,3.7)+flocke(12.6,20.5,1.95,"#6db6ff",1.25)+kapsel(17.4,17.2,3.7));
+    case "hail": return svg(size,defs,W("oben")+[[7.7,18.2],[12.2,20.4],[16.7,18.2]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.7" fill="url(#${id}c)" stroke="#5b9de8" stroke-width=".6"/>`).join(""));
+    case "fog": return svg(size,defs,W("nebel")+[[15.9,3.6,17.6],[18.8,6.6,20.6],[21.7,4.6,15.2]].map(([y,a,b])=>`<path d="M${a} ${y}H${b}" stroke="url(#${id}w)" stroke-width="1.85" stroke-linecap="round" fill="none"/>`).join(""));
+    case "wind": return svg(size,defs,windband(8.9,2.2,12.6,2.3,`stroke="url(#${id}w)" stroke-width="2.1"`)+windband(13.1,1.2,17.6,2.6,`stroke="url(#${id}w)" stroke-width="2.1"`)+`<path d="M3.4 17.2H12a2.1 2.1 0 1 1-2.1 2.1" fill="none" stroke="url(#${id}w)" stroke-width="2.1" stroke-linecap="round"/>`);
+  }
+  return svg(size,defs,W("allein"));
+}
+
+const SAETZE=[
+  ["A","Stand der App","Verlauf und Schatten, Sonne mit acht Zacken, eine Wolke.",iconA],
+  ["B","Plastisch","Sonne mit Lichthof und runden Strahlen, „bewölkt“ in zwei Lagen, Sterne beim Mond, schräge Tropfen.",iconB],
+  ["C","Linie","Nur Kontur in Schriftfarbe; Farbe allein für Sonne, Regen und Blitz. Ruhig, passt zur Schrift.",iconC],
+  ["D","Flach","Volle Flächen in zwei Tönen, ohne Verlauf und Schatten. Klar auch in klein.",iconD],
+  ["E","Kräftig","Satte Verläufe, Sonne mit Lichtringen statt Strahlen, bläuliche Wolken, Regen als Striche.",iconE]];
+
+function bauen(){
+  $("liste").innerHTML=SAETZE.map(([k,titel,text,fn])=>`<div class="var"><div class="vk"><b>${k} · ${titel}</b></div><p class="vb">${text}</p>
+    <div class="kopf"><div class="t">7,5<small>°C</small></div><div class="c"><div class="ic">${fn("partly-cloudy-day",54)}</div>Teils bewölkt</div></div>
+    <div class="strip">${NAMEN.map(([n,l],i)=>`<div class="cell"><div class="z">${(8+i)%24} Uhr</div><div class="ic">${fn(n,28)}</div><div class="n">${l}</div></div>`).join("")}</div>
+    <div class="gr">${NAMEN.map(([n,l])=>`<div class="ik"><div class="ic">${fn(n,54)}</div><div class="n">${l}</div></div>`).join("")}</div>
+    <div class="liste">${[["Mi","clear-day","sonnig","3° – 11°"],["Do","partly-cloudy-day","wechselnd","5° – 12°"],["Fr","rain","6,2 mm","7° – 10°"],["Sa","cloudy","bedeckt","4° – 8°"],["So","snow","Schnee","-2° – 1°"]]
+      .map(([w,n,t,r])=>`<div class="zeile"><div class="wd">${w}</div><div class="ic">${fn(n,26)}</div><div class="tx">${t}</div><div class="r">${r}</div></div>`).join("")}</div></div>`).join("");
+}
+
+/* ---------- Hell/Dunkel und die echte App ---------- */
+const E={thema:"hell",satz:"B"};
+try{Object.assign(E,JSON.parse(localStorage.getItem("symboltest")||"{}"));}catch(e){}
+function merken(){try{localStorage.setItem("symboltest",JSON.stringify(E));}catch(e){}}
+let F=null,appDa=false,appOrig=null;
+function knoepfe(){
+  $("zThema").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.thema));
+  $("zApp").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.satz));
+}
+function thema(){document.documentElement.classList.toggle("dunkel",E.thema==="dunkel");
+  if(appDa){try{F.document.documentElement.classList.toggle("dunkel",E.thema==="dunkel");F._dunkel=E.thema==="dunkel";F.themaNeuZeichnen();}catch(e){}}}
+function appSatz(){
+  if(!appDa)return;const s=SAETZE.find(x=>x[0]===E.satz)||SAETZE[0];
+  try{
+    F.icon=(n,g)=>s[3](n,g);
+    F.zustandZeigen();
+    const r=(F.chartRows&&F.chartRows.length>1)?F.chartRows:F.lastRows;if(r)F.renderStrip(r);
+    if(F._lastFcJ)F.renderForecast(F._lastFcJ);
+    $("stand").textContent="App zeigt Entwurf "+s[0]+" · "+s[1]+" (Kopf, Stundenleiste, 16-Tage-Liste)";
+  }catch(e){$("stand").textContent="Umschalten in der App ging nicht: "+e.message;}
+}
+function appWarten(){
+  F=$("app").contentWindow;
+  if(!F||typeof F.icon!=="function"||!(F.lastRows||F.chartRows)){setTimeout(appWarten,400);return;}
+  appDa=true;thema();appSatz();
+  /* kommt spaeter noch eine Lieferung (16 Tage), zeichnet die App mit dem gesetzten Entwurf weiter */
+}
+$("zApp").innerHTML=SAETZE.map(s=>`<button data-v="${s[0]}">${s[0]}</button>`).join("");
+$("zThema").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.thema=b.dataset.v;merken();knoepfe();thema();});
+$("zApp").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.satz=b.dataset.v;merken();knoepfe();appSatz();});
+$("app").addEventListener("load",()=>setTimeout(appWarten,300));
+bauen();knoepfe();thema();
+</script>
+</body></html>

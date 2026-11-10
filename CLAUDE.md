@@ -2512,6 +2512,18 @@ bei Dauerfrost mit Hoechstwert ab -5 Grad nach oben bis 0. BEWUSST NICHT "immer"
 sonst in der oberen Haelfte, unter -5 Grad Hoechstwert ist ohnehin alles Frost. Geprueft (Playwright, echte Kurve auf acht
 Spannen gestreckt, hell/dunkel): 0,3..9,2 -> Linien 0/2/.../10; 3,2..12 -> 0..12, Null am unteren Rand; -6..2,4;
 -4,5..-1,2 -> Null am oberen Rand; -13..-7,5 und 14..30,5 ohne Null; 1,1..2,9 -> 0..5 in 1er-Schritten.
+VARIANTENSEITE `symboltest.html` (Nutzer 10.11.: "die kleinen Symbole fuer Sonne und Wolken etwas schicker - sehen so
+elementar aus"; die jetzigen stammen aus v4.08, `ikonentest.html` Variante B). Fuenf Saetze mit allen zwoelf Zustaenden,
+je im Kopf (54 px), als Stundenleiste (28 px) und 16-Tage-Liste (26 px), hell/dunkel: A Stand der App, B plastisch (Sonne
+mit Lichthof und runden Strahlen, "bewoelkt" in zwei Lagen, Sterne beim Mond, schraege Tropfen), C Linie (Kontur in
+`currentColor`, Farbe nur fuer Sonne/Regen/Blitz; Sonne und Mond per Maske hinter der Wolke ausgeschnitten), D flach (zwei
+Toene je Flaeche, kein Verlauf/Schatten), E kraeftig (satte Verlaeufe, Lichtringe statt Strahlen, blaeuliche Wolken, Regen
+als Striche). Wolke und Mondsichel sind je EIN berechneter Pfad (`WOLKE` aus drei Kreisen, `sichel()`), viewBox 24 wie
+`icon()` - der Gewinner laesst sich direkt in `icon(name,size)` einsetzen. Unten laeuft die ECHTE App im Rahmen: die Seite
+ersetzt `F.icon` und ruft `zustandZeigen()`, `renderStrip(chartRows||lastRows)`, `renderForecast(_lastFcJ)`. Befund beim
+Bau: auf dem hellen, cremefarbenen Kasten tragen weisse Wolken nur ueber Schatten bzw. Ton - D brauchte dunklere Toene
+(#dae2eb/#bdc9d7), sonst sah "bewoelkt" wie ein halber Balken aus; Lichthof/Ringe muessen ganz im 24er-Feld liegen (sonst
+gerade Kante). Wahl steht aus; bei C muesste die App den Symbol-Behaeltern eine Farbe geben (Kontur = Schriftfarbe).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
