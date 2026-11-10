@@ -15,9 +15,12 @@ name: ICON-D2-RUC Vergleich
 # rund 2 KB je Stunde) - nicht auf main, damit main nicht stuendlich Commits
 # bekommt. Download je Lauf rund 17 MB (28 GRIB2-Dateien), am Tag ~400 MB.
 
+# BEENDET am 10.11.2026 (Nutzer: "RUC-Vergleich beenden"): nach 3 Wochen und 485 Abrufen kein messbarer Gewinn
+# gegen die App (Tagesvergleich besser 1, schlechter 3, gleich 17, p = 0,63; CSI 0,1 mm bei +1 h 0,54 / 5 km 0,60
+# gegen 0,59) - nach der Regel "erst messen, dann in die App" kommt RUC nicht hinein. Zeitplan und Nachfolger-Start
+# sind entfernt; von Hand gestartet laeuft EINE Sitzung von 5,5 h ohne Nachfolger. Wieder aufnehmen: den Zeitplan
+# ("47 */4 * * *") und den Schritt "Nachfolger starten" aus Commit d4aa0a3 zurueckholen. Daten bleiben auf ruc-daten.
 on:
-  schedule:
-    - cron: "47 */4 * * *"     # Rueckfall alle 4 h, falls die Kette reisst
   workflow_dispatch:
 
 concurrency:
@@ -26,7 +29,6 @@ concurrency:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   ruc:
@@ -82,14 +84,3 @@ jobs:
             if [ $(( JETZT + W )) -ge "$ENDE" ]; then echo "naechster Abruf liegt nach dem Ende - Ende"; break; fi
             sleep "$W"
           done
-
-      # Nur nach regulaerem Ende (success) - ein abgeloester Lauf startet keinen.
-      - name: Nachfolger starten
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          curl -sS -o /dev/null -w "Nachfolger: HTTP %{http_code}\n" -X POST \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/ruc.yml/dispatches" \
-            -d '{"ref":"main"}'
