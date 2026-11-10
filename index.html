@@ -1278,7 +1278,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.07</span>
+      <span class="ver">v6.08</span>
     </div>
   </header>
 
@@ -1527,6 +1527,7 @@ const CO={
   get band06(){   return _dunkel?"rgba(255,255,255,.06)":"rgba(15,23,42,.06)";},
   get gitter10(){ return _dunkel?"rgba(255,255,255,.11)":"rgba(15,23,42,.10)";},
   get gitter12(){ return _dunkel?"rgba(255,255,255,.13)":"rgba(15,23,42,.12)";},
+  get frost(){    return _dunkel?"#7fb8ff":"#2f7fe0";},   // v6.08: Null-Linie im Temperaturverlauf
 };
 function thermal(t){if(t==null||isNaN(t))return[120,132,150];if(t<=STOPS[0][0])return STOPS[0].slice(1);if(t>=STOPS.at(-1)[0])return STOPS.at(-1).slice(1);
   for(let i=0;i<STOPS.length-1;i++){const a=STOPS[i],b=STOPS[i+1];if(t>=a[0]&&t<=b[0]){const f=(t-a[0])/(b[0]-a[0]);return[a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f];}}return STOPS.at(-1).slice(1);}
@@ -2434,6 +2435,22 @@ function renderStrip(rows){
 }
 
 const cv=el("chart"), ctx=cv.getContext("2d"), cax=el("chartAxis"), axx=cax.getContext("2d");
+/* v6.08 (Nutzer: "die Null-Linie auf jeden Fall immer einzeichnen, dass man sieht, wann Frost ist oder war"):
+   Skala des Temperaturverlaufs. Linien stehen auf GANZEN Vielfachen des Schritts (1/2/5/10 Grad, hoechstens 7
+   Abstaende) - die Null ist damit von selbst eine Linie, sobald sie im Bereich liegt, und wird blau hervorgehoben.
+   Vorher: fuenf Linien auf Vierteln des Bereichs mit gerundeter Beschriftung (-1/2/5/8/11), die Null fehlte und
+   bei nicht durch 4 teilbarem Bereich stand die Zahl bis 0,5 Grad neben ihrer Linie.
+   In Frostnaehe wird der Bereich bis zur Null gezogen: Tiefstwert im Fenster bis 5 Grad (Bodenfrost moeglich) bzw.
+   Hoechstwert ab -5 Grad. Im Sommer NICHT - bei 14 bis 30 Grad laege die Kurve sonst in der oberen Haelfte. */
+var CHART_FROST_NAH=5;
+function chartSkala(mn,mx){
+  let lo=Math.floor(mn)-1,hi=Math.ceil(mx)+1;if(hi-lo<5)hi=lo+5;
+  if(lo>0&&mn<=CHART_FROST_NAH)lo=0;
+  if(hi<0&&mx>=-CHART_FROST_NAH)hi=0;
+  const st=[1,2,5,10].find(q=>(hi-lo)/q<=7)||20,T=[];
+  for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)T.push(v);
+  return {lo,hi,st,T};
+}
 function drawChart(rows){
   if(!rows||rows.length<2)return;
   const host=el("chartScroll"),viewW=host.clientWidth;if(!viewW)return;
@@ -2445,7 +2462,7 @@ function drawChart(rows){
   cv.style.width=W+"px";cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
   const x0=lead,x1=W-lead,y0=padT,y1=H-padB;
   const temps=rows.map(r=>r.temperature);
-  let lo=Math.floor(Math.min(...temps))-1,hi=Math.ceil(Math.max(...temps))+1;if(hi-lo<5)hi=lo+5;
+  const SK=chartSkala(Math.min(...temps),Math.max(...temps)),lo=SK.lo,hi=SK.hi;
   const X=t=>x0+(x1-x0)*((t-tMin)/(tMax-tMin)),Y=v=>y1-(y1-y0)*((v-lo)/(hi-lo)),nowMs=Date.now();
   let obsMs=tMin;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obsMs=T(rows[i]);break;}}
   const nowX=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):null;
@@ -2455,7 +2472,7 @@ function drawChart(rows){
   // Nacht-Schattierung
   for(let i=0;i<rows.length;i++){if(isNight(rows[i].timestamp)){const a=i>0?(T(rows[i-1])+T(rows[i]))/2:T(rows[i])-1800e3,b=i<rows.length-1?(T(rows[i])+T(rows[i+1]))/2:T(rows[i])+1800e3;ctx.fillStyle="rgba(40,52,74,.05)";ctx.fillRect(X(a),y0,X(b)-X(a),y1-y0);}}
   // horizontale Gridlines (Labels auf der fixen Achse)
-  for(let s=0;s<=4;s++){const y=Y(lo+(hi-lo)*s/4);ctx.strokeStyle=CO.band;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(W-4,y);ctx.stroke();}
+  SK.T.forEach(v=>{const y=Y(v);ctx.strokeStyle=CO.band;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(W-4,y);ctx.stroke();});
   // Tagesgrenzen + Tagesnamen
   ctx.font="10px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.fillStyle=CO.faint;
   let prevDay=ymd(rows[0].timestamp),dayStartX=X(tMin);
@@ -2466,6 +2483,8 @@ function drawChart(rows){
   // Fläche
   ctx.beginPath();ctx.moveTo(X(tMin),Y(rows[0].temperature));rows.forEach(r=>ctx.lineTo(X(T(r)),Y(r.temperature)));ctx.lineTo(X(tMax),y1);ctx.lineTo(X(tMin),y1);ctx.closePath();
   const fg=ctx.createLinearGradient(0,y0,0,y1);fg.addColorStop(0,rgba(thermal(hi),.16));fg.addColorStop(1,rgba(thermal(lo),.02));ctx.fillStyle=fg;ctx.fill();
+  // v6.08: Null-Linie (Frostgrenze) - ueber der Flaeche, unter der Kurve
+  if(lo<=0&&hi>=0){const y=Y(0);ctx.save();ctx.strokeStyle=CO.frost;ctx.globalAlpha=.9;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(W-4,y);ctx.stroke();ctx.restore();}
   // Linie: beobachtet durchgezogen, Prognose gestrichelt
   ctx.lineJoin="round";ctx.lineCap="round";ctx.lineWidth=2.2;
   for(let i=1;i<rows.length;i++){ctx.setLineDash(T(rows[i])>nowMs?[4,3]:[]);ctx.strokeStyle=rgb(thermal((rows[i-1].temperature+rows[i].temperature)/2));ctx.beginPath();ctx.moveTo(X(T(rows[i-1])),Y(rows[i-1].temperature));ctx.lineTo(X(T(rows[i])),Y(rows[i].temperature));ctx.stroke();}
@@ -2475,7 +2494,7 @@ function drawChart(rows){
     ctx.fillStyle=CO.muted;ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";ctx.fillText("jetzt",nx,1);
     let obs=null;for(let i=rows.length-1;i>=0;i--){if(T(rows[i])<=nowMs){obs=rows[i];break;}}
     if(obs){const lx=X(T(obs)),ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(lx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(lx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=CO.karte;ctx.stroke();}}
-  drawAxis(lo,hi,H,padT,padB);
+  drawAxis(lo,hi,H,padT,padB,SK.T);
   if(!chartInit){const nx=(obsMs>=tMin&&obsMs<=tMax)?X(obsMs):W/2;chartScrollX=Math.max(0,Math.min(W-viewW,nx-viewW/2));chartInit=true;}
   else chartScrollX=Math.max(0,Math.min(W-viewW,chartScrollX));
   cv.style.transform="translateX("+(-chartScrollX)+"px)";
@@ -2494,12 +2513,13 @@ function updateCursor(){
   tEl.classList.toggle("fc",fut);
   const y=g.y1-(g.y1-g.y0)*((temp-g.lo)/(g.hi-g.lo));dEl.style.top=y+"px";dEl.style.background=rgb(thermal(temp));
 }
-function drawAxis(lo,hi,H,padT,padB){
+function drawAxis(lo,hi,H,padT,padB,T){
   const dpr=Math.min(window.devicePixelRatio||1,3),W=cax.clientWidth||32;
   cax.width=W*dpr;cax.height=H*dpr;axx.setTransform(dpr,0,0,dpr,0,0);axx.clearRect(0,0,W,H);
   const y0=padT,y1=H-padB;
   axx.font="10px -apple-system,system-ui,sans-serif";axx.textBaseline="middle";axx.textAlign="right";axx.fillStyle=CO.faint;
-  for(let s=0;s<=4;s++){const t=lo+(hi-lo)*s/4,y=y1-(y1-y0)*((t-lo)/(hi-lo));axx.fillText(Math.round(t)+"°",W-3,y);}
+  (T||[]).forEach(t=>{const y=y1-(y1-y0)*((t-lo)/(hi-lo)),nul=t===0;
+    axx.font=(nul?"700 ":"")+"10px -apple-system,system-ui,sans-serif";axx.fillStyle=nul?CO.frost:CO.faint;axx.fillText((nul?0:t)+"°",W-3,y);});
 }
 let _rt;window.addEventListener("resize",()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(chartRows&&chartRows.length>1)drawChart(chartRows);else if(lastRows)drawChart(lastRows);if(lastUVH){drawUV(lastUVH);drawBfsOverlay();}if(el("planetenCv"))drawPlaneten();},150);});
 function setScrollX(v){const g=chartGeom;const mx=g?Math.max(0,g.W-g.viewW):0;chartScrollX=Math.max(0,Math.min(mx,v));cv.style.transform="translateX("+(-chartScrollX)+"px)";if(!_cursorRAF)_cursorRAF=requestAnimationFrame(()=>{_cursorRAF=0;updateCursor();});updateChartJump();}
