@@ -2716,6 +2716,19 @@ ein schwacher Streifen (der Balken ist einfarbig, der Himmel nicht). ECHTE Loesu
 zur Kante, weisse Uhr): dann braucht die klassische helle Ansicht einen eigenen dunklen Streifen, und iOS liest die
 Angabe vermutlich nur beim Hinzufuegen zum Home-Bildschirm (App loeschen und neu anlegen) - nicht gemacht, dem Nutzer
 angeboten.
+v6.15 (Nutzer, iPhone-Bild 10.11. 22:46, Blase "Symbol bewegt sich - Stufe 3 von 3": "im Kopfbereich haben wir keine
+Symbole mehr, und die unten bei der stuendlichen Prognose bewegen sich nicht"): Das Symbol oben gibt es noch (30 px neben
+dem Wort), aber eine Wolke pendelt dort nur um ~1 px - die Stufe wirkte nirgends sichtbar. Jetzt bewegen sich auch die
+Symbole der STUNDENLEISTE: `renderStrip` schreibt `data-ic` an die Zelle `.ic`, `sbLeiste()` (nach jedem renderStrip und in
+`sbSetzen`) haengt einen IntersectionObserver an alle Zellen (121) und setzt nur in SICHTBARE `iconBewegt(name,28,M)`, in
+alle anderen wieder das stehende `icon()` - im Test 7-8 Zellen mit 8-12 Ebenen, beim Schieben der Leiste wechseln sie, ist
+die Leiste aus dem Bild, bewegt sich nichts. `html.sbaus` (Kopf nicht im Bild) haelt nur noch `#hero .ib` an. Einstellung
+heisst "Wettersymbole bewegen", Blase "Symbole bewegen sich - Stufe n von 3". 16-Tage-Liste und Kacheln bleiben stehend.
+WEICHZEICHNER ENTFERNT (backdrop-filter auf Karten und Kacheln, v6.12): gemessen ohne GPU, Kopf + Leiste Stufe 2, oben auf
+der Seite: mit 38-41 % eines Kerns, nur Karten 32-35 %, ohne 17-24 %; Stufe 0: 0-11 %. Im Bildvergleich am Tag kein
+Unterschied, nachts scheinen einzelne Sterne durch Kacheln und Karten. Merke: jede stufenlose Bewegung laesst den
+Kompositor JEDES Bild neu zusammensetzen - alles, was dabei im Bild liegt (Weichzeichner, grosse Ebenen), zahlt mit;
+die Wolken (steps, 10/s) allein kosten kaum etwas.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

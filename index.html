@@ -93,7 +93,7 @@
   @keyframes sbFunkel{0%,100%{opacity:1}50%{opacity:.15}}
   @keyframes sbWieg{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
   html.sbw .ib>svg{animation-duration:var(--sd)!important;animation-iteration-count:infinite!important}   /* gewaehlte Stufe gilt auch bei "Bewegung reduzieren" */
-  html.sbaus .ib>svg{animation-play-state:paused!important}
+  html.sbaus #hero .ib>svg{animation-play-state:paused!important}   /* v6.15: nur der Kopf - die Stundenleiste regelt sich selbst (sbLeiste) */
   #mainBox .cnd{cursor:pointer}
   #sbTip{position:absolute;z-index:5;background:rgba(23,32,46,.93);color:#fff;font:600 12px -apple-system,system-ui,sans-serif;padding:6px 10px;border-radius:9px;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
   #sbTip.an{opacity:1}
@@ -1296,7 +1296,10 @@ html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
 html.histeh .hiS>canvas.hiW{animation:none}
 html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#c3cee0;--faint:#a2b0c6}
-html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:none}
+/* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
+   man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
+   Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
+html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard{box-shadow:none}
 html:root.himmel .pvtage button.on,html:root.himmel .pvsicht button.on,html:root.himmel .mj-tip{color:#1a212c}
 html:root.himmel header,html:root.himmel .hero{text-shadow:0 1px 10px rgba(0,0,0,.35)}
 html:root.himmel .hero{background:transparent;box-shadow:none;padding-top:4px}
@@ -1315,7 +1318,7 @@ html:root.himmel .feel .hl,html:root.himmel .feel .hl .dn,html:root.himmel .feel
 html:root.himmel .ydiff{justify-content:center;text-align:center;color:rgba(255,255,255,.85)}
 html:root.himmel .ydiff .ys{color:rgba(255,255,255,.85)}
 html:root.himmel .when .a{color:rgba(255,255,255,.8)}
-html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11))}
 html:root.himmel .kz .ki .l{color:rgba(255,255,255,.62)}
 html:root.himmel .kz .ki .s{color:rgba(255,255,255,.7)}
 html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
@@ -1420,7 +1423,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.14</span>
+      <span class="ver">v6.15</span>
     </div>
   </header>
 
@@ -1774,25 +1777,46 @@ function sbEigen(){try{var v=localStorage.getItem("symbBew");return /^[0-3]$/.te
 function sbStufe(){var e=sbEigen();return e!=null?e:(waReduziert()?0:2);}
 function sbGroesse(){return hiAn()?30:54;}                 // v6.12: in der Ansicht "Himmel" klein neben dem Wort
 function symbGross(name){var s=sbStufe(),g=sbGroesse();return s?iconBewegt(name,g,SB_STUFEN[s]):icon(name,g);}
+/* v6.15 (Nutzer, iPhone 10.11.: "im Kopf haben wir keine Symbole mehr, und die in der Stundenleiste bewegen sich
+   nicht"): im Himmel ist das Symbol oben nur noch 30 px gross - die Stufe wirkte nirgends sichtbar. Jetzt bewegen
+   sich auch die Symbole der Stundenleiste, aber nur die, die gerade zu sehen sind: ein IntersectionObserver setzt in
+   sichtbare Zellen iconBewegt(), in alle anderen wieder das stehende icon() (jede bewegte Ebene ist eine eigene
+   Kompositor-Ebene - 120 Zellen x bis zu 5 Ebenen waeren zu viel). */
+var _sbIO=null;
+function sbLeiste(){
+  var h=document.getElementById("strip");if(!h)return;
+  if(_sbIO){_sbIO.disconnect();_sbIO=null;}
+  var z=h.querySelectorAll(".ic[data-ic]");
+  z.forEach(function(c){if(c._bw){c.innerHTML=icon(c.dataset.ic,28);c._bw=0;}});
+  if(!sbStufe()||!window.IntersectionObserver)return;
+  _sbIO=new IntersectionObserver(function(es){
+    var st=sbStufe();
+    es.forEach(function(e){var c=e.target,an=e.isIntersecting&&st>0;
+      if(an&&!c._bw){c.innerHTML=iconBewegt(c.dataset.ic,28,SB_STUFEN[st]);c._bw=st;}
+      else if(!an&&c._bw){c.innerHTML=icon(c.dataset.ic,28);c._bw=0;}});
+  },{rootMargin:"0px 24px"});
+  z.forEach(function(c){_sbIO.observe(c);});
+}
 function sbKlasse(){document.documentElement.classList.toggle("sbw",sbEigen()>0);}
 function sbSetzen(s){
   try{localStorage.setItem("symbBew",String(s));}catch(e){}
   sbKlasse();var il=document.getElementById("condIc");if(il)il._sbK=null;
   try{zustandZeigen();}catch(e){}
+  try{sbLeiste();}catch(e){}
   sbAnzeigen();
 }
 function sbAnzeigen(){
   var s=sbStufe(),seg=document.getElementById("sbSeg"),h=document.getElementById("sbHilf");
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.s===s);});
-  if(h)h.textContent=s?"Das große Wettersymbol bewegt sich: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols."
-    :"Das große Wettersymbol steht still."+((sbEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – eine Stufe schaltet die Bewegung trotzdem ein.":"")+" Geht auch durch Antippen des Symbols.";
+  if(h)h.textContent=s?"Die Wettersymbole bewegen sich – oben neben dem Wort und in der Stundenleiste: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols oben."
+    :"Die Wettersymbole stehen still."+((sbEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – eine Stufe schaltet die Bewegung trotzdem ein.":"")+" Geht auch durch Antippen des Symbols oben.";
 }
 /* Antippen des Symbols (oder des Worts darunter) schaltet weiter: aus -> 1 -> 2 -> 3 -> aus; eine kleine Blase sagt,
    was jetzt gilt. Solange der Kasten nicht im Bild ist, ruht die Bewegung (html.sbaus). */
 function sbTipp(s){
   var h=document.getElementById("hero"),c=document.querySelector("#mainBox .cnd");if(!h||!c)return;
   var t=document.getElementById("sbTip");if(!t){t=document.createElement("div");t.id="sbTip";h.appendChild(t);}
-  t.textContent=s?"Symbol bewegt sich · Stufe "+s+" von 3":"Symbol steht still";
+  t.textContent=s?"Symbole bewegen sich · Stufe "+s+" von 3":"Symbole stehen still";
   var r=c.getBoundingClientRect(),hr=h.getBoundingClientRect();
   t.style.top=Math.round(r.bottom-hr.top+6)+"px";t.style.right=Math.max(8,Math.round(hr.right-r.right-4))+"px";
   t.classList.add("an");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("an");},1900);
@@ -2852,11 +2876,12 @@ function renderStrip(rows){
     let _ic=r.icon||"cloudy";
     if(_ic==="cloudy"&&!night&&_ss!=null&&_moegl>=20&&_ss>=0.9*_moegl)_ic="partly-cloudy-day";
     if(r._live)_ic=sonneStuetztIcon(_ic,r._ss30,r._ss60,_tMs);   // v4.30: wie oben im Zustand
-    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic">${icon(_ic,28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
+    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
   requestAnimationFrame(()=>{if(!stripUserScrolled){const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));}if(typeof updateStripJump==="function")updateStripJump();});
+  try{sbLeiste();}catch(e){console.warn("symbole",e);}
 }
 
 const cv=el("chart"), ctx=cv.getContext("2d"), cax=el("chartAxis"), axx=cax.getContext("2d");
@@ -7045,7 +7070,7 @@ function kzRender(){
                    +'<div class="kzseg" id="waSeg"><button type="button" data-w="aus">Aus</button><button type="button" data-w="still">Standbild</button><button type="button" data-w="an">Bewegt</button></div>'
                    +'<div class="kzhilf" id="waHilf"></div>'
                    +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>'
-                   +'<div class="kzregt">Wettersymbol oben bewegen</div>'
+                   +'<div class="kzregt">Wettersymbole bewegen</div>'
                    +'<div class="kzseg" id="sbSeg"><button type="button" data-s="0">Aus</button><button type="button" data-s="1">1</button><button type="button" data-s="2">2</button><button type="button" data-s="3">3</button></div>'
                    +'<div class="kzhilf" id="sbHilf"></div>'
                    +'<div class="kzregt">Himmel im Hintergrund</div>'
