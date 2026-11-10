@@ -188,6 +188,8 @@ function appSatz(){
   try{
     /* im Kopf ist das Symbol 54 px gross, in Leiste und Liste 28 bzw. 26 */
     F.icon=(n,g)=>iconBew(n,g,(E.wo==="kopf"&&g<50)?null:M);
+    /* seit v6.10 nimmt die App fuer den Kopf symbGross() und setzt nur bei Aenderung neu ein */
+    F.symbGross=n=>F.icon(n,54);{const c=F.document.getElementById("condIc");if(c)c._sbK=null;}
     F.zustandZeigen();
     const r=(F.chartRows&&F.chartRows.length>1)?F.chartRows:F.lastRows;if(r)F.renderStrip(r);
     if(F._lastFcJ)F.renderForecast(F._lastFcJ);

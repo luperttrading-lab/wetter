@@ -280,7 +280,7 @@ function appSatz(){
   if(!appDa)return;const s=SAETZE.find(x=>x[0]===E.satz)||SAETZE[0];
   try{
     F.icon=(n,g)=>s[3](n,g);
-    F.zustandZeigen();
+    F.symbGross=n=>F.icon(n,54);{const c=F.document.getElementById("condIc");if(c)c._sbK=null;}F.zustandZeigen();
     const r=(F.chartRows&&F.chartRows.length>1)?F.chartRows:F.lastRows;if(r)F.renderStrip(r);
     if(F._lastFcJ)F.renderForecast(F._lastFcJ);
     $("stand").textContent="App zeigt Entwurf "+s[0]+" · "+s[1]+" (Kopf, Stundenleiste, 16-Tage-Liste)";

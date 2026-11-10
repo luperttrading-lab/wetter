@@ -2612,6 +2612,30 @@ Sonnenzeichen Radius 7 / 4,8 statt 5 / 3,4, Ecken 10 px; Breite = Text + 43 (bei
 nach dem freien Platz (v4.96: neben der heute-Senkrechten, Ring = 1000 Strafpunkte) rechnet mit der neuen Groesse.
 Geprueft mit verstellter Uhr an sechs Tagen (12.01., 20.03., 21.06., 28.08., 03.10., 10.11.) bei 393 pt und am 10.11. bei
 320 pt: kein Ring verdeckt, Kasten ganz im Bild. Der Tipp-Kasten `#mjTip` (HTML) ist unveraendert.
+v6.10 SYMBOLE NEU GEZEICHNET, DAS GROSSE OBEN BEWEGT SICH (Nutzer 10.11. nach `symbolbewegt.html`: "4 sind besser und
+Striche statt Tropfen, beim Nebel 3 statt 2 und Wind 4 statt 3 Puste-Striche", "bei klarer Nacht ein paar Sterne
+funkeln", "entweder ruhig oder deutlich, lebhaft ist zu viel - in der App die Geschwindigkeit verstellen mit Antippen,
+eventuell auch mit aus, also Stufe 1 2 3"). `iconTeile(name)` liefert je Symbol eine Liste TEILE {d: Verlaeufe/Filter als
+Funktion der id, b: Zeichnung, a: Bewegung oder null}; `icon(name,size)` legt sie in EIN <svg> (stehend, ueberall wie
+bisher: Stundenleiste, Listen, Kacheln, `sunSmall`), `iconBewegt(name,size,M)` legt je Teil ein eigenes <svg>
+uebereinander (`.ib`) und bewegt nur dessen transform/opacity per CSS (`@keyframes sbDreh/sbPuls/sbPendel/sbFall/
+sbFlocke/sbBlitz/sbFunkel/sbWieg`, Laengen als px in CSS-Variablen, Dauer in `--sd`). NICHT SMIL: gemessen (Chromium
+ohne GPU, 5 s) Stufe 0 2,1 % Hauptfaden / 6,0 % eines Kerns, Stufe 3 1,4 % / 9,0 % (SMIL auf der Testseite: 15,6 % /
+28,4 %). ZEICHNUNG: Regen vier schraege Striche, Schnee vier feine Sterne, Schneeregen Strich/Stern im Wechsel, Hagel
+vier Koerner (alle in W-Form `P4`), Nebel drei Baender, Wind vier Puste-Striche mit versetzten Kringeln, klare Nacht mit
+drei Sternen, Sonne ganz im 24er-Feld (r 6,1 statt 6,6; Strahlen waren am Rand abgeschnitten), <svg> mit
+overflow:visible (Schatten). BEWEGT wird nur das grosse Symbol im Kopf: `symbGross(name)` in `zustandZeigen`, eingesetzt
+nur bei Aenderung (`il._sbK`, `il._sbN`) - sonst begaenne die Bewegung bei jeder Datenlieferung von vorn. STUFEN
+`SB_STUFEN` 0 = steht, 1 ruhig (Strahlenumlauf 110 s, Wolke +-0,45 Einheiten in 11 s), 2 dazwischen, 3 deutlich (48 s,
++-0,85 in 7,5 s); gemerkt `symbBew`; ohne eigene Wahl Stufe 2, bei "Bewegung reduzieren" 0 - eine gewaehlte Stufe gilt
+immer (`html.sbw` hebt die Kill-Regel fuer `.ib>svg` auf). BEDIENUNG: Antippen des Symbols oder des Worts darunter
+(`#mainBox .cnd`) schaltet aus -> 1 -> 2 -> 3 -> aus, Blase `#sbTip` "Symbol bewegt sich · Stufe 2 von 3" 1,9 s;
+dazu unter Kacheln waehlen > Einstellungen "Wettersymbol oben bewegen: Aus | 1 | 2 | 3" (`#sbSeg`, `sbAnzeigen`). Ist der
+Kasten nicht im Bild, ruht die Bewegung (`html.sbaus`, IntersectionObserver). Geprueft (Playwright): alle zwoelf
+Symbole stehend 54/28 px hell und dunkel, alle zwoelf bewegen sich, Antippen 3-0-1-2-3, Einstellung, Knoten bleibt bei
+wiederholtem `zustandZeigen`/`kzRender`, "Bewegung reduzieren" (Start 0, nach Antippen laeuft Stufe 1 mit echter
+Dauer). Nicht am iPhone geprueft. Testseiten `symbolbewegt.html`/`symboltest.html` setzen fuer ihre Vorschau
+`F.symbGross` und `_sbK=null`. Zurueckholen der alten Zeichnung aus `wetter-giessen-v6_09.html`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
