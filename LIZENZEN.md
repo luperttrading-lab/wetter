@@ -14,7 +14,7 @@ Drittquellen oder abgeleitet, [Vermutung] = nicht belegt.
 | api.brightsky.dev | Messung, Radar, Warnungen, MOSMIX | frei | "free-to-use for all purposes", DWD-Bedingungen gelten, keine Ratenbegrenzung veroeffentlicht, selbst betreibbar [Sicher] |
 | api / air-quality-api / archive-api / geocoding-api .open-meteo.com | Vorhersage, CAMS-UV/Luft/Pollen, Wolkenkarte, Rasen (Stunden, Klima), Ortssuche Rasen-App | frei (nicht kommerziell) | **Abo noetig** [Sicher], siehe unten |
 | nominatim.openstreetmap.org | Ortssuche Wetter-App | frei | erlaubt mit Grenzen (1 Anfrage/s, kein Tippen-Vervollstaendigen) |
-| server.arcgisonline.com (World_Imagery), services.arcgisonline.com (World_Hillshade) | Satellit in Wolken- und Regenkarte, Untergrund "Relief" | geduldet | **nicht gedeckt** ohne Esri-Konto, siehe unten |
+| server.arcgisonline.com (World_Imagery), services.arcgisonline.com (World_Hillshade) | Satellit in der Wolkenkarte; graues Relief in der Regenkarte (seit v6.06 fest) | geduldet | **nicht gedeckt** ohne Esri-Konto, siehe unten |
 | uvi.bfs.de, bfs.de | UV-Tagesgrafiken (Bildauswertung) | frei | ungeklaert |
 | api.wheretheiss.at | ISS-Bahndaten (TLE) | frei | nicht geprueft |
 | ntfy.sh | Erinnerung der Rasen-App | frei | nicht geprueft; im App Store ersetzt durch echte iPhone-Nachrichten (APNs) |
@@ -28,9 +28,9 @@ Drittquellen oder abgeleitet, [Vermutung] = nicht belegt.
 `arcgis.com/sharing/rest/content/items/10df2279f9684e4a9f6a7f08febac2a9?f=json`), Quellvermerk
 "Esri, Vantor, Earthstar Geographics, and the GIS User Community". [Wahrscheinlich] Ohne Esri-Konto
 und -Schluessel ist die Nutzung in einer fremden App nicht gedeckt - auch nicht in einer Gratis-App
-im Store. Betroffen: `WOLK_TILE` (Wolkenkarte, Regenkarte "Satellit") und `RK_GRUND` "Relief"
-(World_Hillshade). Wege:
-- Regenkarte: "Grau" (v5.39) braucht keine Kacheln.
+im Store. Betroffen: `WOLK_TILE` (Wolkenkarte, World_Imagery) und `RK_TILE` (Regenkarte, World_Hillshade,
+seit v6.06 fest). Wege:
+- Regenkarte: eine graue Flaeche ohne Kacheln (Test "Grau" aus v5.39, Code in `wetter-giessen-v6_05.html`).
 - ArcGIS Location Platform mit Schluessel: 2 Mio. Basiskarten-Kacheln im Monat frei, danach 0,15 $
   je 1000 [Sicher, Preisseite]; ob das kommerziell erlaubt ist, steht dort nicht.
 - Sentinel-2 (EOX) oder OSM-Kacheln - Lizenzen je Jahrgang/Anbieter vorher pruefen.

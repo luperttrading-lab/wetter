@@ -381,10 +381,6 @@ html.dunkel .rz-zust.nass{color:#7fb6f0}html.dunkel .rz-zust.tau{color:#7fc8bd}h
 .kzs-bb i.bl{opacity:.4}
 .kzs-x{position:relative}
 /* v5.39: Untergrund der Regenkarte (Test) */
-.rk-grund{margin:8px 0 4px;font-size:11px;color:var(--muted);font-weight:600}
-.rk-grund>div{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;margin-bottom:5px}
-.rk-grund button{font:700 11.5px system-ui;padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
-.rk-grund button.on{background:#2563c9;border-color:#2563c9;color:#fff}
 /* v5.38: 48-h-Grossansicht zum Wischen - Skala fest, Bild scrollt */
 .kzs-sc{position:relative;margin-left:24px}
 .kzs-yl{position:absolute;left:0;top:20px;height:130px;width:0}
@@ -1274,7 +1270,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.05</span>
+      <span class="ver">v6.06</span>
     </div>
   </header>
 
@@ -1310,7 +1306,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
     <div id="chartSec"><div class="sect">Temperaturverlauf</div>
     <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div></div></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
-    <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="rk-grund" id="rkGrund"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
+    <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
     <div id="umkreisSec" class="hidden"><div class="sect">Regen im Umkreis · heute</div><div class="nowcard" id="umkreisCard"></div></div>
     <div id="bilanzSec" class="hidden"><div class="sect">Regenbilanz</div><div class="nowcard" id="bilanzCard"></div></div>
@@ -1850,7 +1846,7 @@ const sum=(rows,f)=>rows.reduce((a,r)=>a+(r[f]!=null&&!isNaN(r[f])?r[f]:0),0);
 
 /* ---------- State ---------- */
 const el=id=>document.getElementById(id);
-let fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, stripUserScrolled=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0, _aqi=null;
+var fullRows=null, lastRows=null, snap=null, isDemo=false, chartRows=null, chartInit=false, stripInit=false, stripUserScrolled=false, chartGeom=null, _cursorRAF=0, chartScrollX=0, _momRAF=0, _aqi=null;
 let uvAirFull=null, uvDayOffset=0, _bfsTs=Date.now();
 /* ===== v3.49: Umschalter hell / dunkel =====
    Drei Zustaende im Rundlauf: automatisch -> hell -> dunkel -> automatisch.
@@ -4871,9 +4867,8 @@ function kzRegen24H(){
    24 h) bzw. Unwetter (> 50).
    v5.28 FARBEN (Nutzer nach dem Farbtest v5.27: "eher E"): Tuerkis -> Blau ->
    Violett statt der bunten Radarfarben (Gelb, Orange, Rot). Die RADARKARTE
-   behaelt ihre Farben (RK_STUFEN) - Tuerkis und Blau gingen auf dem
-   Satellitenbild (Wald, Wasser) unter; Balken und Karte haben seitdem
-   verschiedene Farben, gleiche Schwellen. Vorbild war eine andere Regen-App
+   nimmt seit v6.06 dieselben Farben (RK_PAL), auf grauem Relief statt auf dem
+   Satellitenbild, wo Tuerkis und Blau untergingen. Vorbild war eine andere Regen-App
    (CLAUDE.md, "Vorbild-App"): dort gelbgruen fuer Werte UNTER der kleinsten
    Radarstufe (Mittelwert-Auslaeufer), die es bei uns nicht gibt (unter 0,1 =
    trocken) - darum kein Gruen. */
@@ -5278,11 +5273,31 @@ function uvTagRechnen(){
   const s10=solar10Werte(dayMs,now);
   if(s10&&s10.length){for(const q of s10){const u=uvAusD(bell(q.tc),q.d);if(!mess||u>mess.uv)mess={uv:u,t:q.tc};}
     const q=s10[s10.length-1];jetzt={uv:uvAusD(bell(q.tc),q.d),t:q.t1};if(now-q.t1<36e5)tA=q.t1;}
-  let prog=null;
-  for(let t=tA;t<=t21;t+=5*6e4){const k=uvProgK(t);if(k==null)continue;const u=uvAusD(bell(t),uvKurveD(k));if(!prog||u>prog.max)prog={max:u,t};}
+  let prog=null,kRest=0;
+  for(let t=tA;t<=t21;t+=5*6e4){const g=bell(t);if(g>kRest)kRest=g;const k=uvProgK(t);if(k==null)continue;const u=uvAusD(g,uvKurveD(k));if(!prog||u>prog.max)prog={max:u,t};}
   if(prog&&!(prog.max>0.03))prog=null;
+  // v6.06: die ZAHL "erw." ist die erwartete Tagesspitze, nicht das hoechste Stundenmittel (uvErwSpitze)
+  if(prog){prog.roh=prog.max;prog.klar=kRest;prog.max=uvErwSpitze(prog.roh,kRest);}
   return {tag:ymd(new Date()),mess,jetzt,prog};
 }
+/* v6.06 (Nutzer: "1-5 durchfuehren", Punkt 1): ERWARTETE TAGESSPITZE statt hoechstem Stundenmittel.
+   Befund uv_prognose_log.json, 31 Tage (01.10.-08.11.2026): "erw." am Morgen lag an 27 von 31 Tagen unter dem
+   gemessenen Tagesmaximum, im Mittel -0,24 UV (-13 %); klare Tage 1-5 %, Tage mit Wolkenluecken 25-50 %.
+   Ursache (Jensen): die Strahlungsvorhersage (MOSMIX "solar") ist ein STUNDENMITTEL ueber Sonne und Wolke, das
+   Tagesmaximum ein MAXIMUM ueber 10-Minuten-Werten - E[max] >= max E. An 15 der 31 Tage erreichte die Messung
+   95-100 % des Klarwerts, vorhergesagt waren 46-86 %.
+   Korrektur: Spitze = Klar x (roh / Klar)^p mit p = 0,6. Geht durch (0;0) und (1;1): ein klar vorhergesagter Tag
+   bleibt klar, ein truber bleibt truebe, dazwischen wird angehoben (70 % -> 81 %, 50 % -> 66 %). p gemeinsam aus
+   Morgen- und Vortagsprognose 0,59 (Bootstrap ueber Tage, 95 %: 0,47-0,71; ohne Korrektur waere p = 1).
+   Wirkung, jeder Tag aus den anderen geschaetzt: Morgen Bias -0,24 -> -0,01, mittlerer Fehler 0,29 -> 0,19;
+   Vortag -0,25 -> -0,05, 0,29 -> 0,24. Geeicht NUR an Herbsttagen (Klarwert 1,1-3,5) - ob p im Sommer haelt, ist
+   offen; uv_prognose.py schreibt deshalb den Rohwert mit (erw_roh) und fittet p laufend neu (_auswertung.korrektur).
+   Gilt nur fuer die Zahl "erw." (Kachel "UV heute" / "UV morgen"). Die blassen Prognosesaeulen im UV-Bild zeigen
+   weiter das Stundenmittel - sie liegen bei wechselnder Bewoelkung UNTER der Zahl der Kachel.
+   Verworfen (war am 20.10. besprochen): Spitze = Klarwert, sobald MOSMIX >= 10 min Sonne erwartet. Laesst sich nicht
+   rueckwaerts pruefen (alte Vorhersagen sind nicht archiviert) und springt an der Schwelle. */
+const UV_ERW_P=0.6;
+function uvErwSpitze(roh,klar){return (klar>0&&roh>0)?klar*Math.pow(Math.min(1,roh/klar),UV_ERW_P):roh;}
 /* v4.76: Zusatz der Regen-Kachel, wenn die naechsten 2 h trocken sind: wann
    laut Stundenvorhersage (Open-Meteo, _rainHourly, heute + morgen) der
    naechste Regen einsetzt, mit Wahrscheinlichkeit. precipitation ist die
@@ -5344,7 +5359,7 @@ function kzUvMorgen(){
   a.hourly.time.forEach((x,i)=>{if(ymd(x)!==t)return;const c=a.hourly.uv_index_clear_sky[i];if(c==null||!(c>0))return;
     if(c>klar)klar=c;const k=uvProgK(new Date(x).getTime());if(k==null){if(c>=0.5)luecke=true;return;}
     const v=c*uvKurveD(k);if(v>erw){erw=v;tm=new Date(x).getTime();}});
-  if(!(klar>=0.5)||luecke)return null;return {klar,erw,t:tm};
+  if(!(klar>=0.5)||luecke)return null;return {klar,erw:uvErwSpitze(erw,klar),roh:erw,t:tm};   // v6.06: erwartete Spitze
 }
 function kzUvMax(){const a=uvAirFull;if(!a||!a.hourly||!a.hourly.time)return null;const t=ymd(new Date());let m=null;
   a.hourly.time.forEach((x,i)=>{if(ymd(x)===t){const v=a.hourly.uv_index_clear_sky[i];if(v!=null&&(m==null||v>m))m=v;}});return m;}   // v4.71: Klarwert (uv_index "mit Wolken" wich kaum davon ab)
@@ -6982,7 +6997,11 @@ function renderUmkreis(j){
 }
 
 /* --- Render: 7-Tage --- */
-let _rainHourly=null,_lastFcJ=null;
+/* v6.06: var statt let. Die Kacheln fragen mit typeof ..., ob es die Variable schon gibt - bei let/const wirft typeof
+   aber einen Fehler, solange die Zeile noch nicht gelaufen ist ("temporal dead zone"). kzRender laeuft beim Start vor
+   dieser Zeile: die Kachel "Regen 24 h" fiel dabei mit ReferenceError aus und blieb bis zur naechsten Datenlieferung
+   leer. Gleiches Muster bei lastUVH, BFS_UV_STATIONS, _issPasses, _issHorizonDays, lastRows/chartRows. */
+var _rainHourly=null,_lastFcJ=null;
 // Fuer HEUTE nur den Rest des Tages (ab der laufenden Stunde) statt der Ganztages-Bilanz: bereits gefallener Regen/Gewitter wird rausgerechnet.
 function _restWc(codes){// repraesentatives Wettersymbol fuer den Rest des Tages
   if(!codes.length)return null;
@@ -7039,7 +7058,7 @@ function moonTile(mo,ph){
   const dk=ph.dist.toLocaleString("de-DE");
   const sup=(mo.illum>=98&&ph.dist<361500)?"Supermond":(mo.illum>=98&&ph.dist>405000)?"Mini-Mond":(ph.dist<362000?"erdnah":ph.dist>405000?"erdfern":"");
   return `<div class="tile wide"><div class="k">Mond</div><div style="display:flex;align-items:center;gap:13px;margin-top:6px">${moonSvg(mo,mondHellDreh(mo.frac))}<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:750">${mo.illum}% beleuchtet · ${mo.name}</div><div class="sub" style="margin-top:4px">↑ ${ft(bg.rise)} · ↓ ${ft(bg.set)}${dau}</div><div class="sub" style="margin-top:2px">Entfernung ${dk} km${sup?" · "+sup:""}</div></div></div></div>`;}
-let lastUVH=null;
+var lastUVH=null;
 /* --- Tag-Auswahl fuer die eigene UV-Grafik (heute / gestern) aus der 2-Tage-Reihe --- */
 function filterUvDay(h,off){
   if(!h||!h.time)return h;
@@ -7053,7 +7072,7 @@ function filterUvDay(h,off){
 /* v2.5: BfS-Tagesgrafik fuer die naechste Messstation (Slugs live verifiziert 03.07.2026, Test-Screenshots).
    Liste waechst, sobald weitere Slugs per bfs-stationen-test.html bestaetigt sind. Deckel 70 km: UV-Messkurven
    enthalten die LOKALE Bewoelkung der Station - weiter weg repraesentiert sie den eigenen Himmel nicht mehr. */
-const BFS_UV_STATIONS=[
+var BFS_UV_STATIONS=[
   {slug:"Andernach",name:"Andernach",la:50.439,lo:7.402},
   {slug:"Berlin",name:"Berlin",la:52.447,lo:13.296},
   {slug:"Bonn",name:"Bonn",la:50.7,lo:7.15},
@@ -9507,48 +9526,22 @@ function loadCached(key,url,ttlFresh,ttlStale,render,secId,label){
    einige hundert KB. Geladen wird nur, wenn der Abschnitt offen ist, und
    dann hoechstens alle 5 Minuten neu. */
 const RK={km:50,frames:null,idx:0,karte:null,tok:0,play:false,timer:0,geladen:0,laeuft:false,fehler:null};
-const RK_STUFEN=[[0.1,"rgba(150,205,255,.55)","0,1"],[0.5,"rgba(80,160,255,.70)","0,5"],[1,"rgba(40,110,235,.80)","1"],
-  [2,"rgba(30,185,120,.85)","2"],[5,"rgba(250,215,40,.90)","5"],[10,"rgba(250,140,20,.92)","10"],
-  [20,"rgba(230,40,40,.94)","20"],[50,"rgba(200,40,200,.95)","50 mm/h"]];
-const RK_RGBA=RK_STUFEN.map(s=>s[1].match(/[\d.]+/g).map(Number));
-/* v5.39 (Nutzer: "die anderen Regenradare haben einen grauen Untergrund, bei uns ist der
-   schwaechste Regen blaugrau auf gruen"): UNTERGRUND ZUM AUSPROBIEREN, gemerkt als rk_grund.
-   Satellit (bisher), graues Relief (Esri World Hillshade, wie WetterOnline) oder grau
-   flach ohne Kartenbild (wie "Regen?", nur Grenzen und Orte - ohne Esri). Auf Grau sind
-   die Regenfarben deckend (mindestens .92), auf dem Satelliten wie bisher durchscheinend.
+/* v6.06 (Nutzer nach dem Test v5.39-v5.41: "Relief, Verlauf, blass"): die drei Testschalter unter der Regenkarte sind
+   entschieden und entfernt.
+   UNTERGRUND: graues Gelaenderelief (Esri World Hillshade, wie WetterOnline). Hillshade ist in der Ebene fast weiss -
+   je Kachel per "multiply" mit RK_FILL grau getoent (~190; gemessen 23.10.: WetterOnline ~190, "Regen?" 193-210).
    Die Wolkenkarte behaelt den Satelliten (weisse Wolken brauchen den dunklen Grund).
-   AUFRAEUMEN nach der Wahl: Gewinner fest, rkGrund/RK_GRUND-Rest, .rk-grund, Klick. */
-const RK_GRUND={sat:{n:"Satellit",tile:WOLK_TILE,fill:"#5c7450"},
-  // Hillshade ist in der Ebene fast weiss - per "multiply" grau getoent wie bei WetterOnline
-  relief:{n:"Relief",tile:"https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",fill:"#bcc0c5",mult:"#bcc0c5"},
-  flach:{n:"Grau",tile:null,fill:"#bfc4ca"}};
-/* v5.40 (Nutzer: "das Grau ist bei den anderen dunkler, die Farben sind besser zu erkennen"):
-   gemessen in den Bildschirmfotos 20:45 - WetterOnline Grau ~190, Schwaechste Stufe Cyan
-   (170,254,255); "Regen?" Grund (193,202,210), Gruen (0,255,0). Unser Hellblau (150,205,255)
-   hat fast DIESELBE Helligkeit wie ein Grau um 190 (L* ~80 gegen ~77) - darum verschwand
-   es. Jetzt Grau ~190 und auf Grau eine eigene Palette: schwaechste Stufe helles Cyan
-   (HELLER als der Grund), danach Blau wie gehabt. Satellit unveraendert. */
-const RK_GRAU_RGBA=[[165,248,255,1],[80,175,250,1],[40,110,235,1],[30,185,120,1],[250,215,40,1],[250,140,20,1],[230,40,40,1],[200,40,200,1]];
-/* v5.40 (Nutzer: "wir haben mehr Wolken"): Bright Sky 23.10. 20:50, 120x120 km - 62 % der
-   Flaeche "nass", davon 51 Prozentpunkte die KLEINSTE Radarstufe (roh 1 = 0,12 mm/h),
-   ab 0,24 mm/h nur 11 %. Laut unserer Eichung (v4.27) bleibt der Boden bei Radar
-   0,10-0,25 mm/h in rund zwei Dritteln der Stunden trocken. TEST: diese Stufe zeigen /
-   blass / aus (rk_schwach). Balken und Kachel "Regen 2 h" bleiben bei 0,1 - nur die Karte. */
-/* v5.41 (Nutzer: "auf jeden Fall blass oder aus"): "zeigen" entfaellt, Voreinstellung blass;
-   ein gespeichertes "zeigen" gilt als blass. */
-const RK_SCHWACH={blass:"blass",aus:"aus"};
-function rkSchwach(){try{const v=localStorage.getItem("rk_schwach");if(RK_SCHWACH[v])return v;}catch(e){}return "blass";}
-/* v5.41 (Nutzer: "nicht mit Gelb/Gruen, eher die andere Farbskala", zum Umschalten):
-   FARBEN ZUM AUSPROBIEREN, gemerkt als rk_farbe. "verlauf" = Palette E der Balken
-   (REGEN_FARB, Tuerkis -> Blau -> Violett, dieselben Schwellen wie RK_STUFEN) -
-   Voreinstellung; "bunt" = bisher (RK_RGBA auf dem Satelliten, RK_GRAU_RGBA auf Grau).
-   Verlauf auf Grau deckend, auf dem Satelliten zu 85 % (v5.28: Tuerkis ging dort unter).
-   AUFRAEUMEN nach der Wahl: rkFarbe/RK_FARBE, Knopfzeile. */
-const RK_FARBE={verlauf:"Verlauf",bunt:"Bunt"};
-const RK_E_RGBA=REGEN_FARB.map(c=>c.match(/\d+/g).map(Number));
-function rkFarbe(){try{const v=localStorage.getItem("rk_farbe");if(RK_FARBE[v])return v;}catch(e){}return "verlauf";}
-function rkPalette(grau){return rkFarbe()==="bunt"?(grau?RK_GRAU_RGBA:RK_RGBA):RK_E_RGBA.map(c=>[c[0],c[1],c[2],grau?1:.85]);}
-function rkGrund(){try{const v=localStorage.getItem("rk_grund");if(RK_GRUND[v])return v;}catch(e){}return "sat";}
+   FARBEN: Palette E der Regenbalken (REGEN_FARB, Tuerkis -> Blau -> Violett), deckend, dieselben Schwellen wie die
+   Balken. Die helle Stufe 0,1 hebt sich vom Grau ueber den Farbton ab, kaum ueber die Helligkeit (Kontrast 1,24).
+   KLEINSTE STUFE: roh 1 = 0,12 mm/h nur zu 40 % deckend (RK_BLASS) - am 23.10. waren das 51 von 62 Prozentpunkten
+   "nasser" Flaeche, und der Boden bleibt dabei laut Eichung in rund zwei Dritteln der Stunden trocken. Balken und
+   Kachel "Regen 2 h" zaehlen 0,1 weiter als Regen. Verworfen: Satellit, Grau ohne Karte, bunte Skala (Blau/Gruen/
+   Gelb/Rot), kleinste Stufe ganz aus - zurueckholen aus wetter-giessen-v6_05.html. */
+const RK_STUFEN=[[0.1,"0,1"],[0.5,"0,5"],[1,"1"],[2,"2"],[5,"5"],[10,"10"],[20,"20"],[50,"50 mm/h"]];
+const RK_PAL=REGEN_FARB.map(c=>c.match(/\d+/g).map(Number));
+const RK_TILE="https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}";
+const RK_FILL="#bcc0c5",RK_BLASS=.4;
+try{["rk_grund","rk_farbe","rk_schwach"].forEach(k=>localStorage.removeItem(k));}catch(e){}
 function rkStereo(lat,lon){
   const a=6378137,b=6356752.3142451802,e=Math.sqrt(1-b*b/(a*a)),R=Math.PI/180;
   const t=p=>Math.tan(Math.PI/4-p/2)/Math.pow((1-e*Math.sin(p))/(1+e*Math.sin(p)),e/2);
@@ -9896,11 +9889,11 @@ function radarZeichnen(){
   const P=(la,lo)=>[(_merX(lo)*N-wx0)*sc,(_merY(la)*N-wy0)*sc];
   const tok=++RK.tok;
   // Untergrund: Esri-Kacheln einmal je Groesse in ein eigenes Canvas, danach nur noch kopieren
-  const GR=RK_GRUND[rkGrund()],SW=rkSchwach(),key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON+"|"+rkGrund();   // v5.39/v5.40
+  const key=W+"|"+H+"|"+HOME_LAT+"|"+HOME_LON;
   const malen=()=>{
     if(tok!==RK.tok)return;
     x.clearRect(0,0,W,H);
-    if(_rkBg&&_rkBgKey===key)x.drawImage(_rkBg,0,0,W,H);else{x.fillStyle=GR.fill;x.fillRect(0,0,W,H);}
+    if(_rkBg&&_rkBgKey===key)x.drawImage(_rkBg,0,0,W,H);else{x.fillStyle=RK_FILL;x.fillRect(0,0,W,H);}
     // v4.51: nicht mehr abdunkeln - das Satellitenbild soll aussehen wie auf der Wolkenkarte
     const f=RK.frames&&RK.frames[RK.idx];
     if(f&&RK.bbox){
@@ -9917,14 +9910,14 @@ function radarZeichnen(){
         RK.karte={w:w2,h:h2,idx,cols};
       }
       const oc=document.createElement("canvas");oc.width=w2;oc.height=h2;
-      const oq=oc.getContext("2d"),im=oq.createImageData(w2,h2),d=im.data,{idx,cols}=RK.karte,px=f.px,PAL=rkPalette(GR.tile!==WOLK_TILE);
+      const oq=oc.getContext("2d"),im=oq.createImageData(w2,h2),d=im.data,{idx,cols}=RK.karte,px=f.px;
       for(let i=0;i<idx.length;i++){const k=idx[i];if(k<0)continue;
         const roh=(px[(k/cols)|0][k%cols]||0)*0.12;              // 0,01 mm je 5 min -> mm/h
         if(roh<0.1)continue;
-        const kl=roh<0.2;if(kl&&SW==="aus")continue;   // v5.40: kleinste Radarstufe (roh 1 = 0,12 mm/h)
+        // v5.40/v6.06: kleinste Radarstufe (roh 1 = 0,12 mm/h) blass, alles andere deckend
         const b=radarBoden(roh);let s=0;while(s<RK_STUFEN.length-1&&b>=RK_STUFEN[s+1][0])s++;
-        const c=PAL[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];
-        d[i*4+3]=Math.round(c[3]*(kl&&SW==="blass"?.4:1)*255);}   // v5.39: auf Grau deckend; v5.40 Stufe blass; v5.41 Palette waehlbar
+        const c=RK_PAL[s];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];
+        d[i*4+3]=roh<0.2?Math.round(RK_BLASS*255):255;}
       oq.putImageData(im,0,0);
       x.imageSmoothingEnabled=true;x.drawImage(oc,0,0,w2,h2,0,0,w2*q,h2*q);
     }
@@ -9939,32 +9932,24 @@ function radarZeichnen(){
   if(!_rkBg||_rkBgKey!==key){
     const tx0=Math.floor(wx0/256),tx1=Math.floor(wx1/256),ty0=Math.floor(wy0/256),ty1=Math.floor(wy1/256);
     const bg=document.createElement("canvas");bg.width=Math.round(W*dpr);bg.height=Math.round(H*dpr);
-    const bq=bg.getContext("2d");bq.setTransform(dpr,0,0,dpr,0,0);bq.fillStyle=GR.fill;bq.fillRect(0,0,W,H);
+    const bq=bg.getContext("2d");bq.setTransform(dpr,0,0,dpr,0,0);bq.fillStyle=RK_FILL;bq.fillRect(0,0,W,H);
     let offen=0,fertig=false;const ende=()=>{if(fertig)return;fertig=true;_rkBg=bg;_rkBgKey=key;malen();};
-    if(GR.tile)for(let ty=ty0;ty<=ty1;ty++)for(let tx=tx0;tx<=tx1;tx++){offen++;const im=new Image(),X0=tx,Y0=ty;
+    for(let ty=ty0;ty<=ty1;ty++)for(let tx=tx0;tx<=tx1;tx++){offen++;const im=new Image(),X0=tx,Y0=ty;
       im.onload=()=>{const kx=(X0*256-wx0)*sc,ky=(Y0*256-wy0)*sc;bq.drawImage(im,kx,ky,256*sc,256*sc);
-        if(GR.mult){bq.save();bq.globalCompositeOperation="multiply";bq.fillStyle=GR.mult;bq.fillRect(kx,ky,256*sc,256*sc);bq.restore();}   // v5.39
+        bq.save();bq.globalCompositeOperation="multiply";bq.fillStyle=RK_FILL;bq.fillRect(kx,ky,256*sc,256*sc);bq.restore();
         if(--offen===0)ende();};
       im.onerror=()=>{if(--offen===0)ende();};
-      im.src=GR.tile.replace("{z}",F.z).replace("{y}",ty).replace("{x}",tx);}
-    if(!offen)ende();setTimeout(ende,6000);   // v5.39: "Grau flach" hat keine Kacheln
+      im.src=RK_TILE.replace("{z}",F.z).replace("{y}",ty).replace("{x}",tx);}
+    if(!offen)ende();setTimeout(ende,6000);
     malen();                                   // schon mal ohne Untergrund
   }else malen();
 }
 function radarText(){
   const z=el("rkZeit"),note=el("rkNote"),leg=el("rkLeg");
-  // v5.39: Legende so deckend wie die Karte (auf Grau deckend)
-  const grau=RK_GRUND[rkGrund()].tile!==WOLK_TILE;
-  const lk=grau+"|"+rkFarbe(),PAL=rkPalette(grau);
-  if(leg&&leg.dataset.grau!==lk){leg.dataset.grau=lk;leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=PAL[i];return `<span><i style="background:rgba(${c[0]},${c[1]},${c[2]},${c[3]})"></i>${s[2]}</span>`;}).join("");}
-  const gs=el("rkGrund");if(gs){if(!gs.innerHTML){gs.innerHTML="<div><span>Untergrund (Test):</span>"+Object.keys(RK_GRUND).map(k=>`<button type="button" data-g="${k}">${RK_GRUND[k].n}</button>`).join("")+"</div>"
-        +"<div><span>Farben:</span>"+Object.keys(RK_FARBE).map(k=>`<button type="button" data-f="${k}">${RK_FARBE[k]}</button>`).join("")
-        +"</div><div><span>Kleinste Stufe:</span>"+Object.keys(RK_SCHWACH).map(k=>`<button type="button" data-s="${k}">${RK_SCHWACH[k]}</button>`).join("")+"</div>";
-      gs.addEventListener("click",e=>{const b=e.target.closest("button[data-g],button[data-s],button[data-f]");if(!b)return;
-        try{if(b.dataset.g)localStorage.setItem("rk_grund",b.dataset.g);else if(b.dataset.f)localStorage.setItem("rk_farbe",b.dataset.f);else localStorage.setItem("rk_schwach",b.dataset.s);}catch(_){}radarZeichnen();});}
-    gs.querySelectorAll("button[data-g]").forEach(b=>b.classList.toggle("on",b.dataset.g===rkGrund()));
-    gs.querySelectorAll("button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===rkSchwach()));
-    gs.querySelectorAll("button[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f===rkFarbe()));}   // v5.39-v5.41
+  // v6.06: Legende einmal bauen; die kleinste Stufe so, wie sie auf dem grauen Grund aussieht (40 % ueber RK_FILL)
+  if(leg&&!leg.innerHTML){const g=RK_FILL.match(/\w\w/g).map(h=>parseInt(h,16));
+    leg.innerHTML=RK_STUFEN.map((s,i)=>{const c=i?RK_PAL[i]:RK_PAL[0].map((v,k)=>Math.round(v*RK_BLASS+g[k]*(1-RK_BLASS)));
+      return `<span><i style="background:rgb(${c[0]},${c[1]},${c[2]})"></i>${s[1]}</span>`;}).join("");}
   const f=RK.frames&&RK.frames[RK.idx];
   if(z){if(!f)z.style.display="none";else{z.style.display="";
     const dm=Math.round((f.t-Date.now())/60000),hm=new Date(f.t).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
@@ -9974,7 +9959,7 @@ function radarText(){
     if(RK.fehler)note.textContent=RK.fehler;
     else if(RK.frames){
       note.innerHTML=(RK.trocken?"Im ganzen Ausschnitt kein Regen \u2013 eine Stunde zur\u00fcck bis zwei voraus. ":"")
-        +"DWD-Radar \u00fcber Bright Sky, 1 km, alle 5 min \u00b7 Farbe = gesch\u00e4tzte Menge am Boden (geeicht wie der Balken oben) \u00b7 Grenzen \u00a9 GeoBasis-DE / BKG (2026)"+(RK_GRUND[rkGrund()].tile?" \u00b7 Untergrund: Esri":"")
+        +"DWD-Radar \u00fcber Bright Sky, 1 km, alle 5 min \u00b7 Farbe = gesch\u00e4tzte Menge am Boden (geeicht wie der Balken oben) \u00b7 Grenzen \u00a9 GeoBasis-DE / BKG (2026)"+" \u00b7 Untergrund: Esri"
         +(RK.stoer?` \u00b7 ${RK.stoer} ${RK.stoer===1?"Scheinecho":"Scheinechos"} ausgeblendet (z.\u202fB. Windparks)`:"")
         +(RK.zug&&RK.zug.v<3?`<br><b>Kein Pfeil</b>: der Regen bewegt sich kaum (unter 3\u202fkm/h${RK.zug.quelle==="radar"?", gemessen aus dem Radar":""}) \u2013 er entsteht und vergeht an Ort und Stelle.`
         :RK.zug?`<br><b>Pfeil</b>: Zug nach ${["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(RK.zug.ri/22.5)%16]}, ${Math.round(RK.zug.v)}\u202fkm/h, ${RK.zug.quelle==="radar"?"aus dem Radar (gemessene Stunde, "+RK.zug.paare+" Messungen)"
@@ -10946,7 +10931,7 @@ setTimeout(renderMeteors,900);
 /* ===== ISS-Modul ===== */
 /* ===================== ISS-Überflüge (SGP4 via satellite.js) ===================== */
 const ISS_LAT=LOC.lat, ISS_LON=LOC.lon, ISS_ALT=LOC.isWettenberg?0.2:0, ISS_AU=149597870.7, ISS_RE=6371;
-let _issSat=null, _issPasses=null, _issTimer=null, _issClouds=null;
+var _issSat=null, _issPasses=null, _issTimer=null, _issClouds=null;
 function _issObs(){const S=window.satellite;return {latitude:S.degreesToRadians(LOC.lat),longitude:S.degreesToRadians(LOC.lon),height:LOC.isWettenberg?0.2:0};} // v2.42: LOC live lesen
 function issLook(satrec,date){
   const S=window.satellite, pv=S.propagate(satrec,date); if(!pv.position)return null;
@@ -10968,7 +10953,7 @@ function issSunlit(eci,sp){          // ISS außerhalb des Erdschattens?
 function issMag(range){return -1.8 + 5*Math.log10(Math.max(range,1)/1000);}
 const ISS_DIRS=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 function issDir(a){return ISS_DIRS[Math.round(a/22.5)%16];}
-let _issHorizonDays=5; // v2.41
+var _issHorizonDays=5; // v2.41
 function issWhyInvisible(p){ // v2.41: warum ist dieser Ueberflug unsichtbar?
   if(!p||p.visible)return"";
   if(p.sunAlt==null)return"nicht sichtbar";

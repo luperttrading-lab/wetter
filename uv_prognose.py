@@ -55,11 +55,13 @@ JS_LESEN = """() => {
   return {
     klar: r2(kzUvMax()),
     erw: T && T.prog ? r2(T.prog.max) : null,
+    erw_roh: T && T.prog && T.prog.roh != null ? r2(T.prog.roh) : null,
     erw_zeit: T && T.prog ? iso(T.prog.t) : null,
     mess: T && T.mess ? r2(T.mess.uv) : null,
     mess_zeit: T && T.mess ? iso(T.mess.t) : null,
     jetzt: T && T.jetzt ? r2(T.jetzt.uv) : null,
     morgen_erw: M ? r2(M.erw) : null,
+    morgen_roh: M && M.roh != null ? r2(M.roh) : null,
     morgen_klar: M ? r2(M.klar) : null,
     morgen_zeit: M && M.t ? iso(M.t) : null,
     version: (document.querySelector('.ver') || {}).textContent || null,
@@ -107,6 +109,8 @@ def eintragen(log, modus, m, jetzt, gueltig=True):
             print("morgens schon eingetragen um", alt.get("uhr"), "- bleibt")
             return log
         e["morgens"] = {k: m[k] for k in ("klar", "erw", "erw_zeit", "mess", "version")}
+        if m.get("erw_roh") is not None:      # ab App v6.06: Wert vor der Spitzen-Korrektur
+            e["morgens"]["erw_roh"] = m["erw_roh"]
         # wie die Kachel: erwartet = max(schon Gemessenes, Prognose fuer den Rest).
         e["morgens"]["erw_tag"] = max(v for v in (m["erw"], m["mess"]) if v is not None) \
             if (m["erw"] is not None or m["mess"] is not None) else None
@@ -129,6 +133,8 @@ def eintragen(log, modus, m, jetzt, gueltig=True):
                     "erw": m["morgen_erw"], "klar": m["morgen_klar"],
                     "erw_zeit": m["morgen_zeit"], "uhr": jetzt.strftime("%H:%M"),
                     "version": m["version"], "gueltig": True}
+                if m.get("morgen_roh") is not None:
+                    log[nt]["vortag"]["erw_roh"] = m["morgen_roh"]
     return log
 
 
@@ -154,9 +160,24 @@ def _gilt(x, rolle):
     return not (rolle == "abends" and (x.get("uhr") or "00:00") < "13:00")
 
 
+def fit_p(tripel):
+    """p in Spitze = klar * (roh/klar)^p, kleinste Quadrate ueber Tage (roh, klar, mess)."""
+    t = [(r, k, m) for r, k, m in tripel if r and k and r > 0 and k > 0]
+    if len(t) < 10:
+        return None
+    return min((sum((k * min(1.0, r / k) ** (i / 100) - m) ** 2 for r, k, m in t), i / 100)
+               for i in range(30, 121))[1]
+
+
 def auswerten(log):
-    morg, vor = [], []
+    """Seit App v6.06 zeigt die Kachel die korrigierte Spitze (klar * (roh/klar)^0,6) und liefert den Rohwert als
+    erw_roh mit. Aeltere Eintraege SIND roh. "morgens"/"vortag" bewerten, was die App gezeigt hat; "korrektur"
+    fittet p neu auf den Rohwerten - weicht es deutlich von 0,6 ab (Sommer!), gehoert UV_ERW_P in index.html
+    angepasst."""
+    morg, vor, neu, roh = [], [], [], []
     for tag, e in sorted(log.items()):
+        if tag.startswith("_"):
+            continue
         ab = e.get("abends") or {}
         mess = ab.get("mess")
         if mess is None or not _gilt(ab, "abends"):
@@ -165,9 +186,19 @@ def auswerten(log):
         erw = mo.get("erw_tag", mo.get("erw"))
         if erw is not None and _gilt(mo, "morgens"):
             morg.append((erw, mess))
-        if (e.get("vortag") or {}).get("erw") is not None:
-            vor.append((e["vortag"]["erw"], mess))
+            if mo.get("erw_roh") is not None:
+                neu.append((erw, mess))
+            if mo.get("klar"):
+                roh.append((mo.get("erw_roh", mo.get("erw")), mo["klar"], mess))
+        vo = e.get("vortag") or {}
+        if vo.get("erw") is not None:
+            vor.append((vo["erw"], mess))
+            if vo.get("klar"):
+                roh.append((vo.get("erw_roh", vo["erw"]), vo["klar"], mess))
     return {"morgens": statistik(morg), "vortag": statistik(vor),
+            "morgens_seit_korrektur": statistik(neu),
+            "korrektur": {"p_app": 0.6, "p_fit": fit_p(roh), "n": len(roh),
+                          "hinweis": "p_fit aus Rohwerten (Morgen + Vortag); p_app = UV_ERW_P in index.html"},
             "hinweis": "unter 10 Tagen nicht belastbar" if len(morg) < 10 else
                        "ab 10 Tagen: Richtung belastbar, Groesse noch grob"}
 
