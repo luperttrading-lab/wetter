@@ -117,6 +117,14 @@ MAE/Bias - nur auf der GEMEINSAMEN Stichprobe aller Modelle. Dazu ein
 Tagesvergleich RUC gegen App mit Vorzeichentest (Stunden sind abhaengig).
 Erste Auswertung sinnvoll nach ~2 Wochen mit mehreren Regentagen.
 
+**BEENDET am 10.11.2026 (Nutzer: "RUC-Vergleich beenden").** Endstand `ruc/auswertung.md` vom 10.11. 12:58 UTC, 485
+Abrufe, 21 Tage: Tagesvergleich RUC gegen App besser 1, schlechter 3, gleich 17 (Vorzeichentest p = 0,63). Ueber alle
+Vorlaeufe 1-13 h (n = 6175, 408 Regenstunden): CSI ab 0,1 mm RUC 0,486 / RUC 5 km 0,499 / App 0,487 / ICON-D2 0,489 /
+MOSMIX 0,425; Regen-MAE 0,040 / 0,038 / 0,038 mm; Temperatur-MAE RUC 0,72 gegen App 0,75 Grad. Kein messbarer Gewinn ->
+RUC kommt NICHT in die App. `ruc.yml` ist nur noch von Hand startbar (kein Zeitplan, kein Nachfolger), `ruc.py` /
+`ruc_auswertung.py` und der Zweig `ruc-daten` bleiben. Nebenbefund: MOSMIX trifft Regen fast immer (POD 0,96), meldet
+ihn aber in 57 % der Faelle falsch (FAR) - deckt sich mit dem Rasen-Fall vom 25.10.
+
 ## Bright Sky: "sunshine" ist die VORANGEGANGENE Stunde
 
 Der Wert mit Stempel 14:00 beschreibt 13 bis 14 Uhr (ebenso `precipitation`
