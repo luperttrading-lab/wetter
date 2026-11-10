@@ -2686,6 +2686,20 @@ symbolbewegt/symboltest laden jetzt `wetter-giessen-v6_10.html` (sie greifen in 
 Geprueft (Playwright): Tag/Nacht/jetzt, ganze Seite, Umschalten im Kreis, Bestandsnutzer "hell" -> Himmel, Neuladen behaelt
 die Wahl, Farben schon vor den Daten gesetzt, Einstellung, "Bewegung reduzieren". OFFEN: am iPhone ansehen (Weichzeichner,
 Leiste von Safari, Statusleiste); Regen-Animation liegt weiter nur im frueheren Kasten.
+v6.13 ENTWURF E, SCHRITT 3 "STEHENDER KOPF" (Nutzer 10.11.: "bei Apple bleibt beim Scrollen oben die Ortschaft stehen
+und der Hintergrund"): nur in der Ansicht "himmel". `header` ist `position:sticky;top:0` (z-index 40, unter den Fenstern
+`.loc-ovl` 400) und reicht per negativem Rand bis zur Bildschirmkante, auch unter die Statusleiste (Rand/Polster =
+`max(16px, env(safe-area-inset-top))` wie `#app`). Dahinter `#hiK` (erstes Kind des Kopfs): eine ZWEITE Himmel-Szene,
+gleich gebaut wie die in `#hi` und an derselben Stelle (`hiSzene(...,hmax,links)`: nur so hoch wie der Kopf + 40 px, um die
+Lage des Kopfs nach links geschoben - auf breiten Fenstern sitzt die App mittig); gleiche Sternfolge, gleiche Texturen,
+gleicher Startversatz der Bewegung (`--hv` aus `HI.t0`) -> keine Kante, unten 12 px weich. Nicht `background-attachment:
+fixed` (iOS kann das nicht verlaesslich). KLEINE ZEILE: `.plz` umschliesst jetzt `#stationTxt` und `#hiMini`; liegt die
+grosse Temperatur unter dem Kopf (`hiMini()` am Scroll-Ereignis, per rAF gedrosselt), blendet die Stationszeile aus und
+"1,7 Grad | Bewoelkt" ein (`html.himini`); ohne Zahl oben (laedt, veraltet) bleibt die Stationszeile. `kzAbstand()` nimmt im
+Himmel die Kopfhoehe + 6, damit der Sprung von einer Kachel UNTER dem Kopf landet. Geprueft (Playwright, 393 pt und 900 px
+breit, Tag und Nacht): Kopf bei Scroll 0/180/420/1400 an derselben Stelle (91 px hoch), keine Kante, Sprung landet 6 px
+unter dem Kopf, klassische Ansichten unveraendert. NICHT pruefbar ohne iPhone: Hoehe mit Statusleiste (59 pt), Verhalten
+beim Gummiband-Ziehen (der Kopf wandert mit der Seite, der Himmel dahinter steht - kurz versetzt).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -1324,6 +1324,23 @@ html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .k
 html:root.himmel .kalle button{color:rgba(255,255,255,.8)}
 html:root.himmel .loc-box{background:#141a23}
 html.dunkel .evt-s{color:var(--muted)}
+
+/* ===== v6.13 STEHENDER KOPF (Schritt 3 von Entwurf E) =====
+   In der Ansicht "himmel" bleibt der Kopf (Ort, Knoepfe) oben stehen, die Karten verschwinden darunter. Hinter dem
+   Kopf liegt in #hiK eine zweite, gleich gebaute Himmel-Szene an derselben Stelle wie der Himmel dahinter - so ist der
+   Kopf dicht, ohne dass man eine Kante sieht (unten 12 px weich). Der Kopf reicht bis zur Bildschirmkante (auch unter
+   die Statusleiste). Ist die grosse Temperatur unter dem Kopf verschwunden, steht statt der Stationszeile
+   "1,7 Grad | Bewoelkt" (#hiMini, html.himini). */
+#hiK,#hiMini{display:none}
+.plz{position:relative}
+html:root.himmel header{position:sticky;top:0;z-index:40;isolation:isolate;
+  margin:calc(-1 * max(16px,env(safe-area-inset-top))) -16px -4px;padding:calc(max(16px,env(safe-area-inset-top)) + 4px) 20px 20px}
+html:root.himmel #hiK{display:block;position:absolute;left:0;top:0;width:100%;height:calc(100% + 10px);z-index:-1;overflow:hidden;pointer-events:none;
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 12px),transparent);mask-image:linear-gradient(#000 calc(100% - 12px),transparent)}
+html:root.himmel #stationTxt{transition:opacity .25s}
+html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;white-space:nowrap;font-size:14px;font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
+html:root.himmel.himini #stationTxt{opacity:0}
+html:root.himmel.himini #hiMini{opacity:1}
 </style>
 </head>
 <body>
@@ -1388,7 +1405,8 @@ html.dunkel .evt-s{color:var(--muted)}
 </div>
 <div id="app">
   <header>
-    <div class="place"><span id="placeName">Gießen&thinsp;/&thinsp;Wettenberg</span><small id="stationTxt">Live · DWD-Station</small></div>
+    <div id="hiK" aria-hidden="true"></div>
+    <div class="place"><span id="placeName">Gießen&thinsp;/&thinsp;Wettenberg</span><div class="plz"><small id="stationTxt">Live · DWD-Station</small><div id="hiMini" aria-hidden="true"></div></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
       <div style="display:flex;gap:8px">
         <div class="act-btn" id="locBtn" role="button" aria-label="Standort einstellen">
@@ -1399,7 +1417,7 @@ html.dunkel .evt-s{color:var(--muted)}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.12</span>
+      <span class="ver">v6.13</span>
     </div>
   </header>
 
@@ -1887,11 +1905,11 @@ function hiWolke(sz,tex,B,sc,v,a,dy,off,hmax){
   c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.round(dur*10)+");--hv:-"+ph.toFixed(2)+"s";
   sz.appendChild(c);
 }
-function hiSzene(ziel,C,L,B,hmax){
+function hiSzene(ziel,C,L,B,hmax,links){
   var s=document.createElement("div");s.className="hiS";
   var g="linear-gradient("+hiRgb(C.top)+","+hiRgb(C.bot)+")";
   if(C.glanz>.02)g="radial-gradient(circle "+(B.w*.7).toFixed(0)+"px at "+(B.w*.86).toFixed(0)+"px "+(B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
-  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g;
+  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
   if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
   if(L.N>.04&&HI.texF&&HI.texN){
     hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax);
@@ -1902,6 +1920,7 @@ function hiInit(){
   HI.init=1;
   try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];}catch(e){}
   window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
+  window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
   setInterval(hiPruefen,60000);
   document.addEventListener("visibilitychange",function(){if(!document.hidden)hiPruefen();});
   hiZugKlasse();
@@ -1911,6 +1930,7 @@ function hiInit(){
 function hiPruefen(){
   var el0=document.getElementById("hi");if(!el0)return;
   if(!HI.init)hiInit();
+  hiMini();
   if(!hiAn()){
     HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;return;}
   var L=hiLage(),B=hiMass(),C=hiFarben(L);
@@ -1920,7 +1940,9 @@ function hiPruefen(){
   el0.style.height=B.h+"px";
   if(L.N>.04){HI.texF=hiTextur(11,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29,L.N,C.rand,C.kern);}
   var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
-  if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+4));
+  /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
+     (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
+  if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
   var alt=HI.szenen;HI.szenen=neu;
   var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
   /* GLAS: die Farben der dunklen Ansicht (Links, Warnrot, Diagramme) sind fuer fast schwarze Karten gemacht. Ueber
@@ -1935,6 +1957,16 @@ function hiPruefen(){
     root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},HI_BLENDE+250);
   try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nass?1:0)+"|"+kk);}catch(e){}
   try{themaFarbe();}catch(e){}
+}
+/* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
+   "5 Grad | Wolkenlos"); solange oben keine Zahl steht (laedt, veraltet), bleibt die Stationszeile. */
+function hiMini(){
+  var k=document.querySelector("header"),t=document.getElementById("temp"),m=document.getElementById("hiMini"),h=document.getElementById("hero");
+  if(!k||!t||!m||!h)return;
+  var z=String((t.firstChild&&t.firstChild.textContent)||"").trim();
+  var an=hiAn()&&/\d/.test(z)&&!h.classList.contains("hidden")&&t.getBoundingClientRect().bottom<k.getBoundingClientRect().bottom-10;
+  if(an){var l=(document.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"\u00b0  |  "+l;}
+  document.documentElement.classList.toggle("himini",!!an);
 }
 /* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
    gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
@@ -7030,6 +7062,7 @@ function kzZiel(z,roh){   // roh: auch in zugeklappten Abschnitten suchen (v4.62
    angesprungenen Kachel - am 17.09.2026 landete "Sonne" so, dass "\u2600 SONNE"
    hinter der Uhr lag. Gemessen wird der Streifen oben, dazu etwas Luft. */
 function kzAbstand(){
+  if(hiAn()){const k=document.querySelector("header");if(k)return Math.round(k.getBoundingClientRect().height)+6;}   // v6.13: stehender Kopf
   const m=el("kzSat"),sat=m?m.getBoundingClientRect().height:0;
   return Math.round(sat)+16;
 }
