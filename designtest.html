@@ -21,10 +21,10 @@ iframe{width:100%;height:860px;border:1px solid var(--li);border-radius:18px;bac
 </style></head><body>
 
 <h1>Design-Test</h1>
-<p class="hin">Die echte App in vier Fassungen. Am Aufbau ändert sich nichts – nur Farben, Schriften, Rahmen und der Hintergrund.
+<p class="hin">Die echte App in fünf Fassungen. Am Aufbau ändert sich nichts – nur Farben, Schriften, Rahmen und der Hintergrund.
 Beim Wechsel der Lage blendet der Himmel über.</p>
 
-<div class="zeile" id="zEntwurf"><span>Entwurf</span><button data-v="A">A · wie jetzt</button><button data-v="B">B · ruhig</button><button data-v="C">C · ruhig + Himmel</button><button data-v="D">D · wie Apple</button></div>
+<div class="zeile" id="zEntwurf"><span>Entwurf</span><button data-v="A">A · wie jetzt</button><button data-v="B">B · ruhig</button><button data-v="C">C · ruhig + Himmel</button><button data-v="D">D · Himmel im Kopf</button><button data-v="E">E · Himmel überall</button></div>
 <div class="zeile" id="zLage"><span>Lage</span></div>
 <div class="zeile" id="zAnsicht"><span>Ansicht</span><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
 <div class="stand" id="stand">lädt …</div>
@@ -44,7 +44,8 @@ const ENTW={
   A:{txt:"wie die App heute aussieht"},
   B:{ruhig:1,txt:"eine Schriftfarbe, leichtere Schrift, keine Rahmen, Technik-Zeilen weg"},
   C:{ruhig:1,himmel:"kraeftig",flaeche:"oben",txt:"wie B, dazu der Himmel oben in der Karte"},
-  D:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"seite",txt:"Himmel über den ganzen Kopf, weiße dünne Zahl, Kacheln als Glas – immer dunkel"}
+  D:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"seite",txt:"Himmel hinter dem ganzen Kopf, kein Kasten, weiße dünne Zahl, Kacheln als Glas – immer dunkel"},
+  E:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"fest",txt:"wie Apple: der Himmel ist der Hintergrund für alles und bleibt beim Scrollen stehen, alle Karten sind Glas"}
 };
 const LAGEN={
   jetzt:{name:"Wie jetzt"},
@@ -75,20 +76,21 @@ function sonnenhoehe(ms,lat,lon){
 
 /* ---------- Wolkentextur (wie himmeltest.html) ---------- */
 function rauschen(seed){
-  const h=(x,y,per)=>{x=((x%per)+per)%per;let n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
+  const h=(x,y,per,py)=>{x=((x%per)+per)%per;y=((y%py)+py)%py;let n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
     n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;};
-  const vn=(x,y,per)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
-    const a=h(xi,yi,per),b=h(xi+1,yi,per),c=h(xi,yi+1,per),d=h(xi+1,yi+1,per);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;};
-  return (x,y,per)=>{let s=0,am=1,f=1,n=0;for(let o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7.3,per*f);n+=am;am*=.52;f*=2;}return s/n;};
+  const vn=(x,y,per,py)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+    const a=h(xi,yi,per,py),b=h(xi+1,yi,per,py),c=h(xi,yi+1,per,py),d=h(xi+1,yi+1,per,py);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;};
+  /* in beiden Richtungen nahtlos (per, py = Zellen je Kachel): die Textur wird auf hohen Flaechen untereinander gelegt */
+  return (x,y,per,py)=>{let s=0,am=1,f=1,n=0;for(let o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7,per*f,py*f);n+=am;am*=.52;f*=2;}return s/n;};
 }
-const TW=320,TH=200,PER=3;
+const TW=320,TH=200,PER=3,PY=4;
 const _feld={};
 function feld(seed){
   if(_feld[seed])return _feld[seed];
   const fb=rauschen(seed),wp=rauschen(seed+17),F=new Float32Array(TW*TH);
   for(let y=0;y<TH;y++)for(let x=0;x<TW;x++){
-    const u=x/TW*PER,v=y/TH*PER*1.5,w=wp(u,v*.8,PER)-.5;
-    F[y*TW+x]=fb(u,v+w*1.1,PER);
+    const u=x/TW*PER,v=y/TH*PY,w=wp(u,v,PER,PY)-.5;
+    F[y*TW+x]=fb(u,v+w*1.1,PER,PY);
   }
   const S=Float32Array.from(F).sort();
   return _feld[seed]={F,S};
@@ -192,6 +194,13 @@ html.dz-apple .kz .ki{background:rgba(255,255,255,.11)!important;-webkit-backdro
 html.dz-apple .kz .ki .l{color:rgba(255,255,255,.62)}
 html.dz-apple .kz .ki .s{color:rgba(255,255,255,.7)}
 html.dz-apple .kz,html.dz-apple .kzfoot{text-shadow:none}
+
+/* E: der Himmel ist der Hintergrund der ganzen Seite (steht fest), alle Karten sind Glas */
+html.dz-fest body>#hiCv{position:fixed;-webkit-mask-image:none;mask-image:none}
+html.dz-fest{--card:rgba(26,34,54,.42)}
+html.dz-fest .strip-card,html.dz-fest .chart-card,html.dz-fest .nowcard{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:none}
+html.dz-fest .ksect .sect,html.dz-fest .kalle button,html.dz-fest .ksect .kknopf{text-shadow:0 1px 8px rgba(0,0,0,.45)}
+html.dz-fest .loc-box{background:#141a23}
 `;
 
 /* ---------- Einhaengen in die App ---------- */
@@ -211,6 +220,7 @@ function einhaengen(){
   cv=doc.createElement("canvas");cv.id="hiCv";hero.insertBefore(cv,hero.firstChild);ctx=cv.getContext("2d");
   new F.IntersectionObserver(es=>{sichtbar=es[0].isIntersecting;if(sichtbar)lauf();},{}).observe(hero);
   new F.ResizeObserver(()=>neu()).observe(hero);
+  F.addEventListener("resize",()=>neu());
   if(!E.ansicht)E.ansicht=jetztLage().h<-4?"dunkel":"hell";
   alles();
   F.setInterval(()=>{if(E.lage==="jetzt")neu();},60000);
@@ -220,7 +230,7 @@ function ansicht(){
   const d=dunkelSoll();
   document.documentElement.classList.toggle("dunkel",d);
   if(!doc)return;
-  const h=doc.documentElement;h.classList.toggle("dunkel",d);h.classList.toggle("dz-ruhig",!!P().ruhig);h.classList.toggle("dz-apple",!!P().apple);
+  const h=doc.documentElement;h.classList.toggle("dunkel",d);h.classList.toggle("dz-ruhig",!!P().ruhig);h.classList.toggle("dz-apple",!!P().apple);h.classList.toggle("dz-fest",P().flaeche==="fest");
   try{F.eval("_dunkel="+d);F.themaNeuZeichnen();}catch(e){}
 }
 function kopf(){
@@ -233,6 +243,7 @@ function kopf(){
 }
 function bereich(){
   const r=hero.getBoundingClientRect();
+  if(P().flaeche==="fest")return {w:doc.documentElement.clientWidth,h:F.innerHeight};
   if(P().flaeche==="seite")return {w:doc.documentElement.clientWidth,h:Math.round(r.bottom+F.scrollY+30)};
   const w=hero.clientWidth,h=hero.clientHeight;let hb=h;
   const kz=doc.getElementById("kz");if(kz&&kz.offsetHeight)hb=Math.max(80,kz.getBoundingClientRect().top-r.top+26);
@@ -241,7 +252,7 @@ function bereich(){
 let _key="";
 function neu(){
   if(!cv)return;
-  const p=P(),an=!!p.himmel,seite=p.flaeche==="seite";
+  const p=P(),an=!!p.himmel,seite=p.flaeche==="seite"||p.flaeche==="fest";
   hero.classList.toggle("hiAn",an&&!seite);hero.classList.toggle("hiOben",an&&p.flaeche==="oben");
   const soll=seite?doc.body:hero;                 /* D: die Leinwand liegt hinter dem ganzen Kopf, sonst in der Karte */
   if(cv.parentNode!==soll){soll.insertBefore(cv,soll.firstChild);_key="";Z=null;}
@@ -273,8 +284,10 @@ function neu(){
   $("stand").textContent=`${txt} · ${LAGEN[E.lage].name}: Sonne ${L.h>=0?"+":""}${L.h.toFixed(0)}°, Bedeckung ${Math.round(L.N*100)} %`;
 }
 function schicht(tex,sc,v,t,a,B,dy){
-  const w=B.w*sc,h=Math.max(B.h*1.15,w*TH/TW),x=-((t*v)%w);
-  ctx.globalAlpha=a;ctx.drawImage(tex,x,dy,w,h);ctx.drawImage(tex,x+w-1,dy,w,h);ctx.globalAlpha=1;
+  const w=B.w*sc,h=w*TH/TW,x=-((t*v)%w);          /* Seitenverhaeltnis halten, auf hohen Flaechen untereinander legen */
+  ctx.globalAlpha=a;
+  for(let y=dy;y<B.h;y+=h-1){ctx.drawImage(tex,x,y,w,h);ctx.drawImage(tex,x+w-1,y,w,h);}
+  ctx.globalAlpha=1;
 }
 const BLENDE=1300;                                /* ms - im Apple-Video rund eine Sekunde */
 function zeichne(now){
@@ -289,8 +302,9 @@ function zeichne(now){
   if(Z.alt){const a=1-(now-Z.altT)/BLENDE;
     if(a>0){c.globalAlpha=a*a*(3-2*a);c.drawImage(Z.alt,0,0,B.w,B.h);c.globalAlpha=1;}else Z.alt=null;}
 }
-function lauf(){if(!raf&&cv&&Z&&sichtbar&&P().himmel)raf=F.requestAnimationFrame(schritt);}
-function schritt(now){raf=0;if(!sichtbar)return;if(now-letzt>=100||(Z&&Z.alt)){letzt=now;zeichne(now);}lauf();}
+const zuSehen=()=>sichtbar||P().flaeche==="fest";      /* E: der Himmel ist immer im Bild, auch weiter unten */
+function lauf(){if(!raf&&cv&&Z&&zuSehen()&&P().himmel)raf=F.requestAnimationFrame(schritt);}
+function schritt(now){raf=0;if(!zuSehen())return;if(now-letzt>=100||(Z&&Z.alt)){letzt=now;zeichne(now);}lauf();}
 
 const REIHEN=[["zEntwurf","entwurf"],["zLage","lage"],["zAnsicht","ansicht"]];
 function knoepfe(){

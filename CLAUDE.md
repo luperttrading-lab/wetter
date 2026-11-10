@@ -2589,6 +2589,17 @@ Himmel wird darunter gezeichnet, das alte blendet in `BLENDE` = 1,3 s aus (im Fi
 hellere Himmel zu (bis 40 % statt 34 %). FALLE: `#bg` (fixed, z-index 0) liegt sonst UEBER einer Leinwand im <body>.
 Nicht am iPhone geprueft; die duenne Zahl steht im Pruefstand gesperrt ("3 , 5"), das ist dessen Schrift. Wahl steht aus;
 bei einer Wahl B/C/D wird das ein Umbau von index.html in Schritten (Farben, Schrift, Rahmen, Hintergrund einzeln).
+Nachtrag 10.11. (Nutzer, Screenshot Apple "Tokio": "Apple hat ganz oben keinen Kasten um die oberste Wetteransicht,
+und der Hintergrund ist der gesamte Hintergrund fuer alles"): Entwurf E "Himmel ueberall" (`flaeche:"fest"`, Klasse
+`dz-fest`; D heisst jetzt "Himmel im Kopf"): Leinwand `position:fixed` ueber das ganze Fenster, bleibt beim Scrollen
+stehen; ALLE Karten werden Glas, weil sie `background:var(--card)` nutzen - `--card:rgba(26,34,54,.42)` + backdrop-filter
+16 px auf `.strip-card/.chart-card/.nowcard`; Abschnittstitel mit Schatten. Dafuer ist das Rauschen jetzt auch SENKRECHT
+nahtlos (`rauschen(...,per,py)`, `PY` = 4 Zellen) und `schicht()` legt die Textur im richtigen Seitenverhaeltnis
+untereinander - vorher wurde sie auf hohen Flaechen 1,7-fach in die Hoehe gezogen (Ballen statt Schlieren). GEMESSEN
+(Chromium ohne GPU, 5 s, Himmel zieht mit 10 Bildern/s): B ohne Himmel 1,6 % Hauptfaden / 7,8 % eines Kerns, D 13 % /
+23 %, E 18,5 % / 34 % (ganzes Fenster + Weichzeichner hinter jeder Karte). Fuer einen Einbau von E: Himmel STEHEND oder
+als zwei fertig gemalte Lagen per CSS-transform, Weichzeichner sparsam. Zeichnungen auf Canvas, die mit der Kartenfarbe
+"radieren" (FLAECHE), muessten bei durchsichtigen Karten geprueft werden. Nicht am iPhone geprueft.
 v6.09 (Nutzer-Screenshot 10.11. 19:02, Bild "Mond im Jahr": "das Kaestchen mit den Stunden kann auf jeden Fall
 groesser"): Kasten mit den beiden Dauern in `mjZeichnen` Schrift 14 statt 10 px (800), 46 statt 32 px hoch, Mond-/
 Sonnenzeichen Radius 7 / 4,8 statt 5 / 3,4, Ecken 10 px; Breite = Text + 43 (bei 393 pt rund 118 statt 85 px). Die Suche
