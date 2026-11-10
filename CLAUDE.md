@@ -2523,7 +2523,27 @@ als Striche). Wolke und Mondsichel sind je EIN berechneter Pfad (`WOLKE` aus dre
 ersetzt `F.icon` und ruft `zustandZeigen()`, `renderStrip(chartRows||lastRows)`, `renderForecast(_lastFcJ)`. Befund beim
 Bau: auf dem hellen, cremefarbenen Kasten tragen weisse Wolken nur ueber Schatten bzw. Ton - D brauchte dunklere Toene
 (#dae2eb/#bdc9d7), sonst sah "bewoelkt" wie ein halber Balken aus; Lichthof/Ringe muessen ganz im 24er-Feld liegen (sonst
-gerade Kante). Wahl steht aus; bei C muesste die App den Symbol-Behaeltern eine Farbe geben (Kontur = Schriftfarbe).
+gerade Kante). ABGELEHNT (Nutzer 10.11.: "prima gemacht, aber alles keine Verbesserung - wenn, dann muesste sich
+etwas bewegen"): keiner der Saetze B-E wird uebernommen, die Zeichnung der App bleibt. Seite bleibt als Archiv.
+VARIANTENSEITE `symbolbewegt.html` (Nutzer 10.11.: "die Sonne, die Strahlen sich bewegen, die Wolken ein bisschen -
+guck, ob man was simulieren kann, was gut aussieht"): die Symbole der App UNVERAENDERT (`iconBew(name,size,M)` =
+`icon()` aus v6.08, nur die Sonne ganz ins 24er-Feld gerueckt - ihre Strahlen sind in der App am Rand abgeschnitten,
+beim Drehen saehe man die Kante), bewegt per SMIL im SVG selbst: Strahlen drehen (8-fach gleich, also 45 Grad je
+Umlauf/8), Scheibe atmet, Wolken pendeln waagrecht, Tropfen/Flocken/Hagel fallen mit Ein- und Ausblenden, Blitz zuckt,
+Nebel- und Windbaender schieben, Mond wiegt +-3 Grad. Drei Staerken `STUFEN` (ruhig: Umlauf 110 s, Wolke +-0,45
+Einheiten in 11 s; deutlich: 48 s, +-0,85 in 7,5 s; lebhaft: 20 s, +-1,35 in 4,8 s) + "steht still", je Kopf 54 px,
+Leiste 28 px, alle zwoelf Zustaende; unten die ECHTE App im Rahmen (Staerke, "ueberall" | "nur oben im Kopf").
+SMIL statt CSS, weil die Regel `prefers-reduced-motion` der App jede CSS-Animation abschaltet. `sparen(win,wurzel)`:
+IntersectionObserver haelt per `svg.pauseAnimations()` alles an, was nicht zu sehen ist (auch seitlich weggescrollte
+Zellen der Stundenleiste), ein MutationObserver findet neu gezeichnete Symbole. GEMESSEN (Chromium ohne GPU, App im
+Rahmen, 5 s): still 0,5 % Hauptfaden / 5,8 % eines Kerns ueber alle Prozesse; EIN Symbol im Kopf per SMIL 15,6 % /
+28,4 %; alle sichtbaren (8 von 122) 34,6 % / 55,5 %; ohne `sparen` 47 % Hauptfaden. Jedes SMIL-Bild laesst das ganze
+Dokument neu malen. Gegenprobe: dasselbe Kopf-Symbol als EBENEN (je ein <svg> fuer Strahlen, Scheibe, Wolke,
+uebereinander, CSS-Animation nur auf `transform` des <svg>, will-change) 1,1 % / 15,4 % - die Bewegung laeuft dann im
+Compositor. FOLGERUNG fuer einen Einbau: nicht SMIL, sondern Ebenen + CSS-transform, nur das Kopfsymbol (hoechstens
+noch die sichtbaren Zellen), Schalter wie die Wetter-Animation (Aus | Standbild | Bewegt; die Kill-Regel braucht dann
+eine Ausnahme fuer diese Klasse). Vorbilder (Websuche): Meteocons (meteocons.com, MIT, bewegte SVG/Lottie) und amCharts
+(CC BY 4.0, CSS). Nicht am iPhone geprueft (kein WebKit im Pruefstand). Wahl der Staerke und des Orts steht aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

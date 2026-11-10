@@ -1,0 +1,192 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wettersymbole – bewegt</title>
+<style>
+:root{--bg:#f3f1ec;--karte:#fff;--karte2:#fffaf4;--tx:#17202e;--mu:#5c6b80;--li:#e6e2da;--wahl:#2f6fd0}
+html.dunkel{--bg:#0d1219;--karte:#202a38;--karte2:#1b232f;--tx:#e7edf5;--mu:#a3b2c6;--li:#2c3848}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);
+     padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 70px;-webkit-text-size-adjust:100%}
+h1{font-size:20px;margin:4px 0 4px}
+h2{font-size:16px;margin:26px 0 6px}
+.hin{color:var(--mu);font-size:13.5px;margin:0 0 12px}
+.warn{background:#fff3cd;color:#5c4400;border-radius:12px;padding:9px 12px;font-size:13px;margin:0 0 12px}
+html.dunkel .warn{background:#3b3320;color:#f3dfa0}
+.leiste{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 9px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--li);margin-bottom:14px}
+.leiste span{font-size:13px;color:var(--mu);margin-right:2px}
+button{font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--li);background:var(--karte);color:var(--tx);cursor:pointer}
+button.an{background:var(--wahl);border-color:var(--wahl);color:#fff}
+.var{background:linear-gradient(180deg,var(--karte),var(--karte2));border:1px solid var(--li);border-radius:20px;padding:13px 13px 12px;margin-bottom:16px}
+.vk b{font-size:17px}
+.vb{color:var(--mu);font-size:13px;margin:2px 0 10px}
+.kopf{display:flex;align-items:center;gap:10px;padding:2px 2px 10px}
+.kopf .t{font-size:58px;font-weight:830;letter-spacing:-.05em;line-height:.9;color:#6fcf3c}
+.kopf .t small{font-size:20px;font-weight:700;vertical-align:top;margin-left:2px}
+.kopf .c{margin-left:auto;text-align:center;font-size:13px;font-weight:650;color:var(--mu)}
+.kopf .c .ic{width:54px;height:54px;margin:0 auto 3px}
+.strip{display:flex;overflow-x:auto;border-top:1px solid var(--li);border-bottom:1px solid var(--li);padding:8px 0 9px;-webkit-overflow-scrolling:touch}
+.cell{flex:0 0 58px;text-align:center}
+.cell .z{font-size:11.5px;color:var(--mu)}
+.cell .ic{width:28px;height:28px;margin:6px auto 5px}
+.cell .n{font-size:10.5px;color:var(--mu);line-height:1.15}
+.gr{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:10px}
+.ik{text-align:center;padding:7px 2px 6px}
+.ik .ic{width:54px;height:54px;margin:0 auto}
+.ik .n{font-size:11px;color:var(--mu);margin-top:2px}
+.ic svg{display:block}
+iframe{width:100%;height:680px;border:1px solid var(--li);border-radius:18px;background:var(--karte)}
+.stand{font-size:13px;color:var(--mu);margin:6px 0 8px}
+</style></head><body>
+
+<h1>Wettersymbole – bewegt</h1>
+<p class="hin">Die Symbole der App, wie sie sind – nur in Bewegung: Sonnenstrahlen drehen sich, Wolken ziehen leicht hin und her,
+Tropfen und Flocken fallen, der Blitz zuckt. Drei Stärken zum Vergleichen, jeweils groß (54&nbsp;px) und klein wie in der
+Stundenleiste (28&nbsp;px). Ganz unten läuft die echte App damit. Bewegt wird nur, was gerade zu sehen ist – das schont den Akku.</p>
+<div class="warn" id="warn" hidden>Dein Gerät hat „Bewegung reduzieren“ eingeschaltet. Auf dieser Seite bewegen sich die Symbole trotzdem –
+in der App bekäme das denselben Schalter wie die Wetter-Animation (Aus | Standbild | Bewegt).</div>
+
+<div class="leiste" id="zThema"><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
+
+<div id="liste"></div>
+
+<h2>In der echten App ansehen</h2>
+<div class="leiste" id="zApp" style="position:static;border:0;margin:0;padding:4px 0 2px"></div>
+<div class="leiste" id="zWo" style="position:static;border:0;margin:0;padding:2px 0 2px"><span>Wo:</span><button data-v="alle">überall</button><button data-v="kopf">nur oben im Kopf</button></div>
+<div class="stand" id="stand">lädt …</div>
+<iframe id="app" src="index.html" title="Wetter-App"></iframe>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const NAMEN=[["clear-day","Klar"],["partly-cloudy-day","Teils bewölkt"],["cloudy","Bewölkt"],["rain","Regen"],["thunderstorm","Gewitter"],["snow","Schnee"],
+             ["sleet","Schneeregen"],["hail","Hagel"],["fog","Nebel"],["wind","Wind"],["clear-night","Klar, Nacht"],["partly-cloudy-night","Teils, Nacht"]];
+let gid=0;
+const f=n=>+n.toFixed(2);
+
+/* Bewegung je Staerke. rot = Sekunden fuer eine volle Drehung der Strahlen, puls = Atmen der Sonnenscheibe (s, Anteil),
+   wd/wt = Ausschlag (Einheiten im 24er-Feld) und Dauer des Wolkenzugs, td/tf = Fallzeit von Tropfen und Flocken,
+   ws = Ausschlag von Nebel- und Windbaendern. null = steht still. */
+const STUFEN={
+  aus:null,
+  ruhig:{rot:110,puls:6.5,pa:.03,wd:.45,wt:11,td:1.55,tf:4.6,ws:.7,blitz:5.2},
+  deutlich:{rot:48,puls:4.6,pa:.05,wd:.85,wt:7.5,td:1.15,tf:3.4,ws:1.1,blitz:3.8},
+  lebhaft:{rot:20,puls:3.1,pa:.08,wd:1.35,wt:4.8,td:.85,tf:2.5,ws:1.6,blitz:2.6}
+};
+const WEICH=n=>`calcMode="spline" keySplines="${Array(n).fill(".42 0 .58 1").join(";")}"`;
+/* hin und her (weich), im Element eingesetzt */
+const pendel=(dx,dy,dur,start)=>`<animateTransform attributeName="transform" type="translate" values="${-dx} ${dy};${dx} ${-dy};${-dx} ${dy}" keyTimes="0;.5;1" ${WEICH(2)} dur="${dur}s" begin="${start||0}s" repeatCount="indefinite"/>`;
+/* fallen und dabei ein- und ausblenden */
+const fall=(inhalt,weg,dur,start,sx)=>`<g>${inhalt}<animateTransform attributeName="transform" type="translate" values="${sx?`0 -1.2;${sx} ${f(weg*.3)};${-sx*.7} ${f(weg*.65)};0 ${weg}`:`0 -1.1;0 ${weg}`}" dur="${dur}s" begin="${start}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.18;.72;1" dur="${dur}s" begin="${start}s" repeatCount="indefinite"/></g>`;
+
+/* Symbole der App (icon() aus index.html, v6.08) mit Bewegung M. Zwei Aenderungen an der Zeichnung: die Sonne liegt
+   ganz im 24er-Feld (in der App sind ihre Strahlen am Rand abgeschnitten - beim Drehen saehe man die Kante). */
+function iconBew(name,size,M){gid++;const id="g"+gid;
+  const defsSun=`<radialGradient id="${id}s" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fffbe8"/><stop offset="46%" stop-color="#ffd447"/><stop offset="100%" stop-color="#f4a01c"/></radialGradient>
+    <filter id="${id}gs" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#c47a00" flood-opacity="0.3"/></filter>`;
+  const defsCloud=`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e2ec"/></linearGradient>
+    <filter id="${id}f" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.25" flood-color="#1c2b40" flood-opacity="0.16"/></filter>`;
+  const defsDark=`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c2cbd8"/><stop offset="1" stop-color="#7f8c9e"/></linearGradient>`;
+  const defsDrop=`<linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fb4ea"/><stop offset="1" stop-color="#2f74c0"/></linearGradient>`;
+  const defsWind=`<linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="22" y2="0"><stop offset="0" stop-color="#9fb2c8" stop-opacity="0"/><stop offset="38%" stop-color="#8aa2bd"/><stop offset="100%" stop-color="#6d88a8"/></linearGradient>
+    <filter id="${id}wf" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy=".9" stdDeviation=".7" flood-color="#25384f" flood-opacity="0.18"/></filter>`;
+  const defsMoon=`<linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6cf"/><stop offset="100%" stop-color="#e8cf82"/></linearGradient>`;
+  /* Sonne: Strahlen drehen (8-fach gleich, darum 45 Grad in rot/8), Scheibe atmet */
+  const sun=(cx,cy,r,tip,h,w)=>`<g filter="url(#${id}gs)"><g>${[...Array(8)].map((_,i)=>
+      `<path d="M${cx} ${f(cy-tip)} l${w} ${h} h${-2*w} z" fill="#ffc528" transform="rotate(${i*45} ${cx} ${cy})"/>`).join("")}${M?`<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="45 ${cx} ${cy}" dur="${f(M.rot/8)}s" repeatCount="indefinite"/>`:""}</g><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)">${M?`<animate attributeName="r" values="${r};${f(r*(1+M.pa))};${r}" keyTimes="0;.5;1" ${WEICH(2)} dur="${M.puls}s" repeatCount="indefinite"/>`:""}</circle></g>`;
+  const moonP=`<path d="M16.6 13.6A6.2 6.2 0 1 1 10.8 5.6 4.9 4.9 0 0 0 16.6 13.6Z" fill="url(#${id}m)"/>`;
+  /* Wolke: zieht hin und her; k = Anteil des Ausschlags, dy = leichtes Heben */
+  const cloud=(x,y,sc,fill,k,dy,start)=>`<g><g filter="url(#${id}f)"><path d="M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z" fill="${fill||`url(#${id}c)`}"/></g>${M&&k?pendel(f(M.wd*k),dy||0,M.wt,start):""}</g>`;
+  const dropP=(x,y,sc)=>`<path d="M${x} ${y} c${1.9*sc} ${2.4*sc} ${2.7*sc} ${3.4*sc} ${2.7*sc} ${4.5*sc} a${2.7*sc} ${2.7*sc} 0 0 1 ${-5.4*sc} 0 c0 ${-1.1*sc} ${.8*sc} ${-2.1*sc} ${2.7*sc} ${-4.5*sc}z" fill="url(#${id}r)"/>`;
+  const drop=(x,y,sc,i)=>M?fall(dropP(x,y-1.1,sc),3.3,M.td,f(-M.td*[0,.55,.25][i%3])):dropP(x,y,sc);
+  const flakeP=(x,y,r)=>[0,60,120].map(a=>`<line x1="${x-r}" y1="${y}" x2="${x+r}" y2="${y}" stroke="#a9cdeb" stroke-width="1.15" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+  const flake=(x,y,r,i)=>M?fall(flakeP(x,y-1.6,r),3.4,M.tf,f(-M.tf*[0,.6,.3][i%3]),[.5,-.45,.4][i%3]):flakeP(x,y,r);
+  const bolt=`<path d="M13.2 15.4l-3.4 4.9h2.4l-1.4 3.9 4.4-5.5h-2.6l1.4-3.3z" fill="#f7a81b" stroke="#e08c00" stroke-width=".35" stroke-linejoin="round">${M?`<animate attributeName="opacity" values="1;1;.15;1;.3;1;1" keyTimes="0;.6;.64;.7;.74;.8;1" dur="${M.blitz}s" repeatCount="indefinite"/>`:""}</path>`;
+  const band=(y,len,w,i)=>`<path d="M${13.6-len} ${y}h${len-2.4}a${w} ${w} 0 1 0 ${-w} ${-w}" fill="none" stroke="url(#${id}w)" stroke-width="2.25" stroke-linecap="round">${M?pendel(M.ws,0,f(M.wt*.42),f(-i*M.wt*.14)):""}</path>`;
+  let defs="",body="";
+  switch(name){
+    case "clear-day": defs=defsSun; body=sun(12,12,6.1,11.7,3.8,1.4); break;
+    case "clear-night": defs=defsMoon; body=`<g>${moonP}${M?`<animateTransform attributeName="transform" type="rotate" values="-3 12 12;3 12 12;-3 12 12" keyTimes="0;.5;1" ${WEICH(2)} dur="${f(M.wt*1.2)}s" repeatCount="indefinite"/>`:""}</g>`; break;
+    case "partly-cloudy-day": defs=defsSun+defsCloud; body=sun(14.7,8.3,4.3,8,2.5,1.05)+cloud(2,3,.92,null,1); break;
+    case "partly-cloudy-night": defs=defsCloud+defsMoon; body=`<g transform="translate(3,-3) scale(.8)">${moonP}</g>`+cloud(2,3,.92,null,1); break;
+    case "cloudy": defs=defsCloud; body=cloud(1.5,2.5,1,null,1,.18); break;
+    case "fog": defs=defsCloud+defsWind; body=cloud(1.5,-1.4,.95,null,.5)
+      +[[18.6,15.2],[21.8,11.2]].map(([y,len],i)=>`<path d="M${19.2-len} ${y}h${len}" fill="none" stroke="url(#${id}w)" stroke-width="2.1" stroke-linecap="round">${M?pendel(M.ws,0,f(M.wt*.7),f(-i*M.wt*.35)):""}</path>`).join(""); break;
+    case "rain": defs=defsCloud+defsDrop; body=[[8.4,16.6],[12.4,17.9],[16.4,16.6]].map(([x,y],i)=>drop(x,y,.62+(i%2)*.06,i)).join("")+cloud(1.5,0,1,null,.4); break;
+    case "sleet": defs=defsCloud+defsDrop; body=drop(8.6,16.4,.6,0)+drop(16.4,16.4,.6,1)+flake(12.5,19.9,1.6,1)+cloud(1.5,0,1,null,.4); break;
+    case "snow": defs=defsCloud; body=[[8.1,19.4],[12.5,20.7],[16.9,19.4]].map(([x,y],i)=>flake(x,y,1.55,i)).join("")+cloud(1.5,0,1,null,.4); break;
+    case "hail": defs=defsCloud+defsDrop; body=[[8.6,19.4],[12.5,20.4],[16.4,19.4]].map(([x,y],i)=>{const k=`<circle cx="${x}" cy="${M?y-1.4:y}" r="1.5" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".5"/>`;return M?fall(k,3,f(M.td*.85),f(-M.td*[0,.5,.25][i])):k;}).join("")+cloud(1.5,0,1,null,.4); break;
+    case "thunderstorm": defs=defsCloud+defsDark; body=cloud(1.5,0,1,`url(#${id}d)`,.4)+bolt; break;
+    case "wind": defs=defsWind; body=`<g filter="url(#${id}wf)">`+band(8.9,13.2,2.2,0)+band(13,16.4,2.45,1)+band(17.1,11.4,2,2)+`</g>`; break;
+    default: defs=defsCloud; body=cloud(1.5,2.5,1,null,1);
+  }
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" style="overflow:visible"><defs>${defs}</defs>${body}</svg>`;
+}
+
+const BLOECKE=[["ruhig","1 · Ruhig","Kaum merklich: eine Strahlendrehung dauert knapp zwei Minuten, die Wolke schiebt sich um einen halben Punkt."],
+               ["deutlich","2 · Deutlich","Man sieht es beim Hinschauen, ohne dass es unruhig wird."],
+               ["lebhaft","3 · Lebhaft","Deutlich in Bewegung – zum Vergleich, wo es zu viel wird."],
+               ["aus","0 · Steht still","Dieselbe Zeichnung ohne Bewegung."]];
+function bauen(){
+  $("liste").innerHTML=BLOECKE.map(([k,titel,text])=>{const M=STUFEN[k];return `<div class="var"><div class="vk"><b>${titel}</b></div><p class="vb">${text}</p>
+    <div class="kopf"><div class="t">7,5<small>°C</small></div><div class="c"><div class="ic">${iconBew("partly-cloudy-day",54,M)}</div>Teils bewölkt</div></div>
+    <div class="strip">${NAMEN.map(([n,l],i)=>`<div class="cell"><div class="z">${(8+i)%24} Uhr</div><div class="ic">${iconBew(n,28,M)}</div><div class="n">${l}</div></div>`).join("")}</div>
+    <div class="gr">${NAMEN.map(([n,l])=>`<div class="ik"><div class="ic">${iconBew(n,54,M)}</div><div class="n">${l}</div></div>`).join("")}</div></div>`;}).join("");
+}
+
+/* ---------- Sparen: nur was zu sehen ist, bewegt sich ---------- */
+/* Jedes <svg> hat eine eigene Uhr (pauseAnimations / unpauseAnimations). Ein IntersectionObserver haelt alles an, was
+   nicht im Bild ist - auch Zellen, die in der Stundenleiste seitlich weggescrollt sind. Neue Symbole (die App zeichnet
+   bei jeder Datenlieferung neu) findet ein MutationObserver. */
+function sparen(win,wurzel){
+  const io=new win.IntersectionObserver(es=>es.forEach(e=>{try{e.isIntersecting?e.target.unpauseAnimations():e.target.pauseAnimations();}catch(x){}}),{rootMargin:"30px"});
+  const suchen=()=>wurzel.querySelectorAll("svg:not([data-sp])").forEach(s=>{if(!s.querySelector("animate,animateTransform"))return;s.setAttribute("data-sp","1");try{s.pauseAnimations();}catch(x){}io.observe(s);});
+  let t=0;const mo=new win.MutationObserver(()=>{if(t)return;t=win.setTimeout(()=>{t=0;suchen();},120);});
+  mo.observe(wurzel,{childList:true,subtree:true});suchen();
+  return {aus(){io.disconnect();mo.disconnect();wurzel.querySelectorAll("svg[data-sp]").forEach(s=>{s.removeAttribute("data-sp");try{s.unpauseAnimations();}catch(x){}});}};
+}
+let _spSeite=null,_spApp=null;
+
+/* ---------- Hell/Dunkel und die echte App ---------- */
+const E={thema:"hell",stufe:"deutlich",wo:"alle",sparen:true};
+try{Object.assign(E,JSON.parse(localStorage.getItem("symbolbewegt")||"{}"));}catch(e){}
+if(!(E.stufe in STUFEN))E.stufe="deutlich";
+/* nur fuer Messungen abschaltbar, wird nicht gemerkt */
+E.sparen=true;
+function merken(){try{localStorage.setItem("symbolbewegt",JSON.stringify(E));}catch(e){}}
+let F=null,appDa=false;
+function knoepfe(){
+  $("zThema").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.thema));
+  $("zApp").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.stufe));
+  $("zWo").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.wo));
+}
+function thema(){document.documentElement.classList.toggle("dunkel",E.thema==="dunkel");
+  if(appDa){try{F.document.documentElement.classList.toggle("dunkel",E.thema==="dunkel");F._dunkel=E.thema==="dunkel";F.themaNeuZeichnen();}catch(e){}}}
+function appSatz(){
+  if(!appDa)return;const M=STUFEN[E.stufe];
+  try{
+    /* im Kopf ist das Symbol 54 px gross, in Leiste und Liste 28 bzw. 26 */
+    F.icon=(n,g)=>iconBew(n,g,(E.wo==="kopf"&&g<50)?null:M);
+    F.zustandZeigen();
+    const r=(F.chartRows&&F.chartRows.length>1)?F.chartRows:F.lastRows;if(r)F.renderStrip(r);
+    if(F._lastFcJ)F.renderForecast(F._lastFcJ);
+    if(_spApp){_spApp.aus();_spApp=null;}
+    if(E.sparen&&M)_spApp=sparen(F,F.document.body);
+    $("stand").textContent="App zeigt: "+(M?BLOECKE.find(b=>b[0]===E.stufe)[1]:"steht still")+(M?" · "+(E.wo==="kopf"?"nur das große Symbol oben":"Kopf, Stundenleiste und 16-Tage-Liste"):"");
+  }catch(e){$("stand").textContent="Umschalten in der App ging nicht: "+e.message;}
+}
+function appWarten(){
+  F=$("app").contentWindow;
+  if(!F||typeof F.icon!=="function"||!(F.lastRows||F.chartRows)){setTimeout(appWarten,400);return;}
+  appDa=true;thema();appSatz();
+}
+$("zApp").innerHTML=`<span>Stärke:</span>`+[["aus","Aus"],["ruhig","Ruhig"],["deutlich","Deutlich"],["lebhaft","Lebhaft"]].map(s=>`<button data-v="${s[0]}">${s[1]}</button>`).join("");
+$("zThema").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.thema=b.dataset.v;merken();knoepfe();thema();});
+$("zApp").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.stufe=b.dataset.v;merken();knoepfe();appSatz();});
+$("zWo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.wo=b.dataset.v;merken();knoepfe();appSatz();});
+$("app").addEventListener("load",()=>setTimeout(appWarten,300));
+if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)$("warn").hidden=false;
+bauen();knoepfe();thema();
+if(E.sparen)_spSeite=sparen(window,$("liste"));
+</script>
+</body></html>
