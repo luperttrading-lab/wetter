@@ -2501,6 +2501,17 @@ Lagen hell/dunkel, Ausloeser ueber `zustandZeigen` (Radar 0,3/3/15 mm/h -> Niese
 Schneeregen, Gewitter, Nebel, Boeen 70 trocken und mit Regen, Boeen 30 nichts, Station 5 h alt nichts), Einstellung,
 Vorschau, Pause beim Wegscrollen, reduzierte Bewegung, 320/390/430 pt. Nicht am iPhone geprueft; Staerke und Dichte sind
 meine Wahl ("dezent") - bei Bedarf Regler nachruesten.
+v6.08 (Nutzer-Screenshot 10.11. 17:44, Temperaturverlauf mit Achse 11/8/5/2/-1: "die Null-Linie auf jeden Fall immer
+einzeichnen, dass man sieht, wann Frost ist oder war"): `chartSkala(mn,mx)` -> {lo,hi,st,T}. Linien stehen jetzt auf GANZEN
+Vielfachen des Schritts (1/2/5/10 Grad, hoechstens 7 Abstaende) statt auf Vierteln des Bereichs - die Null ist damit von
+selbst eine Linie, sobald sie im Bereich liegt: blau (`CO.frost`, hell #2f7fe0 / dunkel #7fb8ff, 1,4 px, ueber der Flaeche,
+unter der Kurve), "0°" fett in derselben Farbe an der Achse. Nebenbei behoben: bei nicht durch 4 teilbarem Bereich stand
+die gerundete Zahl bis 0,5 Grad neben ihrer Linie. FROSTNAEHE (`CHART_FROST_NAH` 5): liegt der Tiefstwert des Fensters
+(72 h zurueck, 48 h voraus) bei hoechstens 5 Grad, wird der Bereich nach unten bis 0 gezogen (Linie am unteren Rand);
+bei Dauerfrost mit Hoechstwert ab -5 Grad nach oben bis 0. BEWUSST NICHT "immer": im Sommer (14-30 Grad) laege die Kurve
+sonst in der oberen Haelfte, unter -5 Grad Hoechstwert ist ohnehin alles Frost. Geprueft (Playwright, echte Kurve auf acht
+Spannen gestreckt, hell/dunkel): 0,3..9,2 -> Linien 0/2/.../10; 3,2..12 -> 0..12, Null am unteren Rand; -6..2,4;
+-4,5..-1,2 -> Null am oberen Rand; -13..-7,5 und 14..30,5 ohne Null; 1,1..2,9 -> 0..5 in 1er-Schritten.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
