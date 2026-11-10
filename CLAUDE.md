@@ -2647,6 +2647,17 @@ Symbole stehend 54/28 px hell und dunkel, alle zwoelf bewegen sich, Antippen 3-0
 wiederholtem `zustandZeigen`/`kzRender`, "Bewegung reduzieren" (Start 0, nach Antippen laeuft Stufe 1 mit echter
 Dauer). Nicht am iPhone geprueft. Testseiten `symbolbewegt.html`/`symboltest.html` setzen fuer ihre Vorschau
 `F.symbGross` und `_sbK=null`. Zurueckholen der alten Zeichnung aus `wetter-giessen-v6_09.html`.
+v6.11 ENTWURF E, SCHRITT 1 "RUHIG" (Nutzer 10.11. nach `designtest.html`: "E einbauen"; Einbau in Schritten: v6.11 Farben
+und Schrift, v6.12 Himmel und Glas-Karten, v6.13 stehender Kopf). Ein Block am ENDE des <style> ("v6.11 RUHIG"), Vorsatz
+`html:root` (derselbe Rang wie `html.dunkel`, gewinnt als spaetere Regel) - zuruecknehmen = Block loeschen. Gilt in ALLEN
+Ansichten: `--line` fast unsichtbar (keine Rahmen), `--bg-a/b` einfarbig (#f2f3f6 / #0d1219), `#bg` (Schleier in
+Temperaturfarbe) aus, grosse Temperatur in Schriftfarbe und Gewicht 300 (vorher Temperaturfarbe, 830; `!important`, weil
+die Farbe inline gesetzt wird), "Live"-Abzeichen als gruener Punkt (demo gelb, veraltet in Warnfarbe), Kachelwerte 650 ohne
+Farbe (Pillen mit eigenem Hintergrund ausgenommen: `:not([style*="background"])`), Fuss der Kacheln blass (.55, im
+Bearbeiten voll), Abschnittstitel normal geschrieben 18 px ohne Linie, Karten ohne Rand, "jetzt"-Spalte grau. ANDERS als im
+Entwurf: Version und Stationszeile BLEIBEN (leiser) - die Version zeigt, welche Fassung geladen ist. `themaFarbe()` setzt
+`theme-color` auf den Seitengrund (vorher Temperaturfarbe aus `setHaze`). Geprueft (Playwright, echte Daten, 393 pt): ganze
+Seite hell und dunkel, keine Fehler.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

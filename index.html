@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#fbe9cf">
+<meta name="theme-color" content="#f2f3f6">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1230,6 +1230,53 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .iss-note{color:var(--muted)}
   html.dunkel .bil-box .b-k{color:var(--faint)}
   html.dunkel .loc-quick{color:var(--faint)}
+
+/* ===== v6.11 RUHIG (Schritt 1 von Entwurf E; Vorlage designtest.html, Entwurf B) =====
+   Eine Schriftfarbe, leichtere Schrift, keine Rahmen, kein Farbschleier hinter der Seite. Gemessen vorher im ersten
+   Bildschirm: 9 Schriftfarben, 8 Schriftstaerken, 11 Rahmen. Die Regeln stehen bewusst als EIN Block am Ende und
+   ueberschreiben die aelteren (Vorsatz html:root = derselbe Rang wie html.dunkel, gewinnt als spaetere Regel).
+   Zuruecknehmen = diesen Block loeschen. Version und Stationszeile bleiben (leiser): die Version zeigt, welche
+   Fassung geladen ist. */
+html:root{--line:rgba(125,135,155,.16);--shadow:0 1px 2px rgba(16,24,40,.03),0 6px 22px rgba(16,24,40,.05);--shadow-s:0 1px 2px rgba(16,24,40,.03);--bg-a:#f2f3f6;--bg-b:#f2f3f6}
+html:root.dunkel{--line:rgba(255,255,255,.06);--bg-a:#0d1219;--bg-b:#0d1219}
+html:root #bg{display:none}
+html:root .place{font-weight:700}
+html:root .place small{font-weight:500;color:var(--faint)}
+html:root .act-btn{background:transparent;border-color:transparent;box-shadow:none}
+html:root .hero{border-color:transparent;background:var(--card)}
+html:root .hero::after{display:none}
+html:root .badge{background:none;border:0;padding:0;color:var(--muted);font-weight:600}
+html:root .badge::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;margin-right:6px;vertical-align:1px}
+html:root .badge.demo::before{background:#e0a81f}
+html:root .badge.stale{color:var(--warn)}
+html:root .badge.stale::before{background:var(--warn)}
+html:root .when .d{font-weight:600}
+html:root .temp{color:var(--ink)!important;font-weight:300;letter-spacing:-.045em}
+html:root .temp .deg{font-weight:400;color:var(--muted)}
+html:root .cnd .lbl{font-weight:500;font-size:14px}
+html:root .feel .gf,html:root .feel .hl{font-weight:500}
+html:root #feelV{color:inherit!important;font-weight:650}
+html:root .feel .hl .up,html:root .feel .hl .dn{font-weight:650}
+html:root .ydiff b{color:inherit!important;font-weight:650}
+html:root .kz .ki{border-color:transparent;background:rgba(23,32,46,.045)}
+html:root.dunkel .kz .ki{background:rgba(255,255,255,.06)}
+html:root .kz .ki .l{font-weight:600;letter-spacing:.04em;color:var(--faint)}
+html:root .kz .ki .v{font-weight:650;font-size:15px}
+html:root .kz .ki .v .dn,html:root .kz .ki .v .up,html:root .kz .ki .v [style*="color"]:not([style*="background"]){color:inherit!important}
+html:root .kz .ok{color:inherit}
+html:root .kz .ki .s{font-weight:500}
+html:root .kzfoot{opacity:.55;font-weight:500}
+html:root .kz.edit~.kzfoot{opacity:1}
+html:root .kzfoot .kzpause{border-color:transparent}
+html:root .kalle button{background:transparent;border-color:transparent;box-shadow:none;color:var(--muted)}
+html:root .ksect .sect{text-transform:none;letter-spacing:-.01em;font-size:18px;font-weight:700;color:var(--ink)}
+html:root .ksect .kstrich{visibility:hidden}
+html:root .ksect .kknopf{border-color:transparent;background:transparent;box-shadow:none}
+html:root .strip-card,html:root .chart-card,html:root .nowcard{border-color:transparent}
+html:root #strip .col .v{color:var(--ink)!important;font-weight:600}
+html:root #strip .col .t{font-weight:500}
+html:root #strip .now{background:rgba(23,32,46,.06);box-shadow:none}
+html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
 </style>
 </head>
 <body>
@@ -1295,7 +1342,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.10</span>
+      <span class="ver">v6.11</span>
     </div>
   </header>
 
@@ -2132,8 +2179,7 @@ function ansichtAnwenden(neuZeichnen){
   _dunkel=d;
   ansichtSymbol();
   if(neuZeichnen&&!geaendert)neuZeichnen=false;   // v3.51: nichts zu tun
-  try{const m=document.querySelector('meta[name=theme-color]');
-      if(m&&d)m.setAttribute("content","#0d1219");}catch(e){}
+  themaFarbe();
   if(neuZeichnen)themaNeuZeichnen();
 }
 function ansichtSymbol(){
@@ -2163,7 +2209,9 @@ function ansichtWeiter(){
   h.textContent=t;h.classList.add("an");
   clearTimeout(window._ansichtT);window._ansichtT=setTimeout(()=>h.classList.remove("an"),1500);
 }
-function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));document.querySelector('meta[name=theme-color]').setAttribute("content",rgba(c,.16));}
+/* v6.11: die Leiste des Browsers bekommt die Farbe des Seitengrunds, nicht mehr die Temperaturfarbe (der Schleier ist weg) */
+function themaFarbe(){try{const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute("content",_dunkel?"#0d1219":"#f2f3f6");}catch(e){}}
+function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));themaFarbe();}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
 async function load(silent){
