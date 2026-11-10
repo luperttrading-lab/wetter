@@ -2580,6 +2580,12 @@ Himmel wird darunter gezeichnet, das alte blendet in `BLENDE` = 1,3 s aus (im Fi
 hellere Himmel zu (bis 40 % statt 34 %). FALLE: `#bg` (fixed, z-index 0) liegt sonst UEBER einer Leinwand im <body>.
 Nicht am iPhone geprueft; die duenne Zahl steht im Pruefstand gesperrt ("3 , 5"), das ist dessen Schrift. Wahl steht aus;
 bei einer Wahl B/C/D wird das ein Umbau von index.html in Schritten (Farben, Schrift, Rahmen, Hintergrund einzeln).
+v6.09 (Nutzer-Screenshot 10.11. 19:02, Bild "Mond im Jahr": "das Kaestchen mit den Stunden kann auf jeden Fall
+groesser"): Kasten mit den beiden Dauern in `mjZeichnen` Schrift 14 statt 10 px (800), 46 statt 32 px hoch, Mond-/
+Sonnenzeichen Radius 7 / 4,8 statt 5 / 3,4, Ecken 10 px; Breite = Text + 43 (bei 393 pt rund 118 statt 85 px). Die Suche
+nach dem freien Platz (v4.96: neben der heute-Senkrechten, Ring = 1000 Strafpunkte) rechnet mit der neuen Groesse.
+Geprueft mit verstellter Uhr an sechs Tagen (12.01., 20.03., 21.06., 28.08., 03.10., 10.11.) bei 393 pt und am 10.11. bei
+320 pt: kein Ring verdeckt, Kasten ganz im Bild. Der Tipp-Kasten `#mjTip` (HTML) ist unveraendert.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

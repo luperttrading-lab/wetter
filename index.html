@@ -1278,7 +1278,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.08</span>
+      <span class="ver">v6.09</span>
     </div>
   </header>
 
@@ -4606,9 +4606,11 @@ function mjZeichnen(){
       g.lineWidth=2.2;g.strokeStyle=farbe;g.stroke();};
     if(hs)ziel(Y(hs.h),SONNE);
     if(hm)ziel(Y(hm.h),MOND);
-    g.font="800 10px -apple-system,system-ui,sans-serif";
+    /* v6.09 (Nutzer: "das Kaestchen mit den Stunden kann auf jeden Fall groesser"):
+       Schrift 14 statt 10 px, Kasten 46 statt 32 px hoch, Zeichen im selben Mass. */
+    g.font="800 14px -apple-system,system-ui,sans-serif";
     const t1=hm?dauer(hm.h):"–", t2=hs?dauer(hs.h):"–";
-    const bw=Math.max(g.measureText(t1).width,g.measureText(t2).width)+30;
+    const bw=Math.max(g.measureText(t1).width,g.measureText(t2).width)+43;
     /* v4.96 (Nutzer: "die Anzeige steht direkt ueber dem Mond"): Der Kasten
        sass mittig auf der Senkrechten, oben - und genau dort steht der Ring
        des Mondes, wenn er lange am Himmel ist (03.10.: 17 h 55 min). Jetzt
@@ -4616,7 +4618,7 @@ function mjZeichnen(){
        Hoehe nach der wenigsten Ueberdeckung: jeder Kurvenpunkt im Kasten
        zaehlt 1, ein Voll-/Neumondpunkt 6, ein Ring 1000. Bei Gleichstand
        oben und rechts. */
-    const kh=32, kand=[];
+    const kh=46, kand=[];
     const frei=(kx,ky)=>{let n=0;const a=ky-3,b=ky+kh+3,xa=kx-3,xb=kx+bw+3;
       const zaehl=(arr,w)=>{for(const p of arr){const x=X(p.m);if(x<xa||x>xb)continue;
         const y=Y(p.h);if(y>=a&&y<=b)n+=w;}};
@@ -4632,13 +4634,13 @@ function mjZeichnen(){
         kand.push({kx,ky,n:frei(kx,ky)+(ky-T)*.01+(seite>0?0:.005)});}
     const best=kand.reduce((a,c)=>c.n<a.n?c:a,kand[0]);
     const kx=best.kx, ky=best.ky;
-    g.globalAlpha=.94;g.fillStyle=FLAECHE;mjKasten(g,kx,ky,bw,kh,7);g.fill();
+    g.globalAlpha=.94;g.fillStyle=FLAECHE;mjKasten(g,kx,ky,bw,kh,10);g.fill();
     g.globalAlpha=.25;g.strokeStyle=TEXT;g.lineWidth=1;g.stroke();g.globalAlpha=1;
-    mjMond(g,kx+11,ky+9,5,MOND);
-    mjSonne(g,kx+11,ky+23,3.4,SONNE);
+    mjMond(g,kx+16,ky+13,7,MOND);
+    mjSonne(g,kx+16,ky+33,4.8,SONNE);
     g.textAlign="left";g.textBaseline="middle";
-    g.fillStyle=MOND;g.fillText(t1,kx+21,ky+9);
-    g.fillStyle=SONNE;g.fillText(t2,kx+21,ky+23);
+    g.fillStyle=MOND;g.fillText(t1,kx+31,ky+13.5);
+    g.fillStyle=SONNE;g.fillText(t2,kx+31,ky+33.5);
   }
   cv._mj={L,R,T,B,pw,ph,X,Y,W,H};
 }
