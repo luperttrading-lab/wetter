@@ -77,6 +77,10 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   .hero{position:relative;background:linear-gradient(180deg,#ffffff 0%,#fffaf4 100%);border:1px solid var(--line);border-radius:24px;padding:18px 18px 16px;box-shadow:var(--shadow);overflow:hidden}
+  /* v6.07: Leinwand der Wetter-Animation - ueber dem Hintergrund des Kastens, unter Text und Kacheln (darum
+     isolation am Kasten und z-index -1), unten weich auslaufend */
+  .hero{isolation:isolate}
+  #waCv{position:absolute;left:0;top:0;z-index:-1;pointer-events:none;display:none;-webkit-mask-image:linear-gradient(#000 calc(100% - 30px),transparent);mask-image:linear-gradient(#000 calc(100% - 30px),transparent)}
   .hero::after{content:"";position:absolute;width:200px;height:200px;right:-40px;top:-70px;border-radius:50%;background:radial-gradient(circle,rgba(247,183,51,.16),transparent 65%);pointer-events:none}
   .htop{display:flex;align-items:center;gap:8px;position:relative}
   .badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:#e7f6ec;color:#10713e;border:1px solid #bfe6cd;white-space:nowrap}
@@ -511,6 +515,10 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .kzseg button{flex:1;padding:9px 6px;font:700 13px system-ui;background:transparent;color:var(--muted);border:0;cursor:pointer}
 .kzseg button.on{background:#d79636;color:#fff}
 .kzhilf{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.35}
+/* v6.07: Wetter-Animation - Vorschauknoepfe in den Einstellungen */
+.waprobe{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.waprobe button{padding:7px 11px;font:600 12px system-ui;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);cursor:pointer}
+.waprobe button.on{background:#d79636;border-color:#d79636;color:#fff}
 .kzreg.wsch .kzTaktZ{display:none}
 .kz .k.kzalt>.ki{opacity:.6}   /* v4.82: Quelle veraltet */
 .kz .k:has(.kzdots)>.ki{box-shadow:inset 0 0 0 999px rgba(47,134,207,var(--kzwf,0))}
@@ -1270,7 +1278,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.06</span>
+      <span class="ver">v6.07</span>
     </div>
   </header>
 
@@ -1473,6 +1481,7 @@ try{
    Dieselben Aufrufe wie beim Groessenwechsel des Fensters, plus die Kacheln —
    deren SVGs (Windrose, Sonnenbogen) enthalten die Farben direkt. */
 function themaNeuZeichnen(){
+  try{waPruefen();}catch(e){}
   try{drawPV();}catch(e){}try{
   if(typeof chartRows!=="undefined"&&chartRows&&chartRows.length>1)drawChart(chartRows);
   else if(typeof lastRows!=="undefined"&&lastRows)drawChart(lastRows);
@@ -1586,6 +1595,159 @@ const LABELS={"clear-day":"Klar","clear-night":"Klar","partly-cloudy-day":"Teils
    Steht hier oben, weil der Stationskasten frueher rendert als der Radar-
    Nowcast - mit "let" weiter unten waere die erste Zuweisung ein Fehler. */
 var _condIcon="cloudy",_condText="\u2014",_nowMmh=null,_condMess=null,_condP10=null,_condP30=null;
+/* ===== v6.07: Wetter-Animation im Kopf des Startkastens =====================================================
+   Nutzer (06./10.11.2026): "nur fuer Regen macht es keinen Sinn - wenn, dann auch andere Wetterlagen" und "nur oben
+   im kleinen Kopfbereich, nicht auf dem ganzen Bildschirm". Vorlage: wettertest.html.
+   Gezeichnet wird, was oben als Zustand STEHT (Symbol aus zustandZeigen = Station + Radar am Ort): Regen/Niesel,
+   Schnee, Schneeregen, Hagel, Gewitter, Nebel - dazu Windstriche ab Boeen von 62 km/h (Bft 8). Sonne, Wolken und
+   klare Nacht bleiben ruhig. Leinwand #waCv als erstes Kind von #hero; sie reicht nur bis knapp ueber die Kacheln.
+   Laeuft nur, solange der Kasten zu sehen und die Seite im Vordergrund ist.
+   Einstellung (Kacheln waehlen > Einstellungen): Aus | Standbild | Bewegt, gemerkt als wetterAnim. Ohne eigene
+   Wahl entscheidet die Bedienungshilfe "Bewegung reduzieren" (dann Standbild) - die sah schon einmal wie ein
+   Fehler aus (v3.94), darum sagt es der Hilfetext dazu, und "Bewegt" schaltet die Bewegung ausdruecklich ein.
+   Alles mit var und Funktionen: zustandZeigen ruft waPruefen, bevor spaetere let/const-Zeilen gelaufen sind (v6.06). */
+var _zuIc=null,_zuMb=null;
+var WA_STURM=62,WA_A=.4,WA_K=.9;   /* Boeen km/h fuer Windstriche; Deckkraft und Dichte ("dezent", kleine Flaeche) */
+var _wa={cv:null,ctx:null,raf:0,key:"",L:null,B:null,m:"aus",sicht:true,test:null,testFest:false,testT:0,last:0,
+         regen:[],schnee:[],nebel:[],strich:[],blitz:0,blitzNext:0,kipp:0};
+try{var _waQ=new URLSearchParams(location.search);if(_waQ.has("wettertest")){_wa.test=_waQ.get("wettertest")||"regen";_wa.testFest=true;}}catch(e){}
+function waReduziert(){return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);}
+function waEigen(){try{var m=localStorage.getItem("wetterAnim");return (m==="aus"||m==="still"||m==="an")?m:null;}catch(e){return null;}}
+function waModus(){return waEigen()||(waReduziert()?"still":"an");}
+/* Bodenrate mm/h -> Tropfenbild (n je 10 000 px2, v px/s, l und w px). Unter 0,5 mm/h Niesel - so heisst es dann
+   auch oben; darueber stufenweise von "leicht" (0,5) bis "stark" (ab 8 mm/h). */
+function waRegen(b){
+  if(b==null||!isFinite(b))b=1.5;
+  if(b<0.5)return {n:7,v:240,l:5,w:.9};
+  var t=Math.round(Math.max(0,Math.min(1,Math.log10(b/0.5)/1.204))*4)/4;
+  return {n:1.6+4.4*t,v:560+300*t,l:13+9*t,w:1+.3*t};
+}
+function waFest(n){
+  switch(n){
+    case "regen":return {regen:waRegen(4),wind:12};
+    case "niesel":return {regen:waRegen(.2),wind:5};
+    case "schnee":return {schnee:{n:2.4,v:42},wind:8};
+    case "schneeregen":return {regen:{n:1.4,v:600,l:12,w:1},schnee:{n:1.2,v:70},wind:10};
+    case "gewitter":return {regen:waRegen(5),blitz:true,wind:20};
+    case "nebel":return {nebel:true,wind:5};
+    case "sturm":return {streifen:true,wind:70};
+    case "sturmregen":return {regen:waRegen(3),wind:65};
+  }
+  return null;
+}
+function waLage(){
+  if(_wa.test)return waFest(_wa.test);
+  var ic=_zuIc;if(!ic)return null;
+  var s=snap,frisch=!!(s&&s.ts&&Date.now()-new Date(s.ts).getTime()<2*3600e3);
+  /* Was nur die Station meldet (kein Radar am Ort), gilt nur bei frischer Messung */
+  if(!frisch&&_zuMb==null)return null;
+  var wind=(frisch&&isFinite(s.wind))?+s.wind:0,boe=(frisch&&isFinite(s.gust))?+s.gust:0,sturm=boe>=WA_STURM,L=null;
+  if(ic==="thunderstorm")L={regen:waRegen(_zuMb!=null?Math.max(_zuMb,2):5),blitz:true};
+  else if(ic==="rain")L={regen:waRegen(_zuMb)};
+  else if(ic==="hail")L={regen:{n:4,v:900,l:9,w:1.8}};
+  else if(ic==="sleet")L={regen:{n:1.4,v:600,l:12,w:1},schnee:{n:1.2,v:70}};
+  else if(ic==="snow")L={schnee:{n:2.4,v:42}};
+  else if(ic==="fog")L={nebel:true};
+  else if(sturm||ic==="wind")L={streifen:true};
+  if(L)L.wind=Math.round((sturm?boe:Math.max(wind,boe*.6))/5)*5;
+  return L;
+}
+/* Flaeche: von der Oberkante des Kastens bis knapp ueber die Kacheln */
+function waBereich(){
+  var h=document.getElementById("hero");if(!h)return null;
+  var r=h.getBoundingClientRect(),w=h.clientWidth,hb=h.clientHeight,kz=document.getElementById("kz"),kf=document.getElementById("kzFoot");
+  var u=(kz&&kz.offsetHeight)?kz:((kf&&kf.offsetHeight)?kf:null);
+  if(u)hb=Math.min(hb,Math.max(60,Math.round(u.getBoundingClientRect().top-r.top-4)));
+  return (w>=120&&hb>=40)?{w:w,hb:hb}:null;
+}
+function waFarben(){
+  var d=document.documentElement.classList.contains("dunkel"),a=WA_A;
+  return d?{regen:"rgba(170,205,245,"+a+")",schnee:"rgba(238,244,255,"+Math.min(1,a+.3)+")",nebel:"205,212,224",strich:"rgba(205,220,240,"+(a*1.05)+")",blitz:"205,220,255",d:d}
+          :{regen:"rgba(55,105,175,"+a+")",schnee:"rgba(120,145,182,"+Math.min(1,a+.25)+")",nebel:"150,158,172",strich:"rgba(70,95,130,"+(a*1.1)+")",blitz:"170,195,255",d:d};
+}
+function waStrichNeu(B,start){var R=Math.random;return {x:start?R()*B.w:-110-R()*B.w*.5,y:R()*B.hb,len:45+R()*70,v:420+R()*360,ph:R()*6.3};}
+function waBauen(L,B){
+  var c=_wa.cv,h=document.getElementById("hero");
+  if(!c){
+    c=document.createElement("canvas");c.id="waCv";c.setAttribute("aria-hidden","true");h.insertBefore(c,h.firstChild);
+    _wa.cv=c;_wa.ctx=c.getContext("2d");
+    if(window.IntersectionObserver)new IntersectionObserver(function(es){_wa.sicht=es[es.length-1].isIntersecting;if(_wa.sicht){_wa.last=performance.now();waLauf();}}).observe(h);
+    if(window.ResizeObserver)new ResizeObserver(function(){waPruefen();}).observe(h);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden){_wa.last=performance.now();waLauf();}});
+  }
+  var dpr=Math.min(2,window.devicePixelRatio||1),R=Math.random,i,n;
+  c.width=Math.round(B.w*dpr);c.height=Math.round(B.hb*dpr);c.style.width=B.w+"px";c.style.height=B.hb+"px";c.style.display="block";
+  _wa.ctx.setTransform(dpr,0,0,dpr,0,0);
+  _wa.L=L;_wa.B=B;_wa.last=performance.now();_wa.regen=[];_wa.schnee=[];_wa.nebel=[];_wa.strich=[];_wa.blitz=0;
+  var fl=B.w*B.hb/1e4,kipp=Math.min(.75,(L.wind||0)/90),ext=B.hb*kipp;   /* schraeger Regen kommt von links ins Bild */
+  _wa.kipp=kipp;
+  if(L.regen){n=Math.round(L.regen.n*fl*WA_K);for(i=0;i<n;i++)_wa.regen.push({x:R()*(B.w+ext)-ext,y:R()*B.hb,f:.8+R()*.4});}
+  if(L.schnee){n=Math.round(L.schnee.n*fl*WA_K);for(i=0;i<n;i++)_wa.schnee.push({x:R()*B.w,y:R()*B.hb,r:1+R()*1.8,p:R()*6.3,f:.7+R()*.6});}
+  if(L.nebel)for(i=0;i<5;i++)_wa.nebel.push({x:R()*B.w,y:B.hb*(.15+R()*.75),r:90+R()*100,v:5+R()*9,a:.18+R()*.17});
+  if(L.streifen){n=Math.max(5,Math.round(fl*WA_K));for(i=0;i<n;i++)_wa.strich.push(waStrichNeu(B,true));}
+  if(L.blitz)_wa.blitzNext=performance.now()+1500+R()*3000;
+}
+function waZeichne(now,still){
+  var L=_wa.L,B=_wa.B,c=_wa.ctx;if(!L||!B||!c)return;
+  var col=waFarben(),dt=still?0:Math.max(0,Math.min(.05,(now-_wa.last)/1000)),i,p;_wa.last=now;
+  c.clearRect(0,0,B.w,B.hb);
+  /* Nebel: weiche Flecken, langsam nach rechts */
+  for(i=0;i<_wa.nebel.length;i++){p=_wa.nebel[i];p.x+=p.v*dt;if(p.x-p.r>B.w)p.x=-p.r;
+    var g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r),a=p.a*.8*(col.d?.85:1.7);
+    g.addColorStop(0,"rgba("+col.nebel+","+a+")");g.addColorStop(1,"rgba("+col.nebel+",0)");c.fillStyle=g;c.fillRect(p.x-p.r,p.y-p.r,2*p.r,2*p.r);}
+  /* Regen: ein Strich je Tropfen, schraeg nach Wind */
+  if(L.regen){var r=L.regen,vx=r.v*_wa.kipp,ext=B.hb*_wa.kipp,lx=r.l*_wa.kipp;c.strokeStyle=col.regen;c.lineWidth=r.w;c.lineCap="round";c.beginPath();
+    for(i=0;i<_wa.regen.length;i++){p=_wa.regen[i];p.y+=r.v*p.f*dt;p.x+=vx*p.f*dt;
+      if(p.y>B.hb+r.l){p.y=-r.l-Math.random()*20;p.x=Math.random()*(B.w+ext)-ext;}
+      c.moveTo(p.x,p.y);c.lineTo(p.x-lx,p.y-r.l);}
+    c.stroke();}
+  /* Schnee: Flocken sinken, pendeln und treiben mit dem Wind */
+  if(L.schnee){var sn=L.schnee,drift=6+(L.wind||0)*1.1;c.fillStyle=col.schnee;c.beginPath();
+    for(i=0;i<_wa.schnee.length;i++){p=_wa.schnee[i];p.y+=sn.v*p.f*dt;p.p+=dt*1.3;p.x+=(drift+Math.sin(p.p)*14)*dt;
+      if(p.y>B.hb+4){p.y=-4;p.x=Math.random()*B.w;}if(p.x>B.w+4)p.x=-4;
+      c.moveTo(p.x+p.r,p.y);c.arc(p.x,p.y,p.r,0,6.283);}
+    c.fill();}
+  /* Sturm ohne Niederschlag: feine Windstriche von links nach rechts */
+  if(L.streifen){c.strokeStyle=col.strich;c.lineWidth=1.2;c.lineCap="round";c.beginPath();
+    for(i=0;i<_wa.strich.length;i++){p=_wa.strich[i];p.x+=p.v*dt;p.ph+=dt*3;if(p.x-p.len>B.w)_wa.strich[i]=p=waStrichNeu(B,false);
+      var y=p.y+Math.sin(p.ph)*3;c.moveTo(p.x,y);c.quadraticCurveTo(p.x-p.len/2,y-2,p.x-p.len,y+1);}
+    c.stroke();}
+  /* Gewitter: alle 6-14 s ein weiches Aufhellen (zwei kurze Stoesse, dann Ausklingen) - nie im Standbild */
+  if(L.blitz&&!still){
+    if(!_wa.blitz&&now>=_wa.blitzNext){_wa.blitz=now;_wa.blitzNext=now+6000+Math.random()*8000;}
+    if(_wa.blitz){var e=now-_wa.blitz,ab=e<70?.38:e<150?.08:e<230?.26:e<600?.26*(1-(e-230)/370):0;
+      if(e>600)_wa.blitz=0;if(ab>0){c.fillStyle="rgba("+col.blitz+","+(ab*.65)+")";c.fillRect(0,0,B.w,B.hb);}}}
+}
+function waStop(){if(_wa.raf){cancelAnimationFrame(_wa.raf);_wa.raf=0;}}
+function waLauf(){if(_wa.raf||!_wa.L||_wa.m!=="an"||!_wa.sicht||document.hidden)return;_wa.raf=requestAnimationFrame(waSchritt);}
+function waSchritt(now){_wa.raf=0;if(!_wa.L||_wa.m!=="an"||!_wa.sicht||document.hidden)return;waZeichne(now,false);waLauf();}
+/* Stand pruefen und Leinwand anpassen. Gerufen von zustandZeigen (neuer Zustand), kzRender (Kacheln hoeher oder
+   niedriger), themaNeuZeichnen (hell/dunkel), ResizeObserver am Kasten und von den Einstellungen. */
+function waPruefen(){
+  var m=waModus();
+  if(_wa.test&&m==="aus")m=waReduziert()?"still":"an";      /* Vorschau zeigt auch bei "Aus" etwas */
+  var L=(m==="aus")?null:waLage(),B=L?waBereich():null;
+  _wa.m=m;
+  if(!L||!B){waStop();_wa.L=null;_wa.key="";if(_wa.cv)_wa.cv.style.display="none";return;}
+  var key=JSON.stringify(L)+"|"+B.w+"|"+B.hb;
+  if(key!==_wa.key){_wa.key=key;waBauen(L,B);}
+  if(m==="an"){waLauf();}else{waStop();waZeichne(performance.now(),true);}
+}
+function waProbe(n){
+  clearTimeout(_wa.testT);_wa.test=n;_wa.testFest=false;_wa.key="";
+  _wa.testT=setTimeout(function(){_wa.test=null;_wa.key="";waPruefen();waAnzeigen();},12000);
+  waPruefen();waAnzeigen();
+  try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
+}
+function waAnzeigen(){
+  var m=waModus(),seg=document.getElementById("waSeg"),h=document.getElementById("waHilf"),pr=document.getElementById("waProbe");
+  if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.w===m);});
+  if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.p===_wa.test);});
+  if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
+    m==="still"?"Die Wetterlage steht als ruhiges Bild oben im Kasten."+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
+    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich oben im Kasten – nur, wenn es am Ort gerade so ist. Vorschau: 12 Sekunden.";
+}
+
 /* v4.07: Die 10- und 30-Minuten-Summen derselben Station, unabhaengig davon,
    ob der Live-Punkt als neue Zeile in die Reihe passt. Genau das war das Loch:
    tryCurrent verwarf den Punkt, wenn sein Zeitstempel nicht neuer war als die
@@ -6431,7 +6593,11 @@ function kzRender(){
                    +'<label class="kzTaktZ"><span>Takt</span><input type="range" id="kzRegTakt" min="2" max="20" step="0.5"><b id="kzRegTaktV">–</b></label>'
                    +'<label><span>Blende</span><input type="range" id="kzRegBl" min="0" max="3" step="0.1"><b id="kzRegBlV">–</b></label>'
                    +'<div class="kzregt">Färbung wechselnder Kacheln</div>'
-                   +'<label><span>Stärke</span><input type="range" id="kzRegFarbe" min="0" max="100" step="5"><b id="kzRegFarbeV">–</b></label>';
+                   +'<label><span>Stärke</span><input type="range" id="kzRegFarbe" min="0" max="100" step="5"><b id="kzRegFarbeV">–</b></label>'
+                   +'<div class="kzregt">Wetter-Animation oben</div>'
+                   +'<div class="kzseg" id="waSeg"><button type="button" data-w="aus">Aus</button><button type="button" data-w="still">Standbild</button><button type="button" data-w="an">Bewegt</button></div>'
+                   +'<div class="kzhilf" id="waHilf"></div>'
+                   +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
@@ -6439,13 +6605,16 @@ function kzRender(){
       [wt,wb,wf].forEach(x=>x.addEventListener("input",wz));
       el("kzSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();kzWeSetzen(wt.value,wb.value,wf.value,b.dataset.m);});
       [g,d,wt,wb,wf].forEach(kzRegler);
+      el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
+      el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
     }
-    if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();}}
+    if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();}}
   if(pool){pool.classList.toggle("on",_kzEdit);
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
     ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="zahn${_kzRegAuf?" an":""}" id="kzZahn" title="Einstellungen">${KZ_GEAR}Einstellungen</span><span class="fertig" id="kzFertig">Fertig</span></span>`
     :(ord.length?`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln wählen</span>${kzWe().modus==="auto"&&box.querySelector(".kzdots")?`<span class="kzpause${_kzPause?" an":""}" id="kzPause" role="button">${_kzPause?KZ_WEITER+"Weiter":KZ_PAUSE+"Pause"}</span>`:"<span></span>"}`:`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln einblenden</span><span></span>`);
+  try{waPruefen();}catch(e){}   // v6.07: die Animation endet ueber den Kacheln - deren Lage kann sich geaendert haben
 }
 /* Sprungziel: {id} ein Abschnitt, {label} die Beschriftung einer Kachel im
    Detailbereich ("☀ Sonne", "Wind & Böen", "Luftdruck" ...), {text} eine
@@ -6611,7 +6780,7 @@ function sonneStuetztIcon(ic,ss30,ss60,ms){
 }
 function zustandZeigen(){
   const il=el("condIc"),tl=el("condLbl");if(!il||!tl)return;
-  let ic=_condIcon,tx=_condText;
+  let ic=_condIcon,tx=_condText;_zuMb=null;
   /* 1. Die Meldung der Station geht ihrem abgeleiteten Icon vor.
      Roellbach meldete am 16.09.2026 condition "rain" bei icon "cloudy" -
      das Radar gab der Meldung recht. */
@@ -6653,12 +6822,14 @@ function zustandZeigen(){
        wortwoertlich der alte Code. */
     const mb=radarBoden(_nowMmh);
     tx=mb<0.5?"Niesel":(mb<2.5?"Leichter Regen":(mb<10?"Regen":"Starkregen"));
-    ic="rain";
+    ic="rain";_zuMb=mb;
   }
   // v4.30: Sonnenminuten der Live-Abfrage stuetzen das Icon (siehe sonneStuetztIcon)
   const _sl=(_feinLive&&(now()-_feinLive.ts)<60*60000)?_feinLive:null;
   if(_sl){const neu=sonneStuetztIcon(ic,_sl.ss30,_sl.ss60,Date.now());if(neu!==ic){ic=neu;tx=LABELS[neu]||tx;}}
   il.innerHTML=icon(ic,54);tl.textContent=tx;
+  // v6.07: die Wetter-Animation zeichnet genau das, was hier steht
+  _zuIc=ic;try{waPruefen();}catch(e){console.warn("wetteranim",e);}
 }
 /* v4.88 (Nutzer, 01.10. 07:04): "Regen in 5 Min · ~5 Min lang" - beschrieben
    war ein einzelner nasser Balken, die 85 Minuten Regen danach kamen in der
