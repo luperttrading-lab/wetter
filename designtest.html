@@ -1,0 +1,309 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Design-Test</title>
+<style>
+:root{--bg:#f3f1ec;--karte:#fff;--tx:#17202e;--mu:#5c6b80;--li:#e0dcd3;--wahl:#2f6fd0}
+html.dunkel{--bg:#0d1219;--karte:#202a38;--tx:#e7edf5;--mu:#a3b2c6;--li:#2c3848}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);
+     padding:calc(env(safe-area-inset-top,0px) + 10px) 10px 60px;-webkit-text-size-adjust:100%}
+h1{font-size:19px;margin:2px 2px 3px}
+.hin{color:var(--mu);font-size:13px;margin:0 2px 8px}
+.zeile{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:3px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.zeile::-webkit-scrollbar{display:none}
+.zeile span{flex:0 0 58px;font-size:12.5px;color:var(--mu)}
+button{flex:0 0 auto;font:inherit;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid var(--li);background:var(--karte);color:var(--tx);cursor:pointer;white-space:nowrap}
+button.an{background:var(--wahl);border-color:var(--wahl);color:#fff}
+button:disabled{opacity:.4}
+iframe{width:100%;height:860px;border:1px solid var(--li);border-radius:18px;background:var(--karte);margin-top:8px}
+.stand{font-size:12.5px;color:var(--mu);margin:6px 2px 0}
+</style></head><body>
+
+<h1>Design-Test</h1>
+<p class="hin">Die echte App in vier Fassungen. Am Aufbau ändert sich nichts – nur Farben, Schriften, Rahmen und der Hintergrund.
+Beim Wechsel der Lage blendet der Himmel über.</p>
+
+<div class="zeile" id="zEntwurf"><span>Entwurf</span><button data-v="A">A · wie jetzt</button><button data-v="B">B · ruhig</button><button data-v="C">C · ruhig + Himmel</button><button data-v="D">D · wie Apple</button></div>
+<div class="zeile" id="zLage"><span>Lage</span></div>
+<div class="zeile" id="zAnsicht"><span>Ansicht</span><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
+<div class="stand" id="stand">lädt …</div>
+<iframe id="app" src="index.html" title="Wetter-App"></iframe>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const rad=Math.PI/180,clamp=(x,a,b)=>Math.max(a===undefined?0:a,Math.min(b===undefined?1:b,x));
+const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const lum=c=>(.2126*c[0]+.7152*c[1]+.0722*c[2])/255;
+const rgb=(c,a)=>`rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${a===undefined?1:a})`;
+
+/* Entwuerfe: ruhig = Schrift, Farben, Rahmen beruhigt; himmel = Staerke; flaeche = wo der Himmel liegt */
+const ENTW={
+  A:{txt:"wie die App heute aussieht"},
+  B:{ruhig:1,txt:"eine Schriftfarbe, leichtere Schrift, keine Rahmen, Technik-Zeilen weg"},
+  C:{ruhig:1,himmel:"kraeftig",flaeche:"oben",txt:"wie B, dazu der Himmel oben in der Karte"},
+  D:{ruhig:1,apple:1,himmel:"kraeftig",flaeche:"seite",txt:"Himmel über den ganzen Kopf, weiße dünne Zahl, Kacheln als Glas – immer dunkel"}
+};
+const LAGEN={
+  jetzt:{name:"Wie jetzt"},
+  klar:{name:"Klar",h:34,N:.04,ic:"clear-day",txt:"Klar"},
+  heiter:{name:"Heiter",h:34,N:.35,ic:"partly-cloudy-day",txt:"Teils bewölkt"},
+  wolkig:{name:"Wolkig",h:30,N:.68,ic:"partly-cloudy-day",txt:"Meist bewölkt"},
+  bedeckt:{name:"Bedeckt",h:24,N:1,ic:"cloudy",txt:"Bedeckt"},
+  regen:{name:"Regen",h:20,N:1,nass:1,ic:"rain",txt:"Regen",anim:"regen"},
+  abend:{name:"Abend",h:-1.5,N:.3,ic:"partly-cloudy-night",txt:"Teils bewölkt"},
+  nacht:{name:"Nacht klar",h:-32,N:.03,ic:"clear-night",txt:"Klar"},
+  nachtw:{name:"Nacht wolkig",h:-32,N:.5,ic:"partly-cloudy-night",txt:"Teils bewölkt"},
+  nachtb:{name:"Nacht bedeckt",h:-32,N:1,ic:"cloudy",txt:"Bedeckt"},
+  schnee:{name:"Schnee",h:12,N:1,nass:1,ic:"snow",txt:"Schneefall",anim:"schnee"}
+};
+const E={entwurf:"C",lage:"jetzt",ansicht:""};
+try{Object.assign(E,JSON.parse(localStorage.getItem("designtest")||"{}"));}catch(e){}
+if(!LAGEN[E.lage])E.lage="jetzt";if(!ENTW[E.entwurf])E.entwurf="C";
+const merken=()=>{try{localStorage.setItem("designtest",JSON.stringify(E));}catch(e){}};
+const P=()=>ENTW[E.entwurf];
+
+/* Sonnenhoehe (Naeherung, rund 1 Grad genau - fuer die Himmelsfarbe reicht das) */
+function sonnenhoehe(ms,lat,lon){
+  const d=ms/864e5-10957.5,g=(357.529+.98560028*d)*rad,L=(280.459+.98564736*d+1.915*Math.sin(g)+.02*Math.sin(2*g))*rad,e=23.439*rad;
+  const ra=Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L)),dec=Math.asin(Math.sin(e)*Math.sin(L));
+  const lst=((18.697374558+24.06570982441908*d)%24*15+lon)*rad;
+  return Math.asin(Math.sin(lat*rad)*Math.sin(dec)+Math.cos(lat*rad)*Math.cos(dec)*Math.cos(lst-ra))/rad;
+}
+
+/* ---------- Wolkentextur (wie himmeltest.html) ---------- */
+function rauschen(seed){
+  const h=(x,y,per)=>{x=((x%per)+per)%per;let n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
+    n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;};
+  const vn=(x,y,per)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+    const a=h(xi,yi,per),b=h(xi+1,yi,per),c=h(xi,yi+1,per),d=h(xi+1,yi+1,per);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;};
+  return (x,y,per)=>{let s=0,am=1,f=1,n=0;for(let o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7.3,per*f);n+=am;am*=.52;f*=2;}return s/n;};
+}
+const TW=320,TH=200,PER=3;
+const _feld={};
+function feld(seed){
+  if(_feld[seed])return _feld[seed];
+  const fb=rauschen(seed),wp=rauschen(seed+17),F=new Float32Array(TW*TH);
+  for(let y=0;y<TH;y++)for(let x=0;x<TW;x++){
+    const u=x/TW*PER,v=y/TH*PER*1.5,w=wp(u,v*.8,PER)-.5;
+    F[y*TW+x]=fb(u,v+w*1.1,PER);
+  }
+  const S=Float32Array.from(F).sort();
+  return _feld[seed]={F,S};
+}
+function textur(doc,seed,N,rand,kern){
+  const {F,S}=feld(seed),cv=doc.createElement("canvas");cv.width=TW;cv.height=TH;
+  const c=cv.getContext("2d"),im=c.createImageData(TW,TH),D=im.data;
+  const q=clamp(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[0],hi=S[S.length-1];
+  for(let i=0;i<F.length;i++){
+    const f=F[i],a=thr<0?1:Math.pow(sm(thr-.09,thr+.16,f),1.25);
+    const s=thr<0?sm(lo+.08,hi-.08,f):sm(thr,thr+.28,f),col=mix(rand,kern,s);
+    D[i*4]=col[0];D[i*4+1]=col[1];D[i*4+2]=col[2];D[i*4+3]=a*255;
+  }
+  c.putImageData(im,0,0);return cv;
+}
+
+/* ---------- Farben ---------- */
+function passen(c,dunkel,st,wolke,apple){
+  if(!dunkel){let r=mix(c,[255,255,255],{dezent:.7,mittel:.46,kraeftig:.22}[st]);const L=lum(r),Lmin=wolke?.5:.62;
+    if(L<Lmin)r=mix(r,[255,255,255],(Lmin-L)/(1-L));return r;}
+  let r=mix(c,[24,31,43],apple?0:{dezent:.62,mittel:.36,kraeftig:.1}[st]);const L=lum(r),Lmax=wolke?(apple?.56:.46):(apple?.4:.34);
+  if(L>Lmax)r=r.map(v=>v*Lmax/L);return r;
+}
+function himmel(L,dunkel,st,apple){
+  const h=L.h,N=L.N,tag=sm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=sm(.5,1,N)*(L.nass?1:.88);
+  let top=mix([9,13,38],[46,112,208],tag),bot=mix([34,40,92],[152,202,246],tag);
+  top=mix(top,[72,70,134],daem*.6);bot=mix(bot,[244,164,118],daem*.8);
+  const gt=mix([22,26,36],L.nass?[92,102,118]:[112,124,142],tag),gb=mix([44,50,66],L.nass?[138,148,162]:[172,182,196],tag);
+  top=mix(top,gt,g);bot=mix(bot,gb,g);
+  let rand=mix([92,98,138],[255,255,255],tag),kern=mix([58,62,98],[214,222,236],tag);
+  rand=mix(rand,[255,206,170],daem*.5);kern=mix(kern,[196,150,150],daem*.4);
+  const or=mix([78,84,104],L.nass?[150,158,172]:[206,212,222],tag),ok=mix([40,45,60],L.nass?[98,108,124]:[150,160,176],tag);
+  rand=mix(rand,or,g);kern=mix(kern,ok,g);
+  return {top:passen(top,dunkel,st,0,apple),bot:passen(bot,dunkel,st,0,apple),rand:passen(rand,dunkel,st,1,apple),kern:passen(kern,dunkel,st,1,apple),
+          tag,daem,sterne:dunkel?(1-sm(-9,-3,h))*({dezent:.55,mittel:.8,kraeftig:1}[st]):0,
+          glanz:tag*(1-g)*(dunkel?(apple?.3:.16):.5)};
+}
+
+/* ---------- Was die Entwuerfe an der App aendern (nur CSS, in den Rahmen gelegt) ---------- */
+const CSS=`
+#hiCv{position:absolute;left:0;top:0;z-index:-2;pointer-events:none}
+#hero.hiOben #hiCv{-webkit-mask-image:linear-gradient(#000 38%,transparent 96%);mask-image:linear-gradient(#000 38%,transparent 96%)}
+body>#hiCv{z-index:0;-webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
+#hero.hiAn::after{display:none}
+#hero.hiAn .htop,#hero.hiAn .main,#hero.hiAn .feel,#hero.hiAn .ydiff{text-shadow:0 0 7px rgba(255,255,255,.85),0 0 2px rgba(255,255,255,.7)}
+html.dunkel #hero.hiAn .htop,html.dunkel #hero.hiAn .main,html.dunkel #hero.hiAn .feel,html.dunkel #hero.hiAn .ydiff{text-shadow:0 0 7px rgba(10,14,22,.8),0 0 2px rgba(10,14,22,.7)}
+
+/* B: ruhig - eine Schriftfarbe, leichtere Schrift, keine Rahmen */
+html.dz-ruhig{--line:rgba(125,135,155,.16);--shadow:0 1px 2px rgba(16,24,40,.03),0 6px 22px rgba(16,24,40,.05);--shadow-s:0 1px 2px rgba(16,24,40,.03);--bg-a:#f2f3f6;--bg-b:#f2f3f6;--bg-haze:rgba(0,0,0,0)}
+html.dunkel.dz-ruhig{--line:rgba(255,255,255,.06);--bg-a:#0d1219;--bg-b:#0d1219}
+html.dz-ruhig #bg{display:none}                /* der Farbschleier in Temperaturfarbe hinter der Seite */
+html.dz-ruhig .place{font-weight:700}
+html.dz-ruhig #stationTxt,html.dz-ruhig .ver{display:none}
+html.dz-ruhig .act-btn{background:transparent;border-color:transparent;box-shadow:none}
+html.dz-ruhig .hero{border-color:transparent;background:var(--card)}
+html.dz-ruhig .hero::after{display:none}
+html.dz-ruhig .badge{background:none;border:0;padding:0;color:var(--muted);font-weight:600}
+html.dz-ruhig .badge::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;margin-right:6px;vertical-align:1px}
+html.dz-ruhig .when .d{font-weight:600}
+html.dz-ruhig .temp{color:var(--ink)!important;font-weight:300;letter-spacing:-.045em}
+html.dz-ruhig .temp .deg{font-weight:400;color:var(--muted)}
+html.dz-ruhig .cnd .lbl{font-weight:500;font-size:14px}
+html.dz-ruhig .feel .gf,html.dz-ruhig .feel .hl{font-weight:500}
+html.dz-ruhig #feelV{color:inherit!important;font-weight:650}
+html.dz-ruhig .ydiff b{color:inherit!important;font-weight:650}
+html.dz-ruhig .kz .ki{border-color:transparent;background:rgba(23,32,46,.045)}
+html.dunkel.dz-ruhig .kz .ki{background:rgba(255,255,255,.06)}
+html.dz-ruhig .kz .ki .l{font-weight:600;letter-spacing:.04em;color:var(--faint)}
+html.dz-ruhig .kz .ki .v{font-weight:650;font-size:15px}
+html.dz-ruhig .kz .ki .v .dn,html.dz-ruhig .kz .ki .v .up,html.dz-ruhig .kz .ki .v [style*="color"]{color:inherit!important}
+html.dz-ruhig .kz .ok{color:inherit}
+html.dz-ruhig .kz .ki .s{font-weight:500}
+html.dz-ruhig .kzfoot{opacity:.55;font-weight:500}
+html.dz-ruhig .kzfoot .kzpause{border-color:transparent}
+html.dz-ruhig .kalle button{background:transparent;border-color:transparent;box-shadow:none;color:var(--muted)}
+html.dz-ruhig .ksect .sect{text-transform:none;letter-spacing:-.01em;font-size:18px;font-weight:700;color:var(--ink)}
+html.dz-ruhig .ksect .kstrich{visibility:hidden}
+html.dz-ruhig .ksect .kknopf{border-color:transparent;background:transparent;box-shadow:none}
+html.dz-ruhig .strip-card,html.dz-ruhig .chart-card,html.dz-ruhig .nowcard{border-color:transparent}
+html.dz-ruhig #strip .col .v{color:var(--ink)!important;font-weight:600}
+html.dz-ruhig #strip .col .t{font-weight:500}
+html.dz-ruhig #strip .now{background:rgba(23,32,46,.06);box-shadow:none}
+html.dunkel.dz-ruhig #strip .now{background:rgba(255,255,255,.09)}
+
+/* D: wie Apple - Himmel hinter dem ganzen Kopf, Karte durchsichtig, weisse duenne Zahl, Kacheln als Glas */
+html.dz-apple #app{position:relative;z-index:1}
+html.dz-apple header,html.dz-apple .hero{text-shadow:0 1px 10px rgba(0,0,0,.35)}
+html.dz-apple .hero{background:transparent!important;box-shadow:none!important;padding-top:4px}
+html.dz-apple .htop{opacity:.85}
+html.dz-apple .main{flex-direction:column;align-items:center;gap:0;margin-top:2px}
+html.dz-apple .temp{font-size:96px;font-weight:200;color:#fff!important;line-height:1;letter-spacing:-.04em;margin-left:.18em}
+html.dz-apple .temp .deg{color:#fff;font-weight:300}
+html.dz-apple .cnd{margin:2px 0 0}
+html.dz-apple #condIc{display:none}
+html.dz-apple .cnd .lbl{font-size:19px;font-weight:500;color:#fff}
+html.dz-apple .feel{flex-direction:column;align-items:center;gap:3px;text-align:center;margin-top:8px;color:#fff}
+html.dz-apple .ydiff{justify-content:center;text-align:center;color:rgba(255,255,255,.85)}
+html.dz-apple .feel .hl,html.dz-apple .feel .hl .dn,html.dz-apple .feel .hl .up,html.dz-apple .feel .hl .dl{color:#fff}
+html.dz-apple .when .a{color:rgba(255,255,255,.8)}
+html.dz-apple .kz .ki{background:rgba(255,255,255,.11)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html.dz-apple .kz .ki .l{color:rgba(255,255,255,.62)}
+html.dz-apple .kz .ki .s{color:rgba(255,255,255,.7)}
+html.dz-apple .kz,html.dz-apple .kzfoot{text-shadow:none}
+`;
+
+/* ---------- Einhaengen in die App ---------- */
+let F=null,doc=null,hero=null,cv=null,ctx=null,raf=0,sichtbar=true,Z=null,letzt=0;
+function jetztLage(){
+  let lat=50.6,lon=8.65,N=null;const ic=F._zuIc||"";
+  try{[lat,lon]=F.eval("[LOC.lat,LOC.lon]");}catch(e){}
+  try{const c=F.eval("typeof snap!=='undefined'&&snap&&snap.cloud!=null?snap.cloud:null");if(c!=null)N=c/100;}catch(e){}
+  if(N==null)N=/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95;
+  const nass=/rain|sleet|snow|hail|thunder/.test(ic)?1:0;
+  return {h:sonnenhoehe(Date.now(),lat,lon),N:nass?Math.max(N,.92):N,nass};
+}
+function einhaengen(){
+  F=$("app").contentWindow;doc=$("app").contentDocument;hero=doc&&doc.getElementById("hero");
+  if(!hero||!hero.offsetHeight||typeof F.icon!=="function"){setTimeout(einhaengen,250);return;}
+  const st=doc.createElement("style");st.textContent=CSS;doc.head.appendChild(st);
+  cv=doc.createElement("canvas");cv.id="hiCv";hero.insertBefore(cv,hero.firstChild);ctx=cv.getContext("2d");
+  new F.IntersectionObserver(es=>{sichtbar=es[0].isIntersecting;if(sichtbar)lauf();},{}).observe(hero);
+  new F.ResizeObserver(()=>neu()).observe(hero);
+  if(!E.ansicht)E.ansicht=jetztLage().h<-4?"dunkel":"hell";
+  alles();
+  F.setInterval(()=>{if(E.lage==="jetzt")neu();},60000);
+}
+function dunkelSoll(){return P().apple?true:E.ansicht==="dunkel";}
+function ansicht(){
+  const d=dunkelSoll();
+  document.documentElement.classList.toggle("dunkel",d);
+  if(!doc)return;
+  const h=doc.documentElement;h.classList.toggle("dunkel",d);h.classList.toggle("dz-ruhig",!!P().ruhig);h.classList.toggle("dz-apple",!!P().apple);
+  try{F.eval("_dunkel="+d);F.themaNeuZeichnen();}catch(e){}
+}
+function kopf(){
+  const L=LAGEN[E.lage];
+  try{
+    if(E.lage==="jetzt"){F.zustandZeigen();}
+    else{doc.getElementById("condIc").innerHTML=F.icon(L.ic,54);doc.getElementById("condLbl").textContent=L.txt;}
+    F._wa.test=L.anim||null;F._wa.testFest=!!L.anim;F._wa.key="";clearTimeout(F._wa.testT);F.waPruefen();
+  }catch(e){}
+}
+function bereich(){
+  const r=hero.getBoundingClientRect();
+  if(P().flaeche==="seite")return {w:doc.documentElement.clientWidth,h:Math.round(r.bottom+F.scrollY+30)};
+  const w=hero.clientWidth,h=hero.clientHeight;let hb=h;
+  const kz=doc.getElementById("kz");if(kz&&kz.offsetHeight)hb=Math.max(80,kz.getBoundingClientRect().top-r.top+26);
+  return {w,h:hb};
+}
+let _key="";
+function neu(){
+  if(!cv)return;
+  const p=P(),an=!!p.himmel,seite=p.flaeche==="seite";
+  hero.classList.toggle("hiAn",an&&!seite);hero.classList.toggle("hiOben",an&&p.flaeche==="oben");
+  const soll=seite?doc.body:hero;                 /* D: die Leinwand liegt hinter dem ganzen Kopf, sonst in der Karte */
+  if(cv.parentNode!==soll){soll.insertBefore(cv,soll.firstChild);_key="";Z=null;}
+  cv.style.display=an?"":"none";
+  const txt=`${E.entwurf}: ${p.txt}`;
+  if(!an){F.cancelAnimationFrame(raf);raf=0;_key="";Z=null;$("stand").textContent=txt;return;}
+  const L=E.lage==="jetzt"?jetztLage():LAGEN[E.lage],dunkel=doc.documentElement.classList.contains("dunkel"),B=bereich();
+  const key=[E.entwurf,E.lage,dunkel,B.w,B.h,Math.round(L.h),Math.round(L.N*20)].join("|");
+  if(key===_key)return;_key=key;
+  const dpr=Math.min(2,F.devicePixelRatio||1),bw=Math.round(B.w*dpr),bh=Math.round(B.h*dpr);
+  let alt=null;                                   /* altes Bild merken: der neue Himmel blendet darueber ein */
+  if(Z&&cv.width===bw&&cv.height===bh){alt=doc.createElement("canvas");alt.width=bw;alt.height=bh;alt.getContext("2d").drawImage(cv,0,0);}
+  cv.width=bw;cv.height=bh;cv.style.width=B.w+"px";cv.style.height=B.h+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const C=himmel(L,dunkel,p.himmel,!!p.apple);
+  Z={L,B,C,dunkel,t0:(Z&&Z.t0)||performance.now(),alt,altT:performance.now(),
+     fern:L.N>.04?textur(doc,11,Math.min(1,L.N*.92),mix(C.rand,C.top,.35),mix(C.kern,C.top,.35)):null,
+     nah:L.N>.04?textur(doc,29,L.N,C.rand,C.kern):null,sterne:null};
+  if(C.sterne>0){
+    const s=doc.createElement("canvas");s.width=bw;s.height=bh;const c=s.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);
+    let z=7;const R=()=>{z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;};
+    const n=Math.round(B.w*B.h/900);
+    for(let i=0;i<n;i++){const x=R()*B.w,y=R()*B.h,g=R(),r=g>.97?1.5:g>.8?1:.6,a=.35+R()*.65;
+      c.fillStyle=`rgba(${g>.9?"255,236,214":"236,240,255"},${a})`;c.beginPath();c.arc(x,y,r,0,6.3);c.fill();
+      if(g>.97){c.fillStyle="rgba(236,240,255,.12)";c.beginPath();c.arc(x,y,4,0,6.3);c.fill();}}
+    Z.sterne=s;
+  }
+  zeichne(performance.now());lauf();
+  $("stand").textContent=`${txt} · ${LAGEN[E.lage].name}: Sonne ${L.h>=0?"+":""}${L.h.toFixed(0)}°, Bedeckung ${Math.round(L.N*100)} %`;
+}
+function schicht(tex,sc,v,t,a,B,dy){
+  const w=B.w*sc,h=Math.max(B.h*1.15,w*TH/TW),x=-((t*v)%w);
+  ctx.globalAlpha=a;ctx.drawImage(tex,x,dy,w,h);ctx.drawImage(tex,x+w-1,dy,w,h);ctx.globalAlpha=1;
+}
+const BLENDE=1300;                                /* ms - im Apple-Video rund eine Sekunde */
+function zeichne(now){
+  if(!Z)return;const {B,C,L}=Z,t=(now-Z.t0)/1000,c=ctx;
+  const g=c.createLinearGradient(0,0,0,B.h);g.addColorStop(0,rgb(C.top));g.addColorStop(1,rgb(C.bot));
+  c.fillStyle=g;c.fillRect(0,0,B.w,B.h);
+  if(C.glanz>.02){const s=c.createRadialGradient(B.w*.86,B.h*.06,0,B.w*.86,B.h*.06,B.w*.7);
+    s.addColorStop(0,`rgba(255,244,214,${C.glanz})`);s.addColorStop(1,"rgba(255,244,214,0)");c.fillStyle=s;c.fillRect(0,0,B.w,B.h);}
+  if(Z.sterne){c.globalAlpha=C.sterne;c.drawImage(Z.sterne,0,0,B.w,B.h);c.globalAlpha=1;}
+  if(Z.fern)schicht(Z.fern,1.7,3.2,t,.6,B,-B.h*.05);
+  if(Z.nah)schicht(Z.nah,2.5,7,t+40,L.N>.9?1:.88,B,-B.h*.1);
+  if(Z.alt){const a=1-(now-Z.altT)/BLENDE;
+    if(a>0){c.globalAlpha=a*a*(3-2*a);c.drawImage(Z.alt,0,0,B.w,B.h);c.globalAlpha=1;}else Z.alt=null;}
+}
+function lauf(){if(!raf&&cv&&Z&&sichtbar&&P().himmel)raf=F.requestAnimationFrame(schritt);}
+function schritt(now){raf=0;if(!sichtbar)return;if(now-letzt>=100||(Z&&Z.alt)){letzt=now;zeichne(now);}lauf();}
+
+const REIHEN=[["zEntwurf","entwurf"],["zLage","lage"],["zAnsicht","ansicht"]];
+function knoepfe(){
+  for(const [z,k] of REIHEN)$(z).querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===(k==="ansicht"?(dunkelSoll()?"dunkel":"hell"):E[k])));
+  $("zAnsicht").querySelectorAll("button").forEach(b=>b.disabled=!!P().apple);
+}
+function alles(){knoepfe();ansicht();if(doc&&cv){kopf();neu();}}
+$("zLage").insertAdjacentHTML("beforeend",Object.keys(LAGEN).map(k=>`<button data-v="${k}">${LAGEN[k].name}</button>`).join(""));
+for(const [z,k] of REIHEN)
+  $(z).addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;E[k]=b.dataset.v;
+    if(k==="lage"){const L=LAGEN[E.lage],h=L.h!==undefined?L.h:(F&&cv?jetztLage().h:0);E.ansicht=h<-4?"dunkel":"hell";}
+    merken();alles();});
+$("app").addEventListener("load",()=>setTimeout(einhaengen,300));
+knoepfe();document.documentElement.classList.toggle("dunkel",dunkelSoll());
+</script>
+</body></html>

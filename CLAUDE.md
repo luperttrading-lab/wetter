@@ -2563,6 +2563,23 @@ Symbolen gemessen), oder ganz stehen lassen. GRENZE, dem Nutzer gesagt: Apples B
 gerechnete Szenen ueber den GANZEN Bildschirm mit duenner weisser Schrift; unsere Karte traegt farbige Temperatur,
 Pfeile und neun Kacheln - das Bild kann nur dahinter liegen. Kleine Symbole hat Apple auch (Stundenleiste, Tagesliste:
 weisse Glyphen). Nicht am iPhone geprueft. Wahl steht aus.
+VARIANTENSEITE `designtest.html` (Nutzer 10.11., Bildschirmfilm Apple-Wetter Tokio -> New York: "sogar mit
+Ueberblend-Effekt"; "unsere App ist technisch auf hohem Niveau, sieht aber nach einer Billig-App aus - irgendwie stimmt das
+Design nicht, die Kacheln oben finde ich gut, aber keine Idee, was wir umgestalten"). GEMESSEN im ersten Bildschirm
+(390 x 844, Kopf + Karte): 41 Textelemente, 9 Schriftfarben, 8 Schriftstaerken (400-900, am haeufigsten 800), 10
+Schriftgroessen, 11 Elemente mit Rahmen; dazu Werkzeug sichtbar ("Kacheln waehlen", "Pause", "Alle auf/zu", Version,
+Stationszeile) und ein Farbschleier in Temperaturfarbe hinter der Seite (`#bg`). Die Seite zeigt die ECHTE App in vier
+Fassungen, NUR per CSS in den Rahmen gelegt (Aufbau unveraendert): A wie jetzt; B "ruhig" (Klasse `dz-ruhig`: Temperatur in
+Schriftfarbe statt Temperaturfarbe, Gewicht 300 statt 830; Kachelwerte 650 statt 800 und ohne Farbe; `--line` fast
+unsichtbar = keine Rahmen; `#bg`, Stationszeile, Version weg; "Live"-Abzeichen als gruener Punkt; Abschnittstitel normal
+geschrieben 18 px statt VERSALIEN mit Linie; "jetzt"-Spalte grau statt orange; Fusszeile der Kacheln blass) -> 5 Farben,
+0 Rahmen, Staerken 300-750; C = B + Himmel oben in der Karte (wie himmeltest, kraeftig); D "wie Apple" (`dz-apple`, immer
+dunkel: Leinwand als erstes Kind von <body> hinter Kopf UND Karte, Karte durchsichtig, Zahl 96 px Gewicht 200 weiss und
+mittig, Symbol weg, Kacheln als Glas mit backdrop-filter). UEBERBLENDEN: `neu()` merkt das alte Bild (`Z.alt`), der neue
+Himmel wird darunter gezeichnet, das alte blendet in `BLENDE` = 1,3 s aus (im Film rund 1 s). `himmel(...,apple)` laesst in D
+hellere Himmel zu (bis 40 % statt 34 %). FALLE: `#bg` (fixed, z-index 0) liegt sonst UEBER einer Leinwand im <body>.
+Nicht am iPhone geprueft; die duenne Zahl steht im Pruefstand gesperrt ("3 , 5"), das ist dessen Schrift. Wahl steht aus;
+bei einer Wahl B/C/D wird das ein Umbau von index.html in Schritten (Farben, Schrift, Rahmen, Hintergrund einzeln).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
