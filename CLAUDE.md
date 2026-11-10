@@ -2552,7 +2552,13 @@ kleinen Bild - evtl. werden 4 auch zu klein - Apple hat das aber so". Eingebaut:
 gemerkt `nied`, Voreinstellung "4"): "3 wie jetzt" | "4 fein" (vier Tropfen Massstab 0,46 statt 0,62-0,68 in W-Form
 `P4`, Schnee vier Sterne Radius 1,75 mit Strich 0,8 statt drei mit 1,15, Hagel vier Koerner r 1,2) | "4 Striche" (Regen
 als vier schraege Striche 1,15 breit wie bei Apple, Schnee wie "4 fein"). Befund: bei 28 px bleibt der Schnee in allen
-drei Fassungen klein (Stern ~4 px); in der hellen Ansicht ist er auf der cremefarbenen Karte blass. Wahl steht aus.
+drei Fassungen klein (Stern ~4 px); in der hellen Ansicht ist er auf der cremefarbenen Karte blass.
+GEWAEHLT (Nutzer 10.11.): "4 sind besser und Striche statt Tropfen. Und beim Nebel 3 statt 2 und Wind 4 statt 3
+Puste-Striche." -> Voreinstellung `NIED` "strich" (Marke `nv2`, eine aeltere gespeicherte Wahl gilt nicht mehr); NEBEL drei
+Baender (y 16 / 19,1 / 22,2, Strich 1,7 statt 2,1, Wolke 0,9 hoeher); WIND vier Puste-Striche `band(y,x0,x1,w,dir,i)`
+(Strich 1,7 statt 2,25): zwei mit Kringel nach oben, einer nach unten, der vierte glatt, Enden VERSETZT - uebereinander
+gestapelt sahen die drei Kringel wie eine 8 aus. Offen: Staerke der Bewegung, wo sie laeuft, und ob die neue Zeichnung
+(Striche, Sterne, Nebel, Wind) auch stehend in `icon()` der App soll.
 VARIANTENSEITE `himmeltest.html` (Nutzer 10.11., sieben Screenshots der Apple-Wetter-App: "in anderen Apps gibt es
 halt ein richtiges schoenes Bild als Hintergrund und keine Symbole"): die echte App im Rahmen, dazu eine Leinwand `#hiCv`
 als erstes Kind von `#hero` (z-index -2, also UNTER `#waCv` - Regen/Schnee der App fallen davor). GEMALT, kein Foto:
