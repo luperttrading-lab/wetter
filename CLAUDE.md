@@ -1215,6 +1215,7 @@ Tagesspitze ein Maximum ueber 10-Minuten-Werten; E[max] >= max E. Naechster
 Schritt (Nutzer zugestimmt, steht aus): Spitze aus Stunden mit erwarteter
 Sonne (MOSMIX `sunshine` >= ~10 min) mit Klar-Durchlass rechnen, nur fuer die
 Zahl "erw.", nicht fuer die Saeulen - dann 2-3 Wochen vorwaerts vergleichen.
+ERLEDIGT in v6.06 auf anderem Weg (Potenz auf roh/klar, p = 0,6) - siehe die Notiz v6.06.
 
 ### Erledigt (v4.33): Vitamin D - zweite Flaeche fuer Sonne >= 45 Grad
 
@@ -2457,6 +2458,29 @@ reduzieren" = stehendes Bild. Grundsatz (mein Vorschlag, Nutzer zugestimmt): ani
 PASSIERT; Sonne, Wolken, klare Nacht bleiben ruhig. Zeichnen kostet im Pruefstand < 0,1 ms je Bild (101 Tropfen).
 Wahl steht aus. Fuer die App spaeter: Ausloeser aus Radar am Ort/Station (wie Kachel "Regen") bzw. Bright-Sky-
 `condition`, Pause bei unsichtbarem Startbereich (IntersectionObserver), `?wettertest` zum Erzwingen.
+v6.06 (Nutzer 10.11.: "1-5 durchfuehren" nach einer Durchsicht der App): (1) STARTFEHLER. `typeof X!=="undefined"`
+schuetzt NICHT vor einem top-level `let`/`const`, dessen Zeile noch nicht gelaufen ist (TDZ -> ReferenceError). `kzRender()`
+laeuft beim Start vor `let _rainHourly`: die Kachel "Regen 24 h" warf bei jedem ersten Zeichnen (nur als Warnung in der
+Konsole sichtbar, die Kachel blieb leer bis zur naechsten Datenlieferung). Jetzt `var` fuer `_rainHourly`/`_lastFcJ`,
+`lastUVH`, `BFS_UV_STATIONS`, `_issSat`..., `_issHorizonDays`, `fullRows`... - alles, was Kacheln vor seiner Zeile lesen.
+Regel: was `kzRender` anfasst, wird mit `var` erklaert. (2) REGENKARTE fest (Nutzer waehlte Relief / Verlauf / blass):
+Untergrund Esri World_Hillshade, je Kachel per multiply mit #bcc0c5 (`RK_TILE`, `RK_FILL`), Farben = Palette E der Balken
+(`RK_PAL` aus `REGEN_FARB`, deckend), kleinste Radarstufe (roh < 0,2 mm/h) mit 40 % (`RK_BLASS`). Entfernt: die drei
+Testzeilen (`#rkGrund`, `.rk-grund`), `RK_GRUND`, `RK_RGBA`, `RK_GRAU_RGBA`, `RK_E_RGBA`, `rkGrund`/`rkFarbe`/`rkSchwach`/
+`rkPalette`; gespeicherte `rk_grund`/`rk_farbe`/`rk_schwach` werden geloescht. Balken und Karte haben damit wieder
+DIESELBEN Farben. Wolkenkarte unveraendert (Satellit). Zurueckholen aus `wetter-giessen-v6_05.html`. Geprueft mit
+eingespielten Stufen 0,12-60 mm/h (10.11. war trocken), hell und dunkel. (3) UV "erw." KORRIGIERT (der offene Schritt aus
+"Prognose gegen Messung"): `uvErwSpitze(roh,klar)` = klar x (roh/klar)^`UV_ERW_P`, p = 0,6 - nur die ZAHL in der Kachel
+"UV heute"/"UV morgen" (`uvTagRechnen().prog.max`, `kzUvMorgen().erw`; die Rohwerte stehen daneben als `roh`), die blassen
+Prognosesaeulen bleiben das Stundenmittel. Grund (Jensen): MOSMIX `solar` ist ein Stundenmittel, die Tagesspitze ein
+Maximum ueber 10-Minuten-Werte. Fit an 60 Tag-Paaren (morgens + Vortag, 30.09.-09.11.): p = 0,59 (Bootstrap 95 % 0,47-0,71).
+Jeder Tag aus den anderen vorhergesagt: Morgenprognose Bias -0,24 -> -0,01 UV, mittlerer Fehler 0,29 -> 0,19; Vortag
+-0,25 -> -0,05, 0,29 -> 0,24. Nach Bewoelkung (roh/klar): 0,3-0,5 Bias -0,39 -> 0,00 (n=9), 0,5-0,7 -0,33 -> -0,06 (14),
+0,7-0,85 -0,21 -> -0,05 (23), ab 0,85 -0,11 -> -0,01 (13). UNTER 0,3 nur EIN Tag (+0,16 zu hoch) - dort ist die Potenz
+eine Extrapolation (10.11.: morgen roh 0,21 -> erw. 0,43 bei klar 1,26). Nur Herbsttage (Klarwert 1,1-3,5); ob p im
+Sommer haelt, ist offen. `uv_prognose.py` schreibt deshalb `erw_roh` mit und `_auswertung.korrektur` nennt `p_fit` neben
+`p_app` - weicht p_fit ab ~30 neuen Tagen deutlich von 0,6 ab, `UV_ERW_P` nachziehen. FALLE im Pruefstand: ein Sperrfilter
+"api.open-meteo.com" trifft als Teilwort auch "air-quality-api.open-meteo.com" - "//api.open-meteo.com" nehmen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
