@@ -46,7 +46,8 @@ Stundenleiste (28&nbsp;px). Ganz unten läuft die echte App damit. Bewegt wird n
 <div class="warn" id="warn" hidden>Dein Gerät hat „Bewegung reduzieren“ eingeschaltet. Auf dieser Seite bewegen sich die Symbole trotzdem –
 in der App bekäme das denselben Schalter wie die Wetter-Animation (Aus | Standbild | Bewegt).</div>
 
-<div class="leiste" id="zThema"><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
+<div class="leiste"><span id="zThema" style="display:contents"><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></span>
+<span style="margin-left:8px">Regen, Schnee:</span><span id="zNied" style="display:contents"><button data-v="3">3 wie jetzt</button><button data-v="4">4 fein</button><button data-v="strich">4 Striche</button></span></div>
 
 <div id="liste"></div>
 
@@ -60,8 +61,11 @@ in der App bekäme das denselben Schalter wie die Wetter-Animation (Aus | Standb
 "use strict";
 const $=id=>document.getElementById(id);
 const NAMEN=[["clear-day","Klar"],["partly-cloudy-day","Teils bewölkt"],["cloudy","Bewölkt"],["rain","Regen"],["thunderstorm","Gewitter"],["snow","Schnee"],
-             ["sleet","Schneeregen"],["hail","Hagel"],["fog","Nebel"],["wind","Wind"],["clear-night","Klar, Nacht"],["partly-cloudy-night","Teils, Nacht"]];
+             ["sleet","Schneeregen"],["hail","Hagel"],["fog","Nebel"],["wind","Wind"],["clear-night","Klare Nacht"],["partly-cloudy-night","Nacht, teils bewölkt"]];
 let gid=0;
+/* Niederschlag unter der Wolke: "3" = wie in der App, "4" = vier feinere Tropfen/Flocken, "strich" = vier schraege Striche
+   (so zeichnet Apple den Regen); Schnee ist bei "4" und "strich" gleich: vier feine Sterne in zwei Reihen. */
+let NIED="4";
 const f=n=>+n.toFixed(2);
 
 /* Bewegung je Staerke. rot = Sekunden fuer eine volle Drehung der Strahlen, puls = Atmen der Sonnenscheibe (s, Anteil),
@@ -101,21 +105,33 @@ function iconBew(name,size,M){gid++;const id="g"+gid;
   const drop=(x,y,sc,i)=>M?fall(dropP(x,y-1.1,sc),3.3,M.td,f(-M.td*[0,.55,.25][i%3])):dropP(x,y,sc);
   const flakeP=(x,y,r)=>[0,60,120].map(a=>`<line x1="${x-r}" y1="${y}" x2="${x+r}" y2="${y}" stroke="#a9cdeb" stroke-width="1.15" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
   const flake=(x,y,r,i)=>M?fall(flakeP(x,y-1.6,r),3.4,M.tf,f(-M.tf*[0,.6,.3][i%3]),[.5,-.45,.4][i%3]):flakeP(x,y,r);
+  /* vier feine: Plaetze in zwei Reihen (W-Form), damit sie sich nicht beruehren */
+  const P4=[[6.4,0],[10.5,1],[14.6,0],[18.7,1]],V4=[0,.5,.25,.75];
+  const tropf4=(x,y,i)=>NIED==="strich"
+    ?(()=>{const l=`<line x1="${f(x+.55)}" y1="${M?f(y-1.1):y}" x2="${f(x-.55)}" y2="${f((M?y-1.1:y)+2.9)}" stroke="#3f8bd6" stroke-width="1.15" stroke-linecap="round"/>`;
+        return M?`<g>${l}<animateTransform attributeName="transform" type="translate" values=".4 -1.1;-1.2 3.3" dur="${M.td}s" begin="${f(-M.td*V4[i])}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.18;.72;1" dur="${M.td}s" begin="${f(-M.td*V4[i])}s" repeatCount="indefinite"/></g>`:l;})()
+    :(M?fall(dropP(x,y-1.1,.46),3.3,M.td,f(-M.td*V4[i])):dropP(x,y,.46));
+  const flockeP4=(x,y,r)=>[0,60,120].map(a=>`<line x1="${f(x-r)}" y1="${y}" x2="${f(x+r)}" y2="${y}" stroke="#79aee0" stroke-width=".8" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join("");
+  const flocke4=(x,y,i)=>M?fall(flockeP4(x,y-1.6,1.75),3.2,M.tf,f(-M.tf*V4[i]),[.45,-.4,.4,-.45][i]):flockeP4(x,y,1.75);
+  const stern=(x,y,r,i)=>`<path d="M${x} ${f(y-r)}Q${x} ${y} ${f(x+r)} ${y}Q${x} ${y} ${x} ${f(y+r)}Q${x} ${y} ${f(x-r)} ${y}Q${x} ${y} ${x} ${f(y-r)}Z" fill="#f3d06b">${M?`<animate attributeName="opacity" values="1;.15;1" keyTimes="0;.5;1" ${WEICH(2)} dur="${f(M.puls*[.5,.78,.63][i])}s" begin="${f(-i*.9)}s" repeatCount="indefinite"/>`:""}</path>`;
   const bolt=`<path d="M13.2 15.4l-3.4 4.9h2.4l-1.4 3.9 4.4-5.5h-2.6l1.4-3.3z" fill="#f7a81b" stroke="#e08c00" stroke-width=".35" stroke-linejoin="round">${M?`<animate attributeName="opacity" values="1;1;.15;1;.3;1;1" keyTimes="0;.6;.64;.7;.74;.8;1" dur="${M.blitz}s" repeatCount="indefinite"/>`:""}</path>`;
   const band=(y,len,w,i)=>`<path d="M${13.6-len} ${y}h${len-2.4}a${w} ${w} 0 1 0 ${-w} ${-w}" fill="none" stroke="url(#${id}w)" stroke-width="2.25" stroke-linecap="round">${M?pendel(M.ws,0,f(M.wt*.42),f(-i*M.wt*.14)):""}</path>`;
   let defs="",body="";
   switch(name){
     case "clear-day": defs=defsSun; body=sun(12,12,6.1,11.7,3.8,1.4); break;
-    case "clear-night": defs=defsMoon; body=`<g>${moonP}${M?`<animateTransform attributeName="transform" type="rotate" values="-3 12 12;3 12 12;-3 12 12" keyTimes="0;.5;1" ${WEICH(2)} dur="${f(M.wt*1.2)}s" repeatCount="indefinite"/>`:""}</g>`; break;
+    case "clear-night": defs=defsMoon; body=`<g>${moonP}${M?`<animateTransform attributeName="transform" type="rotate" values="-3 12 12;3 12 12;-3 12 12" keyTimes="0;.5;1" ${WEICH(2)} dur="${f(M.wt*1.2)}s" repeatCount="indefinite"/>`:""}</g>`+stern(16.2,7.4,2.3,0)+stern(20.2,11.6,1.45,1)+stern(20.6,4.4,1.15,2); break;
     case "partly-cloudy-day": defs=defsSun+defsCloud; body=sun(14.7,8.3,4.3,8,2.5,1.05)+cloud(2,3,.92,null,1); break;
     case "partly-cloudy-night": defs=defsCloud+defsMoon; body=`<g transform="translate(3,-3) scale(.8)">${moonP}</g>`+cloud(2,3,.92,null,1); break;
     case "cloudy": defs=defsCloud; body=cloud(1.5,2.5,1,null,1,.18); break;
     case "fog": defs=defsCloud+defsWind; body=cloud(1.5,-1.4,.95,null,.5)
       +[[18.6,15.2],[21.8,11.2]].map(([y,len],i)=>`<path d="M${19.2-len} ${y}h${len}" fill="none" stroke="url(#${id}w)" stroke-width="2.1" stroke-linecap="round">${M?pendel(M.ws,0,f(M.wt*.7),f(-i*M.wt*.35)):""}</path>`).join(""); break;
-    case "rain": defs=defsCloud+defsDrop; body=[[8.4,16.6],[12.4,17.9],[16.4,16.6]].map(([x,y],i)=>drop(x,y,.62+(i%2)*.06,i)).join("")+cloud(1.5,0,1,null,.4); break;
-    case "sleet": defs=defsCloud+defsDrop; body=drop(8.6,16.4,.6,0)+drop(16.4,16.4,.6,1)+flake(12.5,19.9,1.6,1)+cloud(1.5,0,1,null,.4); break;
-    case "snow": defs=defsCloud; body=[[8.1,19.4],[12.5,20.7],[16.9,19.4]].map(([x,y],i)=>flake(x,y,1.55,i)).join("")+cloud(1.5,0,1,null,.4); break;
-    case "hail": defs=defsCloud+defsDrop; body=[[8.6,19.4],[12.5,20.4],[16.4,19.4]].map(([x,y],i)=>{const k=`<circle cx="${x}" cy="${M?y-1.4:y}" r="1.5" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".5"/>`;return M?fall(k,3,f(M.td*.85),f(-M.td*[0,.5,.25][i])):k;}).join("")+cloud(1.5,0,1,null,.4); break;
+    case "rain": defs=defsCloud+defsDrop; body=(NIED==="3"?[[8.4,16.6],[12.4,17.9],[16.4,16.6]].map(([x,y],i)=>drop(x,y,.62+(i%2)*.06,i)).join("")
+      :P4.map(([x,r],i)=>tropf4(x,16.5+r*1.9,i)).join(""))+cloud(1.5,0,1,null,.4); break;
+    case "sleet": defs=defsCloud+defsDrop; body=(NIED==="3"?drop(8.6,16.4,.6,0)+drop(16.4,16.4,.6,1)+flake(12.5,19.9,1.6,1)
+      :tropf4(6.4,16.5,0)+flocke4(10.5,20.9,1)+tropf4(14.6,16.5,2)+flocke4(18.7,20.9,3))+cloud(1.5,0,1,null,.4); break;
+    case "snow": defs=defsCloud; body=(NIED==="3"?[[8.1,19.4],[12.5,20.7],[16.9,19.4]].map(([x,y],i)=>flake(x,y,1.55,i)).join("")
+      :P4.map(([x,r],i)=>flocke4(x,18.6+r*2.7,i)).join(""))+cloud(1.5,0,1,null,.4); break;
+    case "hail": defs=defsCloud+defsDrop; body=(NIED==="3"?[[8.6,19.4],[12.5,20.4],[16.4,19.4]]:P4.map(([x,r])=>[x,18.6+r*2.4])).map(([x,y],i)=>{const k=`<circle cx="${x}" cy="${M?y-1.4:y}" r="${NIED==="3"?1.5:1.2}" fill="#bcd8f0" stroke="#7fa9cd" stroke-width="${NIED==="3"?.5:.4}"/>`;return M?fall(k,3,f(M.td*.85),f(-M.td*V4[i])):k;}).join("")+cloud(1.5,0,1,null,.4); break;
     case "thunderstorm": defs=defsCloud+defsDark; body=cloud(1.5,0,1,`url(#${id}d)`,.4)+bolt; break;
     case "wind": defs=defsWind; body=`<g filter="url(#${id}wf)">`+band(8.9,13.2,2.2,0)+band(13,16.4,2.45,1)+band(17.1,11.4,2,2)+`</g>`; break;
     default: defs=defsCloud; body=cloud(1.5,2.5,1,null,1);
@@ -148,15 +164,18 @@ function sparen(win,wurzel){
 let _spSeite=null,_spApp=null;
 
 /* ---------- Hell/Dunkel und die echte App ---------- */
-const E={thema:"hell",stufe:"deutlich",wo:"alle",sparen:true};
+const E={thema:"hell",stufe:"deutlich",wo:"alle",nied:"4",sparen:true};
 try{Object.assign(E,JSON.parse(localStorage.getItem("symbolbewegt")||"{}"));}catch(e){}
 if(!(E.stufe in STUFEN))E.stufe="deutlich";
 /* nur fuer Messungen abschaltbar, wird nicht gemerkt */
 E.sparen=true;
+if(!/^(3|4|strich)$/.test(E.nied))E.nied="4";
+NIED=E.nied;
 function merken(){try{localStorage.setItem("symbolbewegt",JSON.stringify(E));}catch(e){}}
 let F=null,appDa=false;
 function knoepfe(){
   $("zThema").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.thema));
+  $("zNied").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.nied));
   $("zApp").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.stufe));
   $("zWo").querySelectorAll("button").forEach(b=>b.classList.toggle("an",b.dataset.v===E.wo));
 }
@@ -182,6 +201,7 @@ function appWarten(){
 }
 $("zApp").innerHTML=`<span>Stärke:</span>`+[["aus","Aus"],["ruhig","Ruhig"],["deutlich","Deutlich"],["lebhaft","Lebhaft"]].map(s=>`<button data-v="${s[0]}">${s[1]}</button>`).join("");
 $("zThema").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.thema=b.dataset.v;merken();knoepfe();thema();});
+$("zNied").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.nied=NIED=b.dataset.v;merken();knoepfe();bauen();appSatz();});
 $("zApp").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.stufe=b.dataset.v;merken();knoepfe();appSatz();});
 $("zWo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;E.wo=b.dataset.v;merken();knoepfe();appSatz();});
 $("app").addEventListener("load",()=>setTimeout(appWarten,300));
