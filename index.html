@@ -1277,6 +1277,53 @@ html:root #strip .col .v{color:var(--ink)!important;font-weight:600}
 html:root #strip .col .t{font-weight:500}
 html:root #strip .now{background:rgba(23,32,46,.06);box-shadow:none}
 html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
+
+/* ===== v6.12 HIMMEL (Schritt 2 von Entwurf E; Vorlage designtest.html, Entwurf E) =====
+   Ansicht "himmel" (Klasse am <html>, dazu immer "dunkel"): ein gemalter Himmel liegt fest hinter der ganzen Seite
+   (#hi), der Kasten oben ist weg, die Temperatur gross, duenn, weiss und mittig, alle Karten sind Glas (--card
+   durchscheinend). Aufbau des Himmels: je Bild eine Szene .hiS (Verlauf als CSS, Sterne und zwei Wolkenlagen als
+   kleine Leinwaende, die der Browser streckt und per transform schiebt - kein JS je Bild). Neue Szene blendet ueber
+   die alte (1,3 s). */
+#hi{display:none}
+html:root.himmel,html:root.himmel body{background:var(--hi-o,#090d26)}
+html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:0;overflow:hidden;pointer-events:none;
+  background:linear-gradient(var(--hi-o,#090d26),var(--hi-u,#363e70))}
+.hiS{position:absolute;left:0;top:0;overflow:hidden;opacity:0;transition:opacity 1.3s ease}
+.hiS.an{opacity:1}
+.hiS>canvas{position:absolute;left:0;top:0;display:block}
+.hiS>canvas.hiW{will-change:transform;animation:hiZug var(--hd,200s) var(--hst,linear) var(--hv,0s) infinite}
+@keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
+html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
+html.histeh .hiS>canvas.hiW{animation:none}
+html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#c3cee0;--faint:#a2b0c6}
+html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:none}
+html:root.himmel .pvtage button.on,html:root.himmel .pvsicht button.on,html:root.himmel .mj-tip{color:#1a212c}
+html:root.himmel header,html:root.himmel .hero{text-shadow:0 1px 10px rgba(0,0,0,.35)}
+html:root.himmel .hero{background:transparent;box-shadow:none;padding-top:4px}
+html:root.himmel .htop{opacity:.85}
+html:root.himmel .place small{color:rgba(255,255,255,.72)}
+html:root.himmel .ver{color:rgba(255,255,255,.6)}
+html:root.himmel .main{flex-direction:column;align-items:center;gap:0;margin-top:2px}
+html:root.himmel .temp{font-size:96px;font-weight:200;color:#fff!important;line-height:1;letter-spacing:-.04em;margin-left:.18em}
+html:root.himmel .temp .deg{color:#fff;font-weight:300}
+html:root.himmel .cnd{margin:4px 0 0;flex-direction:row;gap:8px}
+html:root.himmel .cnd .ic{width:30px;height:30px}
+html:root.himmel .cnd .lbl{font-size:19px;font-weight:500;color:#fff}
+html:root.himmel .feel{flex-direction:column;align-items:center;gap:3px;text-align:center;margin-top:8px;color:#fff}
+html:root.himmel .feel .hl{flex:0 0 auto;margin-top:0}
+html:root.himmel .feel .hl,html:root.himmel .feel .hl .dn,html:root.himmel .feel .hl .up,html:root.himmel .feel .hl .dl{color:#fff}
+html:root.himmel .ydiff{justify-content:center;text-align:center;color:rgba(255,255,255,.85)}
+html:root.himmel .ydiff .ys{color:rgba(255,255,255,.85)}
+html:root.himmel .when .a{color:rgba(255,255,255,.8)}
+html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html:root.himmel .kz .ki .l{color:rgba(255,255,255,.62)}
+html:root.himmel .kz .ki .s{color:rgba(255,255,255,.7)}
+html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
+html:root.himmel .kzfoot{opacity:.75;color:#fff}
+html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 8px rgba(0,0,0,.45)}
+html:root.himmel .kalle button{color:rgba(255,255,255,.8)}
+html:root.himmel .loc-box{background:#141a23}
+html.dunkel .evt-s{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1304,8 +1351,11 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    einem halben Grad) — die grosse Astronomie der App steht erst weiter unten
    zur Verfuegung, und bis dahin waere das Bild schon gezeichnet. */
 (function(){try{
-  var w=localStorage.getItem("ansicht")||"auto",d;
-  if(w==="dunkel")d=true;
+  var w=localStorage.getItem("ansicht")||"himmel",d;
+  /* v6.12: die Ansicht "Himmel" (Entwurf E) ist Voreinstellung - einmalig auch fuer alle, die schon eine Ansicht
+     gewaehlt hatten (Marke ansichtV2); hell / dunkel / nach der Sonne bleiben ueber den Knopf erreichbar. */
+  if(!localStorage.getItem("ansichtV2")){w="himmel";try{localStorage.setItem("ansicht","himmel");localStorage.setItem("ansichtV2","1");}catch(e3){}}
+  if(w==="dunkel"||w==="himmel")d=true;
   else if(w==="hell")d=false;
   else{
     var la=50.6481,lo=8.6743;                    // Wettenberg als Rueckfall
@@ -1322,9 +1372,16 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
     d=mu<=-0.06;                                  // Sonne tiefer als etwa 3,5 Grad unter dem Horizont
   }
   document.documentElement.classList.toggle("dunkel",d);
+  document.documentElement.classList.toggle("himmel",w==="himmel");
+  if(w==="himmel"){                               // die Himmelsfarben vom letzten Mal, damit beim Start nichts aufblitzt
+    var hf=String(localStorage.getItem("himmelFarbe")||"").split("|"),hre=/^rgba\([\d,. ]+\)$/;
+    if(hf.length>=2&&hre.test(hf[0])&&hre.test(hf[1])){document.documentElement.style.setProperty("--hi-o",hf[0]);document.documentElement.style.setProperty("--hi-u",hf[1]);}
+    if(hf.length>=5&&hre.test(hf[4]))document.documentElement.style.setProperty("--hi-k",hf[4]);
+  }
 }catch(e){}})();
 </script>
 <div id="bg"></div>
+<div id="hi" aria-hidden="true"></div>
 <div id="evtToast" role="button" tabindex="0" aria-live="polite" hidden>
   <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
   <div class="tt" id="evtToastT"></div>
@@ -1342,7 +1399,7 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.11</span>
+      <span class="ver">v6.12</span>
     </div>
   </header>
 
@@ -1561,8 +1618,8 @@ function themaNeuZeichnen(){
 }catch(err){console.warn("ansicht",err&&err.message);}}
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
-  get muted(){  return _dunkel?"#a3b2c6":"#5c6b80";},
-  get faint(){  return _dunkel?"#7c8a9e":"#9aa7b8";},
+  get muted(){  return _dunkel?(hiAn()?"#c3cee0":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint
+  get faint(){  return _dunkel?(hiAn()?"#a2b0c6":"#7c8a9e"):"#9aa7b8";},
   get karte(){  return _dunkel?"#1a212c":"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
@@ -1694,7 +1751,8 @@ function iconBewegt(name,size,M){
    Stufe 2, bei "Bewegung reduzieren" 0 - eine gewaehlte Stufe gilt immer (wie bei der Wetter-Animation, v6.07). */
 function sbEigen(){try{var v=localStorage.getItem("symbBew");return /^[0-3]$/.test(v||"")?+v:null;}catch(e){return null;}}
 function sbStufe(){var e=sbEigen();return e!=null?e:(waReduziert()?0:2);}
-function symbGross(name){var s=sbStufe();return s?iconBewegt(name,54,SB_STUFEN[s]):icon(name,54);}
+function sbGroesse(){return hiAn()?30:54;}                 // v6.12: in der Ansicht "Himmel" klein neben dem Wort
+function symbGross(name){var s=sbStufe(),g=sbGroesse();return s?iconBewegt(name,g,SB_STUFEN[s]):icon(name,g);}
 function sbKlasse(){document.documentElement.classList.toggle("sbw",sbEigen()>0);}
 function sbSetzen(s){
   try{localStorage.setItem("symbBew",String(s));}catch(e){}
@@ -1723,6 +1781,173 @@ function sbInit(){
   c.setAttribute("role","button");c.setAttribute("aria-label","Bewegung des Wettersymbols umschalten");
   c.addEventListener("click",function(){var s=(sbStufe()+1)%4;sbSetzen(s);sbTipp(s);});
   if(window.IntersectionObserver){try{new IntersectionObserver(function(es){document.documentElement.classList.toggle("sbaus",!es[0].isIntersecting);}).observe(document.getElementById("hero"));}catch(e){}}
+}
+/* ===== v6.12 HIMMEL (Entwurf E, Schritt 2; Vorlage designtest.html) =====
+   Gemalt, kein Foto: Verlauf nach Sonnenhoehe (Tag blau, um den Horizont violett/orange, Nacht marineblau), ab 50 %
+   Bedeckung ins Grau gezogen (Regen dunkler). Wolken = Rauschen in 5 Oktaven (320x200, in beiden Richtungen nahtlos),
+   Schwelle = QUANTIL, damit wirklich N der Flaeche Wolke ist; zwei Lagen, die verschieden schnell ziehen (3,2 und 7
+   px/s). Sterne unter -3 Grad Sonnenhoehe, nur in der oberen Bildhaelfte. hiPassen() haelt den Himmel so dunkel, dass
+   weisse Schrift lesbar bleibt (Helligkeit hoechstens 40 %, Wolken 56 %).
+   Anders als die Testseite (Leinwand, 10 Bilder/s in JS): die Lagen sind kleine Leinwaende (640 x 200..600), die der
+   Browser streckt und per CSS-transform in Zehntelsekunden-Schritten schiebt - je Bild laeuft kein JS.
+   Nur var und Funktionen (Regel aus v6.06). */
+var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:null,texN:null};
+var HI_TW=320,HI_TH=200,HI_PER=3,HI_PY=4,HI_BLENDE=1300;
+/* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb */
+var HI_LAGEN={klar:{h:34,N:.04},heiter:{h:34,N:.35},wolkig:{h:30,N:.68},bedeckt:{h:24,N:1},regen:{h:20,N:1,nass:1},
+  abend:{h:-1.5,N:.3},nacht:{h:-32,N:.03},nachtw:{h:-32,N:.5},nachtb:{h:-32,N:1}};
+function hiAn(){return document.documentElement.classList.contains("himmel");}
+function hiKl(x,a,b){return Math.max(a==null?0:a,Math.min(b==null?1:b,x));}
+function hiSm(a,b,x){var t=hiKl((x-a)/(b-a));return t*t*(3-2*t);}
+function hiMix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function hiLum(c){return (.2126*c[0]+.7152*c[1]+.0722*c[2])/255;}
+function hiRgb(c,a){return "rgba("+Math.round(c[0])+","+Math.round(c[1])+","+Math.round(c[2])+","+(a==null?1:a)+")";}
+function hiRauschen(seed){
+  function h(x,y,per,py){x=((x%per)+per)%per;y=((y%py)+py)%py;var n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
+    n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}
+  function vn(x,y,per,py){var xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+    var a=h(xi,yi,per,py),b=h(xi+1,yi,per,py),c=h(xi,yi+1,per,py),d=h(xi+1,yi+1,per,py);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;}
+  return function(x,y,per,py){var s=0,am=1,f=1,n=0;for(var o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7,per*f,py*f);n+=am;am*=.52;f*=2;}return s/n;};
+}
+function hiFeld(seed){
+  if(HI.feld[seed])return HI.feld[seed];
+  var fb=hiRauschen(seed),wp=hiRauschen(seed+17),F=new Float32Array(HI_TW*HI_TH);
+  for(var y=0;y<HI_TH;y++)for(var x=0;x<HI_TW;x++){
+    var u=x/HI_TW*HI_PER,v=y/HI_TH*HI_PY,w=wp(u,v,HI_PER,HI_PY)-.5;
+    F[y*HI_TW+x]=fb(u,v+w*1.1,HI_PER,HI_PY);}
+  var S=Float32Array.from(F).sort();
+  return HI.feld[seed]={F:F,S:S};
+}
+function hiTextur(seed,N,rand,kern){
+  var fs=hiFeld(seed),F=fs.F,S=fs.S,cv=document.createElement("canvas");cv.width=HI_TW;cv.height=HI_TH;
+  var c=cv.getContext("2d"),im=c.createImageData(HI_TW,HI_TH),D=im.data;
+  var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[0],hi=S[S.length-1];
+  for(var i=0;i<F.length;i++){
+    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo+.08,hi-.08,f):hiSm(thr,thr+.28,f);
+    D[i*4]=rand[0]+(kern[0]-rand[0])*s;D[i*4+1]=rand[1]+(kern[1]-rand[1])*s;D[i*4+2]=rand[2]+(kern[2]-rand[2])*s;D[i*4+3]=a*255;}
+  c.putImageData(im,0,0);return cv;
+}
+function hiPassen(c,wolke){var L=hiLum(c),Lmax=wolke?.56:.4;return L>Lmax?c.map(function(v){return v*Lmax/L;}):c;}
+function hiFarben(L){
+  var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.5,1,N)*(L.nass?1:.88);
+  var top=hiMix([9,13,38],[46,112,208],tag),bot=hiMix([54,62,112],[152,202,246],tag);
+  top=hiMix(top,[72,70,134],daem*.6);bot=hiMix(bot,[244,164,118],daem*.8);
+  var gt=hiMix([22,26,36],L.nass?[92,102,118]:[112,124,142],tag),gb=hiMix([44,50,66],L.nass?[138,148,162]:[172,182,196],tag);
+  top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
+  var rand=hiMix([92,98,138],[255,255,255],tag),kern=hiMix([58,62,98],[214,222,236],tag);
+  rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
+  var or=hiMix([78,84,104],L.nass?[150,158,172]:[206,212,222],tag),ok=hiMix([40,45,60],L.nass?[98,108,124]:[150,160,176],tag);
+  rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
+  return {top:hiPassen(top,0),bot:hiPassen(bot,0),rand:hiPassen(rand,1),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.3};
+}
+/* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
+   im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
+function hiLage(){
+  if(HI.test&&HI_LAGEN[HI.test])return HI_LAGEN[HI.test];
+  var mu=null;try{if(window.satellite)mu=_sunMu(Date.now());}catch(e){mu=null;}
+  if(mu==null||!isFinite(mu)){try{mu=_muFallback(Date.now());}catch(e){mu=null;}}
+  var h=(mu==null||!isFinite(mu))?-20:Math.round(Math.asin(hiKl(mu,-1,1))*360/Math.PI)/2;
+  var ic=_zuIc,N=null,nass=0;
+  if(ic==null){
+    var vor=[];try{vor=String(localStorage.getItem("himmelFarbe")||"").split("|");}catch(e){}
+    N=(vor.length>=4&&isFinite(+vor[2]))?+vor[2]:.3;nass=(vor.length>=4&&+vor[3])?1:0;
+  }else{
+    try{if(snap&&snap.cloud!=null&&isFinite(snap.cloud))N=snap.cloud/100;}catch(e){}
+    if(N==null)N=/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95;
+    nass=/rain|sleet|snow|hail|thunder/.test(ic)?1:0;
+  }
+  return {h:h,N:nass?Math.max(N,.92):hiKl(N),nass:nass};
+}
+/* Die Hoehe grosszuegig: in Safari blendet die Leiste ein und aus (innerHeight springt um bis zu ~180 px) - der
+   Himmel soll dabei nicht neu gebaut werden. */
+function hiMass(){
+  var ih=window.innerHeight||600,sh=(window.screen&&screen.height)||0;
+  return {w:document.documentElement.clientWidth||window.innerWidth||390,h:Math.max(ih,Math.min(sh,ih+200))};
+}
+function hiSterne(sz,B,a,hmax){
+  var hs=Math.min(B.h*.86,hmax||1e9),d=Math.min(2,window.devicePixelRatio||1),c=document.createElement("canvas");
+  c.width=Math.round(B.w*d);c.height=Math.round(hs*d);c.style.cssText="width:"+B.w+"px;height:"+hs.toFixed(1)+"px;opacity:"+a.toFixed(2);
+  var g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
+  var z=7;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
+  var n=Math.round(B.w*B.h/900);
+  for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
+    if(al<.03||y>hs+5)continue;
+    g.fillStyle="rgba("+(q>.9?"255,236,214":"236,240,255")+","+al.toFixed(3)+")";g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
+    if(q>.97){g.fillStyle="rgba(236,240,255,.12)";g.beginPath();g.arc(x,y,4,0,6.3);g.fill();}}
+  sz.appendChild(c);
+}
+/* Eine Wolkenlage: die Textur zweimal nebeneinander (und so oft untereinander, wie die Hoehe braucht) auf eine kleine
+   Leinwand; der Browser streckt sie auf Bildgroesse und schiebt sie um genau eine Texturbreite (-50 %) - nahtlos. */
+function hiWolke(sz,tex,B,sc,v,a,dy,off,hmax){
+  var tw=B.w*sc,th=tw*HI_TH/HI_TW,n=Math.max(1,Math.ceil(((hmax||B.h)-dy)/th)),c=document.createElement("canvas");
+  c.width=HI_TW*2;c.height=HI_TH*n;var g=c.getContext("2d");
+  for(var r=0;r<n;r++){g.drawImage(tex,0,r*HI_TH);g.drawImage(tex,HI_TW,r*HI_TH);}
+  var dur=tw/v,ph=((performance.now()-HI.t0)/1000+off)%dur;
+  c.className="hiW";
+  c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.round(dur*10)+");--hv:-"+ph.toFixed(2)+"s";
+  sz.appendChild(c);
+}
+function hiSzene(ziel,C,L,B,hmax){
+  var s=document.createElement("div");s.className="hiS";
+  var g="linear-gradient("+hiRgb(C.top)+","+hiRgb(C.bot)+")";
+  if(C.glanz>.02)g="radial-gradient(circle "+(B.w*.7).toFixed(0)+"px at "+(B.w*.86).toFixed(0)+"px "+(B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
+  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g;
+  if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
+  if(L.N>.04&&HI.texF&&HI.texN){
+    hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax);
+    hiWolke(s,HI.texN,B,2.5,7,L.N>.9?1:.88,-B.h*.1,40,hmax);}
+  ziel.appendChild(s);return s;
+}
+function hiInit(){
+  HI.init=1;
+  try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];}catch(e){}
+  window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
+  setInterval(hiPruefen,60000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)hiPruefen();});
+  hiZugKlasse();
+}
+/* Baut den Himmel neu, wenn sich etwas Sichtbares geaendert hat (Farben, Bedeckung, Groesse). Die neue Szene liegt
+   ueber der alten und blendet in 1,3 s ein; danach faellt die alte weg. */
+function hiPruefen(){
+  var el0=document.getElementById("hi");if(!el0)return;
+  if(!HI.init)hiInit();
+  if(!hiAn()){
+    HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;return;}
+  var L=hiLage(),B=hiMass(),C=hiFarben(L);
+  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0].join("|");
+  if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
+  if(!HI.t0)HI.t0=performance.now();
+  el0.style.height=B.h+"px";
+  if(L.N>.04){HI.texF=hiTextur(11,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29,L.N,C.rand,C.kern);}
+  var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
+  if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+4));
+  var alt=HI.szenen;HI.szenen=neu;
+  var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
+  /* GLAS: die Farben der dunklen Ansicht (Links, Warnrot, Diagramme) sind fuer fast schwarze Karten gemacht. Ueber
+     einem Taghimmel (Helligkeit bis 40 %) waere das Glas des Entwurfs (42 % Deckung) ein mittleres Blau, auf dem sie
+     untergehen - darum deckt es so stark, dass die Karte hoechstens ~19 % hell wird (nachts 42 %, am Tag bis 74 %).
+     Die Kacheln oben: nachts weisses, am Tag dunkles Glas. */
+  var lm=hiLum(hiMix(C.top,C.bot,.5)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba(22,30,48,"+ka.toFixed(2)+")";
+  root.style.setProperty("--hi-k",kk);root.style.setProperty("--hi-t",lm>.25?"rgba(14,26,52,.32)":"rgba(255,255,255,.11)");
+  var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
+  if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
+  setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
+    root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},HI_BLENDE+250);
+  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nass?1:0)+"|"+kk);}catch(e){}
+  try{themaFarbe();}catch(e){}
+}
+/* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
+   gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
+function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
+function hiZug(){var e=hiZugEigen();return e!=null?e:(waReduziert()?0:1);}
+function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug",hiZugEigen()===1);r.classList.toggle("histeh",hiZug()===0);}
+function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();}
+function hiAnzeigen(){
+  var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
+  if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
+  if(h)h.textContent=(z?"Die Wolken im Hintergrund ziehen langsam.":"Die Wolken im Hintergrund stehen still."
+      +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
+    +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
 }
 const LABELS={"clear-day":"Klar","clear-night":"Klar","partly-cloudy-day":"Teils bewölkt","partly-cloudy-night":"Teils bewölkt","cloudy":"Bewölkt","fog":"Nebel","wind":"Windig","rain":"Regen","sleet":"Schneeregen","snow":"Schnee","hail":"Hagel","thunderstorm":"Gewitter"};
 /* v3.88: Zustand aus Messung und Radar (siehe zustandZeigen weiter unten).
@@ -2150,8 +2375,9 @@ let uvAirFull=null, uvDayOffset=0, _bfsTs=Date.now();
    wenn das Telefon abends umschaltet; die beiden anderen gelten fest.
    Das Symbol zeigt, was gerade gilt: Halbkreis = automatisch, Sonne = hell,
    Mond = dunkel. */
-const ANSICHTEN=["auto","hell","dunkel"];
-function ansichtGespeichert(){try{const w=localStorage.getItem("ansicht");return ANSICHTEN.indexOf(w)>=0?w:"auto";}catch(e){return "auto";}}
+/* v6.12: "himmel" (Entwurf E, Voreinstellung) vor den drei klassischen Ansichten */
+const ANSICHTEN=["himmel","auto","hell","dunkel"];
+function ansichtGespeichert(){try{const w=localStorage.getItem("ansicht");return ANSICHTEN.indexOf(w)>=0?w:"himmel";}catch(e){return "himmel";}}
 /* v3.51: "auto" richtet sich nach der Sonne am angezeigten Ort. Die Grenze
    liegt bei etwa 3,5 Grad unter dem Horizont, also mitten in der buergerlichen
    Daemmerung — dort kippt der Eindruck draussen von hell nach dunkel.
@@ -2167,20 +2393,24 @@ function sonneUeberHorizont(ms){
 }
 function ansichtIstDunkel(w){
   w=w||ansichtGespeichert();
-  if(w==="dunkel")return true;
+  if(w==="dunkel"||w==="himmel")return true;
   if(w==="hell")return false;
   const hell=sonneUeberHorizont();
   if(hell!==null)return !hell;
   try{return matchMedia("(prefers-color-scheme: dark)").matches;}catch(e){return false;}
 }
 function ansichtAnwenden(neuZeichnen){
-  const d=ansichtIstDunkel(),geaendert=(d!==_dunkel);
+  const d=ansichtIstDunkel(),geaendert=(d!==_dunkel),hi=ansichtGespeichert()==="himmel",hiNeu=(hi!==document.documentElement.classList.contains("himmel"));
   document.documentElement.classList.toggle("dunkel",d);
+  document.documentElement.classList.toggle("himmel",hi);
   _dunkel=d;
   ansichtSymbol();
   if(neuZeichnen&&!geaendert)neuZeichnen=false;   // v3.51: nichts zu tun
+  try{hiPruefen();}catch(e){console.warn("himmel",e);}
   themaFarbe();
-  if(neuZeichnen)themaNeuZeichnen();
+  if(neuZeichnen||hiNeu)themaNeuZeichnen();       // hiNeu: die Leinwaende tragen im Himmel hellere Nebenfarben
+  /* das Symbol oben ist im Himmel kleiner (30 statt 54 px) */
+  if(hiNeu){try{zustandZeigen();}catch(e){}try{hiAnzeigen();}catch(e){}}
 }
 function ansichtSymbol(){
   const b=el("ansichtBtn");if(!b)return;
@@ -2188,8 +2418,9 @@ function ansichtSymbol(){
   const sonne='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2M12 19.4v2M2.6 12h2M19.4 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg>';
   const mond='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>';
   const autoS='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.4"/><path d="M12 3.6a8.4 8.4 0 0 1 0 16.8Z" fill="currentColor" stroke="none"/></svg>';
-  b.innerHTML=w==="hell"?sonne:w==="dunkel"?mond:autoS;
-  const wie=w==="hell"?"immer hell":w==="dunkel"?"immer dunkel":
+  const himmelS='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.6 4.5 4.5 0 0 0 7 18.5Z"/></svg>';
+  b.innerHTML=w==="himmel"?himmelS:w==="hell"?sonne:w==="dunkel"?mond:autoS;
+  const wie=w==="himmel"?"Himmel als Hintergrund":w==="hell"?"klassisch, immer hell":w==="dunkel"?"klassisch, immer dunkel":
     ("nach der Sonne in "+((typeof LOC!=="undefined"&&LOC&&LOC.name)?LOC.name:"deinem Ort")+
      " \u2013 gerade "+(sonneUeberHorizont()?"Tag":"Nacht"));
   b.setAttribute("aria-label","Ansicht: "+wie+" \u2013 antippen zum Wechseln");
@@ -2201,7 +2432,7 @@ function ansichtWeiter(){
   ansichtAnwenden(true);
   /* Kurze Rueckmeldung unter dem Knopf — fuer zwei Woerter waere ein
      Hinweisbalken zu viel. */
-  const t=n==="hell"?"immer hell":n==="dunkel"?"immer dunkel":"nach der Sonne";
+  const t=n==="himmel"?"Himmel":n==="hell"?"klassisch hell":n==="dunkel"?"klassisch dunkel":"klassisch \u00b7 nach der Sonne";
   const b=el("ansichtBtn");if(!b)return;
   let h=el("ansichtHint");
   if(!h){h=document.createElement("div");h.id="ansichtHint";h.className="ansicht-hint";
@@ -2210,7 +2441,7 @@ function ansichtWeiter(){
   clearTimeout(window._ansichtT);window._ansichtT=setTimeout(()=>h.classList.remove("an"),1500);
 }
 /* v6.11: die Leiste des Browsers bekommt die Farbe des Seitengrunds, nicht mehr die Temperaturfarbe (der Schleier ist weg) */
-function themaFarbe(){try{const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute("content",_dunkel?"#0d1219":"#f2f3f6");}catch(e){}}
+function themaFarbe(){try{const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute("content",(hiAn()&&HI.C)?hiRgb(HI.C.top):(_dunkel?"#0d1219":"#f2f3f6"));}catch(e){}}
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));themaFarbe();}
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
@@ -2860,7 +3091,7 @@ function renderTiles(s,d){
      Gitter, weil gridUv erst mit den UV-Daten gebaut wird. */
   el("gridSonne").innerHTML=
     `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
-      (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":"#5f79a0"}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
+      (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":(_dunkel?"#9db4d6":"#5f79a0")}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
       `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
   el("uvSec").classList.remove("hidden");
   fillPollen();
@@ -6756,7 +6987,10 @@ function kzRender(){
                    +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>'
                    +'<div class="kzregt">Wettersymbol oben bewegen</div>'
                    +'<div class="kzseg" id="sbSeg"><button type="button" data-s="0">Aus</button><button type="button" data-s="1">1</button><button type="button" data-s="2">2</button><button type="button" data-s="3">3</button></div>'
-                   +'<div class="kzhilf" id="sbHilf"></div>';
+                   +'<div class="kzhilf" id="sbHilf"></div>'
+                   +'<div class="kzregt">Himmel im Hintergrund</div>'
+                   +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
+                   +'<div class="kzhilf" id="hiHilf"></div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
@@ -6767,8 +7001,9 @@ function kzRender(){
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
+      el("hiSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiZugSetzen(+b.dataset.h);});
     }
-    if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();sbAnzeigen();}}
+    if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();sbAnzeigen();hiAnzeigen();}}
   if(pool){pool.classList.toggle("on",_kzEdit);
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
@@ -6988,10 +7223,11 @@ function zustandZeigen(){
   const _sl=(_feinLive&&(now()-_feinLive.ts)<60*60000)?_feinLive:null;
   if(_sl){const neu=sonneStuetztIcon(ic,_sl.ss30,_sl.ss60,Date.now());if(neu!==ic){ic=neu;tx=LABELS[neu]||tx;}}
   /* nur neu einsetzen, wenn sich Symbol oder Stufe aendern - sonst begaenne die Bewegung bei jeder Datenlieferung von vorn */
-  {const k=ic+"|"+sbStufe();if(il._sbK!==k||il.firstElementChild!==il._sbN){il.innerHTML=symbGross(ic);il._sbK=k;il._sbN=il.firstElementChild;}}
+  {const k=ic+"|"+sbStufe()+"|"+sbGroesse();if(il._sbK!==k||il.firstElementChild!==il._sbN){il.innerHTML=symbGross(ic);il._sbK=k;il._sbN=il.firstElementChild;}}
   tl.textContent=tx;sbInit();
   // v6.07: die Wetter-Animation zeichnet genau das, was hier steht
   _zuIc=ic;try{waPruefen();}catch(e){console.warn("wetteranim",e);}
+  try{hiPruefen();}catch(e){console.warn("himmel",e);}
 }
 /* v4.88 (Nutzer, 01.10. 07:04): "Regen in 5 Min · ~5 Min lang" - beschrieben
    war ein einzelner nasser Balken, die 85 Minuten Regen danach kamen in der

@@ -2658,6 +2658,34 @@ Bearbeiten voll), Abschnittstitel normal geschrieben 18 px ohne Linie, Karten oh
 Entwurf: Version und Stationszeile BLEIBEN (leiser) - die Version zeigt, welche Fassung geladen ist. `themaFarbe()` setzt
 `theme-color` auf den Seitengrund (vorher Temperaturfarbe aus `setHaze`). Geprueft (Playwright, echte Daten, 393 pt): ganze
 Seite hell und dunkel, keine Fehler.
+v6.12 ENTWURF E, SCHRITT 2 "HIMMEL" (neue Ansicht, VOREINSTELLUNG): `ANSICHTEN` = himmel | auto | hell | dunkel (Knopf oben
+schaltet im Kreis, Wolken-Zeichen = Himmel; Blase "Himmel" / "klassisch ..."). Einmalig bekommen ALLE "himmel" (Marke
+`ansichtV2`, gesetzt im ersten Script vor dem Zeichnen) - die drei klassischen Ansichten bleiben als Rueckweg, falls der
+Himmel am iPhone Aerger macht (kein WebKit im Pruefstand). "himmel" = Klassen `dunkel` + `himmel` am <html>.
+HIMMEL (`hi*`, Modul vor `LABELS`, nur var/Funktionen): `#hi` fest hinter der Seite; je Zustand eine Szene `.hiS` =
+Verlauf als CSS (dazu Sonnenschein als radial-gradient), Sterne als eine Leinwand (nur bis 86 % der Hoehe), zwei
+Wolkenlagen als KLEINE Leinwaende (640 x 200..600; Textur 2 x nebeneinander), die der Browser streckt und per
+`@keyframes hiZug` um -50 % schiebt, `steps(Dauer x 10)` = 10 Schritte/s. Kein JS je Bild. Neue Szene blendet 1,3 s ueber
+die alte. `hiLage()`: Sonnenhoehe (`_sunMu`, auf 0,5 Grad), Bedeckung `snap.cloud`, sonst aus `_zuIc`; vor den ersten Daten
+der Himmel vom letzten Mal (`himmelFarbe` = oben|unten|N|nass|Glas - das erste Script setzt daraus `--hi-o/-u/-k`, damit
+beim Start nichts aufblitzt). `hiPruefen()` haengt an `zustandZeigen`, `ansichtAnwenden`, resize, 60 s. Farben wie Testseite
+(`hiFarben` = `himmel(...,apple)`), `hiPassen`: Himmel hoechstens 40 % hell, Wolken 56 %.
+GEMESSEN (Chromium ohne GPU, 6 s, Bedeckung 68 %): Wolken ziehen in 10 Schritten/s 0,0 % Hauptfaden / 11 % eines Kerns,
+stehend 0,2 % (= klassisch dunkel); stufenlos waeren es 51 % (ohne Weichzeichner 26,5 %) - darum `steps()`. Testseite
+Entwurf E: 18,5 % / 34 %.
+GLAS: `--card` = `var(--hi-k)`, Deckung nach Himmelshelligkeit (nachts 42 % wie im Entwurf, am Tag bis 74 %): die Farben
+der dunklen Ansicht (Links, Warnrot, Diagramme) gingen auf mittelblauem Tagglas unter. Kacheln oben `--hi-t` (nachts
+weisses, am Tag dunkles Glas). Weichzeichner nur auf `.strip-card/.chart-card/.nowcard` und den Kacheln. `--muted/--faint`
+und `CO.muted/faint` im Himmel heller. Wo `--card` als SCHRIFTfarbe dient (`.pvtage/.pvsicht button.on`, `.mj-tip`), steht
+im Himmel fest #1a212c. KOPF: Temperatur 96 px / 200 weiss mittig, darunter Symbol (30 statt 54 px, `sbGroesse()`,
+Antippen wie v6.10) NEBEN dem Wort - der Entwurf hatte das Symbol weggelassen, es bleibt, weil es erst in v6.10 gewuenscht
+wurde. Einstellung "Himmel im Hintergrund: Wolken stehen | ziehen" (`himmelZug`; ohne Wahl entscheidet "Bewegung
+reduzieren", `html.hizug` hebt die Sperre auf, `html.histeh` haelt an). `?himmel=klar|heiter|wolkig|bedeckt|regen|abend|
+nacht|nachtw|nachtb` zeigt feste Lagen. `theme-color` = obere Himmelsfarbe. Die Testseiten designtest/himmeltest/
+symbolbewegt/symboltest laden jetzt `wetter-giessen-v6_10.html` (sie greifen in die App ein und passen nicht mehr zur neuen).
+Geprueft (Playwright): Tag/Nacht/jetzt, ganze Seite, Umschalten im Kreis, Bestandsnutzer "hell" -> Himmel, Neuladen behaelt
+die Wahl, Farben schon vor den Daten gesetzt, Einstellung, "Bewegung reduzieren". OFFEN: am iPhone ansehen (Weichzeichner,
+Leiste von Safari, Statusleiste); Regen-Animation liegt weiter nur im frueheren Kasten.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
