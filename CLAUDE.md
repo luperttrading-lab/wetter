@@ -2879,6 +2879,15 @@ Regenwolken. OFFEN (Nutzer gefragt, nicht gebaut): Umschalter ueber der 16-Tage-
 Apple - Regen = je Tag 24 Stundenbalken + mm + %, Wind = Verlauf mit Boeen und Spanne; Daten waeren Open-Meteo stuendlich
 (16 Tage, ~20 KB zusaetzlich), sinnvoll nur fuer die ersten 7 Tage (danach Langfristtrend). Geprueft (Playwright, echte
 Daten, Himmel/hell, 393/320 pt): Zahlen 27 px breit in 50-px-Zellen, vergangene Zellen und "jetzt" leer.
+v6.24 (Nutzer 11.11. 18:33, Bild der Stundenleiste v6.23: "nutzen die Tropfen den ganzen Spielraum nach unten aus? Der
+Regenbereich koennte noch etwas laenger nach unten gehen - nicht viel"): nein - die Regenstriche (`strich` in `iconTeile`)
+endeten bei 21,9 von 24 Einheiten, bei 28 px blieben unten 2,4 px frei. Jetzt 3,8 statt 2,9 Einheiten lang (gleiche
+Neigung, dx +-0,72), zweite Reihe 2,4 statt 1,9 tiefer: Unterkante 23,3 Einheiten (gemessen bei 28 px: Strichende 26,5 px
++ runde Kappe). Gilt fuer Regen und die beiden Striche im Schneeregen; Schnee, Hagel, Gewitter unveraendert. BEWEGUNG:
+Fallweg der Striche -2,4 .. +1,6 statt -2,2 .. +2,2 (kommt weiter hinter der Wolke hervor, laeuft unten weniger weit) -
+sonst liefe der ausblendende Strich in die Zeile mit der Regenwahrscheinlichkeit (v6.23), die 2 px unter dem Symbolfeld
+beginnt (gemessen: Symbol unten 409,9, Zahl oben 411,9). Geprueft (Playwright): alt/neu nebeneinander bei 28 und 112 px,
+Zelle der Leiste mit bewegtem Regensymbol ueber "55 %". Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
