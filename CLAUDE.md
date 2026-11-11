@@ -2774,6 +2774,21 @@ Standbild | Bewegt), Hilfetext nennt "im Himmel hinter den Karten". Ansehen im B
 (auch niesel, schnee, gewitter, nebel, sturm); in der App ueber die Vorschau-Knoepfe in den Einstellungen. Geprueft
 (Playwright): drei Starts = drei Wolkenbilder; Regen/Niesel/Schnee/Gewitter ueber dem Himmel, im Kopf und gescrollt;
 Wechsel klassisch <-> Himmel haengt die Leinwand um; Standbild; Aus. Nicht am iPhone geprueft.
+v6.19 (Nutzer 11.11. 12:33, UV-Bild mit Messung nur bis 09:50, "3 h alt": "warum gibt es keine UV-Daten?"): KEIN Fehler
+bei uns - der DWD lieferte seit 08:50 UTC keine 10-Minuten-Werte mehr. Nachgesehen: Zweig `daten` um 11:34 UTC frisch
+geschrieben (`solar10.yml` lief), aber `letzter` = 08:50Z in ALLEN 62 Stationsdateien; auf opendata.dwd.de standen die
+"now"-Dateien aller 10-Minuten-Produkte (solar, air_temperature, precipitation, wind) fuer 01639 seit 08:50-09:15 UTC
+still. SO PRUEFEN beim naechsten Mal: `git fetch origin daten`, `letzter` der Stationsdateien gegen die Commit-Zeit;
+dann Last-Modified unter `.../10_minutes/solar/now/`. In der App geaendert: (1) LUECKE FUELLEN - die blassen Saeulen
+beginnen jetzt IMMER am Ende der Messung (`tA=_tE` in `drawUV`, ebenso `uvTagRechnen`), bis v6.18 nur bei Messung juenger
+als 1 h, sonst ab jetzt (Loch 09:50-12:33). Fuer vergangene Stunden traegt Bright Sky die GEMESSENE Stundensumme `solar`
+(am 11.11. fuer 10 und 11 Uhr vorhanden) - die Luecke zeigt also Stundenmessung, danach MOSMIX. (2) GRUND nennen: bei
+alter Messung zweite Zeile unter dem Bild - "Der DWD liefert seit 09:50 Uhr keine 10-Minuten-Werte - ab da Stundenwerte
+(blass)", wenn unser Abruf (`_solar10Json.aktualisiert` aus stationen.json) mehr als 75 min NACH dem letzten Wert lief;
+sonst "Der Abruf der 10-Minuten-Werte haengt seit ...". (3) Dunkle Ansichten: Kurve "max. moeglich" hell (#c9d3e0 statt
+fest #3a4453, auch in der Legende), Ortsname im Bild `CO.uvTitel` (war fest #12324f), "UV INDEX" im Logo weiss (war
+`CO.karte` = dunkel auf dunkelblau). Geprueft mit den echten Daten des Ausfalls (Playwright, Himmel / dunkel / hell):
+`_uvProg.ab` 09:50, Hinweis mit DWD-Grund.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

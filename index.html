@@ -838,6 +838,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .uvleg i{display:inline-block;vertical-align:middle;margin-right:5px}
   .uvleg i.bars{width:12px;height:11px;border-radius:2px;background:linear-gradient(0deg,#46a13a,#f5d800,#f15a16,#c41f3e)}
   .uvleg i.glock{width:15px;height:0;border-top:3px solid #3a4453;border-radius:2px}
+  html.dunkel .uvleg i.glock{border-top-color:#c9d3e0}
   .uvleg i.ghuel{width:15px;height:0;border-top:2px dashed #c2410c;opacity:.7;border-radius:2px}
   .uvsimrow{text-align:center;margin-top:7px}
   /* v3.06: Regler fuer den Kurvenexponenten */
@@ -1427,7 +1428,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.18</span>
+      <span class="ver">v6.19</span>
     </div>
   </header>
 
@@ -5965,7 +5966,7 @@ function uvTagRechnen(){
   let mess=null,jetzt=null,tA=now;
   const s10=solar10Werte(dayMs,now);
   if(s10&&s10.length){for(const q of s10){const u=uvAusD(bell(q.tc),q.d);if(!mess||u>mess.uv)mess={uv:u,t:q.tc};}
-    const q=s10[s10.length-1];jetzt={uv:uvAusD(bell(q.tc),q.d),t:q.t1};if(now-q.t1<36e5)tA=q.t1;}
+    const q=s10[s10.length-1];jetzt={uv:uvAusD(bell(q.tc),q.d),t:q.t1};if(q.t1<now)tA=q.t1;}
   let prog=null,kRest=0;
   for(let t=tA;t<=t21;t+=5*6e4){const g=bell(t);if(g>kRest)kRest=g;const k=uvProgK(t);if(k==null)continue;const u=uvAusD(g,uvKurveD(k));if(!prog||u>prog.max)prog={max:u,t};}
   if(prog&&!(prog.max>0.03))prog=null;
@@ -8174,12 +8175,12 @@ function drawUV(h){
   const _ds=_wd+". "+String(_dO.getDate()).padStart(2,"0")+"."+String(_dO.getMonth()+1).padStart(2,"0")+"."+_dO.getFullYear();
   const lgW=scaleW,lgH=17,lgX=scaleX,lgY=2;
   x.fillStyle="#1b3a6b";rr(lgX,lgY,lgW,lgH,2.5);x.fill();
-  x.fillStyle=CO.karte;x.textAlign="center";x.textBaseline="middle";
+  x.fillStyle="#ffffff";x.textAlign="center";x.textBaseline="middle";      // v6.19: war CO.karte - im Dunkeln dunkle Schrift auf dunkelblauem Feld
   x.font="800 8.5px -apple-system,system-ui,sans-serif";x.fillText("UV",lgX+lgW/2,lgY+6.3);
   x.font="700 4px -apple-system,system-ui,sans-serif";x.fillText("INDEX",lgX+lgW/2,lgY+12.5);
   x.fillStyle=CO.muted;x.textAlign="left";x.textBaseline="middle";x.font="600 9.5px -apple-system,system-ui,sans-serif";
   x.fillText(_ds,lgX+lgW+6,lgY+lgH/2);const _dEnd=lgX+lgW+6+x.measureText(_ds).width;
-  x.fillStyle="#12324f";x.textAlign="center";x.textBaseline="middle";x.font="800 11.5px -apple-system,system-ui,sans-serif";
+  x.fillStyle=CO.uvTitel;x.textAlign="center";x.textBaseline="middle";x.font="800 11.5px -apple-system,system-ui,sans-serif";
   const _hl=LOC.isWettenberg?"Gießen-Wettenberg":LOC.name,_tw=x.measureText(_hl).width;let _tc=gx0+plotW/2;if(_tc-_tw/2<_dEnd+5)_tc=_dEnd+5+_tw/2;if(_tc+_tw/2>gx1)_tc=gx1-_tw/2;
   x.fillText(_hl,_tc,lgY+lgH/2);
   // === Farbskala: exakt UV 0..9 (deckt die Box-Höhe, kein Überhang) ===
@@ -8256,8 +8257,16 @@ function drawUV(h){
        von gestern Abend - "22 h alt" in Orange war ein Fehlalarm, denn der Tag
        ist vollstaendig und das Alter sagt dort nichts. */
     const _altTxt=(_altMin<60||(typeof uvDayOffset==="number"&&uvDayOffset!==0))?"":' \u00b7 <span class="uvalt">'+altStr(_altMin)+' alt</span>';
+    /* v6.19: bei alter Messung der Grund. Lief unser Abruf (stationen.json "aktualisiert") deutlich NACH dem letzten
+       Messwert, fehlt es beim DWD; sonst haengt der Abruf selbst (wie am 03.09.2026). */
+    let _altGrund="";
+    if(_altTxt){
+      const _abr=(_solar10Json&&_solar10Json.aktualisiert)?new Date(_solar10Json.aktualisiert).getTime():NaN;
+      _altGrund='<br>'+((isFinite(_abr)&&_abr-_qL.t1>75*6e4)?'Der DWD liefert seit '+_hm+'\u00a0Uhr keine 10-Minuten-Werte':'Der Abruf der 10-Minuten-Werte h\u00e4ngt seit '+_hm+'\u00a0Uhr')
+        +' \u2013 ab da Stundenwerte (blass).';
+    }
     window._uvS10Kurz='<span class="dg">Wolkendurchlass <b>'+Math.round(100*_qL.d)+'\u202f%</b>'
-      +_stTxt+' \u00b7 '+_hm+_altTxt+'</span>';
+      +_stTxt+' \u00b7 '+_hm+_altTxt+_altGrund+'</span>';
     window._uvS10Diag=(_qL.art==="sd")
       ?'<span class="dg">10-min-Messung \u00b7 Sonne <b>'+Math.round(_qL.sd)+'/10\u202fmin</b> \u2192 Durchlass <b>'+Math.round(100*_qL.d)+'\u202f%</b> <small>(Station ohne Strahlungsmesser)</small></span>'
       :'<span class="dg">10-min-Messung \u00b7 Global <b>'+Math.round(_qL.g)+'\u202fW/m\u00b2</b> von <b>'+Math.round(_qL.gclr)+'</b> klar \u2192 Durchlass <b>'+Math.round(100*_qL.d)+'\u202f%</b></span>';
@@ -8386,7 +8395,11 @@ function drawUV(h){
   if(uvDayOffset===0){
     const P=uvProgStd();
     if(P&&P.length){
-      const _tE=_s10Aktiv?_s10[_s10.length-1].t1:null,tA=(_tE!=null&&now-_tE<36e5)?_tE:now;   // Luecke zur Messung schliessen
+      /* v6.19 (Nutzer 11.11. 12:33: "warum gibt es keine UV-Daten?" - der DWD lieferte seit 09:50 Uhr keine
+         10-Minuten-Werte, fuer ALLE Stationen): die blassen Saeulen beginnen jetzt IMMER am Ende der Messung. Bis v6.18
+         nur, wenn die Messung juenger als eine Stunde war - bei einem Ausfall blieb dazwischen ein Loch. Fuer vergangene
+         Stunden traegt Bright Sky die GEMESSENE Stundensumme der Strahlung, die Luecke zeigt also Stundenmessung. */
+      const _tE=_s10Aktiv?_s10[_s10.length-1].t1:null,tA=(_tE!=null&&_tE<now)?_tE:now;
       const kAt=uvProgK;
       let mx=0,tMx=null;const _ob=[];
       for(let px=gx0;px<gx1;px+=step){
@@ -8412,7 +8425,7 @@ function drawUV(h){
     window._uvHeute=_H;
     if(_sig!==window._uvHeuteSig){window._uvHeuteSig=_sig;setTimeout(()=>{try{kzRender();}catch(e){}},0);}
   }
-  x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle="#3a4453";x.beginPath();let _gf=true;
+  x.lineJoin="round";x.lineCap="round";x.lineWidth=3;x.strokeStyle=_dunkel?"#c9d3e0":"#3a4453";x.beginPath();let _gf=true;
   let _gN=0,_gMax=0,_gBad=0,_gPx=null;   // v2.81: Selbstkontrolle der Glocke
   for(let px=pxA;px<=pxB;px+=1){const t=t6+((px-gx0)/(gx1-gx0))*(t21-t6);const uv=sunBell(t);
     const yy=Y(uv);
