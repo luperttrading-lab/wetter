@@ -962,6 +962,19 @@
    "version": "v6.14"
   }
  },
+ "2026-11-12": {
+  "morgens": {
+   "erw": 0.71,
+   "erw_roh": 0.48,
+   "erw_tag": 0.71,
+   "erw_zeit": "2026-11-12T11:55:51.539Z",
+   "gueltig": true,
+   "klar": 1.26,
+   "mess": null,
+   "uhr": "00:00",
+   "version": "v6.25"
+  }
+ },
  "_auswertung": {
   "hinweis": "ab 10 Tagen: Richtung belastbar, Groesse noch grob",
   "korrektur": {
