@@ -2888,6 +2888,30 @@ Fallweg der Striche -2,4 .. +1,6 statt -2,2 .. +2,2 (kommt weiter hinter der Wol
 sonst liefe der ausblendende Strich in die Zeile mit der Regenwahrscheinlichkeit (v6.23), die 2 px unter dem Symbolfeld
 beginnt (gemessen: Symbol unten 409,9, Zahl oben 411,9). Geprueft (Playwright): alt/neu nebeneinander bei 28 und 112 px,
 Zelle der Leiste mit bewegtem Regensymbol ueber "55 %". Nicht am iPhone geprueft.
+v6.25 (Nutzer 11.11. 18:42 zu v6.24: "besseren Regeneffekt versuchen - die Tropfen etwas kleiner, also kuerzer, und die
+Laenge nach unten gehen, dann sieht man mehr, was sich bewegt" + "das Sonnensymbol in der Kachel Sonne koennte sich auch
+drehen wie die anderen Wettersymbole"): v6.24 war eine FEHLDEUTUNG - dort wurden die STRICHE laenger (3,8 Einheiten), gemeint
+war der FALLWEG. (1) REGEN im Symbol (`regen()` in `iconTeile`, Konstanten `RK` Neigung .38, `RL` Laenge 1,6, `RP` Periode
+4,2, `RW` Breite 1,1): vier Bahnen, je Bahn Tropfen im Abstand RP, Bahn 2 und 4 um eine halbe Periode versetzt. Stehend
+acht kurze Tropfen von der Wolke bis zum unteren Rand (y 15,6-23,5). Bewegt: ALLE Tropfen in EINER Ebene (14 Linien),
+die entlang der Neigung um genau eine Periode rueckt (`@keyframes sbRegen`, Dauer `td` x 0,5 = 0,78/0,67/0,58 s, also rund
+6 Einheiten/s statt 3) und nahtlos von vorn beginnt - jeder Tropfen kommt hinter der Wolke hervor (sie liegt obenauf) und
+faellt bis unten. Die Ebene liegt in einer Huelle `.ibk` (overflow:hidden + mask-image, unten 14 % weich) - die Ebene
+selbst bewegt sich mit, darum kann sie sich nicht selbst beschneiden. `t.b(id,bew)`: nur bewegt liegen auch die Tropfen
+ober- und unterhalb des Felds in der Ebene. Selektoren `.ib>svg` ueberall um `.ib>.ibk>svg` ergaenzt (Sparregel `html.sbw`,
+Pause `html.sbaus`). GEMESSEN (Chromium ohne GPU, 7 Regenzellen der Leiste, Stufe 2): alt 35 Ebenen / 11,8 % eines Kerns,
+neu 14 Ebenen / 10,0 %. Schneeregen: `strich()` 2,2 lang, faellt jetzt ebenfalls von hinter der Wolke bis zum Rand (9,7
+Einheiten statt 4). Hagel, Schnee unveraendert. (2) KACHEL "SONNE": statt des Schriftzeichens U+2600 die gezeichnete Sonne
+(`kzSonneSym()`, Huelle `.kzso` 1,08 em): ab Stufe 1 von "Wettersymbole bewegen" `iconBewegt("clear-day")`, bei 0 das
+stehende `icon()`; `sbSetzen` ruft dafuer `kzRender()`. Damit die Drehung beim Neuzeichnen der Kacheln (jede
+Datenlieferung) nicht zurueckspringt, beginnen Drehen und Atmen in `iconBewegt` nach der UHR (`animation-delay` =
+-(Date.now() mod Dauer)) - gilt fuer alle Sonnen. Gemessen: Winkel 2,9 -> 7,9 -> 13,0 Grad ueber ein `kzRender` hinweg.
+Breite: 1,5 px schmaler als das Zeichen (375 pt: "10:16 h" 73,4 statt 74,9 px von 79,3), Kachelhoehe unveraendert; bei
+320 pt bricht "10:16 h" um wie vorher. Liegt der Kopf nicht im Bild, ruht die Sonne (`#kz` liegt in `#hero`). Geprueft
+(Playwright): Bildfolgen alt/neu bei 28/54/112 px hell und dunkel, Stundenleiste mit Regenzellen ueber "55 %" (Huelle endet
+2 px ueber der Zahl), Kopf 30 px (Himmel) und 54 px (hell), Stufen 0-3, "Bewegung reduzieren" ohne und mit eigener Wahl,
+Pause beim Wegscrollen. Nicht am iPhone geprueft (mask-image auf der Huelle ist dort neu fuer die Symbole; `#waCv` nutzt es
+seit v6.07). Zurueckholen der alten Striche aus `wetter-giessen-v6_24.html`.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
