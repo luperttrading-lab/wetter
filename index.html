@@ -86,7 +86,11 @@
   #hiK>#waK{position:absolute;left:0;top:0;z-index:3;pointer-events:none}
   /* v6.10: das grosse Symbol aus Ebenen - je Teil ein <svg>, bewegt wird nur transform/opacity */
   .ib{position:relative;width:100%;height:100%}
-  .ib>svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;will-change:transform,opacity;animation-duration:var(--sd);animation-iteration-count:infinite}
+  .ib>svg,.ib>.ibk>svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;will-change:transform,opacity;animation-duration:var(--sd);animation-iteration-count:infinite}
+  /* v6.25: Regen = EINE Ebene mit allen Tropfen, die um genau eine Periode weiterrueckt (nahtlos). Die Huelle .ibk
+     schneidet am Symbolfeld ab und blendet unten weich aus - die Ebene selbst bewegt sich ja mit. */
+  .ib>.ibk{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;-webkit-mask-image:linear-gradient(#000 86%,transparent 100%);mask-image:linear-gradient(#000 86%,transparent 100%)}
+  @keyframes sbRegen{to{transform:translate(var(--x1),var(--y1))}}
   @keyframes sbDreh{to{transform:rotate(45deg)}}
   @keyframes sbPuls{0%,100%{transform:scale(1)}50%{transform:scale(var(--sp))}}
   @keyframes sbPendel{0%,100%{transform:translateX(calc(var(--sa) * -1))}50%{transform:translateX(var(--sa))}}
@@ -95,8 +99,8 @@
   @keyframes sbBlitz{0%,60%,70%,80%,100%{opacity:1}64%{opacity:.15}74%{opacity:.3}}
   @keyframes sbFunkel{0%,100%{opacity:1}50%{opacity:.15}}
   @keyframes sbWieg{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-  html.sbw .ib>svg{animation-duration:var(--sd)!important;animation-iteration-count:infinite!important}   /* gewaehlte Stufe gilt auch bei "Bewegung reduzieren" */
-  html.sbaus #hero .ib>svg{animation-play-state:paused!important}   /* v6.15: nur der Kopf - die Stundenleiste regelt sich selbst (sbLeiste) */
+  html.sbw .ib>svg,html.sbw .ib>.ibk>svg{animation-duration:var(--sd)!important;animation-iteration-count:infinite!important}   /* gewaehlte Stufe gilt auch bei "Bewegung reduzieren" */
+  html.sbaus #hero .ib>svg,html.sbaus #hero .ib>.ibk>svg{animation-play-state:paused!important}   /* v6.15: nur der Kopf - die Stundenleiste regelt sich selbst (sbLeiste) */
   #mainBox .cnd{cursor:pointer}
   #sbTip{position:absolute;z-index:5;background:rgba(23,32,46,.93);color:#fff;font:600 12px -apple-system,system-ui,sans-serif;padding:6px 10px;border-radius:9px;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
   #sbTip.an{opacity:1}
@@ -447,6 +451,9 @@ html.dunkel .kzg-c.ab .kzg-a{box-shadow:-1.5px 0 0 rgba(255,255,255,.3)}
 .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(40,56,90,.45)}
 html.dunkel .kz .kzbal .kzbw b.ab{box-shadow:-1px 0 0 rgba(255,255,255,.35)}
 .kz .kztropfen{vertical-align:-1px;margin-right:2px}
+/* v6.25: Sonne in der Kachel "Sonne" - gezeichnet wie die Wettersymbole (statt des Schriftzeichens), dreht mit deren Stufe */
+.kz .kzso{display:inline-block;position:relative;width:1.08em;height:1.08em;vertical-align:-.19em;margin-right:.14em}
+.kz .kzso>svg{display:block;width:100%;height:100%}
 .kz .kzwolke{vertical-align:0;margin-left:3px;width:.95em;height:.65em}
 .kz .ki .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kz .ki .v{font-size:14.5px;letter-spacing:-.01em;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1432,7 +1439,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.24</span>
+      <span class="ver">v6.25</span>
     </div>
   </header>
 
@@ -1732,12 +1739,24 @@ function iconTeile(name){
   const wolke=(x,y,sc,k,dunkel)=>({d:dunkel?[dCloud,dDark]:[dCloud],b:id=>`<g filter="url(#${id}f)"><path d="M${x+5} ${y+15}h${13*sc}a${4.2*sc} ${4.2*sc} 0 0 0 .3-${8.4*sc} ${5.6*sc} ${5.6*sc} 0 0 0-${10.8*sc}-${1.6*sc}A${4.4*sc} ${4.4*sc} 0 0 0 ${x+5} ${y+15}Z" fill="url(#${id}${dunkel?"d":"c"})"/></g>`,a:{t:"pendel",u:"wd",k:k,dur:1,ph:0}});
   /* vier Teile unter der Wolke, in zwei Reihen (W-Form), damit sie sich nicht beruehren; V4 = versetzter Beginn */
   const P4=[[6.4,0],[10.5,1],[14.6,0],[18.7,1]],V4=[0,.5,.25,.75];
-  /* v6.24 (Nutzer 11.11.: "nutzen die Tropfen den ganzen Spielraum nach unten aus? Der Regenbereich koennte noch etwas
-     laenger nach unten gehen"): die Striche endeten bei 21,9 von 24 Einheiten (bei 28 px blieben unten 2,4 px frei).
-     Jetzt 3,8 statt 2,9 lang, die zweite Reihe 2,4 statt 1,9 tiefer - Unterkante 23,3. Gleiche Neigung. In der Bewegung
-     faellt der Strich weiter von oben (hinter der Wolke hervor) und nur noch 1,6 statt 2,2 nach unten, damit er beim
-     Ausblenden nicht in die Zeile mit der Regenwahrscheinlichkeit laeuft. */
-  const strich=(x,y,i)=>({d:[],b:()=>`<line x1="${f(x+.72)}" y1="${y}" x2="${f(x-.72)}" y2="${f(y+3.8)}" stroke="#3f8bd6" stroke-width="1.15" stroke-linecap="round"/>`,a:{t:"fall",x0:.87,y0:-2.4,x1:-.58,y1:1.6,ph:V4[i],tk:1}});
+  /* v6.25 (Nutzer 11.11., nach v6.24: "besserer Regeneffekt - die Tropfen etwas kleiner, also kuerzer, und die Laenge
+     nach unten gehen, dann sieht man mehr, was sich bewegt"): v6.24 hatte die STRICHE verlaengert (3,8 Einheiten) -
+     gemeint war der FALLWEG. Jetzt kurze Tropfen (1,6 lang) in vier Bahnen, je Bahn im Abstand RP untereinander, die
+     Bahnen 2 und 4 um eine halbe Periode versetzt. Stehend: acht Tropfen von der Wolke bis zum unteren Rand. Bewegt:
+     alle Tropfen liegen in EINER Ebene, die entlang der Neigung um genau eine Periode rueckt und von vorn beginnt -
+     jeder Tropfen kommt hinter der Wolke hervor (sie liegt obenauf) und faellt bis zum unteren Rand, wo die Huelle
+     .ibk ihn ausblendet. Vorher bewegte sich jeder Strich nur um seine eigene Laenge (4 Einheiten bei 3,8 Laenge). */
+  const RK=.38,RL=1.6,RP=4.2,RW=1.1;
+  const regen=()=>({d:[],b:(id,bew)=>[[6.45,15.6],[10.55,17.7],[14.65,15.6],[18.75,17.7]].map(([x,a])=>{let h="";
+      for(let y=a-RP;y<24.6;y+=RP){
+        if(!bew&&(y+RL<16.2||y+RL+RW/2>24.06))continue;
+        const xm=x-RK*(y+RL/2-20);
+        h+=`<line x1="${f(xm+RK*RL/2)}" y1="${f(y)}" x2="${f(xm-RK*RL/2)}" y2="${f(y+RL)}" stroke="#3f8bd6" stroke-width="${RW}" stroke-linecap="round"/>`;}
+      return h;}).join(""),a:{t:"regen",x:-RK*RP,y:RP}});
+  /* einzelner Strich (Schneeregen): etwas laenger (2,2), sonst geht er neben den Flocken unter; gleiche Neigung,
+     faellt von hinter der Wolke bis an den unteren Rand */
+  const strich=(x,y,i)=>{const SL=2.2,ya=12.1-y,yb=21.8-y;
+    return {d:[],b:()=>`<line x1="${f(x+RK*SL/2)}" y1="${y}" x2="${f(x-RK*SL/2)}" y2="${f(y+SL)}" stroke="#3f8bd6" stroke-width="${RW}" stroke-linecap="round"/>`,a:{t:"fall",x0:f(-RK*ya),y0:ya,x1:f(-RK*yb),y1:yb,ph:V4[i],tk:1.25}};};
   const flocke=(x,y,i)=>({d:[],b:()=>[0,60,120].map(a=>`<line x1="${f(x-1.75)}" y1="${y}" x2="${f(x+1.75)}" y2="${y}" stroke="#79aee0" stroke-width=".8" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join(""),a:{t:"flocke",sx:[.45,-.4,.4,-.45][i],ph:V4[i]}});
   const korn=(x,y,i)=>({d:[],b:()=>`<circle cx="${x}" cy="${y}" r="1.2" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".4"/>`,a:{t:"fall",x0:0,y0:-2.5,x1:0,y1:1.6,ph:V4[i],tk:.85}});
   /* der Blitz ragte frueher unten aus dem Feld und wurde abgeschnitten (v4.08) - er endet bei 24,2 */
@@ -1754,8 +1773,8 @@ function iconTeile(name){
     case "partly-cloudy-day": return [strahlen(14.7,8.3,8,2.5,1.05),scheibe(14.7,8.3,4.3),wolke(2,3,.92,1)];
     case "partly-cloudy-night": return [mond(true),wolke(2,3,.92,1)];
     case "fog": return [wolke(1.5,-2.3,.95,.5),nebelband(16,20.4,15.4,0),nebelband(19.1,18.6,11.6,1),nebelband(22.2,20.4,13.4,2)];
-    case "rain": return P4.map(([x,r],i)=>strich(x,16.5+r*2.4,i)).concat([wolke(1.5,0,1,.4)]);
-    case "sleet": return [strich(6.4,16.5,0),flocke(10.5,20.9,1),strich(14.6,16.5,2),flocke(18.7,20.9,3),wolke(1.5,0,1,.4)];
+    case "rain": return [regen(),wolke(1.5,0,1,.4)];
+    case "sleet": return [strich(7.2,16.8,0),flocke(10.5,20.9,1),strich(15.4,16.8,2),flocke(18.7,20.9,3),wolke(1.5,0,1,.4)];
     case "snow": return P4.map(([x,r],i)=>flocke(x,18.6+r*2.7,i)).concat([wolke(1.5,0,1,.4)]);
     case "hail": return P4.map(([x,r],i)=>korn(x,18.6+r*2.4,i)).concat([wolke(1.5,0,1,.4)]);
     case "thunderstorm": return [wolke(1.5,0,1,.4,true),blitz];
@@ -1772,10 +1791,14 @@ function icon(name,size){gid++;const id="g"+gid,T=iconTeile(name),D=[];
    Geraet "Bewegung reduzieren" meldet und der Nutzer trotzdem eine Stufe gewaehlt hat. */
 function iconBewegt(name,size,M){
   const u=size/24,px=v=>(+(v*u).toFixed(2))+"px",s2=v=>+v.toFixed(2),pr=v=>(+(v/24*100).toFixed(1))+"%";
+  /* v6.25: Drehen und Atmen der Sonne beginnen nach der UHR, nicht bei null - wird ein Symbol neu eingesetzt (die
+     Kacheln zeichnen bei jeder Datenlieferung neu), laeuft die Bewegung dort weiter, statt zurueckzuspringen. */
+  const uhr=d=>-s2((Date.now()/1000)%d);
   return `<div class="ib">`+iconTeile(name).map(t=>{gid++;const id="g"+gid,a=t.a;let st="";
     if(a){
-      if(a.t==="dreh")st=`--sd:${s2(M.rot/8)}s;animation-name:sbDreh;animation-timing-function:linear;transform-origin:${pr(a.ox)} ${pr(a.oy)}`;
-      else if(a.t==="puls")st=`--sd:${M.puls}s;--sp:${1+M.pa};animation-name:sbPuls;animation-timing-function:ease-in-out;transform-origin:${pr(a.ox)} ${pr(a.oy)}`;
+      if(a.t==="dreh"){const d=s2(M.rot/8);st=`--sd:${d}s;animation-name:sbDreh;animation-timing-function:linear;animation-delay:${uhr(d)}s;transform-origin:${pr(a.ox)} ${pr(a.oy)}`;}
+      else if(a.t==="puls")st=`--sd:${M.puls}s;--sp:${1+M.pa};animation-name:sbPuls;animation-timing-function:ease-in-out;animation-delay:${uhr(M.puls)}s;transform-origin:${pr(a.ox)} ${pr(a.oy)}`;
+      else if(a.t==="regen")st=`--sd:${s2(M.td*.5)}s;--x1:${px(a.x)};--y1:${px(a.y)};animation-name:sbRegen;animation-timing-function:linear`;
       else if(a.t==="pendel"){const d=s2(M.wt*a.dur);st=`--sd:${d}s;--sa:${px(M[a.u]*a.k)};animation-name:sbPendel;animation-timing-function:ease-in-out;animation-delay:${-s2(M.wt*a.ph)}s`;}
       else if(a.t==="fall"){const d=s2(M.td*a.tk);st=`--sd:${d}s;--x0:${px(a.x0)};--y0:${px(a.y0)};--x1:${px(a.x1)};--y1:${px(a.y1)};animation-name:sbFall;animation-timing-function:linear;animation-delay:${-s2(d*a.ph)}s`;}
       else if(a.t==="flocke")st=`--sd:${M.tf}s;--sx:${px(a.sx)};--y0:${px(-2.8)};--ya:${px(-.64)};--yb:${px(.48)};--y1:${px(1.6)};animation-name:sbFlocke;animation-timing-function:linear;animation-delay:${-s2(M.tf*a.ph)}s`;
@@ -1783,7 +1806,8 @@ function iconBewegt(name,size,M){
       else if(a.t==="funkel")st=`--sd:${s2(M.puls*[.5,.78,.63][a.i])}s;animation-name:sbFunkel;animation-timing-function:ease-in-out;animation-delay:${-s2(a.i*.9)}s`;
       else if(a.t==="wieg")st=`--sd:${s2(M.wt*1.2)}s;animation-name:sbWieg;animation-timing-function:ease-in-out`;
     }
-    return `<svg viewBox="0 0 24 24"${st?` style="${st}"`:""}><defs>${t.d.map(d=>d(id)).join("")}</defs>${t.b(id)}</svg>`;}).join("")+`</div>`;
+    const g=`<svg viewBox="0 0 24 24"${st?` style="${st}"`:""}><defs>${t.d.map(d=>d(id)).join("")}</defs>${t.b(id,true)}</svg>`;
+    return a&&a.t==="regen"?`<div class="ibk">${g}</div>`:g;}).join("")+`</div>`;
 }
 /* Stufe 0 = steht, 1 ruhig ... 3 deutlich ("lebhaft" aus der Testseite war dem Nutzer zu viel). Ohne eigene Wahl:
    Stufe 2, bei "Bewegung reduzieren" 0 - eine gewaehlte Stufe gilt immer (wie bei der Wetter-Animation, v6.07). */
@@ -1818,12 +1842,13 @@ function sbSetzen(s){
   sbKlasse();var il=document.getElementById("condIc");if(il)il._sbK=null;
   try{zustandZeigen();}catch(e){}
   try{sbLeiste();}catch(e){}
+  try{kzRender();}catch(e){}
   sbAnzeigen();
 }
 function sbAnzeigen(){
   var s=sbStufe(),seg=document.getElementById("sbSeg"),h=document.getElementById("sbHilf");
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.s===s);});
-  if(h)h.textContent=s?"Die Wettersymbole bewegen sich – oben neben dem Wort, in der Stundenleiste und in der 16-Tage-Vorhersage: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols oben."
+  if(h)h.textContent=s?"Die Wettersymbole bewegen sich – oben neben dem Wort, in der Stundenleiste, in der 16-Tage-Vorhersage und die Sonne in der Kachel „Sonne“: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols oben."
     :"Die Wettersymbole stehen still."+((sbEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – eine Stufe schaltet die Bewegung trotzdem ein.":"")+" Geht auch durch Antippen des Symbols oben.";
 }
 /* Antippen des Symbols (oder des Worts darunter) schaltet weiter: aus -> 1 -> 2 -> 3 -> aus; eine kleine Blase sagt,
@@ -5645,6 +5670,11 @@ const kzR0=v=>(v==null||isNaN(v))?"–":String(Math.round(v));
 const kzHM=ms=>new Date(ms).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:TZ});
 const kzRichtung=g=>(g==null||isNaN(g))?"":["N","NO","O","SO","S","SW","W","NW"][Math.round(((+g%360)+360)%360/45)%8];
 const kzUvStufe=u=>u<3?"niedrig":u<6?"mäßig":u<8?"hoch":u<11?"sehr hoch":"extrem";
+/* v6.25 (Nutzer: "das Sonnensymbol in der Kachel Sonne koennte sich auch drehen wie die anderen Wettersymbole"): bis
+   v6.24 stand dort das Schriftzeichen U+2600. Jetzt die gezeichnete Sonne der Wettersymbole, so gross wie die Schrift
+   (.kzso); ab Stufe 1 von "Wettersymbole bewegen" dreht sie mit, bei Stufe 0 steht sie. */
+function kzSonneSym(){var s=0;try{s=sbStufe();}catch(e){}
+  return '<span class="kzso" role="img" aria-label="Sonne">'+(s?iconBewegt("clear-day",16,SB_STUFEN[s]):icon("clear-day",16))+'</span>';}
 const KZ_TROPFEN='<svg class="kztropfen" viewBox="0 0 12 16" width="8" height="11" aria-label="Regen"><path d="M6 1C4 5 1.5 8 1.5 10.6a4.5 4.5 0 0 0 9 0C10.5 8 8 5 6 1z" fill="#3b82f6"/></svg>';
 /* v5.09: 24 Stunden wie der Abschnitt (vorher bis 25 - "~2,1 mm" gegen "~1,7 mm").
    Wert mit Stempel t = Regen von t-1h bis t (Open-Meteo precipitation). */
@@ -7006,11 +7036,11 @@ const KZ_DEF={
        wechselt die Unterzeile ruhig mit den Sonnenstunden des Tages (s2). */
     /* Wechsel: Wert UND Unterzeile ("1:16 h" / "bisher") - "☀ 10:16 h bisher"
        passt bei 375 pt in keine Unterzeile. */
-    const so=kzSonneHeute(),w=so?{v2:`☀ ${kzDauer(so.min)}`,s2:"bisher"}:{};
+    const SO=kzSonneSym(),so=kzSonneHeute(),w=so?{v2:`${SO}${kzDauer(so.min)}`,s2:"bisher"}:{};
     // v4.91: noch keine Sonne, aber welche erwartet -> das zuerst ("☀ ~11:30 / erste Sonne")
     const er=kzSonneErwartet();
     if(sc.up&&er){const a=[{v:`bis ${kzHM(set)}`,s:`noch ${kurz(sc.ms)}`}];if(w.v2)a.push({v:w.v2,s:w.s2});
-      return {l:"Sonne",v:er.bald?"☀ bald":`☀ ~${kzHM(er.t)}`,s:"erste Sonne",alt:a};}
+      return {l:"Sonne",v:er.bald?`${SO}bald`:`${SO}~${kzHM(er.t)}`,s:"erste Sonne",alt:a};}
     if(sc.up)return Object.assign({l:"Sonne",v:`bis ${kzHM(set)}`,s:`noch ${kurz(sc.ms)}`},w);
     const next=Date.now()<rise?rise:sunMoment(new Date(t.getTime()+864e5),true);
     return Object.assign({l:"Sonne",v:`ab ${kzHM(next)}`,s:`in ${kurz(sc.ms)}`},Date.now()>set&&w.v2?{v2:w.v2,s2:"heute"}:{});}},
