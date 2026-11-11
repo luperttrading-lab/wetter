@@ -194,6 +194,65 @@ def achse_lesen(png_bytes):
     return None, f"Leiste nicht gefunden ({w}x{h}; Proben bei y=30%: {' '.join(proben)})"
 
 
+# Bekannte Zeitachsen nach Zahl der Stunden (= Gitterlinien minus 1)
+STUNDEN_BEKANNT = {15: (6, 21), 11: (7, 18)}
+
+
+def stunden_aus_pixeln(getpix, w, h, sommerzeit):
+    """Zeitachse des Bildes als (von, bis) oder None.
+
+    Das BfS zeigt im Sommer 6-21 Uhr, seit November 2026 7-18 Uhr; die App legt
+    eigene Kurven ueber das Bild und muss die Stunden kennen. Gezaehlt werden die
+    senkrechten Gitterlinien in der Box (eine je volle Stunde, beide Rahmenkanten
+    eingeschlossen): Linien - 1 = Stunden. Die Box liegt in allen Bildern bei
+    x 0,125..0,900 der Breite (in der App nachgemessen, v3.41). Abgetastet wird
+    der obere Teil der Box unterhalb von Legende und Uhrzeitfeld; gezaehlt werden
+    nur ungesaettigte, nicht weisse Pixel (Gitter und Rahmen sind grau/schwarz,
+    die Messbalken farbig).
+    Bekannte Stundenzahlen stehen in STUNDEN_BEKANNT; fuer andere gilt: die Achse
+    liegt symmetrisch um 12:30 (Winterzeit) bzw. 13:30 (Sommerzeit)."""
+    x0, x1 = int(round(0.125 * w)) + 1, int(round(0.900 * w)) - 1
+    y0, y1 = int(round(0.19 * h)), int(round(0.42 * h))
+
+    def grau(x, y):
+        r, g, b, a = getpix(x, y)
+        return a >= 200 and max(r, g, b) - min(r, g, b) <= 24 and r + g + b < 705
+
+    prof = [sum(1 for y in range(y0, y1) if grau(x, y)) for x in range(x0, x1 + 1)]
+    mx = max(prof) if prof else 0
+    if mx < 10:
+        return None
+    lin = []
+    for i, n in enumerate(prof):
+        if n >= 0.25 * mx:
+            if lin and i - lin[-1][-1] <= 2:
+                lin[-1].append(i)
+            else:
+                lin.append([i])
+    mitten = [sum(l) / len(l) for l in lin]
+    if len(mitten) < 5:
+        return None
+    ab = sorted(b - a for a, b in zip(mitten, mitten[1:]))
+    schritt = ab[len(ab) // 2]
+    if schritt < 8 or ab[-1] - ab[0] > 0.2 * schritt:      # unregelmaessig: nicht das Gitter
+        return None
+    n = int(round((x1 - x0) / schritt))
+    if n in STUNDEN_BEKANNT:
+        return STUNDEN_BEKANNT[n]
+    if n < 6 or n > 18 or n % 2 == 0:
+        return None
+    mitte = 13.5 if sommerzeit else 12.5
+    return int(mitte - n / 2), int(mitte + n / 2)
+
+
+def stunden_lesen(png_bytes, datum):
+    im = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
+    w, h = im.size
+    sommer = bool(datetime(datum.year, datum.month, datum.day, 12, tzinfo=TZ).dst())
+    pix = im.load()
+    return stunden_aus_pixeln(lambda x, y: pix[x, y], w, h, sommer)
+
+
 def bild_holen(slug, tag):
     # v1.1: Leerzeichen im Slug ("Sankt Augustin") muessen als %20 in die URL.
     url = BASIS.format(slug=urllib.parse.quote(slug), tag=tag)
@@ -212,10 +271,14 @@ def main():
     # bisherigen Stand laden, damit aeltere Tage erhalten bleiben
     try:
         with open(AUSGABE, "r", encoding="utf-8") as fh:
-            alt = json.load(fh).get("achsen", {})
+            _alt = json.load(fh)
+            alt = _alt.get("achsen", {})
+            alt_std = _alt.get("stunden", {})
     except (FileNotFoundError, json.JSONDecodeError, ValueError):
         alt = {}
+        alt_std = {}
     achsen = {k: dict(v) for k, v in alt.items() if isinstance(v, dict)}
+    stunden = {k: dict(v) for k, v in alt_std.items() if isinstance(v, dict)}
 
     ok = fehl = 0
     gruende = {}
@@ -226,6 +289,15 @@ def main():
             try:
                 png = bild_holen(slug, tag)
                 achse, grund = achse_lesen(png)
+                try:                                   # Zeitachse (v1.5) - ein Fehler hier darf die Y-Achse nicht kosten
+                    st = stunden_lesen(png, datum)
+                    if st:
+                        stunden.setdefault(slug, {})[ds] = [st[0], st[1]]
+                        grund += f", {st[0]}-{st[1]} Uhr"
+                    else:
+                        grund += ", Stunden nicht lesbar"
+                except Exception as e2:
+                    grund += f", Stunden: {str(e2)[:40]}"
             except urllib.error.HTTPError as e:
                 achse, grund = None, f"HTTP {e.code}"
             except Exception as e:
@@ -243,11 +315,14 @@ def main():
     grenze = (heute - timedelta(days=45)).isoformat()
     for slug in achsen:
         achsen[slug] = {d: v for d, v in achsen[slug].items() if d >= grenze}
+    for slug in stunden:
+        stunden[slug] = {d: v for d, v in stunden[slug].items() if d >= grenze}
 
     with open(AUSGABE, "w", encoding="utf-8") as fh:
         json.dump({"stand": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                    "quelle": "BfS-Tagesgrafiken, Farbleiste ausgelesen",
                    "achsen": dict(sorted(achsen.items())),
+                   "stunden": dict(sorted(stunden.items())),
                    "gelesen": ok, "nicht_lesbar": fehl,
                    "gruende": gruende}, fh, ensure_ascii=False, indent=1)
     print(f"\n{ok} gelesen, {fehl} nicht lesbar. Geschrieben: {AUSGABE}")

@@ -2789,6 +2789,29 @@ sonst "Der Abruf der 10-Minuten-Werte haengt seit ...". (3) Dunkle Ansichten: Ku
 fest #3a4453, auch in der Legende), Ortsname im Bild `CO.uvTitel` (war fest #12324f), "UV INDEX" im Logo weiss (war
 `CO.karte` = dunkel auf dunkelblau). Geprueft mit den echten Daten des Ausfalls (Playwright, Himmel / dunkel / hell):
 `_uvProg.ab` 09:50, Hinweis mit DWD-Grund.
+v6.20 (Nutzer 11.11. 12:35, Bild: unsere UV-Grafik 0-4 / 6-21 Uhr ueber der amtlichen 0-3 / 7-18 Uhr: "sollte
+eigentlich immer gleich sein"): ZWEI Fehler, beide seit dem 01.11. (1) HOEHE: das BfS stellt seine Achse zum Monatsersten
+um (bfs-achse.json: September 6, Oktober 4, seit 01.11. 3 an 42 von 43 Stationen). Die App liess nur 4-12 zu
+(`UV_AX_MIN`, `UV_AX_STUFEN`) - die gemessene 3 wurde beim Laden verworfen, die eigene Regel begann bei 4. Jetzt gemessen
+ab 2, eigene Regel ab 3. Im BfS-Bild nachgemessen: Linien alle 0,5 UV, 109,7 px je Stufe, Rahmen oben = Achse + 0,5 (wie
+bisher gerechnet). (2) ZEIT: das Winterbild zeigt 7-18 Uhr statt 6-21 (Beschriftung im Bild gelesen, 12 Gitterlinien). Die
+App rechnete fest mit 6-21: die Kurven, die sie UEBER das amtliche Bild legt, waren waagrecht gestaucht (Glocke 8:30-14:30
+statt 8-16:15 Uhr) und standen mit Teiler 4,5 statt 3,5 zu niedrig - der Nutzer hatte nur die Skala bemerkt. Jetzt
+`uvStunden()` -> [von,bis]: gemessen (`_bfsStdMess` aus bfs-achse.json, neuer Schluessel `stunden` {slug:{datum:[von,bis]}})
+fuer das eigene Bild bzw. die naechste Station bis 150 km, bis 3 Tage alt; sonst Winterzeit 7-18, Sommerzeit 6-21
+(`uvSommerzeit()`); ohne Station in 150 km (Ausland) wie bisher 6-21. `drawUV` und `drawBfsOverlay` nehmen das fuer
+`t6`/`t21` (die Namen blieben, sie heissen jetzt Achsenanfang/-ende) und die Stundenbeschriftung. WANN das BfS die
+Stunden umstellt, weiss ich nicht (vermutet: mit der Y-Achse am Monatsersten oder mit der Zeitumstellung) - darum misst
+die Pipeline: `bfs_achse.py stunden_aus_pixeln()` zaehlt die senkrechten Gitterlinien in der Box (x 0,125-0,900, Zeilen
+0,19-0,42 der Hoehe, nur graue Pixel), 15 Abstaende = 6-21, 11 = 7-18, andere ungerade Zahlen symmetrisch um 12:30
+(Winterzeit) / 13:30 (Sommerzeit), sonst nichts. Lokal an den Bildern vom 10. und 11.11. geprueft (ueber PPM - Pillow
+ist im Pruefstand defekt): beide (7, 18). Grafik OHNE BfS-Bild: Hoehe jetzt aus dem Seitenverhaeltnis der BfS-Box
+(496 x 384) statt Faktor 1,80 x Achse / 15 - der galt nur fuer 0-6 und 15 Stunden, mit 0-3 waere sie halb so hoch
+gewesen. Nebenbei: das Wort "schwarz" unter dem amtlichen Bild war in den dunklen Ansichten unsichtbar (`.uvsw`).
+Geprueft (Playwright, echte Daten + das amtliche Bild vom 11.11. eingespielt, Himmel/hell/dunkel): eigene Grafik 0-3 und
+7-18, beide Boxen gleich gross, Glocke auf dem amtlichen Bild 8:00-16:15 mit Scheitel 12:10, Messbalken darunter.
+PRUEFSTAND: uvi.bfs.de laedt im Browser dort nicht - Bild per curl (UA/Referer der Pipeline) holen und mit
+`pg.route("**/uvi.bfs.de/**", ...fulfill(body=png))` einspielen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
