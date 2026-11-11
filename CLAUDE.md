@@ -2831,6 +2831,39 @@ auf fog und zurueck: Himmel, Glas, Speicher, Schwaden folgen), gescrollt mit ste
 BEFUND AUS DEN BILDERN, NICHT GEAENDERT: in zwei der drei Bilder waren die wechselnden Kacheln leer bzw. blass - mitten
 in der Blende. Takt 4 s mit Blende 1,5 s (vom Nutzer in v4.82 gewaehlt) heisst: 37,5 % der Zeit ist ein Text nicht voll
 lesbar. Dem Nutzer als Frage vorgelegt (kuerzere Blende, z. B. 0,6 s = 15 %).
+v6.22 (Nutzer 11.11. zu den sechs Bildern von 17:58: "bei uns steht Nebel, im iPhone Dunst; bei uns ueberall Nebel, im
+iPhone Giessen Nieselregen - koennen oder muessen wir etwas anpassen?"). Antwort aus den Daten: fuer DIESEN Moment nichts
+(Station 17:30: Sicht 268 m, 0,0 mm in 60 min, 5,9 Grad; 18:00: 535 m, 0,0 mm) - aber beim Nachpruefen DREI Fehler gefunden:
+(1) NEBEL KAM FAST NIE. "Nebel" stand nur, wenn Bright Sky das Symbol "fog" lieferte. Station 01639, 01.09.-11.11.: 56
+Stunden mit Sicht unter 1 km, davon EINE mit "fog" (49 "dry", 6 "rain"). Jetzt `sichtZustand(ic,vis)`: gemessene Sicht
+unter `SICHT_NEBEL` 1000 m -> Nebel (so meldet es auch der DWD), bis unter `SICHT_DUNST` 4000 m und bedeckt -> "Dunst"
+(Symbol und Himmel wie Nebel); fachlich reicht Dunst bis 8 km (wetterdienst.de/DWD), 4 km ist MEINE Wahl (darueber merkt
+man wenig; die Kachel sagt 4-10 km "diesig"). Nur wenn trocken (Regen/Schnee gehen vor), Messung hoechstens 2 h alt
+(`_condSicht`, `_condSichtT`), nie aus Vorhersagezeilen; Dunst nicht bei "klar"/"teils bewoelkt" (die Sonne fiele aus dem
+Symbol). Gilt im Kopf (Schritt 3 in `zustandZeigen`) und fuer gemessene Zellen der Stundenleiste (nasse Stunden
+ausgenommen). Kachel "Sichtweite": 1-4 km hiess "Nebel" -> "Dunst"; unter 1 km in Metern ("270 m" statt "0 km"), bis
+10 km eine Nachkommastelle.
+(2) VORHERSAGE ALS "LIVE". Bright Sky mischt in /weather Messung und MOSMIX; nach der vollen Stunde ist die Zeile der
+laufenden Stunde zuerst eine VORHERSAGE (11.11. 18:15: 18:00 = 6,1 Grad, "cloudy"). `render` nahm die letzte Zeile als
+"jetzt", das Abzeichen sagte trotzdem "Live - DWD" (`snap` trug `_fc` nicht), und `tryCurrent` verwarf die echte Messung
+(current_weather 18:00: 5,9 Grad, Nebel, 535 m), weil ihr Stempel nicht NEUER war als der der Vorhersagezeile - bis zur
+naechsten Messung, oft eine halbe Stunde und laenger. Fuenf Minuten nach den Nutzerbildern stand im Test "Bewoelkt 6,1"
+statt "Nebel 5,9". Jetzt: ist die letzte Zeile `_fc`, gilt die juengste MESSUNG - letzte gemessene Stundenzeile oder
+`_liveVor` (Live-Abfrage derselben Station, die nicht neuer ist als die Vorhersagezeile) -, solange sie hoechstens
+`MESS_VOR_MIN` 90 min alt ist; danach die Vorhersage mit Abzeichen "Prognose" (gelber Punkt). `_kopfMess` = diese Messung:
+auch fuer die Zelle "jetzt" der Stundenleiste und `kzLetzte()` (Kacheln Wind/Luftdruck/Taupunkt, Datenfrische); die
+Detailkacheln lesen nur Messzeilen (`messAll`). "heute" gilt auch, wenn die letzte Zeile heute ist (sonst stuende kurz
+nach Mitternacht "Veraltet"). OFFEN: der Temperaturverlauf zeigt am Strich "jetzt" weiter den Wert der Stundenzeile
+(Vorhersage) - oben 5,9, im Verlauf 6,1.
+(3) FALSCHER HINWEIS IM UV-BILD (mein Fehler aus v6.19): das Alter hing am letzten TAGESLICHT-Wert von `solar10Werte`
+(Daemmerung faellt weg) - jeden Abend "2 h alt" und seit v6.19 "Der DWD liefert seit 16:10 Uhr keine 10-Minuten-Werte",
+obwohl bis 17:50 geliefert war. Jetzt `solar10Letzter()` (Feld `letzter` der Stationsdatei).
+Geprueft (Playwright, echte Daten 18:17-18:20): Kopf "17:30 Uhr, 5,9, Nebel" bei letzter Zeile 18:00 Vorhersage; Zelle
+"jetzt" gleich; ohne Live-Abfrage die Stundenzeile 17:00; Messung aelter als 90 min -> "Prognose 6,1 Bewoelkt"; nur
+Messzeilen -> wie bisher; 16 erzwungene Faelle fuer Nebel/Dunst (268/999 m Nebel, 1000/2500 m Dunst, 4000 m bedeckt,
+klar + 2500 m bleibt klar, klar + 600 m Nebel, 3 h alt nichts, Radar/Niesel gehen vor). Mitternacht nur am Code
+geprueft (`isToday` ist const). Apples "Nieselregen" fuer Giessen: an der Station nicht gemessen (0,0 mm 17-18 Uhr);
+MOSMIX hatte fuer die Stunde ebenfalls 0,3 mm erwartet. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

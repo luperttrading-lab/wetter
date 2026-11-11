@@ -1430,7 +1430,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.21</span>
+      <span class="ver">v6.22</span>
     </div>
   </header>
 
@@ -2094,6 +2094,31 @@ const LABELS={"clear-day":"Klar","clear-night":"Klar","partly-cloudy-day":"Teils
    Steht hier oben, weil der Stationskasten frueher rendert als der Radar-
    Nowcast - mit "let" weiter unten waere die erste Zuweisung ein Fehler. */
 var _condIcon="cloudy",_condText="\u2014",_nowMmh=null,_condMess=null,_condP10=null,_condP30=null;
+/* v6.22 NEBEL UND DUNST AUS DER GEMESSENEN SICHTWEITE (Nutzer 11.11.: "bei uns steht Nebel, im iPhone Dunst - muessen
+   wir etwas anpassen?"). Am 11.11. 17:30 mass die Station 268 m Sicht - "Nebel" stimmte. Aber: "Nebel" kam bisher nur,
+   wenn Bright Sky das Symbol "fog" lieferte, und das ist selten. Station 01639, 01.09.-11.11.2026: 56 Stunden mit Sicht
+   unter 1 km, davon EINE mit Zustand "fog" (49 "dry", 6 "rain") - die App zeigte bei Nebel fast immer "Bewoelkt".
+   Jetzt entscheidet die Messung: unter 1 km Nebel (so meldet es auch der DWD), 1 bis unter 4 km Dunst (fachlich reicht
+   Dunst bis 8 km; ab 4 km merkt man im Alltag wenig - meine Wahl, die Kachel "Sichtweite" nennt 4-10 km "diesig").
+   Nur wenn es gerade TROCKEN ist (Regen, Schnee ... gehen vor) und die Messung hoechstens 2 h alt ist. Dunst nur unter
+   bedecktem Himmel: bei "klar"/"teils bewoelkt" bliebe sonst die Sonne im Symbol weg. Vorhersagezeilen zaehlen nicht. */
+var SICHT_NEBEL=1000,SICHT_DUNST=4000,_condSicht=null,_condSichtT=0;
+/* v6.22 MESSUNG VOR VORHERSAGE. Beim Nachpruefen gefunden (11.11. 18:15): Bright Sky mischt in der Stundenreihe Messung
+   und MOSMIX, und die Zeile der LAUFENDEN Stunde kommt nach der vollen Stunde zuerst aus der Vorhersage (18:00 Uhr:
+   6,1 Grad, "cloudy"). Die App nahm diese Zeile als "jetzt" und nannte sie "Live - DWD" (die Marke _fc erreichte das
+   Abzeichen nie). Die echte Messung von 18:00 Uhr (current_weather: 5,9 Grad, Nebel, 535 m) wurde verworfen, weil ihr
+   Stempel nicht NEUER war als der der Vorhersagezeile - bis die naechste Messung kam, oft eine halbe Stunde und laenger.
+   Jetzt: ist die letzte Zeile eine Vorhersage, gilt die juengste MESSUNG (Stundenzeile oder Live-Abfrage derselben
+   Station), solange sie hoechstens MESS_VOR_MIN alt ist; erst danach die Vorhersage, dann mit Abzeichen "Prognose".
+   _liveVor = Live-Messung, die nicht neuer ist als die Vorhersagezeile; _kopfMess = die Messung, die oben steht
+   (auch fuer die Zelle "jetzt" der Stundenleiste und die Kacheln Wind / Luftdruck / Taupunkt). */
+var MESS_VOR_MIN=90,_kopfMess=null,_liveVor=null;
+function sichtZustand(ic,vis){
+  if(vis==null||!isFinite(vis)||vis<0||radarNass(ic))return null;
+  if(vis<SICHT_NEBEL)return {ic:"fog",tx:"Nebel"};
+  if(vis<SICHT_DUNST&&(ic==="cloudy"||ic==="fog"))return {ic:"fog",tx:"Dunst"};
+  return null;
+}
 /* ===== v6.07: Wetter-Animation im Kopf des Startkastens =====================================================
    Nutzer (06./10.11.2026): "nur fuer Regen macht es keinen Sinn - wenn, dann auch andere Wetterlagen" und "nur oben
    im kleinen Kopfbereich, nicht auf dem ganzen Bildschirm". Vorlage: wettertest.html.
@@ -2676,12 +2701,23 @@ async function tryCurrent(obsSrc){
       zustandZeigen();
     }
     if(!same||!lastRows||!lastRows.length)return;
-    if(new Date(w.timestamp)<=new Date(lastRows.at(-1).timestamp))return;
     const pt={timestamp:w.timestamp,temperature:w.temperature,icon:w.icon,condition:w.condition,relative_humidity:w.relative_humidity,
       p10:w.precipitation_10,p30:w.precipitation_30,p60:w.precipitation_60,
       wind_speed:(w.wind_speed_10!=null?w.wind_speed_10:w.wind_speed),wind_direction:(w.wind_direction_10!=null?w.wind_direction_10:w.wind_direction),
       pressure_msl:w.pressure_msl,dew_point:w.dew_point,cloud_cover:w.cloud_cover,visibility:w.visibility,wind_gust_speed:w.wind_gust_speed_10!=null?w.wind_gust_speed_10:w.wind_gust_speed,_fc:false,_live:true,
       _ss30:w.sunshine_30,_ss60:w.sunshine_60};   // v4.30: fuer das Icon der Jetzt-Zelle
+    const _lz=lastRows.at(-1);
+    if(new Date(w.timestamp)<=new Date(_lz.timestamp)){
+      /* v6.22: nicht neuer als die letzte Zeile - ist die aber eine VORHERSAGE und die Live-Messung juenger als die
+         letzte gemessene Stundenzeile, gehoert sie in den Kopf (siehe MESS_VOR_MIN) */
+      let _lm=null;for(let i=lastRows.length-1;i>=0;i--){if(!lastRows[i]._fc){_lm=lastRows[i];break;}}
+      if(_lz._fc&&(!_lm||new Date(w.timestamp)>new Date(_lm.timestamp))){
+        _liveVor={pt:pt,st:obsSrc.dwd_station_id||obsSrc.station_name||""};
+        render(fullRows.slice(-WINDOW_HOURS),fullRows,obsSrc,false);
+      }
+      return;
+    }
+    _liveVor=null;
     fullRows=fullRows.concat([pt]);
     chartRows=(chartRows||fullRows).concat([pt]).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
     chartInit=false;  // Live-Messpunkt kam erst nach der ersten Zentrierung -> erneut auf jetzt ausrichten
@@ -2691,8 +2727,18 @@ async function tryCurrent(obsSrc){
 
 function render(rows,all,src,demo){
   isDemo=demo; lastRows=rows; showState(null);
-  const cur=rows.at(-1);
-  const today=isToday(cur.timestamp);
+  let cur=rows.at(-1),messAll=all;_kopfMess=null;
+  /* v6.22: Messung vor Vorhersage (siehe MESS_VOR_MIN) */
+  if(!demo&&cur&&cur._fc){
+    let m=null;for(let i=rows.length-1;i>=0;i--){if(!rows[i]._fc){m=rows[i];break;}}
+    const stK=(src&&(src.dwd_station_id||src.station_name))||"";
+    if(_liveVor&&_liveVor.st===stK&&(!m||new Date(_liveVor.pt.timestamp)>new Date(m.timestamp)))m=_liveVor.pt;
+    if(m&&Date.now()-new Date(m.timestamp).getTime()<=MESS_VOR_MIN*60000){
+      const tM=new Date(m.timestamp).getTime();
+      messAll=all.filter(r=>!r._fc&&r!==m&&new Date(r.timestamp).getTime()<=tM).concat([m]);cur=m;_kopfMess=m;}
+  }
+  /* kurz nach Mitternacht ist die letzte Messung von gestern - "heute" richtet sich dann nach der letzten Zeile */
+  const today=isToday(cur.timestamp)||isToday(rows.at(-1).timestamp);
   window._lastSrc=src; // v2.28: fuer Backfill-Rerender; Label setzt der eine Schreiber unten
 
   // Stationszeile
@@ -2705,9 +2751,9 @@ function render(rows,all,src,demo){
      st.textContent=st.dataset.basis+hoeheSuffix()+tzSuffix();}} // v2.28 / v2.71 Ortszeit / v2.94 Hoehe
 
   // aktuelle Werte (Snapshot)
-  const wind=cur.wind_speed!=null?cur.wind_speed:latestOf(all,"wind_speed");
-  let rh=cur.relative_humidity!=null?cur.relative_humidity:latestOf(all,"relative_humidity");
-  if(rh==null){const _T=cur.temperature,_Td=cur.dew_point!=null?cur.dew_point:latestOf(all,"dew_point"); // v2.28: Magnus aus Taupunkt (SYNOP ohne RH)
+  const wind=cur.wind_speed!=null?cur.wind_speed:latestOf(messAll,"wind_speed");
+  let rh=cur.relative_humidity!=null?cur.relative_humidity:latestOf(messAll,"relative_humidity");
+  if(rh==null){const _T=cur.temperature,_Td=cur.dew_point!=null?cur.dew_point:latestOf(messAll,"dew_point"); // v2.28: Magnus aus Taupunkt (SYNOP ohne RH)
     if(_T!=null&&_Td!=null)rh=Math.max(1,Math.min(100,Math.round(100*Math.exp(17.62*_Td/(243.12+_Td)-17.62*_T/(243.12+_T)))));}
   /* v4.07: condition NUR aus einer Messung. Bright Sky mischt in /weather
      Messreihe und MOSMIX; die laufende Stunde kommt oft schon aus der
@@ -2717,10 +2763,12 @@ function render(rows,all,src,demo){
      Minuten 0,0 mm gemessen hatte. Die Zeilen sind seit jeher mit _fc
      markiert, nur wurde das bei condition nicht gelesen. */
   snap={temp:cur.temperature,icon:cur.icon,condition:cur._fc?null:cur.condition,ts:cur.timestamp,rh,wind,
-    p10:cur.p10,p30:cur.p30,
-    dir:cur.wind_direction!=null?cur.wind_direction:latestOf(all,"wind_direction"),
-    gust:latestOf(all,"wind_gust_speed"),press:latestOf(all,"pressure_msl"),
-    dew:latestOf(all,"dew_point"),cloud:latestOf(all,"cloud_cover"),vis:latestOf(all,"visibility")};
+    p10:cur.p10,p30:cur.p30,_fc:!!cur._fc,
+    dir:cur.wind_direction!=null?cur.wind_direction:latestOf(messAll,"wind_direction"),
+    gust:latestOf(messAll,"wind_gust_speed"),press:latestOf(messAll,"pressure_msl"),
+    dew:latestOf(messAll,"dew_point"),cloud:latestOf(messAll,"cloud_cover"),vis:latestOf(messAll,"visibility")};
+  /* v6.22: die GEMESSENE Sicht der letzten Zeile (keine Vorhersagezeile) fuer Nebel/Dunst im Kopf */
+  _condSicht=(!demo&&!cur._fc&&cur.visibility!=null&&isFinite(cur.visibility))?+cur.visibility:null;_condSichtT=new Date(cur.timestamp).getTime();
 
   // Tageshoch/-tief + Tagessummen
   const todayRows=all.filter(r=>isToday(r.timestamp));
@@ -2760,7 +2808,7 @@ function paintHero(s,demo,today,d){
   el("ydiffBox").classList.toggle("hidden",!today);
   el("staleBox").classList.toggle("on",!today);
 
-  const badge=el("badge");badge.className="badge"+(demo?" demo":(!today?" stale":""));
+  const badge=el("badge");badge.className="badge"+(demo?" demo":(!today?" stale":(s._fc?" demo":"")));
   badge.textContent=demo?"Demo-Snapshot":(!today?"Veraltet":(s._live?"Live · aktuell":(s._fc?"Prognose":"Live · DWD")));
 
   if(!today){el("staleSub").innerHTML="Letzter Messwert: <b>"+dateWD(s.ts)+"</b>, "+timeHM(s.ts)+" Uhr ("+ageText(s.ts)+")";el("heat").classList.remove("on");return;}
@@ -2897,7 +2945,9 @@ function renderStrip(rows){
     prev=day;
     const isNow=i===nowIdx, night=isNight(r.timestamp);
     const cell=document.createElement("div");
-    cell.className="col"+(isNow?" now":"")+(r._fc?" fc":"")+(night?" night":"");
+    /* v6.22: steht oben eine Messung statt der Vorhersagezeile der laufenden Stunde, zeigt die Zelle "jetzt" dieselbe */
+    const _rk=(isNow&&r._fc&&_kopfMess)?_kopfMess:r;
+    cell.className="col"+(isNow?" now":"")+(_rk._fc?" fc":"")+(night?" night":"");
     // v2.98: Sonnenminuten als Leiste (0..60 min, DWD-Messung ueber die
     // 120-W/m2-Schwelle) und Boee darunter. Beide Felder liefert Bright Sky
     // ohnehin mit; sie wurden bisher verworfen.
@@ -2956,10 +3006,12 @@ function renderStrip(rows){
        als Bedeckung. Nachts nie, dort gibt es keine Sonnenminuten. Die
        Untergrenze von 20 moeglichen Minuten verhindert, dass in der Auf- und
        Untergangsstunde drei Minuten von drei moeglichen den Ausschlag geben. */
-    let _ic=r.icon||"cloudy";
+    let _ic=_rk.icon||"cloudy";
     if(_ic==="cloudy"&&!night&&_ss!=null&&_moegl>=20&&_ss>=0.9*_moegl)_ic="partly-cloudy-day";
-    if(r._live)_ic=sonneStuetztIcon(_ic,r._ss30,r._ss60,_tMs);   // v4.30: wie oben im Zustand
-    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(r.temperature))}">${fmt1(r.temperature)}°</div>${_unten}`;
+    if(_rk._live)_ic=sonneStuetztIcon(_ic,_rk._ss30,_rk._ss60,_tMs);   // v4.30: wie oben im Zustand
+    /* v6.22: Nebel/Dunst aus der gemessenen Sicht wie oben im Kopf - nicht in Vorhersagezeilen, nicht in nassen Stunden */
+    if(!_rk._fc&&!_rk._om&&!radarNass(_rk.condition)){const _sz=sichtZustand(_ic,_rk.visibility);if(_sz)_ic=_sz.ic;}
+    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${fmt1(_rk.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
@@ -3219,7 +3271,9 @@ function renderTiles(s,d){
   const pSub=pTrend!=null?`${pArrow} ${pNum} hPa / 3 h`:"—";
   const dewSub=s.dew==null?"":(s.dew<10?"angenehm trocken":s.dew<16?"behaglich":s.dew<19?"leicht schwül":"schwül");
   const cloudSub=s.cloud==null?"":(s.cloud<15?"klar":s.cloud<50?"aufgelockert":s.cloud<85?"stark bewölkt":"bedeckt");
-  const visSub=s.vis==null?"":(s.vis>=30000?"sehr klar":s.vis>=10000?"klar":s.vis>=4000?"diesig":"Nebel");
+  /* v6.22: 1 bis 4 km hiess hier "Nebel" - Nebel ist erst unter 1 km; und 268 m standen als "0 km" da */
+  const visSub=s.vis==null?"":(s.vis>=30000?"sehr klar":s.vis>=10000?"klar":s.vis>=SICHT_DUNST?"diesig":s.vis>=SICHT_NEBEL?"Dunst":"Nebel");
+  const visVal=s.vis==null?"\u2013":s.vis<1000?String(Math.round(s.vis/10)*10):(s.vis/1000).toLocaleString("de-DE",{maximumFractionDigits:s.vis<10000?1:0});
   /* Pfeil, Farbe und Text an derselben 0,5-K-Schwelle wie in der Hero-Kachel:
      vorher konnte bei genau +0,5 K der Pfeil "≈" neben dem Text "1° wärmer"
      stehen, weil die Schwellen (>0.5 vs. <0.5) sich nicht deckten. */
@@ -3244,7 +3298,7 @@ function renderTiles(s,d){
       `<div><div class="zk">Luftfeuchte</div><div class="val">${s.rh!=null?Math.round(s.rh):"–"} <small>%</small></div><div class="sub">${s.rh!=null?(s.rh<35?"trocken":s.rh<65?"moderat":"feucht"):""}</div></div>`+
     `</div></div>`+
     tile("Bewölkung",s.cloud!=null?Math.round(s.cloud):"–","%",cloudSub)+
-    tile("Sichtweite",s.vis!=null?(s.vis/1000).toLocaleString("de-DE",{maximumFractionDigits:0}):"–","km",visSub)+
+    tile("Sichtweite",visVal,(s.vis!=null&&s.vis<1000)?"m":"km",visSub)+
     /* v3.53: Niederschlag und Sonnenenergie sind beides Tagessummen und stehen
        jetzt nebeneinander in einer breiten Kachel. Die Kennungen precTodayVal
        und precTodaySub bleiben - renderRadolan schreibt die genauere
@@ -3918,6 +3972,20 @@ function gClear(ms){   // Klarhimmel-Globalstrahlung W/m2 (Haurwitz)
 /* Intervalle des gezeichneten Tages (6-21 Uhr Ortszeit), nur gemessene und
    nur bis nowMs. Liefert [{t0,t1,tc,g,gclr,k,sd}] oder null. Die UV-Hoehe
    rechnet drawUV dazu, sobald die Glocke bekannt ist. */
+/* v6.22: Ende des letzten GELIEFERTEN 10-Minuten-Werts der Station (ms), auch nachts. solar10Werte() laesst die
+   Daemmerung weg (Klarhimmel unter 25 W/m2) - sein letzter Wert ist abends der von kurz vor Sonnenuntergang. Daran hing
+   die Altersangabe: jeden Abend "2 h alt", und seit v6.19 dazu der falsche Satz "Der DWD liefert seit 16:10 Uhr keine
+   10-Minuten-Werte" (am 11.11. 18:17 gesehen; geliefert war bis 17:50). */
+function solar10Letzter(){
+  try{
+    const st=solar10Station(_solar10Json);if(!st)return null;
+    const re=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})Z$/;let m=re.exec(String(st.letzter||""));
+    if(m)return Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
+    m=re.exec(String(st.t0||""));const a=st.gs||st.sd;if(!m||!a)return null;
+    let i=a.length-1;while(i>=0&&(a[i]==null||!isFinite(a[i])))i--;
+    return i<0?null:Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5])+i*(st.dt_min||10)*60000;
+  }catch(e){return null;}
+}
 function solar10Werte(dayMs,nowMs){
   const st=solar10Station(_solar10Json);if(!st)return null;
   const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})Z$/.exec(String(st.t0||""));if(!m)return null;
@@ -5840,7 +5908,7 @@ function kzTageGrafik(T){
 const KZ_SONNE='<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="#e0a100"/><g stroke="#e0a100" stroke-width="1.1" stroke-linecap="round"><path d="M5 .6v1.2M5 8.2v1.2M.6 5h1.2M8.2 5h1.2M1.9 1.9l.8.8M7.3 7.3l.8.8M1.9 8.1l.8-.8M7.3 2.7l.8-.8"/></g></svg>';
 const KZ_MOND='<svg width="8" height="9" viewBox="0 0 10 10" aria-hidden="true"><path class="kzmd" d="M6.8 1.2A4 4 0 1 0 8.8 7.6 3.3 3.3 0 0 1 6.8 1.2z"/></svg>';
 const kzStaerke=v=>v<0.5?"sehr leicht":v<2.5?"leicht":v<10?"mäßig":"stark";
-const kzLetzte=()=>(typeof lastRows!=="undefined"&&lastRows&&lastRows.length)?lastRows.at(-1):null;
+const kzLetzte=()=>_kopfMess||((typeof lastRows!=="undefined"&&lastRows&&lastRows.length)?lastRows.at(-1):null);   // v6.22: die Messung, die oben steht
 /* v4.68: UV-Stufe als Farbe statt Wort (das Wort passte nicht mehr in die
    Kachel) - dieselbe Farbskala wie das UV-Abzeichen, als Pille, weil Gelb als
    Schriftfarbe auf Weiss unlesbar waere. */
@@ -7421,6 +7489,8 @@ function zustandZeigen(){
     tx=mb<0.5?"Niesel":(mb<2.5?"Leichter Regen":(mb<10?"Regen":"Starkregen"));
     ic="rain";_zuMb=mb;
   }
+  /* 3. v6.22: die gemessene Sichtweite - unter 1 km Nebel, unter 4 km (bedeckt) Dunst; nur wenn es trocken ist */
+  if(_condSicht!=null&&_condSichtT&&Date.now()-_condSichtT<2*3600e3){const _sz=sichtZustand(ic,_condSicht);if(_sz){ic=_sz.ic;tx=_sz.tx;}}
   // v4.30: Sonnenminuten der Live-Abfrage stuetzen das Icon (siehe sonneStuetztIcon)
   const _sl=(_feinLive&&(now()-_feinLive.ts)<60*60000)?_feinLive:null;
   if(_sl){const neu=sonneStuetztIcon(ic,_sl.ss30,_sl.ss60,Date.now());if(neu!==ic){ic=neu;tx=LABELS[neu]||tx;}}
@@ -8307,7 +8377,7 @@ function drawUV(h){
        Alter, sobald es auffaellt. Genau das fehlte am 03.09.2026, als die
        Pipeline drei Stunden hing und die App den alten Wert wie einen
        aktuellen zeigte. Die Rohwerte dahinter stehen im Aufklapper. */
-    const _altMin=Math.round((Date.now()-_qL.t1)/60000);
+    const _tGel=solar10Letzter(),_altMin=Math.round((Date.now()-Math.max(_qL.t1,_tGel||0))/60000);   // v6.22: Alter der LIEFERUNG, nicht des letzten Tageslichtwerts
     /* Der DWD liefert alle 30 Minuten neu, mit rund 25 Minuten Latenz; bis zu
        einer Stunde Rueckstand ist also normal und bleibt unerwaehnt. */
     /* v4.30: nur fuer heute. In der Gestern-Ansicht ist der letzte Wert der
@@ -8319,7 +8389,9 @@ function drawUV(h){
     let _altGrund="";
     if(_altTxt){
       const _abr=(_solar10Json&&_solar10Json.aktualisiert)?new Date(_solar10Json.aktualisiert).getTime():NaN;
-      _altGrund='<br>'+((isFinite(_abr)&&_abr-_qL.t1>75*6e4)?'Der DWD liefert seit '+_hm+'\u00a0Uhr keine 10-Minuten-Werte':'Der Abruf der 10-Minuten-Werte h\u00e4ngt seit '+_hm+'\u00a0Uhr')
+      /* v6.22: Bezug ist der letzte GELIEFERTE Wert (siehe solar10Letzter), auch fuer die genannte Uhrzeit */
+      const _tLf=Math.max(_qL.t1,_tGel||0),_hmL=new Date(_tLf).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
+      _altGrund='<br>'+((isFinite(_abr)&&_abr-_tLf>75*6e4)?'Der DWD liefert seit '+_hmL+'\u00a0Uhr keine 10-Minuten-Werte':'Der Abruf der 10-Minuten-Werte h\u00e4ngt seit '+_hmL+'\u00a0Uhr')
         +' \u2013 ab da Stundenwerte (blass).';
     }
     window._uvS10Kurz='<span class="dg">Wolkendurchlass <b>'+Math.round(100*_qL.d)+'\u202f%</b>'
