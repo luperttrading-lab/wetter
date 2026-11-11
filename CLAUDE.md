@@ -2739,6 +2739,22 @@ an, zurueck nach oben wechselt es wieder. Aufwand ohne GPU mit der Liste im Bild
 eines Kerns (Stufe 0: 10 % / 2 %). FALLE im Pruefstand: scheitert der Abruf der Tagesvorhersage, traegt die Huelle
 `.kbody` von `#fcSec` die Klasse `hidden` - ein direkt aufgerufenes `renderForecast` nimmt sie nicht weg, die Liste bleibt
 0 px hoch und der IntersectionObserver meldet nichts (sah erst wie ein Fehler der neuen Funktion aus).
+v6.17 BEDECKTER HIMMEL (Nutzer 11.11. 12:08, zwei iPhone-Bilder nebeneinander, unsere App v6.15 und Apple "Bewoelkt":
+"bei uns etwas langweilig, sieht nach Nebel aus"). GEMESSEN in den Bildern: unser Himmel war eine voellig gleichfoermige
+Flaeche (137,143,152; Streuung 0), Apple Schieferblau (105..141, 115..149, 129..161) mit Helligkeit 95-141 nebeneinander,
+unten ruhig (85,98,111). URSACHE: bei geschlossener Decke (N >= 0,985) deckt die nahe Wolkenlage alles, und ihre helle und
+dunkle Farbe (206,212,222 / 150,160,176) drueckte `hiPassen` beide auf dieselbe Helligkeit (56 %) - kein Abstand mehr.
+Jetzt in `hiFarben`: Wolke hell (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); Regen
+dunkler (124,134,152 / 58,68,86 / 50,60,78 / 70,82,98). `hiTextur`: bei geschlossener Decke laeuft Hell -> Dunkel zwischen
+dem 10. und 90. Perzentil des Rauschens (vorher fast der ganze Wertebereich = ueberwiegend Mittelton). SCHLEIER `.hiV`
+(Staerke = Grauanteil g, `C.schleier`): ueber den Wolken oben etwas dunkler, untere Haelfte laeuft in die Grundfarbe aus
+(ruhig hinter den Karten). Die ferne Lage entfaellt bei geschlossener Decke (war unsichtbar). Ergebnis bedeckt am Tag:
+Wolke (136,143,157), Luecke (82,94,113). Nicht so plastisch wie Apple (dort gerechnete Wolkenkoerper mit Lichtkanten bis
+Helligkeit 190; bei uns Rauschen und Deckel 56 %, damit die weisse Schrift lesbar bleibt). STATUSLEISTE: im Bild (v6.15)
+hatte sie die Farbe `--hi-o` (88,104,127 = oberer Verlauf), NICHT `theme-color` (waere 137,143,154 gewesen) - iOS nimmt
+dort offenbar den Hintergrund des <html>. Der bekommt jetzt die Randfarbe `--hi-r` (= `HI.rand`, mit Wolken und Schleier),
+sofort gesetzt und als 6. Feld in `himmelFarbe` fuer das erste Script. Glas-Deckung rechnet jetzt mit max(Verlauf,
+0,8 x Randfarbe). Geprueft (Playwright): bedeckt, Regen, wolkig, heiter, Nacht bedeckt, jetzt (echt bedeckt).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
