@@ -2812,6 +2812,25 @@ Geprueft (Playwright, echte Daten + das amtliche Bild vom 11.11. eingespielt, Hi
 7-18, beide Boxen gleich gross, Glocke auf dem amtlichen Bild 8:00-16:15 mit Scheitel 12:10, Messbalken darunter.
 PRUEFSTAND: uvi.bfs.de laedt im Browser dort nicht - Bild per curl (UA/Referer der Pipeline) holen und mit
 `pg.route("**/uvi.bfs.de/**", ...fulfill(body=png))` einspielen.
+v6.21 NEBELHIMMEL (Nutzer 11.11. 17:58, sechs Bilder OHNE Text: unsere App fuer Giessen / Staufenberg / Erlental - ueberall
+"Nebel 5,9 Grad" - und Apple fuer dieselben Orte: "Dunst 7 Grad" (zweimal) und "Nieselregen 8 Grad"; von mir als Vergleich
+der Bilder gelesen). NACHGEPRUEFT (Bright Sky, Station 01639): 17:30 Uhr Sicht 268 m, 17:00 Uhr 400 m, Zustand fog, kein
+Niederschlag in den letzten 10/30/60 min, 5,9 Grad -> "Nebel" (Sicht unter 1 km) und "trocken" stimmen AN DER STATION;
+Apples "Dunst" und "Nieselregen" sind Modellwerte je Ort. Davor (12-16 Uhr) mass die Station 0,1-0,4 mm/h Niesel; ob das
+Radar den sah, liess sich nicht mehr pruefen (Bright Sky /radar reicht nur wenige Stunden zurueck). Alle drei Orte zeigen
+bei uns denselben Zustand, weil sie dieselbe Station nehmen (2,8 / 5,5 / 9,1 km). GEAENDERT: bei Nebel zeigte der Himmel
+das Bild "bedeckt" (dunkelblau mit kraeftiger Wolkenstruktur, im Nutzerbild 36..96), Apple ein fast gleichfoermiges
+neutrales Grau (108,108,102 oben -> 127,128,124 unten, Streuung 1). Jetzt `hiNebelFarben(L)`: neutrales Grau (nachts
+84,85,82 -> 102,102,99; am Tag an der 40-%-Grenze), EINE Schwadenlage mit wenig Abstand hell/dunkel, halb durchscheinend,
+gross und langsam (`hiNah(L)`: Massstab 3,2 / 3 px/s / Deckkraft .55 statt 2,5 / 7 / 1), keine Sterne. `hiLage()` liefert
+`nebel:1`, wenn oben das Nebel-Symbol steht (`_zuIc==="fog"`); im Speicher `himmelFarbe` Feld 4 = 2 (0 trocken, 1 nass).
+Glas im Nebel ohne Blau (`--hi-k` rgba(28,31,36,..), `--hi-t` rgba(22,25,30,.36)) - marineblaue Karten stachen auf dem
+Grau heraus. Die ziehenden Flecken der Wetter-Animation (v6.07/v6.18) liegen weiter darueber. Ansehen:
+`?himmel=nebel|nachtnebel` (+ `&wettertest=nebel`). Geprueft (Playwright): beide festen Lagen, echter Weg (`_zuIc`
+auf fog und zurueck: Himmel, Glas, Speicher, Schwaden folgen), gescrollt mit stehendem Kopf. Nicht am iPhone geprueft.
+BEFUND AUS DEN BILDERN, NICHT GEAENDERT: in zwei der drei Bilder waren die wechselnden Kacheln leer bzw. blass - mitten
+in der Blende. Takt 4 s mit Blende 1,5 s (vom Nutzer in v4.82 gewaehlt) heisst: 37,5 % der Zeit ist ein Text nicht voll
+lesbar. Dem Nutzer als Frage vorgelegt (kuerzere Blende, z. B. 0,6 s = 15 %).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -1430,7 +1430,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.20</span>
+      <span class="ver">v6.21</span>
     </div>
   </header>
 
@@ -1852,9 +1852,10 @@ var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:n
    Wolken bei jedem Wechsel der Himmelsfarbe. Die alten Felder werden verworfen (je Saat rund 0,5 MB). */
 function hiNeuesBild(){HI.saat=Math.floor(Math.random()*1e6);HI.ph0=Math.random()*2000;HI.feld={};HI.key="";}
 var HI_TW=320,HI_TH=200,HI_PER=3,HI_PY=4,HI_BLENDE=1300;
-/* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb */
+/* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb|nebel|nachtnebel */
 var HI_LAGEN={klar:{h:34,N:.04},heiter:{h:34,N:.35},wolkig:{h:30,N:.68},bedeckt:{h:24,N:1},regen:{h:20,N:1,nass:1},
-  abend:{h:-1.5,N:.3},nacht:{h:-32,N:.03},nachtw:{h:-32,N:.5},nachtb:{h:-32,N:1}};
+  abend:{h:-1.5,N:.3},nacht:{h:-32,N:.03},nachtw:{h:-32,N:.5},nachtb:{h:-32,N:1},
+  nebel:{h:20,N:1,nebel:1},nachtnebel:{h:-32,N:1,nebel:1}};
 function hiAn(){return document.documentElement.classList.contains("himmel");}
 function hiKl(x,a,b){return Math.max(a==null?0:a,Math.min(b==null?1:b,x));}
 function hiSm(a,b,x){var t=hiKl((x-a)/(b-a));return t*t*(3-2*t);}
@@ -1889,7 +1890,22 @@ function hiTextur(seed,N,rand,kern){
   c.putImageData(im,0,0);return cv;
 }
 function hiPassen(c,wolke){var L=hiLum(c),Lmax=wolke?.56:.4;return L>Lmax?c.map(function(v){return v*Lmax/L;}):c;}
+/* v6.21 NEBEL (Nutzer 11.11. 17:58, drei Orte bei uns und bei Apple nebeneinander): bei "Nebel" zeigte der Himmel
+   dasselbe Bild wie "bedeckt" - dunkelblau mit kraeftiger Wolkenstruktur (im Bild 36..96, links/rechts bis 50
+   Einheiten auseinander). Apple zeigt Dunst als fast gleichfoermiges, neutrales Grau, oben etwas dunkler als unten
+   (gemessen 108,108,102 -> 127,128,124, Streuung 1). Jetzt eigenes Bild: neutrales Grau ohne Blau, eine einzige
+   Schwadenlage mit wenig Abstand zwischen hell und dunkel, halb durchscheinend, gross und langsam (hiNah); keine
+   Sterne, kein Sonnenschein. Dunkler als bei Apple, weil der Himmel hoechstens 40 % hell sein darf (weisse Schrift). */
+function hiNebelFarben(L){
+  var tg=hiSm(-5,9,L.h);
+  return {top:hiPassen(hiMix([84,85,82],[104,106,104],tg),0),bot:hiPassen(hiMix([106,107,103],[124,126,124],tg),0),
+    rand:hiPassen(hiMix([126,127,122],[168,170,168],tg),1),kern:hiPassen(hiMix([98,99,96],[124,126,124],tg),1),
+    sterne:0,glanz:0,schleier:.45,nebel:1};
+}
+/* die nahe Wolkenlage: Massstab (x Fensterbreite), Tempo in px/s, Deckkraft - bei Nebel gross, langsam, halb */
+function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};}
 function hiFarben(L){
+  if(L.nebel)return hiNebelFarben(L);
   var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.5,1,N)*(L.nass?1:.88);
   var top=hiMix([9,13,38],[46,112,208],tag),bot=hiMix([54,62,112],[152,202,246],tag);
   top=hiMix(top,[72,70,134],daem*.6);bot=hiMix(bot,[244,164,118],daem*.8);
@@ -1913,15 +1929,18 @@ function hiLage(){
   var mu=null;try{if(window.satellite)mu=_sunMu(Date.now());}catch(e){mu=null;}
   if(mu==null||!isFinite(mu)){try{mu=_muFallback(Date.now());}catch(e){mu=null;}}
   var h=(mu==null||!isFinite(mu))?-20:Math.round(Math.asin(hiKl(mu,-1,1))*360/Math.PI)/2;
-  var ic=_zuIc,N=null,nass=0;
+  var ic=_zuIc,N=null,nass=0,nebel=0;
   if(ic==null){
     var vor=[];try{vor=String(localStorage.getItem("himmelFarbe")||"").split("|");}catch(e){}
-    N=(vor.length>=4&&isFinite(+vor[2]))?+vor[2]:.3;nass=(vor.length>=4&&+vor[3])?1:0;
+    /* Feld 4: 0 trocken, 1 nass, 2 Nebel (v6.21) */
+    N=(vor.length>=4&&isFinite(+vor[2]))?+vor[2]:.3;nass=(vor.length>=4&&+vor[3]===1)?1:0;nebel=(vor.length>=4&&+vor[3]===2)?1:0;
   }else{
     try{if(snap&&snap.cloud!=null&&isFinite(snap.cloud))N=snap.cloud/100;}catch(e){}
     if(N==null)N=/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95;
     nass=/rain|sleet|snow|hail|thunder/.test(ic)?1:0;
+    nebel=ic==="fog"?1:0;
   }
+  if(nebel)return {h:h,N:1,nass:0,nebel:1};
   return {h:h,N:nass?Math.max(N,.92):hiKl(N),nass:nass};
 }
 /* Die Hoehe grosszuegig: in Safari blendet die Leiste ein und aus (innerHeight springt um bis zu ~180 px) - der
@@ -1960,8 +1979,9 @@ function hiSzene(ziel,C,L,B,hmax,links){
   s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
   if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
   if(L.N>.04&&HI.texF&&HI.texN){
+    var nh=hiNah(L);
     if(L.N<.985)hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax);      // unter einer geschlossenen Decke saehe man sie nicht
-    hiWolke(s,HI.texN,B,2.5,7,L.N>.9?1:.88,-B.h*.1,40,hmax);}
+    hiWolke(s,HI.texN,B,nh.sc,nh.v,nh.a,-B.h*.1,40,hmax);}
   /* v6.17: je bedeckter, desto staerker ein Schleier ueber den Wolken - oben etwas dunkler, die untere Haelfte laeuft
      in die Grundfarbe aus (bei Apple ist der Himmel hinter den Karten ebenfalls ruhig; die Karten bleiben lesbar) */
   if(C.schleier>.03){var v=document.createElement("div");v.className="hiV";
@@ -1982,7 +2002,7 @@ function hiRand(C,L,B){
     var sr=0,sg=0,sb=0,sa=0;for(var i=0;i<d.length;i+=4){var al=d[i+3]/255;sr+=d[i]*al;sg+=d[i+1]*al;sb+=d[i+2]*al;sa+=al;}
     if(sa>0)c=hiMix(c,[sr/sa,sg/sa,sb/sa],sa/(d.length/4)*a);
   }
-  if(L.N>.04){if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,2.5,L.N>.9?1:.88,-B.h*.1);}
+  if(L.N>.04){var nh=hiNah(L);if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,nh.sc,nh.a,-B.h*.1);}
   if(C.schleier>.03)c=hiMix(c,C.top,.5*C.schleier*(1-32/(.34*B.h)));       // der Schleier bei y = 32 px
   return c;
 }
@@ -2009,7 +2029,7 @@ function hiPruefen(){
   if(!hiAn()){
     HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;return;}
   var L=hiLage(),B=hiMass(),C=hiFarben(L);
-  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0].join("|");
+  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0].join("|");
   if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
   if(!HI.t0)HI.t0=performance.now();
   el0.style.height=B.h+"px";
@@ -2029,13 +2049,14 @@ function hiPruefen(){
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba(22,30,48,"+ka.toFixed(2)+")";
-  root.style.setProperty("--hi-k",kk);root.style.setProperty("--hi-t",lm>.25?"rgba(14,26,52,.32)":"rgba(255,255,255,.11)");
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba("+(L.nebel?"28,31,36":"22,30,48")+","+ka.toFixed(2)+")";
+  /* v6.21: im Nebel ist der Himmel neutral grau - das Glas dann ebenfalls ohne Blau (marineblaue Karten stachen heraus) */
+  root.style.setProperty("--hi-k",kk);root.style.setProperty("--hi-t",L.nebel?"rgba(22,25,30,.36)":lm>.25?"rgba(14,26,52,.32)":"rgba(255,255,255,.11)");
   var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
   if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
   setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
     root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},HI_BLENDE+250);
-  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
+  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nebel?2:L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
   try{themaFarbe();}catch(e){}
 }
 /* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
