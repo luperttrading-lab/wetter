@@ -2755,6 +2755,25 @@ hatte sie die Farbe `--hi-o` (88,104,127 = oberer Verlauf), NICHT `theme-color` 
 dort offenbar den Hintergrund des <html>. Der bekommt jetzt die Randfarbe `--hi-r` (= `HI.rand`, mit Wolken und Schleier),
 sofort gesetzt und als 6. Feld in `himmelFarbe` fuer das erste Script. Glas-Deckung rechnet jetzt mit max(Verlauf,
 0,8 x Randfarbe). Geprueft (Playwright): bedeckt, Regen, wolkig, heiter, Nacht bedeckt, jetzt (echt bedeckt).
+v6.18 (Nutzer 11.11.: "haben wir bei bewoelkt immer das gleiche Bild - ein bisschen abwechselnd, auch bei den anderen
+Wetterlagen" + "wie sehen die Regen-Bilder aus, koennen wir da den Regen leicht regnen lassen?"): (1) ABWECHSLUNG. Bis
+v6.17 waren Rauschfelder (Saat 11 / 29), Startversatz der Wolken und Sterne fest - jedes Oeffnen zeigte dasselbe Bild.
+`hiNeuesBild()` wuerfelt `HI.saat` (Felder `11+saat` / `29+saat`, Sterne `7+saat`) und `HI.ph0` (Versatz bis 2000 s):
+beim Start und wenn die App laenger als 30 min im Hintergrund war (am iPhone bleibt die Seite oft tagelang geladen).
+Innerhalb einer Sitzung bleibt das Muster (sonst spraengen die Wolken bei jedem Farbwechsel); alte Felder werden
+verworfen. Kostet je neuem Bild einmal die Feldrechnung (2 x 64 000 Punkte, 5 Oktaven). (2) NIEDERSCHLAG UEBER DEM GANZEN
+HIMMEL: in der Ansicht "himmel" liefert `waBereich()` die ganze Himmelsflaeche (`voll`), `waBauen` haengt `#waCv` dann in
+`#hi` (ueber den Szenen, `z-index:3`, ohne Auslauf-Maske) statt in den Kasten - Regen, Niesel, Schnee, Schneeregen,
+Hagel, Gewitter, Nebel, Windstriche fallen hinter Kacheln und Karten (durch das Glas schwach sichtbar). Der stehende Kopf
+bekommt nach jedem Bild eine Kopie des obersten Streifens (`waKopf`, Leinwand `#waK` in `#hiK`) - sonst hoerte der
+Regen an seiner Unterkante auf. Klassische Ansichten unveraendert (Kasten oben, 60 Bilder/s). SPARSAM: ueber dem ganzen
+Himmel 1,5-fache statt doppelte Aufloesung und nur jedes zweite Bild (30/s, `_wa.tz`), dafuer ist der Regenstrich
+mindestens so lang wie der Weg je Bild (sonst flimmert er). GEMESSEN ohne GPU: jedes Bild doppelt 68-76 % eines Kerns,
+jedes zweite 42 %, mit 1,5-fach 43 % (Schwankung), Standbild 7 %. Einstellung heisst jetzt "Wetter-Animation" (Aus |
+Standbild | Bewegt), Hilfetext nennt "im Himmel hinter den Karten". Ansehen im Browser: `?himmel=regen&wettertest=regen`
+(auch niesel, schnee, gewitter, nebel, sturm); in der App ueber die Vorschau-Knoepfe in den Einstellungen. Geprueft
+(Playwright): drei Starts = drei Wolkenbilder; Regen/Niesel/Schnee/Gewitter ueber dem Himmel, im Kopf und gescrollt;
+Wechsel klassisch <-> Himmel haengt die Leinwand um; Standbild; Aus. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
