@@ -1285,12 +1285,12 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    kleine Leinwaende, die der Browser streckt und per transform schiebt - kein JS je Bild). Neue Szene blendet ueber
    die alte (1,3 s). */
 #hi{display:none}
-html:root.himmel,html:root.himmel body{background:var(--hi-o,#090d26)}
+html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26))}
 html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:0;overflow:hidden;pointer-events:none;
   background:linear-gradient(var(--hi-o,#090d26),var(--hi-u,#363e70))}
 .hiS{position:absolute;left:0;top:0;overflow:hidden;opacity:0;transition:opacity 1.3s ease}
 .hiS.an{opacity:1}
-.hiS>canvas{position:absolute;left:0;top:0;display:block}
+.hiS>canvas,.hiS>.hiV{position:absolute;left:0;top:0;display:block}
 .hiS>canvas.hiW{will-change:transform;animation:hiZug var(--hd,200s) var(--hst,linear) var(--hv,0s) infinite}
 @keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
@@ -1400,6 +1400,7 @@ html:root.himmel.himini #hiMini{opacity:1}
     var hf=String(localStorage.getItem("himmelFarbe")||"").split("|"),hre=/^rgba\([\d,. ]+\)$/;
     if(hf.length>=2&&hre.test(hf[0])&&hre.test(hf[1])){document.documentElement.style.setProperty("--hi-o",hf[0]);document.documentElement.style.setProperty("--hi-u",hf[1]);}
     if(hf.length>=5&&hre.test(hf[4]))document.documentElement.style.setProperty("--hi-k",hf[4]);
+    if(hf.length>=6&&hre.test(hf[5]))document.documentElement.style.setProperty("--hi-r",hf[5]);
   }
 }catch(e){}})();
 </script>
@@ -1423,7 +1424,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.16</span>
+      <span class="ver">v6.17</span>
     </div>
   </header>
 
@@ -1867,9 +1868,11 @@ function hiFeld(seed){
 function hiTextur(seed,N,rand,kern){
   var fs=hiFeld(seed),F=fs.F,S=fs.S,cv=document.createElement("canvas");cv.width=HI_TW;cv.height=HI_TH;
   var c=cv.getContext("2d"),im=c.createImageData(HI_TW,HI_TH),D=im.data;
-  var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[0],hi=S[S.length-1];
+  /* v6.17: bei geschlossener Decke (thr < 0) laeuft Hell -> Dunkel zwischen dem 10. und 90. Perzentil des Rauschens
+     (vorher fast der ganze Wertebereich: die meisten Pixel lagen im Mittelton, die Decke wirkte wie Nebel) */
+  var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[Math.floor(.1*(S.length-1))],hi=S[Math.floor(.9*(S.length-1))];
   for(var i=0;i<F.length;i++){
-    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo+.08,hi-.08,f):hiSm(thr,thr+.28,f);
+    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo,hi,f):hiSm(thr,thr+.28,f);
     D[i*4]=rand[0]+(kern[0]-rand[0])*s;D[i*4+1]=rand[1]+(kern[1]-rand[1])*s;D[i*4+2]=rand[2]+(kern[2]-rand[2])*s;D[i*4+3]=a*255;}
   c.putImageData(im,0,0);return cv;
 }
@@ -1878,13 +1881,18 @@ function hiFarben(L){
   var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.5,1,N)*(L.nass?1:.88);
   var top=hiMix([9,13,38],[46,112,208],tag),bot=hiMix([54,62,112],[152,202,246],tag);
   top=hiMix(top,[72,70,134],daem*.6);bot=hiMix(bot,[244,164,118],daem*.8);
-  var gt=hiMix([22,26,36],L.nass?[92,102,118]:[112,124,142],tag),gb=hiMix([44,50,66],L.nass?[138,148,162]:[172,182,196],tag);
+  /* v6.17 BEDECKT (Nutzer 11.11., Vergleich mit Apple "Bewoelkt": "bei uns sieht es nach Nebel aus"). Gemessen im
+     Bildschirmfoto: unser Himmel war eine voellig gleichfoermige Flaeche (137,143,152), Apple (105..141,115..149,
+     129..161) mit Helligkeit 95-141 nebeneinander. Ursache: helle und dunkle Wolkenfarbe (206,212,222 / 150,160,176)
+     wurden von hiPassen beide auf dieselbe Helligkeit gedrueckt. Jetzt Schieferblau mit echtem Abstand: Wolke hell
+     (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); bei Regen dunkler. */
+  var gt=hiMix([22,26,36],L.nass?[50,60,78]:[70,82,102],tag),gb=hiMix([44,50,66],L.nass?[70,82,98]:[84,97,112],tag);
   top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
   var rand=hiMix([92,98,138],[255,255,255],tag),kern=hiMix([58,62,98],[214,222,236],tag);
   rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
-  var or=hiMix([78,84,104],L.nass?[150,158,172]:[206,212,222],tag),ok=hiMix([40,45,60],L.nass?[98,108,124]:[150,160,176],tag);
+  var or=hiMix([78,84,104],L.nass?[124,134,152]:[152,162,180],tag),ok=hiMix([40,45,60],L.nass?[58,68,86]:[64,76,96],tag);
   rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
-  return {top:hiPassen(top,0),bot:hiPassen(bot,0),rand:hiPassen(rand,1),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.3};
+  return {top:hiPassen(top,0),bot:hiPassen(bot,0),rand:hiPassen(rand,1),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.3,schleier:g};
 }
 /* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
    im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
@@ -1940,8 +1948,13 @@ function hiSzene(ziel,C,L,B,hmax,links){
   s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
   if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
   if(L.N>.04&&HI.texF&&HI.texN){
-    hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax);
+    if(L.N<.985)hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax);      // unter einer geschlossenen Decke saehe man sie nicht
     hiWolke(s,HI.texN,B,2.5,7,L.N>.9?1:.88,-B.h*.1,40,hmax);}
+  /* v6.17: je bedeckter, desto staerker ein Schleier ueber den Wolken - oben etwas dunkler, die untere Haelfte laeuft
+     in die Grundfarbe aus (bei Apple ist der Himmel hinter den Karten ebenfalls ruhig; die Karten bleiben lesbar) */
+  if(C.schleier>.03){var v=document.createElement("div");v.className="hiV";
+    v.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:linear-gradient("+hiRgb(C.top,(.5*C.schleier).toFixed(3))+" 0%,"+hiRgb(C.top,0)+" 34%,"+hiRgb(C.bot,0)+" 46%,"+hiRgb(C.bot,(.8*C.schleier).toFixed(3))+" 100%)";
+    s.appendChild(v);}
   ziel.appendChild(s);return s;
 }
 /* v6.14 (Nutzer-Bild vom iPhone, 10.11. 22:45): die Statusleiste ist dort ein deckender Balken in der Farbe
@@ -1957,7 +1970,8 @@ function hiRand(C,L,B){
     var sr=0,sg=0,sb=0,sa=0;for(var i=0;i<d.length;i+=4){var al=d[i+3]/255;sr+=d[i]*al;sg+=d[i+1]*al;sb+=d[i+2]*al;sa+=al;}
     if(sa>0)c=hiMix(c,[sr/sa,sg/sa,sb/sa],sa/(d.length/4)*a);
   }
-  if(L.N>.04){lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,2.5,L.N>.9?1:.88,-B.h*.1);}
+  if(L.N>.04){if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,2.5,L.N>.9?1:.88,-B.h*.1);}
+  if(C.schleier>.03)c=hiMix(c,C.top,.5*C.schleier*(1-32/(.34*B.h)));       // der Schleier bei y = 32 px
   return c;
 }
 function hiInit(){
@@ -1995,13 +2009,17 @@ function hiPruefen(){
      einem Taghimmel (Helligkeit bis 40 %) waere das Glas des Entwurfs (42 % Deckung) ein mittleres Blau, auf dem sie
      untergehen - darum deckt es so stark, dass die Karte hoechstens ~19 % hell wird (nachts 42 %, am Tag bis 74 %).
      Die Kacheln oben: nachts weisses, am Tag dunkles Glas. */
-  var lm=hiLum(hiMix(C.top,C.bot,.5)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba(22,30,48,"+ka.toFixed(2)+")";
+  /* v6.17: im Bild vom 11.11. (v6.15) hatte die Statusleiste die Farbe --hi-o (oberer Verlauf, 88,104,127), nicht
+     theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
+     Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
+  var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba(22,30,48,"+ka.toFixed(2)+")";
   root.style.setProperty("--hi-k",kk);root.style.setProperty("--hi-t",lm>.25?"rgba(14,26,52,.32)":"rgba(255,255,255,.11)");
   var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
   if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
   setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
     root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},HI_BLENDE+250);
-  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nass?1:0)+"|"+kk);}catch(e){}
+  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
   try{themaFarbe();}catch(e){}
 }
 /* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
