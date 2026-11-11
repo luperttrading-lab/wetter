@@ -2864,6 +2864,21 @@ Messzeilen -> wie bisher; 16 erzwungene Faelle fuer Nebel/Dunst (268/999 m Nebel
 klar + 2500 m bleibt klar, klar + 600 m Nebel, 3 h alt nichts, Radar/Niesel gehen vor). Mitternacht nur am Code
 geprueft (`isToday` ist const). Apples "Nieselregen" fuer Giessen: an der Station nicht gemessen (0,0 mm 17-18 Uhr);
 MOSMIX hatte fuer die Stunde ebenfalls 0,3 mm erwartet. Nicht am iPhone geprueft.
+v6.23 (Nutzer 11.11., Bilder Apple-Wetter "Erlental" mit den drei Ansichten Wetterlage / Niederschlag / Wind: "die
+Regenwahrscheinlichkeit ist in der Stundenprognose unter den Wolkensymbolen abgebildet, und in der Tagesliste gibt es
+jetzt Wind ueber den ganzen Tag und Regen fuer jede einzelne Stunde - ich glaube, das ist neu"): REGENWAHRSCHEINLICHKEIT
+IN DER STUNDENLEISTE. Bright Sky liefert sie in den MOSMIX-Zeilen mit (`precipitation_probability` = mehr als 0,1 mm in
+der Stunde VOR dem Stempel, nur Vorhersage; laut openapi.json) - die Zelle T zeigt den Wert mit Stempel T+1 (`_nx`, wie
+bei den Sonnenminuten). Neue feste Zeile `.pp` direkt unter dem Symbol (12 px, Zelle 164 statt 157 px hoch), blau
+(`--rain`), nur KOMMENDE Stunden (nicht "jetzt": dort gelten Messung und Radar; nicht die abgelaufene Stunde - die hatte
+im ersten Versuch "60 %", weil ihre Folgezeile noch Vorhersage war), ab `STRIP_PP_MIN` 20 %, auf 5 % gerundet. Bekannter
+Widerspruch, dem Nutzer gesagt: die Kachel "Regen" (Radar) kann "Trocken naechste 2 h" sagen, waehrend die Leiste fuer
+dieselben Stunden 55 % zeigt (MOSMIX; am 11.11. abends genau so, gemessen wurden 0,0 mm). Die Symbole der
+Vorhersagezellen bleiben Bright Skys `icon` ("cloudy" auch bei condition "rain" mit 0,2-0,4 mm) - Apple zeigt dort
+Regenwolken. OFFEN (Nutzer gefragt, nicht gebaut): Umschalter ueber der 16-Tage-Liste "Wetter | Regen | Wind" wie bei
+Apple - Regen = je Tag 24 Stundenbalken + mm + %, Wind = Verlauf mit Boeen und Spanne; Daten waeren Open-Meteo stuendlich
+(16 Tage, ~20 KB zusaetzlich), sinnvoll nur fuer die ersten 7 Tage (danach Langfristtrend). Geprueft (Playwright, echte
+Daten, Himmel/hell, 393/320 pt): Zahlen 27 px breit in 50-px-Zellen, vergangene Zellen und "jetzt" leer.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

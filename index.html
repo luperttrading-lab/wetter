@@ -602,6 +602,8 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .col.night.now{background:rgba(247,183,51,.2);box-shadow:inset 0 0 0 1px rgba(224,122,31,.25)}
   .col .ic{width:28px;height:28px;margin:7px 0}
   .col .v{font-size:14px;font-weight:780;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap}
+  /* v6.23: Regenwahrscheinlichkeit der Stunde direkt unter dem Symbol - feste Zeile, leer wenn nichts zu sagen ist */
+  .col .pp{height:12px;line-height:12px;margin-top:-5px;font-size:11px;font-weight:650;color:var(--rain);white-space:nowrap;font-variant-numeric:tabular-nums}
   /* v2.98: Sonnenminuten der Stunde als schmale Leiste, Boee als Zahl */
   .col .ssbar{height:5px;margin:6px 6px 0;background:rgba(15,23,42,.07);border-radius:3px;overflow:hidden}
   .col .ssbar i{display:block;height:100%;background:var(--sun);border-radius:2px}
@@ -1430,7 +1432,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.22</span>
+      <span class="ver">v6.23</span>
     </div>
   </header>
 
@@ -2113,6 +2115,7 @@ var SICHT_NEBEL=1000,SICHT_DUNST=4000,_condSicht=null,_condSichtT=0;
    _liveVor = Live-Messung, die nicht neuer ist als die Vorhersagezeile; _kopfMess = die Messung, die oben steht
    (auch fuer die Zelle "jetzt" der Stundenleiste und die Kacheln Wind / Luftdruck / Taupunkt). */
 var MESS_VOR_MIN=90,_kopfMess=null,_liveVor=null;
+var STRIP_PP_MIN=20;   // v6.23: ab dieser Regenwahrscheinlichkeit (%) steht sie in der Stundenleiste
 function sichtZustand(ic,vis){
   if(vis==null||!isFinite(vis)||vis<0||radarNass(ic))return null;
   if(vis<SICHT_NEBEL)return {ic:"fog",tx:"Nebel"};
@@ -3006,12 +3009,18 @@ function renderStrip(rows){
        als Bedeckung. Nachts nie, dort gibt es keine Sonnenminuten. Die
        Untergrenze von 20 moeglichen Minuten verhindert, dass in der Auf- und
        Untergangsstunde drei Minuten von drei moeglichen den Ausschlag geben. */
+    /* v6.23 (Nutzer 11.11., Vergleich mit Apple: "die Regenwahrscheinlichkeit ist in der Stundenprognose unter den
+       Wolkensymbolen"): MOSMIX liefert sie je Stunde mit (Bright Sky precipitation_probability = mehr als 0,1 mm in der
+       Stunde VOR dem Stempel, nur Vorhersage) - die Zelle T zeigt also den Wert mit Stempel T+1 wie bei der Sonne.
+       Nur KOMMENDE Stunden, nicht "jetzt" (dort gelten Messung und Radar), ab STRIP_PP_MIN, auf 5 % gerundet. */
+    const _ppW=(!isNow&&_tMs>nowMs&&_nx&&_nx._fc&&typeof _nx.precipitation_probability==="number"&&isFinite(_nx.precipitation_probability))?_nx.precipitation_probability:null;
+    const _pp=(_ppW!=null&&_ppW>=STRIP_PP_MIN)?Math.round(_ppW/5)*5+"\u202f%":"";
     let _ic=_rk.icon||"cloudy";
     if(_ic==="cloudy"&&!night&&_ss!=null&&_moegl>=20&&_ss>=0.9*_moegl)_ic="partly-cloudy-day";
     if(_rk._live)_ic=sonneStuetztIcon(_ic,_rk._ss30,_rk._ss60,_tMs);   // v4.30: wie oben im Zustand
     /* v6.22: Nebel/Dunst aus der gemessenen Sicht wie oben im Kopf - nicht in Vorhersagezeilen, nicht in nassen Stunden */
     if(!_rk._fc&&!_rk._om&&!radarNass(_rk.condition)){const _sz=sichtZustand(_ic,_rk.visibility);if(_sz)_ic=_sz.ic;}
-    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${fmt1(_rk.temperature)}°</div>${_unten}`;
+    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div><div class="pp">${_pp}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${fmt1(_rk.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
