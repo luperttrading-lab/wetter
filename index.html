@@ -1423,7 +1423,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.15</span>
+      <span class="ver">v6.16</span>
     </div>
   </header>
 
@@ -1783,17 +1783,18 @@ function symbGross(name){var s=sbStufe(),g=sbGroesse();return s?iconBewegt(name,
    sichtbare Zellen iconBewegt(), in alle anderen wieder das stehende icon() (jede bewegte Ebene ist eine eigene
    Kompositor-Ebene - 120 Zellen x bis zu 5 Ebenen waeren zu viel). */
 var _sbIO=null;
+/* v6.16 (Nutzer: "bei der 16-Tage-Vorhersage bewegen sich die Icons nicht"): dieselbe Regel fuer Stundenleiste UND
+   16-Tage-Liste - jede Zelle traegt data-ic (Symbol) und optional data-gr (Groesse, sonst 28). */
 function sbLeiste(){
-  var h=document.getElementById("strip");if(!h)return;
   if(_sbIO){_sbIO.disconnect();_sbIO=null;}
-  var z=h.querySelectorAll(".ic[data-ic]");
-  z.forEach(function(c){if(c._bw){c.innerHTML=icon(c.dataset.ic,28);c._bw=0;}});
-  if(!sbStufe()||!window.IntersectionObserver)return;
+  var z=document.querySelectorAll("#strip .ic[data-ic],#fcList .fi[data-ic]");
+  z.forEach(function(c){if(c._bw){c.innerHTML=icon(c.dataset.ic,+c.dataset.gr||28);c._bw=0;}});
+  if(!z.length||!sbStufe()||!window.IntersectionObserver)return;
   _sbIO=new IntersectionObserver(function(es){
     var st=sbStufe();
-    es.forEach(function(e){var c=e.target,an=e.isIntersecting&&st>0;
-      if(an&&!c._bw){c.innerHTML=iconBewegt(c.dataset.ic,28,SB_STUFEN[st]);c._bw=st;}
-      else if(!an&&c._bw){c.innerHTML=icon(c.dataset.ic,28);c._bw=0;}});
+    es.forEach(function(e){var c=e.target,an=e.isIntersecting&&st>0,g=+c.dataset.gr||28;
+      if(an&&!c._bw){c.innerHTML=iconBewegt(c.dataset.ic,g,SB_STUFEN[st]);c._bw=st;}
+      else if(!an&&c._bw){c.innerHTML=icon(c.dataset.ic,g);c._bw=0;}});
   },{rootMargin:"0px 24px"});
   z.forEach(function(c){_sbIO.observe(c);});
 }
@@ -1808,7 +1809,7 @@ function sbSetzen(s){
 function sbAnzeigen(){
   var s=sbStufe(),seg=document.getElementById("sbSeg"),h=document.getElementById("sbHilf");
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.s===s);});
-  if(h)h.textContent=s?"Die Wettersymbole bewegen sich – oben neben dem Wort und in der Stundenleiste: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols oben."
+  if(h)h.textContent=s?"Die Wettersymbole bewegen sich – oben neben dem Wort, in der Stundenleiste und in der 16-Tage-Vorhersage: Strahlen drehen, Wolken ziehen, Regen fällt, Sterne funkeln. 1 = ruhig, 3 = deutlich. Geht auch durch Antippen des Symbols oben."
     :"Die Wettersymbole stehen still."+((sbEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – eine Stufe schaltet die Bewegung trotzdem ein.":"")+" Geht auch durch Antippen des Symbols oben.";
 }
 /* Antippen des Symbols (oder des Worts darunter) schaltet weiter: aus -> 1 -> 2 -> 3 -> aus; eine kleine Blase sagt,
@@ -7699,10 +7700,11 @@ function renderForecast(j){
     const ppPct=_pp!=null&&_pp>=10?`${dropMini}${_pp}%`:"";
     const mmShow=_mm!=null&&_mm>=0.1;
     const mmTxt=mmShow?`<span class="mmbar" style="height:${Math.max(2,Math.min(16,Math.round(_mm/15*16)))}px"></span><span class="mmv">${_mm>=10?Math.round(_mm):fmt1(_mm)} mm</span>`:"";
-    html+=`<div class="fc-row${i>=7?" far":""}"><div class="wd">${wd}</div><div class="fi">${icon(ic,26)}</div><div class="pp">${ppPct}${mmTxt}</div><div class="rng"><div class="lo">${Math.round(x.lo)}°</div><div class="track"><div class="fill" style="left:${left}%;width:${width}%;background:linear-gradient(90deg,${rgb(thermal(x.lo))},${rgb(thermal(x.hi))})"></div></div><div class="hiT">${Math.round(x.hi)}°</div></div></div>`;
+    html+=`<div class="fc-row${i>=7?" far":""}"><div class="wd">${wd}</div><div class="fi" data-ic="${ic}" data-gr="26">${icon(ic,26)}</div><div class="pp">${ppPct}${mmTxt}</div><div class="rng"><div class="lo">${Math.round(x.lo)}°</div><div class="track"><div class="fill" style="left:${left}%;width:${width}%;background:linear-gradient(90deg,${rgb(thermal(x.lo))},${rgb(thermal(x.hi))})"></div></div><div class="hiT">${Math.round(x.hi)}°</div></div></div>`;
   });
   if(days.length>7)html+=`<div class="fc-note">Tag 8–${days.length} ist Langfristtrend — deutlich geringere Vorhersagegüte, eher Tendenz als genaue Werte.</div>`;
   el("fcList").innerHTML=html;sec.classList.remove("hidden");
+  try{sbLeiste();}catch(e){console.warn("symbole",e);}
 }
 
 /* --- Render: Luft, Pollen, Mond --- */
