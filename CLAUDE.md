@@ -2729,6 +2729,16 @@ der Seite: mit 38-41 % eines Kerns, nur Karten 32-35 %, ohne 17-24 %; Stufe 0: 0
 Unterschied, nachts scheinen einzelne Sterne durch Kacheln und Karten. Merke: jede stufenlose Bewegung laesst den
 Kompositor JEDES Bild neu zusammensetzen - alles, was dabei im Bild liegt (Weichzeichner, grosse Ebenen), zahlt mit;
 die Wolken (steps, 10/s) allein kosten kaum etwas.
+v6.16 (Nutzer 11.11.: "sieht gut aus, aber unten bei der 16-Tage-Vorhersage bewegen sich die Icons nicht; die
+Stundenprognose bitte auch nochmal pruefen"): `sbLeiste()` gilt jetzt fuer Stundenleiste UND 16-Tage-Liste - Zellen
+`#strip .ic[data-ic]` und `#fcList .fi[data-ic]` (dort `data-gr="26"`), `renderForecast` ruft sie am Ende. Weiter nur
+SICHTBARE Zellen bewegt, alle anderen stehend. Geprueft (Playwright, Himmel und klassisch hell, 16 Tage mit eingespielten
+Tageswerten, weil Open-Meteo im Pruefstand gesperrt ist): oben 7 Stundenzellen bewegt (11 Ebenen, in 1,3 s alle 11 an
+anderer Stelle), bei der Liste 16 Zeilen bewegt (52 Ebenen, 50 veraendert) und die Stundenleiste steht, Stufe 0 haelt alles
+an, zurueck nach oben wechselt es wieder. Aufwand ohne GPU mit der Liste im Bild, Stufe 2: Himmel 26 %, klassisch 13,5 %
+eines Kerns (Stufe 0: 10 % / 2 %). FALLE im Pruefstand: scheitert der Abruf der Tagesvorhersage, traegt die Huelle
+`.kbody` von `#fcSec` die Klasse `hidden` - ein direkt aufgerufenes `renderForecast` nimmt sie nicht weg, die Liste bleibt
+0 px hoch und der IntersectionObserver meldet nichts (sah erst wie ein Fehler der neuen Funktion aus).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
