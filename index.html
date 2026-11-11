@@ -81,6 +81,9 @@
      isolation am Kasten und z-index -1), unten weich auslaufend */
   .hero{isolation:isolate}
   #waCv{position:absolute;left:0;top:0;z-index:-1;pointer-events:none;display:none;-webkit-mask-image:linear-gradient(#000 calc(100% - 30px),transparent);mask-image:linear-gradient(#000 calc(100% - 30px),transparent)}
+  /* v6.18: in der Ansicht "Himmel" liegt die Leinwand ueber den Himmel-Szenen in #hi (ganzer Bildschirm, ohne Auslauf) */
+  #hi>#waCv{z-index:3;-webkit-mask-image:none;mask-image:none}
+  #hiK>#waK{position:absolute;left:0;top:0;z-index:3;pointer-events:none}
   /* v6.10: das grosse Symbol aus Ebenen - je Teil ein <svg>, bewegt wird nur transform/opacity */
   .ib{position:relative;width:100%;height:100%}
   .ib>svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;will-change:transform,opacity;animation-duration:var(--sd);animation-iteration-count:infinite}
@@ -1424,7 +1427,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.17</span>
+      <span class="ver">v6.18</span>
     </div>
   </header>
 
@@ -1838,7 +1841,13 @@ function sbInit(){
    Anders als die Testseite (Leinwand, 10 Bilder/s in JS): die Lagen sind kleine Leinwaende (640 x 200..600), die der
    Browser streckt und per CSS-transform in Zehntelsekunden-Schritten schiebt - je Bild laeuft kein JS.
    Nur var und Funktionen (Regel aus v6.06). */
-var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:null,texN:null};
+var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:null,texN:null,saat:0,ph0:0,weg:0};
+/* v6.18 (Nutzer: "haben wir bei bewoelkt immer das gleiche Bild - ein bisschen abwechselnd?"): bis v6.17 waren die
+   Rauschfelder (Saat 11 / 29), der Startversatz der Bewegung und die Sterne fest - jedes Oeffnen zeigte dasselbe Bild.
+   Jetzt wuerfelt hiNeuesBild() Saat und Versatz: beim Start und wenn die App laenger als 30 min im Hintergrund war
+   (am iPhone bleibt die Seite oft tagelang geladen). Innerhalb einer Sitzung bleibt das Muster - sonst spraengen die
+   Wolken bei jedem Wechsel der Himmelsfarbe. Die alten Felder werden verworfen (je Saat rund 0,5 MB). */
+function hiNeuesBild(){HI.saat=Math.floor(Math.random()*1e6);HI.ph0=Math.random()*2000;HI.feld={};HI.key="";}
 var HI_TW=320,HI_TH=200,HI_PER=3,HI_PY=4,HI_BLENDE=1300;
 /* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb */
 var HI_LAGEN={klar:{h:34,N:.04},heiter:{h:34,N:.35},wolkig:{h:30,N:.68},bedeckt:{h:24,N:1},regen:{h:20,N:1,nass:1},
@@ -1922,7 +1931,7 @@ function hiSterne(sz,B,a,hmax){
   var hs=Math.min(B.h*.86,hmax||1e9),d=Math.min(2,window.devicePixelRatio||1),c=document.createElement("canvas");
   c.width=Math.round(B.w*d);c.height=Math.round(hs*d);c.style.cssText="width:"+B.w+"px;height:"+hs.toFixed(1)+"px;opacity:"+a.toFixed(2);
   var g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
-  var z=7;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
+  var z=(7+HI.saat)|0;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
   var n=Math.round(B.w*B.h/900);
   for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
     if(al<.03||y>hs+5)continue;
@@ -1936,7 +1945,7 @@ function hiWolke(sz,tex,B,sc,v,a,dy,off,hmax){
   var tw=B.w*sc,th=tw*HI_TH/HI_TW,n=Math.max(1,Math.ceil(((hmax||B.h)-dy)/th)),c=document.createElement("canvas");
   c.width=HI_TW*2;c.height=HI_TH*n;var g=c.getContext("2d");
   for(var r=0;r<n;r++){g.drawImage(tex,0,r*HI_TH);g.drawImage(tex,HI_TW,r*HI_TH);}
-  var dur=tw/v,ph=((performance.now()-HI.t0)/1000+off)%dur;
+  var dur=tw/v,ph=((performance.now()-HI.t0)/1000+off+HI.ph0)%dur;
   c.className="hiW";
   c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.round(dur*10)+");--hv:-"+ph.toFixed(2)+"s";
   sz.appendChild(c);
@@ -1980,7 +1989,11 @@ function hiInit(){
   window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
   window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
   setInterval(hiPruefen,60000);
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)hiPruefen();});
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){HI.weg=Date.now();return;}
+    if(HI.weg&&Date.now()-HI.weg>30*60e3)hiNeuesBild();
+    hiPruefen();});
+  hiNeuesBild();
   hiZugKlasse();
   document.documentElement.style.setProperty("--hmg",hiMiniGr()+"px");
 }
@@ -1997,7 +2010,7 @@ function hiPruefen(){
   if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
   if(!HI.t0)HI.t0=performance.now();
   el0.style.height=B.h+"px";
-  if(L.N>.04){HI.texF=hiTextur(11,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29,L.N,C.rand,C.kern);}
+  if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
   HI.rand=hiRand(C,L,B);
   var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
   /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
@@ -2116,6 +2129,9 @@ function waLage(){
 }
 /* Flaeche: von der Oberkante des Kastens bis knapp ueber die Kacheln */
 function waBereich(){
+  /* v6.18: in der Ansicht "Himmel" faellt der Niederschlag ueber den GANZEN Himmel (hinter den Karten), nicht nur im
+     frueheren Kasten - die Leinwand liegt dann in #hi, der Kopf bekommt eine Kopie des obersten Streifens (waKopf) */
+  if(hiAn()){var M=hiMass();return {w:M.w,hb:M.h,voll:1};}
   var h=document.getElementById("hero");if(!h)return null;
   var r=h.getBoundingClientRect(),w=h.clientWidth,hb=h.clientHeight,kz=document.getElementById("kz"),kf=document.getElementById("kzFoot");
   var u=(kz&&kz.offsetHeight)?kz:((kf&&kf.offsetHeight)?kf:null);
@@ -2137,7 +2153,11 @@ function waBauen(L,B){
     if(window.ResizeObserver)new ResizeObserver(function(){waPruefen();}).observe(h);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){_wa.last=performance.now();waLauf();}});
   }
-  var dpr=Math.min(2,window.devicePixelRatio||1),R=Math.random,i,n;
+  var soll=B.voll?document.getElementById("hi"):h;
+  if(soll&&c.parentNode!==soll){if(B.voll)soll.appendChild(c);else soll.insertBefore(c,soll.firstChild);}
+  if(_wa.kcv)_wa.kcv.style.display=B.voll?"block":"none";
+  /* ganzer Himmel: 1,5-fache statt doppelte Aufloesung (die Striche liegen hinter Glas, weich genuegt) */
+  var dpr=Math.min(B.voll?1.5:2,window.devicePixelRatio||1),R=Math.random,i,n;
   c.width=Math.round(B.w*dpr);c.height=Math.round(B.hb*dpr);c.style.width=B.w+"px";c.style.height=B.hb+"px";c.style.display="block";
   _wa.ctx.setTransform(dpr,0,0,dpr,0,0);
   _wa.L=L;_wa.B=B;_wa.last=performance.now();_wa.regen=[];_wa.schnee=[];_wa.nebel=[];_wa.strich=[];_wa.blitz=0;
@@ -2145,7 +2165,7 @@ function waBauen(L,B){
   _wa.kipp=kipp;
   if(L.regen){n=Math.round(L.regen.n*fl*WA_K);for(i=0;i<n;i++)_wa.regen.push({x:R()*(B.w+ext)-ext,y:R()*B.hb,f:.8+R()*.4});}
   if(L.schnee){n=Math.round(L.schnee.n*fl*WA_K);for(i=0;i<n;i++)_wa.schnee.push({x:R()*B.w,y:R()*B.hb,r:1+R()*1.8,p:R()*6.3,f:.7+R()*.6});}
-  if(L.nebel)for(i=0;i<5;i++)_wa.nebel.push({x:R()*B.w,y:B.hb*(.15+R()*.75),r:90+R()*100,v:5+R()*9,a:.18+R()*.17});
+  if(L.nebel)for(i=0;i<(B.voll?10:5);i++)_wa.nebel.push({x:R()*B.w,y:B.hb*(.15+R()*.75),r:90+R()*100,v:5+R()*9,a:.18+R()*.17});
   if(L.streifen){n=Math.max(5,Math.round(fl*WA_K));for(i=0;i<n;i++)_wa.strich.push(waStrichNeu(B,true));}
   if(L.blitz)_wa.blitzNext=performance.now()+1500+R()*3000;
 }
@@ -2161,7 +2181,9 @@ function waZeichne(now,still){
   if(L.regen){var r=L.regen,vx=r.v*_wa.kipp,ext=B.hb*_wa.kipp,lx=r.l*_wa.kipp;c.strokeStyle=col.regen;c.lineWidth=r.w;c.lineCap="round";c.beginPath();
     for(i=0;i<_wa.regen.length;i++){p=_wa.regen[i];p.y+=r.v*p.f*dt;p.x+=vx*p.f*dt;
       if(p.y>B.hb+r.l){p.y=-r.l-Math.random()*20;p.x=Math.random()*(B.w+ext)-ext;}
-      c.moveTo(p.x,p.y);c.lineTo(p.x-lx,p.y-r.l);}
+      /* ganzer Himmel (30 Bilder/s): der Strich ist mindestens so lang wie der Weg je Bild - sonst flimmert der Regen */
+      var lp=B.voll?Math.max(r.l,r.v*p.f*dt*.9):r.l;
+      c.moveTo(p.x,p.y);c.lineTo(p.x-lx*lp/r.l,p.y-lp);}
     c.stroke();}
   /* Schnee: Flocken sinken, pendeln und treiben mit dem Wind */
   if(L.schnee){var sn=L.schnee,drift=6+(L.wind||0)*1.1;c.fillStyle=col.schnee;c.beginPath();
@@ -2179,10 +2201,28 @@ function waZeichne(now,still){
     if(!_wa.blitz&&now>=_wa.blitzNext){_wa.blitz=now;_wa.blitzNext=now+6000+Math.random()*8000;}
     if(_wa.blitz){var e=now-_wa.blitz,ab=e<70?.38:e<150?.08:e<230?.26:e<600?.26*(1-(e-230)/370):0;
       if(e>600)_wa.blitz=0;if(ab>0){c.fillStyle="rgba("+col.blitz+","+(ab*.65)+")";c.fillRect(0,0,B.w,B.hb);}}}
+  if(B.voll)waKopf();
+}
+/* Der stehende Kopf deckt den Himmel mit einer eigenen Szene (#hiK) - ohne Kopie hoerte der Regen an seiner Unterkante
+   auf. Darum nach jedem Bild der oberste Streifen der Regen-Leinwand in eine zweite, kleine (#waK). */
+function waKopf(){
+  var k=document.getElementById("hiK");if(!k||!_wa.cv||!_wa.B)return;
+  var c=_wa.kcv;
+  if(!c){c=document.createElement("canvas");c.id="waK";c.setAttribute("aria-hidden","true");_wa.kcv=c;_wa.kctx=c.getContext("2d");}
+  if(c.parentNode!==k)k.appendChild(c);
+  var r=k.getBoundingClientRect(),q=_wa.cv.width/_wa.B.w,w=Math.round(r.width*q),h=Math.round(r.height*q);
+  if(w<2||h<2)return;
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;c.style.width=r.width+"px";c.style.height=r.height+"px";}
+  _wa.kctx.clearRect(0,0,w,h);_wa.kctx.drawImage(_wa.cv,Math.round(r.left*q),0,w,h,0,0,w,h);
 }
 function waStop(){if(_wa.raf){cancelAnimationFrame(_wa.raf);_wa.raf=0;}}
-function waLauf(){if(_wa.raf||!_wa.L||_wa.m!=="an"||!_wa.sicht||document.hidden)return;_wa.raf=requestAnimationFrame(waSchritt);}
-function waSchritt(now){_wa.raf=0;if(!_wa.L||_wa.m!=="an"||!_wa.sicht||document.hidden)return;waZeichne(now,false);waLauf();}
+function waSicht(){return _wa.sicht||!!(_wa.B&&_wa.B.voll);}      // v6.18: der ganze Himmel ist immer im Bild
+function waLauf(){if(_wa.raf||!_wa.L||_wa.m!=="an"||!waSicht()||document.hidden)return;_wa.raf=requestAnimationFrame(waSchritt);}
+/* v6.18: ueber dem ganzen Himmel nur jedes zweite Bild (30/s). Gemessen ohne GPU: jedes Bild in doppelter Aufloesung
+   68 % eines Kerns, jedes zweite 42 %, dazu 1,5-fach ~35 %; der Regen im frueheren Kasten (klassisch) bleibt bei 60/s. */
+function waSchritt(now){_wa.raf=0;if(!_wa.L||_wa.m!=="an"||!waSicht()||document.hidden)return;
+  if(_wa.B&&_wa.B.voll&&now-(_wa.tz||0)<30){waLauf();return;}
+  _wa.tz=now;waZeichne(now,false);waLauf();}
 /* Stand pruefen und Leinwand anpassen. Gerufen von zustandZeigen (neuer Zustand), kzRender (Kacheln hoeher oder
    niedriger), themaNeuZeichnen (hell/dunkel), ResizeObserver am Kasten und von den Einstellungen. */
 function waPruefen(){
@@ -2190,7 +2230,7 @@ function waPruefen(){
   if(_wa.test&&m==="aus")m=waReduziert()?"still":"an";      /* Vorschau zeigt auch bei "Aus" etwas */
   var L=(m==="aus")?null:waLage(),B=L?waBereich():null;
   _wa.m=m;
-  if(!L||!B){waStop();_wa.L=null;_wa.key="";if(_wa.cv)_wa.cv.style.display="none";return;}
+  if(!L||!B){waStop();_wa.L=null;_wa.key="";if(_wa.cv)_wa.cv.style.display="none";if(_wa.kcv)_wa.kcv.style.display="none";return;}
   var key=JSON.stringify(L)+"|"+B.w+"|"+B.hb;
   if(key!==_wa.key){_wa.key=key;waBauen(L,B);}
   if(m==="an"){waLauf();}else{waStop();waZeichne(performance.now(),true);}
@@ -2206,8 +2246,8 @@ function waAnzeigen(){
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.w===m);});
   if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.p===_wa.test);});
   if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
-    m==="still"?"Die Wetterlage steht als ruhiges Bild oben im Kasten."+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
-    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich oben im Kasten – nur, wenn es am Ort gerade so ist. Vorschau: 12 Sekunden.";
+    m==="still"?"Die Wetterlage steht als ruhiges Bild "+(hiAn()?"im Himmel hinter den Karten.":"oben im Kasten.")+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
+    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Vorschau: 12 Sekunden.";
 }
 
 /* v4.07: Die 10- und 30-Minuten-Summen derselben Station, unabhaengig davon,
@@ -7085,7 +7125,7 @@ function kzRender(){
                    +'<label><span>Blende</span><input type="range" id="kzRegBl" min="0" max="3" step="0.1"><b id="kzRegBlV">–</b></label>'
                    +'<div class="kzregt">Färbung wechselnder Kacheln</div>'
                    +'<label><span>Stärke</span><input type="range" id="kzRegFarbe" min="0" max="100" step="5"><b id="kzRegFarbeV">–</b></label>'
-                   +'<div class="kzregt">Wetter-Animation oben</div>'
+                   +'<div class="kzregt">Wetter-Animation</div>'
                    +'<div class="kzseg" id="waSeg"><button type="button" data-w="aus">Aus</button><button type="button" data-w="still">Standbild</button><button type="button" data-w="an">Bewegt</button></div>'
                    +'<div class="kzhilf" id="waHilf"></div>'
                    +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>'
