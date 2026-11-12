@@ -3304,6 +3304,29 @@ Karte (klar): Weiss 4,4 : 1, `--muted` 3,4 -> nach Aufhellen (#e2e9f4) ~3,7, `--
 ist Apples Niveau (dort 3,9 / 3,6 / 2,2), aber wir haben viel mehr kleine Nebentexte. Innere Kaesten (`--stufe`, `.rz-mehrk`
 ...) von 34 auf 22 % Dunkelblau (Apples Schalterfeld: 1,2 : 1 zur Box). Sonnenzahl der Stundenleiste (#c79100, 1,25 : 1) im
 Himmel #ffdc8a. Regler "Karten: Farbe > Himmel" bleibt (100 = dieses Ziel, 0 = dunkles Marineblau). Nicht am iPhone geprueft.
+v6.44 HIMMEL BIS ZUR BILDSCHIRMKANTE + SICHERUNG DER EINSTELLUNGEN (Nutzer 12.11. 13:03, Apple neben unserer v6.42: "wie
+bekommt die iPhone-App es hin, dass Bild und Farbe bis oben hingehen? Wir haben wieder so einen haesslichen Balken, der nicht
+ins Bild passt, auch die Farbe passt nicht ganz"). GEMESSEN im Nutzerbild: Balken (84,113,155) mit SCHWARZER Uhr, Himmel direkt
+darunter (91,127,182) links / (110,143,190) Mitte. Die Grenze aus v6.40 (Helligkeit <= 43 %) hat die weisse Uhr NICHT
+gebracht - iOS waehlt die Schriftfarbe nach einer Regel, die ich nicht kenne (bei 61,118,203 weiss, bei 84,113,155 schwarz).
+URSACHE DES BALKENS: `apple-mobile-web-app-status-bar-style: default` - iOS legt einen deckenden Balken ueber die
+Statusleiste. JETZT `black-translucent`: die Seite reicht bis zur Kante, Uhr und Akku stehen weiss darueber; im Himmel liegt
+dort der stehende Kopf mit seinem Himmels-Ausschnitt (`#hiK`), nichts weiter noetig. Klassische Ansichten: fester Streifen
+`#stLeiste` (Hoehe `env(safe-area-inset-top)`, hell #27313f fuer die weisse Uhr, dunkel Seitenfarbe, im Himmel aus), sonst
+rollte der Inhalt unter die Uhr; `--st-test` stellt den Rand im Pruefstand nach. HAKEN (per Websuche, nicht am Geraet
+geprueft): (1) WebKit-Fehler 260508 (offen seit 08/2023): ein schon angelegtes Home-Bildschirm-Symbol uebernimmt eine
+geaenderte Statusleisten-Angabe NICHT - das Symbol muss geloescht und neu angelegt werden; fuer Bestandsnutzer aendert sich
+sonst nichts. (2) WebKit-Fehler 301994 (11/2025): Meldungen, dass seit iOS 26.1 die Statusleiste in Home-Bildschirm-Apps
+wieder Platz beansprucht; Apple konnte keinen Unterschied 18.6 / 26.0 / 26.1 nachstellen - ob `black-translucent` auf dem
+Geraet des Nutzers greift, zeigt erst der Versuch. (3) Mit dem alten Symbol loescht iOS dessen Speicher. Darum NEU im
+Zahnrad-Menue "Einstellungen sichern" (`einstDialog`, `einstSicherung`, `einstEinspielen`): alle localStorage-Eintraege
+ausser /cache/i und `erstStartSicherung` als JSON-Text ({wetterApp:1,stand,daten}) - "Sicherung kopieren" (Zwischenablage,
+Rueckfall Feld markieren), in der neuen App einfuegen, "Einspielen" (Rueckfrage, ersetzt alle Eintraege ausser Zwischenspeichern,
+laedt neu). Geprueft (Playwright mit Zwischenablage): 16 Eintraege / 6 KB kopiert, falsche Eingabe abgewiesen, Wert nach dem
+Einspielen wieder da, fremder Eintrag weg; Streifen hell / dunkel / Himmel. ABLAUF fuer den Nutzer: altes Symbol oeffnen ->
+Zahnrad -> Einstellungen sichern -> kopieren (zur Sicherheit in Notizen ablegen) -> Symbol loeschen -> Safari, Seite oeffnen,
+Teilen -> Zum Home-Bildschirm -> neue App -> Zahnrad -> Einstellungen sichern -> einfuegen -> Einspielen. Die Rasen-App
+(eigenes Symbol, eigener Speicher) ist nicht betroffen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#f2f3f6">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Wetter">
 <title>Wetter · Ort</title>
 <style>
@@ -1464,9 +1464,27 @@ html:root.himmel .badge:not(.stale){color:#e7edf5}
 /* mit Sonne: auch die Abschnittstitel laufen beim Scrollen ueber den Schein */
 html:root.himmel.hison .ksect .sect{text-shadow:0 0 7px rgba(6,32,78,.75),0 1px 2px rgba(6,32,78,.55)}
 html:root.himmel.hison #stationTxt{color:#fff}
+/* ============ v6.44 HIMMEL BIS OBEN (Nutzer 12.11. 13:03, Apple neben uns: "wie bekommt die iPhone-App es hin, dass Bild
+   und Farbe bis oben gehen? Wir haben wieder so einen haesslichen Balken, der nicht ins Bild passt") ============
+   iOS legt bei der Angabe "default" einen DECKENDEN Balken in einer Farbe ueber die Statusleiste (und waehlt die
+   Schriftfarbe selbst - im Bild schwarz auf 84,113,155). Mit "black-translucent" entfaellt der Balken: die Seite liegt
+   bis zur Bildschirmkante, Uhr und Akku stehen weiss darueber. Im Himmel deckt der stehende Kopf (#hiK = Himmel) die
+   Statusleiste ab. In den KLASSISCHEN Ansichten rollt der Inhalt sonst unter die Uhr - dort dieser feste Streifen in
+   Seitenfarbe (dunkel) bzw. dunkel fuer die weisse Uhr (hell). Wer die App noch mit "default" angelegt hat, sieht ihn
+   nicht (der iOS-Balken liegt darueber). --st-test nur fuer den Pruefstand (Chromium kennt den Rand nicht). */
+#stLeiste{position:fixed;left:0;right:0;top:0;height:var(--st-test,env(safe-area-inset-top,0px));z-index:350;pointer-events:none;background:#27313f}
+html.dunkel #stLeiste{background:var(--bg-b)}
+html:root.himmel #stLeiste{display:none}
+/* Sicherung der Einstellungen (Zahnrad) */
+.es-t{font-size:12.5px;line-height:1.45;color:var(--muted);margin:8px 0 6px}
+.es-t b{color:var(--ink)}
+.es-ta{display:block;width:100%;box-sizing:border-box;font:11px/1.35 ui-monospace,Menlo,monospace;border:1px solid var(--feld-line);background:var(--feld);color:var(--ink);border-radius:9px;padding:7px;margin:6px 0;resize:none}
+.es-m{font-size:12.5px;font-weight:700;min-height:17px;margin-top:6px;color:var(--ink)}
+.es-kn{display:block;width:100%;margin:6px 0 0}
 </style>
 </head>
 <body>
+<div id="stLeiste" aria-hidden="true"></div>
 <script>
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
    die Wetterabschnitte, Himmel/ISS/PV & Co. sind zu (KLAPP_ZU_NEU). Wer die
@@ -1552,7 +1570,7 @@ html:root.himmel.hison #stationTxt{color:#fff}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.43</span>
+      <span class="ver">v6.44</span>
     </div>
   </header>
 
@@ -8092,6 +8110,7 @@ function ortPassen(){
    "verdecken zu viel vom wichtigen Startbildschirm - einfach ganz oben zu den anderen Symbolen, sonst wird auch nicht
    gefunden, dass unter den Kacheln die Einstellungen sind"): Zahnrad #menuBtn im Kopf oeffnet ein kleines Menue. */
 var _kzZuT=0;
+const KM_SICH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><path d="M5 18h14"/></svg>';
 const KM_KACHEL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>';
 const KM_AUF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l6 6 6-6"/><path d="M6 13l6 6 6-6"/></svg>';
 const KM_ZU='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11l6-6 6 6"/><path d="M6 18l6-6 6 6"/></svg>';
@@ -8107,6 +8126,7 @@ function kopfMenuAuf(){
   const wechsel=kzWe().modus==="auto"&&!!document.querySelector("#kz .kzdots");
   m.innerHTML=`<button type="button" role="menuitem" data-m="kacheln">${KM_KACHEL}Kacheln wählen und sortieren</button>`
     +`<button type="button" role="menuitem" data-m="einst">${KZ_GEAR}Einstellungen</button>`
+    +`<button type="button" role="menuitem" data-m="sich">${KM_SICH}Einstellungen sichern</button>`
     +`<hr><button type="button" role="menuitem" data-m="auf">${KM_AUF}Alle Abschnitte aufklappen</button>`
     +`<button type="button" role="menuitem" data-m="zu">${KM_ZU}Alle Abschnitte zuklappen</button>`
     +(wechsel?`<hr><button type="button" role="menuitem" data-m="pause">${_kzPause?KZ_WEITER+"Kachelwechsel fortsetzen":KZ_PAUSE+"Kachelwechsel anhalten"}</button>`:"");
@@ -8114,7 +8134,44 @@ function kopfMenuAuf(){
   m.style.top=Math.round(r.bottom+6)+"px";m.style.right=Math.max(8,Math.round(vw-rr.right))+"px";
   h.classList.add("an");m.classList.add("an");kopfTipWeg();
 }
+/* v6.44: Einstellungen sichern und uebertragen. Anlass: die Statusleiste ohne Balken gilt nur fuer ein NEU angelegtes
+   Home-Bildschirm-Symbol - und mit dem alten Symbol loescht iOS dessen Speicher (Kacheln, Regler, Orte, Rasen, PV).
+   Die Sicherung ist ein Text (alle Eintraege ausser Zwischenspeichern), der ueber die Zwischenablage wandert. */
+function einstSicherung(){
+  const o={};
+  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/cache/i.test(k)||k==="erstStartSicherung")continue;o[k]=localStorage.getItem(k);}}catch(e){}
+  return JSON.stringify({wetterApp:1,stand:new Date().toISOString(),daten:o});
+}
+function einstEinspielen(txt){
+  let j=null;try{j=JSON.parse(String(txt).trim());}catch(e){return "Das ist keine vollständige Sicherung (Text beginnt mit { und endet mit }).";}
+  if(!j||j.wetterApp!==1||!j.daten||typeof j.daten!=="object")return "Das ist keine Sicherung dieser App.";
+  const ks=Object.keys(j.daten);if(!ks.length)return "Die Sicherung ist leer.";
+  if(!confirm(ks.length+" Einträge einspielen? Die jetzigen Einstellungen auf diesem Gerät werden ersetzt."))return "";
+  try{const weg=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!/cache/i.test(k))weg.push(k);}
+    weg.forEach(k=>localStorage.removeItem(k));
+    ks.forEach(k=>{if(typeof j.daten[k]==="string")localStorage.setItem(k,j.daten[k]);});
+  }catch(e){return "Speichern ist fehlgeschlagen: "+e.message;}
+  location.reload();return "";
+}
+function einstDialog(){
+  const js=einstSicherung();let n=0;try{n=Object.keys(JSON.parse(js).daten).length;}catch(e){}
+  const esc=t=>t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  kzGrossZeigen('<div class="kzg-titel">Einstellungen sichern</div>'
+    +'<div class="es-t">Kacheln, Regler, Orte, Rasen und Photovoltaik stecken in diesem Text ('+n+' Einträge, '+Math.max(1,Math.round(js.length/1024))+' KB). <b>Kopieren</b>, in der neu angelegten App hier unten <b>einfügen</b> – fertig. Zwischenspeicher (Messwerte, Karten) sind nicht dabei, die lädt die App neu.</div>'
+    +'<button type="button" class="loc-btn es-kn" id="esKop">Sicherung kopieren</button>'
+    +'<textarea class="es-ta" id="esAus" rows="3" readonly>'+esc(js)+'</textarea>'
+    +'<div class="es-m" id="esMeld"></div>'
+    +'<div class="es-t"><b>Wiederherstellen:</b> Sicherung in das Feld einfügen, dann „Einspielen“. Die App lädt danach neu.</div>'
+    +'<textarea class="es-ta" id="esEin" rows="3" placeholder="Sicherung hier einfügen"></textarea>'
+    +'<button type="button" class="loc-btn es-kn" id="esLad">Einspielen</button>');
+  const meld=t=>{const m=el("esMeld");if(m)m.textContent=t;};
+  el("esKop").onclick=()=>{
+    const ta=el("esAus"),ok=()=>meld("Kopiert – jetzt in der neuen App einfügen."),von=()=>{try{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);document.execCommand("copy");ok();}catch(e){meld("Bitte den Text im Feld von Hand markieren und kopieren.");}};
+    try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(js).then(ok,von);else von();}catch(e){von();}};
+  el("esLad").onclick=()=>{const f=einstEinspielen(el("esEin").value);if(f)meld(f);};
+}
 function kopfMenuTun(a){
+  if(a==="sich"){einstDialog();return;}
   if(a==="auf"||a==="zu"){klappAlle(a==="auf");return;}
   if(a==="pause"){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}
   _kzRegAuf=(a==="einst");kzEditSetzen(true);if(_kzRegAuf)kzBewAnwenden(false);
