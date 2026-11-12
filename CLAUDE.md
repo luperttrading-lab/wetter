@@ -2924,6 +2924,37 @@ Knoepfen (`.kopf-r`, vorher Inline-Stil). Gemessen (393 pt, `?warntest`): verdec
 ("Giessen / Wettenberg" + Zeile passen bei 393 pt nicht neben die drei Knoepfe), der Gewinn waere 3-4 px gewesen. Mehr
 ginge nur mit kleinerer Schrift oder ohne die Knoepfe im gescrollten Zustand. Klassische Ansichten unveraendert (Kopf
 20-71 px wie vorher). Nicht am iPhone geprueft (Statusleiste 59 pt kennt Chromium nicht; der Abstand haengt nicht davon ab).
+v6.27 TEMPERATURVERLAUF MIT ZOOM UND 30 TAGEN (Nutzer 12.11.: "so wie er jetzt ist, mit einem Finger zum Schieben und mit
+zwei Fingern zusammenziehen, dass man auch mehr historische Daten bekommt"). (1) ZOOM: `chartViewH` = Stunden in der Breite
+(12 h bis 30 Tage, `CHART_VIEW_MIN/MAX`, Voreinstellung wie bisher `CHART_VIEW_H` 48, nicht gespeichert). Zwei Finger
+(Touch-Ereignisse auf der ganzen `.chart-card`, `chartZoom(vh,fokT,fokPx)`): die Zeit unter den Fingern bleibt dort; beim
+HERAUSzoomen bleibt das Datenende bei hoechstens 88 % der Breite (der Cursor steht fest in der Mitte - um "jetzt" herum
+waere sonst die rechte Haelfte leer). Oben links die Spanne als Knopf `#chartZoom` ("14 Tage" + Pfeil) = zurueck zum
+Standard, ebenso Doppeltipp (`chartStandard`). Am Rechner Strg + Mausrad. Unter der Kurve die Zeile `.chart-hint`.
+(2) AELTERE WERTE: `chartHistLaden()` holt EINMAL je Seitenaufruf 30 Tage Stundenwerte (Bright Sky /weather, 656 Zeilen =
+445 KB roh), sobald man herauszoomt (> 60 h) oder dem Datenanfang auf eine halbe Bildbreite nahe kommt - nie beim Start.
+Liefert Bright Sky < 48 Zeilen (Ausland), Open-Meteo `past_days` mit `timeformat=unixtime`. Sie liegen in `_chartHist`,
+NICHT in fullRows/chartRows (davon lebt der Rest der App); `chartAlle(rows)` haengt sie davor und nimmt Zeilen auf, die
+beim Neuladen vorn aus dem 74-h-Fenster fallen (sonst Luecke). (3) ZEICHNEN: die Leinwand ist nur noch so breit wie das
+Fenster, `chartMalen()` zeichnet je Bild den sichtbaren Ausschnitt (binaere Suche `chartIdx`, 0,6 ms ohne / 1,2 ms mit 30
+Tagen im Bild); vorher eine Leinwand ueber ALLE Daten, per CSS verschoben - mit 30 Tagen bei 12 h Zoom 20 000 CSS-px.
+Gerechnet wird weiter in denselben gedachten Pixeln (`chartScrollX`, `chartGeom` aus `chartGeoBauen()`), darum blieben
+Cursor und Schwung fast unveraendert. Je Zeile EINMAL gemerkt: `_ct` Zeit, `_cn` Nacht, `_cd` Tag (new Date/Intl je Bild
+waeren zu teuer), `_ch` Stunde erst bei Bedarf. SKALA: Grundfenster (wie bisher) plus sichtbare aeltere Werte.
+BESCHRIFTUNG: >= 26 px je Tag Wochentag (haelt sich am Rand, solange der Tag zu sehen ist; reicht das Bild > 6,5 Tage von
+jetzt weg, bei ALLEN das Datum), darunter nur Montage "Mo 9.11."; ab 9 px je Stunde Uhrzeiten (6/12/18, ab 18 px alle 3 h);
+Tagesgrenze jetzt genau um Mitternacht (vorher 23:30). Cursor nennt das Datum, wenn er > 5,5 Tage von jetzt steht.
+STELLE HALTEN: wer die Kurve in den letzten 5 min angefasst hat (`_chartTouchT`), behaelt Stelle (`_chartMitteT`) und Zoom
+ueber `load()` hinweg; sonst wie bisher zurueck auf "jetzt" und 48 h. FEHLER BEIM BAU, den der Test fand: Ziehen und
+Schwung rechneten in Pixeln - kamen die aelteren Werte waehrend des Schiebens an, sprang die Kurve 4 Wochen zurueck. Jetzt
+in ZEIT (`sT`, `chartSetzeZeit`). Geprueft (Playwright mit echten Touch-Ereignissen per CDP, echte Bright-Sky-Daten):
+Grundansicht alt/neu gleich, 6/14/30 Tage, 12 h, Schieben bis Anfang und Ende, ein Finger auf der Achse + einer in der
+Kurve, senkrechtes Wischen scrollt die Seite, load() nach Beruehrung haelt / nach 6 min setzt zurueck, Himmel/hell/dunkel,
+393/320 pt. NICHT am iPhone geprueft: ob Safari beim Zusammenziehen die Seite mitzoomt (`touch-action:pan-y` auf der Karte,
+`gesturestart` unterbunden, preventDefault im touchmove). NEBENBEFUND (Nutzerbild Norden 06:54, Knick 7,8 -> 3 -> 8 Grad):
+kein Fehler der App - gemessen 6,3-7,8 Grad, MOSMIX sagte fuer 07 Uhr noch 2,9 Grad (Warmluft kam frueher). Die
+Stundenzeilen kamen dabei von NORDERNEY (03631, Insel, 14 km), "Live" von Norden-Leybuchtpolde (02763). Angeboten, nicht
+gebaut: Vorhersage an die letzte Messung anhaengen (Abweichung klingt ueber einige Stunden ab).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
