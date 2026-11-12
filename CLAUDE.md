@@ -3503,6 +3503,18 @@ Szene/Variablen/Inhalt deckungsgleich auch bei "Bewegung reduzieren"; klassisch 
 NICHT geaendert, dem Nutzer gesagt: die Statusleiste selbst ist mit dem alten Home-Symbol ein einfarbiger iOS-Balken
 (Haarlinie 10 % dunkler in Zeile 176 auch in diesem Film) - Himmel bis zur Kante nur mit neuem Symbol (v6.44); unten laufen
 die Wolken am Tag absichtlich aus (v6.41, wie Apple). Nicht am iPhone geprueft.
+v6.54 (Nutzer 12.11., iPhone-Bild des Standort-Dialogs: "die Orte unten einfach als Liste, etwas flacher die Namen" und
+"die Einstellungsseite besser strukturiert und sortiert, die Ueberschriften groesser"): (1) ZULETZT VERWENDETE ORTE als
+Liste in EINEM Kasten (`.loc-row.loc-zul`: Spalte, Rand, Ecken 12 px), Zeilen 36 px statt Knoepfe nebeneinander (vorher
+40 px im Pruefstand, am iPhone deutlich hoeher), feine Linie dazwischen, Name links (15,5 px), x rechts (44 px breite
+Tippflaeche, fragt weiter nach); leere Liste ohne Kasten. Bedienung unveraendert (`locZulZeigen`). (2) EINSTELLUNGEN
+(Zahnrad > Einstellungen, `#kzReg`) in drei Gruppen mit grosser Ueberschrift (`.kzgr`/`.kzgrt` 20 px, Trennlinie), darin
+Unterueberschriften 15 px in Schriftfarbe (`.kzgr .kzregt`; vorher 12 px grau, alles in einer Reihe): HIMMEL (nur in der
+Ansicht Himmel: Wolken stehen/ziehen + Wind-Vorschau + Tempo, Sonne, Farbe der Karten, Glas der Kacheln oben; in den
+klassischen Ansichten statt dessen ein Satz mit Verweis auf den Wolken-Knopf, `.kzKlass`), BEWEGUNG (Wetter-Animation mit
+Staerke/Kacheln/Vorschau, Wettersymbole), KACHELN (Wechsel mit Takt/Blende, Faerbung wechselnder Kacheln, Wackeln beim
+Sortieren). Vorher stand das Wackeln oben und der Himmel unten. Die Bausteine (ids, Regler, Hilfetexte) sind unveraendert,
+nur umgestellt; alle zehn Regler geprueft (`e/t67.py`: Fuellung = Wert, Tipp und Ziehen). Geprueft Himmel und hell, 393 pt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

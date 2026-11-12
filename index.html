@@ -579,6 +579,16 @@ html.dunkel #kopfTip::before{border-bottom-color:rgba(235,240,248,.97)}
 .kz .k:has(.kzdots)>.ki{box-shadow:inset 0 0 0 999px rgba(47,134,207,var(--kzwf,0))}
 .kzregt{margin-top:12px;font-weight:700}
 .kzregt1{margin-top:2px}
+/* v6.54 (Nutzer: "Einstellungsseite besser strukturiert und sortiert, die Ueberschriften groesser"): drei Gruppen
+   Himmel / Bewegung / Kacheln mit grosser Ueberschrift und Trennlinie, darin Unterueberschriften in Schriftfarbe */
+.kzgr{margin-top:26px}
+.kzgr:first-child{margin-top:4px}
+.kzgrt{font-size:20px;font-weight:750;letter-spacing:-.01em;color:var(--ink);padding-bottom:7px;border-bottom:1px solid rgba(15,23,42,.14)}
+html.dunkel .kzgrt{border-bottom-color:rgba(255,255,255,.18)}
+.kzgr .kzregt{font-size:15px;font-weight:700;color:var(--ink);margin-top:16px}
+.kzgr .kzgrt+.kzregt{margin-top:11px}
+.kzgr .kzhilf{font-size:12.5px}
+.kzreg:not(.wakl) .kzKlass{display:none}
 /* v4.73: wechselnde Unterzeile - beide Texte in derselben Zelle, Breite = der laengere */
 .kz .ki .kzwe{display:grid}
 /* erst aus-, dann einblenden (je die halbe Blendzeit) - beim Ueberblenden lagen beide Texte halb uebereinander */
@@ -1189,6 +1199,15 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 .loc-zul{flex-wrap:wrap}
 .loc-zul .loc-btn{flex:1 1 auto;position:relative;padding:11px 26px 11px 10px;white-space:nowrap}
 .loc-x{position:absolute;top:0;right:0;bottom:0;width:26px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;opacity:.5}
+/* v6.54 (Nutzer: "einfach als Liste, etwas flacher die Namen"): zuletzt verwendete Orte untereinander in EINEM Kasten,
+   Zeilen mit feiner Linie dazwischen, Name links, x rechts */
+.loc-row.loc-zul{display:flex;flex-direction:column;gap:0;margin-top:6px;border:1px solid #dbe3ee;border-radius:12px;overflow:hidden;background:#f7f9fc}
+.loc-row.loc-zul:empty{display:none}
+.loc-zul .loc-btn.loc-go{flex:none;display:block;width:100%;box-sizing:border-box;text-align:left;border:0;border-radius:0;border-top:1px solid #e3e9f1;background:transparent;
+  padding:8px 46px 8px 14px;font-size:15.5px;font-weight:650;line-height:20px;color:#1c4b78;overflow:hidden;text-overflow:ellipsis}
+.loc-zul .loc-btn.loc-go:first-child{border-top:0}
+.loc-zul .loc-btn.loc-go:active{background:rgba(28,75,120,.08)}
+.loc-zul .loc-x{width:44px;font-size:18px;font-weight:500;opacity:.45}
 .loc-quick{font-size:11.5px;font-weight:700;color:#5c6b80;margin:13px 0 -2px}
 .loc-go{background:#dcebf9;border-color:#9fc5ea;color:#1c4b78}   /* v5.16: etwas blauer (Nutzer) */
 /* v3.46: Im Bestaetigungsschritt traegt der Ortsname die Aussage — er wird
@@ -1253,6 +1272,9 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .loc-box input{background:var(--feld);border-color:var(--feld-line);color:var(--ink)}
   html.dunkel .loc-btn{background:var(--stufe);border-color:var(--line);color:#cfdaea}
   html.dunkel .loc-go{background:#1d3550;border-color:#3a5f88;color:#a8cdf0}
+  html.dunkel .loc-row.loc-zul{background:var(--stufe);border-color:var(--line)}
+  html.dunkel .loc-zul .loc-btn.loc-go{background:transparent;border-top-color:rgba(255,255,255,.08);color:#a8cdf0}
+  html.dunkel .loc-zul .loc-btn.loc-go:active{background:rgba(255,255,255,.06)}
   html.dunkel .loc-hit{background:var(--card);border-color:var(--line);color:var(--ink)}
   html.dunkel .loc-ovl{background:rgba(4,8,14,.62)}
   html.dunkel .loc-box input.loc-ok{background:#12251a;border-color:#3d9a52;color:#8fe0a8}
@@ -2254,7 +2276,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.53</span>
+      <span class="ver">v6.54</span>
     </div>
   </header>
 
@@ -8179,15 +8201,25 @@ function kzRender(){
   const reg=el("kzReg");
   if(reg){reg.classList.toggle("on",_kzEdit&&_kzRegAuf);
     if(_kzEdit&&!reg.dataset.fertig){reg.dataset.fertig="1";
-      reg.innerHTML='<div class="kzregt kzregt1">Wackeln beim Sortieren</div><label><span>Ausschlag</span><input type="range" id="kzRegGrad" min="0" max="3.5" step="0.1"><b id="kzRegGradV">–</b></label>'
-                   +'<label><span>Dauer</span><input type="range" id="kzRegDauer" min="0.6" max="5" step="0.1"><b id="kzRegDauerV">–</b></label>'
-                   +'<div class="kzregt">Wechsel der Kacheln</div>'
-                   +'<div class="kzseg" id="kzSeg"><button type="button" data-m="wischen">Wischen</button><button type="button" data-m="auto">Auto + Wischen</button></div>'
-                   +'<div class="kzhilf" id="kzSegHilf"></div>'
-                   +'<label class="kzTaktZ"><span>Takt</span><input type="range" id="kzRegTakt" min="2" max="20" step="0.5"><b id="kzRegTaktV">–</b></label>'
-                   +'<label><span>Blende</span><input type="range" id="kzRegBl" min="0" max="3" step="0.1"><b id="kzRegBlV">–</b></label>'
-                   +'<div class="kzregt">Färbung wechselnder Kacheln</div>'
-                   +'<label><span>Stärke</span><input type="range" id="kzRegFarbe" min="0" max="100" step="5"><b id="kzRegFarbeV">–</b></label>'
+      /* v6.54 (Nutzer 12.11.: "Einstellungsseite besser strukturiert und sortiert, die Ueberschriften groesser"): drei Gruppen
+         mit grosser Ueberschrift - Himmel (nur in der Ansicht Himmel), Bewegung, Kacheln; darin kleinere Ueberschriften */
+      reg.innerHTML='<div class="kzgr waKaZ"><div class="kzgrt">Himmel</div>'
+                   +'<div class="kzregt">Wolken</div>'
+                   +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
+                   +'<div class="kzhilf" id="hiHilf"></div>'
+                   +'<div class="waprobe waKaZ" id="hiProbe"><span>Vorschau km/h:</span><button type="button" data-w="0">0</button><button type="button" data-w="10">10</button><button type="button" data-w="35">35</button><button type="button" data-w="70">70</button></div>'
+                   +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="300" step="10"><b id="hiRegTpV">–</b></label>'
+                   +'<div class="kzregt">Sonne</div>'
+                   +'<div class="kzseg waKaZ" id="hiSoSeg"><button type="button" data-s="1">Mit Sonne</button><button type="button" data-s="0">Ohne Sonne</button></div>'
+                   +'<div class="kzhilf waKaZ">Die Sonne steht am Taghimmel, solange es trocken ist und sie durchkommt (bis etwa 90 % Bewölkung); Wolken ziehen vor ihr vorbei.</div>'
+                   +'<div class="kzregt">Farbe der Karten</div>'
+                   +'<label class="waKaZ"><span>Himmel</span><input type="range" id="hiRegGl" min="0" max="100" step="5"><b id="hiRegGlV">–</b></label>'
+                   +'<div class="kzhilf waKaZ">Wie stark Karten und Warnmeldung die Farbe des Himmels annehmen: 0 % = dunkles Marineblau wie bisher, 100 % = fast die Himmelsfarbe. Je heller, desto blasser wirken kleine graue Texte.</div>'
+                   +'<div class="kzregt">Glas der Kacheln oben</div>'
+                   +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
+                   +'<div class="kzhilf waKaZ">100 % = dasselbe Glas wie die Karten darunter (Stündlich, Temperaturverlauf …), 0 % = ein eigenes, helleres Glas. Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>'
+                   +'</div><div class="kzgr kzKlass"><div class="kzgrt">Himmel</div><div class="kzhilf">Wolken, Sonne und die Farbe der Karten stellst du in der Ansicht „Himmel“ ein – Knopf mit der Wolke oben.</div></div>'
+                   +'<div class="kzgr"><div class="kzgrt">Bewegung</div>'
                    +'<div class="kzregt">Wetter-Animation</div>'
                    +'<div class="kzseg" id="waSeg"><button type="button" data-w="aus">Aus</button><button type="button" data-w="still">Standbild</button><button type="button" data-w="an">Bewegt</button></div>'
                    +'<div class="kzhilf" id="waHilf"></div>'
@@ -8195,22 +8227,21 @@ function kzRender(){
                    +'<label class="waKaZ"><span>Kacheln</span><input type="range" id="waRegKa" min="0" max="100" step="5"><b id="waRegKaV">–</b></label>'
                    +'<div class="kzhilf" id="waEHilf"></div>'
                    +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>'
-                   +'<div class="kzregt">Wettersymbole bewegen</div>'
+                   +'<div class="kzregt">Wettersymbole</div>'
                    +'<div class="kzseg" id="sbSeg"><button type="button" data-s="0">Aus</button><button type="button" data-s="1">1</button><button type="button" data-s="2">2</button><button type="button" data-s="3">3</button></div>'
                    +'<div class="kzhilf" id="sbHilf"></div>'
-                   +'<div class="kzregt">Himmel im Hintergrund</div>'
-                   +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
-                   +'<div class="kzhilf" id="hiHilf"></div>'
-                   +'<div class="waprobe waKaZ" id="hiProbe"><span>Vorschau km/h:</span><button type="button" data-w="0">0</button><button type="button" data-w="10">10</button><button type="button" data-w="35">35</button><button type="button" data-w="70">70</button></div>'
-                   +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="300" step="10"><b id="hiRegTpV">–</b></label>'
-                   +'<div class="kzseg waKaZ" id="hiSoSeg"><button type="button" data-s="1">Mit Sonne</button><button type="button" data-s="0">Ohne Sonne</button></div>'
-                   +'<div class="kzhilf waKaZ">Die Sonne steht am Taghimmel, solange es trocken ist und sie durchkommt (bis etwa 90 % Bewölkung); Wolken ziehen vor ihr vorbei.</div>'
-                   +'<div class="kzregt waKaZ">Karten: Farbe</div>'
-                   +'<label class="waKaZ"><span>Himmel</span><input type="range" id="hiRegGl" min="0" max="100" step="5"><b id="hiRegGlV">–</b></label>'
-                   +'<div class="kzhilf waKaZ">Wie stark Karten und Warnmeldung die Farbe des Himmels annehmen: 0 % = dunkles Marineblau wie bisher, 100 % = fast die Himmelsfarbe. Je heller, desto blasser wirken kleine graue Texte.</div>'
-                   +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
-                   +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
-                   +'<div class="kzhilf waKaZ">100 % = dasselbe Glas wie die Karten darunter (Stündlich, Temperaturverlauf …), 0 % = ein eigenes, helleres Glas. Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
+                   +'</div><div class="kzgr"><div class="kzgrt">Kacheln</div>'
+                   +'<div class="kzregt">Wechsel</div>'
+                   +'<div class="kzseg" id="kzSeg"><button type="button" data-m="wischen">Wischen</button><button type="button" data-m="auto">Auto + Wischen</button></div>'
+                   +'<div class="kzhilf" id="kzSegHilf"></div>'
+                   +'<label class="kzTaktZ"><span>Takt</span><input type="range" id="kzRegTakt" min="2" max="20" step="0.5"><b id="kzRegTaktV">–</b></label>'
+                   +'<label><span>Blende</span><input type="range" id="kzRegBl" min="0" max="3" step="0.1"><b id="kzRegBlV">–</b></label>'
+                   +'<div class="kzregt">Färbung wechselnder Kacheln</div>'
+                   +'<label><span>Stärke</span><input type="range" id="kzRegFarbe" min="0" max="100" step="5"><b id="kzRegFarbeV">–</b></label>'
+                   +'<div class="kzregt">Wackeln beim Sortieren</div>'
+                   +'<label><span>Ausschlag</span><input type="range" id="kzRegGrad" min="0" max="3.5" step="0.1"><b id="kzRegGradV">–</b></label>'
+                   +'<label><span>Dauer</span><input type="range" id="kzRegDauer" min="0.6" max="5" step="0.1"><b id="kzRegDauerV">–</b></label>'
+                   +'</div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
