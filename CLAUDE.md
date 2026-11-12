@@ -3149,6 +3149,27 @@ Wolken ziehen: 17,3 gegen 17,0 % eines Kerns). Geprueft (Playwright): klar/heite
 iPhone geprueft. NEBENBEFUND, offen: unser "Nissi beach" nahm die Station Kythira (24,6 km, 19,4 Grad, Abzeichen "Live - DWD"),
 Apple zeigt Nissi Beach/Ayia Napa (Zypern) mit 22 Grad - vermutlich ein anderer Ort gleichen Namens bzw. falsches Abzeichen
 fuer eine Nicht-DWD-Station. Einmal im Pruefstand gesehen, nicht wiederholbar: UV-Grafik nur ~20 px hoch.
+v6.38 SONNE ALS SCHEIN STATT SCHEIBE (Nutzer 12.11. nach v6.37: "gibt es in der iPhone-App, dass man die Sonne sieht, oder
+ist die immer nur angedeutet? Als Kugel, als Scheibe wie den Mond ist schwierig - die Sonne ist so strahlend, dass man sie
+nicht wirklich sieht; guck, ob es Bilder gibt"). GEMESSEN in seinem eigenen Apple-Bild (Nissi Beach 11:28, 1179 px breit):
+Mitte des Scheins bei (714,122) = 61 % der Breite, 41 pt unter der Oberkante; fast weiss (Mittel > 240) auf 27 015 px = Radius
+~31 pt; danach faellt die Helligkeit stetig von 245 auf ~140 ueber ~130 pt; groesster Sprung zwischen Nachbarpixeln im Profil
+4 von 255 - es gibt KEINEN Rand. Dazu ein schwacher farbiger Ring (Halo) und zwei blasse Linsenflecken. Zweites Bild
+(MacRumors-Leitfaden iOS 15, "Sunnyvale / Sunny", 5:41): Schein mit Strahlen oben rechts + Linsenfleck; das Nachtbild
+daneben ("London / Clear") zeigt nur Sterne, keinen Mond. Forenbeitrag (nur aus der Zusammenfassung der Websuche, Seite
+selbst 403): der Linsenfleck bewegt sich, der Ort der Sonne haengt von der Tageszeit ab - passt zu 61 % um 11:28 und
+"oben rechts" um 17:41. Eine Scheibe zeigt Apple in keinem der Bilder. GEAENDERT `hiSonne`: ein Kern, der ohne Kante
+auslaeuft (ein Verlauf, Radius 5,2 x `B.sr`: 100 % -> 82 % bei 12 % -> 56 % bei 18 % -> 32 % bei 26 % -> 0), und vier feine
+Lichtstreifen = acht ungleich lange Strahlen (`HI_STRAHL`: Winkel 14/58/103/149 Grad, halbe Laenge 1,7-2,7 r, Dicke ~0,3 r,
+gedrehte Ellipsen-Verlaeufe als <i> in `.hiSo`, also unter den Wolken). Alles steht still; gemessen (heiter, Wolken ziehen,
+ohne GPU) 18,2 / 17,7 gegen 16,8 / 16,0 % eines Kerns bei v6.36 (v6.37 mit Scheibe: 17,3 gegen 17,0) - etwa ein Punkt mehr.
+Geprueft wie v6.37 (320-430 pt, Warnkarten, gescrollt, Sonnenhoehe 2-30 Grad, Schalter, klassisch). BEWUSST NICHT:
+Linsenflecken und Halo-Ring (saehen auf unserer Karte wie Schmutz aus), Ort nach Tageszeit (die Luecke zwischen "Live" und
+Datum ist der einzige freie Platz), Mond als Scheibe im Nachthimmel (dem Nutzer angeboten - Phase und Auf-/Untergang haben
+wir). FALLE BEIM BAU: ein Ersetzen "von Marke A bis Marke B" per Skript loeschte vier Funktionen dazwischen (hiLage, hiMass,
+hiSterne, hiWolke); `node --check` merkt das nicht (fehlende Funktion = Laufzeitfehler), und weil `hiPruefen` den Schluessel
+VOR dem Bauen setzt, blieb der Himmel nach dem ersten Fehler leer. Aufgefallen im Browsertest. Seitdem nach jedem
+Block-Ersetzen: Liste der top-level-Funktionen gegen `git show HEAD:index.html` vergleichen (`fehlen: []`).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
