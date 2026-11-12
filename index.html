@@ -1331,6 +1331,10 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    die alte (1,3 s). */
 #hi{display:none}
 html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26))}
+@property --hi-r{syntax:"<color>";inherits:true;initial-value:#090d26}
+@property --hi-k{syntax:"<color>";inherits:true;initial-value:rgba(22,30,48,.42)}
+@property --hi-t{syntax:"<color>";inherits:true;initial-value:rgba(255,255,255,.11)}
+html:root.himmel{transition:--hi-r var(--hi-bl,1.3s) ease,--hi-k var(--hi-bl,1.3s) ease,--hi-t var(--hi-bl,1.3s) ease}
 html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:0;overflow:hidden;pointer-events:none;
   background:linear-gradient(var(--hi-o,#090d26),var(--hi-u,#363e70))}
 .hiS{position:absolute;left:0;top:0;overflow:hidden;opacity:0;transition:opacity 1.3s ease}
@@ -1524,14 +1528,18 @@ html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:non
 /* v6.51 WEICHER START und ORTSWECHSEL: Inhalt verborgen (sanft) -> in einem Zug einblenden (sanft-ein); vor dem
    Ortswechsel ausblenden (sanft-aus). Der Himmel #hi und der Ortsname bleiben. Die Blende ist keine Bewegung - sie
    laeuft auch bei "Bewegung reduzieren" (!important gegen die Sperrregel). */
-html.sanft #app>:not(header):not(.state),html.sanft header .plz{opacity:0}
-html.sanft-ein #app>:not(header):not(.state),html.sanft-ein header .plz{transition:opacity .7s ease!important;transition-duration:.7s!important}
+html.sanft #app>:not(header):not(.state),html.sanft header .plz,html.sanft #placeName,html.sanft #waCv{opacity:0}
+html.sanft-ein #app>:not(header):not(.state),html.sanft-ein header .plz,html.sanft-ein #placeName,html.sanft-ein #waCv{transition:opacity 1s ease!important;transition-duration:1s!important}
+/* v6.52 (Nutzer 12.11.: "kein fleckiges Auftreten von Elementen oder Regionen wie Kopfzeile, Fusszeile, Mittelteil"):
+   der neue Himmel blendet in DERSELBEN Sekunde ueber wie der Inhalt - Szenen (.hiS) und die Farben, die sonst springen
+   (--hi-r: oberer Streifen und Statusleiste, --hi-k: Glas der Karten, --hi-t: Kacheln), auch bei "Bewegung reduzieren" */
+html:root.sanft-ein .hiS{transition-duration:var(--hi-bl,1s)!important}
+html:root.himmel.sanft-ein{transition-duration:var(--hi-bl,1s)!important}
 /* der Inhalt hinter dem Dialog geht schneller weg als der Dialog selbst - sonst scheint er beim Ausblenden kurz durch */
-html.sanft-aus #app>:not(header):not(.state),html.sanft-aus header .plz,html.sanft-aus #placeName{opacity:0!important;transition:opacity .16s ease!important;transition-duration:.16s!important}
+html.sanft-aus #app>:not(header):not(.state),html.sanft-aus header .plz,html.sanft-aus #placeName,html.sanft-aus #waCv{opacity:0!important;transition:opacity .16s ease!important;transition-duration:.16s!important}
 html.sanft-aus .loc-ovl{opacity:0!important;transition:opacity .26s ease!important;transition-duration:.26s!important}
 html.sanft-aus body{pointer-events:none}
 html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
-html.sanft-ort #placeName{animation:sanftLaden .6s ease both;animation-duration:.6s!important}
 @keyframes sanftLaden{from{opacity:0}to{opacity:1}}
 </style>
 </head>
@@ -1539,8 +1547,8 @@ html.sanft-ort #placeName{animation:sanftLaden .6s ease both;animation-duration:
 <div id="stLeiste" aria-hidden="true"></div>
 <script>
 /* v6.51 WEICHER START (Nutzer: "nicht die einzelnen Elemente sehen, nicht so aufploppen"): der Inhalt bleibt verborgen,
-   bis die wichtigen Daten da sind, und blendet dann in einem Zug ein (sanftZeigen im Hauptscript). Der Himmel und der
-   Ortsname stehen sofort. Sicherung: nach 9 s wird in jedem Fall gezeigt. */
+   bis die wichtigen Daten da sind, und blendet dann in einem Zug ein (sanftZeigen im Hauptscript). Der Himmel steht
+   sofort (nach einem Ortswechsel der ALTE, v6.52), der Ortsname kommt mit dem Rest. Sicherung: nach 9 s wird gezeigt. */
 (function(){try{var h=document.documentElement;h.classList.add("sanft");
   try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
   setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}},9000);
@@ -1629,7 +1637,7 @@ html.sanft-ort #placeName{animation:sanftLaden .6s ease both;animation-duration:
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.51</span>
+      <span class="ver">v6.52</span>
     </div>
   </header>
 
@@ -2377,6 +2385,13 @@ function hiRand(C,L,B,ohneSonne){
     if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
   return c;
 }
+/* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
+function hiWeiterMerken(){
+  if(!hiAn()||!HI.L||!HI.sT)return;
+  var jz=performance.now(),L=HI.L;
+  sessionStorage.setItem("hiWeiter",JSON.stringify({saat:HI.saat,ph:HI.ph0+(HI.s||0)+(jz-HI.sT)/1000*(HI.f||1),f:HI.f||1,t:Date.now(),
+    L:{h:L.h,N:L.N,nass:L.nass?1:0,nebel:L.nebel?1:0}}));
+}
 function hiInit(){
   HI.init=1;
   try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];
@@ -2389,19 +2404,31 @@ function hiInit(){
     if(HI.weg&&Date.now()-HI.weg>30*60e3)hiNeuesBild();
     hiPruefen();});
   hiNeuesBild();
+  /* v6.52: nach einem Ortswechsel denselben Himmel weiterfuehren - gleiches Muster, Wolken an derselben Stelle, gleiche
+     Lage (Sonnenhoehe, Bedeckung) wie auf der alten Seite; erst sanftZeigen blendet zum neuen Ort ueber */
+  try{var hw=JSON.parse(sessionStorage.getItem("hiWeiter")||"null");sessionStorage.removeItem("hiWeiter");
+    if(hw&&isFinite(hw.saat)&&isFinite(hw.ph)&&hw.L&&isFinite(hw.L.N)&&Math.abs(Date.now()-hw.t)<15000){
+      HI.saat=hw.saat;HI.ph0=hw.ph+Math.max(0,Date.now()-hw.t)/1000*(hw.f||1);HI.weiterL=hw.L;}}catch(e){}
   hiZugKlasse();
   try{localStorage.removeItem("hiMiniGr");}catch(e){}      /* v6.29: 18 px sind fest (Nutzer), der Test ist weg */
 }
 /* Baut den Himmel neu, wenn sich etwas Sichtbares geaendert hat (Farben, Bedeckung, Groesse). Die neue Szene liegt
    ueber der alten und blendet in 1,3 s ein; danach faellt die alte weg. */
-function hiPruefen(){
+function hiPruefen(bl){
   var el0=document.getElementById("hi");if(!el0)return;
   if(!HI.init)hiInit();
   hiMini();
   if(!hiAn()){
     HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;
     document.documentElement.classList.remove("hison");return;}
-  var L=hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();
+  /* v6.52 (Nutzer 12.11.: "beim Ortswechsel wurde erst der dunkle Bereich geladen und spaeter nachgefaerbt - kein fleckiges
+     Auftreten von Kopfzeile, Fusszeile, Mittelteil"): solange der Inhalt beim Start verborgen ist, bleibt der Himmel, wie
+     er steht - sanftZeigen baut ihn um, und er blendet zusammen mit dem Inhalt ein. Die ERSTE Szene steht sofort (vorher
+     blendete sie 1,3 s aus einem wolkenlosen Verlauf ein); nach einem Ortswechsel ist es der alte Himmel (hiWeiterMerken). */
+  if(HI.szenen.length&&sanftWartet())return;
+  bl=(typeof bl==="number"&&bl>=0)?bl:HI_BLENDE;
+  var erst=!HI.szenen.length;
+  var L=(erst&&HI.weiterL)?HI.weiterL:hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();HI.weiterL=null;
   /* v6.37: Ort der Sonne = 41 % der Kopfbreite, eine gute Scheibe unter der Unterkante des stehenden Kopfs */
   try{var kr0=document.querySelector("header").getBoundingClientRect();
     if(kr0.width>0){B.aw=kr0.width;B.sr=Math.max(17,Math.min(27,kr0.width*.061));B.sx=kr0.left+kr0.width*.41;B.kb=Math.max(0,kr0.top)+kr0.height;B.sy=B.kb+B.sr*.7;
@@ -2433,6 +2460,10 @@ function hiPruefen(){
   if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
   var alt=HI.szenen;HI.szenen=neu;
   var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
+  /* v6.52: Szenen und die Farben oben (--hi-r), der Karten (--hi-k) und Kacheln (--hi-t) wechseln GLEICH lang (die drei
+     Farben sind per @property registriert und blenden ueber); die erste Szene ohne Blende */
+  neu.forEach(function(s){if(erst)s.style.transition="none";else s.style.transitionDuration=bl+"ms";});
+  if(erst){root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);}
   /* GLAS: die Farben der dunklen Ansicht (Links, Warnrot, Diagramme) sind fuer fast schwarze Karten gemacht. Ueber
      einem Taghimmel (Helligkeit bis 40 %) waere das Glas des Entwurfs (42 % Deckung) ein mittleres Blau, auf dem sie
      untergehen - darum deckt es so stark, dass die Karte hoechstens ~19 % hell wird (nachts 42 %, am Tag bis 74 %).
@@ -2440,20 +2471,26 @@ function hiPruefen(){
   /* v6.17: im Bild vom 11.11. (v6.15) hatte die Statusleiste die Farbe --hi-o (oberer Verlauf, 88,104,127), nicht
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
-  var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
+  var rr=hiRgb(HI.rand||C.top);
   var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.randG||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
   /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
      v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
   HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.randG||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
   /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
   HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
-  var kk=hiKartenGlas();
-  var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
-  if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
-  setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
-    root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},HI_BLENDE+250);
-  try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nebel?2:L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
-  try{themaFarbe();}catch(e){}
+  /* v6.52: die Farben im SELBEN Bild setzen, in dem die Szene einzublenden beginnt (vorher sofort, die Szene zwei Bilder
+     spaeter - bei "Bewegung reduzieren" sprang der obere Streifen dann vor dem Rest) */
+  var los=0,zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
+  var beides=function(){if(los)return;los=1;
+    root.style.setProperty("--hi-bl",(erst?0:bl)+"ms");root.style.setProperty("--hi-r",rr);
+    var kk=hiKartenGlas();
+    try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nebel?2:L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
+    try{themaFarbe();}catch(e){}
+    zeigen();};
+  if(erst)beides();
+  else if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(beides);});else beides();
+  setTimeout(function(){beides();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
+    root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},bl+250);
 }
 /* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
    "5 Grad | Wolkenlos"); solange oben keine Zahl steht (laedt, veraltet), bleibt die Stationszeile. */
@@ -2539,14 +2576,14 @@ function hiKartenGlas(){
   HI.gK=c.concat([g.ka]);hiKachelGlas();
   return kk;
 }
-function hiGlasSetzen(v){
+function hiGlasSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");
   try{localStorage.setItem("himmelGlas",String(+v));}catch(e){}
   var kk=hiKartenGlas();
   /* das erste Script malt beim naechsten Start mit dem gemerkten Glas (Feld 5 von himmelFarbe) */
   try{var a=String(localStorage.getItem("himmelFarbe")||"").split("|");if(kk&&a.length>=5){a[4]=kk;localStorage.setItem("himmelFarbe",a.join("|"));}}catch(e){}
   hiAnzeigen();
 }
-function hiKaSetzen(v){try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
+function hiKaSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
 /* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
    gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
 function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
@@ -3268,7 +3305,9 @@ function themaFarbe(){try{const m=document.querySelector('meta[name=theme-color]
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));themaFarbe();}
 /* v6.51 WEICHER START: wartet nach den Hauptdaten auf die Teile, die sonst sichtbar nachruecken (Live-Messung,
    Warnungen, Radar, Stundenregen, Tagesvorhersage) - laengstens SANFT_MAX -, dann blendet alles zusammen ein. */
-var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=700,SANFT_AUS_MS=270;
+var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
+/* v6.52: solange der Inhalt verborgen ist, baut der Himmel nicht um (hiPruefen wartet) - sonst wechselt er vor dem Rest */
+function sanftWartet(){return !!(SANFT&&SANFT.an&&!SANFT.fertig);}
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
@@ -3278,6 +3317,10 @@ function sanftZeigen(){
   if(SANFT.fertig)return;SANFT.fertig=true;clearTimeout(SANFT.tm);
   var h=document.documentElement,los=false;
   if(!h.classList.contains("sanft"))return;
+  /* v6.52: den Himmel JETZT bauen - seine Szene blendet in denselben zwei Bildern ein wie der Inhalt, gleich lang.
+     sanft-ein schon vorher: es legt nur die Dauer fest (auch gegen die Sperre bei "Bewegung reduzieren") */
+  h.classList.add("sanft-ein");
+  try{if(hiAn())hiPruefen(SANFT_EIN_MS);}catch(e){}
   function start(){if(los)return;los=true;
     h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
     setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");},SANFT_EIN_MS+200);}
@@ -13195,6 +13238,7 @@ load();
     const fertig=()=>{try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
       locZulMerken(p,LOC);
       try{sessionStorage.setItem("ortWechsel","1");}catch(e){}
+      try{hiWeiterMerken();}catch(e){}
       /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37).
          v6.51: vorher Inhalt und Dialog ausblenden - die neue Seite blendet wieder ein */
       sanftWeg(function(){location.href=location.pathname+"?v="+Date.now();});};
