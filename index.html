@@ -1340,7 +1340,7 @@ html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height
 @keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
 html.histeh .hiS>canvas.hiW{animation:none}
-html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#cdd7e7;--faint:#bcc7da}
+html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#d8e1ef;--faint:#c8d2e3}
 /* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
    man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
@@ -1353,6 +1353,10 @@ html:root.himmel .htop{opacity:.85}
    einen dunkelblauen Saum (auf blauem Himmel unsichtbar, auf dem hellen Schein haelt er die Buchstaben zusammen) */
 html:root.himmel.hison header,html:root.himmel.hison .hero{text-shadow:0 0 7px rgba(6,32,78,.7),0 1px 2px rgba(6,32,78,.5)}
 html:root.himmel.hison .htop{opacity:1}
+/* v6.42 (Nutzer: "die Temperatur oben weniger schwarzen Schatten, selbst auf hellerem Hintergrund"): die 96-px-Ziffern
+   brauchen keinen Saum - nur noch ein weicher, schwacher Schatten; das Wort darunter (22 px) einen halb so starken */
+html:root.himmel .temp,html:root.himmel.hison .temp{text-shadow:0 1px 14px rgba(6,32,78,.16)}
+html:root.himmel.hison .cnd .lbl{text-shadow:0 0 8px rgba(6,32,78,.38)}
 html:root.himmel.hison .kz,html:root.himmel.hison .kzfoot{text-shadow:none}
 html:root.himmel .place small{color:rgba(255,255,255,.72)}
 html:root.himmel .ver{color:rgba(255,255,255,.6)}
@@ -1369,8 +1373,8 @@ html:root.himmel .ydiff{justify-content:center;text-align:center;color:rgba(255,
 html:root.himmel .ydiff .ys{color:rgba(255,255,255,.85)}
 html:root.himmel .when .a{color:rgba(255,255,255,.8)}
 html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11))}
-html:root.himmel .kz .ki .l{color:rgba(255,255,255,.62)}
-html:root.himmel .kz .ki .s{color:rgba(255,255,255,.7)}
+html:root.himmel .kz .ki .l{color:rgba(255,255,255,.76)}
+html:root.himmel .kz .ki .s{color:rgba(255,255,255,.82)}
 html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
 html:root.himmel .kzfoot{opacity:.75;color:#fff}
 html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 8px rgba(0,0,0,.45)}
@@ -1445,7 +1449,12 @@ html:root.himmel .uvnote{opacity:.95;color:var(--muted)}
 html:root.himmel .iss-row.grob{opacity:.72}
 html:root.himmel .foot{color:#e3eaf4}html:root.himmel .foot a{color:#fff}
 html:root.dunkel .bfsfb{color:#4a586c}
-html:root.himmel .rz-zust.nass{color:#a8d2ff}
+html:root.himmel .rz-zust.nass{color:#b9dbff}
+/* v6.42: die Karten sind heller geworden - die farbigen Texte aus v6.40 im Himmel eine Stufe heller */
+html:root.himmel .evt-w{color:#ffbdb6}
+html:root.himmel .evt-cd,html:root.himmel .iss-cd{color:#ddd5ff}
+html:root.himmel .bil-tag,html:root.himmel .bil-box .bv,html:root.himmel .umk-dry-last{color:#b5d7ff}
+html:root.himmel .vitd-info{color:#a8ecbc}
 html:root.himmel .uvalt{color:#ffb894}
 html:root.himmel .badge:not(.stale){color:#e7edf5}
 /* mit Sonne: auch die Abschnittstitel laufen beim Scrollen ueber den Schein */
@@ -1539,7 +1548,7 @@ html:root.himmel.hison #stationTxt{color:#fff}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.41</span>
+      <span class="ver">v6.42</span>
     </div>
   </header>
 
@@ -1757,8 +1766,8 @@ function themaNeuZeichnen(){
 }catch(err){console.warn("ansicht",err&&err.message);}}
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
-  get muted(){  return _dunkel?(hiAn()?"#cdd7e7":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
-  get faint(){  return _dunkel?(hiAn()?"#bcc7da":"#7c8a9e"):"#9aa7b8";},
+  get muted(){  return _dunkel?(hiAn()?"#d8e1ef":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
+  get faint(){  return _dunkel?(hiAn()?"#c8d2e3":"#7c8a9e"):"#9aa7b8";},
   get karte(){  return _dunkel?(hiKarteHex(0)||"#1a212c"):"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
@@ -1796,7 +1805,7 @@ function txtF(c){
   if(!_dunkel||typeof c!=="string"||c.charAt(0)!=="#")return c;
   var h=c.slice(1);if(h.length===3)h=h.replace(/./g,"$&$&");
   var v=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)],z=.42,t=0,m=v;
-  try{if(hiAn())z=.5;}catch(e){}
+  try{if(hiAn())z=.62;}catch(e){}
   if(!isFinite(v[0]+v[1]+v[2]))return c;
   while(t<.9&&hiY(m)<z){t+=.05;m=v.map(function(q){return q+(255-q)*t;});}
   return "rgb("+m.map(Math.round).join(",")+")";
@@ -2330,7 +2339,7 @@ function hiPruefen(){
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42;
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.66):.42;
   /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
      v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
   HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48]};
@@ -2374,7 +2383,7 @@ function hiKachelGlas(){
    Farbton des mittleren Himmels, am Tag dunkler (Leuchtdichte x0,8, hoechstens 0,16 = weisse Schrift mindestens
    5:1), in der Nacht etwas heller als der Himmel; daraus die Glasfarbe bei unveraenderter Deckung (ka).
    Regler "Karten: Farbe" (himmelGlas): 0 = dunkles Glas wie bis v6.35, 100 = die Zielfarbe. */
-var HI_GLAS_STD=70;
+var HI_GLAS_STD=100;
 function hiGlasTon(){try{var v=parseFloat(localStorage.getItem("himmelGlas"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_GLAS_STD;}
 /* Leuchtdichte nach WCAG (mit Gamma) - hiLum oben ist die lineare "Helligkeit" der Himmelsfarben */
 function hiY(c){
@@ -2392,7 +2401,12 @@ function hiKarteHex(dunkler){
 }
 function hiSatt(c,k){var m=hiLum(c)*255;return c.map(function(v){return hiKl(m+(v-m)*k,0,255);});}
 function hiGlasZiel(S){
-  var y=hiY(S),yt=Math.min(.16,Math.max(y*.8,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
+  /* v6.42 (Nutzer: "Container immer noch zu kontrastreich im Verhaeltnis zum Hintergrund - sie muessen gar nicht so
+     doll auffallen, etwas mehr die Farbe vom Hintergrund, bei der iPhone-App wirkt das ruhiger"). GEMESSEN Karte gegen
+     Himmel dahinter (Leuchtdichte-Kontrast): Apple 1,07-1,21 : 1; wir 1,5-1,6 auf Blau und 2,8-3,0 auf hellen Wolken.
+     Ziel jetzt: Karte nur noch 1,2 : 1 dunkler als der mittlere Himmel (vorher Leuchtdichte x 0,8 und davon 70 %),
+     hoechstens 0,19 (weisse Schrift bleibt >= 4,4 : 1; Apple geht bis 0,245 = 3,6 : 1). Voreinstellung des Reglers 100. */
+  var y=hiY(S),yt=Math.min(.19,Math.max((y+.05)/1.2-.05,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
   if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
     for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
   else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
@@ -11850,7 +11864,7 @@ function renderBilanz(){try{
         : B.trocken>0 ? `<span class="bil-dry">Seit ${B.trocken} Tag${B.trocken>1?"en":""} kein nennenswerter Regen.</span>`
         : "Heute noch trocken.";
       h+=`<br><span id="bilProg"></span></div>`;
-      h+=`<div class="uvnote" style="margin-top:5px">dunkelblau = bereits gefallen (Radar 1\u202fkm) \u00b7 hellblau = erwartet \u00b7 graue S\u00e4ule = heute \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
+      h+=`<div class="uvnote" style="margin-top:5px">kr\u00e4ftig = bereits gefallen (Radar 1\u202fkm) \u00b7 blass = erwartet \u00b7 graue S\u00e4ule = heute \u00b7 Archiv umfasst ${B.tage} Tage</div>`;
       el("bilanzCard").innerHTML=h;
       sec.classList.remove("hidden");
       _bilLetzte=B;setTimeout(()=>bilanzZeichne(B),0);
@@ -11913,7 +11927,10 @@ function bilanzChart(serie,prog,rest){
   const balken=(i,v,mess,unten)=>{
     const hh=HP(v);if(hh<=0)return;
     const y=gy1-(unten||0)-hh;
-    x.fillStyle=mess?(v>=0.2?"#2f86cf":"rgba(120,140,165,.30)")
+    /* v6.42: auf der Karte in Himmelsfarbe (55,104,175) verschwand das Blau #2f86cf - im Himmel helle Saeulen:
+       gefallen kraeftig, erwartet blass */
+    x.fillStyle=hiAn()?(mess?(v>=0.2?"#d6eaff":"rgba(214,234,255,.28)"):(v>=0.2?"rgba(214,234,255,.5)":"rgba(214,234,255,.2)"))
+                    :mess?(v>=0.2?"#2f86cf":"rgba(120,140,165,.30)")
                     :(v>=0.2?"#a8c8e8":"rgba(150,170,190,.22)");
     x.fillRect(i*bw+bw*0.18,y,bw*0.64,hh);
   };
@@ -11997,7 +12014,7 @@ function bilanzChart(serie,prog,rest){
     flaeche.addEventListener("pointerup",los);
     flaeche.addEventListener("pointercancel",los);
   }
-  x.textAlign="left";x.fillStyle="#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
+  x.textAlign="left";x.fillStyle=_dunkel?CO.faint:"#7a8798";x.fillText("max "+mx.toLocaleString("de-DE",{maximumFractionDigits:1})+" mm",0,0);
 }
 setTimeout(renderBilanz,1600);
 /* ===== Vitamin-D im Jahresverlauf (v2.45) =====

@@ -3265,6 +3265,26 @@ Lesbarkeit (Pruefskript `t58.py`, ohne den Saum gerechnet): 88 % 1 Text unter 2 
 Wolkengrenze 67 % waren es dort 9 und 20 - "Live", Datum, Abschnittstitel auf den hellsten Stellen ~2 : 1, darum 62 %).
 Testlage `?himmel=meist` (h 21, N 0,88). Nacht und Abend unveraendert. Apple bleibt heller (weisse Wolken bis 210): dort steht
 nur grosse Schrift im Himmel, bei uns auch 11-px-Zeilen. Nicht am iPhone geprueft.
+v6.42 RUHIGERE KARTEN, WENIGER SCHATTEN AN DER TEMPERATUR (Nutzer 12.11. nach v6.41: "die Temperatur oben weniger schwarzen
+Schatten, selbst auf hellerem Hintergrund"; "Container sind manchmal immer noch zu kontrastreich im Verhaeltnis zum
+Hintergrund - sie muessen gar nicht so doll auffallen, etwas mehr die Farbe vom Hintergrund, bei der iPhone-App wirkt das
+ruhiger"). GEMESSEN Karte gegen den Himmel dahinter (Leuchtdichte-Kontrast): Apple 1,07 : 1 (Luxor) und 1,21 : 1 (Erlental);
+wir 1,5-1,6 auf Blau und 2,8-3,0 auf hellen Wolken (v6.41 hatte den Himmel heller gemacht, die Karten nicht). JETZT
+`hiGlasZiel`: Ziel = 1,2 : 1 dunkler als der mittlere Himmel S, hoechstens Leuchtdichte 0,19 (vorher S x 0,8, hoechstens
+0,16); `HI_GLAS_STD` 100 statt 70 (Regler "Karten: Farbe > Himmel": 0 = dunkles Marineblau, 100 = dieses Ziel); Deckung des
+Glases am Tag hoechstens 66 statt 74 % (mehr vom Himmel dahinter scheint durch). ERGEBNIS: klar Karte (55,104,175) statt
+(51,92,152), 88 % (67,103,155), bedeckt (78,98,130), Nacht (35,42,85); Abstand zum Himmel 1,24-1,26 : 1 auf Blau, 1,8-1,9 auf
+hellen Wolken; weisse Schrift auf der Karte 5,5-6,2 : 1, ueber einer hellen Wolke 4,3-4,9. PREIS (Pruefskript, klar): Texte
+ab 4,5 : 1 von 226 auf 91, das Feld 3-4,5 waechst auf 301, unter 3 : 1 von 25 auf 31 - fast alles Schrift, die beim Scrollen
+ueber den Sonnenschein laeuft. Dagegen: `txtF`-Ziel im Himmel 0,62 statt 0,5, `--muted` #d8e1ef, `--faint` #c8d2e3 (auch
+`CO`), die Farbtexte aus v6.40 im Himmel eine Stufe heller (#ffbdb6, #ddd5ff, #b5d7ff, #a8ecbc), Kachel-Beschriftung 76 statt
+62 % Weiss, Unterzeile 82 statt 70 %. TEMPERATUR: `.temp` nur noch `text-shadow:0 1px 14px rgba(6,32,78,.16)` (vorher der
+Saum 0 0 7px .7 aus v6.39 bzw. 0 1px 10px schwarz .35), das Wort darunter `.cnd .lbl` halb so stark; kleine Schrift behaelt
+den Saum. NICHT angefasst: die Faerbung wechselnder Kacheln (auf dem neuen Glas kaum noch sichtbar: 12,8 % von 47,134,207
+ueber 55,105,178). REGENBILANZ: die blauen Saeulen (#2f86cf) verschwanden auf der Karte in Himmelsfarbe - im Himmel jetzt
+hell (#d6eaff gefallen, 50 % davon erwartet), Legende in allen Ansichten "kraeftig = gefallen, blass = erwartet" statt
+"dunkelblau / hellblau"; "max ... mm" im Bild in `CO.faint`. Wer einen eigenen Reglerwert gespeichert hat, behaelt ihn - mit
+der neuen Formel etwas heller. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
