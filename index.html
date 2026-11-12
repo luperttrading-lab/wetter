@@ -1346,17 +1346,24 @@ html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#e2e9f4;--faint:#
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
 html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard{box-shadow:none}
 html:root.himmel .pvtage button.on,html:root.himmel .pvsicht button.on,html:root.himmel .mj-tip{color:#1a212c}
-html:root.himmel header,html:root.himmel .hero{text-shadow:0 1px 10px rgba(0,0,0,.35)}
+/* v6.46 (Nutzer: "bei Temperaturverlauf und Stuendlich und so ist auch der schwarze Schein hinter der weissen Schrift -
+   sieht nicht huebsch aus"): Schriftschatten im Himmel nur noch WEICH (weit, schwach, dunkelblau statt schwarz) - kein
+   enger dunkler Saum mehr. Ausnahme: scheint die Sonne (hisonne), behalten Kopf und die Zeile "Live / Datum" einen
+   Saum - sie liegen direkt am weissen Kern des Scheins und waeren sonst nicht lesbar; ebenso die Abschnittstitel
+   (beim Scrollen laufen sie ueber den Kern: mit weichem Schatten verschwand dort "Temperaturverlauf" zur Haelfte).
+   Auf blauem Himmel faellt der dunkelblaue Saum kaum auf - stoerend war er auf den grauen Wolken. */
+html:root.himmel header,html:root.himmel .hero{text-shadow:0 1px 10px rgba(6,24,60,.2)}
 html:root.himmel .hero{background:transparent;box-shadow:none;padding-top:4px}
 html:root.himmel .htop{opacity:.85}
 /* v6.39: steht die Sonne im Himmel, liegt ihr weiter Schein hinter Kopf, "Live" und Datum - die Schrift bekommt dort
    einen dunkelblauen Saum (auf blauem Himmel unsichtbar, auf dem hellen Schein haelt er die Buchstaben zusammen) */
-html:root.himmel.hison header,html:root.himmel.hison .hero{text-shadow:0 0 7px rgba(6,32,78,.7),0 1px 2px rgba(6,32,78,.5)}
+html:root.himmel.hison header,html:root.himmel.hison .hero{text-shadow:0 1px 10px rgba(6,32,78,.26)}
+html:root.himmel.hisonne header,html:root.himmel.hisonne .hero .htop{text-shadow:0 0 7px rgba(6,32,78,.6),0 1px 2px rgba(6,32,78,.38)}
 html:root.himmel.hison .htop{opacity:1}
 /* v6.42 (Nutzer: "die Temperatur oben weniger schwarzen Schatten, selbst auf hellerem Hintergrund"): die 96-px-Ziffern
    brauchen keinen Saum - nur noch ein weicher, schwacher Schatten; das Wort darunter (22 px) einen halb so starken */
 html:root.himmel .temp,html:root.himmel.hison .temp{text-shadow:0 1px 14px rgba(6,32,78,.16)}
-html:root.himmel.hison .cnd .lbl{text-shadow:0 0 8px rgba(6,32,78,.38)}
+html:root.himmel.hison .cnd .lbl{text-shadow:0 1px 12px rgba(6,32,78,.2)}
 html:root.himmel.hison .kz,html:root.himmel.hison .kzfoot{text-shadow:none}
 html:root.himmel .place small{color:rgba(255,255,255,.72)}
 html:root.himmel .ver{color:rgba(255,255,255,.6)}
@@ -1377,7 +1384,7 @@ html:root.himmel .kz .ki .l{color:rgba(255,255,255,.76)}
 html:root.himmel .kz .ki .s{color:rgba(255,255,255,.82)}
 html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
 html:root.himmel .kzfoot{opacity:.75;color:#fff}
-html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 8px rgba(0,0,0,.45)}
+html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 12px rgba(6,24,60,.18)}
 html:root.himmel .kalle button{color:rgba(255,255,255,.8)}
 html:root.himmel .loc-box{background:#141a23}
 /* v6.36: Warnkarte im Himmel - dasselbe Glas wie die Karten (folgt Tag, Nacht und Wetter), auffaellig durch Rand,
@@ -1462,7 +1469,8 @@ html:root.himmel .bfscard .uvnote a{color:#cfe2ff}
 html:root.himmel .uvalt{color:#ffb894}
 html:root.himmel .badge:not(.stale){color:#e7edf5}
 /* mit Sonne: auch die Abschnittstitel laufen beim Scrollen ueber den Schein */
-html:root.himmel.hison .ksect .sect{text-shadow:0 0 7px rgba(6,32,78,.75),0 1px 2px rgba(6,32,78,.55)}
+html:root.himmel.hison .ksect .sect{text-shadow:0 1px 12px rgba(6,32,78,.22)}
+html:root.himmel.hisonne .ksect .sect{text-shadow:0 0 7px rgba(6,32,78,.62),0 1px 2px rgba(6,32,78,.38)}
 html:root.himmel.hison #stationTxt{color:#fff}
 /* ============ v6.44 HIMMEL BIS OBEN (Nutzer 12.11. 13:03, Apple neben uns: "wie bekommt die iPhone-App es hin, dass Bild
    und Farbe bis oben gehen? Wir haben wieder so einen haesslichen Balken, der nicht ins Bild passt") ============
@@ -1570,7 +1578,7 @@ html:root.himmel #stLeiste{display:none}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.45</span>
+      <span class="ver">v6.46</span>
     </div>
   </header>
 
@@ -2349,6 +2357,7 @@ function hiPruefen(){
         if(b1.width>0&&w1.width>0){var lo0=b1.right+B.sr*.83+8,hi0=w1.left-B.sr*.83-8;
           B.sx=hi0>=lo0?Math.max(lo0,Math.min(hi0,B.sx)):(b1.right+w1.left)/2;}}}}catch(e){}
   document.documentElement.classList.toggle("hison",!!C.hell);
+  document.documentElement.classList.toggle("hisonne",C.sonne>.3);
   var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0,tf,
     C.sonne||0,B.sx!=null?Math.round(B.sx/3)+"."+Math.round(B.sy/3):"",C.fade||0,hiRgb(C.rand),hiRgb(C.kern)].join("|");
   if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
