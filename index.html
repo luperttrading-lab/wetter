@@ -1208,6 +1208,13 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 .loc-zul .loc-btn.loc-go:first-child{border-top:0}
 .loc-zul .loc-btn.loc-go:active{background:rgba(28,75,120,.08)}
 .loc-zul .loc-x{width:44px;font-size:18px;font-weight:500;opacity:.45}
+/* v6.55: aktueller Ort markiert, Verschieben per langem Druck */
+.loc-zul .loc-btn.loc-go{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y}
+.loc-zul .loc-hier{position:absolute;top:0;right:0;bottom:0;width:58px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#2e9e4a}
+.loc-zul .loc-btn.hier::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#2e9e4a;margin:0 8px 2px 0;vertical-align:middle}
+.loc-row.loc-zul.sortiert{overflow:visible}
+.loc-zul.sortiert .loc-btn.loc-go{transition:transform .15s ease}
+.loc-zul .loc-btn.loc-go.zieh{transition:none;position:relative;z-index:3;background:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,.22);scale:1.02}
 .loc-quick{font-size:11.5px;font-weight:700;color:#5c6b80;margin:13px 0 -2px}
 .loc-go{background:#dcebf9;border-color:#9fc5ea;color:#1c4b78}   /* v5.16: etwas blauer (Nutzer) */
 /* v3.46: Im Bestaetigungsschritt traegt der Ortsname die Aussage — er wird
@@ -1275,6 +1282,9 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .loc-row.loc-zul{background:var(--stufe);border-color:var(--line)}
   html.dunkel .loc-zul .loc-btn.loc-go{background:transparent;border-top-color:rgba(255,255,255,.08);color:#a8cdf0}
   html.dunkel .loc-zul .loc-btn.loc-go:active{background:rgba(255,255,255,.06)}
+  html.dunkel .loc-zul .loc-btn.loc-go.zieh{background:#2a3a52;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  html.dunkel .loc-zul .loc-hier{color:#6fd08a}
+  html.dunkel .loc-zul .loc-btn.hier::before{background:#6fd08a}
   html.dunkel .loc-hit{background:var(--card);border-color:var(--line);color:var(--ink)}
   html.dunkel .loc-ovl{background:rgba(4,8,14,.62)}
   html.dunkel .loc-box input.loc-ok{background:#12251a;border-color:#3d9a52;color:#8fe0a8}
@@ -2276,7 +2286,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.54</span>
+      <span class="ver">v6.55</span>
     </div>
   </header>
 
@@ -2382,7 +2392,7 @@ function hiAnzeigen(){
     <div class="loc-row hidden" id="locConfGrp"><button type="button" id="locConfBack" class="loc-btn">&larr; Zur&uuml;ck</button><button type="button" id="locConfGo" class="loc-btn loc-pri">Diesen Ort verwenden</button></div>
     <div id="locActGrp">
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
-    <div class="loc-quick">Zuletzt verwendet &ndash; direkt wechseln:</div>
+    <div class="loc-quick">Deine Orte &ndash; lang dr&uuml;cken zum Verschieben:</div>
     <div class="loc-row loc-zul" id="locZul"></div>
     <div class="loc-hint hidden" id="locZulLeer">Hier erscheinen die Orte, die du &uuml;bernimmst &ndash; ein Tipp wechselt dann direkt dorthin.</div>
     </div>
@@ -2436,14 +2446,18 @@ function locZulLesen(){
   catch(e){return [];}
 }
 function locZulSchreiben(a){try{localStorage.setItem("locZuletzt",JSON.stringify(a.map(o=>({lat:o.lat,lon:o.lon,name:o.name,tz:o.tz||undefined}))));}catch(e){}}
+/* v6.55 (Nutzer: "alle Standorte in der Liste zeigen, lang andruecken, um die Reihenfolge zu aendern"): die Liste ist jetzt
+   DEINE Reihenfolge - bekannte Orte bleiben, wo sie stehen (vorher rueckte jeder Wechsel den Ort nach oben, sonst waere
+   Sortieren sinnlos). Ein NEUER Ort kommt oben hinein, der verlassene (falls noch nicht drin) gleich darunter. Bis 20 Orte. */
+var LOC_ZUL_MAX=20;
 function locZulMerken(neu,alt){
-  const a=[];
-  for(const o of [neu,alt,...locZulLesen()]){
+  const a=locZulLesen();
+  for(const o of [alt,neu]){
     if(!o||!isFinite(+o.lat)||!isFinite(+o.lon))continue;
     if(a.some(x=>locGleich(x,o)))continue;
-    a.push({lat:+o.lat,lon:+o.lon,name:_locSan(o.name),tz:o.tz});
+    a.unshift({lat:+o.lat,lon:+o.lon,name:_locSan(o.name),tz:o.tz});
   }
-  locZulSchreiben(a.slice(0,8));
+  locZulSchreiben(a.slice(0,LOC_ZUL_MAX));
 }
 const LOC_KEY="_"+LOC.lat.toFixed(2)+"_"+LOC.lon.toFixed(2); // Cache-Suffix pro Standort
 /* Wetter-Koordinaten: im Wettenberg-Profil stationsnah (DWD 01639), sonst = Standort */
@@ -13250,15 +13264,54 @@ load();
   /* v5.14: Zuletzt verwendete Orte als Knoepfe, direkt wechseln wie die festen.
      Der aktuelle Ort fehlt (dorthin wechseln ist sinnlos). Das x rechts
      entfernt einen Eintrag nach Rueckfrage (v5.15), ohne zu wechseln. */
+  /* v6.55: ALLE Orte, auch der aktuelle (markiert "hier", ein Tipp schliesst nur); fehlt er in der Liste, kommt er oben
+     hinein. Lang druecken (0,42 s) hebt eine Zeile an, dann ziehen - beim Loslassen gilt die neue Reihenfolge. */
   function locZulZeigen(){
-    const box=el("locZul"),a=locZulLesen().filter(o=>!locGleich(o,LOC));
+    const box=el("locZul");let a=locZulLesen();
+    if(!a.some(o=>locGleich(o,LOC))){a.unshift({lat:+LOC.lat,lon:+LOC.lon,name:_locSan(LOC.name),tz:LOC.tz});a=a.slice(0,LOC_ZUL_MAX);locZulSchreiben(a);}
     box.innerHTML="";el("locZulLeer").classList.toggle("hidden",!!a.length);
-    a.forEach(o=>{const b=document.createElement("button");b.type="button";b.className="loc-btn loc-go";
-      b.textContent=o.name;const x=document.createElement("span");x.className="loc-x";x.textContent="\u00d7";
-      x.setAttribute("role","button");x.setAttribute("aria-label",o.name+" aus der Liste entfernen");b.appendChild(x);
-      b.onclick=e=>{if(e.target===x){if(!confirm("\u201e"+o.name+"\u201c aus der Liste l\u00f6schen?"))return;locZulSchreiben(locZulLesen().filter(y=>!locGleich(y,o)));locZulZeigen();return;}saveGo(o);};
+    a.forEach((o,i)=>{const hier=locGleich(o,LOC),b=document.createElement("button");b.type="button";b.className="loc-btn loc-go"+(hier?" hier":"");
+      b.dataset.i=i;b.textContent=o.name;let x=null;
+      if(hier){const t=document.createElement("span");t.className="loc-hier";t.textContent="hier";b.appendChild(t);}
+      else{x=document.createElement("span");x.className="loc-x";x.textContent="\u00d7";
+        x.setAttribute("role","button");x.setAttribute("aria-label",o.name+" aus der Liste entfernen");b.appendChild(x);}
+      b.onclick=e=>{if(LZ.war){LZ.war=0;return;}
+        if(x&&e.target===x){if(!confirm("\u201e"+o.name+"\u201c aus der Liste l\u00f6schen?"))return;locZulSchreiben(locZulLesen().filter(y=>!locGleich(y,o)));locZulZeigen();return;}
+        if(hier){hide();return;}
+        saveGo(o);};
       box.appendChild(b);});
   }
+  const LZ={t:0,b:null,akt:false,war:0,x0:0,y0:0,i0:0,h:0,ziel:0,zeilen:[]};
+  (function(){
+    const box=el("locZul");
+    function los(){
+      const b=LZ.b;if(!b)return;LZ.akt=true;LZ.zeilen=[...box.querySelectorAll(".loc-go")];LZ.i0=LZ.zeilen.indexOf(b);LZ.ziel=LZ.i0;
+      LZ.h=b.getBoundingClientRect().height;box.classList.add("sortiert");b.classList.add("zieh");}
+    function zieh(y){
+      const dy=y-LZ.y0,n=LZ.zeilen.length;let z=LZ.i0+Math.round(dy/LZ.h);z=Math.max(0,Math.min(n-1,z));
+      const lo=-LZ.i0*LZ.h,hi=(n-1-LZ.i0)*LZ.h;
+      LZ.b.style.transform="translateY("+Math.max(lo,Math.min(hi,dy)).toFixed(1)+"px)";
+      if(z!==LZ.ziel){LZ.ziel=z;LZ.zeilen.forEach((r,j)=>{if(r===LZ.b)return;let v=0;
+        if(LZ.i0<z&&j>LZ.i0&&j<=z)v=-LZ.h;else if(LZ.i0>z&&j<LZ.i0&&j>=z)v=LZ.h;r.style.transform=v?"translateY("+v+"px)":"";});}
+    }
+    function ende(){
+      clearTimeout(LZ.t);if(!LZ.akt){LZ.b=null;return;}
+      LZ.akt=false;LZ.war=1;setTimeout(()=>{LZ.war=0;},450);
+      const a=locZulLesen(),i0=LZ.i0,z=LZ.ziel;
+      if(z!==i0&&a[i0]){const o=a.splice(i0,1)[0];a.splice(z,0,o);locZulSchreiben(a);}
+      LZ.b=null;box.classList.remove("sortiert");locZulZeigen();
+    }
+    box.addEventListener("pointerdown",e=>{const b=e.target.closest(".loc-go");if(!b||e.target.closest(".loc-x"))return;
+      LZ.b=b;LZ.x0=e.clientX;LZ.y0=e.clientY;clearTimeout(LZ.t);LZ.t=setTimeout(los,420);});
+    box.addEventListener("pointermove",e=>{
+      if(!LZ.akt){if(LZ.b&&Math.hypot(e.clientX-LZ.x0,e.clientY-LZ.y0)>8){clearTimeout(LZ.t);LZ.b=null;}return;}
+      e.preventDefault();zieh(e.clientY);});
+    box.addEventListener("pointerup",ende);
+    box.addEventListener("pointercancel",ende);
+    /* waehrend des Ziehens scrollt der Dialog nicht (iOS: nur ein nicht-passiver touchmove-Hoerer kann das verhindern) */
+    box.addEventListener("touchmove",e=>{if(LZ.akt)e.preventDefault();},{passive:false});
+    box.addEventListener("contextmenu",e=>{if(e.target.closest(".loc-go"))e.preventDefault();});
+  })();
   const hide=()=>ov.classList.add("hidden");
   el("locBtn").onclick=show;el("locCancel").onclick=hide;
   /* v3.47: Beim Zurueckgehen wird der Suchbegriff geloescht. Sonst stand oben
