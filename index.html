@@ -1376,9 +1376,8 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    Seite auch die untersten 59 pt - auf einer einfarbigen Flaeche ist der Streifen nicht zu sehen. Nur als
    Home-Bildschirm-App (Klasse hiflach: alte Seite vor dem Neuladen, neue Seite ab dem ersten Bild bis zum Einblenden). */
 #hiDeck{display:none}
-html:root.himmel #hiDeck{display:block;position:fixed;left:0;top:0;right:0;bottom:-200px;z-index:0;pointer-events:none;background:var(--hi-r,#090d26);opacity:0;transition:opacity var(--hf,.2s) ease}
+html:root.himmel #hiDeck{display:block;position:fixed;left:0;top:0;right:0;bottom:-200px;z-index:0;pointer-events:none;background:var(--hi-r,#090d26);opacity:0}
 html:root.himmel.hiflach #hiDeck{opacity:1}
-html:root.himmel header>#hiK{transition:opacity var(--hf,.2s) ease}
 html:root.himmel.hiflach header>#hiK{opacity:0}
 html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26))}
 @property --hi-r{syntax:"<color>";inherits:true;initial-value:#090d26}
@@ -1626,12 +1625,12 @@ html.ortzieh{overflow-x:clip}
    die 1 s des Starts (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB). v6.59: 0,35 statt 0,55 s */
 html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state),
 html.wisch-n.sanft-ein header .plz,html.wisch-v.sanft-ein header .plz,html.wisch-n.sanft-ein #placeName,html.wisch-v.sanft-ein #placeName,
-html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .35s ease!important;transition-duration:.35s!important}
+html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .55s ease!important;transition-duration:.55s!important}
 @media (prefers-reduced-motion:no-preference){
 html.wisch-n.sanft #app>:not(header):not(.state),html.wisch-n.sanft header .place{transform:translate3d(64px,0,0)}
 html.wisch-v.sanft #app>:not(header):not(.state),html.wisch-v.sanft header .place{transform:translate3d(-64px,0,0)}
-html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .35s ease,transform .35s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.35s!important}
-html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .35s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.35s!important}
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
 }
 </style>
 </head>
@@ -2072,13 +2071,21 @@ function hiFussAn(){
 }
 /* v6.64: Himmel einfarbig zudecken (vor dem Neuladen) bzw. wieder freigeben (ms = Dauer der Blende; fruehestens
    HI_FLACH_MS nach Seitenbeginn - so lange stand der Streifen im Film hoechstens, 0,28 s, mit Reserve) */
-var HI_FLACH_MS=700;
-function hiFlachAn(){try{if(hiAn()&&hiFussAn()){var h=document.documentElement;h.style.setProperty("--hf",".2s");h.classList.add("hiflach");}}catch(e){}}
-function hiFlachWeg(ms){
-  var h=document.documentElement;if(!h.classList.contains("hiflach")||HI.flachT)return;
-  var w=HI_FLACH_MS-performance.now(),f=function(){HI.flachT=0;h.style.setProperty("--hf",Math.max(200,ms||350)+"ms");h.classList.remove("hiflach");};
-  if(w>0)HI.flachT=setTimeout(f,w);else f();
+var HI_FLACH_MS=450;
+/* v6.65: die Blende der Decke laeuft als Web-Animation (wie owAnim seit v6.58) - als CSS-Uebergang sprang sie am iPhone
+   in einem Bild (Film 12.11. 23:12). Die Klasse hiflach setzt nur den Endzustand. */
+function hiFlachBl(zu,ms){
+  var d=document.getElementById("hiDeck"),k=document.getElementById("hiK");
+  [[d,zu?0:1,zu?1:0],[k,zu?1:0,zu?0:1]].forEach(function(x){
+    try{if(x[0]&&x[0].animate)x[0].animate([{opacity:x[1]},{opacity:x[2]}],{duration:ms,easing:"ease"});}catch(e){}});
 }
+function hiFlachAn(){try{if(hiAn()&&hiFussAn()){var h=document.documentElement;if(h.classList.contains("hiflach"))return;h.classList.add("hiflach");hiFlachBl(1,200);}}catch(e){}}
+function hiFlachWeg(ms){
+  var h=document.documentElement;if(!h.classList.contains("hiflach"))return;
+  h.classList.remove("hiflach");hiFlachBl(0,Math.max(200,ms||350));
+}
+/* wie lange die neue Seite noch zugedeckt bleiben muss (ms; 0 = kann aufgehen) */
+function hiFlachRest(){try{if(document.documentElement.classList.contains("hiflach"))return Math.max(0,HI_FLACH_MS-performance.now());}catch(e){}return 0;}
 /* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
 function hiWeiterMerken(){
   if(!hiAn()||!HI.L||!HI.sT)return;
@@ -2387,7 +2394,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.64</span>
+      <span class="ver">v6.65</span>
     </div>
   </header>
 
@@ -3512,22 +3519,26 @@ function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rg
 var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
 /* v6.58: nach einem Wisch kuerzer warten und schneller einblenden - die Daten kommen meist aus dem Vorabruf (VORAB) */
-try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=350;SANFT_MAX=800;}}catch(e){}
+try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=550;SANFT_MAX=800;}}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
 function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt=Date.now();SANFT.tm=setTimeout(sanftZeigen,SANFT_MAX);sanftPruefen();}
 function sanftPruefen(){if(!SANFT.an||SANFT.fertig||!SANFT.haupt)return;for(var k in SANFT.offen)return;sanftZeigen();}
 function sanftZeigen(){
-  if(SANFT.fertig)return;SANFT.fertig=true;clearTimeout(SANFT.tm);
-  try{hiFlachWeg(SANFT_EIN_MS);}catch(e){}
+  if(SANFT.fertig)return;
+  /* v6.65: Decke und Inhalt gehen ZUSAMMEN auf - ist die Decke noch gesperrt (HI_FLACH_MS), wartet auch der Inhalt */
+  if(!SANFT.warte){var wr=0;try{wr=hiFlachRest();}catch(e){}
+    if(wr>15){SANFT.warte=1;clearTimeout(SANFT.tm);setTimeout(sanftZeigen,wr);return;}}
+  SANFT.fertig=true;clearTimeout(SANFT.tm);
   var h=document.documentElement,los=false;
-  if(!h.classList.contains("sanft"))return;
+  if(!h.classList.contains("sanft")){try{hiFlachWeg(SANFT_EIN_MS);}catch(e){}return;}
   /* v6.52: den Himmel JETZT bauen - seine Szene blendet in denselben zwei Bildern ein wie der Inhalt, gleich lang.
      sanft-ein schon vorher: es legt nur die Dauer fest (auch gegen die Sperre bei "Bewegung reduzieren") */
   h.classList.add("sanft-ein");
   try{if(hiAn())hiPruefen(SANFT_EIN_MS);}catch(e){}
   function start(){if(los)return;los=true;
     h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
+    try{hiFlachWeg(SANFT_EIN_MS);}catch(e){}
     var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v"),ri=h.classList.contains("wisch-v")?-1:1;
     if(gewischt)setTimeout(function(){try{owAnkunft();}catch(e){}},250);
     /* v6.59: die Nachbarn in der Liste schon holen, damit der naechste Wisch nicht warten muss (nach einem Wisch die Richtung,
