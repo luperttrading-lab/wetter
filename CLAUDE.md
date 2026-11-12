@@ -3118,6 +3118,37 @@ gemischt wird es grau-braun, darum traegt die Flaeche nur wenig Warnfarbe, Rand 
 unveraendert (hell cremefarben, dunkel braun). Geprueft (Playwright): acht Lagen x Regler 0 / 70 / 100 mit `?warntest`,
 Regler in den Einstellungen, Wert und Glas ueberleben Neuladen (erstes Script malt schon mit dem neuen Glas), hell/dunkel
 unveraendert. Nicht am iPhone geprueft. OFFEN: Wert des Reglers vom Nutzer.
+v6.37 SONNE IM HIMMEL, BLAUE STATT GRAUE TAGWOLKEN (Nutzer 12.11. 11:28, zwei iPhone-Bilder fuer denselben Strand, Apple
+"Nissi Beach" und unsere v6.36: "die Farben sind beim iPhone Wetter wesentlich besser, die Sonne wird eingeblendet").
+GEMESSEN: Apple Himmel oben (68,105,152) -> unten (126,167,219), Wolkenschleier (110,138,173), Karten (80,130,196), Sonne als
+weisse Scheibe mit Schein; bei uns Himmel (73,117,181) - also NICHT blasser als Apple -, aber Wolken (129,139,155) = neutrales
+Grau ueber dem halben Bild, unten (133,139,147), Kacheln (57,87,128). URSACHE im Code: `hiPassen` dunkelt GLEICHMAESSIG ab - aus
+weissen Tagwolken (255,255,255) wurde (143,143,143), aus dem hellen Blau unten (152,202,246) ein Graublau (80,106,129).
+Jetzt in `hiFarben` Farben, die bei gleicher Helligkeit blau bleiben: Wolkenrand (196,218,250) -> (130,144,166), Wolkenkern
+(102,134,186), Himmel oben (40,104,202), unten (98,152,226) mit eigener Grenze 50 % (`hiPassen(c,wolke,lmax)`, .4 + .1 x tag;
+50 % = Helligkeit von Apples Karten, auf denen dort weisse Schrift steht) -> (86,133,198). Nacht, bedeckt, Regen, Nebel
+unveraendert. SONNE: `C.sonne` = hiSm(.5,7,h) x (1 - hiSm(.55,.92,N)), 0 bei Regen/Nebel/Einstellung aus - voll bis ~55 %
+Bedeckung, ab ~90 % weg, unter 7 Grad Sonnenhoehe schwaecher und waermer (`C.sonneF`). `hiSonne(s,C,B,vorn)`: zwei Ebenen
+`.hiSo` aus CSS-Verlaeufen (steht still): Scheibe (Radius `B.sr` = 5,6 % der Kopfbreite, 16-28 px) + Schein (5,2 r) UNTER den
+Wolken - sie ziehen davor vorbei -, ein schwaecherer Schein (3,4 r) UEBER den Wolken, damit eine Wolke vor der Sonne aufleuchtet.
+ORT (`B.sx/B.sy` in `hiPruefen`, im Szenenschluessel): 41 % der Kopfbreite, 1,25 r unter der Unterkante des stehenden Kopfs =
+in der Luecke zwischen "Live" und dem Datum ueber der grossen Temperatur; zwischen `#badge` und `#hero .when` mit 8 px Abstand
+gehalten (320 pt: genau in der Mitte der Luecke, 0 px Ueberdeckung). Die Kopf-Kopie `#hiK` bekommt dieselbe Sonne (keine Kante).
+Der weite Schein (`C.glanz`, jetzt .2 statt .3) sitzt an der Sonne statt fest oben rechts und zaehlt in `hiRand` (Farbe der
+Statusleiste) mit - im Nutzerbild war die Leiste (54,112,196) kraeftiger als der Himmel darunter. Einstellung "Mit Sonne | Ohne
+Sonne" (`himmelSonne`, `#hiSoSeg`) unter "Himmel im Hintergrund". Ort, Groesse und Staerke der Sonne sind MEINE Wahl. Stehen
+Warnkarten ueber dem Kasten, liegt die Sonne hinter der ersten Karte (scheint durchs Glas). KARTEN: Formel unveraendert
+(`HI_GLAS_STD` 70), sie folgen dem blaueren Himmel: heiter (56,87,130) -> (53,91,148), weisse Schrift 7,4 -> 6,8 : 1.
+BEWUSST NICHT heller: bei Regler 100 % (Karte (56,105,176), weiss 5,5 : 1) gehen die FARBIGEN Texte unter - blau ("heute 0 mm
+gefallen", "Letzter Regen", "Gras ist noch nass"), gruen ("kein Vitamin D"), rot ("nicht sichtbar - ISS im Erdschatten"),
+violett ("in 100 Tagen"); sie sind fest fuer fast schwarze Karten gewaehlt (einzelne Hex-Werte in CSS/JS, keine Variablen) und
+sind schon bei 70 % am Tag schwach (Blau auf Karte ~2,3 : 1). Apples Karten tragen nur Weiss. NAECHSTER SCHRITT (dem Nutzer
+vorgeschlagen): Farbtexte in der Ansicht "Himmel" aufhellen, dann koennen die Karten heller. Aufwand unveraendert (heiter,
+Wolken ziehen: 17,3 gegen 17,0 % eines Kerns). Geprueft (Playwright): klar/heiter/wolkig/bedeckt/Abend/Nacht/Regen/Nebel,
+320/375/393/430 pt, Warnkarten, gescrollt, Sonnenhoehe 2/5/10/30 Grad, Schalter, klassische Ansichten ohne Szene. Nicht am
+iPhone geprueft. NEBENBEFUND, offen: unser "Nissi beach" nahm die Station Kythira (24,6 km, 19,4 Grad, Abzeichen "Live - DWD"),
+Apple zeigt Nissi Beach/Ayia Napa (Zypern) mit 22 Grad - vermutlich ein anderer Ort gleichen Namens bzw. falsches Abzeichen
+fuer eine Nicht-DWD-Station. Einmal im Pruefstand gesehen, nicht wiederholbar: UV-Grafik nur ~20 px hoch.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
