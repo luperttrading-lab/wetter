@@ -3049,6 +3049,22 @@ sonst `waStationsRate()`. Das Wort oben bleibt "Schnee" (keine Staerkestufen im 
 nicht an echtem Schneefall geprueft (12.11. kein Schnee) - bei Bedarf nachstellen. Geprueft (Playwright, erzwungener
 Zustand): Schnee mit Radar 0,12-6 mm/h und ohne Radar (10-min-, Stundensumme, nichts), Schneeregen, Regen unveraendert;
 Zeichnen bei starkem Schnee 2,1 ms je Bild. Vorschau-Knopf "Schnee" zeigt weiter die mittlere Dichte.
+v6.33 WOLKENTEMPO ALS S-KURVE (Nutzer 12.11.: "bei 4 km/h bei uns schon recht zuegig, in Norden mit 35 km/h nicht so
+viel Unterschied - verstaerken, oder wird das bei noch mehr Wind zu viel? Eine nicht lineare Skala, die bei 60 km/h nicht
+nochmal verdoppelt - ueberleg mal"). NACHGEMESSEN in der App: Erlental Wind 4,3 km/h -> 4,1 px/s, Norden 35,3 km/h ->
+16,5 px/s - nur Faktor 4, kein Datenfehler; Ursache die Gerade mit hohem Sockel aus v6.29 (0,3 + Wind/17). Jetzt
+`hiWindTempo(w)` = v0 + (vm - v0) x tanh((w/w0)^p) fuer die nahe Lage in px/s, `HI_WIND` = {v0 0,8, vm 30, w0 45,
+p 1,4}; `hiTempo()` = das / 7 x Tempo-Regler. Tabelle (neu / alt, px/s): 0 km/h 0,8 / 2,1 - 5: 2,1 / 4,2 - 10: 4,3 / 6,2 -
+20: 9,9 / 10,3 - 35: 18,5 / 16,5 - 50: 24,8 / 22,7 - 60: 27,2 / 25,2 - 90: 29,7 / 25,2. 35 gegen 5 km/h jetzt Faktor
+8,8 (vorher 3,9), 60 gegen 35 nur 1,5, darueber fast nichts mehr. Ferne Lage wie bisher 46 %. Ohne frische Windmessung
+Faktor 1 (7 px/s). REGLER "Tempo" 50-160 % (`himmelTempo`, `hiTempoEigen`, Faktor auf die ganze Kurve, baut mit 160 ms
+Verzug neu) und WIND-VORSCHAU "Vorschau km/h: 0 | 10 | 35 | 70" (`#hiProbe`, `hiWindProbe`, 20 s, setzt `HI.testWind`,
+danach zurueck auf die Messung bzw. `HI.urlWind` aus `?hwind=`) unter "Himmel im Hintergrund" - zwei Orte sieht man nie
+nebeneinander, darum die Vorschau. Der Hilfetext nennt den Wind, mit dem gerade gerechnet wird ("Jetzt: 5 km/h").
+`hiWindJetzt()`: Vorschau/URL, bei festen Lagen (`?himmel=`) null, sonst `waWind()`. Gemessen (Chromium ohne GPU,
+Bedeckung 68 %): Vorschau 0 / 10 / 35 / 60 / 90 km/h = 9 / 10 / 23 / 23 / 23 % eines Kerns (nahe Lage ab 14 px/s bei
+20 Schritten/s gedeckelt). Echte Orte 12.11.: Norden 18,5 px/s (fern 8,4), Erlental 2,2 px/s. Kurve und Deckel sind MEINE
+Wahl - der Nutzer stellt mit Vorschau und "Tempo" ein und nennt den Wert. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
