@@ -548,7 +548,7 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .waprobe button{padding:7px 11px;font:600 12px system-ui;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);cursor:pointer}
 .waprobe button.on{background:#d79636;border-color:#d79636;color:#fff}
 .kzreg.wsch .kzTaktZ{display:none}
-.kzreg.wakl .waKaZ{display:none}
+.kzreg.wakl .waKaZ{display:none!important}
 /* v6.31: Fusszeile der Kacheln nur noch im Bearbeiten und solange der Wechsel angehalten ist */
 .kzfoot.leer{display:none}
 .kopf-kn{display:flex;gap:8px}
@@ -1486,7 +1486,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.32</span>
+      <span class="ver">v6.33</span>
     </div>
   </header>
 
@@ -1987,10 +1987,26 @@ function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};
    Gemessen wird der Wind in 10 m Hoehe (waWind) - in Wolkenhoehe weht es meist staerker und aus leicht anderer
    Richtung; fuer ein Hintergrundbild genuegt die Bodenmessung. Die RICHTUNG bleibt fest (nach links): ein Handy hat
    kein Norden, links/rechts haette keine Bedeutung. Ohne frische Messung Faktor 1. */
+/* v6.33 (Nutzer 12.11.: "bei 4 km/h bei uns schon recht zuegig, in Norden mit 35 km/h nicht so viel Unterschied -
+   verstaerken? oder wird das bei noch mehr Wind zu viel? eine nicht lineare Skala, die bei 60 km/h nicht nochmal
+   verdoppelt"). Nachgemessen: 5 km/h = 4,1 px/s, 35 km/h = 16,5 px/s - nur Faktor 4 (v6.29: 0,3 + Wind/17, geradlinig mit
+   hohem Sockel). Jetzt eine S-Kurve fuer die nahe Lage in px/s: v = v0 + (vm - v0) x tanh((Wind/w0)^p).
+   Unten flach (Windstille 0,8, 5 km/h 2,1, 10 km/h 4,3), in der Mitte steil (20 km/h 9,9, 35 km/h 18,5), oben
+   gedeckelt (50 km/h 24,8, 60 km/h 27,2, 90 km/h 29,7). 35 gegen 5 km/h: Faktor 8,8; 60 gegen 35: nur noch 1,5.
+   Dazu ein Regler "Tempo" (himmelTempo 50-160 %, Faktor auf die ganze Kurve) und eine Wind-Vorschau in den
+   Einstellungen - das Tempo laesst sich nur am Geraet beurteilen, und zwei Orte sieht man nie nebeneinander. */
+var HI_WIND={v0:.8,vm:30,w0:45,p:1.4};
+function hiWindTempo(w){return HI_WIND.v0+(HI_WIND.vm-HI_WIND.v0)*Math.tanh(Math.pow(Math.max(0,w)/HI_WIND.w0,HI_WIND.p));}
+function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(50,Math.min(160,v));}catch(e){}return 100;}
+/* Wind fuer die Wolken: Vorschau bzw. ?hwind= geht vor; feste Lagen (?himmel=) ohne Wind; sonst die Messung. null = unbekannt */
+function hiWindJetzt(){
+  if(HI.testWind!=null)return HI.testWind;
+  if(HI.test)return null;
+  try{return waWind();}catch(e){return null;}
+}
 function hiTempo(){
-  if(HI.test&&HI.testWind==null)return 1;
-  var w=HI.testWind!=null?HI.testWind:null;if(w==null){try{w=waWind();}catch(e){w=null;}}
-  return w==null?1:Math.round(hiKl(.3+w/17,.3,3.6)*100)/100;
+  var w=hiWindJetzt();
+  return Math.round((w==null?1:hiWindTempo(w)/7)*hiTempoEigen())/100;
 }
 function hiFarben(L){
   if(L.nebel)return hiNebelFarben(L);
@@ -2100,7 +2116,7 @@ function hiRand(C,L,B){
 function hiInit(){
   HI.init=1;
   try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];
-      var mw=/[?&]hwind=(\d+)/.exec(location.search);if(mw)HI.testWind=+mw[1];}catch(e){}
+      var mw=/[?&]hwind=(\d+)/.exec(location.search);if(mw){HI.testWind=+mw[1];HI.urlWind=+mw[1];}}catch(e){}
   window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
   window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
   setInterval(hiPruefen,60000);
@@ -2186,6 +2202,15 @@ function hiKaSetzen(v){try{localStorage.setItem("himmelKachel",String(+v));}catc
 function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
 function hiZug(){var e=hiZugEigen();return e!=null?e:(waReduziert()?0:1);}
 function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug",hiZugEigen()===1);r.classList.toggle("histeh",hiZug()===0);}
+/* v6.33: Wind-Vorschau (20 s) und Tempo-Regler */
+function hiWindProbe(w){
+  clearTimeout(HI.wpT);HI.testWind=w;HI.wp=w;HI.key="";hiPruefen();hiAnzeigen();
+  HI.wpT=setTimeout(function(){HI.testWind=HI.urlWind!=null?HI.urlWind:null;HI.wp=null;HI.key="";hiPruefen();hiAnzeigen();},20000);
+}
+function hiTempoSetzen(v){
+  try{localStorage.setItem("himmelTempo",String(+v));}catch(e){}hiAnzeigen();
+  clearTimeout(HI.tpT);HI.tpT=setTimeout(function(){HI.key="";hiPruefen();},160);      /* beim Ziehen nicht je Schritt neu bauen */
+}
 function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();}
 function hiAnzeigen(){
   var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
@@ -2193,7 +2218,14 @@ function hiAnzeigen(){
   if(kr&&+kr.value!==kd){kr.value=kd;kzReglerFuell(kr);}
   if(kv)kv.textContent=kd+"\u202f%";
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
-  if(h)h.textContent=(z?"Die Wolken im Hintergrund ziehen – je nach Wind am Ort langsamer oder schneller.":"Die Wolken im Hintergrund stehen still."
+  var pr=document.getElementById("hiProbe"),tr=document.getElementById("hiRegTp"),tv=document.getElementById("hiRegTpV"),te=hiTempoEigen(),wj=null;
+  try{wj=hiWindJetzt();}catch(e){}
+  if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",HI.wp!=null&&+b.dataset.w===HI.wp);});
+  if(tr&&+tr.value!==te){tr.value=te;kzReglerFuell(tr);}
+  if(tv)tv.textContent=te+"\u202f%";
+  if(h)h.textContent=(z?"Die Wolken ziehen je nach Wind am Ort: bei Windstille fast gar nicht, bei 35 km/h deutlich, ab etwa 60 km/h kaum noch schneller."
+        +(HI.wp!=null?" Vorschau: "+HI.wp+" km/h (20 Sekunden).":wj!=null?" Jetzt: "+wj+" km/h.":" Jetzt keine frische Windmessung – mittleres Tempo.")
+      :"Die Wolken im Hintergrund stehen still."
       +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
     +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
 }
@@ -7662,6 +7694,8 @@ function kzRender(){
                    +'<div class="kzregt">Himmel im Hintergrund</div>'
                    +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
                    +'<div class="kzhilf" id="hiHilf"></div>'
+                   +'<div class="waprobe waKaZ" id="hiProbe"><span>Vorschau km/h:</span><button type="button" data-w="0">0</button><button type="button" data-w="10">10</button><button type="button" data-w="35">35</button><button type="button" data-w="70">70</button></div>'
+                   +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="160" step="10"><b id="hiRegTpV">–</b></label>'
                    +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
                    +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
                    +'<div class="kzhilf waKaZ">0 % = helles Glas wie bisher, 100 % = genauso dicht wie die Karten darunter (Stündlich, Temperaturverlauf …). Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
@@ -7675,7 +7709,9 @@ function kzRender(){
       as.value=waE().st;ak.value=waE().ka;
       [as,ak].forEach(x=>x.addEventListener("input",az));
       const hk=el("hiRegKa");hk.value=hiKaDeck();hk.addEventListener("input",()=>hiKaSetzen(hk.value));
-      [g,d,wt,wb,wf,as,ak,hk].forEach(kzRegler);
+      const ht=el("hiRegTp");ht.value=hiTempoEigen();ht.addEventListener("input",()=>hiTempoSetzen(ht.value));
+      el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
+      [g,d,wt,wb,wf,as,ak,hk,ht].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
