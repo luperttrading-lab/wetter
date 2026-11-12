@@ -1610,7 +1610,7 @@ html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:non
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.48</span>
+      <span class="ver">v6.49</span>
     </div>
   </header>
 
@@ -8089,7 +8089,7 @@ function kzRender(){
       const hg=el("hiRegGl");hg.value=hiGlasTon();hg.addEventListener("input",()=>hiGlasSetzen(hg.value));
       const ht=el("hiRegTp");ht.value=hiTempoEigen();ht.addEventListener("input",()=>hiTempoSetzen(ht.value));
       el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
-      [g,d,wt,wb,wf,as,ak,hk,ht].forEach(kzRegler);
+      [g,d,wt,wb,wf,as,ak,hk,hg,ht].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();
         if(b.dataset.p==="sturm"&&hiWolkenZiehen()){

@@ -3402,6 +3402,19 @@ Rand durch `.plz` nach aussen: Kopf 3,6 px niedriger, kleine Zeile 12 px hoeher 
 (border-box), `pointer-events:none` (die Flaeche liegt ueber `.plz` VOR den Knoepfen). Gemessen alt/neu: Kopf 0-118,6,
 Stationstext 20/85, kleine Zeile 20/90 - identisch; Kuerzung bei 320 pt bleibt; alle vier Knoepfe 57 von 57 Treffpunkten
 (`e/t66.py`, Rundung beachten: elementFromPoint trifft die Ecken runder Knoepfe nicht). Nicht am iPhone geprueft.
+v6.49 (Nutzer 12.11. 14:09, drei Bilder der Einstellungen: "Haben wir das als Standardeinstellung?"): JA - alle gezeigten
+Werte sind die eingebauten Voreinstellungen, am Code nachgesehen: Wackeln 1,0 Grad / 0,6 s (`KZ_BEW_STD`), Auto + Wischen,
+Takt 4 s, Blende 0,5 s, Faerbung 80 % (`KZ_WE_STD`), Wetter-Animation Bewegt, Staerke 80 % / Kacheln 50 % (`WA_E_STD`),
+Wettersymbole 3 (`sbStufe`), Wolken ziehen (`hiZug`), Tempo x2,0 (`HI_TEMPO_STD` 200), Mit Sonne (`hiSonneAn`), Karten:
+Farbe -> Himmel 100 % (`HI_GLAS_STD`), Kacheln oben: Glas 100 % (`HI_KA_STD`). EINSCHRAENKUNG: Bewegt, Wolken ziehen und
+Symbolstufe 3 gelten nur, wenn am Geraet "Bewegung reduzieren" AUS ist - sonst Standbild / Wolken stehen / Stufe 0, bis man
+selbst waehlt. Aus den Bildern ist nicht zu sehen, ob ein Wert gespeichert oder Voreinstellung ist (beides sieht gleich aus).
+ANZEIGEFEHLER dabei gefunden (im ersten Bild sichtbar): der Regler "Karten: Farbe > Himmel" stand auf 100 %, die orange
+Fuellung endete in der Mitte. Ursache: `hg` (`#hiRegGl`, neu in v6.36) fehlte in der Liste `[...].forEach(kzRegler)` - ohne
+`kzRegler` setzt niemand `--p` (CSS-Rueckfall 50 %), und der Regler hatte auch die eigene Bedienung nicht (Tippen auf die
+Bahn, Ziehen per Pointer-Capture; er lief ueber die Systembedienung). Gemessen (`e/t67.py`, alle zehn Regler: Wert gegen
+`--p`): vorher neun richtig, `hiRegGl` leer; jetzt zehn richtig, Tipp bei 25 % und Ziehen auf 80 % setzen Wert, Fuellung,
+Anzeige und Speicher. Merke: wer einen Regler in `#kzReg` hinzufuegt, traegt ihn in diese Liste ein. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
