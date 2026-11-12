@@ -549,6 +549,29 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .waprobe button.on{background:#d79636;border-color:#d79636;color:#fff}
 .kzreg.wsch .kzTaktZ{display:none}
 .kzreg.wakl .waKaZ{display:none}
+/* v6.31: Fusszeile der Kacheln nur noch im Bearbeiten und solange der Wechsel angehalten ist */
+.kzfoot.leer{display:none}
+.kopf-kn{display:flex;gap:8px}
+/* v6.31: mit vier Knoepfen ist der Block links schmaler (393 pt: 209 statt 247 px) - die Stationszeile braeche um.
+   Sie steht aber UNTER den Knoepfen, auf Hoehe der Versionsnummer: darf also breiter sein als der Block (laeuft
+   unter den Knoepfen durch) und endet vor der Version; was auch dann nicht passt, wird gekuerzt. */
+header .place{min-width:0}
+header .place small{white-space:nowrap;width:max-content;max-width:calc(100vw - 100px);overflow:hidden;text-overflow:ellipsis}
+#kopfMenuHg{position:fixed;left:0;top:0;right:0;bottom:0;z-index:394;display:none}
+#kopfMenuHg.an{display:block}
+#kopfMenu{position:fixed;z-index:395;min-width:248px;max-width:calc(100vw - 24px);background:#fff;color:#1c1c1e;border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.3),0 0 0 1px rgba(0,0,0,.06);padding:6px;display:none;text-shadow:none}
+#kopfMenu.an{display:block}
+#kopfMenu button{display:flex;align-items:center;gap:11px;width:100%;appearance:none;-webkit-appearance:none;border:0;background:transparent;font:inherit;font-size:15px;font-weight:600;color:inherit;text-align:left;padding:12px 12px;border-radius:9px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#kopfMenu button:active{background:rgba(127,127,127,.2)}
+#kopfMenu button svg{flex:0 0 18px;width:18px;height:18px;margin:0;position:static;opacity:.75}
+#kopfMenu button svg.kzgear,#kopfMenu button svg.kzpi{fill:currentColor}
+#kopfMenu hr{border:0;border-top:1px solid rgba(127,127,127,.28);margin:4px 10px}
+html.dunkel #kopfMenu{background:#1d2532;color:#eef2f7;box-shadow:0 12px 36px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
+#kopfTip{position:fixed;z-index:393;max-width:232px;background:rgba(23,32,46,.95);color:#fff;font:600 13px/1.35 -apple-system,system-ui,sans-serif;padding:9px 12px;border-radius:11px;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .25s;text-shadow:none;cursor:pointer}
+#kopfTip.an{opacity:1}
+#kopfTip::before{content:"";position:absolute;top:-6px;right:var(--kp,40px);border:6px solid transparent;border-top:0;border-bottom-color:rgba(23,32,46,.95)}
+html.dunkel #kopfTip{background:rgba(235,240,248,.97);color:#17202e}
+html.dunkel #kopfTip::before{border-bottom-color:rgba(235,240,248,.97)}
 .kz .k.kzalt>.ki{opacity:.6}   /* v4.82: Quelle veraltet */
 .kz .k:has(.kzdots)>.ki{box-shadow:inset 0 0 0 999px rgba(47,134,207,var(--kzwf,0))}
 .kzregt{margin-top:12px;font-weight:700}
@@ -1372,7 +1395,7 @@ html:root.himmel #stationTxt{transition:opacity .25s}
 /* v6.14: Groesse war waehlbar (Test), seit v6.29 fest 18 px (Nutzer). Die Hoehe der Zeile ist IMMER freigehalten (.plz) -
    sonst wuechse der Kopf in dem Moment, in dem die Zeile erscheint, und alles darunter spraenge. */
 html:root.himmel .plz{min-height:calc(18px * 1.2 + 4px)}
-html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
+html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;max-width:calc(100vw - 100px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
 html:root.himmel.himini #stationTxt{opacity:0}
 html:root.himmel.himini #hiMini{opacity:1}
 </style>
@@ -1386,6 +1409,14 @@ html:root.himmel.himini #hiMini{opacity:1}
    speichert: gibt es schon Eintraege ausser Zwischenspeichern, ist es ein
    Bestandsnutzer ("klappBestand"). Die Erststart-Vorschau (3 s auf die
    Versionsnummer) raeumt alles ausser der Sicherung weg und gilt damit als neu. */
+/* v6.31: "Kacheln waehlen", "Pause" und "Alle auf / Alle zu" sind hinter das Zahnrad oben gezogen. Wer die App schon
+   benutzt hat (hier, bevor irgendetwas speichert: es gibt schon Eintraege), bekommt EINMAL einen Hinweis am Zahnrad;
+   neue Nutzer nicht (v5.08: beim ersten Start wenig Einblendungen). */
+(function(){try{
+  if(localStorage.getItem("menuHinweis"))return;
+  var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!/cache/i.test(k)&&k!=="erstStartSicherung")n++;}
+  localStorage.setItem("menuHinweis",n>0?"zeigen":"1");
+}catch(e){}})();
 (function(){try{
   if(localStorage.getItem("klappStd2"))return;
   var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!/cache/i.test(k)&&k!=="erstStartSicherung")n++;}
@@ -1443,16 +1474,19 @@ html:root.himmel.himini #hiMini{opacity:1}
     <div id="hiK" aria-hidden="true"></div>
     <div class="place"><span id="placeName">Gießen&thinsp;/&thinsp;Wettenberg</span><div class="plz"><small id="stationTxt">Live · DWD-Station</small><div id="hiMini" aria-hidden="true"></div></div></div>
     <div class="kopf-r">
-      <div style="display:flex;gap:8px">
+      <div class="kopf-kn">
         <div class="act-btn" id="locBtn" role="button" aria-label="Standort einstellen">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         </div>
         <div class="act-btn" id="ansichtBtn" role="button" aria-label="Helle oder dunkle Ansicht"></div>
+        <div class="act-btn" id="menuBtn" role="button" aria-label="Kacheln, Einstellungen, Abschnitte" aria-haspopup="menu">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
         <div class="act-btn" id="refresh" role="button" aria-label="Aktualisieren">
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.30</span>
+      <span class="ver">v6.31</span>
     </div>
   </header>
 
@@ -1482,7 +1516,6 @@ html:root.himmel.himini #hiMini{opacity:1}
   </section>
 
   <div id="content">
-    <div class="kalle" id="kAlle"><button type="button" data-a="1">Alle auf</button><button type="button" data-a="0">Alle zu</button></div>
     <div id="stdSec"><div class="sect">Stündlich</div>
     <div class="strip-card"><div class="strip" id="strip"></div></div></div>
     <div id="chartSec"><div class="sect">Temperaturverlauf</div>
@@ -5817,7 +5850,7 @@ function erstStartUmschalten(){try{
 })();
 function klappAlle(auf){KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec._setzen){sec._autoAuf=false;
   if(sec.classList.contains("kzu")===auf)sec._setzen(auf,true);else{try{localStorage.setItem("klapp_"+KLAPP_ABS.find(a=>a[0]===id)[1],auf?"1":"0");}catch(e){}}}});}
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#kAlle button");if(b)klappAlle(b.dataset.a==="1");});
+/* v6.31: die Knoepfe "Alle auf / Alle zu" (#kAlle) standen ueber dem ersten Abschnitt - jetzt im Menue am Zahnrad oben (kopfMenuTun) */
 const dropMini=`<svg width="9" height="12" viewBox="0 0 9 12"><path d="M4.5 0C4.5 0 0 5.4 0 8.2A4.5 4.5 0 0 0 9 8.2C9 5.4 4.5 0 4.5 0Z" fill="#2f86cf"/></svg>`;
 
 /* --- Render: Warnungen --- */
@@ -7634,7 +7667,10 @@ function kzRender(){
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
     ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="zahn${_kzRegAuf?" an":""}" id="kzZahn" title="Einstellungen">${KZ_GEAR}Einstellungen</span><span class="fertig" id="kzFertig">Fertig</span></span>`
-    :(ord.length?`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln wählen</span>${kzWe().modus==="auto"&&box.querySelector(".kzdots")?`<span class="kzpause${_kzPause?" an":""}" id="kzPause" role="button">${_kzPause?KZ_WEITER+"Weiter":KZ_PAUSE+"Pause"}</span>`:"<span></span>"}`:`<span class="wahl" id="kzWahlBtn">${KZ_GEAR}Kacheln einblenden</span><span></span>`);
+    :((_kzPause&&kzWe().modus==="auto"&&box.querySelector(".kzdots"))?`<span></span><span class="kzpause an" id="kzPause" role="button">${KZ_WEITER}Weiter</span>`:"");
+  /* v6.31 (Nutzer: "verdeckt zu viel vom wichtigen Startbildschirm"): "Kacheln waehlen" und "Pause" stehen im Menue am
+     Zahnrad oben; hier bleibt nur der Fuss des Bearbeitens und, solange angehalten ist, der Knopf "Weiter" */
+  if(foot)foot.classList.toggle("leer",!foot.innerHTML);
   try{waPruefen();}catch(e){}   // v6.07: die Animation endet ueber den Kacheln - deren Lage kann sich geaendert haben
 }
 /* Sprungziel: {id} ein Abschnitt, {label} die Beschriftung einer Kachel im
@@ -7681,6 +7717,68 @@ window.addEventListener("scroll",()=>{
   _kzAutoScharf=false;
   KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec._autoAuf){sec._autoAuf=false;sec._setzen(false,false);}});
 },{passive:true});
+/* v6.31: mit dem vierten Knopf im Kopf bleibt dem Ortsnamen bei 393 pt weniger Breite (215 statt 247 px) -
+   "Giessen / Wettenberg" (240 px bei 23 px Schrift) braeche in zwei Zeilen um, der Kopf wuerde 24 px hoeher. Darum
+   schrumpft der Name in 1-px-Schritten bis 17 px, solange er sonst umbricht; passt er auch dann nicht, bleibt es wie
+   bisher bei zwei Zeilen in voller Groesse. Gemessen am Zeilenkasten des <span> (eine Zeile ~1,2 x Schrift). */
+function ortPassen(){
+  const n=el("placeName"),pl=n&&n.parentNode;if(!n||!pl)return;
+  /* Groesse am Block .place (nicht am <span>): sonst haelt die 23-px-Zeile des Blocks die Zeile hoeher */
+  pl.style.fontSize="";const f0=parseFloat(getComputedStyle(n).fontSize)||23;
+  if(n.getBoundingClientRect().height<=f0*1.6)return;
+  let f=f0;
+  while(f>17){f-=1;pl.style.fontSize=f+"px";if(n.getBoundingClientRect().height<=f*1.6)return;}
+  pl.style.fontSize="";
+}
+/* v6.31 (Nutzer, iPhone-Bild 12.11.: die Zeilen "Kacheln waehlen / Pause" und "Alle auf / Alle zu" unter den Kacheln
+   "verdecken zu viel vom wichtigen Startbildschirm - einfach ganz oben zu den anderen Symbolen, sonst wird auch nicht
+   gefunden, dass unter den Kacheln die Einstellungen sind"): Zahnrad #menuBtn im Kopf oeffnet ein kleines Menue. */
+var _kzZuT=0;
+const KM_KACHEL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>';
+const KM_AUF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l6 6 6-6"/><path d="M6 13l6 6 6-6"/></svg>';
+const KM_ZU='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11l6-6 6 6"/><path d="M6 18l6-6 6 6"/></svg>';
+function kopfMenuZu(){const m=el("kopfMenu"),h=el("kopfMenuHg");if(m)m.classList.remove("an");if(h)h.classList.remove("an");}
+function kopfMenuAuf(){
+  let m=el("kopfMenu"),h=el("kopfMenuHg");
+  if(!m){h=document.createElement("div");h.id="kopfMenuHg";m=document.createElement("div");m.id="kopfMenu";m.setAttribute("role","menu");
+    document.body.appendChild(h);document.body.appendChild(m);
+    h.addEventListener("click",kopfMenuZu);
+    m.addEventListener("click",e=>{const b=e.target.closest("button[data-m]");if(!b)return;e.stopPropagation();kopfMenuZu();kopfMenuTun(b.dataset.m);});
+    window.addEventListener("scroll",()=>{if(m.classList.contains("an"))kopfMenuZu();},{passive:true});
+    document.addEventListener("keydown",e=>{if(e.key==="Escape")kopfMenuZu();});}
+  const wechsel=kzWe().modus==="auto"&&!!document.querySelector("#kz .kzdots");
+  m.innerHTML=`<button type="button" role="menuitem" data-m="kacheln">${KM_KACHEL}Kacheln wählen und sortieren</button>`
+    +`<button type="button" role="menuitem" data-m="einst">${KZ_GEAR}Einstellungen</button>`
+    +`<hr><button type="button" role="menuitem" data-m="auf">${KM_AUF}Alle Abschnitte aufklappen</button>`
+    +`<button type="button" role="menuitem" data-m="zu">${KM_ZU}Alle Abschnitte zuklappen</button>`
+    +(wechsel?`<hr><button type="button" role="menuitem" data-m="pause">${_kzPause?KZ_WEITER+"Kachelwechsel fortsetzen":KZ_PAUSE+"Kachelwechsel anhalten"}</button>`:"");
+  const r=el("menuBtn").getBoundingClientRect(),rr=el("refresh").getBoundingClientRect(),vw=document.documentElement.clientWidth;
+  m.style.top=Math.round(r.bottom+6)+"px";m.style.right=Math.max(8,Math.round(vw-rr.right))+"px";
+  h.classList.add("an");m.classList.add("an");kopfTipWeg();
+}
+function kopfMenuTun(a){
+  if(a==="auf"||a==="zu"){klappAlle(a==="auf");return;}
+  if(a==="pause"){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}
+  _kzRegAuf=(a==="einst");kzEditSetzen(true);if(_kzRegAuf)kzBewAnwenden(false);
+  /* Kacheln bzw. Regler ins Bild holen - im Himmel steht der Kopf, das Zahnrad ist auch weit unten erreichbar */
+  requestAnimationFrame(()=>{const z=el(a==="einst"?"kzReg":"kz");if(!z)return;
+    const r=z.getBoundingClientRect(),ab=kzAbstand()+8;
+    if(r.top<ab||r.top>window.innerHeight*.55)window.scrollTo({top:Math.max(0,r.top+window.scrollY-ab),behavior:"smooth"});});
+}
+/* einmaliger Hinweis fuer Bestandsnutzer (menuHinweis = "zeigen", vom ersten Script gesetzt) */
+function kopfTipWeg(){const t=el("kopfTip");if(t){t.classList.remove("an");setTimeout(()=>{if(t.parentNode&&!t.classList.contains("an"))t.remove();},300);}}
+function kopfTipZeigen(){
+  let v=null;try{v=localStorage.getItem("menuHinweis");}catch(e){}
+  const b=el("menuBtn");if(v!=="zeigen"||!b||el("kopfTip"))return;
+  const r=b.getBoundingClientRect(),vw=document.documentElement.clientWidth;if(r.bottom<0||r.top>window.innerHeight||!r.width)return;
+  try{localStorage.setItem("menuHinweis","1");}catch(e){}
+  const t=document.createElement("div");t.id="kopfTip";t.textContent="Neu: „Kacheln wählen“, die Einstellungen und „Alle auf / Alle zu“ findest du jetzt hier am Zahnrad.";
+  const re=Math.max(8,Math.round(vw-r.right-22));
+  t.style.top=Math.round(r.bottom+9)+"px";t.style.right=re+"px";t.style.setProperty("--kp",Math.max(8,Math.round(vw-re-(r.left+r.width/2)-6))+"px");
+  document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add("an"));
+  t.addEventListener("click",kopfTipWeg);setTimeout(kopfTipWeg,9000);
+  window.addEventListener("scroll",kopfTipWeg,{passive:true,once:true});
+}
 function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();}
 function kzGhost(tile,x,y){
   document.querySelectorAll(".kzghost").forEach(q=>q.remove());   // nie zwei Geister
@@ -7758,7 +7856,11 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
     if(e.clientY>=a.top-12&&e.clientY<=b.bottom+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
   document.addEventListener("pointercancel",()=>{_kzAussen=null;},true);
   document.addEventListener("pointerup",e=>{const p=_kzAussen;_kzAussen=null;if(!p||!_kzEdit)return;
-    if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)return;kzGhostWeg();kzEditSetzen(false);},true);
+    if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)return;kzGhostWeg();_kzZuT=Date.now();kzEditSetzen(false);},true);
+  /* v6.31: Zahnrad im Kopf. Hat derselbe Tipp gerade das Bearbeiten beendet (Tippen ausserhalb), geht kein Menue auf. */
+  {const mb=el("menuBtn");if(mb)mb.addEventListener("click",e=>{e.stopPropagation();if(Date.now()-_kzZuT<600)return;
+      const m=el("kopfMenu");if(m&&m.classList.contains("an"))kopfMenuZu();else kopfMenuAuf();});
+   setTimeout(kopfTipZeigen,2500);}
   document.addEventListener("touchmove",e=>{if(_kzDrag)e.preventDefault();},{passive:false});
   setInterval(()=>{if(document.visibilityState==="visible"&&!_kzDrag)kzRender();},60e3);
   kzBewAnwenden(false);kzWechselLauf();   // v4.73
@@ -12432,6 +12534,9 @@ load();
 (function(){
   document.title="Wetter \u00b7 "+(LOC.isWettenberg?"Gie\u00dfen/Wettenberg":LOC.name);
   if(!LOC.isWettenberg){const pn=el("placeName");if(pn)pn.textContent=LOC.name;}
+  ortPassen();
+  {const pl=document.querySelector("header");let w0=0;
+   if(pl&&window.ResizeObserver)new ResizeObserver(en=>{const w=Math.round(en[0].contentRect.width);if(w&&w!==w0){w0=w;ortPassen();}}).observe(pl);}
   try{const gz=localStorage.getItem("hoehe"+LOC_KEY);if(gz!=null&&gz!=="")_hoehe=+gz;}catch(e){}
   {const st=el("stationTxt");if(st&&st.dataset.basis==null){st.dataset.basis=st.textContent;zeitzoneAnzeigen();}}
   const ov=el("locOverlay"),msg=el("locMsg"),ap=el("locApply");

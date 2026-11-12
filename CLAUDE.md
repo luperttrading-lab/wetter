@@ -343,9 +343,9 @@ Seit v4.18 ist jede Abschnittsueberschrift ein Schalter: Titel, eine feine
 Linie bis zum Rand, dort ein runder Knopf. `klappBauen()` baut die Zeilen im
 Code um - wer einen Abschnitt hinzufuegt, traegt ihn nur in `KLAPP_ABS` ein.
 Seit v4.86 (Nutzer) ist OFFEN die Voreinstellung (v4.20-v4.85: zugeklappt);
-zu bleibt nur, was von Hand zugeklappt wurde (`klapp_<name>` = "0"). Ueber
-dem ersten Abschnitt stehen "Alle auf" / "Alle zu" (`#kAlle`, `klappAlle`),
-beide werden gemerkt. Folge: beim Start wird alles gerechnet und das Radar
+zu bleibt nur, was von Hand zugeklappt wurde (`klapp_<name>` = "0"). "Alle
+Abschnitte auf / zu" (`klappAlle`) steht seit v6.31 im Menue am Zahnrad oben
+(vorher als Knoepfe `#kAlle` ueber dem ersten Abschnitt), beide werden gemerkt. Folge: beim Start wird alles gerechnet und das Radar
 sofort geladen (vorher erst beim Aufklappen).
 
 ### Erster Start und Geheimknopf (v5.08)
@@ -3011,6 +3011,31 @@ Geprueft (Playwright, bedeckt / Nacht / Nebel): 0 % unveraendert, 100 % Kachel =
 Kacheln" (seit v6.29 Voreinstellung 80 %) liegt weiter obendrauf - wechselnde Kacheln bleiben also blauer als die Karten.
 Wechselwirkung: der Regen hinter den Kacheln (v6.28, Regler "Kacheln" 50 %) wird durch dichteres Glas zusaetzlich
 gedaempft. Voreinstellung bleibt 0, bis der Nutzer einen Wert nennt. Nicht am iPhone geprueft.
+v6.31 ZAHNRAD IM KOPF (Nutzer, iPhone-Bild 12.11. mit markierter Flaeche unter den Kacheln: "Kacheln waehlen / Pause"
+und "Alle auf / Alle zu" "verdecken zu viel vom wichtigen Startbildschirm - einfach ganz oben zu den anderen Symbolen;
+sonst wird auch nicht gefunden, dass unter den Kacheln die Einstellungen sind"). Vierter Knopf `#menuBtn` (Zahnrad,
+zwischen Ansicht und Aktualisieren) oeffnet das Menue `#kopfMenu` (`kopfMenuAuf/Zu/Tun`, Hintergrund `#kopfMenuHg` faengt
+den Tipp daneben; zu auch bei Scrollen und Esc): "Kacheln waehlen und sortieren" (Bearbeiten), "Einstellungen" (Bearbeiten
++ Regler offen, `#kzReg` wird unter den Kopf gescrollt), "Alle Abschnitte aufklappen / zuklappen" (`klappAlle`), und -
+nur bei "Auto + Wischen" mit wechselnden Kacheln - "Kachelwechsel anhalten / fortsetzen" (`_kzPause`). ENTFERNT aus der
+Seite: die Zeile `#kAlle` und der Normalzustand der Fusszeile `#kzFoot` ("Kacheln waehlen", "Pause", "Kacheln
+einblenden"); `#kzFoot` traegt `.leer` (display:none) ausser im Bearbeiten und solange angehalten ist - dann steht dort
+nur der Knopf "Weiter" (sonst saehe niemand, warum die Kacheln stehen). Gewinn bei 393 pt: "Stuendlich" beginnt 68 px
+hoeher (570 -> 502). Tippt man das Zahnrad IM Bearbeiten, beendet der Tipp das Bearbeiten (Aussentipp, `_kzZuT`) und
+oeffnet kein Menue. EINMALIGER HINWEIS am Zahnrad (`#kopfTip`, 9 s, "Neu: ... findest du jetzt hier") nur fuer
+Bestandsnutzer: das erste Script setzt `menuHinweis` = "zeigen", wenn schon Eintraege da sind, sonst "1" (neue Nutzer
+bekommen nichts, v5.08). KOPF MIT VIER KNOEPFEN: links bleiben bei 393 pt 209 statt 247 px. (a) `ortPassen()` (nach dem
+Setzen des Namens und per ResizeObserver am Kopf): bricht der Ortsname um, schrumpft die Schrift des Blocks `.place` in
+1-px-Schritten bis 17 px ("Giessen / Wettenberg" 21 px bei 393 pt, 20 px bei 375 pt); passt er auch dann nicht (320 pt,
+"Frankfurt am Main / Sachsenhausen"), bleibt es wie bisher zweizeilig in voller Groesse. Die Schrift am iPhone ist breiter
+als im Pruefstand - der Wert stellt sich dort selbst ein. (b) Die Stationszeile darf breiter sein als der Block und laeuft
+unter den Knoepfen durch (`header .place{min-width:0}`, `small` nowrap, max-content, hoechstens 100vw - 100 px, sonst
+"..."); `#hiMini` ebenso. Kopfhoehe 393 pt 75,6 statt 77,7 px. Geprueft (Playwright mit Touch, Himmel / hell / dunkel,
+320-430 pt): alle fuenf Menuepunkte, Tipp daneben, Zahnrad im Bearbeiten, Einstellungen von Scroll 1500 aus, Alle zu 0/17
+und auf 17/17, Pause -> "Weiter" -> weg, Hinweis einmal / nach Neuladen nicht / neuer Nutzer nie. OFFEN (dem Nutzer
+vorgeschlagen): die Ansicht (Himmel / hell / dunkel) ebenfalls ins Menue, dann waeren es wieder drei Knoepfe. Die
+CSS-Regeln `.kalle` und `.kzfoot .wahl` sind tot und stehen noch. Zurueckholen aus `wetter-giessen-v6_30.html`.
+Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
