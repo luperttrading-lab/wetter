@@ -3527,6 +3527,32 @@ bekannte Orte nicht mehr nach oben (bis v6.54 "neuester zuerst"); NEUE Orte komm
 darunter, falls er fehlt. Hoechstens 20 statt 8 (`LOC_ZUL_MAX`). Geprueft (Playwright, Touch per CDP und Maus): Norden 2
 Zeilen nach unten, Luxor ganz nach oben, Wisch ohne Halten aendert nichts, Tipp auf "hier" schliesst, x loescht nach
 Rueckfrage, Tipp auf Norden wechselt und die Reihenfolge bleibt; Himmel und hell. Nicht am iPhone geprueft.
+v6.56 ORTE WISCHEN (Nutzer 12.11.: "durch links und rechts wischen die Orte der Liste wechseln wie in der iPhone-Wetter-
+App"): Links wischen = naechster Ort der Liste "Deine Orte" (v6.55, eigene Reihenfolge), rechts = voriger; am Anfang/Ende
+federt es nur (kein Umlauf, wie Apple). NUR OBEN: Kopf, Warnkarten, Wetterkasten (`owZone`: header, #alerts, #hero ohne
+#kz/#kzPool/#kzReg/#kzFoot, Eingabefelder, Links) - Kacheln (Ansicht wechseln, v4.83), Stundenleiste, Verlauf, Karten
+und Regler wischen selbst waagrecht. Gesperrt im Bearbeiten (`_kzEdit`), bei offenem Dialog/Menue, waehrend sanft/
+sanft-aus (`owGesperrt`). Erkennung (Touch-Ereignisse auf den drei Bereichen, touchmove nicht passiv): nach 10 px
+entscheidet |dx| > 1,5 |dy| (sonst scrollt die Seite wie immer). Waehrenddessen folgt der Inhalt dem Finger (Klasse
+`ortzieh`, `--wx`/`--wo` auf `#app>:not(header):not(.state)` und `header .place`, Deckkraft bis -45 %), der Himmel steht;
+unten eine Pille `#ortPkt` mit Punkten (aktueller Ort weiss, Ziel heller) und dem Zielnamen ("Muenchen ›" / "‹ Norden").
+Wechsel ab einem Viertel der Breite (hoechstens 100 px) oder mit Schwung: ab 30 px und 0,35 px/ms in dieselbe Richtung,
+gemessen ueber die letzten 100 ms mit `e.timeStamp` (`owZeit`; mit performance.now() taeuschte eine beschaeftigte Seite
+langsame Finger vor). Sonst federt alles in 0,24 s zurueck (`ortlos`). Beim Wechsel fliegt der Inhalt in 0,23 s zur Seite
+(Bewegung reduzieren: nur ausblenden), dann `ortGehen(p,{sofort,wisch})` - der Weg von saveGo (Profil, Liste, Himmel
+weiterreichen, neu laden) steht jetzt dort, saveGo ruft ihn auf. Fehlt dem Ort die Zeitzone, wird sie hoechstens 2,5 s
+geholt. NEUE SEITE: sessionStorage `ortWisch` (n/v) -> erstes Script setzt `wisch-n`/`wisch-v`; der verborgene Inhalt
+liegt 64 px zur Seite und schiebt sich beim Einblenden (sanft-ein, 1 s) in 0,8 s herein - nicht bei "Bewegung
+reduzieren" (dort nur die Blende). Danach zeigt `owAnkunft` die Punkte 1,7 s. Der Klick, den der Browser nach einem Wisch
+schickt, wird 0,45 s lang verschluckt (Capture auf document). Waehrend des Ziehens `html{overflow-x:clip}` (der Inhalt
+verbreitert sonst die Seite). Hinweis im Standort-Dialog unter der Liste (`#locZulWisch`, ab 2 Orten). Geprueft
+(Playwright, Touch per CDP und als TouchEvent in der Seite, Himmel/hell/Bewegung reduzieren): kurz und langsam -> zurueck,
+senkrecht -> Seite scrollt, auf den Kacheln -> kein Wechsel, weit links -> naechster Ort (Zeitleiste: Inhalt 64 -> 0 px,
+Deckkraft 0 -> 1 in 1 s, Punkte ab +0,4 s), kurz mit Schwung rechts -> voriger, Anfang der Liste federt (51 px, nur
+Punkte), Tipp danach wirkt, im Bearbeiten und hinter dem Dialog nichts. FALLE im Pruefstand: CDP-Touch kommt bei voller
+Seite nur alle 60-100 ms an - Schwung dort nicht messbar, darum der Test mit `new Touch()/TouchEvent` in der Seite (auch
+die sind verzoegert, aber mit 30-ms-Schritten reicht es). Nicht am iPhone geprueft (Safari-Wischgeste "zurueck" vom
+linken Rand gibt es nur im Browser, nicht in der Home-Bildschirm-App).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
