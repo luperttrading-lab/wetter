@@ -1340,7 +1340,7 @@ html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height
 @keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
 html.histeh .hiS>canvas.hiW{animation:none}
-html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#cdd7e7;--faint:#b1bdd1}
+html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#cdd7e7;--faint:#bcc7da}
 /* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
    man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
@@ -1414,6 +1414,43 @@ html:root.himmel .plz{min-height:calc(18px * 1.2 + 4px)}
 html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;max-width:calc(100vw - 100px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
 html:root.himmel.himini #stationTxt{opacity:0}
 html:root.himmel.himini #hiMini{opacity:1}
+/* ============ v6.40 FARBDURCHSICHT (Nutzer 12.11., Bild Luxor: "das Wort Prognose passt farblich gar nicht - generell
+   noch mal gucken, was farblich zusammenpasst und was nicht") ============
+   Gemessen: jede Schrift der Seite gegen die Flaeche, die wirklich dahinter liegt (Ansicht Himmel, klarer Tag, 406
+   Texte): 29 unter 2 : 1, 42 zwischen 2 und 3. Drei Ursachen:
+   (1) Farben der HELLEN Ansicht ohne dunkles Gegenstueck (#c62828, #7a4dd8, #1c66c4, #1f7a4d, #5c6b80, #26334a, #2c3e50) -
+       auch in der klassischen dunklen Ansicht kaum lesbar ("Heute noch trocken" 1,5 : 1). Gilt darum fuer beide. */
+html:root.dunkel .evt-w{color:#ff9d94}
+html:root.dunkel .evt-cd,html:root.dunkel .iss-cd{color:#c9bcff}
+html:root.dunkel .bil-tag,html:root.dunkel .bil-box .bv,html:root.dunkel .umk-dry-last{color:#93c5ff}
+html:root.dunkel .bil-note,html:root.dunkel .vitd-info small,html:root.dunkel .bil-box .bk,html:root.dunkel .bil-box .bu{color:var(--muted)}
+html:root.dunkel .vitd-info{color:#8fe0a8}
+html:root.dunkel .iss-when b,html:root.dunkel .umk-dry-t{color:var(--ink)}
+/* das Planetenbild ist am Tag HELL: seine Unterzeile nimmt die Farbe, die das Bild selbst vorgibt (--plMut) */
+html:root.dunkel .pl-note,html:root.dunkel .pl-empty{color:var(--plMut,var(--faint))}
+/* (2) "Prognose" / "Veraltet": seit v6.11 ohne Kasten gedacht (Punkt + Wort wie "Live"), in den dunklen Ansichten gewann
+       aber die alte Regel - ein fast schwarzer Kasten mit gelber Schrift mitten im Himmel */
+html:root .badge.demo,html:root .badge.stale{background:none;border:0;padding:0}
+html:root .badge.demo{color:var(--muted)}
+/* (3) nur Ansicht HIMMEL: fast schwarze Kaesten auf blauem Glas -> dunkelblaues Glas; blasse Kleinschrift kraeftiger */
+html:root.himmel{--stufe:rgba(6,22,54,.34);--feld:rgba(6,22,54,.4);--feld-line:rgba(255,255,255,.2)}
+html:root.himmel .bil-box,html:root.himmel .met-amp:not(.ok):not(.mid):not(.bad),html:root.himmel .rz-mehrk{background:rgba(6,22,54,.34);border-color:rgba(255,255,255,.16)}
+html:root.himmel .rz-frei2{background:rgba(6,22,54,.3)}
+html:root.himmel .rz-w:not(.rec):not(.nw){background:rgba(6,22,54,.42)}
+html:root.himmel .cc-val,html:root.himmel .cc-time{background:rgba(6,22,54,.8)}
+html:root.himmel .rz-ersatz{background:linear-gradient(rgba(240,180,60,.17),rgba(240,180,60,.17)),rgba(6,22,54,.3);border-color:#e0ae45;color:#ffe2a6}
+html:root.himmel .rz-ersatz button{background:rgba(6,22,54,.42);border-color:#e0ae45;color:#ffe2a6}
+html:root.himmel .loc-box{--stufe:#222c3a;--feld:#141b25;--feld-line:#39465a}
+html:root.himmel .uvnote{opacity:.95;color:var(--muted)}
+html:root.himmel .iss-row.grob{opacity:.72}
+html:root.himmel .foot{color:#e3eaf4}html:root.himmel .foot a{color:#fff}
+html:root.dunkel .bfsfb{color:#4a586c}
+html:root.himmel .rz-zust.nass{color:#a8d2ff}
+html:root.himmel .uvalt{color:#ffb894}
+html:root.himmel .badge:not(.stale){color:#e7edf5}
+/* mit Sonne: auch die Abschnittstitel laufen beim Scrollen ueber den Schein */
+html:root.himmel.hison .ksect .sect{text-shadow:0 0 7px rgba(6,32,78,.75),0 1px 2px rgba(6,32,78,.55)}
+html:root.himmel.hison #stationTxt{color:#fff}
 </style>
 </head>
 <body>
@@ -1502,7 +1539,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.39</span>
+      <span class="ver">v6.40</span>
     </div>
   </header>
 
@@ -1721,8 +1758,8 @@ function themaNeuZeichnen(){
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
   get muted(){  return _dunkel?(hiAn()?"#cdd7e7":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
-  get faint(){  return _dunkel?(hiAn()?"#b1bdd1":"#7c8a9e"):"#9aa7b8";},
-  get karte(){  return _dunkel?"#1a212c":"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
+  get faint(){  return _dunkel?(hiAn()?"#bcc7da":"#7c8a9e"):"#9aa7b8";},
+  get karte(){  return _dunkel?(hiKarteHex(0)||"#1a212c"):"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
   get achse(){  return _dunkel?"#93a3b8":"#1c2432";},
@@ -1740,18 +1777,30 @@ const CO={
      mit v3.47: die ISS-Himmelsscheibe wurde von leicht blaeulich (#f7f9fc)
      zu reinweiss, ebenso die Windrose. Diese Getter geben im hellen Modus
      wieder genau den alten Wert. */
-  get scheibe(){  return _dunkel?"#1a212c":"#f7f9fc";},   // ISS-Himmelsscheibe
-  get rose(){     return _dunkel?"#1a212c":"#f4f7fb";},   // Windrose
+  get scheibe(){  return _dunkel?(hiKarteHex(.45)||"#1a212c"):"#f7f9fc";},   // ISS-Himmelsscheibe
+  get rose(){     return _dunkel?(hiKarteHex(.45)||"#1a212c"):"#f4f7fb";},   // Windrose
   get beschr(){   return _dunkel?"#8fa0b6":"#8693a6";},   // Himmelsrichtungen der ISS-Scheibe
   get bogen4(){   return _dunkel?"#7c8ba3":"#aab3c0";},   // Endpunkte des Sonnenbogens
   get uvTitel(){  return _dunkel?"#cfe0f5":"#12324a";},
   get uvSub(){    return _dunkel?"#a3b2c6":"#59657a";},
-  get vitdGrund(){return _dunkel?"#1a212c":"#fbfcfd";},
+  get vitdGrund(){return _dunkel?(hiKarteHex(.5)||"#1a212c"):"#fbfcfd";},
   get band06(){   return _dunkel?"rgba(255,255,255,.06)":"rgba(15,23,42,.06)";},
   get gitter10(){ return _dunkel?"rgba(255,255,255,.11)":"rgba(15,23,42,.10)";},
   get gitter12(){ return _dunkel?"rgba(255,255,255,.13)":"rgba(15,23,42,.12)";},
   get frost(){    return _dunkel?"#7fb8ff":"#2f7fe0";},   // v6.08: Null-Linie im Temperaturverlauf
 };
+/* v6.40: Kategorie-Farben (rot/gruen/gelb/blau) stehen als SCHRIFT auf dunklen bzw. blauen Karten - dort mit Weiss
+   aufgehellt, bis sie hell genug sind (Leuchtdichte >= 0,5 im Himmel, 0,42 klassisch dunkel). Punkte, Balken und
+   Flaechen behalten die Originalfarbe. Helle Ansicht: unveraendert. */
+function txtF(c){
+  if(!_dunkel||typeof c!=="string"||c.charAt(0)!=="#")return c;
+  var h=c.slice(1);if(h.length===3)h=h.replace(/./g,"$&$&");
+  var v=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)],z=.42,t=0,m=v;
+  try{if(hiAn())z=.5;}catch(e){}
+  if(!isFinite(v[0]+v[1]+v[2]))return c;
+  while(t<.9&&hiY(m)<z){t+=.05;m=v.map(function(q){return q+(255-q)*t;});}
+  return "rgb("+m.map(Math.round).join(",")+")";
+}
 function thermal(t){if(t==null||isNaN(t))return[120,132,150];if(t<=STOPS[0][0])return STOPS[0].slice(1);if(t>=STOPS.at(-1)[0])return STOPS.at(-1).slice(1);
   for(let i=0;i<STOPS.length-1;i++){const a=STOPS[i],b=STOPS[i+1];if(t>=a[0]&&t<=b[0]){const f=(t-a[0])/(b[0]-a[0]);return[a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f];}}return STOPS.at(-1).slice(1);}
 const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`,rgba=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
@@ -2249,7 +2298,9 @@ function hiPruefen(){
   HI.sT=jz;HI.f=tf;
   el0.style.height=B.h+"px";
   if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
-  HI.rand=hiRand(C,L,B);
+  /* v6.40: im Bild vom 12.11. 12:28 (v6.39) schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein
+     auf (88,128,185) gestiegen (Helligkeit 48 %); bei (61,118,203) = 44 % war die Schrift noch weiss. Grenze 43 %. */
+  HI.rand=hiPassen(hiRand(C,L,B),0,.43);
   var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
   /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
      (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
@@ -2314,6 +2365,15 @@ function hiGlasTon(){try{var v=parseFloat(localStorage.getItem("himmelGlas"));if
 function hiY(c){
   function g(v){v=Math.max(0,Math.min(255,v))/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
   return .2126*g(c[0])+.7152*g(c[1])+.0722*g(c[2]);
+}
+/* v6.40: die Farbe, die eine Karte im Himmel WIRKLICH hat (Glas ueber dem mittleren Himmel), als #rrggbb - fuer
+   Zeichnungen, die bisher mit dem fast schwarzen #1a212c der klassischen Ansicht umrandet, radiert oder unterlegt
+   haben (Punkte im UV-Bild, Windrose, ISS-Scheibe, Vitamin-D-Bild). dunkler = Anteil Dunkelblau fuer "Zifferblaetter". */
+function hiKarteHex(dunkler){
+  try{if(!hiAn()||!HI.gl||!HI.gK)return "";
+    var g=HI.gl,k=HI.gK,c=[0,1,2].map(function(i){return g.S[i]*(1-k[3])+k[i]*k[3];});
+    if(dunkler)c=hiMix(c,[8,22,50],dunkler);
+    return "#"+c.map(function(v){return ("0"+Math.round(hiKl(v,0,255)).toString(16)).slice(-2);}).join("");}catch(e){return "";}
 }
 function hiSatt(c,k){var m=hiLum(c)*255;return c.map(function(v){return hiKl(m+(v-m)*k,0,255);});}
 function hiGlasZiel(S){
@@ -3814,8 +3874,8 @@ function aqiCellInner(){
          + `<div class="aq-bars">${luftBalken()}</div>`;
   const[cat,col]=aqiCat(g), tr=luftTreiber();
   return kopf
-    + `<div class="aq-head"><div class="aq-num" style="color:${col}">${Math.round(g)}</div>`
-    + `<div><div class="aq-cat" style="color:${col}">${cat}</div>`
+    + `<div class="aq-head"><div class="aq-num" style="color:${txtF(col)}">${Math.round(g)}</div>`
+    + `<div><div class="aq-cat" style="color:${txtF(col)}">${cat}</div>`
     + `<div class="aq-drv">${tr?"bestimmt durch "+tr.st.lang:"europäischer Luftqualitätsindex"}</div></div></div>`
     + `<div class="aq-bars">${luftBalken()}</div>`
     + `<div class="aq-foot">Werte in µg/m³ · Balken = Teilindex 0–100 nach den EAQI-Bändern der EEA (Stand 2024) · der Gesamtindex ist der höchste davon</div>`;
@@ -3898,7 +3958,7 @@ function renderTiles(s,d){
   const cmpNear=dT!=null&&Math.abs(dT)<0.5;
   const cmpTxt=dT==null?"keine Vergleichsdaten":(cmpNear?"genauso warm wie gestern":`${Math.abs(dT).toFixed(0)}° ${dT>0?"wärmer":"kälter"} als gestern`);
   const cmpArrow=dT==null?"–":(cmpNear?"≈":dT>0?"↑":"↓");
-  const cmpCol=dT==null?"#9aa7b8":(cmpNear?"#5c6b80":dT>0?"#d8472f":"#2f86cf");
+  const cmpCol=txtF(dT==null?"#9aa7b8":(cmpNear?"#5c6b80":dT>0?"#d8472f":"#2f86cf"));
 
   g.innerHTML=
     `<div class="tile wide"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px"><div><div class="k">Wind &amp; Böen</div><div class="val" style="margin-top:7px">${s.wind!=null?Math.round(s.wind):"–"} <small>km/h</small></div>${windSub2?`<div class="sub">${windSub2}</div>`:""}</div>${windRoseSvg}</div></div>`+
@@ -3929,8 +3989,8 @@ function renderTiles(s,d){
      oben, VOR dem Schalter Gestern|Heute - sie zeigt nur heute. Eigenes
      Gitter, weil gridUv erst mit den UV-Daten gebaut wird. */
   el("gridSonne").innerHTML=
-    `<div class="tile wide"><div class="k" style="color:#d79636">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
-      (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?"#d79636":(_dunkel?"#9db4d6":"#5f79a0")}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
+    `<div class="tile wide"><div class="k" style="color:${txtF("#d79636")}">☀ Sonne</div><div style="display:flex;justify-content:center;margin-top:2px">${sunArc(d)}</div>`+
+      (()=>{const cd=sunCountdown();return cd?`<div style="text-align:center;font-size:13px;font-weight:750;margin-top:2px;color:${cd.up?txtF("#d79636"):(_dunkel?"#b9cbe6":"#5f79a0")}">noch ${durHM(cd.ms)} bis Sonnen${cd.up?"untergang":"aufgang"}</div>`:"";})()+
       `<div class="sunrow"><div class="se">Aufgang<b>${utToLocal(new Date(),sunUT(new Date(),true))}</b></div><div class="se" style="text-align:center">Sonnenstunden<b>${d.sunH>0?d.sunH.toLocaleString("de-DE",{maximumFractionDigits:1})+" h":"–"}</b></div><div class="se" style="text-align:right">Untergang<b>${utToLocal(new Date(),sunUT(new Date(),false))}</b></div></div></div>`;
   el("uvSec").classList.remove("hidden");
   fillPollen();
@@ -7708,7 +7768,7 @@ const KZ_DEF={
     if(g==null||!isFinite(g))return {l:"Luft",v:"–",s:"lädt"};
     const [cat,col]=aqiCat(g),tr=luftTreiber();
     // v4.67: "sehr schlecht"/"extrem schlecht" passen nicht neben die Zahl - dann in die Unterzeile
-    const zahl=`<span style="color:${col}">${Math.round(g)}</span>`;
+    const zahl=`<span style="color:${txtF(col)}">${Math.round(g)}</span>`;
     return cat.length<=5?{l:"Luft",v:`${zahl} ${cat}`,s:tr?tr.st.k:"EU-Index"}:{l:"Luft",v:zahl,s:cat==="extrem schlecht"?"extrem":cat};}},
   himmel:{name:"Himmel heute Nacht",kurz:"Planet",ziel:{id:"planetenSec"},r(){
     /* Hellster Planet, der bis zum naechsten Sonnenaufgang mindestens 10 Grad
@@ -8882,7 +8942,7 @@ function renderAirGrid(air){
           if((a<3)!==(b<3)){const f=(3-a)/(b-a);_vd.push(new Date(_ut[i]).getTime()+f*(new Date(_ut[i+1]).getTime()-new Date(_ut[i]).getTime()));}}}
     }
     let vdLine="";
-    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
+    if(_vd.length>=2){const vs=new Date(_vd[0]),ve=new Date(_vd[_vd.length-1]);const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});vdLine=`<b style="color:${txtF("#3f9b6e")};font-size:11px">Vitamin-D-Zeit ${f2(vs)}–${f2(ve)} Uhr · Dauer ${vh}h ${String(vmin).padStart(2,"0")}min</b>`;}
     const _daysw=`<div class="uvdaysw"><button class="${uvDayOffset<0?'on':''}" onclick="setUvDay(-1)">Gestern</button><button class="${uvDayOffset===0?'on':''}" onclick="setUvDay(0)">Heute</button></div>`;
     window._uvJetzt=uvN;   // v2.98: fuer die Globalstrahlungs-Diagnose
     html+=`<div class="tile wide uvcard">${_daysw}<div class="uvhead"><div><div class="k">UV-Index · ${LOC.name}</div><div class="uvmax">max. möglich (klarer Himmel)<br><b>UV ${fmt1(pk)} · ${pkTime} Uhr</b></div></div><div class="uvbadge"><div class="uvb-top">UV<span>INDEX</span></div><div class="uvb-num" style="background:${bcol};color:${btxt}">${fmt1(uvN)}</div><div class="uvb-time">${nowTime}</div></div></div><canvas id="uvchart"></canvas><div class="uvleg"><span><i class="bars"></i>gemessen bis jetzt</span><span><i class="glock"></i>max. möglich</span><span><i class="ghuel"></i>Spitzen möglich</span></div><div class="uvsimrow">
@@ -8891,7 +8951,7 @@ function renderAirGrid(air){
       <div class="krow"><input type="range" id="hSlider" min="0" max="50" step="1" aria-label="Zuschlag der Spitzenkurve">
         <div class="kinfo"><span id="hWert"></span><button type="button" id="hAuto" class="kbtn" title="zurueck auf 20 %">auto</button></div></div></div><div class="uvdiag" id="uvHaupt"></div><details class="uvmehr"><summary>Rechenwege</summary><div class="uvdiag"><span id="atmDamp"></span><span id="ccDiag"></span></div><div class="uvnote">Säulen = reale UV bis jetzt (max. möglich × gemessener Wolkendurchlass: DWD-Globalstrahlung alle 10 Minuten, ersatzweise Sonnenschein alle 10 Minuten, dazwischen interpoliert; sonst Sonnenschein je Stunde) · dicke Kurve = max. möglich bei klarem Himmel · ab UV 3 (grün) = Vitamin-D möglich${LOC.isWettenberg?' · amtliche Messung siehe unten':''}</div></details><div class="uvvd" id="vdZeile">${vdLine}</div></div>`;
     const _bfsSt=bfsNearest();
-    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:#8a8f98">grau</b> = DWD-Prognose · <b class="uvsw">schwarz</b> = unser Modell · <b style="color:#c2410c">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
+    if(_bfsSt)html+=`<div class="tile wide bfscard" id="bfsCard"><div class="k">Amtlich gemessen · BfS ${_bfsSt.name}${_bfsSt.dist>2?" · "+_bfsSt.dist.toFixed(0)+" km":""}</div><div class="bfswrap"><img id="bfsUv" src="https://uvi.bfs.de/Tagesgrafiken/EEr_${encodeURIComponent(_bfsSt.slug)}_${uvDayOffset===0?'today':'yesterday'}.png?ts=${_bfsTs}" alt="UV-Index-Tagesverlauf der n\u00e4chsten BfS-Messstation" onload="var f=document.getElementById('bfsFb');if(f)f.style.display='none';if(window.syncUV)syncUV();else if(window.drawBfsOverlay)drawBfsOverlay()" onerror="this.style.display='none';var f=document.getElementById('bfsFb');if(f)f.style.display='block'"><canvas id="bfsOvl" class="bfsovl"></canvas><div class="bfsfb" id="bfsFb">Amtliche BfS-Messgrafik – lädt nur auf der veröffentlichten Seite (online), nicht in der App-Vorschau.</div></div><div class="uvnote">Breitbandradiometer, 1-Minuten-Takt · echte Messung an der Station · <b style="color:${txtF("#8a8f98")}">grau</b> = DWD-Prognose · <b class="uvsw">schwarz</b> = unser Modell · <b style="color:${txtF("#c2410c")}">gestrichelt</b> = Spitzen möglich (Glocke + Zuschlag) · <span id="bfsAx" style="display:none">Achse 0–9</span> · </div><div class="uvnote">Quelle: <a href="https://www.bfs.de/DE/themen/opt/uv/uv-index/aktuelle-tagesverlaeufe/aktuelle-tagesverlaeufe.html" target="_blank" rel="noopener">BfS</a></div></div>`;
   }
   const _uvBilder=html; html="";   // bis hierher die beiden UV-Bilder
   html+=`<div class="tile wide" id="vitdCard"><div class="k" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Vitamin-D im Jahresverlauf</span><button type="button" id="vitdHeute" class="vitd-btn" style="display:none"></button></div><canvas id="vitdCv"></canvas><div class="vitd-info" id="vitdInfo"></div><div class="uvnote" style="margin-top:6px;text-align:center">hellgr\u00fcn = UV\u200a\u2265\u200a3 bei klarem Himmel \u00b7 dunkelgr\u00fcn = Sonne\u200a\u2265\u200a45\u00b0 (Schattenregel) \u00b7 Wischen zeigt einen beliebigen Tag \u00b7 blaue Linien = Zeitumstellung</div><div class="uvnote vitd-jahr" id="vitdJahrTxt"></div></div>`; // v2.48: steht jetzt vor der Mond-Kachel
@@ -9351,8 +9411,8 @@ function drawUV(h){
     const vs=new Date(cross[0]),ve=new Date(cross[cross.length-1]);
     const vmn=Math.round((ve-vs)/60000),vh=Math.floor(vmn/60),vmin=vmn%60;
     const f2=t=>t.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
-    _e.innerHTML='<b style="color:#3f9b6e;font-size:11px">Vitamin-D-Zeit '+f2(vs)+'\u2013'+f2(ve)+' Uhr \u00b7 Dauer '+vh+'h '+String(vmin).padStart(2,"0")+'min</b>';
-  }else if(_e&&cross.length<2){_e.innerHTML='<span style="color:#9aa7b8;font-size:11px">heute kein UV \u2265 3 \u2013 keine Vitamin-D-Zeit</span>';}}catch(e){}
+    _e.innerHTML='<b style="color:'+txtF("#3f9b6e")+';font-size:11px">Vitamin-D-Zeit '+f2(vs)+'\u2013'+f2(ve)+' Uhr \u00b7 Dauer '+vh+'h '+String(vmin).padStart(2,"0")+'min</b>';
+  }else if(_e&&cross.length<2){_e.innerHTML='<span style="color:var(--faint);font-size:11px">heute kein UV \u2265 3 \u2013 keine Vitamin-D-Zeit</span>';}}catch(e){}
   const gC="#1f6b43",y3=Y(3);
   x.setLineDash([4,3]);x.lineWidth=2;x.strokeStyle=gC;x.beginPath();x.moveTo(gx0,y3);x.lineTo(gx1,y3);x.stroke();x.setLineDash([]);
   x.fillStyle=gC;x.font="700 8px -apple-system,system-ui,sans-serif";x.textBaseline="bottom";x.textAlign="right";x.fillText("Vit-D",gx1,y3-3);
@@ -12624,13 +12684,13 @@ function issMainHTML(p,now){
     <div class="iss-cd" id="issCd">${issCountdown(p.start,now)}</div>
     <div class="iss-l1">${issDir(p.startAz)} → ${issDir(p.endAz)} · ${Math.round(p.durSec/60)} Min</div>
     <div class="iss-l1">max. ${Math.round(p.maxEl)}° hoch · ${p.mag.toFixed(1).replace(".",",")} mag</div>
-    <div class="iss-amp">${p.visible?`<span class="iss-dot" style="background:${acol}"></span><span style="color:${acol};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span>`:`<span class="iss-dot" style="background:#c62828"></span><span style="color:#c62828;font-weight:700">${issWhyInvisible(p)}</span>`}</div></div></div>`;
+    <div class="iss-amp">${p.visible?`<span class="iss-dot" style="background:${acol}"></span><span style="color:${txtF(acol)};font-weight:700">Himmel ${atxt}${good?' → gut sichtbar':''}</span>`:`<span class="iss-dot" style="background:#c62828"></span><span style="color:#c62828;font-weight:700">${issWhyInvisible(p)}</span>`}</div></div></div>`;
 }
 function issNoteHTML(upcoming,main,now){ // v2.42: erklaert, warum der naechste Ueberflug nicht in der Karte steht
   if(!upcoming||!upcoming.length)return"";
   const p=upcoming[0];
   if(p===main||p.visible)return"";
-  return `<div class="iss-note">N\u00e4chster \u00dcberflug ${issWhen(p.start,now)} ${issTime(p.start)} \u00b7 <b style="color:#c62828">${issWhyInvisible(p)}</b></div>`;
+  return `<div class="iss-note">N\u00e4chster \u00dcberflug ${issWhen(p.start,now)} ${issTime(p.start)} \u00b7 <b style="color:${txtF("#c62828")}">${issWhyInvisible(p)}</b></div>`;
 }
 function issListHTML(passes,now,mainVis){
   if(!passes.length)return `<div class="iss-empty">Keine ${mainVis?'weiteren ':''}sichtbaren Überflüge in den nächsten ${_issHorizonDays} Tagen.</div>`;
