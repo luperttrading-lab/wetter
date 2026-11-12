@@ -1340,7 +1340,7 @@ html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height
 @keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
 html.histeh .hiS>canvas.hiW{animation:none}
-html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#d8e1ef;--faint:#c8d2e3}
+html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#e2e9f4;--faint:#d2dbea}
 /* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
    man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
@@ -1437,10 +1437,10 @@ html:root.dunkel .pl-note,html:root.dunkel .pl-empty{color:var(--plMut,var(--fai
 html:root .badge.demo,html:root .badge.stale{background:none;border:0;padding:0}
 html:root .badge.demo{color:var(--muted)}
 /* (3) nur Ansicht HIMMEL: fast schwarze Kaesten auf blauem Glas -> dunkelblaues Glas; blasse Kleinschrift kraeftiger */
-html:root.himmel{--stufe:rgba(6,22,54,.34);--feld:rgba(6,22,54,.4);--feld-line:rgba(255,255,255,.2)}
-html:root.himmel .bil-box,html:root.himmel .met-amp:not(.ok):not(.mid):not(.bad),html:root.himmel .rz-mehrk{background:rgba(6,22,54,.34);border-color:rgba(255,255,255,.16)}
-html:root.himmel .rz-frei2{background:rgba(6,22,54,.3)}
-html:root.himmel .rz-w:not(.rec):not(.nw){background:rgba(6,22,54,.42)}
+html:root.himmel{--stufe:rgba(6,22,54,.22);--feld:rgba(6,22,54,.3);--feld-line:rgba(255,255,255,.2)}
+html:root.himmel .bil-box,html:root.himmel .met-amp:not(.ok):not(.mid):not(.bad),html:root.himmel .rz-mehrk{background:rgba(6,22,54,.22);border-color:rgba(255,255,255,.16)}
+html:root.himmel .rz-frei2{background:rgba(6,22,54,.2)}
+html:root.himmel .rz-w:not(.rec):not(.nw){background:rgba(6,22,54,.3)}
 html:root.himmel .cc-val,html:root.himmel .cc-time{background:rgba(6,22,54,.8)}
 html:root.himmel .rz-ersatz{background:linear-gradient(rgba(240,180,60,.17),rgba(240,180,60,.17)),rgba(6,22,54,.3);border-color:#e0ae45;color:#ffe2a6}
 html:root.himmel .rz-ersatz button{background:rgba(6,22,54,.42);border-color:#e0ae45;color:#ffe2a6}
@@ -1455,6 +1455,10 @@ html:root.himmel .evt-w{color:#ffbdb6}
 html:root.himmel .evt-cd,html:root.himmel .iss-cd{color:#ddd5ff}
 html:root.himmel .bil-tag,html:root.himmel .bil-box .bv,html:root.himmel .umk-dry-last{color:#b5d7ff}
 html:root.himmel .vitd-info{color:#a8ecbc}
+/* v6.43: Karten wie bei Apple (Helligkeit des mittleren Himmels) - Nebentexte und die kleine Sonnenzahl der Stundenleiste heller */
+html:root.himmel .col .xtra .sx{color:#ffdc8a}
+html:root.himmel .col .xtra .sx small{opacity:.85}
+html:root.himmel .bfscard .uvnote a{color:#cfe2ff}
 html:root.himmel .uvalt{color:#ffb894}
 html:root.himmel .badge:not(.stale){color:#e7edf5}
 /* mit Sonne: auch die Abschnittstitel laufen beim Scrollen ueber den Schein */
@@ -1548,7 +1552,7 @@ html:root.himmel.hison #stationTxt{color:#fff}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.42</span>
+      <span class="ver">v6.43</span>
     </div>
   </header>
 
@@ -1766,8 +1770,8 @@ function themaNeuZeichnen(){
 }catch(err){console.warn("ansicht",err&&err.message);}}
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
-  get muted(){  return _dunkel?(hiAn()?"#d8e1ef":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
-  get faint(){  return _dunkel?(hiAn()?"#c8d2e3":"#7c8a9e"):"#9aa7b8";},
+  get muted(){  return _dunkel?(hiAn()?"#e2e9f4":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
+  get faint(){  return _dunkel?(hiAn()?"#d2dbea":"#7c8a9e"):"#9aa7b8";},
   get karte(){  return _dunkel?(hiKarteHex(0)||"#1a212c"):"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
@@ -2339,7 +2343,7 @@ function hiPruefen(){
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.66):.42;
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
   /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
      v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
   HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48]};
@@ -2406,7 +2410,16 @@ function hiGlasZiel(S){
      Himmel dahinter (Leuchtdichte-Kontrast): Apple 1,07-1,21 : 1; wir 1,5-1,6 auf Blau und 2,8-3,0 auf hellen Wolken.
      Ziel jetzt: Karte nur noch 1,2 : 1 dunkler als der mittlere Himmel (vorher Leuchtdichte x 0,8 und davon 70 %),
      hoechstens 0,19 (weisse Schrift bleibt >= 4,4 : 1; Apple geht bis 0,245 = 3,6 : 1). Voreinstellung des Reglers 100. */
-  var y=hiY(S),yt=Math.min(.19,Math.max((y+.05)/1.2-.05,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
+  /* v6.43 (Nutzer: "bei der iPhone-Wetter-App den Kontrast messen zwischen Vordergrund und Hintergrund von den Boxen
+     und das so bei uns anpassen"). GEMESSEN in sechs Apple-Bildern, Box gegen den Himmel direkt daneben, alle 20 pt:
+     jede Box hat EINE feste Farbe ueber ihre ganze Hoehe (Nissi 80,130,196; Luxor 79,130,197; Dakar 66,115,188;
+     Erlental 94,138,194) = die Helligkeit des Himmels auf mittlerer Hoehe, etwas kraeftiger blau. Darum ist sie an
+     ihrer Oberkante 1,07-1,20 : 1 HELLER und an der Unterkante 1,13-1,15 : 1 DUNKLER als der Himmel (untere Box ganz
+     unten bis 1,4-1,6), dazwischen 1,00. Weisse Schrift darauf 3,9 : 1, Nebenzeile 3,6, blasse Werte 2,2.
+     Wir bisher (v6.42): 1,2 : 1 dunkler als der Himmel und durchscheinend. Jetzt wie Apple: Ziel = Leuchtdichte des
+     mittleren Himmels (Verhaeltnis 1,0), hoechstens 0,21 (weiss >= 4,0 : 1), und das Glas deckt am Tag bis 84 %
+     (hiPruefen) - eine ruhige, einheitliche Flaeche statt durchscheinender Wolken. */
+  var y=hiY(S),yt=Math.min(.21,Math.max(y,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
   if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
     for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
   else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
