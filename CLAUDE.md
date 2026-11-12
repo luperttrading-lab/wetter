@@ -3515,6 +3515,18 @@ klassischen Ansichten statt dessen ein Satz mit Verweis auf den Wolken-Knopf, `.
 Staerke/Kacheln/Vorschau, Wettersymbole), KACHELN (Wechsel mit Takt/Blende, Faerbung wechselnder Kacheln, Wackeln beim
 Sortieren). Vorher stand das Wackeln oben und der Himmel unten. Die Bausteine (ids, Regler, Hilfetexte) sind unveraendert,
 nur umgestellt; alle zehn Regler geprueft (`e/t67.py`: Fuellung = Wert, Tipp und Ziehen). Geprueft Himmel und hell, 393 pt.
+v6.55 (Nutzer 12.11.: "alle Standorte in der Liste zeigen, lang andruecken, so dass man die Reihenfolge aendern kann"):
+(1) Die Liste zeigt ALLE Orte, auch den aktuellen (gruener Punkt + "hier" statt x; ein Tipp darauf schliesst nur den
+Dialog). Fehlt er in `locZuletzt`, setzt `locZulZeigen` ihn oben hinein. Ueberschrift "Deine Orte - lang druecken zum
+Verschieben:". (2) VERSCHIEBEN: 0,42 s druecken (unter 8 px Bewegung) hebt die Zeile an (`.zieh`: weiss bzw. #2a3a52,
+Schatten), sie folgt dem Finger, die anderen ruecken in 0,15 s nach; beim Loslassen neue Reihenfolge in `locZuletzt`, danach
+schluckt `LZ.war` den Klick (sonst wechselte der Ort). Pointer-Ereignisse; ein nicht-passiver touchmove-Hoerer auf der Liste
+verhindert waehrend des Ziehens das Scrollen des Dialogs (iOS), `-webkit-touch-callout`/`user-select` aus, contextmenu
+unterdrueckt (Android). Ein Wisch ohne Halten scrollt wie bisher. (3) EIGENE REIHENFOLGE bleibt: `locZulMerken` rueckt
+bekannte Orte nicht mehr nach oben (bis v6.54 "neuester zuerst"); NEUE Orte kommen oben hinein, der verlassene gleich
+darunter, falls er fehlt. Hoechstens 20 statt 8 (`LOC_ZUL_MAX`). Geprueft (Playwright, Touch per CDP und Maus): Norden 2
+Zeilen nach unten, Luxor ganz nach oben, Wisch ohne Halten aendert nichts, Tipp auf "hier" schliesst, x loescht nach
+Rueckfrage, Tipp auf Norden wechselt und die Reihenfolge bleibt; Himmel und hell. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
