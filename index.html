@@ -1486,7 +1486,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.34</span>
+      <span class="ver">v6.35</span>
     </div>
   </header>
 
@@ -1998,10 +1998,11 @@ function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};
    v6.34 (Nutzer: "bei 30-35 km/h fast ein bisschen zu langsam - Regler mit Faktor, dabei stehen, wie schnell"):
    Bereich x0,5 bis x3,0 (vorher 50-160 %), Anzeige als Faktor, im Hilfetext das Tempo in px/s und die Zeit fuer
    eine Bildschirmbreite. HI_TEMPO_MAX gilt fuer Speicher und Regler gemeinsam. */
-var HI_TEMPO_MIN=50,HI_TEMPO_MAX=300;
+/* v6.35: Standard x2,0 - vom Nutzer am iPhone gewaehlt (12.11.: "bei 30-35 km/h fast zu langsam" -> "nimm 2,0") */
+var HI_TEMPO_MIN=50,HI_TEMPO_MAX=300,HI_TEMPO_STD=200;
 var HI_WIND={v0:.8,vm:30,w0:45,p:1.4};
 function hiWindTempo(w){return HI_WIND.v0+(HI_WIND.vm-HI_WIND.v0)*Math.tanh(Math.pow(Math.max(0,w)/HI_WIND.w0,HI_WIND.p));}
-function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(HI_TEMPO_MIN,Math.min(HI_TEMPO_MAX,v));}catch(e){}return 100;}
+function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(HI_TEMPO_MIN,Math.min(HI_TEMPO_MAX,v));}catch(e){}return HI_TEMPO_STD;}
 /* Wind fuer die Wolken: Vorschau bzw. ?hwind= geht vor; feste Lagen (?himmel=) ohne Wind; sonst die Messung. null = unbekannt */
 function hiWindJetzt(){
   if(HI.testWind!=null)return HI.testWind;
@@ -2234,7 +2235,17 @@ function hiDauerTxt(s){
   if(s<90)return Math.round(s)+"\u00a0s";
   return hiZahl(s/60,1)+"\u00a0min";
 }
-function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();}
+function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();
+  /* die Windstriche haengen davon ab, ob die Wolken ziehen (hiWolkenZiehen) */
+  try{_wa.key="";waPruefen();waAnzeigen();}catch(e){}
+}
+/* v6.35 (Nutzer: "wenn wir Wolken haben, die Striche ganz weg; wenn es klar ist, lassen - dass man den Wind sieht"):
+   Zeigen die ziehenden Wolken den Wind schon? Ansicht "Himmel", Wolken ziehen, mindestens HI_WOLKEN_MIN bedeckt.
+   Dann zeichnet die Wetter-Animation keine Windstriche (waLage). Klassische Ansichten: nie - dort gibt es keine Wolken. */
+var HI_WOLKEN_MIN=.15;
+function hiWolkenZiehen(){
+  try{if(!hiAn()||hiZug()!==1)return false;var L=hiLage();return !!(L&&!L.nebel&&L.N>=HI_WOLKEN_MIN);}catch(e){return false;}
+}
 function hiAnzeigen(){
   var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
   var kr=document.getElementById("hiRegKa"),kv=document.getElementById("hiRegKaV"),kd=hiKaDeck();
@@ -2397,7 +2408,7 @@ function waLage(){
     L={regen:{n:+(1.4*q).toFixed(2),v:600,l:12,w:1},schnee:{n:+(1.2*q).toFixed(2),v:70,g:1}};}
   else if(ic==="snow")L={schnee:waSchnee(mb)};
   else if(ic==="fog")L={nebel:true};
-  else if(sturm||ic==="wind")L={streifen:true};
+  else if((sturm||ic==="wind")&&!hiWolkenZiehen())L={streifen:true};
   if(L)L.wind=Math.round((sturm?boe:Math.max(wind,boe*.6))/5)*5;
   return L;
 }
@@ -2417,6 +2428,7 @@ function waFarben(){
   return d?{regen:"rgba(170,205,245,"+a+")",schnee:"rgba(238,244,255,"+z(WA_A+.3)+")",nebel:"205,212,224",strich:"rgba(205,220,240,"+z(WA_A*1.05)+")",blitz:"205,220,255",d:d,f:f}
           :{regen:"rgba(55,105,175,"+a+")",schnee:"rgba(120,145,182,"+z(WA_A+.25)+")",nebel:"150,158,172",strich:"rgba(70,95,130,"+z(WA_A*1.1)+")",blitz:"170,195,255",d:d,f:f};
 }
+var WA_LINKS=true;
 function waStrichNeu(B,start){var R=Math.random;return {x:start?R()*B.w:-110-R()*B.w*.5,y:R()*B.hb,len:45+R()*70,v:420+R()*360,ph:R()*6.3};}
 function waBauen(L,B){
   var c=_wa.cv,h=document.getElementById("hero");
@@ -2451,7 +2463,12 @@ function waZeichne(now,still){
   var L=_wa.L,B=_wa.B,c=_wa.ctx;if(!L||!B||!c)return;
   var col=waFarben(),dt=still?0:Math.max(0,Math.min(.05,(now-_wa.last)/1000)),i,p;_wa.last=now;
   c.clearRect(0,0,B.w,B.hb);
-  /* Nebel: weiche Flecken, langsam nach rechts */
+  /* v6.35 (Nutzer: "Striche entgegengesetzt von den Wolken ist bloed"): Die Wolken des Himmels ziehen nach LINKS
+     (hiZug), hier lief alles nach rechts - Windstriche, schraeger Regen, treibender Schnee, Nebelflecken. Gerechnet
+     wird weiter "Wind von links"; gezeichnet wird gespiegelt (WA_LINKS), in allen Ansichten gleich. Die kleinen
+     Regensymbole fallen ebenfalls nach links unten. Kacheln, Blitz und Kopf-Kopie liegen NACH dem restore. */
+  c.save();if(WA_LINKS){c.translate(B.w,0);c.scale(-1,1);}
+  /* Nebel: weiche Flecken, langsam mit dem Wind */
   for(i=0;i<_wa.nebel.length;i++){p=_wa.nebel[i];p.x+=p.v*dt;if(p.x-p.r>B.w)p.x=-p.r;
     var g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r),a=Math.min(1,p.a*.8*(col.d?.85:1.7)*col.f);
     g.addColorStop(0,"rgba("+col.nebel+","+a+")");g.addColorStop(1,"rgba("+col.nebel+",0)");c.fillStyle=g;c.fillRect(p.x-p.r,p.y-p.r,2*p.r,2*p.r);}
@@ -2469,11 +2486,12 @@ function waZeichne(now,still){
       if(p.y>B.hb+4){p.y=-4;p.x=Math.random()*B.w;}if(p.x>B.w+4)p.x=-4;
       c.moveTo(p.x+p.r,p.y);c.arc(p.x,p.y,p.r,0,6.283);}
     c.fill();}
-  /* Sturm ohne Niederschlag: feine Windstriche von links nach rechts */
+  /* Sturm ohne Niederschlag: feine Windstriche in Wolkenrichtung (gespiegelt, siehe oben) */
   if(L.streifen){c.strokeStyle=col.strich;c.lineWidth=1.2;c.lineCap="round";c.beginPath();
     for(i=0;i<_wa.strich.length;i++){p=_wa.strich[i];p.x+=p.v*dt;p.ph+=dt*3;if(p.x-p.len>B.w)_wa.strich[i]=p=waStrichNeu(B,false);
       var y=p.y+Math.sin(p.ph)*3;c.moveTo(p.x,y);c.quadraticCurveTo(p.x-p.len/2,y-2,p.x-p.len,y+1);}
     c.stroke();}
+  c.restore();
   /* v6.28: hinter den Kacheln bleibt nur ein Teil stehen - vor dem Blitz, der hellt den ganzen Himmel gleich auf */
   if(B.voll)waKacheln(c);
   /* Gewitter: alle 6-14 s ein weiches Aufhellen (zwei kurze Stoesse, dann Ausklingen) - nie im Standbild */
@@ -2559,7 +2577,7 @@ function waAnzeigen(){
   if(eh)eh.textContent="Stärke: wie kräftig Regen, Schnee und Nebel gezeichnet werden."+(hiAn()?" Kacheln: wie viel davon hinter den Kacheln oben zu sehen bleibt (0 % = nichts).":"")+" Beim Ziehen läuft 25 Sekunden lang Regen zur Ansicht.";
   if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
     m==="still"?"Die Wetterlage steht als ruhiges Bild "+(hiAn()?"im Himmel hinter den Karten.":"oben im Kasten.")+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
-    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Regen und Schnee fallen je nach gemessener Menge schwächer oder stärker, der Wind kippt den Regen. Vorschau: 12 Sekunden.";
+    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Regen und Schnee fallen je nach gemessener Menge schwächer oder stärker, der Wind kippt den Regen."+(hiAn()?" Bei Sturm zeigen die ziehenden Wolken den Wind; Windstriche gibt es nur bei klarem Himmel.":"")+" Vorschau: 12 Sekunden.";
 }
 
 /* v4.07: Die 10- und 30-Minuten-Summen derselben Station, unabhaengig davon,
@@ -7739,7 +7757,13 @@ function kzRender(){
       el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
       [g,d,wt,wb,wf,as,ak,hk,ht].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
-      el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
+      el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();
+        if(b.dataset.p==="sturm"&&hiWolkenZiehen()){
+          /* v6.35: mit Wolken gibt es keine Windstriche - die Vorschau zeigt dann, was man bei Sturm wirklich sieht */
+          if(HI.wp!==70)hiWindProbe(70);
+          try{window.scrollTo({top:0,behavior:"smooth"});}catch(err){window.scrollTo(0,0);}
+          return;}
+        waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
       el("hiSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiZugSetzen(+b.dataset.h);});
     }

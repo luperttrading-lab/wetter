@@ -3078,6 +3078,24 @@ eines Kerns, 70 km/h x3 = 29 % - der Aufwand ist bei 20 Schritten/s gedeckelt (a
 schneller heisst nur groessere Schritte (x3 bei 35 km/h: 2,8 px je Schritt). Voreinstellung bleibt x1,0, bis der Nutzer
 einen Wert nennt - dann entscheiden: `HI_WIND.vm` (ganze Kurve) anheben oder nur die Mitte (`w0` kleiner). Nicht am
 iPhone geprueft.
+v6.35 (Nutzer 12.11.: "nimm als Standard 2,0"; Wolken nach Windrichtung nach meiner Einschaetzung VERWORFEN - "du hast
+recht, das ist schlecht, lassen wie sie sind"; "aber die Striche entgegengesetzt von den Wolken ist bloed - wenn wir Wolken
+haben, die Striche ganz weg, generell die Striche in Wolkenrichtung, auch bei hell und dunkel; wenn es klar ist, lassen,
+dass man den Wind sieht"). (1) TEMPO-STANDARD x2,0 (`HI_TEMPO_STD` 200; wer selbst etwas gespeichert hat, behaelt es):
+35 km/h = 37 px/s, 70 km/h = 57, Windstille 1,6, ohne Windmessung 14 px/s. (2) RICHTUNG: die Wolken ziehen nach LINKS
+(`hiZug`), die Wetter-Animation lief nach rechts (Windstriche, schraeger Regen, treibender Schnee, Nebelflecken). Jetzt
+zeichnet `waZeichne` gespiegelt (`WA_LINKS`, c.translate/scale(-1,1) um die vier Teile; Kacheln-Aussparung, Blitz und
+Kopf-Kopie danach) - gerechnet wird unveraendert, gilt in ALLEN Ansichten. Der grosse Regen faellt damit nach links unten
+wie in den kleinen Regensymbolen. (3) WINDSTRICHE NUR OHNE WOLKEN: `hiWolkenZiehen()` = Ansicht "Himmel" UND "Wolken
+ziehen" UND Bedeckung >= `HI_WOLKEN_MIN` 15 % (nicht im Nebel); dann liefert `waLage()` bei Sturm (Boeen ab 62 km/h,
+trocken) bzw. Symbol "wind" NICHTS - die Wolken zeigen den Wind. Striche bleiben: bei klarem Himmel, wenn die Wolken
+stehen (Einstellung oder "Bewegung reduzieren"), und in den klassischen Ansichten (dort gibt es keine Wolken).
+`hiZugSetzen` ruft dafuer `waPruefen`. Vorschau-Knopf "Sturm": mit ziehenden Wolken startet er die Wind-Vorschau 70 km/h
+(`hiWindProbe`) statt Strichen; `?wettertest=sturm` zeigt die Striche weiter immer (Pruefweg). Hilfetext nennt die Regel.
+15 % ist MEINE Wahl. Geprueft (Playwright): Sturm trocken bei 68 / 20 % keine Striche, 14 / 4 % Striche, Wolken stehen ->
+Striche, klassisch hell/dunkel Striche; Richtung an einem gesetzten Strich gemessen (innen +50 px = im Bild -50 px, alle
+drei Ansichten), Wolken -37 px in 1 s bei 35 km/h; gespeicherte 130 % bleiben. FALLE beim Messen: die Verschiebung per
+Kreuzkorrelation zweier Bilder taugt bei 7 Strichen nicht (lieferte einmal +38 statt -32 px). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
