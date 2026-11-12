@@ -2912,6 +2912,18 @@ Breite: 1,5 px schmaler als das Zeichen (375 pt: "10:16 h" 73,4 statt 74,9 px vo
 2 px ueber der Zahl), Kopf 30 px (Himmel) und 54 px (hell), Stufen 0-3, "Bewegung reduzieren" ohne und mit eigener Wahl,
 Pause beim Wegscrollen. Nicht am iPhone geprueft (mask-image auf der Huelle ist dort neu fuer die Symbole; `#waCv` nutzt es
 seit v6.07). Zurueckholen der alten Striche aus `wetter-giessen-v6_24.html`.
+v6.26 (Nutzer, zwei iPhone-Bilder Norden 12.11. 06:42 mit Warnkarte "Sturmboeen": "die Kopfzeile ist etwas gross, die
+Warnungen verschwinden hinten dran etwas, beim Schieben geht oben relativ viel Platz verloren"): Der stehende Kopf (v6.13,
+nur Ansicht "himmel") hatte unten 20 px Leerraum, sein Himmel `#hiK` reichte 10 px ueber den Kopf hinaus (letzte 12 px
+weich), und der Rand -4 px zog den Inhalt noch hinein - die ERSTE KARTE lag in Ruhe 14 px unter dem Kopf, ihr oberer Rand
+war ausgeblendet. Fiel im Pruefstand nie auf: ohne Warnung beginnt dort der Kasten ohne eigene Kante. Jetzt Polster oben
++2 statt +4, unten 6 statt 20, Rand unten 0, `#hiK` endet mit dem Kopf (letzte 8 px weich), Version 4 statt 7 px unter den
+Knoepfen (`.kopf-r`, vorher Inline-Stil). Gemessen (393 pt, `?warntest`): verdeckt war bis Statusleiste + 87,7 px, jetzt
++ 61,7 (-30 %); erste Karte beginnt 12 px hoeher und genau an der Kopfkante. Schriften unveraendert (Ort 23 px, kleine Zeile
+`--hmg`). BEWUSST NICHT gebaut: ein Kopf, der beim Scrollen schrumpft - Ort und "7,8 Grad | Bewoelkt" brauchen zwei Zeilen
+("Giessen / Wettenberg" + Zeile passen bei 393 pt nicht neben die drei Knoepfe), der Gewinn waere 3-4 px gewesen. Mehr
+ginge nur mit kleinerer Schrift oder ohne die Knoepfe im gescrollten Zustand. Klassische Ansichten unveraendert (Kopf
+20-71 px wie vorher). Nicht am iPhone geprueft (Statusleiste 59 pt kennt Chromium nicht; der Abstand haengt nicht davon ab).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
