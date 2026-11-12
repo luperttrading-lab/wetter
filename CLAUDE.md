@@ -3561,6 +3561,39 @@ loeschen? Die App wechselt dann zu „Muenchen“.", Nachbar = der naechste in d
 `ortGehen(z,{ohneAlt:1})` - `locZulMerken(p,null)`, sonst haette der Wechsel den geloeschten Ort als "verlassenen" gleich
 wieder eingetragen. Geprueft (Playwright): Erlental (Mitte) -> Muenchen, Liste ohne Erlental; Kiel (Ende) -> Muenchen; ein
 einzelner Ort ohne x; Himmel und hell.
+v6.58 WISCHEN ROBUSTER, VORABRUF, KACHELN WECHSELN DEN ORT (Nutzer 12.11., Bildschirmfilm v6.57: "manchmal klappt das
+Scrollen nicht / auch nicht, wenn man auf den Kacheln links rechts wischt / der Bildaufbau sieht nicht gut aus"). IM FILM
+GEMESSEN: der Inhalt folgte dem Finger nicht sichtbar und verschwand beim Loslassen in 1-2 Bildern (CSS-Variablen --wx/--wo am
+<html> mit transition liefen am iPhone nicht), danach je Wisch 1,45-2,3 s leerer Himmel, dann 1 s Blende. JETZT: (1) Ziehen =
+Inline-Stil (translate3d + opacity) nur auf den sichtbaren Bloecken (#alerts, #hero, #content, .foot, header .place;
+`owElemente`), je Bild hoechstens einmal (rAF, `owSetzen`/`owStil`); Loslassen = Web-Animation mit festen Werten (`owAnim`, der
+Endzustand steht vorher als Stil da). Die CSS-Regeln mit --wx/--wo sind weg. (2) VORAB: sobald beim Ziehen ein Ziel feststeht,
+holt die alte Seite dessen Messung (Bright Sky weather), Live-Wert, Warnungen, Radar 7 km, Stundenregen und - wenn dessen
+Zwischenspeicher nicht frisch ist - die 16 Tage (`vorabHolen`, `VORAB_MEM`). Beim Loslassen wartet sie darauf, laengstens
+`OW_WARTE` 1,5 s (Abrufe brechen beim Neuladen ab), legt alles in sessionStorage `ortVorab` (`vorabSichern` in ortGehen); die
+neue Seite nimmt es je Teil EINMAL (`vorabNimm`/`vorabOder` in load, tryCurrent, loadExtras, loadNowcast; 16 Tage ueber den
+fcCache), hoechstens `VORAB_MS` 3 min alt. Adressen fuer beide Seiten aus denselben Funktionen (`urlHaupt`, `urlLive`,
+`urlWarn`, `urlRadar7`, `urlRegenStd`, `urlTage`) - wer eine dieser Abfragen aendert, aendert sie dort. Nach einer
+Wisch-Ankunft holt die Seite den naechsten Ort in derselben Richtung schon (`owNachbarVorab`, 2 s nach dem Einblenden).
+Gescheiterter Hauptabruf wird beim naechsten Ziehen neu versucht. (3) SEITE AUS DEM CACHE: ein Ortswechsel laedt nicht mehr
+`?v=<Zeit>` (v3.37), sondern `seiteUrl()` = `?v=<Version>&o=1|2` (abwechselnd - dieselbe Adresse hiesse "neu laden" und prueft
+immer nach); GitHub Pages erlaubt 10 min Cache. `seiteVorab()` holt die naechste Seite schon beim Ziehen in den HTTP-Cache (in
+Chromium nachgewiesen: Navigation danach transferSize 0; Safari nicht pruefbar). FALLE im Pruefstand: `page.route` schaltet den
+HTTP-Cache von Playwright AB - Cache-Tests nur ohne route (eigener Server mit Cache-Control, `e/cachesrv.py`). (4) ANKUNFT: die
+Pille mit Ortsname und Punkten steht schon im ERSTEN Bild der neuen Seite (erstes Script baut sie aus locProfile/locZuletzt,
+gleicher Text wie zuletzt auf der alten Seite - dort wird beim Loslassen das Ziel schon der aktuelle Punkt); `owAnkunft`
+blendet sie nur noch aus. Nach einem Wisch SANFT_MAX 1,2 statt 1,8 s und Blende/Hereinschieben 0,55 statt 1 / 0,8 s.
+(5) KACHELN: "Wechsel" hat drei Modi - "Auto" (neu, Voreinstellung, `modus:"ort"`): Kacheln wechseln im Takt, Wischen ueber die
+Kacheln wechselt den Ort wie ueberall oben; "Auto + Wischen" (v4.85, `auto`) und "Wischen" (v4.83): ein Wisch auf einer Kachel
+MIT Punkten schaltet deren Ansicht, auf den anderen Kacheln wechselt er den Ort (`owZone`). Ein gespeichertes "auto" (mv:2,
+meist die alte Voreinstellung) wird einmalig "ort", gespeichert wird jetzt mv:3 - wer Auto + Wischen will, waehlt es neu.
+Knoepfe nach Textbreite (`#kzSeg button{flex:1 1 auto}`), einzeilig bei 320 und 393 pt. (6) `touch-action:pan-y` auf Kopf,
+Warnungen und Wetterkasten (waagrecht gehoert der Seite, iOS faengt schraeg begonnene Wische sonst als Scrollen ab) und Winkel
+bis |dx| > 1,15 |dy| (gut 40 Grad) statt 1,5. GEMESSEN (Pruefstand, Netz ueber Python, langsam): Navigation 0,6-0,9 s nach
+Wischbeginn; die neue Seite holt Messung/Live/Warnungen/Radar nicht mehr selbst, Hauptdaten dort nach ~0,9 s statt ~3,6 s.
+Geprueft (Playwright, Touch per CDP und in der Seite): kurz/langsam zurueck (Web-Animation laeuft), senkrecht scrollt, Kachel
+mit Punkten im Modus Auto -> naechster Ort, Schwung rechts -> voriger, Auto + Wischen -> Kachelansicht 0 -> 1 ohne Ortswechsel,
+Standort-Dialog (Loeschen + Wechsel), Himmel / hell / "Bewegung reduzieren". Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

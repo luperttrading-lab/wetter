@@ -545,6 +545,8 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .kzseg{display:flex;gap:0;margin-top:6px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .kzseg button{flex:1;padding:9px 6px;font:700 13px system-ui;background:transparent;color:var(--muted);border:0;cursor:pointer}
 .kzseg button.on{background:#d79636;color:#fff}
+/* v6.58: drei Knoepfe - Breite nach dem Text, "Auto + Wischen" bricht sonst um */
+#kzSeg button{flex:1 1 auto;white-space:nowrap}
 .kzhilf{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.35}
 /* v6.07: Wetter-Animation - Vorschauknoepfe in den Einstellungen */
 .waprobe{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
@@ -1576,11 +1578,13 @@ html.sanft-aus body{pointer-events:none}
 html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
 @keyframes sanftLaden{from{opacity:0}to{opacity:1}}
 /* v6.56 ORTE WISCHEN (Nutzer 12.11.: "durch links und rechts wischen die Orte der Liste wechseln wie in der iPhone-Wetter-
-   App"): oben im Kopf und im Wetterkasten (nicht auf den Kacheln) folgt der Inhalt dem Finger; der Himmel bleibt stehen.
-   --wx Versatz, --wo Deckkraft; ortlos = loslassen (Sprung zurueck oder weg). Punkte unten wie bei Apple (#ortPkt). */
-html.ortzieh #app>:not(header):not(.state),html.ortzieh header .place{transform:translate3d(var(--wx,0px),0,0);opacity:var(--wo,1);will-change:transform,opacity}
-html.ortlos #app>:not(header):not(.state),html.ortlos header .place{transition:transform .24s cubic-bezier(.25,.8,.3,1),opacity .24s ease!important;transition-duration:.24s!important}
+   App"): der Inhalt folgt dem Finger, der Himmel bleibt stehen; ortlos = losgelassen (Sprung zurueck oder weg). Punkte unten
+   wie bei Apple (#ortPkt). v6.58: Versatz und Deckkraft als Inline-Stil auf den wenigen sichtbaren Bloecken (owStil) und das
+   Loslassen als Web-Animation - die CSS-Variablen am <html> (v6.56) liefen am iPhone nicht sichtbar mit. */
 html.ortlos body{pointer-events:none}
+/* v6.58 (Nutzer: "manchmal klappt das Wischen nicht"): oben gehoeren waagrechte Bewegungen der Seite, nicht dem Browser - sonst
+   faengt iOS schraeg begonnene Wische als Scrollen ab, und die Seite rutscht beim Wischen senkrecht mit */
+#app>header,#alerts,#hero{touch-action:pan-y}
 /* der weggeschobene Inhalt darf die Seite nicht waagrecht verbreitern (sonst liesse sie sich seitlich schieben) */
 html.ortzieh{overflow-x:clip}
 #ortPkt{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;
@@ -1594,11 +1598,16 @@ html.ortzieh{overflow-x:clip}
 #ortPkt .op-d i.zl{background:rgba(255,255,255,.66)}
 #ortPkt .op-d i.ak{background:#fff}
 /* die neue Seite schiebt sich von der Seite herein, aus der der Finger kam (nicht bei "Bewegung reduzieren": nur Blende) */
+/* v6.58 (Nutzer, Bildschirmfilm: "der Bildaufbau sieht nicht gut aus"): nach einem Wisch blendet alles in 0,55 s ein
+   statt in 1 s (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB) */
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state),
+html.wisch-n.sanft-ein header .plz,html.wisch-v.sanft-ein header .plz,html.wisch-n.sanft-ein #placeName,html.wisch-v.sanft-ein #placeName,
+html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .55s ease!important;transition-duration:.55s!important}
 @media (prefers-reduced-motion:no-preference){
 html.wisch-n.sanft #app>:not(header):not(.state),html.wisch-n.sanft header .place{transform:translate3d(64px,0,0)}
 html.wisch-v.sanft #app>:not(header):not(.state),html.wisch-v.sanft header .place{transform:translate3d(-64px,0,0)}
-html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity 1s ease,transform .8s cubic-bezier(.2,.8,.25,1)!important}
-html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .8s cubic-bezier(.2,.8,.25,1)!important}
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
 }
 </style>
 </head>
@@ -1611,7 +1620,15 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
 (function(){try{var h=document.documentElement;h.classList.add("sanft");
   try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
   /* v6.56: nach einem Wisch kommt die neue Seite von der passenden Seite herein (n = naechster Ort, v = voriger) */
-  try{var ow=sessionStorage.getItem("ortWisch");if(ow){sessionStorage.removeItem("ortWisch");if(ow==="n"||ow==="v")h.classList.add("wisch-"+ow);}}catch(e){}
+  try{var ow=sessionStorage.getItem("ortWisch");if(ow){sessionStorage.removeItem("ortWisch");if(ow==="n"||ow==="v"){h.classList.add("wisch-"+ow);
+    /* v6.58: die Pille mit Ortsname und Punkten steht schon im ERSTEN Bild - genau wie die alte Seite sie zuletzt zeigte
+       (Ziel = aktueller Punkt); owAnkunft blendet sie nach dem Einblenden aus */
+    var lp=JSON.parse(localStorage.getItem("locProfile")||"null"),za=JSON.parse(localStorage.getItem("locZuletzt")||"[]"),ix=-1,k;
+    for(k=0;lp&&k<za.length;k++)if(Math.abs(za[k].lat-lp.lat)<.01&&Math.abs(za[k].lon-lp.lon)<.01){ix=k;break;}
+    if(ix>=0&&za.length>1){var nm=String(lp.name||"").replace(/[<>&"'`]/g,"").slice(0,40),pd="",pk=document.createElement("div");
+      for(k=0;k<za.length&&k<20;k++)pd+=k===ix?'<i class="ak"></i>':"<i></i>";
+      pk.id="ortPkt";pk.setAttribute("aria-hidden","true");pk.innerHTML='<div class="op-n"></div><div class="op-d">'+pd+"</div>";
+      pk.firstChild.textContent=ow==="n"?nm+" \u203a":"\u2039 "+nm;pk.style.opacity="1";document.body.appendChild(pk);}}}}catch(e){}
   setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}},9000);
 }catch(e){}})();
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
@@ -2311,7 +2328,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.57</span>
+      <span class="ver">v6.58</span>
     </div>
   </header>
 
@@ -3412,6 +3429,8 @@ function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rg
    Warnungen, Radar, Stundenregen, Tagesvorhersage) - laengstens SANFT_MAX -, dann blendet alles zusammen ein. */
 var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
+/* v6.58: nach einem Wisch kuerzer warten und schneller einblenden - die Daten kommen meist aus dem Vorabruf (VORAB) */
+try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=550;SANFT_MAX=1200;}}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
 function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt=Date.now();SANFT.tm=setTimeout(sanftZeigen,SANFT_MAX);sanftPruefen();}
@@ -3426,8 +3445,10 @@ function sanftZeigen(){
   try{if(hiAn())hiPruefen(SANFT_EIN_MS);}catch(e){}
   function start(){if(los)return;los=true;
     h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
-    var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v");
-    if(gewischt)setTimeout(function(){try{owAnkunft();}catch(e){}},250);
+    var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v"),ri=h.classList.contains("wisch-n")?1:-1;
+    if(gewischt){setTimeout(function(){try{owAnkunft();}catch(e){}},250);
+      /* v6.58: wer gerade durch die Orte wischt, wischt meist weiter - den naechsten Ort in derselben Richtung schon holen */
+      setTimeout(function(){try{owNachbarVorab(ri);}catch(e){}},SANFT_EIN_MS+1500);}
     setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");h.classList.remove("wisch-n");h.classList.remove("wisch-v");},SANFT_EIN_MS+200);}
   /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt */
   try{requestAnimationFrame(function(){requestAnimationFrame(start);});}catch(e){}
@@ -3441,7 +3462,7 @@ function sanftWeg(dann){
     setTimeout(function(){h.classList.remove("sanft-aus");},4000);},SANFT_AUS_MS);
 }
 window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("sanft-aus");h.classList.remove("sanft");
-  h.classList.remove("ortzieh");h.classList.remove("ortlos");h.style.removeProperty("--wx");h.style.removeProperty("--wo");}});
+  try{owAufraeumen();}catch(x){}}});
 /* v6.56: Ortswechsel ohne Dialog - derselbe Weg wie saveGo im Standort-Dialog (Profil, Liste, Himmel weiterreichen,
    neu laden). opt.wisch = Richtung fuer die neue Seite, opt.sofort = nicht erst ausblenden (der Wisch hat das schon getan),
    opt.msg = Zeile fuer "Zeitzone wird ermittelt", opt.tzMs = Wartezeit auf die Zeitzone, opt.ohneAlt = den verlassenen Ort
@@ -3452,8 +3473,10 @@ function ortGehen(p,opt){
     locZulMerken(p,opt.ohneAlt?null:LOC);
     try{sessionStorage.setItem("ortWechsel","1");if(opt.wisch)sessionStorage.setItem("ortWisch",opt.wisch);}catch(e){}
     try{hiWeiterMerken();}catch(e){}
-    /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37) */
-    var neu=function(){location.href=location.pathname+"?v="+Date.now();};
+    try{vorabSichern(p);}catch(e){}
+    /* lat/lon abwerfen, damit das gespeicherte Profil greift. v6.58: feste Adresse je Version statt ?v=Zeit (v3.37) - die
+       Seite darf aus dem HTTP-Cache kommen (GitHub Pages: 10 min), siehe seiteUrl */
+    var neu=function(){location.href=seiteUrl();};
     if(opt.sofort)neu();else sanftWeg(neu);};
   if(p.tz){fertig();return;}
   /* Zeitzone des Ortes holen (Open-Meteo, timezone=auto). Faellt der Abruf aus, wird ohne tz gespeichert - die App nimmt
@@ -3466,10 +3489,60 @@ function ortGehen(p,opt){
     to
   ]).then(function(j){var t=_tzSan(j&&j.timezone);if(t)p.tz=t;}).catch(function(){}).then(fertig);
 }
+/* v6.58 VORAB (Nutzer, Bildschirmfilm 12.11.: nach jedem Wisch 1,5-2,3 s leerer Himmel). Waehrend der Finger noch zieht,
+   holt die alte Seite die Daten des Ziels, die die neue Seite vor dem Einblenden braucht (Messung, Live, Warnungen, Radar,
+   Stundenregen, 16 Tage); beim Wechsel landen sie in sessionStorage "ortVorab", die neue Seite nimmt sie (vorabNimm) statt
+   neu zu laden - je Teil einmal, hoechstens VORAB_MS alt. Abrufe einer Seite brechen beim Neuladen ab, darum wartet das
+   Loslassen auf den Vorabruf (hoechstens OW_WARTE ms). Die Adressen kommen fuer beide Seiten aus denselben Funktionen. */
+var VORAB=null,VORAB_MEM={},VORAB_MS=180e3,OW_WARTE=1500,_seiteVorab=0;
+function urlHaupt(la,lo){var now=new Date(),from=new Date(now-(CHART_PAST_H+2)*3600e3),to=new Date(now.getTime()+CHART_FUT_H*3600e3);
+  return "https://api.brightsky.dev/weather?lat="+la+"&lon="+lo+"&date="+isoDate(from)+"&last_date="+isoDate(to)+"&tz=Europe/Berlin";}
+function urlLive(la,lo){return "https://api.brightsky.dev/current_weather?lat="+la+"&lon="+lo;}
+function urlWarn(la,lo){return "https://api.brightsky.dev/alerts?lat="+la+"&lon="+lo;}
+function urlRadar7(la,lo){var d0=new Date(Date.now()-65*60e3),d1=new Date(Date.now()+125*60e3);
+  return "https://api.brightsky.dev/radar?lat="+la+"&lon="+lo+"&distance=7000&format=plain&tz=Europe/Berlin&date="+encodeURIComponent(d0.toISOString())+"&last_date="+encodeURIComponent(d1.toISOString());}
+function urlRegenStd(la,lo){return "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone="+encodeURIComponent(GERAETE_TZ);}
+function urlTage(la,lo){return "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone="+encodeURIComponent(GERAETE_TZ);}
+function vorabLL(p){return {la:p.isWettenberg?50.6034:+p.lat,lo:p.isWettenberg?8.6516:+p.lon};}
+function vorabHolen(p){
+  var q=vorabLL(p),k=q.la+"|"+q.lo,e=VORAB_MEM[k];
+  /* schon geholt (oder unterwegs) - ausser der Hauptabruf ist gescheitert, dann neu */
+  if(e&&Date.now()-e.t<VORAB_MS-30e3&&!(e.fertig&&!e.d.haupt))return e.pr;
+  e={la:q.la,lo:q.lo,t:Date.now(),d:{}};VORAB_MEM[k]=e;
+  var u={haupt:urlHaupt(q.la,q.lo),live:urlLive(q.la,q.lo),warn:urlWarn(q.la,q.lo),radar:urlRadar7(q.la,q.lo),regen:urlRegenStd(q.la,q.lo)};
+  /* 16 Tage nur, wenn der Zwischenspeicher des Ziels nicht ohnehin frisch ist (loadCached nimmt ihn dann) */
+  try{var fc=JSON.parse(localStorage.getItem("fcCache_"+(+p.lat).toFixed(2)+"_"+(+p.lon).toFixed(2))||"null");
+    if(!fc||Date.now()-fc.t>8*60e3)u.tage=urlTage(q.la,q.lo);}catch(x){u.tage=urlTage(q.la,q.lo);}
+  e.pr=Promise.all(Object.keys(u).map(function(n){
+    return fetchJSON(u[n],n==="haupt"?9000:7000).then(function(j){e.d[n]=j;},function(){});})).then(function(){e.fertig=1;});
+  return e.pr;
+}
+function vorabSichern(p){
+  var q=vorabLL(p),e=VORAB_MEM[q.la+"|"+q.lo];if(!e)return;
+  var d={},n=0;for(var k in e.d){d[k]=e.d[k];n++;}if(!n)return;
+  try{sessionStorage.setItem("ortVorab",JSON.stringify({la:e.la,lo:e.lo,t:e.t,d:d}));}catch(x){}
+}
+function vorabNimm(k){
+  if(VORAB===null){VORAB=false;
+    try{var s=sessionStorage.getItem("ortVorab");sessionStorage.removeItem("ortVorab");
+      if(s){var o=JSON.parse(s);if(o&&o.d&&Math.abs(o.la-LAT)<1e-7&&Math.abs(o.lo-LON)<1e-7&&Date.now()-o.t<VORAB_MS)VORAB=o;}}catch(e){}}
+  if(!VORAB||VORAB.d[k]==null)return null;
+  var v=VORAB.d[k];delete VORAB.d[k];return v;
+}
+function vorabOder(k,u,ms){var v=vorabNimm(k);return v?Promise.resolve(v):fetchJSON(u,ms);}
+/* feste Adresse der Seite je Version, abwechselnd o=1 / o=2 (dieselbe Adresse wie die aktuelle hiesse "neu laden" - das
+   prueft den Cache immer nach). Beide Fassungen liegen nach dem ersten Abruf 10 min im HTTP-Cache. */
+function seiteUrl(){
+  var v="";try{v=((document.querySelector(".ver")||{}).textContent||"").replace(/[^0-9.]/g,"");}catch(e){}
+  return location.pathname+"?v="+(v||Date.now())+"&o="+(/[?&]o=1(&|$)/.test(location.search)?2:1);
+}
+/* die naechste Seite schon in den HTTP-Cache holen (einmal je Seite) */
+function seiteVorab(){if(_seiteVorab)return;_seiteVorab=1;try{fetch(seiteUrl(),{credentials:"same-origin"}).catch(function(){});}catch(e){}}
+function owNachbarVorab(ri){if(document.hidden)return;var L=owListe(),j=L.i+ri;if(j<0||j>=L.a.length)return;vorabHolen(L.a[j]);seiteVorab();}
 /* v6.56 ORTE WISCHEN. Nur oben (Kopf, Warnungen, Wetterkasten ohne Kacheln): Kacheln, Stundenleiste, Verlauf, Karten und
-   Regler wischen selbst waagrecht. Entschieden wird nach 10 px: deutlich waagrecht (|dx| > 1,5 |dy|) = Ortswechsel,
+   Regler wischen selbst waagrecht. Entschieden wird nach 10 px: waagrecht (|dx| > 1,15 |dy|, v6.56: 1,5) = Ortswechsel,
    sonst scrollt die Seite wie immer. Links wischen = naechster Ort der Liste, rechts = voriger; am Ende federt es nur. */
-var OW={on:0,art:"",x0:0,y0:0,dx:0,sp:[],L:null,ziel:null,j:-1,schluck:0,tm:0};
+var OW={on:0,art:"",x0:0,y0:0,dx:0,sp:[],L:null,ziel:null,j:-1,schluck:0,tm:0,els:null,raf:0,wx:0,wo:1,an:[]};
 function owListe(){
   var a=locZulLesen(),i=-1;
   for(var k=0;k<a.length;k++)if(locGleich(a[k],LOC)){i=k;break;}
@@ -3478,7 +3551,12 @@ function owListe(){
 }
 function owZone(t){
   if(!t||!t.closest||!t.closest("header,#alerts,#hero"))return false;
-  return !t.closest("#kz,#kzPool,#kzReg,#kzFoot,input,select,textarea,a");
+  if(t.closest("#kzPool,#kzReg,#kzFoot,input,select,textarea,a"))return false;
+  /* v6.58 (Nutzer: "auch nicht, wenn man auf den Kacheln links rechts wischt"): Kachelwechsel "Automatisch" (Voreinstellung)
+     = Wischen wechselt auch auf den Kacheln den Ort; in "Wischen" / "Auto + Wischen" schaltet ein Wisch auf einer wechselnden
+     Kachel (mit Punkten) weiter deren Ansicht um - auf den anderen Kacheln wechselt er den Ort */
+  if(!t.closest("#kz")||kzWe().modus==="ort")return true;
+  var k=t.closest(".k");return !(k&&k.querySelector(".kzdots"));
 }
 function owGesperrt(){
   var h=document.documentElement;
@@ -3500,29 +3578,61 @@ function owPunkte(L,j,txt,deck,weich){
 function owPunkteWeg(ms){var p=el("ortPkt");if(!p)return;clearTimeout(OW.tm);
   OW.tm=setTimeout(function(){p.classList.add("weich");p.style.opacity="0";},ms||0);}
 /* nach dem Wechsel: Punkte kurz zeigen, damit man sieht, wo man in der Liste steht */
-function owAnkunft(){var L=owListe();if(L.a.length<2)return;owPunkte(L,-1,"",0,true);
+function owAnkunft(){var L=owListe();if(L.a.length<2)return;
+  /* v6.58: steht die Pille schon seit dem ersten Bild (erstes Script), wird sie nur noch ausgeblendet */
+  var p=el("ortPkt");if(p&&p.style.opacity==="1"){owPunkteWeg(1300);return;}
+  owPunkte(L,-1,"",0,true);
   requestAnimationFrame(function(){owPunkte(L,-1,"",1,true);owPunkteWeg(1700);});}
-function owSetzen(dx,deck){var h=document.documentElement;
-  h.style.setProperty("--wx",dx.toFixed(1)+"px");h.style.setProperty("--wo",deck.toFixed(3));}
+/* die Bloecke, die gerade zu sehen sind - nur sie werden verschoben (der Kopf mit den Knoepfen bleibt, sein Ortsname geht mit) */
+function owElemente(){
+  var a=[],H=innerHeight||800;
+  [el("alerts"),el("hero"),el("content"),document.querySelector("#app>.foot")].forEach(function(n){if(!n)return;
+    var r=n.getBoundingClientRect();if(r.height>0&&r.bottom>-40&&r.top<H+40)a.push(n);});
+  var p=document.querySelector("header .place");if(p)a.push(p);
+  return a;
+}
+function owStil(wx,wo){var t=wx?"translate3d("+wx.toFixed(1)+"px,0,0)":"",o=wo<1?wo.toFixed(3):"";
+  (OW.els||[]).forEach(function(n){n.style.transform=t;n.style.opacity=o;});}
+/* je Bild hoechstens einmal setzen - kommen die Bewegungen gebuendelt, zaehlt nur die letzte */
+function owSetzen(dx,deck){OW.wx=dx;OW.wo=deck;if(OW.raf)return;
+  OW.raf=requestAnimationFrame(function(){OW.raf=0;owStil(OW.wx,OW.wo);});}
+/* Loslassen: Web-Animation von der aktuellen Lage zum Ziel; der Endzustand steht vorher schon als Stil da (die Animation
+   laeuft darueber und hinterlaesst nichts - auch ohne Web-Animationen stimmt das Ende) */
+function owAnim(wx,wo,ms,ease,dann){
+  if(OW.raf){cancelAnimationFrame(OW.raf);OW.raf=0;}
+  var von={transform:"translate3d("+OW.wx.toFixed(1)+"px,0,0)",opacity:OW.wo},bis={transform:"translate3d("+wx.toFixed(1)+"px,0,0)",opacity:wo};
+  owStil(wx,wo);OW.an=[];
+  (OW.els||[]).forEach(function(n){try{OW.an.push(n.animate([von,bis],{duration:ms,easing:ease}));}catch(e){}});
+  OW.wx=wx;OW.wo=wo;
+  if(dann)setTimeout(dann,ms+20);
+}
 function owAufraeumen(){var h=document.documentElement;
-  h.classList.remove("ortzieh");h.classList.remove("ortlos");h.style.removeProperty("--wx");h.style.removeProperty("--wo");}
+  if(OW.raf){cancelAnimationFrame(OW.raf);OW.raf=0;}
+  (OW.an||[]).forEach(function(a){try{a.cancel();}catch(e){}});OW.an=[];
+  owStil(0,1);OW.els=null;OW.wx=0;OW.wo=1;
+  h.classList.remove("ortzieh");h.classList.remove("ortlos");}
 function owZurueck(){
   var h=document.documentElement;
   if(!h.classList.contains("ortzieh")){owPunkteWeg(0);return;}
-  h.classList.add("ortlos");owSetzen(0,1);owPunkteWeg(0);
-  setTimeout(owAufraeumen,280);
+  h.classList.add("ortlos");owPunkteWeg(0);
+  owAnim(0,1,240,"cubic-bezier(.25,.8,.3,1)",owAufraeumen);
 }
 function owLos(){
-  var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel;
+  var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel,red=hiReduziert();
   OW.schluck=Date.now();
-  owPunkte(OW.L,OW.j,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);
+  /* die Punkte zeigen jetzt schon das Ziel als aktuellen Ort - die neue Seite uebernimmt die Pille unveraendert */
+  owPunkte({a:OW.L.a,i:OW.j},-1,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);clearTimeout(OW.tm);
   h.classList.add("ortlos");
   /* Bewegung reduzieren: nicht wegfliegen, nur ausblenden */
-  owSetzen(hiReduziert()?OW.dx:s*W*.6,0);
-  setTimeout(function(){
-    /* falls die Zeitzone noch geholt werden muss: hoechstens 2,5 s */
-    ortGehen({lat:p.lat,lon:p.lon,name:p.name,isWettenberg:false,tz:p.tz},{sofort:1,wisch:s<0?"n":"v",tzMs:2500});
-  },230);
+  owAnim(red?OW.wx:s*W*.6,0,red?200:230,"cubic-bezier(.3,0,.6,1)",null);
+  var los=false,ziel={lat:p.lat,lon:p.lon,name:p.name,isWettenberg:false,tz:p.tz},
+    go=function(){if(los)return;los=true;
+      /* falls die Zeitzone noch geholt werden muss: hoechstens 2,5 s */
+      ortGehen(ziel,{sofort:1,wisch:s<0?"n":"v",tzMs:2500});};
+  /* v6.58: erst gehen, wenn der Vorabruf (seit Beginn des Wischens) da ist - laengstens OW_WARTE ms nach dem Loslassen */
+  var pr=vorabHolen(p);
+  setTimeout(function(){pr.then(go,go);},230);
+  setTimeout(go,OW_WARTE);
 }
 function owZeit(e){var t=e&&e.timeStamp;return (t&&t>0&&t<1e12)?t:performance.now();}
 function owStart(e){
@@ -3537,9 +3647,11 @@ function owZieh(e){
   var t=e.touches[0],dx=t.clientX-OW.x0,dy=t.clientY-OW.y0;
   if(!OW.art){
     if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
-    if(Math.abs(dx)<=1.5*Math.abs(dy)){OW.art="v";OW.on=0;return;}
-    OW.art="h";OW.L=owListe();
+    /* v6.58: bis gut 40 Grad schraeg gilt als waagrecht (vorher 34 Grad - Daumenwische laufen im Bogen) */
+    if(Math.abs(dx)<=1.15*Math.abs(dy)){OW.art="v";OW.on=0;return;}
+    OW.art="h";OW.L=owListe();OW.els=owElemente();
     document.documentElement.classList.add("ortzieh");
+    if(OW.L.a.length>1)seiteVorab();
   }
   e.preventDefault();
   /* Spur der letzten 100 ms fuer den Schwung beim Loslassen (Zeit des Ereignisses, nicht der Verarbeitung - ist die
@@ -3547,7 +3659,7 @@ function owZieh(e){
   var jz=owZeit(e);OW.sp.push([jz,t.clientX]);while(OW.sp.length>2&&jz-OW.sp[0][0]>100)OW.sp.shift();
   OW.dx=dx;
   var W=innerWidth||390,j=OW.L.i+(dx<0?1:-1),z=(dx!==0&&OW.L.a.length>1)?OW.L.a[j]:null;
-  OW.ziel=z||null;OW.j=z?j:-1;
+  OW.ziel=z||null;OW.j=z?j:-1;if(z)vorabHolen(z);
   /* ohne Ziel (Ende der Liste) federt es: ein Drittel des Wegs, hoechstens 60 px */
   var wx=z?dx:(dx<0?-1:1)*Math.min(60,Math.abs(dx)*.3);
   owSetzen(wx,z?1-.45*Math.min(1,Math.abs(dx)/W):1);
@@ -3583,9 +3695,9 @@ async function load(silent){
   if(!silent)showState("loading");
   el("refresh").classList.add("spin");
   try{
-    const now=new Date(), from=new Date(now-(CHART_PAST_H+2)*3600e3), to=new Date(now.getTime()+CHART_FUT_H*3600e3);
-    const url=`https://api.brightsky.dev/weather?lat=${LAT}&lon=${LON}&date=${isoDate(from)}&last_date=${isoDate(to)}&tz=Europe/Berlin`;
-    const j=await fetchJSON(url,12000), srcs=j.sources||[]; // 12-s-Timeout statt Endlos-Spinner
+    const now=new Date();
+    /* v6.58: nach einem Wisch liegen die Daten oft schon bereit (VORAB) */
+    const j=vorabNimm("haupt")||await fetchJSON(urlHaupt(LAT,LON),12000), srcs=j.sources||[]; // 12-s-Timeout statt Endlos-Spinner
     const fcIds=new Set(srcs.filter(s=>(s.observation_type||"").toLowerCase()==="forecast").map(s=>s.id));
     const obsSrc=srcs.find(s=>(s.observation_type||"").toLowerCase()!=="forecast")||srcs[0]||{};
     const sorted=(j.weather||[]).filter(w=>w.temperature!=null)
@@ -3635,7 +3747,7 @@ async function backfillPast(){
 }
 async function tryCurrent(obsSrc){
   try{
-    const j=await fetchJSON(`https://api.brightsky.dev/current_weather?lat=${LAT}&lon=${LON}`,9000),w=j.weather||{},s=(j.sources&&j.sources[0])||{};
+    const j=await vorabOder("live",urlLive(LAT,LON),9000),w=j.weather||{},s=(j.sources&&j.sources[0])||{};
     if(!Number.isFinite(w.temperature)||!w.timestamp)return;
     const same=(s.dwd_station_id&&obsSrc.dwd_station_id&&s.dwd_station_id===obsSrc.dwd_station_id)||(s.station_name&&obsSrc.station_name&&s.station_name===obsSrc.station_name);
     if(same&&(w.precipitation_10!=null||w.precipitation_30!=null)){
@@ -7149,12 +7261,16 @@ const kzDauer=m=>{m=Math.round(m);return m<60?`${m} min`:`${Math.floor(m/60)}:${
 /* v4.83 (Nutzer): "wischen" (Standard) = die Kachel steht still, ein Wisch nach
    links/rechts schaltet SIE durch; "auto" = alle im Takt wie bis v4.82. */
 // v6.29 (Nutzer, Bild der Einstellungen 12.11.): Blende 0,5 s statt 1,5 und Faerbung 80 % statt aus
-const KZ_WE_STD={takt:4,blende:.5,farbe:80,modus:"auto"};   // v4.85 (Nutzer): Auto + Wischen ist Voreinstellung
+// v6.58: Voreinstellung "ort" = Automatisch, Wischen auf den Kacheln wechselt den Ort (Nutzer: Wischen auf den Kacheln soll den
+// Ort wechseln); "auto" = Auto + Wischen (v4.85), "wischen" = von Hand (v4.83)
+const KZ_WE_STD={takt:4,blende:.5,farbe:80,modus:"ort"};
 // v4.82: neuer Schluessel - die Testwerte (Faerbung 25 %) vom 30.09. gelten nicht mehr.
 // v4.85: Modus zaehlt nur, wenn ab v4.85 gespeichert (mv:2) - ein "wischen" aus v4.83/84 war die alte Voreinstellung
 let _kzWe=(()=>{try{const o=JSON.parse(localStorage.getItem("kzWechsel2")||"null");if(!o)return null;
   const takt=isFinite(o.takt)?+o.takt:(isFinite(o.an)?+o.an:null);if(takt==null||!isFinite(o.blende))return null;
-  return {takt,blende:+o.blende,farbe:isFinite(o.farbe)?+o.farbe:0,modus:o.mv===2&&o.modus==="wischen"?"wischen":"auto"};}catch(e){}return null;})();
+  /* v6.58: ein "auto" aus v4.85-v6.57 (mv:2, meist die Voreinstellung) wird einmalig "ort"; ab mv:3 gilt die Wahl */
+  const m=(o.mv===2||o.mv===3)&&o.modus==="wischen"?"wischen":(o.mv===3&&o.modus==="auto"?"auto":"ort");
+  return {takt,blende:+o.blende,farbe:isFinite(o.farbe)?+o.farbe:0,modus:m};}catch(e){}return null;})();
 function kzWe(){return _kzWe||KZ_WE_STD;}
 /* v5.32 (Nutzer: "Pause, wenn die Grafiken kommen und man sie kurz laenger
    angucken moechte"): haelt den Takt an, Wischen geht weiter. Als SVG - die
@@ -7165,8 +7281,8 @@ let _kzWeT=null,_kzPause=false;   // v5.32: Pause (Knopf unten rechts), nicht ge
 function kzWechselLauf(){
   clearTimeout(_kzWeT);const b=el("kz");if(!b)return;const w=kzWe();
   b.style.setProperty("--kzwd",w.blende+"s");b.style.setProperty("--kzwf",(w.farbe/100*0.16).toFixed(3));
-  b.classList.toggle("kzwischen",w.modus!=="auto");
-  if(w.modus!=="auto"||_kzPause)return;   // v4.83: im Wisch-Modus kein Timer; v5.32: angehalten
+  b.classList.toggle("kzwischen",w.modus==="wischen");
+  if(w.modus==="wischen"||_kzPause)return;   // v4.83: im Wisch-Modus kein Timer; v5.32: angehalten
   _kzWeT=setTimeout(()=>{
     /* v4.84: jede Kachel rueckt von IHRER aktuellen Ansicht eins weiter - eine
        gewischte Kachel springt also nicht auf den gemeinsamen Zaehler zurueck */
@@ -7175,11 +7291,11 @@ function kzWechselLauf(){
 }
 function kzWeAnzeigen(){const w=kzWe();
   document.querySelectorAll("#kzSeg button").forEach(b=>b.classList.toggle("on",b.dataset.m===w.modus));
-  const rg=el("kzReg");if(rg)rg.classList.toggle("wsch",w.modus!=="auto");
-  const h=el("kzSegHilf");if(h)h.textContent=w.modus==="auto"?"Wechselt im Takt. Wischen schaltet sofort weiter, danach beginnt der Takt neu.":"Die Kachel steht still. Nach links wischen: nächste Ansicht, nach rechts: vorherige. Punkte am Rand zeigen, wo du bist.";
+  const rg=el("kzReg");if(rg)rg.classList.toggle("wsch",w.modus==="wischen");
+  const h=el("kzSegHilf");if(h)h.textContent=w.modus==="ort"?"Wechselt im Takt. Wischen über die Kacheln wechselt den Ort – wie überall oben.":w.modus==="auto"?"Wechselt im Takt. Wischen auf einer Kachel mit Punkten schaltet sie sofort weiter, danach beginnt der Takt neu. Den Ort wechselst du dann oberhalb der Kacheln.":"Die Kachel steht still. Nach links wischen: nächste Ansicht, nach rechts: vorherige. Punkte am Rand zeigen, wo du bist. Den Ort wechselst du oberhalb der Kacheln.";
   const f=v=>v.toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1})+"\u202fs";
   [["kzRegTakt","takt",f],["kzRegBl","blende",f],["kzRegFarbe","farbe",v=>v?Math.round(v)+"\u202f%":"aus"]].forEach(([id,k,fm])=>{const i=el(id),o=el(id+"V");if(i&&+i.value!==w[k]){i.value=w[k];kzReglerFuell(i);}if(o)o.textContent=fm(w[k]);});}
-function kzWeSetzen(takt,bl,fa,modus){const alt=kzWe();_kzWe={takt:+takt,blende:+bl,farbe:+fa,modus:modus||alt.modus};if(alt.modus!==_kzWe.modus){_kzWeI={};kzRender();}try{localStorage.setItem("kzWechsel2",JSON.stringify({..._kzWe,mv:2}));}catch(e){}
+function kzWeSetzen(takt,bl,fa,modus){const alt=kzWe();_kzWe={takt:+takt,blende:+bl,farbe:+fa,modus:modus||alt.modus};if(alt.modus!==_kzWe.modus){_kzWeI={};kzRender();}try{localStorage.setItem("kzWechsel2",JSON.stringify({..._kzWe,mv:3}));}catch(e){}
   const b=el("kz");if(b){b.style.setProperty("--kzwd",_kzWe.blende+"s");b.style.setProperty("--kzwf",(_kzWe.farbe/100*0.16).toFixed(3));}
   kzWeAnzeigen();if(alt.takt!==_kzWe.takt||alt.modus!==_kzWe.modus)kzWechselLauf();}
 /* v4.83: Wisch = naechste (links) bzw. vorherige (rechts) Ansicht NUR dieser Kachel.
@@ -7190,7 +7306,7 @@ function kzWeSchritt(tile,dir,vomTakt){
   const nx=(cur+dir+n)%n;_kzWeI[id]=nx;
   tile.querySelectorAll(".kzwe,.kzdots").forEach(z=>[...z.children].forEach((c,i)=>c.classList.toggle("an",i===nx)));
   // v4.84 (Nutzer): Wisch im Auto-Modus startet den Takt neu - sonst schaltet es gleich wieder von allein weiter
-  if(!vomTakt&&kzWe().modus==="auto")kzWechselLauf();
+  if(!vomTakt&&kzWe().modus!=="wischen")kzWechselLauf();
   return true;
 }
 function kzWeModus(){return kzWe().modus;}
@@ -8409,7 +8525,7 @@ function kzRender(){
                    +'<div class="kzhilf" id="sbHilf"></div>'
                    +'</div><div class="kzgr"><div class="kzgrt">Kacheln</div>'
                    +'<div class="kzregt">Wechsel</div>'
-                   +'<div class="kzseg" id="kzSeg"><button type="button" data-m="wischen">Wischen</button><button type="button" data-m="auto">Auto + Wischen</button></div>'
+                   +'<div class="kzseg" id="kzSeg"><button type="button" data-m="ort">Auto</button><button type="button" data-m="auto">Auto + Wischen</button><button type="button" data-m="wischen">Wischen</button></div>'
                    +'<div class="kzhilf" id="kzSegHilf"></div>'
                    +'<label class="kzTaktZ"><span>Takt</span><input type="range" id="kzRegTakt" min="2" max="20" step="0.5"><b id="kzRegTaktV">–</b></label>'
                    +'<label><span>Blende</span><input type="range" id="kzRegBl" min="0" max="3" step="0.1"><b id="kzRegBlV">–</b></label>'
@@ -8450,7 +8566,7 @@ function kzRender(){
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
     ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="zahn${_kzRegAuf?" an":""}" id="kzZahn" title="Einstellungen">${KZ_GEAR}Einstellungen</span><span class="fertig" id="kzFertig">Fertig</span></span>`
-    :((_kzPause&&kzWe().modus==="auto"&&box.querySelector(".kzdots"))?`<span></span><span class="kzpause an" id="kzPause" role="button">${KZ_WEITER}Weiter</span>`:"");
+    :((_kzPause&&kzWe().modus!=="wischen"&&box.querySelector(".kzdots"))?`<span></span><span class="kzpause an" id="kzPause" role="button">${KZ_WEITER}Weiter</span>`:"");
   /* v6.31 (Nutzer: "verdeckt zu viel vom wichtigen Startbildschirm"): "Kacheln waehlen" und "Pause" stehen im Menue am
      Zahnrad oben; hier bleibt nur der Fuss des Bearbeitens und, solange angehalten ist, der Knopf "Weiter" */
   if(foot)foot.classList.toggle("leer",!foot.innerHTML);
@@ -8530,7 +8646,7 @@ function kopfMenuAuf(){
     m.addEventListener("click",e=>{const b=e.target.closest("button[data-m]");if(!b)return;e.stopPropagation();kopfMenuZu();kopfMenuTun(b.dataset.m);});
     window.addEventListener("scroll",()=>{if(m.classList.contains("an"))kopfMenuZu();},{passive:true});
     document.addEventListener("keydown",e=>{if(e.key==="Escape")kopfMenuZu();});}
-  const wechsel=kzWe().modus==="auto"&&!!document.querySelector("#kz .kzdots");
+  const wechsel=kzWe().modus!=="wischen"&&!!document.querySelector("#kz .kzdots");
   m.innerHTML=`<button type="button" role="menuitem" data-m="kacheln">${KM_KACHEL}Kacheln wählen und sortieren</button>`
     +`<button type="button" role="menuitem" data-m="einst">${KZ_GEAR}Einstellungen</button>`
     +`<button type="button" role="menuitem" data-m="sich">${KM_SICH}Einstellungen sichern</button>`
@@ -8646,8 +8762,10 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
     if(_kzDrag){kzVerschieben(_kzDrag.ziel);kzGhostWeg();kzSpeichern();kzRender();_kzP0=null;return;}
     const tile=e.target.closest&&e.target.closest("#kz .k");
     if(!_kzEdit&&_kzP0&&_kzP0.id&&e.type==="pointerup"){   // v4.83: Wisch waagrecht (>= 28 px, deutlich mehr als senkrecht); gemeint ist die Kachel, auf der der Finger AUFSETZTE
+      /* v6.58: war es ein Ortswechsel-Wisch (auch auf der Kachel), tut die Kachel nichts */
+      if(OW.art==="h"&&(OW.on||Date.now()-OW.schluck<450)){_kzP0=null;return;}
       const dx=e.clientX-_kzP0.x,dy=e.clientY-_kzP0.y,t0=box.querySelector(`.k[data-id="${_kzP0.id}"]`);
-      if(t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
+      if(kzWe().modus!=="ort"&&t0&&Math.abs(dx)>=28&&Math.abs(dx)>1.6*Math.abs(dy)&&kzWeSchritt(t0,dx<0?1:-1)){_kzP0=null;return;}}
     if(!_kzEdit&&tile&&_kzMoved<=14&&e.type==="pointerup"){const d=KZ_DEF[tile.dataset.id];
       let g=null;try{g=d&&d.gross?d.gross():null;}catch(x){}   // v5.21: Kacheln mit Grossansicht oeffnen sie statt zu springen
       if(g){const o=typeof g==="string"?{html:g}:g;kzGrossZeigen(o.html);if(o.nach)o.nach(el("kzGrossIn"));_kzP0=null;return;}   // v5.44: nach = Knoepfe im Fenster verdrahten
@@ -12143,8 +12261,7 @@ function loadNowcast(){
   /* v4.68: 7 km Umkreis (15x15 km) und die letzte Stunde dazu - nur so laesst
      sich ein Scheinecho (Windpark, steht still) wie auf der Karte erkennen.
      Trocken rund 1-2 KB, bei Regen einige zehn KB. */
-  const d0=new Date(Date.now()-65*60e3),d1=new Date(Date.now()+125*60e3);
-  fetchJSON(`https://api.brightsky.dev/radar?lat=${LAT}&lon=${LON}&distance=7000&format=plain&tz=Europe/Berlin&date=${encodeURIComponent(d0.toISOString())}&last_date=${encodeURIComponent(d1.toISOString())}`,11000).then(d=>{_nowcastHad=true;renderNowcast(d);}).catch(e=>{if(!_nowcastHad)el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);}).then(function(){sanftZu("radar");});
+  vorabOder("radar",urlRadar7(LAT,LON),11000).then(d=>{_nowcastHad=true;renderNowcast(d);}).catch(e=>{if(!_nowcastHad)el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);}).then(function(){sanftZu("radar");});
 }
 /* --- Auto-Refresh beim Zurueckkehren in die App ---
    Voll (>30 min alt): kompletter Neuabruf, still (bei Fehler bleibt alter Stand).
@@ -12252,7 +12369,7 @@ function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{omZeitenAbsolut(d);hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);}).then(function(){sanftZu("regen");});
+  vorabOder("regen",urlRegenStd(LAT,LON)).then(d=>{omZeitenAbsolut(d);hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);}).then(function(){sanftZu("regen");});
   tzNachtragen();  // v2.71: echte Zeitzone des Ortes nachziehen
   ladeSolar10();   // v3.33: 10-Minuten-Strahlung fuer die UV-Saeulen
   uvStationLaden(); // v3.84: Stationsabgleich der schwarzen Kurve
@@ -12261,10 +12378,12 @@ function loadExtras(){
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
   loadCached("wolkCache6"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,sulphur_dioxide,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
-  loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=${encodeURIComponent(GERAETE_TZ)}`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage",function(){sanftZu("tage");});
+  /* v6.58: 16 Tage aus dem Vorabruf landen im Zwischenspeicher - loadCached nimmt sie dann sofort */
+  {const vt=vorabNimm("tage");if(vt){try{localStorage.setItem("fcCache"+LOC_KEY,JSON.stringify({t:Date.now(),d:vt}));}catch(e){}}}
+  loadCached("fcCache"+LOC_KEY,urlTage(LAT,LON),10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage",function(){sanftZu("tage");});
   loadIss();
   loadNowcast();
-  fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(j=>{renderAlerts(j);warnTest();}).catch(e=>{console.warn("alerts",e.message);warnTest();}).then(function(){sanftZu("warn");});
+  vorabOder("warn",urlWarn(LAT,LON)).then(j=>{renderAlerts(j);warnTest();}).catch(e=>{console.warn("alerts",e.message);warnTest();}).then(function(){sanftZu("warn");});
 }
 
 /* --- Demo für die Zusatz-Sektionen (Vorschau) --- */
