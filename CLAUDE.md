@@ -3356,6 +3356,32 @@ Kern des Scheins; mit weichem Schatten verschwand dort "Temperaturverlauf" zur H
 faellt der dunkelblaue Saum kaum auf. Die uebrigen Zeilen im Kasten (Gefuehlt, Heute bisher, Vergleich) sind auch bei Sonne
 weich. Geprueft (Playwright, `e/t62.py`: alt gegen neu, Lagen meist / bedeckt / klar / nacht, Titel in Bildmitte und direkt
 unter dem Kopf): Titel und kleine Kopfzeilen auf den hellsten Wolken lesbar. Nicht am iPhone geprueft.
+v6.47 UEBERGANG STATUSLEISTE -> HIMMEL, KACHELN = CONTAINER (Nutzer 12.11. 13:52, Bild "Region Dakar" v6.46: "die Kacheln
+oben haben einen anderen Hintergrund als unten die Boxen (Container), und der Streifen oben am Bildschirmrand ist immer noch
+in einer anderen Farbe - weiss nicht, ob man das beheben kann ... wenn es dunkel ist, muss es ja auch dunkler werden ... lass
+dir was einfallen, dass man den Uebergang nicht sieht"). GEMESSEN: Balken 0-59 pt einfarbig (84,113,154); direkt darunter der
+Himmel links (117,145,189), Mitte (126,155,195), rechts (63,110,179); Kacheln (110,130,161) grau, Container (67,121,198)
+blau; Hinweis "Warmer Sommertag" (48,29,13) fast schwarz. Die Balkenfarbe ist `--hi-r` = `HI.rand` an der 43-%-Grenze
+(Luma 0,428 in drei Bildern: Erlental 13:03, Huettenberg 13:22, Dakar 13:52) - sie folgt also dem Himmel, ist aber EINE
+Farbe, der Himmel darunter hat Struktur. (1) UEBERGANG: `#hi::after` und `#hiK::after` (nur Ansicht "himmel", z-index 4,
+ueber Szenen und Regen-Leinwand) = Flaeche in `--hi-r`, per mask-image deckend bis `--sat` und von dort ueber 96 px als
+S-Kurve auslaufend (1 / .9 / .65 / .35 / .1 / 0). An der Naht haben Balken und Seite dieselbe Farbe; der Sonnenkern (Kopf +
+~17 px) liegt knapp unter dem Ende. Reines CSS, wirkt ab dem ersten Bild (das erste Script setzt `--hi-r` aus dem Speicher),
+folgt jeder Szene (Nacht 9,13,38). Mit durchscheinender Leiste (neues Symbol, v6.44) sieht es genauso aus - "Himmel mit
+Wolken bis ganz oben" gibt es damit nicht mehr, dafuer in BEIDEN Faellen keine Kante. `HI.rand` jetzt OHNE Sonnenschein
+(`hiRand(C,L,B,1)`): mit Schein war die Leiste ueber blauem Himmel grau (91,112,143), jetzt (61,108,178); das Glas der
+Karten rechnet weiter mit `HI.randG` (samt Schein, unveraendert). (2) `--sat` = `var(--st-test,env(safe-area-inset-top,0px))`
+an `:root`; `#app`, Kopf, `#kzSat`, `#stLeiste` nutzen es - damit laesst sich der iPhone-Rand im Pruefstand ERSTMALS ganz
+nachstellen (`--st-test:59px` NACH dem Laden setzen, im Init-Script geht es verloren; Kopf dann 0-119 px, Titel bei ~64 pt
+wie im Nutzerbild). `e/t63.py` legt dazu einen Balken in `--hi-r` ueber die oberen 59 px. (3) KACHELN: `HI_KA_STD` 100 =
+dasselbe Glas wie die Karten (v6.30-v6.46: 0, eigenes helles Glas); ein gespeichertes 0 gilt einmalig nicht mehr (Marke
+`himmelKachelV2`); Regler "Kacheln oben: Glas" bleibt. (4) HINWEIS im Kasten (`.heat`, "Warmer Sommertag", Frost): in beiden
+dunklen Ansichten helle Schrift (#ffc48a / #a9d4ff; vorher dunkelbraun auf dunkelbraun 2,3 : 1), im Himmel Glas der Karten
+mit einem Hauch Farbe und feinem Rand. Geprueft (Playwright, nachgestellter Balken): heiter, klar, meist, Nacht, Regen mit
+Animation, gescrollt, klassisch hell/dunkel (Streifen `#stLeiste` unveraendert). NICHT pruefbar: ob iOS den Balken wirklich
+in `--hi-r` malt (gefolgert aus der Luma 0,428) und pixelgenau bei 59 pt endet - bleibt eine feine Linie, die deckende
+Strecke der Maske um 1-2 px verlaengern. OFFEN: die Uhr war bei fast gleicher Balkenfarbe einmal schwarz (13:03), einmal
+weiss (13:52) - wonach iOS das waehlt, ist unklar (Vermutung: nach der Farbe beim Start der App).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
