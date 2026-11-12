@@ -3415,6 +3415,16 @@ Fuellung endete in der Mitte. Ursache: `hg` (`#hiRegGl`, neu in v6.36) fehlte in
 Bahn, Ziehen per Pointer-Capture; er lief ueber die Systembedienung). Gemessen (`e/t67.py`, alle zehn Regler: Wert gegen
 `--p`): vorher neun richtig, `hiRegGl` leer; jetzt zehn richtig, Tipp bei 25 % und Ziehen auf 80 % setzen Wert, Fuellung,
 Anzeige und Speicher. Merke: wer einen Regler in `#kzReg` hinzufuegt, traegt ihn in diese Liste ein. Nicht am iPhone geprueft.
+v6.50 (Nutzer, iPhone-Bild Norden 12.11. 16:39, Temperaturverlauf "4 Tage": "die Striche fuer die Tage etwas deutlicher,
+dass man sieht, wie viele Tage gerade eingeblendet sind - nicht zu doll, aber staerker als jetzt, sieht man gar nicht"): Die
+Tagesgrenzen in `chartMalen` nahmen die Gitterfarbe `CO.gitter` (dunkel/Himmel 10 % Weiss, hell 9 % Dunkel), gestrichelt 2/3.
+Jetzt eigene Farbe `CO.tagLinie` aus `CHART_TAG_A` = [.3, .24] (dunkel/Himmel 30 % Weiss, hell 24 % Dunkel), Strich 3/3, weiter
+1 px. Die Abstufung beim Herauszoomen bleibt: unter 26 px je Tag Nicht-Montage halb so stark, unter 14 px nur Montage.
+Verglichen (`e/t68.py`, Himmel Abend/Tag/Nacht, hell, dunkel; 24 Std, 4, 14, 30 Tage) mit 22 / 30 / 40 % - 30 % ist MEINE
+Wahl; dem Nutzer das Blatt mit allen Stufen geschickt, er nennt bei Bedarf "schwaecher"/"staerker" (dann nur `CHART_TAG_A`
+aendern). Nebenbefund, nicht geaendert: die "jetzt"-Linie ist fest rgba(23,32,46,.35) - in der klassischen dunklen Ansicht
+kaum zu sehen. FALLE im Pruefstand: `chartZoom(vh)` OHNE Brennpunkt (fokT, fokPx) gibt eine leere Kurve und "Invalid Date" -
+immer `chartZoom(vh,Date.now(),chartGeom.viewW*.62)`. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

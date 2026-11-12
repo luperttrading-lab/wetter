@@ -1610,7 +1610,7 @@ html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:non
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.49</span>
+      <span class="ver">v6.50</span>
     </div>
   </header>
 
@@ -1826,6 +1826,7 @@ function themaNeuZeichnen(){
   if(typeof renderBilanz==="function"&&document.getElementById("bilanzCard"))renderBilanz();
   if(window._kachelArg&&typeof renderTiles==="function")renderTiles(window._kachelArg.s,window._kachelArg.d);
 }catch(err){console.warn("ansicht",err&&err.message);}}
+var CHART_TAG_A=[.3,.24];
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
   get muted(){  return _dunkel?(hiAn()?"#e2e9f4":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
@@ -1833,6 +1834,8 @@ const CO={
   get karte(){  return _dunkel?(hiKarteHex(0)||"#1a212c"):"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
+  /* v6.50: Tagesgrenzen im Temperaturverlauf - deutlicher als das Gitter, damit man die Tage zaehlen kann */
+  get tagLinie(){return _dunkel?"rgba(255,255,255,"+CHART_TAG_A[0]+")":"rgba(15,23,42,"+CHART_TAG_A[1]+")";},
   get achse(){  return _dunkel?"#93a3b8":"#1c2432";},
   get rahmen(){ return _dunkel?"#4d5b6e":"#2a3340";},
   get bogen(){  return _dunkel?"#46536a":"#e2e7ee";},
@@ -3752,7 +3755,7 @@ function chartMalen(){
   G.forEach(q=>{const mo=chartTag(rows[q.i]._cd).w===1;
     if(pxDay<26&&!mo&&pxDay<14)return;
     ctx.save();if(pxDay<26&&!mo)ctx.globalAlpha=.5;
-    ctx.strokeStyle=CO.gitter;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(q.x,y0);ctx.lineTo(q.x,y1);ctx.stroke();ctx.restore();});
+    ctx.strokeStyle=CO.tagLinie;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(q.x,y0);ctx.lineTo(q.x,y1);ctx.stroke();ctx.restore();});
   ctx.setLineDash([]);
   ctx.font="10px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.fillStyle=CO.faint;
   const belegt=[];
