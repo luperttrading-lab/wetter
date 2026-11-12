@@ -3247,6 +3247,24 @@ Mit Sonne (`hison`): auch Abschnittstitel mit dunkelblauem Saum, Stationszeile w
 Farbskala), Kategorie-Farben der Rasen-Kaestchen, die gefaerbten "wechselnden" Kacheln (Nutzerwahl 80 %), das helle
 Planetenbild. FALLE im Pruefstand: `netz2.hole(netz2.ALLE)` OHNE Sperre fuer Open-Meteo - haengt die Verbindung, blockiert der
 Python-Handler alle anderen Abrufe und die Seite bleibt leer (Hoehe 852, 10 Texte). Nicht am iPhone geprueft.
+v6.41 BEWOELKTER TAG WAR ZU DUNKEL (Nutzer 12.11. 12:29, Erlental "Bewoelkt" v6.39 neben Apple "Meist bewoelkt": "fuer diese
+Uhrzeit viel zu dunkel - ist ja tagsueber und nicht Daemmerung"). GEMESSEN (linker Rand, ohne Schrift): unser Bild im Mittel
+(88,106,132) = 109 von 255, Apple (131,160,199) = 163; Apples Wolken 176-210, unsere 95-119; unten Apple Blau (89,132,186) ->
+(147,179,218), wir Grau (94,113,138). URSACHE: der Grauanteil `g` in `hiFarben` begann bei 50 % Bedeckung - bei 88 % (7/8)
+waren Himmel und Wolken zu 75 % Schiefergrau wie unter einer Regendecke (das Bild "bedeckt" aus v6.17 war an Apples ganz
+geschlossener Decke geeicht, die wirklich dunkel ist). JETZT: `g=hiSm(.8,1,N)` (88 % -> 0,31, 95 % -> 0,74, 100 % -> 0,88) -
+bis ~85 % helle Wolken vor Blau. Am Tag dazu: Wolkengrenze 67 statt 56 % (`hiPassen(rand,1,.56+.11*tag*(1-.55*g))`, unter
+der geschlossenen Decke 62 %), geschlossene Decke heller (Wolke 168,176,190 statt 152,162,180; Luecke 100,112,134 statt
+64,76,96; Grund 86,100,124 / 108,122,144; Regen 140,150,166 / 76,88,108 / 64,76,98 / 86,98,118), und die Wolken LAUFEN NACH
+UNTEN AUS: `C.fade` = 0,9 x tag x (1 - hiSm(.8,.97,N)), in `hiWolke(...,fade)` einmal per `destination-in` ins Wolkenbild
+gerechnet (voll bis 40 % der Bildschirmhoehe, bei 84 % nur noch 1 - fade; kostet beim Ziehen nichts) - unten steht wie bei
+Apple der blaue Himmel, ruhig hinter den Karten; bei geschlossener Decke und nachts nicht. Schleier oben .58 statt .5 (auch in
+`hiRand`). `C.hell` = Sonne ODER (Tag und Bedeckung > 30 %) setzt die Klasse `hison` (dunkelblauer Schriftsaum, v6.39).
+ERGEBNIS: 88 % -> Wolken (153,168,189), Himmel (63,101,160) -> (104,139,188); 100 % -> Wolken (150,158,172) / (100,115,140).
+Lesbarkeit (Pruefskript `t58.py`, ohne den Saum gerechnet): 88 % 1 Text unter 2 : 1 und 14 unter 3 : 1; 100 % 1 und 13 (mit
+Wolkengrenze 67 % waren es dort 9 und 20 - "Live", Datum, Abschnittstitel auf den hellsten Stellen ~2 : 1, darum 62 %).
+Testlage `?himmel=meist` (h 21, N 0,88). Nacht und Abend unveraendert. Apple bleibt heller (weisse Wolken bis 210): dort steht
+nur grosse Schrift im Himmel, bei uns auch 11-px-Zeilen. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
