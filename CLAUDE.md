@@ -3285,6 +3285,25 @@ ueber 55,105,178). REGENBILANZ: die blauen Saeulen (#2f86cf) verschwanden auf de
 hell (#d6eaff gefallen, 50 % davon erwartet), Legende in allen Ansichten "kraeftig = gefallen, blass = erwartet" statt
 "dunkelblau / hellblau"; "max ... mm" im Bild in `CO.faint`. Wer einen eigenen Reglerwert gespeichert hat, behaelt ihn - mit
 der neuen Formel etwas heller. Nicht am iPhone geprueft.
+v6.43 KARTEN NACH APPLES KONTRAST (Nutzer 12.11.: "bei der iPhone-Wetter-App den Kontrast messen zwischen Vordergrund und
+Hintergrund von den Boxen und das so bei uns anpassen"). GEMESSEN in sechs Apple-Bildern (Nissi Beach 10:30 / 11:28 / 11:44,
+Luxor, Dakar, Erlental), Box (x 22-28 pt) gegen den Himmel direkt daneben (x 2-10 pt), alle 20 pt Hoehe: (1) jede Box hat EINE
+feste Farbe ueber ihre ganze Hoehe - Nissi (80,130,196), Luxor (79,130,197), Dakar (66,115,188), Erlental (94,138,194) -,
+beide Boxen eines Bilds dieselbe; der Himmel dahinter wird nach unten heller. (2) Diese Farbe hat die Leuchtdichte des Himmels
+auf mittlerer Hoehe (~56 % des Bildschirms) und ist etwas kraeftiger blau (R -7, B +9 gegen den gleich hellen Himmel).
+(3) Darum ist die obere Box an ihrer Oberkante 1,07-1,20 : 1 HELLER (Dakar 1,37), in der Mitte 1,00, an der Unterkante
+1,13-1,15 : 1 DUNKLER als der Himmel; die untere Box ganz unten 1,4-1,6 : 1 dunkler. (4) Schrift IN der Box (Nissi,
+Box-Leuchtdichte 0,217): Weiss 3,9 : 1, Nebenzeile (213,253,254) 3,6, blasser Tiefstwert (148,200,250) 2,2, Trennlinie 1,5.
+WIR bis v6.42: Ziel 1,2 : 1 dunkler als der Himmel, Glas 66 % deckend (Wolken schienen durch). JETZT wie Apple: `hiGlasZiel`
+Ziel = Leuchtdichte des mittleren Himmels S (Verhaeltnis 1,0), hoechstens 0,21 (weiss >= 4,0 : 1); Glas am Tag bis 84 %
+deckend (`ka`, Anstieg x1,25) = ruhige einheitliche Flaeche; Saettigung wie bisher x1,35. ERGEBNIS: klar (63,120,201),
+88 % (75,118,181), bedeckt (90,113,148), Regen (74,90,118), Abend (92,75,109), Nacht unveraendert (35,42,85, 42 %); gegen
+den Himmel ganz oben 1,17-1,25 heller, ganz unten 1,15-1,26 dunkler, auf der hellsten Wolke 1,7 dunkler. Schrift auf der
+Karte (klar): Weiss 4,4 : 1, `--muted` 3,4 -> nach Aufhellen (#e2e9f4) ~3,7, `--faint` (#d2dbea) ~3,2. Pruefskript klar:
+1 Text unter 2 : 1, 57 zwischen 2 und 3 (v6.42: 1 / 30; vor dem Aufhellen 4 / 89), 333 zwischen 3 und 4,5, 36 darueber - das
+ist Apples Niveau (dort 3,9 / 3,6 / 2,2), aber wir haben viel mehr kleine Nebentexte. Innere Kaesten (`--stufe`, `.rz-mehrk`
+...) von 34 auf 22 % Dunkelblau (Apples Schalterfeld: 1,2 : 1 zur Box). Sonnenzahl der Stundenleiste (#c79100, 1,25 : 1) im
+Himmel #ffdc8a. Regler "Karten: Farbe > Himmel" bleibt (100 = dieses Ziel, 0 = dunkles Marineblau). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
