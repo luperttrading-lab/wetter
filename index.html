@@ -1369,10 +1369,10 @@ html:root.himmel .kopf-r{gap:4px}
 html:root.himmel #hiK{display:block;position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none;
   -webkit-mask-image:linear-gradient(#000 calc(100% - 8px),transparent);mask-image:linear-gradient(#000 calc(100% - 8px),transparent)}
 html:root.himmel #stationTxt{transition:opacity .25s}
-/* v6.14: Groesse waehlbar (--hmg, Test in den Einstellungen). Die Hoehe der Zeile ist IMMER freigehalten (.plz) -
+/* v6.14: Groesse war waehlbar (Test), seit v6.29 fest 18 px (Nutzer). Die Hoehe der Zeile ist IMMER freigehalten (.plz) -
    sonst wuechse der Kopf in dem Moment, in dem die Zeile erscheint, und alles darunter spraenge. */
-html:root.himmel .plz{min-height:calc(var(--hmg,18px) * 1.2 + 4px)}
-html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--hmg,18px);font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
+html:root.himmel .plz{min-height:calc(18px * 1.2 + 4px)}
+html:root.himmel #hiMini{display:block;position:absolute;left:0;top:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;font-weight:500;letter-spacing:0;line-height:1.2;color:rgba(255,255,255,.92);opacity:0;transition:opacity .25s}
 html:root.himmel.himini #stationTxt{opacity:0}
 html:root.himmel.himini #hiMini{opacity:1}
 </style>
@@ -1452,7 +1452,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.28</span>
+      <span class="ver">v6.29</span>
     </div>
   </header>
 
@@ -1825,7 +1825,7 @@ function iconBewegt(name,size,M){
 /* Stufe 0 = steht, 1 ruhig ... 3 deutlich ("lebhaft" aus der Testseite war dem Nutzer zu viel). Ohne eigene Wahl:
    Stufe 2, bei "Bewegung reduzieren" 0 - eine gewaehlte Stufe gilt immer (wie bei der Wetter-Animation, v6.07). */
 function sbEigen(){try{var v=localStorage.getItem("symbBew");return /^[0-3]$/.test(v||"")?+v:null;}catch(e){return null;}}
-function sbStufe(){var e=sbEigen();return e!=null?e:(waReduziert()?0:2);}
+function sbStufe(){var e=sbEigen();return e!=null?e:(waReduziert()?0:3);}      /* v6.29 (Nutzer): Stufe 3 statt 2 */
 function sbGroesse(){return hiAn()?30:54;}                 // v6.12: in der Ansicht "Himmel" klein neben dem Wort
 function symbGross(name){var s=sbStufe(),g=sbGroesse();return s?iconBewegt(name,g,SB_STUFEN[s]):icon(name,g);}
 /* v6.15 (Nutzer, iPhone 10.11.: "im Kopf haben wir keine Symbole mehr, und die in der Stundenleiste bewegen sich
@@ -1949,6 +1949,16 @@ function hiNebelFarben(L){
 }
 /* die nahe Wolkenlage: Massstab (x Fensterbreite), Tempo in px/s, Deckkraft - bei Nebel gross, langsam, halb */
 function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};}
+/* v6.29 (Nutzer: "die Windstaerke fuer die Wolken beruecksichtigen"): Tempo der Wolkenlagen = Grundtempo x hiTempo.
+   12 km/h = wie bisher (nah 7 px/s), Windstille 0,3-fach (zieht kaum), 30 km/h doppelt, ab ~55 km/h 3,6-fach (25 px/s).
+   Gemessen wird der Wind in 10 m Hoehe (waWind) - in Wolkenhoehe weht es meist staerker und aus leicht anderer
+   Richtung; fuer ein Hintergrundbild genuegt die Bodenmessung. Die RICHTUNG bleibt fest (nach links): ein Handy hat
+   kein Norden, links/rechts haette keine Bedeutung. Ohne frische Messung Faktor 1. */
+function hiTempo(){
+  if(HI.test&&HI.testWind==null)return 1;
+  var w=HI.testWind!=null?HI.testWind:null;if(w==null){try{w=waWind();}catch(e){w=null;}}
+  return w==null?1:Math.round(hiKl(.3+w/17,.3,3.6)*100)/100;
+}
 function hiFarben(L){
   if(L.nebel)return hiNebelFarben(L);
   var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.5,1,N)*(L.nass?1:.88);
@@ -2008,13 +2018,16 @@ function hiSterne(sz,B,a,hmax){
 }
 /* Eine Wolkenlage: die Textur zweimal nebeneinander (und so oft untereinander, wie die Hoehe braucht) auf eine kleine
    Leinwand; der Browser streckt sie auf Bildgroesse und schiebt sie um genau eine Texturbreite (-50 %) - nahtlos. */
-function hiWolke(sz,tex,B,sc,v,a,dy,off,hmax){
+function hiWolke(sz,tex,B,sc,v0,a,dy,off,hmax){
   var tw=B.w*sc,th=tw*HI_TH/HI_TW,n=Math.max(1,Math.ceil(((hmax||B.h)-dy)/th)),c=document.createElement("canvas");
   c.width=HI_TW*2;c.height=HI_TH*n;var g=c.getContext("2d");
   for(var r=0;r<n;r++){g.drawImage(tex,0,r*HI_TH);g.drawImage(tex,HI_TW,r*HI_TH);}
-  var dur=tw/v,ph=((performance.now()-HI.t0)/1000+off+HI.ph0)%dur;
+  /* v6.29: Tempo v0 x HI.f (Wind). Die Lage der Textur haengt am aufsummierten WEG HI.s (Sekunden bei Grundtempo),
+     nicht an der Uhr - sonst spraengen die Wolken bei jedem Tempowechsel. Schritte: einer je ~0,7 px (wie die nahe
+     Lage bisher), 4 bis 20 je Sekunde - bei Windstille weniger Arbeit, bei Sturm kein Ruckeln. */
+  var f=HI.f||1,v=v0*f,dur=tw/v,ph=((HI.s+off+HI.ph0)*v0/tw%1)*dur,sps=hiKl(v/.7,4,20);
   c.className="hiW";
-  c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.round(dur*10)+");--hv:-"+ph.toFixed(2)+"s";
+  c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.max(2,Math.round(dur*sps))+");--hv:-"+ph.toFixed(2)+"s";
   sz.appendChild(c);
 }
 function hiSzene(ziel,C,L,B,hmax,links){
@@ -2053,7 +2066,8 @@ function hiRand(C,L,B){
 }
 function hiInit(){
   HI.init=1;
-  try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];}catch(e){}
+  try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];
+      var mw=/[?&]hwind=(\d+)/.exec(location.search);if(mw)HI.testWind=+mw[1];}catch(e){}
   window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
   window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
   setInterval(hiPruefen,60000);
@@ -2063,7 +2077,7 @@ function hiInit(){
     hiPruefen();});
   hiNeuesBild();
   hiZugKlasse();
-  document.documentElement.style.setProperty("--hmg",hiMiniGr()+"px");
+  try{localStorage.removeItem("hiMiniGr");}catch(e){}      /* v6.29: 18 px sind fest (Nutzer), der Test ist weg */
 }
 /* Baut den Himmel neu, wenn sich etwas Sichtbares geaendert hat (Farben, Bedeckung, Groesse). Die neue Szene liegt
    ueber der alten und blendet in 1,3 s ein; danach faellt die alte weg. */
@@ -2073,10 +2087,12 @@ function hiPruefen(){
   hiMini();
   if(!hiAn()){
     HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;return;}
-  var L=hiLage(),B=hiMass(),C=hiFarben(L);
-  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0].join("|");
+  var L=hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();
+  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0,tf].join("|");
   if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
-  if(!HI.t0)HI.t0=performance.now();
+  /* Weg bis jetzt mit dem ALTEN Tempo aufsummieren, dann gilt das neue */
+  var jz=performance.now();if(!HI.t0){HI.t0=jz;HI.s=0;}else HI.s+=(jz-HI.sT)/1000*(HI.f||1);
+  HI.sT=jz;HI.f=tf;
   el0.style.height=B.h+"px";
   if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
   HI.rand=hiRand(C,L,B);
@@ -2114,11 +2130,6 @@ function hiMini(){
   if(an){var l=(document.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"\u00b0  |  "+l;}
   document.documentElement.classList.toggle("himini",!!an);
 }
-/* v6.14 TEST (Nutzer: "0,3 Grad | Bewoelkt etwas groesser?"): Schriftgroesse der kleinen Zeile zum Auswaehlen */
-var HI_MINI_GR=[14,16,18,20];
-function hiMiniGr(){try{var v=+localStorage.getItem("hiMiniGr");return HI_MINI_GR.indexOf(v)>=0?v:18;}catch(e){return 18;}}
-function hiMiniSetzen(v){try{localStorage.setItem("hiMiniGr",String(v));}catch(e){}
-  document.documentElement.style.setProperty("--hmg",hiMiniGr()+"px");hiAnzeigen();HI.key="";hiPruefen();}
 /* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
    gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
 function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
@@ -2128,9 +2139,7 @@ function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e
 function hiAnzeigen(){
   var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
-  var gs=document.getElementById("hmSeg"),gr=hiMiniGr();
-  if(gs)gs.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.g===gr);});
-  if(h)h.textContent=(z?"Die Wolken im Hintergrund ziehen langsam.":"Die Wolken im Hintergrund stehen still."
+  if(h)h.textContent=(z?"Die Wolken im Hintergrund ziehen – je nach Wind am Ort langsamer oder schneller.":"Die Wolken im Hintergrund stehen still."
       +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
     +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
 }
@@ -2189,7 +2198,7 @@ function waModus(){return waEigen()||(waReduziert()?"still":"an");}
    sie liefen quer durch die kleinen Texte. Jetzt bleibt hinter den Kacheln nur ein Teil stehen (waKacheln). Wie viel,
    ist nur am Geraet zu beurteilen - darum zwei Regler unter "Wetter-Animation": Staerke (alles) und Kacheln (Rest
    hinter den Kacheln), gespeichert in wetterAnimE. */
-var WA_E_STD={st:100,ka:30},_waE=null;
+var WA_E_STD={st:80,ka:50},_waE=null;      /* v6.29: vom Nutzer am iPhone gewaehlt (12.11.) */
 function waE(){
   if(_waE)return _waE;
   var o={st:WA_E_STD.st,ka:WA_E_STD.ka};
@@ -2223,6 +2232,26 @@ function waFest(n){
   }
   return null;
 }
+/* v6.29 (Nutzer: "die Staerke des Regens oder Niesel beruecksichtigen"): mit Radar am Ort gilt dessen Bodenrate
+   (_zuMb, seit v6.07). OHNE Radar (Ausland - Anlass Barcelona 12.11., "kein Radar") stand bisher fest die mittlere
+   Stufe; jetzt die Messung der Station: 10 Minuten x 6, sonst 30 Minuten x 2, sonst die Stundensumme der Zeile
+   (bei "Prognose" die erwartete). null = unbekannt -> mittlere Stufe wie bisher. */
+function waStationsRate(){
+  var f=null,r=null;try{f=feinJetzt();}catch(e){}
+  if(f&&f.p10>0)r=f.p10*6;else if(f&&f.p30>0)r=f.p30*2;
+  else{try{if(snap&&snap.p60!=null&&isFinite(snap.p60)&&+snap.p60>0)r=+snap.p60;}catch(e){}}
+  return (r!=null&&isFinite(r)&&r>0)?r:null;
+}
+/* Wind fuer Regenneigung UND Wolkentempo: Mittelwind, bei boeigem Wetter 60 % der Boee, ab Sturm die Boee; auf 5 km/h
+   gerundet (sonst baute jede Messung die Szene neu). null = keine frische Messung (aelter als 2 h). */
+function waWind(){
+  var s=null;try{s=snap;}catch(e){}
+  if(!s||!s.ts||Date.now()-new Date(s.ts).getTime()>=2*3600e3)return null;
+  var hw=s.wind!=null&&isFinite(s.wind),hb=s.gust!=null&&isFinite(s.gust);
+  if(!hw&&!hb)return null;      /* Station ohne Windmesser: unbekannt, nicht "windstill" */
+  var wind=hw?+s.wind:0,boe=hb?+s.gust:0;
+  return Math.round((boe>=WA_STURM?boe:Math.max(wind,boe*.6))/5)*5;
+}
 function waLage(){
   if(_wa.test)return waFest(_wa.test);
   var ic=_zuIc;if(!ic)return null;
@@ -2230,8 +2259,9 @@ function waLage(){
   /* Was nur die Station meldet (kein Radar am Ort), gilt nur bei frischer Messung */
   if(!frisch&&_zuMb==null)return null;
   var wind=(frisch&&isFinite(s.wind))?+s.wind:0,boe=(frisch&&isFinite(s.gust))?+s.gust:0,sturm=boe>=WA_STURM,L=null;
-  if(ic==="thunderstorm")L={regen:waRegen(_zuMb!=null?Math.max(_zuMb,2):5),blitz:true};
-  else if(ic==="rain")L={regen:waRegen(_zuMb)};
+  var mb=_zuMb!=null?_zuMb:waStationsRate();
+  if(ic==="thunderstorm")L={regen:waRegen(mb!=null?Math.max(mb,2):5),blitz:true};
+  else if(ic==="rain")L={regen:waRegen(mb)};
   else if(ic==="hail")L={regen:{n:4,v:900,l:9,w:1.8}};
   else if(ic==="sleet")L={regen:{n:1.4,v:600,l:12,w:1},schnee:{n:1.2,v:70}};
   else if(ic==="snow")L={schnee:{n:2.4,v:42}};
@@ -2398,7 +2428,7 @@ function waAnzeigen(){
   if(eh)eh.textContent="Stärke: wie kräftig Regen, Schnee und Nebel gezeichnet werden."+(hiAn()?" Kacheln: wie viel davon hinter den Kacheln oben zu sehen bleibt (0 % = nichts).":"")+" Beim Ziehen läuft 25 Sekunden lang Regen zur Ansicht.";
   if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
     m==="still"?"Die Wetterlage steht als ruhiges Bild "+(hiAn()?"im Himmel hinter den Karten.":"oben im Kasten.")+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
-    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Vorschau: 12 Sekunden.";
+    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Niesel bis Starkregen nach der gemessenen Menge, der Wind kippt den Regen. Vorschau: 12 Sekunden.";
 }
 
 /* v4.07: Die 10- und 30-Minuten-Summen derselben Station, unabhaengig davon,
@@ -2865,7 +2895,7 @@ function render(rows,all,src,demo){
      Minuten 0,0 mm gemessen hatte. Die Zeilen sind seit jeher mit _fc
      markiert, nur wurde das bei condition nicht gelesen. */
   snap={temp:cur.temperature,icon:cur.icon,condition:cur._fc?null:cur.condition,ts:cur.timestamp,rh,wind,
-    p10:cur.p10,p30:cur.p30,_fc:!!cur._fc,
+    p10:cur.p10,p30:cur.p30,p60:(cur.p60!=null?cur.p60:cur.precipitation),_fc:!!cur._fc,
     dir:cur.wind_direction!=null?cur.wind_direction:latestOf(messAll,"wind_direction"),
     gust:latestOf(messAll,"wind_gust_speed"),press:latestOf(messAll,"pressure_msl"),
     dew:latestOf(messAll,"dew_point"),cloud:latestOf(messAll,"cloud_cover"),vis:latestOf(messAll,"visibility")};
@@ -6307,7 +6337,8 @@ const kzDauer=m=>{m=Math.round(m);return m<60?`${m} min`:`${Math.floor(m/60)}:${
    Speicherung {an,aus,blende} wird uebernommen (Takt = an). */
 /* v4.83 (Nutzer): "wischen" (Standard) = die Kachel steht still, ein Wisch nach
    links/rechts schaltet SIE durch; "auto" = alle im Takt wie bis v4.82. */
-const KZ_WE_STD={takt:4,blende:1.5,farbe:0,modus:"auto"};   // v4.85 (Nutzer): Auto + Wischen ist Voreinstellung
+// v6.29 (Nutzer, Bild der Einstellungen 12.11.): Blende 0,5 s statt 1,5 und Faerbung 80 % statt aus
+const KZ_WE_STD={takt:4,blende:.5,farbe:80,modus:"auto"};   // v4.85 (Nutzer): Auto + Wischen ist Voreinstellung
 // v4.82: neuer Schluessel - die Testwerte (Faerbung 25 %) vom 30.09. gelten nicht mehr.
 // v4.85: Modus zaehlt nur, wenn ab v4.85 gespeichert (mv:2) - ein "wischen" aus v4.83/84 war die alte Voreinstellung
 let _kzWe=(()=>{try{const o=JSON.parse(localStorage.getItem("kzWechsel2")||"null");if(!o)return null;
@@ -7557,10 +7588,7 @@ function kzRender(){
                    +'<div class="kzhilf" id="sbHilf"></div>'
                    +'<div class="kzregt">Himmel im Hintergrund</div>'
                    +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
-                   +'<div class="kzhilf" id="hiHilf"></div>'
-                   +'<div class="kzregt">Zeile unter dem Ort beim Scrollen (Test)</div>'
-                   +'<div class="kzseg" id="hmSeg"><button type="button" data-g="14">14</button><button type="button" data-g="16">16</button><button type="button" data-g="18">18</button><button type="button" data-g="20">20</button></div>'
-                   +'<div class="kzhilf">Schriftgröße von „0,3° | Bewölkt“, wenn der Kopf oben stehen bleibt (Ansicht „Himmel“). Sag mir die Zahl, die dir gefällt – sie wird dann fest.</div>';
+                   +'<div class="kzhilf" id="hiHilf"></div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
@@ -7575,7 +7603,6 @@ function kzRender(){
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
       el("hiSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiZugSetzen(+b.dataset.h);});
-      el("hmSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiMiniSetzen(+b.dataset.g);});
     }
     if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();sbAnzeigen();hiAnzeigen();}}
   if(pool){pool.classList.toggle("on",_kzEdit);
