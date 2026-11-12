@@ -2998,6 +2998,19 @@ Ansehen im Browser `?himmel=wolkig&hwind=40`. Gemessen (Chromium ohne GPU, Bedec
 Geprueft (Playwright): Voreinstellungen ohne Speicher (alle Regler und Schalter wie im Nutzerbild), gespeicherte Werte
 bleiben, Tempo je Wind, echter Weg ueber `snap` (auch ohne Wind und 3 h alt), sechs Regenfaelle ohne Radar, Radar
 unveraendert. Nicht am iPhone geprueft.
+v6.30 (Nutzer, iPhone-Bild Erlental 12.11. 08:25, Ansicht "Himmel": "warum sind die Kacheln weniger gefaerbt als die
+anderen Container unten - sollten die nicht gleich sein, oder kann ich das einstellen?"): Absicht aus v6.12, nie vom
+Nutzer gewaehlt und ohne Einstellung: Kacheln oben mit eigenem hellen Glas `--hi-t` (nachts 11 % Weiss, am Tag 32 %
+Dunkelblau, Nebel 36 % Grau), Karten mit dem dichteren `--hi-k` (42-74 %, damit Links, Warnrot und Diagramme lesbar
+bleiben). Jetzt REGLER unter Kacheln waehlen > Einstellungen > "Kacheln oben: Glas" > "Deckung" 0-100 % (`himmelKachel`,
+`hiKaDeck()`, `hiKachelGlas()`, `HI_KA_STD` 0 = wie bisher; nur in der Ansicht "Himmel" sichtbar): 0 = helles Glas,
+100 = exakt das Glas der Karten. `hiPruefen` merkt beide Farben (`HI.gT`, `HI.gK`), der Regler setzt nur `--hi-t` neu
+(kein Neubau der Szene). Gemischt wird VORMULTIPLIZIERT - geradlinig waere die Mitte nachts heller als beide Enden.
+Geprueft (Playwright, bedeckt / Nacht / Nebel): 0 % unveraendert, 100 % Kachel = Karte auf die Stelle genau
+(z. B. rgba(22,30,48,.66)), Wert ueberlebt Neuladen, klassische Ansichten unberuehrt. Die blaue "Faerbung wechselnder
+Kacheln" (seit v6.29 Voreinstellung 80 %) liegt weiter obendrauf - wechselnde Kacheln bleiben also blauer als die Karten.
+Wechselwirkung: der Regen hinter den Kacheln (v6.28, Regler "Kacheln" 50 %) wird durch dichteres Glas zusaetzlich
+gedaempft. Voreinstellung bleibt 0, bis der Nutzer einen Wert nennt. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

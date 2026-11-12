@@ -1452,7 +1452,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.29</span>
+      <span class="ver">v6.30</span>
     </div>
   </header>
 
@@ -2112,7 +2112,11 @@ function hiPruefen(){
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
   var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba("+(L.nebel?"28,31,36":"22,30,48")+","+ka.toFixed(2)+")";
   /* v6.21: im Nebel ist der Himmel neutral grau - das Glas dann ebenfalls ohne Blau (marineblaue Karten stachen heraus) */
-  root.style.setProperty("--hi-k",kk);root.style.setProperty("--hi-t",L.nebel?"rgba(22,25,30,.36)":lm>.25?"rgba(14,26,52,.32)":"rgba(255,255,255,.11)");
+  root.style.setProperty("--hi-k",kk);
+  /* v6.30: Grundglas der Kacheln (wie bisher) und Glas der Karten merken - hiKachelGlas mischt nach der Einstellung */
+  HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
+  HI.gK=(L.nebel?[28,31,36]:[22,30,48]).concat([+ka.toFixed(2)]);
+  hiKachelGlas();
   var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
   if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
   setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
@@ -2130,6 +2134,20 @@ function hiMini(){
   if(an){var l=(document.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"\u00b0  |  "+l;}
   document.documentElement.classList.toggle("himini",!!an);
 }
+/* v6.30 (Nutzer, iPhone-Bild 12.11. 08:25: "warum sind die Kacheln weniger gefaerbt als die anderen Container unten -
+   sollten die nicht gleich sein, oder kann ich das einstellen?"): die Kacheln oben hatten seit v6.12 ein eigenes,
+   helleres Glas (--hi-t: nachts 11 % Weiss, am Tag 32 % Dunkelblau), die Karten darunter das dichtere --hi-k (42-74 %).
+   Jetzt einstellbar: himmelKachel 0-100 %, 0 = wie bisher, 100 = genau das Glas der Karten. Gemischt wird
+   VORMULTIPLIZIERT (Farbe x Deckung) - geradlinig gemischt waere die Mitte nachts heller als beide Enden
+   (Weiss 11 % -> Dunkelblau 42 % liefe ueber ein Grau mit 26 %). */
+var HI_KA_STD=0;
+function hiKaDeck(){try{var v=parseFloat(localStorage.getItem("himmelKachel"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_KA_STD;}
+function hiKachelGlas(){
+  var t=HI.gT,k=HI.gK;if(!t||!k)return;
+  var p=hiKaDeck()/100,a=t[3]+(k[3]-t[3])*p,c=[0,1,2].map(function(i){return a>0?(t[i]*t[3]*(1-p)+k[i]*k[3]*p)/a:0;});
+  document.documentElement.style.setProperty("--hi-t",hiRgb(c,+a.toFixed(3)));
+}
+function hiKaSetzen(v){try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
 /* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
    gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
 function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
@@ -2138,6 +2156,9 @@ function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug"
 function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();}
 function hiAnzeigen(){
   var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
+  var kr=document.getElementById("hiRegKa"),kv=document.getElementById("hiRegKaV"),kd=hiKaDeck();
+  if(kr&&+kr.value!==kd){kr.value=kd;kzReglerFuell(kr);}
+  if(kv)kv.textContent=kd+"\u202f%";
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
   if(h)h.textContent=(z?"Die Wolken im Hintergrund ziehen – je nach Wind am Ort langsamer oder schneller.":"Die Wolken im Hintergrund stehen still."
       +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
@@ -7588,7 +7609,10 @@ function kzRender(){
                    +'<div class="kzhilf" id="sbHilf"></div>'
                    +'<div class="kzregt">Himmel im Hintergrund</div>'
                    +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
-                   +'<div class="kzhilf" id="hiHilf"></div>';
+                   +'<div class="kzhilf" id="hiHilf"></div>'
+                   +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
+                   +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
+                   +'<div class="kzhilf waKaZ">0 % = helles Glas wie bisher, 100 % = genauso dicht wie die Karten darunter (Stündlich, Temperaturverlauf …). Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
@@ -7598,7 +7622,8 @@ function kzRender(){
       const as=el("waRegSt"),ak=el("waRegKa"),az=()=>waESetzen(as.value,ak.value);
       as.value=waE().st;ak.value=waE().ka;
       [as,ak].forEach(x=>x.addEventListener("input",az));
-      [g,d,wt,wb,wf,as,ak].forEach(kzRegler);
+      const hk=el("hiRegKa");hk.value=hiKaDeck();hk.addEventListener("input",()=>hiKaSetzen(hk.value));
+      [g,d,wt,wb,wf,as,ak,hk].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
