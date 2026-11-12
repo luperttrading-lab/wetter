@@ -1486,7 +1486,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.33</span>
+      <span class="ver">v6.34</span>
     </div>
   </header>
 
@@ -1993,11 +1993,15 @@ function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};
    hohem Sockel). Jetzt eine S-Kurve fuer die nahe Lage in px/s: v = v0 + (vm - v0) x tanh((Wind/w0)^p).
    Unten flach (Windstille 0,8, 5 km/h 2,1, 10 km/h 4,3), in der Mitte steil (20 km/h 9,9, 35 km/h 18,5), oben
    gedeckelt (50 km/h 24,8, 60 km/h 27,2, 90 km/h 29,7). 35 gegen 5 km/h: Faktor 8,8; 60 gegen 35: nur noch 1,5.
-   Dazu ein Regler "Tempo" (himmelTempo 50-160 %, Faktor auf die ganze Kurve) und eine Wind-Vorschau in den
-   Einstellungen - das Tempo laesst sich nur am Geraet beurteilen, und zwei Orte sieht man nie nebeneinander. */
+   Dazu ein Regler "Tempo" (himmelTempo in Prozent, Faktor auf die ganze Kurve) und eine Wind-Vorschau in den
+   Einstellungen - das Tempo laesst sich nur am Geraet beurteilen, und zwei Orte sieht man nie nebeneinander.
+   v6.34 (Nutzer: "bei 30-35 km/h fast ein bisschen zu langsam - Regler mit Faktor, dabei stehen, wie schnell"):
+   Bereich x0,5 bis x3,0 (vorher 50-160 %), Anzeige als Faktor, im Hilfetext das Tempo in px/s und die Zeit fuer
+   eine Bildschirmbreite. HI_TEMPO_MAX gilt fuer Speicher und Regler gemeinsam. */
+var HI_TEMPO_MIN=50,HI_TEMPO_MAX=300;
 var HI_WIND={v0:.8,vm:30,w0:45,p:1.4};
 function hiWindTempo(w){return HI_WIND.v0+(HI_WIND.vm-HI_WIND.v0)*Math.tanh(Math.pow(Math.max(0,w)/HI_WIND.w0,HI_WIND.p));}
-function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(50,Math.min(160,v));}catch(e){}return 100;}
+function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(HI_TEMPO_MIN,Math.min(HI_TEMPO_MAX,v));}catch(e){}return 100;}
 /* Wind fuer die Wolken: Vorschau bzw. ?hwind= geht vor; feste Lagen (?himmel=) ohne Wind; sonst die Messung. null = unbekannt */
 function hiWindJetzt(){
   if(HI.testWind!=null)return HI.testWind;
@@ -2202,14 +2206,33 @@ function hiKaSetzen(v){try{localStorage.setItem("himmelKachel",String(+v));}catc
 function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
 function hiZug(){var e=hiZugEigen();return e!=null?e:(waReduziert()?0:1);}
 function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug",hiZugEigen()===1);r.classList.toggle("histeh",hiZug()===0);}
-/* v6.33: Wind-Vorschau (20 s) und Tempo-Regler */
+/* v6.33: Wind-Vorschau und Tempo-Regler. v6.34: Vorschau 60 s (vorher 20 - zu kurz, um dabei am Regler zu ziehen),
+   jeder Zug am Regler verlaengert sie, ein Tipp auf den aktiven Knopf beendet sie. */
+var HI_PROBE_MS=60000;
+function hiWindProbeEnde(){
+  clearTimeout(HI.wpT);HI.testWind=HI.urlWind!=null?HI.urlWind:null;HI.wp=null;HI.key="";hiPruefen();hiAnzeigen();
+}
 function hiWindProbe(w){
+  if(HI.wp===w){hiWindProbeEnde();return;}
   clearTimeout(HI.wpT);HI.testWind=w;HI.wp=w;HI.key="";hiPruefen();hiAnzeigen();
-  HI.wpT=setTimeout(function(){HI.testWind=HI.urlWind!=null?HI.urlWind:null;HI.wp=null;HI.key="";hiPruefen();hiAnzeigen();},20000);
+  HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);
 }
 function hiTempoSetzen(v){
   try{localStorage.setItem("himmelTempo",String(+v));}catch(e){}hiAnzeigen();
-  clearTimeout(HI.tpT);HI.tpT=setTimeout(function(){HI.key="";hiPruefen();},160);      /* beim Ziehen nicht je Schritt neu bauen */
+  if(HI.wp!=null){clearTimeout(HI.wpT);HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);}
+  /* beim Ziehen nicht je Schritt neu bauen */
+  clearTimeout(HI.tpT);HI.tpT=setTimeout(function(){HI.key="";hiPruefen();},160);
+}
+/* Tempo der nahen Wolkenlage in px/s, so wie es gerade gezeichnet wird (Nebel: langsamere Schwaden) */
+function hiTempoPx(){
+  var v0=7;try{if(hiLage().nebel)v0=3;}catch(e){}
+  return v0*hiTempo();
+}
+function hiZahl(x,n){return x.toFixed(n).replace(".",",");}
+function hiDauerTxt(s){
+  if(!isFinite(s)||s<=0)return "–";
+  if(s<90)return Math.round(s)+"\u00a0s";
+  return hiZahl(s/60,1)+"\u00a0min";
 }
 function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();}
 function hiAnzeigen(){
@@ -2222,9 +2245,12 @@ function hiAnzeigen(){
   try{wj=hiWindJetzt();}catch(e){}
   if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",HI.wp!=null&&+b.dataset.w===HI.wp);});
   if(tr&&+tr.value!==te){tr.value=te;kzReglerFuell(tr);}
-  if(tv)tv.textContent=te+"\u202f%";
-  if(h)h.textContent=(z?"Die Wolken ziehen je nach Wind am Ort: bei Windstille fast gar nicht, bei 35 km/h deutlich, ab etwa 60 km/h kaum noch schneller."
-        +(HI.wp!=null?" Vorschau: "+HI.wp+" km/h (20 Sekunden).":wj!=null?" Jetzt: "+wj+" km/h.":" Jetzt keine frische Windmessung – mittleres Tempo.")
+  if(tv)tv.textContent="×"+hiZahl(te/100,1);
+  var vp=0,bw=window.innerWidth||390;try{vp=hiTempoPx();}catch(e){}
+  var vt=(vp<10?hiZahl(vp,1):String(Math.round(vp)))+"\u00a0px/s, Bildschirmbreite in "+hiDauerTxt(bw/vp)+".";
+  if(h)h.textContent=(z?"Die Wolken ziehen je nach Wind am Ort: bei Windstille fast gar nicht, ab etwa 60 km/h kaum noch schneller. „Tempo“ ist ein Faktor auf alles."
+        +(HI.wp!=null?" Vorschau "+HI.wp+"\u00a0km/h (1\u00a0min, nochmal tippen = aus): "+vt
+          :wj!=null?" Jetzt "+wj+"\u00a0km/h: "+vt:" Jetzt keine frische Windmessung, mittleres Tempo: "+vt)
       :"Die Wolken im Hintergrund stehen still."
       +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
     +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
@@ -7695,7 +7721,7 @@ function kzRender(){
                    +'<div class="kzseg" id="hiSeg"><button type="button" data-h="0">Wolken stehen</button><button type="button" data-h="1">Wolken ziehen</button></div>'
                    +'<div class="kzhilf" id="hiHilf"></div>'
                    +'<div class="waprobe waKaZ" id="hiProbe"><span>Vorschau km/h:</span><button type="button" data-w="0">0</button><button type="button" data-w="10">10</button><button type="button" data-w="35">35</button><button type="button" data-w="70">70</button></div>'
-                   +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="160" step="10"><b id="hiRegTpV">–</b></label>'
+                   +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="300" step="10"><b id="hiRegTpV">–</b></label>'
                    +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
                    +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
                    +'<div class="kzhilf waKaZ">0 % = helles Glas wie bisher, 100 % = genauso dicht wie die Karten darunter (Stündlich, Temperaturverlauf …). Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
