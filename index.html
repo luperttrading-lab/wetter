@@ -84,6 +84,9 @@
   #waCv{position:absolute;left:0;top:0;z-index:-1;pointer-events:none;display:none;-webkit-mask-image:linear-gradient(#000 calc(100% - 30px),transparent);mask-image:linear-gradient(#000 calc(100% - 30px),transparent)}
   /* v6.18: in der Ansicht "Himmel" liegt die Leinwand ueber den Himmel-Szenen in #hi (ganzer Bildschirm, ohne Auslauf) */
   #hi>#waCv{z-index:3;-webkit-mask-image:none;mask-image:none}
+  /* v6.53: der Streifen oben liegt jetzt IN der Szene (unter dem Regen) - der Regen laeuft deshalb selbst darunter aus */
+  html:root.himmel #hi>#waCv,html:root.himmel #hiK>#waK{-webkit-mask-image:linear-gradient(transparent 0,transparent var(--sat),rgba(0,0,0,.1) calc(var(--sat) + 19px),rgba(0,0,0,.35) calc(var(--sat) + 38px),rgba(0,0,0,.65) calc(var(--sat) + 58px),rgba(0,0,0,.9) calc(var(--sat) + 77px),#000 calc(var(--sat) + 96px));
+    mask-image:linear-gradient(transparent 0,transparent var(--sat),rgba(0,0,0,.1) calc(var(--sat) + 19px),rgba(0,0,0,.35) calc(var(--sat) + 38px),rgba(0,0,0,.65) calc(var(--sat) + 58px),rgba(0,0,0,.9) calc(var(--sat) + 77px),#000 calc(var(--sat) + 96px))}
   #hiK>#waK{position:absolute;left:0;top:0;z-index:3;pointer-events:none}
   /* v6.10: das grosse Symbol aus Ebenen - je Teil ein <svg>, bewegt wird nur transform/opacity */
   .ib{position:relative;width:100%;height:100%}
@@ -1503,7 +1506,8 @@ html:root.himmel #stLeiste{display:none}
    Naht haben Balken und Seite dieselbe Farbe; sie folgt jedem Himmel (nachts dunkel). Regen (#waCv/#waK) laeuft mit
    aus. Mit durchscheinender Leiste (neues Symbol) sieht es genauso aus. */
 :root{--sat:var(--st-test,env(safe-area-inset-top,0px))}
-html:root.himmel #hi::after,html:root.himmel #hiK::after{content:"";position:absolute;left:0;top:0;width:100%;height:calc(var(--sat) + 96px);z-index:4;pointer-events:none;background:var(--hi-r,transparent);
+/* v6.53: der Streifen ist eine Ebene JEDER Szene (.hiB) und blendet mit ihr - vorher #hi::after / #hiK::after in --hi-r */
+.hiS>.hiB{position:absolute;left:0;top:0;width:100%;height:calc(var(--sat) + 96px);pointer-events:none;
   -webkit-mask-image:linear-gradient(#000 0,#000 var(--sat),rgba(0,0,0,.9) calc(var(--sat) + 19px),rgba(0,0,0,.65) calc(var(--sat) + 38px),rgba(0,0,0,.35) calc(var(--sat) + 58px),rgba(0,0,0,.1) calc(var(--sat) + 77px),transparent calc(var(--sat) + 96px));
   mask-image:linear-gradient(#000 0,#000 var(--sat),rgba(0,0,0,.9) calc(var(--sat) + 19px),rgba(0,0,0,.65) calc(var(--sat) + 38px),rgba(0,0,0,.35) calc(var(--sat) + 58px),rgba(0,0,0,.1) calc(var(--sat) + 77px),transparent calc(var(--sat) + 96px))}
 /* Hinweis im Kasten ("Warmer Sommertag ...", Frost): im Bild ein fast schwarzer Kasten (48,29,13) mit dunkelbrauner
@@ -1616,6 +1620,619 @@ html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
 </script>
 <div id="bg"></div>
 <div id="hi" aria-hidden="true"></div>
+<script>
+/* v6.53 (Nutzer 12.11., Bildschirmfilm 18:05 vom iPhone: "es wechselt immer noch mit unterschiedlichen Farben zu
+   Zeitpunkten" - "vor allem Kopf- und Fusszeile, die eine Farbe sind und nicht wie das Hintergrundbild"): das Himmel-
+   Modul steht jetzt in diesem fruehen Script direkt hinter #hi. Am iPhone malte die neue Seite ihr erstes Bild, bevor
+   das grosse Hauptscript lief - rund 0,17 s lang nur den einfarbigen Verlauf ohne Wolken (gemessen im Film). Jetzt
+   steht die erste Szene schon beim ersten Bild; nach einem Ortswechsel ist es der alte Himmel (hiWeiterMerken). */
+/* ===== v6.12 HIMMEL (Entwurf E, Schritt 2; Vorlage designtest.html) =====
+   Gemalt, kein Foto: Verlauf nach Sonnenhoehe (Tag blau, um den Horizont violett/orange, Nacht marineblau), ab 50 %
+   Bedeckung ins Grau gezogen (Regen dunkler). Wolken = Rauschen in 5 Oktaven (320x200, in beiden Richtungen nahtlos),
+   Schwelle = QUANTIL, damit wirklich N der Flaeche Wolke ist; zwei Lagen, die verschieden schnell ziehen (3,2 und 7
+   px/s). Sterne unter -3 Grad Sonnenhoehe, nur in der oberen Bildhaelfte. hiPassen() haelt den Himmel so dunkel, dass
+   weisse Schrift lesbar bleibt (Helligkeit hoechstens 40 %, Wolken 56 %).
+   Anders als die Testseite (Leinwand, 10 Bilder/s in JS): die Lagen sind kleine Leinwaende (640 x 200..600), die der
+   Browser streckt und per CSS-transform in Zehntelsekunden-Schritten schiebt - je Bild laeuft kein JS.
+   Nur var und Funktionen (Regel aus v6.06). */
+var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:null,texN:null,saat:0,ph0:0,weg:0};
+/* v6.18 (Nutzer: "haben wir bei bewoelkt immer das gleiche Bild - ein bisschen abwechselnd?"): bis v6.17 waren die
+   Rauschfelder (Saat 11 / 29), der Startversatz der Bewegung und die Sterne fest - jedes Oeffnen zeigte dasselbe Bild.
+   Jetzt wuerfelt hiNeuesBild() Saat und Versatz: beim Start und wenn die App laenger als 30 min im Hintergrund war
+   (am iPhone bleibt die Seite oft tagelang geladen). Innerhalb einer Sitzung bleibt das Muster - sonst spraengen die
+   Wolken bei jedem Wechsel der Himmelsfarbe. Die alten Felder werden verworfen (je Saat rund 0,5 MB). */
+function hiNeuesBild(){HI.saat=Math.floor(Math.random()*1e6);HI.ph0=Math.random()*2000;HI.feld={};HI.key="";}
+var HI_TW=320,HI_TH=200,HI_PER=3,HI_PY=4,HI_BLENDE=1300;
+/* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb|nebel|nachtnebel */
+var HI_LAGEN={meist:{h:21,N:.88},klar:{h:34,N:.04},heiter:{h:34,N:.35},wolkig:{h:30,N:.68},bedeckt:{h:24,N:1},regen:{h:20,N:1,nass:1},
+  abend:{h:-1.5,N:.3},nacht:{h:-32,N:.03},nachtw:{h:-32,N:.5},nachtb:{h:-32,N:1},
+  nebel:{h:20,N:1,nebel:1},nachtnebel:{h:-32,N:1,nebel:1}};
+function hiAn(){return document.documentElement.classList.contains("himmel");}
+function hiKl(x,a,b){return Math.max(a==null?0:a,Math.min(b==null?1:b,x));}
+function hiSm(a,b,x){var t=hiKl((x-a)/(b-a));return t*t*(3-2*t);}
+function hiMix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function hiLum(c){return (.2126*c[0]+.7152*c[1]+.0722*c[2])/255;}
+function hiRgb(c,a){return "rgba("+Math.round(c[0])+","+Math.round(c[1])+","+Math.round(c[2])+","+(a==null?1:a)+")";}
+function hiRauschen(seed){
+  function h(x,y,per,py){x=((x%per)+per)%per;y=((y%py)+py)%py;var n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
+    n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}
+  function vn(x,y,per,py){var xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+    var a=h(xi,yi,per,py),b=h(xi+1,yi,per,py),c=h(xi,yi+1,per,py),d=h(xi+1,yi+1,per,py);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;}
+  return function(x,y,per,py){var s=0,am=1,f=1,n=0;for(var o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7,per*f,py*f);n+=am;am*=.52;f*=2;}return s/n;};
+}
+function hiFeld(seed){
+  if(HI.feld[seed])return HI.feld[seed];
+  var fb=hiRauschen(seed),wp=hiRauschen(seed+17),F=new Float32Array(HI_TW*HI_TH);
+  for(var y=0;y<HI_TH;y++)for(var x=0;x<HI_TW;x++){
+    var u=x/HI_TW*HI_PER,v=y/HI_TH*HI_PY,w=wp(u,v,HI_PER,HI_PY)-.5;
+    F[y*HI_TW+x]=fb(u,v+w*1.1,HI_PER,HI_PY);}
+  var S=Float32Array.from(F).sort();
+  return HI.feld[seed]={F:F,S:S};
+}
+function hiTextur(seed,N,rand,kern){
+  var fs=hiFeld(seed),F=fs.F,S=fs.S,cv=document.createElement("canvas");cv.width=HI_TW;cv.height=HI_TH;
+  var c=cv.getContext("2d"),im=c.createImageData(HI_TW,HI_TH),D=im.data;
+  /* v6.17: bei geschlossener Decke (thr < 0) laeuft Hell -> Dunkel zwischen dem 10. und 90. Perzentil des Rauschens
+     (vorher fast der ganze Wertebereich: die meisten Pixel lagen im Mittelton, die Decke wirkte wie Nebel) */
+  var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[Math.floor(.1*(S.length-1))],hi=S[Math.floor(.9*(S.length-1))];
+  /* v6.45: bei 7/8 lag fast die ganze Wolkenflaeche im dunklen "Kern" (hell war nur der schmale Saum an den Luecken,
+     Fenster thr..thr+0,28) - das Bild war dunkler und blauer als die geschlossene Decke. Ab ~75 % Bedeckung weitet sich
+     das Fenster bis zum 90. Perzentil (wie bei der Decke): hell und dunkel verteilen sich ueber die ganze Wolke. */
+  var wf=hiSm(.74,.9,N),se=thr+.28+(Math.max(hi,thr+.28)-(thr+.28))*wf;
+  for(var i=0;i<F.length;i++){
+    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo,hi,f):hiSm(thr,se,f);
+    D[i*4]=rand[0]+(kern[0]-rand[0])*s;D[i*4+1]=rand[1]+(kern[1]-rand[1])*s;D[i*4+2]=rand[2]+(kern[2]-rand[2])*s;D[i*4+3]=a*255;}
+  c.putImageData(im,0,0);return cv;
+}
+function hiPassen(c,wolke,lmax){var L=hiLum(c),Lmax=lmax||(wolke?.56:.4);return L>Lmax?c.map(function(v){return v*Lmax/L;}):c;}
+/* v6.21 NEBEL (Nutzer 11.11. 17:58, drei Orte bei uns und bei Apple nebeneinander): bei "Nebel" zeigte der Himmel
+   dasselbe Bild wie "bedeckt" - dunkelblau mit kraeftiger Wolkenstruktur (im Bild 36..96, links/rechts bis 50
+   Einheiten auseinander). Apple zeigt Dunst als fast gleichfoermiges, neutrales Grau, oben etwas dunkler als unten
+   (gemessen 108,108,102 -> 127,128,124, Streuung 1). Jetzt eigenes Bild: neutrales Grau ohne Blau, eine einzige
+   Schwadenlage mit wenig Abstand zwischen hell und dunkel, halb durchscheinend, gross und langsam (hiNah); keine
+   Sterne, kein Sonnenschein. Dunkler als bei Apple, weil der Himmel hoechstens 40 % hell sein darf (weisse Schrift). */
+function hiNebelFarben(L){
+  var tg=hiSm(-5,9,L.h);
+  return {top:hiPassen(hiMix([84,85,82],[104,106,104],tg),0),bot:hiPassen(hiMix([106,107,103],[124,126,124],tg),0),
+    rand:hiPassen(hiMix([126,127,122],[168,170,168],tg),1),kern:hiPassen(hiMix([98,99,96],[124,126,124],tg),1),
+    sterne:0,glanz:0,schleier:.45,nebel:1};
+}
+/* die nahe Wolkenlage: Massstab (x Fensterbreite), Tempo in px/s, Deckkraft - bei Nebel gross, langsam, halb */
+function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};}
+/* v6.29 (Nutzer: "die Windstaerke fuer die Wolken beruecksichtigen"): Tempo der Wolkenlagen = Grundtempo x hiTempo.
+   12 km/h = wie bisher (nah 7 px/s), Windstille 0,3-fach (zieht kaum), 30 km/h doppelt, ab ~55 km/h 3,6-fach (25 px/s).
+   Gemessen wird der Wind in 10 m Hoehe (waWind) - in Wolkenhoehe weht es meist staerker und aus leicht anderer
+   Richtung; fuer ein Hintergrundbild genuegt die Bodenmessung. Die RICHTUNG bleibt fest (nach links): ein Handy hat
+   kein Norden, links/rechts haette keine Bedeutung. Ohne frische Messung Faktor 1. */
+/* v6.33 (Nutzer 12.11.: "bei 4 km/h bei uns schon recht zuegig, in Norden mit 35 km/h nicht so viel Unterschied -
+   verstaerken? oder wird das bei noch mehr Wind zu viel? eine nicht lineare Skala, die bei 60 km/h nicht nochmal
+   verdoppelt"). Nachgemessen: 5 km/h = 4,1 px/s, 35 km/h = 16,5 px/s - nur Faktor 4 (v6.29: 0,3 + Wind/17, geradlinig mit
+   hohem Sockel). Jetzt eine S-Kurve fuer die nahe Lage in px/s: v = v0 + (vm - v0) x tanh((Wind/w0)^p).
+   Unten flach (Windstille 0,8, 5 km/h 2,1, 10 km/h 4,3), in der Mitte steil (20 km/h 9,9, 35 km/h 18,5), oben
+   gedeckelt (50 km/h 24,8, 60 km/h 27,2, 90 km/h 29,7). 35 gegen 5 km/h: Faktor 8,8; 60 gegen 35: nur noch 1,5.
+   Dazu ein Regler "Tempo" (himmelTempo in Prozent, Faktor auf die ganze Kurve) und eine Wind-Vorschau in den
+   Einstellungen - das Tempo laesst sich nur am Geraet beurteilen, und zwei Orte sieht man nie nebeneinander.
+   v6.34 (Nutzer: "bei 30-35 km/h fast ein bisschen zu langsam - Regler mit Faktor, dabei stehen, wie schnell"):
+   Bereich x0,5 bis x3,0 (vorher 50-160 %), Anzeige als Faktor, im Hilfetext das Tempo in px/s und die Zeit fuer
+   eine Bildschirmbreite. HI_TEMPO_MAX gilt fuer Speicher und Regler gemeinsam. */
+/* v6.35: Standard x2,0 - vom Nutzer am iPhone gewaehlt (12.11.: "bei 30-35 km/h fast zu langsam" -> "nimm 2,0") */
+var HI_TEMPO_MIN=50,HI_TEMPO_MAX=300,HI_TEMPO_STD=200;
+var HI_WIND={v0:.8,vm:30,w0:45,p:1.4};
+function hiWindTempo(w){return HI_WIND.v0+(HI_WIND.vm-HI_WIND.v0)*Math.tanh(Math.pow(Math.max(0,w)/HI_WIND.w0,HI_WIND.p));}
+function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(HI_TEMPO_MIN,Math.min(HI_TEMPO_MAX,v));}catch(e){}return HI_TEMPO_STD;}
+/* Wind fuer die Wolken: Vorschau bzw. ?hwind= geht vor; feste Lagen (?himmel=) ohne Wind; sonst die Messung. null = unbekannt */
+function hiWindJetzt(){
+  if(HI.testWind!=null)return HI.testWind;
+  if(HI.test)return null;
+  try{return waWind();}catch(e){return null;}
+}
+function hiTempo(){
+  var w=hiWindJetzt();
+  return Math.round((w==null?1:hiWindTempo(w)/7)*hiTempoEigen())/100;
+}
+function hiFarben(L){
+  if(L.nebel)return hiNebelFarben(L);
+  /* v6.41 (Nutzer 12.11. 12:29, Erlental "Bewoelkt" neben Apple "Meist bewoelkt": "fuer diese Uhrzeit viel zu dunkel -
+     ist ja tagsueber und nicht Daemmerung"). GEMESSEN: unser Bild im Mittel (88,106,132) = 109 von 255, Apple
+     (131,160,199) = 163; Apples Wolken 176-210, unsere 95-119; unten bei Apple Blau (89,132,186 -> 147,179,218), bei
+     uns Grau (94,113,138). URSACHE: der Grauanteil g begann bei 50 % Bedeckung - bei 88 % (7/8, "meist bewoelkt")
+     waren Himmel und Wolken schon zu 75 % Schiefergrau wie unter einer geschlossenen Regendecke. Jetzt beginnt er bei
+     80 % (88 % -> 0,31, 95 % -> 0,74, 100 % -> 0,88); bis dahin helle Wolken vor blauem Himmel. Dazu am Tag: Wolken
+     duerfen heller sein (Grenze 67 statt 56 %, unter der geschlossenen Decke 62 % - dort steht kleine Schrift auf den hellsten Stellen sonst nur noch 2 : 1), die geschlossene Decke ist heller (Wolke 168,176,190 statt 152,162,180,
+     Luecke 100,112,134 statt 64,76,96), und die Wolken laufen nach unten aus (C.fade) - unten steht wie bei Apple der
+     blaue Himmel, ruhig hinter den Karten. Die Schrift bekommt dafuer den dunkelblauen Saum (C.hell -> Klasse hison). */
+  /* v6.45 (Nutzer 12.11. 13:22, Huettenberg "Bewoelkt" neben Apple "Bewoelkt": "fuer bewoelkt ein bisschen zu blau").
+     GEMESSEN am linken Rand: Apple (98,108,120) Saettigung 18 %, wir (109,136,175) 38 %; unsere Szene bei 100 %
+     Bedeckung hat 20 % - die Farbe stimmt also, sie kam nur zu spaet: Station 88 % (7/8), g war dort 0,31. v6.41 hatte
+     den Beginn von 50 auf 80 % geschoben (Anlass damals "zu dunkel" - das Dunkle war die Decke selbst, die seit v6.41
+     heller ist). Jetzt 74-90 %: 6/8 (75 %) -> 0,01, 80 % -> 0,28, 85 % -> 0,68, 7/8 (88 %) -> 0,84, ab 90 % 0,88. Bis
+     6/8 also weiter helle Wolken vor Blau; ab 7/8 steht oben das Wort "Bewoelkt" - dazu gehoert ein ueberwiegend
+     grauer Himmel. Die grauen Grundfarben dazu etwas neutraler (Grund 90,101,120 / 110,121,140, Luecke 102,113,131;
+     vorher 86,100,124 / 108,122,144 / 100,112,134). Apples Wechsel "Meist bewoelkt" (hell, blau) / "Bewoelkt" (grau) laesst sich
+     aus der Stationsmeldung nicht nachbilden: beide Male meldete sie 88 %. */
+  var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.74,.9,N)*(L.nass?1:.88);
+  /* v6.37 (Nutzer 12.11. 11:28, Apple-Wetter und unsere App fuer denselben Strand: "die Farben sind beim iPhone
+     wesentlich besser, die Sonne wird eingeblendet"). GEMESSEN in den Bildern: Apple Himmel oben (68,105,152), unten
+     (126,167,219), Wolkenschleier (110,138,173) - blau; bei uns Wolken (129,139,155) = neutrales GRAU ueber dem halben
+     Bild, Kacheln (57,87,128). Ursache im Code: die Tagfarben wurden von hiPassen GLEICHMAESSIG abgedunkelt - aus
+     weissen Wolken (255,255,255) wurde (143,143,143), aus dem hellen Blau unten (152,202,246) ein Graublau
+     (80,106,129). Jetzt Farben, die bei derselben Helligkeit BLAU bleiben: Wolkenrand (196,218,250) -> (130,144,166),
+     Wolkenkern (102,134,186), Himmel unten (98,152,226) mit eigener Grenze 50 % (= die Helligkeit von Apples Karten,
+     auf denen dort weisse Schrift steht; oben bleibt es bei 40 %). */
+  /* v6.39 (Nutzer: "den Hintergrund noch ein bisschen in der Farbe angepasst"): Apple "Luxor" gemessen oben
+     (63,100,150), Mitte (73,115,170), unten (121,164,219) - oben gedeckter, nach unten deutlich heller; wir waren oben
+     kraeftiger (61,118,203) und fast ohne Verlauf (unten 84,132,198). Jetzt etwa auf halbem Weg: oben (52,102,176),
+     unten (104,150,212) mit Grenze 53 % -> (97,140,198). */
+  var top=hiMix([9,13,38],[52,102,176],tag),bot=hiMix([54,62,112],[104,150,212],tag);
+  top=hiMix(top,[72,70,134],daem*.6);bot=hiMix(bot,[244,164,118],daem*.8);
+  /* v6.17 BEDECKT (Nutzer 11.11., Vergleich mit Apple "Bewoelkt": "bei uns sieht es nach Nebel aus"). Gemessen im
+     Bildschirmfoto: unser Himmel war eine voellig gleichfoermige Flaeche (137,143,152), Apple (105..141,115..149,
+     129..161) mit Helligkeit 95-141 nebeneinander. Ursache: helle und dunkle Wolkenfarbe (206,212,222 / 150,160,176)
+     wurden von hiPassen beide auf dieselbe Helligkeit gedrueckt. Jetzt Schieferblau mit echtem Abstand: Wolke hell
+     (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); bei Regen dunkler. */
+  var gt=hiMix([22,26,36],L.nass?[64,76,98]:[90,101,120],tag),gb=hiMix([44,50,66],L.nass?[86,98,118]:[110,121,140],tag);
+  top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
+  var rand=hiMix([92,98,138],[196,218,250],tag),kern=hiMix([58,62,98],[102,134,186],tag);
+  rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
+  var or=hiMix([78,84,104],L.nass?[140,150,166]:[168,176,190],tag),ok=hiMix([40,45,60],L.nass?[76,88,108]:[102,113,131],tag);
+  rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
+  /* SONNE (v6.37, seit v6.38 Schein ohne Scheibe): nur am Tag, trocken und solange die Sonne durchkommt - voll bis ~55 %
+     Bedeckung, ab ~90 % nichts mehr. Tief stehend waermer (und unter 7 Grad schwaecher). Aus: himmelSonne = "0". */
+  var so=(L.nass||!hiSonneAn())?0:hiSm(.5,7,h)*(1-hiSm(.55,.92,N));
+  return {top:hiPassen(top,0,.4+.05*tag*g),bot:hiPassen(bot,0,.4+.13*tag),rand:hiPassen(rand,1,.56+.11*tag*(1-.55*g)),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.12,schleier:g,
+    sonne:+so.toFixed(2),sonneF:hiMix([255,222,168],[255,250,238],hiSm(3,18,h)),
+    fade:+(.9*tag*(1-hiSm(.8,.97,N))).toFixed(2),hell:so>.3||(tag>.6&&N>.3)};
+}
+function hiSonneAn(){try{return localStorage.getItem("himmelSonne")!=="0";}catch(e){return true;}}
+function hiSonneSetzen(v){try{localStorage.setItem("himmelSonne",v?"1":"0");}catch(e){}HI.key="";hiPruefen();hiAnzeigen();}
+/* Die Sonne liegt UNTER den Wolken (sie ziehen davor vorbei), ein schwaecherer Schein noch einmal DARUEBER - eine
+   Wolke vor der Sonne leuchtet dann auf, statt sie einfach auszuknipsen. Nur CSS-Verlaeufe, steht still, kostet
+   nichts. Ort: links der Mitte knapp unter dem Kopf, in der Luecke zwischen "Live" und dem Datum ueber der grossen
+   Temperatur (B.sx/B.sy aus hiPruefen) - dort liegt bei 320-430 pt kein Text unter dem Kern.
+   v6.38 (Nutzer: "als Kugel, als Scheibe wie den Mond ist schwierig - die Sonne ist so strahlend, dass man sie nicht
+   wirklich sieht"): KEINE Scheibe mehr. Gemessen in seinem Apple-Bild: Kern fast weiss (Radius ~31 pt), danach
+   faellt die Helligkeit stetig ueber ~200 pt ab, groesster Sprung zwischen Nachbarpixeln 4 von 255 - es gibt keinen
+   Rand; im Pressebild (iOS 15, "Sunnyvale") dazu Strahlen. Jetzt ein Kern, der ohne Kante auslaeuft, und vier
+   feine Lichtstreifen (acht Strahlen, ungleich lang) als gedrehte Ellipsen. HI_STRAHL: Winkel, halbe Laenge und
+   Dicke in Kernradien, Deckkraft. */
+/* v6.39 (Nutzer 12.11., Apple "Luxor" neben unserer v6.38: "die Sonne so gross und mit dem groesseren Schein aussen
+   rum, aehnlich wie auf der iPhone-App"). GEMESSEN bei Apple (Ringmittel um die Sonne, Hintergrund ~128): fast weiss
+   (245) nur bis 15-20 pt - aber dann faellt es LANGSAM: 222 bei 30 pt, 195 bei 45, 177 bei 60, 157 bei 80, 149 bei 110,
+   erst bei ~190 pt ist der Schein weg; dazu ein blasser Ring bei ~155 pt. Unsere v6.38: fast weiss bis 16 pt, bei
+   64 pt schon fast nichts. Gross wirkt Apples Sonne also durch den weiten Schein, nicht durch den Kern.
+   HI_SONNE_P = Apples Profil x 0,93: [Abstand in Kernradien (B.sr = 24 pt bei 393 pt Breite), Deckkraft].
+   HI_STRAHL: vier breite kurze Ellipsen = achtzackiger Stern wie bei Apple, drei feine lange Strahlen.
+   [Winkel, halbe Laenge, Dicke (in B.sr), Deckkraft] */
+var HI_SONNE_P=[[0,1],[.58,.98],[.83,.93],[1.04,.84],[1.25,.74],[1.46,.65],[1.67,.57],[2.08,.46],[2.5,.37],[2.92,.3],[3.33,.23],[3.96,.19],[4.58,.15],[5.2,.12],[6.04,.06],[7.08,.025],[7.92,0]];
+var HI_STRAHL=[[22,1.7,.6,.8],[67,1.7,.6,.8],[112,1.7,.6,.8],[157,1.7,.6,.8],[40,3.4,.15,.36],[97,3,.14,.32],[152,3.2,.14,.34]];
+var HI_RING=[6.3,.7,.075];
+function hiSonneA(d,r){
+  var q=d/r,P=HI_SONNE_P,i,t;if(q>=P[P.length-1][0])return 0;
+  for(i=1;i<P.length;i++)if(q<=P[i][0]){t=(q-P[i-1][0])/(P[i][0]-P[i-1][0]);return P[i-1][1]+(P[i][1]-P[i-1][1])*t;}
+  return 0;}
+function hiSonne(s,C,B,vorn){
+  var x=B.sx.toFixed(0)+"px "+B.sy.toFixed(0)+"px",r=B.sr,f=C.sonneF.map(Math.round).join(","),d=document.createElement("div"),g;
+  d.className="hiSo";
+  if(vorn)g="radial-gradient(circle "+(r*3.4).toFixed(0)+"px at "+x+",rgba("+f+",.26),rgba("+f+",.09) 42%,rgba("+f+",0))";
+  else{
+    var P=HI_SONNE_P,R=P[P.length-1][0],rr=HI_RING,ro=rr[0]+rr[1],pz=function(v){return (v/ro*100).toFixed(1)+"%";};
+    g="radial-gradient(circle "+(r*R).toFixed(0)+"px at "+x+","+P.map(function(q){
+        return "rgba("+(q[1]>.8?"255,255,255":f)+","+q[1]+") "+(q[0]/R*100).toFixed(1)+"%";}).join(",")+"),"
+      /* der Ring (22-Grad-Halo): innen warm, aussen kuehl, sehr blass */
+      +"radial-gradient(circle "+(r*ro).toFixed(0)+"px at "+x+",rgba(255,226,196,0) "+pz(rr[0]-rr[1])+",rgba(255,226,196,"+(rr[2]*.8).toFixed(3)+") "+pz(rr[0]-rr[1]/3)
+      +",rgba(255,255,255,"+rr[2]+") "+pz(rr[0])+",rgba(196,222,255,"+(rr[2]*.8).toFixed(3)+") "+pz(rr[0]+rr[1]/3)+",rgba(196,222,255,0) 100%)";}
+  d.style.cssText="width:"+B.w+"px;height:"+B.h+"px;opacity:"+C.sonne.toFixed(2)+";background:"+g;
+  if(!vorn)HI_STRAHL.forEach(function(q){
+    var L=r*q[1],h=r*q[2],e=document.createElement("i");
+    e.style.cssText="display:block;position:absolute;left:"+(B.sx-L).toFixed(1)+"px;top:"+(B.sy-h/2).toFixed(1)+"px;width:"+(2*L).toFixed(1)+"px;height:"+h.toFixed(1)+"px;transform:rotate("+q[0]+"deg);background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,255,255,"+q[3]+"),rgba(255,255,255,"+(q[3]*.38).toFixed(2)+") 34%,rgba(255,255,255,0))";
+    d.appendChild(e);});
+  s.appendChild(d);
+}
+/* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
+   im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
+/* v6.53: Sonnenhoehe ohne Hauptscript (gleiche Formel wie _muFallback), Ort aus dem gespeicherten Profil */
+function hiMuFrueh(ms){
+  var la=50.6481,lo=8.6743;try{var p=JSON.parse(localStorage.getItem("locProfile")||"null");if(p&&isFinite(p.lat)&&isFinite(p.lon)){la=+p.lat;lo=+p.lon;}}catch(e){}
+  var d=new Date(ms),N=Math.floor((ms-Date.UTC(d.getUTCFullYear(),0,0))/864e5),g=2*Math.PI*(N-1)/365;
+  var decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  var eot=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  var utcH=d.getUTCHours()+d.getUTCMinutes()/60+d.getUTCSeconds()/3600;
+  var H=(utcH+lo/15+eot/60-12)*15*Math.PI/180,phi=la*Math.PI/180;
+  return Math.sin(phi)*Math.sin(decl)+Math.cos(phi)*Math.cos(decl)*Math.cos(H);
+}
+/* v6.53: solange der Inhalt beim Start verborgen ist (Klasse sanft, sanftZeigen noch nicht gelaufen) */
+function hiWartet(){return document.documentElement.classList.contains("sanft")&&!(typeof SANFT!=="undefined"&&SANFT&&SANFT.fertig);}
+function hiLage(){
+  if(HI.test&&HI_LAGEN[HI.test])return HI_LAGEN[HI.test];
+  var mu=null;try{if(window.satellite)mu=_sunMu(Date.now());}catch(e){mu=null;}
+  if(mu==null||!isFinite(mu)){try{mu=(typeof _muFallback==="function")?_muFallback(Date.now()):hiMuFrueh(Date.now());}catch(e){mu=null;}}
+  var h=(mu==null||!isFinite(mu))?-20:Math.round(Math.asin(hiKl(mu,-1,1))*360/Math.PI)/2;
+  var ic=(typeof _zuIc==="undefined")?null:_zuIc,N=null,nass=0,nebel=0;
+  if(ic==null){
+    var vor=[];try{vor=String(localStorage.getItem("himmelFarbe")||"").split("|");}catch(e){}
+    /* Feld 4: 0 trocken, 1 nass, 2 Nebel (v6.21) */
+    N=(vor.length>=4&&isFinite(+vor[2]))?+vor[2]:.3;nass=(vor.length>=4&&+vor[3]===1)?1:0;nebel=(vor.length>=4&&+vor[3]===2)?1:0;
+  }else{
+    try{if(snap&&snap.cloud!=null&&isFinite(snap.cloud))N=snap.cloud/100;}catch(e){}
+    if(N==null)N=/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95;
+    nass=/rain|sleet|snow|hail|thunder/.test(ic)?1:0;
+    nebel=ic==="fog"?1:0;
+  }
+  if(nebel)return {h:h,N:1,nass:0,nebel:1};
+  return {h:h,N:nass?Math.max(N,.92):hiKl(N),nass:nass};
+}
+/* Die Hoehe grosszuegig: in Safari blendet die Leiste ein und aus (innerHeight springt um bis zu ~180 px) - der
+   Himmel soll dabei nicht neu gebaut werden. */
+function hiMass(){
+  var ih=window.innerHeight||600,sh=(window.screen&&screen.height)||0;
+  return {w:document.documentElement.clientWidth||window.innerWidth||390,h:Math.max(ih,Math.min(sh,ih+200))};
+}
+function hiSterne(sz,B,a,hmax){
+  var hs=Math.min(B.h*.86,hmax||1e9),d=Math.min(2,window.devicePixelRatio||1),c=document.createElement("canvas");
+  c.width=Math.round(B.w*d);c.height=Math.round(hs*d);c.style.cssText="width:"+B.w+"px;height:"+hs.toFixed(1)+"px;opacity:"+a.toFixed(2);
+  var g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
+  var z=(7+HI.saat)|0;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
+  var n=Math.round(B.w*B.h/900);
+  for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
+    if(al<.03||y>hs+5)continue;
+    g.fillStyle="rgba("+(q>.9?"255,236,214":"236,240,255")+","+al.toFixed(3)+")";g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
+    if(q>.97){g.fillStyle="rgba(236,240,255,.12)";g.beginPath();g.arc(x,y,4,0,6.3);g.fill();}}
+  sz.appendChild(c);
+}
+/* Eine Wolkenlage: die Textur zweimal nebeneinander (und so oft untereinander, wie die Hoehe braucht) auf eine kleine
+   Leinwand; der Browser streckt sie auf Bildgroesse und schiebt sie um genau eine Texturbreite (-50 %) - nahtlos. */
+function hiWolke(sz,tex,B,sc,v0,a,dy,off,hmax,fade){
+  var tw=B.w*sc,th=tw*HI_TH/HI_TW,n=Math.max(1,Math.ceil(((hmax||B.h)-dy)/th)),c=document.createElement("canvas");
+  c.width=HI_TW*2;c.height=HI_TH*n;var g=c.getContext("2d");
+  for(var r=0;r<n;r++){g.drawImage(tex,0,r*HI_TH);g.drawImage(tex,HI_TW,r*HI_TH);}
+  /* v6.41: am Tag duennen die Wolken zwischen 40 und 84 % der Bildschirmhoehe aus (einmal ins Bild gerechnet, kostet
+     beim Ziehen nichts); bei geschlossener Decke und nachts nicht */
+  if(fade>.02){var Hc=c.height,y1=hiKl((B.h*.4-dy)/th*HI_TH/Hc),y2=hiKl((B.h*.84-dy)/th*HI_TH/Hc),gr=g.createLinearGradient(0,0,0,Hc),rest="rgba(0,0,0,"+(1-fade).toFixed(2)+")";
+    gr.addColorStop(0,"#000");gr.addColorStop(y1,"#000");if(y2>y1)gr.addColorStop(y2,rest);gr.addColorStop(1,rest);
+    g.globalCompositeOperation="destination-in";g.fillStyle=gr;g.fillRect(0,0,c.width,Hc);g.globalCompositeOperation="source-over";}
+  /* v6.29: Tempo v0 x HI.f (Wind). Die Lage der Textur haengt am aufsummierten WEG HI.s (Sekunden bei Grundtempo),
+     nicht an der Uhr - sonst spraengen die Wolken bei jedem Tempowechsel. Schritte: einer je ~0,7 px (wie die nahe
+     Lage bisher), 4 bis 20 je Sekunde - bei Windstille weniger Arbeit, bei Sturm kein Ruckeln. */
+  var f=HI.f||1,v=v0*f,dur=tw/v,ph=((HI.s+off+HI.ph0)*v0/tw%1)*dur,sps=hiKl(v/.7,4,20);
+  c.className="hiW";
+  c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.max(2,Math.round(dur*sps))+");--hv:-"+ph.toFixed(2)+"s";
+  sz.appendChild(c);
+}
+function hiGlanzR(B){return (B.aw||B.w)*.8;}
+function hiSzene(ziel,C,L,B,hmax,links){
+  var s=document.createElement("div");s.className="hiS";
+  var g="linear-gradient("+hiRgb(C.top)+","+hiRgb(C.bot)+")";
+  var son=C.sonne>.03&&B.sx!=null;
+  /* v6.37: der weite Schein sitzt an der Sonne (vorher fest oben rechts) */
+  if(C.glanz>.02)g="radial-gradient(circle "+hiGlanzR(B).toFixed(0)+"px at "+(B.sx!=null?B.sx:B.w*.86).toFixed(0)+"px "+(B.sx!=null?B.sy:B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
+  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
+  if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
+  if(son)hiSonne(s,C,B,0);
+  if(L.N>.04&&HI.texF&&HI.texN){
+    var nh=hiNah(L);
+    if(L.N<.985)hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax,C.fade);      // unter einer geschlossenen Decke saehe man sie nicht
+    hiWolke(s,HI.texN,B,nh.sc,nh.v,nh.a,-B.h*.1,40,hmax,C.fade);
+    if(son)hiSonne(s,C,B,1);}
+  /* v6.17: je bedeckter, desto staerker ein Schleier ueber den Wolken - oben etwas dunkler, die untere Haelfte laeuft
+     in die Grundfarbe aus (bei Apple ist der Himmel hinter den Karten ebenfalls ruhig; die Karten bleiben lesbar) */
+  if(C.schleier>.03){var v=document.createElement("div");v.className="hiV";
+    v.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:linear-gradient("+hiRgb(C.top,(.58*C.schleier).toFixed(3))+" 0%,"+hiRgb(C.top,0)+" 34%,"+hiRgb(C.bot,0)+" 46%,"+hiRgb(C.bot,(.8*C.schleier).toFixed(3))+" 100%)";
+    s.appendChild(v);}
+  /* v6.53: der Streifen in Balkenfarbe oben (v6.47) gehoert zur Szene und blendet mit ihr - als eigene Ebene (#hi::after,
+     Farbe per Variable) hing er am iPhone beim Ueberblenden hinter dem Rest her */
+  if(C.band){var bd=document.createElement("div");bd.className="hiB";bd.style.background=C.band;s.appendChild(bd);}
+  ziel.appendChild(s);return s;
+}
+/* v6.14 (Nutzer-Bild vom iPhone, 10.11. 22:45): die Statusleiste ist dort ein deckender Balken in der Farbe
+   "theme-color" - der Himmel geht nicht darunter weiter. Bis v6.13 stand dort die obere Farbe des VERLAUFS; bei
+   bedecktem Himmel liegen aber hellere Wolken davor, und man sah eine harte Kante. Jetzt die mittlere Farbe des
+   obersten Streifens (64 px), Wolken eingerechnet: Mittel ueber die ganze Texturbreite, weil die Wolken ziehen. */
+function hiRand(C,L,B,ohneSonne){
+  var c=C.top.slice();
+  function lage(tex,sc,a,dy){
+    if(!tex)return;
+    var th=B.w*sc*HI_TH/HI_TW,r0=Math.floor(((-dy)/th*HI_TH)%HI_TH),n=Math.max(1,Math.min(HI_TH-r0,Math.round(64/th*HI_TH))),d;
+    try{d=tex.getContext("2d").getImageData(0,r0,HI_TW,n).data;}catch(e){return;}
+    var sr=0,sg=0,sb=0,sa=0;for(var i=0;i<d.length;i+=4){var al=d[i+3]/255;sr+=d[i]*al;sg+=d[i+1]*al;sb+=d[i+2]*al;sa+=al;}
+    if(sa>0)c=hiMix(c,[sr/sa,sg/sa,sb/sa],sa/(d.length/4)*a);
+  }
+  if(L.N>.04){var nh=hiNah(L);if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,nh.sc,nh.a,-B.h*.1);}
+  if(C.schleier>.03)c=hiMix(c,C.top,.58*C.schleier*(1-32/(.34*B.h)));       // der Schleier bei y = 32 px
+  /* v6.37: der weite Sonnenschein hellt auch den obersten Streifen auf - im Bild vom 12.11. war die Statusleiste
+     (54,112,196) kraeftiger als der Himmel direkt darunter (73,117,181). Mittel ueber die Breite bei y = 32 px. */
+  /* v6.39: dazu der Schein der Sonne selbst, gemessen dicht unter der Statusleiste (Kopfunterkante - 60 px) */
+  if(!ohneSonne&&B.sx!=null&&(C.glanz>.02||C.sonne>.03)){var R=hiGlanzR(B),sm=0,ss=0,nn=16,ys=Math.max(16,(B.kb||92)-60);
+    for(var q=0;q<nn;q++){var dx=(q+.5)/nn*B.w-B.sx,dd=Math.sqrt(dx*dx+(ys-B.sy)*(ys-B.sy));sm+=Math.max(0,1-dd/R);ss+=hiSonneA(dd,B.sr||22);}
+    if(C.glanz>.02)c=hiMix(c,[255,244,214],C.glanz*sm/nn);
+    if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
+  return c;
+}
+/* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
+function hiWeiterMerken(){
+  if(!hiAn()||!HI.L||!HI.sT)return;
+  var jz=performance.now(),L=HI.L;
+  var B=HI.B||{};
+  sessionStorage.setItem("hiWeiter",JSON.stringify({saat:HI.saat,ph:HI.ph0+(HI.s||0)+(jz-HI.sT)/1000*(HI.f||1),f:HI.f||1,t:Date.now(),
+    L:{h:L.h,N:L.N,nass:L.nass?1:0,nebel:L.nebel?1:0},B:B.sx!=null?{w:B.w,aw:B.aw,sr:B.sr,sx:B.sx,sy:B.sy,kb:B.kb}:null}));
+}
+function hiInit(){
+  HI.init=1;
+  try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];
+      var mw=/[?&]hwind=(\d+)/.exec(location.search);if(mw){HI.testWind=+mw[1];HI.urlWind=+mw[1];}}catch(e){}
+  window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
+  window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
+  setInterval(hiPruefen,60000);
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){HI.weg=Date.now();return;}
+    if(HI.weg&&Date.now()-HI.weg>30*60e3)hiNeuesBild();
+    hiPruefen();});
+  hiNeuesBild();
+  /* v6.52: nach einem Ortswechsel denselben Himmel weiterfuehren - gleiches Muster, Wolken an derselben Stelle, gleiche
+     Lage (Sonnenhoehe, Bedeckung) wie auf der alten Seite; erst sanftZeigen blendet zum neuen Ort ueber */
+  try{var hw=JSON.parse(sessionStorage.getItem("hiWeiter")||"null");sessionStorage.removeItem("hiWeiter");
+    if(hw&&isFinite(hw.saat)&&isFinite(hw.ph)&&hw.L&&isFinite(hw.L.N)&&Math.abs(Date.now()-hw.t)<15000){
+      HI.saat=hw.saat;HI.ph0=hw.ph+Math.max(0,Date.now()-hw.t)/1000*(hw.f||1);HI.weiterL=hw.L;HI.weiterB=hw.B||null;}}catch(e){}
+  hiZugKlasse();
+  try{localStorage.removeItem("hiMiniGr");}catch(e){}      /* v6.29: 18 px sind fest (Nutzer), der Test ist weg */
+}
+/* Baut den Himmel neu, wenn sich etwas Sichtbares geaendert hat (Farben, Bedeckung, Groesse). Die neue Szene liegt
+   ueber der alten und blendet in 1,3 s ein; danach faellt die alte weg. */
+function hiPruefen(bl){
+  var el0=document.getElementById("hi");if(!el0)return;
+  if(!HI.init)hiInit();
+  hiMini();
+  if(!hiAn()){
+    HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;
+    document.documentElement.classList.remove("hison");return;}
+  /* v6.52 (Nutzer 12.11.: "beim Ortswechsel wurde erst der dunkle Bereich geladen und spaeter nachgefaerbt - kein fleckiges
+     Auftreten von Kopfzeile, Fusszeile, Mittelteil"): solange der Inhalt beim Start verborgen ist, bleibt der Himmel, wie
+     er steht - sanftZeigen baut ihn um, und er blendet zusammen mit dem Inhalt ein. Die ERSTE Szene steht sofort (vorher
+     blendete sie 1,3 s aus einem wolkenlosen Verlauf ein); nach einem Ortswechsel ist es der alte Himmel (hiWeiterMerken). */
+  /* v6.53: die erste Szene baut jetzt das fruehe Script, bevor es den Kopf gibt - seine Kopie (#hiK) kommt hier nach:
+     dieselbe Szene, derselbe Weg der Wolken bis jetzt, ohne Blende */
+  var kq=document.getElementById("hiK");
+  if(kq&&HI.szenen.length&&HI.C&&HI.B&&!kq.querySelector(".hiS")){
+    var jq=performance.now();HI.s+=(jq-HI.sT)/1000*(HI.f||1);HI.sT=jq;
+    var sq=hiSzene(kq,HI.C,HI.L,HI.B,(kq.offsetHeight||110)+40,-kq.getBoundingClientRect().left);
+    sq.style.transition="none";sq.classList.add("an");HI.szenen.push(sq);}
+  if(HI.szenen.length&&hiWartet())return;
+  bl=(typeof bl==="number"&&bl>=0)?bl:HI_BLENDE;
+  var erst=!HI.szenen.length;
+  var L=(erst&&HI.weiterL)?HI.weiterL:hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();HI.weiterL=null;
+  /* v6.37: Ort der Sonne = 41 % der Kopfbreite, eine gute Scheibe unter der Unterkante des stehenden Kopfs */
+  try{var kr0=document.querySelector("header").getBoundingClientRect();
+    if(kr0.width>0){B.aw=kr0.width;B.sr=Math.max(17,Math.min(27,kr0.width*.061));B.sx=kr0.left+kr0.width*.41;B.kb=Math.max(0,kr0.top)+kr0.height;B.sy=B.kb+B.sr*.7;
+      /* schmale Geraete (320 pt): die Scheibe bleibt zwischen "Live" und dem Datum, mit 8 px Abstand zu beiden */
+      var bd0=document.getElementById("badge"),wn0=document.querySelector("#hero .when");
+      if(bd0&&wn0){var b1=bd0.getBoundingClientRect(),w1=wn0.getBoundingClientRect();
+        if(b1.width>0&&w1.width>0){var lo0=b1.right+B.sr*.83+8,hi0=w1.left-B.sr*.83-8;
+          B.sx=hi0>=lo0?Math.max(lo0,Math.min(hi0,B.sx)):(b1.right+w1.left)/2;}}}}catch(e){}
+  /* v6.53: im fruehen Script gibt es den Kopf noch nicht - Lage der Sonne von der alten Seite bzw. vom letzten Mal */
+  if(B.sx==null){var gq=HI.weiterB;if(!gq){try{gq=JSON.parse(localStorage.getItem("himmelGeo")||"null");}catch(e){gq=null;}}
+    if(gq&&gq.sx!=null&&Math.abs(gq.w-B.w)<2){B.aw=gq.aw;B.sr=gq.sr;B.sx=gq.sx;B.kb=gq.kb;B.sy=gq.sy;}}
+  document.documentElement.classList.toggle("hison",!!C.hell);
+  document.documentElement.classList.toggle("hisonne",C.sonne>.3);
+  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0,tf,
+    C.sonne||0,B.sx!=null?Math.round(B.sx/3)+"."+Math.round(B.sy/3):"",C.fade||0,hiRgb(C.rand),hiRgb(C.kern)].join("|");
+  if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;HI.B=B;
+  /* Weg bis jetzt mit dem ALTEN Tempo aufsummieren, dann gilt das neue */
+  var jz=performance.now();if(!HI.t0){HI.t0=jz;HI.s=0;}else HI.s+=(jz-HI.sT)/1000*(HI.f||1);
+  HI.sT=jz;HI.f=tf;
+  el0.style.height=B.h+"px";
+  if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
+  /* v6.40: im Bild vom 12.11. 12:28 (v6.39) schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein
+     auf (88,128,185) gestiegen (Helligkeit 48 %); bei (61,118,203) = 44 % war die Schrift noch weiss. Grenze 43 %. */
+  /* v6.47: die Balkenfarbe (HI.rand, --hi-r) OHNE den Sonnenschein - er machte sie grau (Weiss eingemischt, dann
+     abgedunkelt: 91,112,143 ueber blauem Himmel); seit dem weichen Uebergang oben (#hi::after) muss sie den Schein
+     nicht mehr treffen. Das Glas der Karten rechnet weiter mit dem Wert samt Schein (HI.randG). */
+  HI.randG=hiPassen(hiRand(C,L,B),0,.43);
+  HI.rand=hiPassen(hiRand(C,L,B,1),0,.43);
+  C.band=hiRgb(HI.rand||C.top);
+  var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
+  /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
+     (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
+  if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
+  var alt=HI.szenen;HI.szenen=neu;
+  var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
+  /* v6.52: Szenen und die Farben oben (--hi-r), der Karten (--hi-k) und Kacheln (--hi-t) wechseln GLEICH lang (die drei
+     Farben sind per @property registriert und blenden ueber); die erste Szene ohne Blende */
+  neu.forEach(function(s){if(erst)s.style.transition="none";else s.style.transitionDuration=bl+"ms";});
+  if(erst){root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);}
+  /* GLAS: die Farben der dunklen Ansicht (Links, Warnrot, Diagramme) sind fuer fast schwarze Karten gemacht. Ueber
+     einem Taghimmel (Helligkeit bis 40 %) waere das Glas des Entwurfs (42 % Deckung) ein mittleres Blau, auf dem sie
+     untergehen - darum deckt es so stark, dass die Karte hoechstens ~19 % hell wird (nachts 42 %, am Tag bis 74 %).
+     Die Kacheln oben: nachts weisses, am Tag dunkles Glas. */
+  /* v6.17: im Bild vom 11.11. (v6.15) hatte die Statusleiste die Farbe --hi-o (oberer Verlauf, 88,104,127), nicht
+     theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
+     Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
+  var rr=hiRgb(HI.rand||C.top);
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.randG||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
+  /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
+     v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
+  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.randG||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
+  /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
+  HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
+  /* v6.52: die Farben im SELBEN Bild setzen, in dem die Szene einzublenden beginnt (vorher sofort, die Szene zwei Bilder
+     spaeter - bei "Bewegung reduzieren" sprang der obere Streifen dann vor dem Rest) */
+  var los=0,zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
+  var beides=function(){if(los)return;los=1;
+    root.style.setProperty("--hi-bl",(erst?0:bl)+"ms");root.style.setProperty("--hi-r",rr);
+    var kk=hiKartenGlas();
+    try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nebel?2:L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
+    if(B.sx!=null&&document.querySelector("header"))try{localStorage.setItem("himmelGeo",JSON.stringify({w:B.w,aw:B.aw,sr:B.sr,sx:B.sx,sy:B.sy,kb:B.kb}));}catch(e){}
+    try{themaFarbe();}catch(e){}
+    zeigen();};
+  if(erst)beides();
+  else if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(beides);});else beides();
+  setTimeout(function(){beides();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
+    root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},bl+250);
+}
+/* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
+   "5 Grad | Wolkenlos"); solange oben keine Zahl steht (laedt, veraltet), bleibt die Stationszeile. */
+function hiMini(){
+  var k=document.querySelector("header"),t=document.getElementById("temp"),m=document.getElementById("hiMini"),h=document.getElementById("hero");
+  if(!k||!t||!m||!h)return;
+  var z=String((t.firstChild&&t.firstChild.textContent)||"").trim();
+  var an=hiAn()&&/\d/.test(z)&&!h.classList.contains("hidden")&&t.getBoundingClientRect().bottom<k.getBoundingClientRect().bottom-10;
+  if(an){var l=(document.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"\u00b0  |  "+l;}
+  document.documentElement.classList.toggle("himini",!!an);
+}
+/* v6.30 (Nutzer, iPhone-Bild 12.11. 08:25: "warum sind die Kacheln weniger gefaerbt als die anderen Container unten -
+   sollten die nicht gleich sein, oder kann ich das einstellen?"): die Kacheln oben hatten seit v6.12 ein eigenes,
+   helleres Glas (--hi-t: nachts 11 % Weiss, am Tag 32 % Dunkelblau), die Karten darunter das dichtere --hi-k (42-74 %).
+   Jetzt einstellbar: himmelKachel 0-100 %, 0 = wie bisher, 100 = genau das Glas der Karten. Gemischt wird
+   VORMULTIPLIZIERT (Farbe x Deckung) - geradlinig gemischt waere die Mitte nachts heller als beide Enden
+   (Weiss 11 % -> Dunkelblau 42 % liefe ueber ein Grau mit 26 %). */
+/* v6.47 (Nutzer: "die Kacheln oben haben einen anderen Hintergrund als die Container unten"): Voreinstellung 100 =
+   dasselbe Glas wie die Karten (v6.30-v6.46: 0 = helles Grundglas, am Tag grau neben blauen Karten). Ein gespeichertes
+   "0" war die alte Voreinstellung bzw. ein Test am Regler und gilt einmalig nicht mehr (Marke himmelKachelV2). */
+var HI_KA_STD=100;
+try{if(localStorage.getItem("himmelKachelV2")!=="1"){if(parseFloat(localStorage.getItem("himmelKachel"))===0)localStorage.removeItem("himmelKachel");localStorage.setItem("himmelKachelV2","1");}}catch(e){}
+function hiKaDeck(){try{var v=parseFloat(localStorage.getItem("himmelKachel"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_KA_STD;}
+function hiKachelGlas(){
+  var t=HI.gT,k=HI.gK;if(!t||!k)return;
+  var p=hiKaDeck()/100,a=t[3]+(k[3]-t[3])*p,c=[0,1,2].map(function(i){return a>0?(t[i]*t[3]*(1-p)+k[i]*k[3]*p)/a:0;});
+  document.documentElement.style.setProperty("--hi-t",hiRgb(c,+a.toFixed(3)));
+}
+/* v6.36 GLAS IN HIMMELSFARBE (Nutzer 12.11., Vergleich mit Apple-Wetter: "die Containerfarbe an den Hintergrund
+   anpassen wie beim iPhone, auch die Warnmeldung - auffaellig, aber passend, je nach Tag, Nacht und Wetter").
+   Gemessen in den Bildern: Apple Himmel (74,118,176), Karte (79,129,196) - fast dieselbe Farbe; bei uns Himmel
+   (53,108,185), Kacheln (50,60,78) - dunkles Marineblau, das Glas war fest (22,30,48). Jetzt: Zielfarbe der Karte =
+   Farbton des mittleren Himmels, am Tag dunkler (Leuchtdichte x0,8, hoechstens 0,16 = weisse Schrift mindestens
+   5:1), in der Nacht etwas heller als der Himmel; daraus die Glasfarbe bei unveraenderter Deckung (ka).
+   Regler "Karten: Farbe" (himmelGlas): 0 = dunkles Glas wie bis v6.35, 100 = die Zielfarbe. */
+var HI_GLAS_STD=100;
+function hiGlasTon(){try{var v=parseFloat(localStorage.getItem("himmelGlas"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_GLAS_STD;}
+/* Leuchtdichte nach WCAG (mit Gamma) - hiLum oben ist die lineare "Helligkeit" der Himmelsfarben */
+function hiY(c){
+  function g(v){v=Math.max(0,Math.min(255,v))/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+  return .2126*g(c[0])+.7152*g(c[1])+.0722*g(c[2]);
+}
+/* v6.40: die Farbe, die eine Karte im Himmel WIRKLICH hat (Glas ueber dem mittleren Himmel), als #rrggbb - fuer
+   Zeichnungen, die bisher mit dem fast schwarzen #1a212c der klassischen Ansicht umrandet, radiert oder unterlegt
+   haben (Punkte im UV-Bild, Windrose, ISS-Scheibe, Vitamin-D-Bild). dunkler = Anteil Dunkelblau fuer "Zifferblaetter". */
+function hiKarteHex(dunkler){
+  try{if(!hiAn()||!HI.gl||!HI.gK)return "";
+    var g=HI.gl,k=HI.gK,c=[0,1,2].map(function(i){return g.S[i]*(1-k[3])+k[i]*k[3];});
+    if(dunkler)c=hiMix(c,[8,22,50],dunkler);
+    return "#"+c.map(function(v){return ("0"+Math.round(hiKl(v,0,255)).toString(16)).slice(-2);}).join("");}catch(e){return "";}
+}
+function hiSatt(c,k){var m=hiLum(c)*255;return c.map(function(v){return hiKl(m+(v-m)*k,0,255);});}
+function hiGlasZiel(S){
+  /* v6.42 (Nutzer: "Container immer noch zu kontrastreich im Verhaeltnis zum Hintergrund - sie muessen gar nicht so
+     doll auffallen, etwas mehr die Farbe vom Hintergrund, bei der iPhone-App wirkt das ruhiger"). GEMESSEN Karte gegen
+     Himmel dahinter (Leuchtdichte-Kontrast): Apple 1,07-1,21 : 1; wir 1,5-1,6 auf Blau und 2,8-3,0 auf hellen Wolken.
+     Ziel jetzt: Karte nur noch 1,2 : 1 dunkler als der mittlere Himmel (vorher Leuchtdichte x 0,8 und davon 70 %),
+     hoechstens 0,19 (weisse Schrift bleibt >= 4,4 : 1; Apple geht bis 0,245 = 3,6 : 1). Voreinstellung des Reglers 100. */
+  /* v6.43 (Nutzer: "bei der iPhone-Wetter-App den Kontrast messen zwischen Vordergrund und Hintergrund von den Boxen
+     und das so bei uns anpassen"). GEMESSEN in sechs Apple-Bildern, Box gegen den Himmel direkt daneben, alle 20 pt:
+     jede Box hat EINE feste Farbe ueber ihre ganze Hoehe (Nissi 80,130,196; Luxor 79,130,197; Dakar 66,115,188;
+     Erlental 94,138,194) = die Helligkeit des Himmels auf mittlerer Hoehe, etwas kraeftiger blau. Darum ist sie an
+     ihrer Oberkante 1,07-1,20 : 1 HELLER und an der Unterkante 1,13-1,15 : 1 DUNKLER als der Himmel (untere Box ganz
+     unten bis 1,4-1,6), dazwischen 1,00. Weisse Schrift darauf 3,9 : 1, Nebenzeile 3,6, blasse Werte 2,2.
+     Wir bisher (v6.42): 1,2 : 1 dunkler als der Himmel und durchscheinend. Jetzt wie Apple: Ziel = Leuchtdichte des
+     mittleren Himmels (Verhaeltnis 1,0), hoechstens 0,21 (weiss >= 4,0 : 1), und das Glas deckt am Tag bis 84 %
+     (hiPruefen) - eine ruhige, einheitliche Flaeche statt durchscheinender Wolken. */
+  var y=hiY(S),yt=Math.min(.21,Math.max(y,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
+  if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
+    for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
+  else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
+  return c;
+}
+function hiKartenGlas(){
+  var g=HI.gl;if(!g)return "";
+  /* v6.39: der Himmel ist gedeckter geworden - die Karten sollen trotzdem blau bleiben (bei Apple sind sie sogar
+     kraeftiger als der Himmel: Karte 79,130,197 auf Himmel 73,115,170). Ziel darum aus einem um 35 % gesaettigteren S. */
+  /* v6.45: unter grauem Himmel weniger Zuschlag (Apple "Bewoelkt": Karte 79,92,107 = Saettigung 26 % auf Himmel 18 %;
+     wir hatten 39 % auf 20 %). gr = Grauanteil des Himmels: 0 -> x1,35 wie bisher, 0,88 -> x0,91. */
+  var Z=hiGlasZiel(hiSatt(g.S,1.35-.5*(g.gr||0))),G=Z.map(function(v,i){return hiKl((v-(1-g.ka)*g.S[i])/g.ka,0,255);});
+  var c=hiMix(g.basis,G,hiGlasTon()/100),kk=hiRgb(c,g.ka);
+  document.documentElement.style.setProperty("--hi-k",kk);
+  HI.gK=c.concat([g.ka]);hiKachelGlas();
+  return kk;
+}
+function hiGlasSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");
+  try{localStorage.setItem("himmelGlas",String(+v));}catch(e){}
+  var kk=hiKartenGlas();
+  /* das erste Script malt beim naechsten Start mit dem gemerkten Glas (Feld 5 von himmelFarbe) */
+  try{var a=String(localStorage.getItem("himmelFarbe")||"").split("|");if(kk&&a.length>=5){a[4]=kk;localStorage.setItem("himmelFarbe",a.join("|"));}}catch(e){}
+  hiAnzeigen();
+}
+function hiKaSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
+/* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
+   gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
+function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
+/* v6.53: das Modul laeuft jetzt vor dem Hauptscript - "Bewegung reduzieren" hier selbst abfragen (waReduziert gibt es da noch nicht) */
+function hiReduziert(){return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);}
+function hiZug(){var e=hiZugEigen();return e!=null?e:(hiReduziert()?0:1);}
+function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug",hiZugEigen()===1);r.classList.toggle("histeh",hiZug()===0);}
+/* v6.33: Wind-Vorschau und Tempo-Regler. v6.34: Vorschau 60 s (vorher 20 - zu kurz, um dabei am Regler zu ziehen),
+   jeder Zug am Regler verlaengert sie, ein Tipp auf den aktiven Knopf beendet sie. */
+var HI_PROBE_MS=60000;
+function hiWindProbeEnde(){
+  clearTimeout(HI.wpT);HI.testWind=HI.urlWind!=null?HI.urlWind:null;HI.wp=null;HI.key="";hiPruefen();hiAnzeigen();
+}
+function hiWindProbe(w){
+  if(HI.wp===w){hiWindProbeEnde();return;}
+  clearTimeout(HI.wpT);HI.testWind=w;HI.wp=w;HI.key="";hiPruefen();hiAnzeigen();
+  HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);
+}
+function hiTempoSetzen(v){
+  try{localStorage.setItem("himmelTempo",String(+v));}catch(e){}hiAnzeigen();
+  if(HI.wp!=null){clearTimeout(HI.wpT);HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);}
+  /* beim Ziehen nicht je Schritt neu bauen */
+  clearTimeout(HI.tpT);HI.tpT=setTimeout(function(){HI.key="";hiPruefen();},160);
+}
+/* Tempo der nahen Wolkenlage in px/s, so wie es gerade gezeichnet wird (Nebel: langsamere Schwaden) */
+function hiTempoPx(){
+  var v0=7;try{if(hiLage().nebel)v0=3;}catch(e){}
+  return v0*hiTempo();
+}
+function hiZahl(x,n){return x.toFixed(n).replace(".",",");}
+function hiDauerTxt(s){
+  if(!isFinite(s)||s<=0)return "–";
+  if(s<90)return Math.round(s)+"\u00a0s";
+  return hiZahl(s/60,1)+"\u00a0min";
+}
+function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();
+  /* die Windstriche haengen davon ab, ob die Wolken ziehen (hiWolkenZiehen) */
+  try{_wa.key="";waPruefen();waAnzeigen();}catch(e){}
+}
+/* v6.35 (Nutzer: "wenn wir Wolken haben, die Striche ganz weg; wenn es klar ist, lassen - dass man den Wind sieht"):
+   Zeigen die ziehenden Wolken den Wind schon? Ansicht "Himmel", Wolken ziehen, mindestens HI_WOLKEN_MIN bedeckt.
+   Dann zeichnet die Wetter-Animation keine Windstriche (waLage). Klassische Ansichten: nie - dort gibt es keine Wolken. */
+var HI_WOLKEN_MIN=.15;
+function hiWolkenZiehen(){
+  try{if(!hiAn()||hiZug()!==1)return false;var L=hiLage();return !!(L&&!L.nebel&&L.N>=HI_WOLKEN_MIN);}catch(e){return false;}
+}
+function hiAnzeigen(){
+  var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
+  var kr=document.getElementById("hiRegKa"),kv=document.getElementById("hiRegKaV"),kd=hiKaDeck();
+  if(kr&&+kr.value!==kd){kr.value=kd;kzReglerFuell(kr);}
+  if(kv)kv.textContent=kd+"\u202f%";
+  var gr=document.getElementById("hiRegGl"),gv=document.getElementById("hiRegGlV"),gd=hiGlasTon();
+  if(gr&&+gr.value!==gd){gr.value=gd;kzReglerFuell(gr);}
+  if(gv)gv.textContent=gd+"\u202f%";
+  if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
+  var ss=document.getElementById("hiSoSeg"),sa=hiSonneAn()?1:0;
+  if(ss)ss.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.s===sa);});
+  var pr=document.getElementById("hiProbe"),tr=document.getElementById("hiRegTp"),tv=document.getElementById("hiRegTpV"),te=hiTempoEigen(),wj=null;
+  try{wj=hiWindJetzt();}catch(e){}
+  if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",HI.wp!=null&&+b.dataset.w===HI.wp);});
+  if(tr&&+tr.value!==te){tr.value=te;kzReglerFuell(tr);}
+  if(tv)tv.textContent="×"+hiZahl(te/100,1);
+  var vp=0,bw=window.innerWidth||390;try{vp=hiTempoPx();}catch(e){}
+  var vt=(vp<10?hiZahl(vp,1):String(Math.round(vp)))+"\u00a0px/s, Bildschirmbreite in "+hiDauerTxt(bw/vp)+".";
+  if(h)h.textContent=(z?"Die Wolken ziehen je nach Wind am Ort: bei Windstille fast gar nicht, ab etwa 60 km/h kaum noch schneller. „Tempo“ ist ein Faktor auf alles."
+        +(HI.wp!=null?" Vorschau "+HI.wp+"\u00a0km/h (1\u00a0min, nochmal tippen = aus): "+vt
+          :wj!=null?" Jetzt "+wj+"\u00a0km/h: "+vt:" Jetzt keine frische Windmessung, mittleres Tempo: "+vt)
+      :"Die Wolken im Hintergrund stehen still."
+      +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
+    +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
+}
+/* v6.53: die erste Szene sofort - vor dem ersten Bild der Seite */
+(function(){try{if(hiAn())hiPruefen();}catch(e){}})();
+</script>
 <div id="evtToast" role="button" tabindex="0" aria-live="polite" hidden>
   <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
   <div class="tt" id="evtToastT"></div>
@@ -1637,7 +2254,7 @@ html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.52</span>
+      <span class="ver">v6.53</span>
     </div>
   </header>
 
@@ -2078,580 +2695,6 @@ function sbInit(){
   c.setAttribute("role","button");c.setAttribute("aria-label","Bewegung des Wettersymbols umschalten");
   c.addEventListener("click",function(){var s=(sbStufe()+1)%4;sbSetzen(s);sbTipp(s);});
   if(window.IntersectionObserver){try{new IntersectionObserver(function(es){document.documentElement.classList.toggle("sbaus",!es[0].isIntersecting);}).observe(document.getElementById("hero"));}catch(e){}}
-}
-/* ===== v6.12 HIMMEL (Entwurf E, Schritt 2; Vorlage designtest.html) =====
-   Gemalt, kein Foto: Verlauf nach Sonnenhoehe (Tag blau, um den Horizont violett/orange, Nacht marineblau), ab 50 %
-   Bedeckung ins Grau gezogen (Regen dunkler). Wolken = Rauschen in 5 Oktaven (320x200, in beiden Richtungen nahtlos),
-   Schwelle = QUANTIL, damit wirklich N der Flaeche Wolke ist; zwei Lagen, die verschieden schnell ziehen (3,2 und 7
-   px/s). Sterne unter -3 Grad Sonnenhoehe, nur in der oberen Bildhaelfte. hiPassen() haelt den Himmel so dunkel, dass
-   weisse Schrift lesbar bleibt (Helligkeit hoechstens 40 %, Wolken 56 %).
-   Anders als die Testseite (Leinwand, 10 Bilder/s in JS): die Lagen sind kleine Leinwaende (640 x 200..600), die der
-   Browser streckt und per CSS-transform in Zehntelsekunden-Schritten schiebt - je Bild laeuft kein JS.
-   Nur var und Funktionen (Regel aus v6.06). */
-var HI={key:"",t0:0,szenen:[],feld:{},C:null,L:null,test:null,rt:0,init:0,texF:null,texN:null,saat:0,ph0:0,weg:0};
-/* v6.18 (Nutzer: "haben wir bei bewoelkt immer das gleiche Bild - ein bisschen abwechselnd?"): bis v6.17 waren die
-   Rauschfelder (Saat 11 / 29), der Startversatz der Bewegung und die Sterne fest - jedes Oeffnen zeigte dasselbe Bild.
-   Jetzt wuerfelt hiNeuesBild() Saat und Versatz: beim Start und wenn die App laenger als 30 min im Hintergrund war
-   (am iPhone bleibt die Seite oft tagelang geladen). Innerhalb einer Sitzung bleibt das Muster - sonst spraengen die
-   Wolken bei jedem Wechsel der Himmelsfarbe. Die alten Felder werden verworfen (je Saat rund 0,5 MB). */
-function hiNeuesBild(){HI.saat=Math.floor(Math.random()*1e6);HI.ph0=Math.random()*2000;HI.feld={};HI.key="";}
-var HI_TW=320,HI_TH=200,HI_PER=3,HI_PY=4,HI_BLENDE=1300;
-/* feste Lagen zum Ansehen im Browser: ?himmel=klar|heiter|wolkig|bedeckt|regen|abend|nacht|nachtw|nachtb|nebel|nachtnebel */
-var HI_LAGEN={meist:{h:21,N:.88},klar:{h:34,N:.04},heiter:{h:34,N:.35},wolkig:{h:30,N:.68},bedeckt:{h:24,N:1},regen:{h:20,N:1,nass:1},
-  abend:{h:-1.5,N:.3},nacht:{h:-32,N:.03},nachtw:{h:-32,N:.5},nachtb:{h:-32,N:1},
-  nebel:{h:20,N:1,nebel:1},nachtnebel:{h:-32,N:1,nebel:1}};
-function hiAn(){return document.documentElement.classList.contains("himmel");}
-function hiKl(x,a,b){return Math.max(a==null?0:a,Math.min(b==null?1:b,x));}
-function hiSm(a,b,x){var t=hiKl((x-a)/(b-a));return t*t*(3-2*t);}
-function hiMix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
-function hiLum(c){return (.2126*c[0]+.7152*c[1]+.0722*c[2])/255;}
-function hiRgb(c,a){return "rgba("+Math.round(c[0])+","+Math.round(c[1])+","+Math.round(c[2])+","+(a==null?1:a)+")";}
-function hiRauschen(seed){
-  function h(x,y,per,py){x=((x%per)+per)%per;y=((y%py)+py)%py;var n=Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(seed,1442695041)|0;
-    n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}
-  function vn(x,y,per,py){var xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
-    var a=h(xi,yi,per,py),b=h(xi+1,yi,per,py),c=h(xi,yi+1,per,py),d=h(xi+1,yi+1,per,py);return a+(b-a)*u+(c-a+(a-b+d-c)*u)*v;}
-  return function(x,y,per,py){var s=0,am=1,f=1,n=0;for(var o=0;o<5;o++){s+=am*vn(x*f,y*f+o*7,per*f,py*f);n+=am;am*=.52;f*=2;}return s/n;};
-}
-function hiFeld(seed){
-  if(HI.feld[seed])return HI.feld[seed];
-  var fb=hiRauschen(seed),wp=hiRauschen(seed+17),F=new Float32Array(HI_TW*HI_TH);
-  for(var y=0;y<HI_TH;y++)for(var x=0;x<HI_TW;x++){
-    var u=x/HI_TW*HI_PER,v=y/HI_TH*HI_PY,w=wp(u,v,HI_PER,HI_PY)-.5;
-    F[y*HI_TW+x]=fb(u,v+w*1.1,HI_PER,HI_PY);}
-  var S=Float32Array.from(F).sort();
-  return HI.feld[seed]={F:F,S:S};
-}
-function hiTextur(seed,N,rand,kern){
-  var fs=hiFeld(seed),F=fs.F,S=fs.S,cv=document.createElement("canvas");cv.width=HI_TW;cv.height=HI_TH;
-  var c=cv.getContext("2d"),im=c.createImageData(HI_TW,HI_TH),D=im.data;
-  /* v6.17: bei geschlossener Decke (thr < 0) laeuft Hell -> Dunkel zwischen dem 10. und 90. Perzentil des Rauschens
-     (vorher fast der ganze Wertebereich: die meisten Pixel lagen im Mittelton, die Decke wirkte wie Nebel) */
-  var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[Math.floor(.1*(S.length-1))],hi=S[Math.floor(.9*(S.length-1))];
-  /* v6.45: bei 7/8 lag fast die ganze Wolkenflaeche im dunklen "Kern" (hell war nur der schmale Saum an den Luecken,
-     Fenster thr..thr+0,28) - das Bild war dunkler und blauer als die geschlossene Decke. Ab ~75 % Bedeckung weitet sich
-     das Fenster bis zum 90. Perzentil (wie bei der Decke): hell und dunkel verteilen sich ueber die ganze Wolke. */
-  var wf=hiSm(.74,.9,N),se=thr+.28+(Math.max(hi,thr+.28)-(thr+.28))*wf;
-  for(var i=0;i<F.length;i++){
-    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo,hi,f):hiSm(thr,se,f);
-    D[i*4]=rand[0]+(kern[0]-rand[0])*s;D[i*4+1]=rand[1]+(kern[1]-rand[1])*s;D[i*4+2]=rand[2]+(kern[2]-rand[2])*s;D[i*4+3]=a*255;}
-  c.putImageData(im,0,0);return cv;
-}
-function hiPassen(c,wolke,lmax){var L=hiLum(c),Lmax=lmax||(wolke?.56:.4);return L>Lmax?c.map(function(v){return v*Lmax/L;}):c;}
-/* v6.21 NEBEL (Nutzer 11.11. 17:58, drei Orte bei uns und bei Apple nebeneinander): bei "Nebel" zeigte der Himmel
-   dasselbe Bild wie "bedeckt" - dunkelblau mit kraeftiger Wolkenstruktur (im Bild 36..96, links/rechts bis 50
-   Einheiten auseinander). Apple zeigt Dunst als fast gleichfoermiges, neutrales Grau, oben etwas dunkler als unten
-   (gemessen 108,108,102 -> 127,128,124, Streuung 1). Jetzt eigenes Bild: neutrales Grau ohne Blau, eine einzige
-   Schwadenlage mit wenig Abstand zwischen hell und dunkel, halb durchscheinend, gross und langsam (hiNah); keine
-   Sterne, kein Sonnenschein. Dunkler als bei Apple, weil der Himmel hoechstens 40 % hell sein darf (weisse Schrift). */
-function hiNebelFarben(L){
-  var tg=hiSm(-5,9,L.h);
-  return {top:hiPassen(hiMix([84,85,82],[104,106,104],tg),0),bot:hiPassen(hiMix([106,107,103],[124,126,124],tg),0),
-    rand:hiPassen(hiMix([126,127,122],[168,170,168],tg),1),kern:hiPassen(hiMix([98,99,96],[124,126,124],tg),1),
-    sterne:0,glanz:0,schleier:.45,nebel:1};
-}
-/* die nahe Wolkenlage: Massstab (x Fensterbreite), Tempo in px/s, Deckkraft - bei Nebel gross, langsam, halb */
-function hiNah(L){return L.nebel?{sc:3.2,v:3,a:.55}:{sc:2.5,v:7,a:L.N>.9?1:.88};}
-/* v6.29 (Nutzer: "die Windstaerke fuer die Wolken beruecksichtigen"): Tempo der Wolkenlagen = Grundtempo x hiTempo.
-   12 km/h = wie bisher (nah 7 px/s), Windstille 0,3-fach (zieht kaum), 30 km/h doppelt, ab ~55 km/h 3,6-fach (25 px/s).
-   Gemessen wird der Wind in 10 m Hoehe (waWind) - in Wolkenhoehe weht es meist staerker und aus leicht anderer
-   Richtung; fuer ein Hintergrundbild genuegt die Bodenmessung. Die RICHTUNG bleibt fest (nach links): ein Handy hat
-   kein Norden, links/rechts haette keine Bedeutung. Ohne frische Messung Faktor 1. */
-/* v6.33 (Nutzer 12.11.: "bei 4 km/h bei uns schon recht zuegig, in Norden mit 35 km/h nicht so viel Unterschied -
-   verstaerken? oder wird das bei noch mehr Wind zu viel? eine nicht lineare Skala, die bei 60 km/h nicht nochmal
-   verdoppelt"). Nachgemessen: 5 km/h = 4,1 px/s, 35 km/h = 16,5 px/s - nur Faktor 4 (v6.29: 0,3 + Wind/17, geradlinig mit
-   hohem Sockel). Jetzt eine S-Kurve fuer die nahe Lage in px/s: v = v0 + (vm - v0) x tanh((Wind/w0)^p).
-   Unten flach (Windstille 0,8, 5 km/h 2,1, 10 km/h 4,3), in der Mitte steil (20 km/h 9,9, 35 km/h 18,5), oben
-   gedeckelt (50 km/h 24,8, 60 km/h 27,2, 90 km/h 29,7). 35 gegen 5 km/h: Faktor 8,8; 60 gegen 35: nur noch 1,5.
-   Dazu ein Regler "Tempo" (himmelTempo in Prozent, Faktor auf die ganze Kurve) und eine Wind-Vorschau in den
-   Einstellungen - das Tempo laesst sich nur am Geraet beurteilen, und zwei Orte sieht man nie nebeneinander.
-   v6.34 (Nutzer: "bei 30-35 km/h fast ein bisschen zu langsam - Regler mit Faktor, dabei stehen, wie schnell"):
-   Bereich x0,5 bis x3,0 (vorher 50-160 %), Anzeige als Faktor, im Hilfetext das Tempo in px/s und die Zeit fuer
-   eine Bildschirmbreite. HI_TEMPO_MAX gilt fuer Speicher und Regler gemeinsam. */
-/* v6.35: Standard x2,0 - vom Nutzer am iPhone gewaehlt (12.11.: "bei 30-35 km/h fast zu langsam" -> "nimm 2,0") */
-var HI_TEMPO_MIN=50,HI_TEMPO_MAX=300,HI_TEMPO_STD=200;
-var HI_WIND={v0:.8,vm:30,w0:45,p:1.4};
-function hiWindTempo(w){return HI_WIND.v0+(HI_WIND.vm-HI_WIND.v0)*Math.tanh(Math.pow(Math.max(0,w)/HI_WIND.w0,HI_WIND.p));}
-function hiTempoEigen(){try{var v=parseFloat(localStorage.getItem("himmelTempo"));if(isFinite(v))return Math.max(HI_TEMPO_MIN,Math.min(HI_TEMPO_MAX,v));}catch(e){}return HI_TEMPO_STD;}
-/* Wind fuer die Wolken: Vorschau bzw. ?hwind= geht vor; feste Lagen (?himmel=) ohne Wind; sonst die Messung. null = unbekannt */
-function hiWindJetzt(){
-  if(HI.testWind!=null)return HI.testWind;
-  if(HI.test)return null;
-  try{return waWind();}catch(e){return null;}
-}
-function hiTempo(){
-  var w=hiWindJetzt();
-  return Math.round((w==null?1:hiWindTempo(w)/7)*hiTempoEigen())/100;
-}
-function hiFarben(L){
-  if(L.nebel)return hiNebelFarben(L);
-  /* v6.41 (Nutzer 12.11. 12:29, Erlental "Bewoelkt" neben Apple "Meist bewoelkt": "fuer diese Uhrzeit viel zu dunkel -
-     ist ja tagsueber und nicht Daemmerung"). GEMESSEN: unser Bild im Mittel (88,106,132) = 109 von 255, Apple
-     (131,160,199) = 163; Apples Wolken 176-210, unsere 95-119; unten bei Apple Blau (89,132,186 -> 147,179,218), bei
-     uns Grau (94,113,138). URSACHE: der Grauanteil g begann bei 50 % Bedeckung - bei 88 % (7/8, "meist bewoelkt")
-     waren Himmel und Wolken schon zu 75 % Schiefergrau wie unter einer geschlossenen Regendecke. Jetzt beginnt er bei
-     80 % (88 % -> 0,31, 95 % -> 0,74, 100 % -> 0,88); bis dahin helle Wolken vor blauem Himmel. Dazu am Tag: Wolken
-     duerfen heller sein (Grenze 67 statt 56 %, unter der geschlossenen Decke 62 % - dort steht kleine Schrift auf den hellsten Stellen sonst nur noch 2 : 1), die geschlossene Decke ist heller (Wolke 168,176,190 statt 152,162,180,
-     Luecke 100,112,134 statt 64,76,96), und die Wolken laufen nach unten aus (C.fade) - unten steht wie bei Apple der
-     blaue Himmel, ruhig hinter den Karten. Die Schrift bekommt dafuer den dunkelblauen Saum (C.hell -> Klasse hison). */
-  /* v6.45 (Nutzer 12.11. 13:22, Huettenberg "Bewoelkt" neben Apple "Bewoelkt": "fuer bewoelkt ein bisschen zu blau").
-     GEMESSEN am linken Rand: Apple (98,108,120) Saettigung 18 %, wir (109,136,175) 38 %; unsere Szene bei 100 %
-     Bedeckung hat 20 % - die Farbe stimmt also, sie kam nur zu spaet: Station 88 % (7/8), g war dort 0,31. v6.41 hatte
-     den Beginn von 50 auf 80 % geschoben (Anlass damals "zu dunkel" - das Dunkle war die Decke selbst, die seit v6.41
-     heller ist). Jetzt 74-90 %: 6/8 (75 %) -> 0,01, 80 % -> 0,28, 85 % -> 0,68, 7/8 (88 %) -> 0,84, ab 90 % 0,88. Bis
-     6/8 also weiter helle Wolken vor Blau; ab 7/8 steht oben das Wort "Bewoelkt" - dazu gehoert ein ueberwiegend
-     grauer Himmel. Die grauen Grundfarben dazu etwas neutraler (Grund 90,101,120 / 110,121,140, Luecke 102,113,131;
-     vorher 86,100,124 / 108,122,144 / 100,112,134). Apples Wechsel "Meist bewoelkt" (hell, blau) / "Bewoelkt" (grau) laesst sich
-     aus der Stationsmeldung nicht nachbilden: beide Male meldete sie 88 %. */
-  var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.74,.9,N)*(L.nass?1:.88);
-  /* v6.37 (Nutzer 12.11. 11:28, Apple-Wetter und unsere App fuer denselben Strand: "die Farben sind beim iPhone
-     wesentlich besser, die Sonne wird eingeblendet"). GEMESSEN in den Bildern: Apple Himmel oben (68,105,152), unten
-     (126,167,219), Wolkenschleier (110,138,173) - blau; bei uns Wolken (129,139,155) = neutrales GRAU ueber dem halben
-     Bild, Kacheln (57,87,128). Ursache im Code: die Tagfarben wurden von hiPassen GLEICHMAESSIG abgedunkelt - aus
-     weissen Wolken (255,255,255) wurde (143,143,143), aus dem hellen Blau unten (152,202,246) ein Graublau
-     (80,106,129). Jetzt Farben, die bei derselben Helligkeit BLAU bleiben: Wolkenrand (196,218,250) -> (130,144,166),
-     Wolkenkern (102,134,186), Himmel unten (98,152,226) mit eigener Grenze 50 % (= die Helligkeit von Apples Karten,
-     auf denen dort weisse Schrift steht; oben bleibt es bei 40 %). */
-  /* v6.39 (Nutzer: "den Hintergrund noch ein bisschen in der Farbe angepasst"): Apple "Luxor" gemessen oben
-     (63,100,150), Mitte (73,115,170), unten (121,164,219) - oben gedeckter, nach unten deutlich heller; wir waren oben
-     kraeftiger (61,118,203) und fast ohne Verlauf (unten 84,132,198). Jetzt etwa auf halbem Weg: oben (52,102,176),
-     unten (104,150,212) mit Grenze 53 % -> (97,140,198). */
-  var top=hiMix([9,13,38],[52,102,176],tag),bot=hiMix([54,62,112],[104,150,212],tag);
-  top=hiMix(top,[72,70,134],daem*.6);bot=hiMix(bot,[244,164,118],daem*.8);
-  /* v6.17 BEDECKT (Nutzer 11.11., Vergleich mit Apple "Bewoelkt": "bei uns sieht es nach Nebel aus"). Gemessen im
-     Bildschirmfoto: unser Himmel war eine voellig gleichfoermige Flaeche (137,143,152), Apple (105..141,115..149,
-     129..161) mit Helligkeit 95-141 nebeneinander. Ursache: helle und dunkle Wolkenfarbe (206,212,222 / 150,160,176)
-     wurden von hiPassen beide auf dieselbe Helligkeit gedrueckt. Jetzt Schieferblau mit echtem Abstand: Wolke hell
-     (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); bei Regen dunkler. */
-  var gt=hiMix([22,26,36],L.nass?[64,76,98]:[90,101,120],tag),gb=hiMix([44,50,66],L.nass?[86,98,118]:[110,121,140],tag);
-  top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
-  var rand=hiMix([92,98,138],[196,218,250],tag),kern=hiMix([58,62,98],[102,134,186],tag);
-  rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
-  var or=hiMix([78,84,104],L.nass?[140,150,166]:[168,176,190],tag),ok=hiMix([40,45,60],L.nass?[76,88,108]:[102,113,131],tag);
-  rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
-  /* SONNE (v6.37, seit v6.38 Schein ohne Scheibe): nur am Tag, trocken und solange die Sonne durchkommt - voll bis ~55 %
-     Bedeckung, ab ~90 % nichts mehr. Tief stehend waermer (und unter 7 Grad schwaecher). Aus: himmelSonne = "0". */
-  var so=(L.nass||!hiSonneAn())?0:hiSm(.5,7,h)*(1-hiSm(.55,.92,N));
-  return {top:hiPassen(top,0,.4+.05*tag*g),bot:hiPassen(bot,0,.4+.13*tag),rand:hiPassen(rand,1,.56+.11*tag*(1-.55*g)),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.12,schleier:g,
-    sonne:+so.toFixed(2),sonneF:hiMix([255,222,168],[255,250,238],hiSm(3,18,h)),
-    fade:+(.9*tag*(1-hiSm(.8,.97,N))).toFixed(2),hell:so>.3||(tag>.6&&N>.3)};
-}
-function hiSonneAn(){try{return localStorage.getItem("himmelSonne")!=="0";}catch(e){return true;}}
-function hiSonneSetzen(v){try{localStorage.setItem("himmelSonne",v?"1":"0");}catch(e){}HI.key="";hiPruefen();hiAnzeigen();}
-/* Die Sonne liegt UNTER den Wolken (sie ziehen davor vorbei), ein schwaecherer Schein noch einmal DARUEBER - eine
-   Wolke vor der Sonne leuchtet dann auf, statt sie einfach auszuknipsen. Nur CSS-Verlaeufe, steht still, kostet
-   nichts. Ort: links der Mitte knapp unter dem Kopf, in der Luecke zwischen "Live" und dem Datum ueber der grossen
-   Temperatur (B.sx/B.sy aus hiPruefen) - dort liegt bei 320-430 pt kein Text unter dem Kern.
-   v6.38 (Nutzer: "als Kugel, als Scheibe wie den Mond ist schwierig - die Sonne ist so strahlend, dass man sie nicht
-   wirklich sieht"): KEINE Scheibe mehr. Gemessen in seinem Apple-Bild: Kern fast weiss (Radius ~31 pt), danach
-   faellt die Helligkeit stetig ueber ~200 pt ab, groesster Sprung zwischen Nachbarpixeln 4 von 255 - es gibt keinen
-   Rand; im Pressebild (iOS 15, "Sunnyvale") dazu Strahlen. Jetzt ein Kern, der ohne Kante auslaeuft, und vier
-   feine Lichtstreifen (acht Strahlen, ungleich lang) als gedrehte Ellipsen. HI_STRAHL: Winkel, halbe Laenge und
-   Dicke in Kernradien, Deckkraft. */
-/* v6.39 (Nutzer 12.11., Apple "Luxor" neben unserer v6.38: "die Sonne so gross und mit dem groesseren Schein aussen
-   rum, aehnlich wie auf der iPhone-App"). GEMESSEN bei Apple (Ringmittel um die Sonne, Hintergrund ~128): fast weiss
-   (245) nur bis 15-20 pt - aber dann faellt es LANGSAM: 222 bei 30 pt, 195 bei 45, 177 bei 60, 157 bei 80, 149 bei 110,
-   erst bei ~190 pt ist der Schein weg; dazu ein blasser Ring bei ~155 pt. Unsere v6.38: fast weiss bis 16 pt, bei
-   64 pt schon fast nichts. Gross wirkt Apples Sonne also durch den weiten Schein, nicht durch den Kern.
-   HI_SONNE_P = Apples Profil x 0,93: [Abstand in Kernradien (B.sr = 24 pt bei 393 pt Breite), Deckkraft].
-   HI_STRAHL: vier breite kurze Ellipsen = achtzackiger Stern wie bei Apple, drei feine lange Strahlen.
-   [Winkel, halbe Laenge, Dicke (in B.sr), Deckkraft] */
-var HI_SONNE_P=[[0,1],[.58,.98],[.83,.93],[1.04,.84],[1.25,.74],[1.46,.65],[1.67,.57],[2.08,.46],[2.5,.37],[2.92,.3],[3.33,.23],[3.96,.19],[4.58,.15],[5.2,.12],[6.04,.06],[7.08,.025],[7.92,0]];
-var HI_STRAHL=[[22,1.7,.6,.8],[67,1.7,.6,.8],[112,1.7,.6,.8],[157,1.7,.6,.8],[40,3.4,.15,.36],[97,3,.14,.32],[152,3.2,.14,.34]];
-var HI_RING=[6.3,.7,.075];
-function hiSonneA(d,r){
-  var q=d/r,P=HI_SONNE_P,i,t;if(q>=P[P.length-1][0])return 0;
-  for(i=1;i<P.length;i++)if(q<=P[i][0]){t=(q-P[i-1][0])/(P[i][0]-P[i-1][0]);return P[i-1][1]+(P[i][1]-P[i-1][1])*t;}
-  return 0;}
-function hiSonne(s,C,B,vorn){
-  var x=B.sx.toFixed(0)+"px "+B.sy.toFixed(0)+"px",r=B.sr,f=C.sonneF.map(Math.round).join(","),d=document.createElement("div"),g;
-  d.className="hiSo";
-  if(vorn)g="radial-gradient(circle "+(r*3.4).toFixed(0)+"px at "+x+",rgba("+f+",.26),rgba("+f+",.09) 42%,rgba("+f+",0))";
-  else{
-    var P=HI_SONNE_P,R=P[P.length-1][0],rr=HI_RING,ro=rr[0]+rr[1],pz=function(v){return (v/ro*100).toFixed(1)+"%";};
-    g="radial-gradient(circle "+(r*R).toFixed(0)+"px at "+x+","+P.map(function(q){
-        return "rgba("+(q[1]>.8?"255,255,255":f)+","+q[1]+") "+(q[0]/R*100).toFixed(1)+"%";}).join(",")+"),"
-      /* der Ring (22-Grad-Halo): innen warm, aussen kuehl, sehr blass */
-      +"radial-gradient(circle "+(r*ro).toFixed(0)+"px at "+x+",rgba(255,226,196,0) "+pz(rr[0]-rr[1])+",rgba(255,226,196,"+(rr[2]*.8).toFixed(3)+") "+pz(rr[0]-rr[1]/3)
-      +",rgba(255,255,255,"+rr[2]+") "+pz(rr[0])+",rgba(196,222,255,"+(rr[2]*.8).toFixed(3)+") "+pz(rr[0]+rr[1]/3)+",rgba(196,222,255,0) 100%)";}
-  d.style.cssText="width:"+B.w+"px;height:"+B.h+"px;opacity:"+C.sonne.toFixed(2)+";background:"+g;
-  if(!vorn)HI_STRAHL.forEach(function(q){
-    var L=r*q[1],h=r*q[2],e=document.createElement("i");
-    e.style.cssText="display:block;position:absolute;left:"+(B.sx-L).toFixed(1)+"px;top:"+(B.sy-h/2).toFixed(1)+"px;width:"+(2*L).toFixed(1)+"px;height:"+h.toFixed(1)+"px;transform:rotate("+q[0]+"deg);background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,255,255,"+q[3]+"),rgba(255,255,255,"+(q[3]*.38).toFixed(2)+") 34%,rgba(255,255,255,0))";
-    d.appendChild(e);});
-  s.appendChild(d);
-}
-/* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
-   im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
-function hiLage(){
-  if(HI.test&&HI_LAGEN[HI.test])return HI_LAGEN[HI.test];
-  var mu=null;try{if(window.satellite)mu=_sunMu(Date.now());}catch(e){mu=null;}
-  if(mu==null||!isFinite(mu)){try{mu=_muFallback(Date.now());}catch(e){mu=null;}}
-  var h=(mu==null||!isFinite(mu))?-20:Math.round(Math.asin(hiKl(mu,-1,1))*360/Math.PI)/2;
-  var ic=_zuIc,N=null,nass=0,nebel=0;
-  if(ic==null){
-    var vor=[];try{vor=String(localStorage.getItem("himmelFarbe")||"").split("|");}catch(e){}
-    /* Feld 4: 0 trocken, 1 nass, 2 Nebel (v6.21) */
-    N=(vor.length>=4&&isFinite(+vor[2]))?+vor[2]:.3;nass=(vor.length>=4&&+vor[3]===1)?1:0;nebel=(vor.length>=4&&+vor[3]===2)?1:0;
-  }else{
-    try{if(snap&&snap.cloud!=null&&isFinite(snap.cloud))N=snap.cloud/100;}catch(e){}
-    if(N==null)N=/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95;
-    nass=/rain|sleet|snow|hail|thunder/.test(ic)?1:0;
-    nebel=ic==="fog"?1:0;
-  }
-  if(nebel)return {h:h,N:1,nass:0,nebel:1};
-  return {h:h,N:nass?Math.max(N,.92):hiKl(N),nass:nass};
-}
-/* Die Hoehe grosszuegig: in Safari blendet die Leiste ein und aus (innerHeight springt um bis zu ~180 px) - der
-   Himmel soll dabei nicht neu gebaut werden. */
-function hiMass(){
-  var ih=window.innerHeight||600,sh=(window.screen&&screen.height)||0;
-  return {w:document.documentElement.clientWidth||window.innerWidth||390,h:Math.max(ih,Math.min(sh,ih+200))};
-}
-function hiSterne(sz,B,a,hmax){
-  var hs=Math.min(B.h*.86,hmax||1e9),d=Math.min(2,window.devicePixelRatio||1),c=document.createElement("canvas");
-  c.width=Math.round(B.w*d);c.height=Math.round(hs*d);c.style.cssText="width:"+B.w+"px;height:"+hs.toFixed(1)+"px;opacity:"+a.toFixed(2);
-  var g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
-  var z=(7+HI.saat)|0;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
-  var n=Math.round(B.w*B.h/900);
-  for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
-    if(al<.03||y>hs+5)continue;
-    g.fillStyle="rgba("+(q>.9?"255,236,214":"236,240,255")+","+al.toFixed(3)+")";g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
-    if(q>.97){g.fillStyle="rgba(236,240,255,.12)";g.beginPath();g.arc(x,y,4,0,6.3);g.fill();}}
-  sz.appendChild(c);
-}
-/* Eine Wolkenlage: die Textur zweimal nebeneinander (und so oft untereinander, wie die Hoehe braucht) auf eine kleine
-   Leinwand; der Browser streckt sie auf Bildgroesse und schiebt sie um genau eine Texturbreite (-50 %) - nahtlos. */
-function hiWolke(sz,tex,B,sc,v0,a,dy,off,hmax,fade){
-  var tw=B.w*sc,th=tw*HI_TH/HI_TW,n=Math.max(1,Math.ceil(((hmax||B.h)-dy)/th)),c=document.createElement("canvas");
-  c.width=HI_TW*2;c.height=HI_TH*n;var g=c.getContext("2d");
-  for(var r=0;r<n;r++){g.drawImage(tex,0,r*HI_TH);g.drawImage(tex,HI_TW,r*HI_TH);}
-  /* v6.41: am Tag duennen die Wolken zwischen 40 und 84 % der Bildschirmhoehe aus (einmal ins Bild gerechnet, kostet
-     beim Ziehen nichts); bei geschlossener Decke und nachts nicht */
-  if(fade>.02){var Hc=c.height,y1=hiKl((B.h*.4-dy)/th*HI_TH/Hc),y2=hiKl((B.h*.84-dy)/th*HI_TH/Hc),gr=g.createLinearGradient(0,0,0,Hc),rest="rgba(0,0,0,"+(1-fade).toFixed(2)+")";
-    gr.addColorStop(0,"#000");gr.addColorStop(y1,"#000");if(y2>y1)gr.addColorStop(y2,rest);gr.addColorStop(1,rest);
-    g.globalCompositeOperation="destination-in";g.fillStyle=gr;g.fillRect(0,0,c.width,Hc);g.globalCompositeOperation="source-over";}
-  /* v6.29: Tempo v0 x HI.f (Wind). Die Lage der Textur haengt am aufsummierten WEG HI.s (Sekunden bei Grundtempo),
-     nicht an der Uhr - sonst spraengen die Wolken bei jedem Tempowechsel. Schritte: einer je ~0,7 px (wie die nahe
-     Lage bisher), 4 bis 20 je Sekunde - bei Windstille weniger Arbeit, bei Sturm kein Ruckeln. */
-  var f=HI.f||1,v=v0*f,dur=tw/v,ph=((HI.s+off+HI.ph0)*v0/tw%1)*dur,sps=hiKl(v/.7,4,20);
-  c.className="hiW";
-  c.style.cssText="top:"+dy.toFixed(1)+"px;width:"+(tw*2).toFixed(1)+"px;height:"+(th*n).toFixed(1)+"px;opacity:"+a+";--hd:"+dur.toFixed(1)+"s;--hst:steps("+Math.max(2,Math.round(dur*sps))+");--hv:-"+ph.toFixed(2)+"s";
-  sz.appendChild(c);
-}
-function hiGlanzR(B){return (B.aw||B.w)*.8;}
-function hiSzene(ziel,C,L,B,hmax,links){
-  var s=document.createElement("div");s.className="hiS";
-  var g="linear-gradient("+hiRgb(C.top)+","+hiRgb(C.bot)+")";
-  var son=C.sonne>.03&&B.sx!=null;
-  /* v6.37: der weite Schein sitzt an der Sonne (vorher fest oben rechts) */
-  if(C.glanz>.02)g="radial-gradient(circle "+hiGlanzR(B).toFixed(0)+"px at "+(B.sx!=null?B.sx:B.w*.86).toFixed(0)+"px "+(B.sx!=null?B.sy:B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
-  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
-  if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
-  if(son)hiSonne(s,C,B,0);
-  if(L.N>.04&&HI.texF&&HI.texN){
-    var nh=hiNah(L);
-    if(L.N<.985)hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax,C.fade);      // unter einer geschlossenen Decke saehe man sie nicht
-    hiWolke(s,HI.texN,B,nh.sc,nh.v,nh.a,-B.h*.1,40,hmax,C.fade);
-    if(son)hiSonne(s,C,B,1);}
-  /* v6.17: je bedeckter, desto staerker ein Schleier ueber den Wolken - oben etwas dunkler, die untere Haelfte laeuft
-     in die Grundfarbe aus (bei Apple ist der Himmel hinter den Karten ebenfalls ruhig; die Karten bleiben lesbar) */
-  if(C.schleier>.03){var v=document.createElement("div");v.className="hiV";
-    v.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:linear-gradient("+hiRgb(C.top,(.58*C.schleier).toFixed(3))+" 0%,"+hiRgb(C.top,0)+" 34%,"+hiRgb(C.bot,0)+" 46%,"+hiRgb(C.bot,(.8*C.schleier).toFixed(3))+" 100%)";
-    s.appendChild(v);}
-  ziel.appendChild(s);return s;
-}
-/* v6.14 (Nutzer-Bild vom iPhone, 10.11. 22:45): die Statusleiste ist dort ein deckender Balken in der Farbe
-   "theme-color" - der Himmel geht nicht darunter weiter. Bis v6.13 stand dort die obere Farbe des VERLAUFS; bei
-   bedecktem Himmel liegen aber hellere Wolken davor, und man sah eine harte Kante. Jetzt die mittlere Farbe des
-   obersten Streifens (64 px), Wolken eingerechnet: Mittel ueber die ganze Texturbreite, weil die Wolken ziehen. */
-function hiRand(C,L,B,ohneSonne){
-  var c=C.top.slice();
-  function lage(tex,sc,a,dy){
-    if(!tex)return;
-    var th=B.w*sc*HI_TH/HI_TW,r0=Math.floor(((-dy)/th*HI_TH)%HI_TH),n=Math.max(1,Math.min(HI_TH-r0,Math.round(64/th*HI_TH))),d;
-    try{d=tex.getContext("2d").getImageData(0,r0,HI_TW,n).data;}catch(e){return;}
-    var sr=0,sg=0,sb=0,sa=0;for(var i=0;i<d.length;i+=4){var al=d[i+3]/255;sr+=d[i]*al;sg+=d[i+1]*al;sb+=d[i+2]*al;sa+=al;}
-    if(sa>0)c=hiMix(c,[sr/sa,sg/sa,sb/sa],sa/(d.length/4)*a);
-  }
-  if(L.N>.04){var nh=hiNah(L);if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,nh.sc,nh.a,-B.h*.1);}
-  if(C.schleier>.03)c=hiMix(c,C.top,.58*C.schleier*(1-32/(.34*B.h)));       // der Schleier bei y = 32 px
-  /* v6.37: der weite Sonnenschein hellt auch den obersten Streifen auf - im Bild vom 12.11. war die Statusleiste
-     (54,112,196) kraeftiger als der Himmel direkt darunter (73,117,181). Mittel ueber die Breite bei y = 32 px. */
-  /* v6.39: dazu der Schein der Sonne selbst, gemessen dicht unter der Statusleiste (Kopfunterkante - 60 px) */
-  if(!ohneSonne&&B.sx!=null&&(C.glanz>.02||C.sonne>.03)){var R=hiGlanzR(B),sm=0,ss=0,nn=16,ys=Math.max(16,(B.kb||92)-60);
-    for(var q=0;q<nn;q++){var dx=(q+.5)/nn*B.w-B.sx,dd=Math.sqrt(dx*dx+(ys-B.sy)*(ys-B.sy));sm+=Math.max(0,1-dd/R);ss+=hiSonneA(dd,B.sr||22);}
-    if(C.glanz>.02)c=hiMix(c,[255,244,214],C.glanz*sm/nn);
-    if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
-  return c;
-}
-/* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
-function hiWeiterMerken(){
-  if(!hiAn()||!HI.L||!HI.sT)return;
-  var jz=performance.now(),L=HI.L;
-  sessionStorage.setItem("hiWeiter",JSON.stringify({saat:HI.saat,ph:HI.ph0+(HI.s||0)+(jz-HI.sT)/1000*(HI.f||1),f:HI.f||1,t:Date.now(),
-    L:{h:L.h,N:L.N,nass:L.nass?1:0,nebel:L.nebel?1:0}}));
-}
-function hiInit(){
-  HI.init=1;
-  try{var m=/[?&]himmel=([a-z]+)/.exec(location.search);if(m&&HI_LAGEN[m[1]])HI.test=m[1];
-      var mw=/[?&]hwind=(\d+)/.exec(location.search);if(mw){HI.testWind=+mw[1];HI.urlWind=+mw[1];}}catch(e){}
-  window.addEventListener("resize",function(){clearTimeout(HI.rt);HI.rt=setTimeout(hiPruefen,250);});
-  window.addEventListener("scroll",function(){if(HI.sr||!window.requestAnimationFrame)return;HI.sr=requestAnimationFrame(function(){HI.sr=0;hiMini();});},{passive:true});
-  setInterval(hiPruefen,60000);
-  document.addEventListener("visibilitychange",function(){
-    if(document.hidden){HI.weg=Date.now();return;}
-    if(HI.weg&&Date.now()-HI.weg>30*60e3)hiNeuesBild();
-    hiPruefen();});
-  hiNeuesBild();
-  /* v6.52: nach einem Ortswechsel denselben Himmel weiterfuehren - gleiches Muster, Wolken an derselben Stelle, gleiche
-     Lage (Sonnenhoehe, Bedeckung) wie auf der alten Seite; erst sanftZeigen blendet zum neuen Ort ueber */
-  try{var hw=JSON.parse(sessionStorage.getItem("hiWeiter")||"null");sessionStorage.removeItem("hiWeiter");
-    if(hw&&isFinite(hw.saat)&&isFinite(hw.ph)&&hw.L&&isFinite(hw.L.N)&&Math.abs(Date.now()-hw.t)<15000){
-      HI.saat=hw.saat;HI.ph0=hw.ph+Math.max(0,Date.now()-hw.t)/1000*(hw.f||1);HI.weiterL=hw.L;}}catch(e){}
-  hiZugKlasse();
-  try{localStorage.removeItem("hiMiniGr");}catch(e){}      /* v6.29: 18 px sind fest (Nutzer), der Test ist weg */
-}
-/* Baut den Himmel neu, wenn sich etwas Sichtbares geaendert hat (Farben, Bedeckung, Groesse). Die neue Szene liegt
-   ueber der alten und blendet in 1,3 s ein; danach faellt die alte weg. */
-function hiPruefen(bl){
-  var el0=document.getElementById("hi");if(!el0)return;
-  if(!HI.init)hiInit();
-  hiMini();
-  if(!hiAn()){
-    HI.szenen.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});HI.szenen=[];HI.key="";HI.C=null;
-    document.documentElement.classList.remove("hison");return;}
-  /* v6.52 (Nutzer 12.11.: "beim Ortswechsel wurde erst der dunkle Bereich geladen und spaeter nachgefaerbt - kein fleckiges
-     Auftreten von Kopfzeile, Fusszeile, Mittelteil"): solange der Inhalt beim Start verborgen ist, bleibt der Himmel, wie
-     er steht - sanftZeigen baut ihn um, und er blendet zusammen mit dem Inhalt ein. Die ERSTE Szene steht sofort (vorher
-     blendete sie 1,3 s aus einem wolkenlosen Verlauf ein); nach einem Ortswechsel ist es der alte Himmel (hiWeiterMerken). */
-  if(HI.szenen.length&&sanftWartet())return;
-  bl=(typeof bl==="number"&&bl>=0)?bl:HI_BLENDE;
-  var erst=!HI.szenen.length;
-  var L=(erst&&HI.weiterL)?HI.weiterL:hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();HI.weiterL=null;
-  /* v6.37: Ort der Sonne = 41 % der Kopfbreite, eine gute Scheibe unter der Unterkante des stehenden Kopfs */
-  try{var kr0=document.querySelector("header").getBoundingClientRect();
-    if(kr0.width>0){B.aw=kr0.width;B.sr=Math.max(17,Math.min(27,kr0.width*.061));B.sx=kr0.left+kr0.width*.41;B.kb=Math.max(0,kr0.top)+kr0.height;B.sy=B.kb+B.sr*.7;
-      /* schmale Geraete (320 pt): die Scheibe bleibt zwischen "Live" und dem Datum, mit 8 px Abstand zu beiden */
-      var bd0=document.getElementById("badge"),wn0=document.querySelector("#hero .when");
-      if(bd0&&wn0){var b1=bd0.getBoundingClientRect(),w1=wn0.getBoundingClientRect();
-        if(b1.width>0&&w1.width>0){var lo0=b1.right+B.sr*.83+8,hi0=w1.left-B.sr*.83-8;
-          B.sx=hi0>=lo0?Math.max(lo0,Math.min(hi0,B.sx)):(b1.right+w1.left)/2;}}}}catch(e){}
-  document.documentElement.classList.toggle("hison",!!C.hell);
-  document.documentElement.classList.toggle("hisonne",C.sonne>.3);
-  var key=[B.w,B.h,hiRgb(C.top),hiRgb(C.bot),Math.round(L.N*20),Math.round(C.sterne*10),Math.round(C.glanz*20),L.nass?1:0,L.nebel?1:0,tf,
-    C.sonne||0,B.sx!=null?Math.round(B.sx/3)+"."+Math.round(B.sy/3):"",C.fade||0,hiRgb(C.rand),hiRgb(C.kern)].join("|");
-  if(key===HI.key)return;HI.key=key;HI.C=C;HI.L=L;
-  /* Weg bis jetzt mit dem ALTEN Tempo aufsummieren, dann gilt das neue */
-  var jz=performance.now();if(!HI.t0){HI.t0=jz;HI.s=0;}else HI.s+=(jz-HI.sT)/1000*(HI.f||1);
-  HI.sT=jz;HI.f=tf;
-  el0.style.height=B.h+"px";
-  if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
-  /* v6.40: im Bild vom 12.11. 12:28 (v6.39) schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein
-     auf (88,128,185) gestiegen (Helligkeit 48 %); bei (61,118,203) = 44 % war die Schrift noch weiss. Grenze 43 %. */
-  /* v6.47: die Balkenfarbe (HI.rand, --hi-r) OHNE den Sonnenschein - er machte sie grau (Weiss eingemischt, dann
-     abgedunkelt: 91,112,143 ueber blauem Himmel); seit dem weichen Uebergang oben (#hi::after) muss sie den Schein
-     nicht mehr treffen. Das Glas der Karten rechnet weiter mit dem Wert samt Schein (HI.randG). */
-  HI.randG=hiPassen(hiRand(C,L,B),0,.43);
-  HI.rand=hiPassen(hiRand(C,L,B,1),0,.43);
-  var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
-  /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
-     (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
-  if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
-  var alt=HI.szenen;HI.szenen=neu;
-  var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
-  /* v6.52: Szenen und die Farben oben (--hi-r), der Karten (--hi-k) und Kacheln (--hi-t) wechseln GLEICH lang (die drei
-     Farben sind per @property registriert und blenden ueber); die erste Szene ohne Blende */
-  neu.forEach(function(s){if(erst)s.style.transition="none";else s.style.transitionDuration=bl+"ms";});
-  if(erst){root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);}
-  /* GLAS: die Farben der dunklen Ansicht (Links, Warnrot, Diagramme) sind fuer fast schwarze Karten gemacht. Ueber
-     einem Taghimmel (Helligkeit bis 40 %) waere das Glas des Entwurfs (42 % Deckung) ein mittleres Blau, auf dem sie
-     untergehen - darum deckt es so stark, dass die Karte hoechstens ~19 % hell wird (nachts 42 %, am Tag bis 74 %).
-     Die Kacheln oben: nachts weisses, am Tag dunkles Glas. */
-  /* v6.17: im Bild vom 11.11. (v6.15) hatte die Statusleiste die Farbe --hi-o (oberer Verlauf, 88,104,127), nicht
-     theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
-     Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
-  var rr=hiRgb(HI.rand||C.top);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.randG||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
-  /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
-     v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
-  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.randG||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
-  /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
-  HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
-  /* v6.52: die Farben im SELBEN Bild setzen, in dem die Szene einzublenden beginnt (vorher sofort, die Szene zwei Bilder
-     spaeter - bei "Bewegung reduzieren" sprang der obere Streifen dann vor dem Rest) */
-  var los=0,zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
-  var beides=function(){if(los)return;los=1;
-    root.style.setProperty("--hi-bl",(erst?0:bl)+"ms");root.style.setProperty("--hi-r",rr);
-    var kk=hiKartenGlas();
-    try{localStorage.setItem("himmelFarbe",o+"|"+u+"|"+L.N.toFixed(2)+"|"+(L.nebel?2:L.nass?1:0)+"|"+kk+"|"+rr);}catch(e){}
-    try{themaFarbe();}catch(e){}
-    zeigen();};
-  if(erst)beides();
-  else if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(beides);});else beides();
-  setTimeout(function(){beides();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
-    root.style.setProperty("--hi-o",o);root.style.setProperty("--hi-u",u);},bl+250);
-}
-/* v6.13: ist die grosse Temperatur unter dem stehenden Kopf verschwunden, steht sie klein unter dem Ort (bei Apple
-   "5 Grad | Wolkenlos"); solange oben keine Zahl steht (laedt, veraltet), bleibt die Stationszeile. */
-function hiMini(){
-  var k=document.querySelector("header"),t=document.getElementById("temp"),m=document.getElementById("hiMini"),h=document.getElementById("hero");
-  if(!k||!t||!m||!h)return;
-  var z=String((t.firstChild&&t.firstChild.textContent)||"").trim();
-  var an=hiAn()&&/\d/.test(z)&&!h.classList.contains("hidden")&&t.getBoundingClientRect().bottom<k.getBoundingClientRect().bottom-10;
-  if(an){var l=(document.getElementById("condLbl")||{}).textContent||"";m.textContent=z+"\u00b0  |  "+l;}
-  document.documentElement.classList.toggle("himini",!!an);
-}
-/* v6.30 (Nutzer, iPhone-Bild 12.11. 08:25: "warum sind die Kacheln weniger gefaerbt als die anderen Container unten -
-   sollten die nicht gleich sein, oder kann ich das einstellen?"): die Kacheln oben hatten seit v6.12 ein eigenes,
-   helleres Glas (--hi-t: nachts 11 % Weiss, am Tag 32 % Dunkelblau), die Karten darunter das dichtere --hi-k (42-74 %).
-   Jetzt einstellbar: himmelKachel 0-100 %, 0 = wie bisher, 100 = genau das Glas der Karten. Gemischt wird
-   VORMULTIPLIZIERT (Farbe x Deckung) - geradlinig gemischt waere die Mitte nachts heller als beide Enden
-   (Weiss 11 % -> Dunkelblau 42 % liefe ueber ein Grau mit 26 %). */
-/* v6.47 (Nutzer: "die Kacheln oben haben einen anderen Hintergrund als die Container unten"): Voreinstellung 100 =
-   dasselbe Glas wie die Karten (v6.30-v6.46: 0 = helles Grundglas, am Tag grau neben blauen Karten). Ein gespeichertes
-   "0" war die alte Voreinstellung bzw. ein Test am Regler und gilt einmalig nicht mehr (Marke himmelKachelV2). */
-var HI_KA_STD=100;
-try{if(localStorage.getItem("himmelKachelV2")!=="1"){if(parseFloat(localStorage.getItem("himmelKachel"))===0)localStorage.removeItem("himmelKachel");localStorage.setItem("himmelKachelV2","1");}}catch(e){}
-function hiKaDeck(){try{var v=parseFloat(localStorage.getItem("himmelKachel"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_KA_STD;}
-function hiKachelGlas(){
-  var t=HI.gT,k=HI.gK;if(!t||!k)return;
-  var p=hiKaDeck()/100,a=t[3]+(k[3]-t[3])*p,c=[0,1,2].map(function(i){return a>0?(t[i]*t[3]*(1-p)+k[i]*k[3]*p)/a:0;});
-  document.documentElement.style.setProperty("--hi-t",hiRgb(c,+a.toFixed(3)));
-}
-/* v6.36 GLAS IN HIMMELSFARBE (Nutzer 12.11., Vergleich mit Apple-Wetter: "die Containerfarbe an den Hintergrund
-   anpassen wie beim iPhone, auch die Warnmeldung - auffaellig, aber passend, je nach Tag, Nacht und Wetter").
-   Gemessen in den Bildern: Apple Himmel (74,118,176), Karte (79,129,196) - fast dieselbe Farbe; bei uns Himmel
-   (53,108,185), Kacheln (50,60,78) - dunkles Marineblau, das Glas war fest (22,30,48). Jetzt: Zielfarbe der Karte =
-   Farbton des mittleren Himmels, am Tag dunkler (Leuchtdichte x0,8, hoechstens 0,16 = weisse Schrift mindestens
-   5:1), in der Nacht etwas heller als der Himmel; daraus die Glasfarbe bei unveraenderter Deckung (ka).
-   Regler "Karten: Farbe" (himmelGlas): 0 = dunkles Glas wie bis v6.35, 100 = die Zielfarbe. */
-var HI_GLAS_STD=100;
-function hiGlasTon(){try{var v=parseFloat(localStorage.getItem("himmelGlas"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_GLAS_STD;}
-/* Leuchtdichte nach WCAG (mit Gamma) - hiLum oben ist die lineare "Helligkeit" der Himmelsfarben */
-function hiY(c){
-  function g(v){v=Math.max(0,Math.min(255,v))/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
-  return .2126*g(c[0])+.7152*g(c[1])+.0722*g(c[2]);
-}
-/* v6.40: die Farbe, die eine Karte im Himmel WIRKLICH hat (Glas ueber dem mittleren Himmel), als #rrggbb - fuer
-   Zeichnungen, die bisher mit dem fast schwarzen #1a212c der klassischen Ansicht umrandet, radiert oder unterlegt
-   haben (Punkte im UV-Bild, Windrose, ISS-Scheibe, Vitamin-D-Bild). dunkler = Anteil Dunkelblau fuer "Zifferblaetter". */
-function hiKarteHex(dunkler){
-  try{if(!hiAn()||!HI.gl||!HI.gK)return "";
-    var g=HI.gl,k=HI.gK,c=[0,1,2].map(function(i){return g.S[i]*(1-k[3])+k[i]*k[3];});
-    if(dunkler)c=hiMix(c,[8,22,50],dunkler);
-    return "#"+c.map(function(v){return ("0"+Math.round(hiKl(v,0,255)).toString(16)).slice(-2);}).join("");}catch(e){return "";}
-}
-function hiSatt(c,k){var m=hiLum(c)*255;return c.map(function(v){return hiKl(m+(v-m)*k,0,255);});}
-function hiGlasZiel(S){
-  /* v6.42 (Nutzer: "Container immer noch zu kontrastreich im Verhaeltnis zum Hintergrund - sie muessen gar nicht so
-     doll auffallen, etwas mehr die Farbe vom Hintergrund, bei der iPhone-App wirkt das ruhiger"). GEMESSEN Karte gegen
-     Himmel dahinter (Leuchtdichte-Kontrast): Apple 1,07-1,21 : 1; wir 1,5-1,6 auf Blau und 2,8-3,0 auf hellen Wolken.
-     Ziel jetzt: Karte nur noch 1,2 : 1 dunkler als der mittlere Himmel (vorher Leuchtdichte x 0,8 und davon 70 %),
-     hoechstens 0,19 (weisse Schrift bleibt >= 4,4 : 1; Apple geht bis 0,245 = 3,6 : 1). Voreinstellung des Reglers 100. */
-  /* v6.43 (Nutzer: "bei der iPhone-Wetter-App den Kontrast messen zwischen Vordergrund und Hintergrund von den Boxen
-     und das so bei uns anpassen"). GEMESSEN in sechs Apple-Bildern, Box gegen den Himmel direkt daneben, alle 20 pt:
-     jede Box hat EINE feste Farbe ueber ihre ganze Hoehe (Nissi 80,130,196; Luxor 79,130,197; Dakar 66,115,188;
-     Erlental 94,138,194) = die Helligkeit des Himmels auf mittlerer Hoehe, etwas kraeftiger blau. Darum ist sie an
-     ihrer Oberkante 1,07-1,20 : 1 HELLER und an der Unterkante 1,13-1,15 : 1 DUNKLER als der Himmel (untere Box ganz
-     unten bis 1,4-1,6), dazwischen 1,00. Weisse Schrift darauf 3,9 : 1, Nebenzeile 3,6, blasse Werte 2,2.
-     Wir bisher (v6.42): 1,2 : 1 dunkler als der Himmel und durchscheinend. Jetzt wie Apple: Ziel = Leuchtdichte des
-     mittleren Himmels (Verhaeltnis 1,0), hoechstens 0,21 (weiss >= 4,0 : 1), und das Glas deckt am Tag bis 84 %
-     (hiPruefen) - eine ruhige, einheitliche Flaeche statt durchscheinender Wolken. */
-  var y=hiY(S),yt=Math.min(.21,Math.max(y,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
-  if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
-    for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
-  else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
-  return c;
-}
-function hiKartenGlas(){
-  var g=HI.gl;if(!g)return "";
-  /* v6.39: der Himmel ist gedeckter geworden - die Karten sollen trotzdem blau bleiben (bei Apple sind sie sogar
-     kraeftiger als der Himmel: Karte 79,130,197 auf Himmel 73,115,170). Ziel darum aus einem um 35 % gesaettigteren S. */
-  /* v6.45: unter grauem Himmel weniger Zuschlag (Apple "Bewoelkt": Karte 79,92,107 = Saettigung 26 % auf Himmel 18 %;
-     wir hatten 39 % auf 20 %). gr = Grauanteil des Himmels: 0 -> x1,35 wie bisher, 0,88 -> x0,91. */
-  var Z=hiGlasZiel(hiSatt(g.S,1.35-.5*(g.gr||0))),G=Z.map(function(v,i){return hiKl((v-(1-g.ka)*g.S[i])/g.ka,0,255);});
-  var c=hiMix(g.basis,G,hiGlasTon()/100),kk=hiRgb(c,g.ka);
-  document.documentElement.style.setProperty("--hi-k",kk);
-  HI.gK=c.concat([g.ka]);hiKachelGlas();
-  return kk;
-}
-function hiGlasSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");
-  try{localStorage.setItem("himmelGlas",String(+v));}catch(e){}
-  var kk=hiKartenGlas();
-  /* das erste Script malt beim naechsten Start mit dem gemerkten Glas (Feld 5 von himmelFarbe) */
-  try{var a=String(localStorage.getItem("himmelFarbe")||"").split("|");if(kk&&a.length>=5){a[4]=kk;localStorage.setItem("himmelFarbe",a.join("|"));}}catch(e){}
-  hiAnzeigen();
-}
-function hiKaSetzen(v){document.documentElement.style.setProperty("--hi-bl","0ms");try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
-/* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
-   gilt immer (html.hizug hebt die Sperre fuer diese Lagen auf) - wie bei Wetter-Animation und Symbol. */
-function hiZugEigen(){try{var v=localStorage.getItem("himmelZug");return (v==="0"||v==="1")?+v:null;}catch(e){return null;}}
-function hiZug(){var e=hiZugEigen();return e!=null?e:(waReduziert()?0:1);}
-function hiZugKlasse(){var r=document.documentElement;r.classList.toggle("hizug",hiZugEigen()===1);r.classList.toggle("histeh",hiZug()===0);}
-/* v6.33: Wind-Vorschau und Tempo-Regler. v6.34: Vorschau 60 s (vorher 20 - zu kurz, um dabei am Regler zu ziehen),
-   jeder Zug am Regler verlaengert sie, ein Tipp auf den aktiven Knopf beendet sie. */
-var HI_PROBE_MS=60000;
-function hiWindProbeEnde(){
-  clearTimeout(HI.wpT);HI.testWind=HI.urlWind!=null?HI.urlWind:null;HI.wp=null;HI.key="";hiPruefen();hiAnzeigen();
-}
-function hiWindProbe(w){
-  if(HI.wp===w){hiWindProbeEnde();return;}
-  clearTimeout(HI.wpT);HI.testWind=w;HI.wp=w;HI.key="";hiPruefen();hiAnzeigen();
-  HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);
-}
-function hiTempoSetzen(v){
-  try{localStorage.setItem("himmelTempo",String(+v));}catch(e){}hiAnzeigen();
-  if(HI.wp!=null){clearTimeout(HI.wpT);HI.wpT=setTimeout(hiWindProbeEnde,HI_PROBE_MS);}
-  /* beim Ziehen nicht je Schritt neu bauen */
-  clearTimeout(HI.tpT);HI.tpT=setTimeout(function(){HI.key="";hiPruefen();},160);
-}
-/* Tempo der nahen Wolkenlage in px/s, so wie es gerade gezeichnet wird (Nebel: langsamere Schwaden) */
-function hiTempoPx(){
-  var v0=7;try{if(hiLage().nebel)v0=3;}catch(e){}
-  return v0*hiTempo();
-}
-function hiZahl(x,n){return x.toFixed(n).replace(".",",");}
-function hiDauerTxt(s){
-  if(!isFinite(s)||s<=0)return "–";
-  if(s<90)return Math.round(s)+"\u00a0s";
-  return hiZahl(s/60,1)+"\u00a0min";
-}
-function hiZugSetzen(v){try{localStorage.setItem("himmelZug",String(v));}catch(e){}hiZugKlasse();hiAnzeigen();
-  /* die Windstriche haengen davon ab, ob die Wolken ziehen (hiWolkenZiehen) */
-  try{_wa.key="";waPruefen();waAnzeigen();}catch(e){}
-}
-/* v6.35 (Nutzer: "wenn wir Wolken haben, die Striche ganz weg; wenn es klar ist, lassen - dass man den Wind sieht"):
-   Zeigen die ziehenden Wolken den Wind schon? Ansicht "Himmel", Wolken ziehen, mindestens HI_WOLKEN_MIN bedeckt.
-   Dann zeichnet die Wetter-Animation keine Windstriche (waLage). Klassische Ansichten: nie - dort gibt es keine Wolken. */
-var HI_WOLKEN_MIN=.15;
-function hiWolkenZiehen(){
-  try{if(!hiAn()||hiZug()!==1)return false;var L=hiLage();return !!(L&&!L.nebel&&L.N>=HI_WOLKEN_MIN);}catch(e){return false;}
-}
-function hiAnzeigen(){
-  var z=hiZug(),seg=document.getElementById("hiSeg"),h=document.getElementById("hiHilf");
-  var kr=document.getElementById("hiRegKa"),kv=document.getElementById("hiRegKaV"),kd=hiKaDeck();
-  if(kr&&+kr.value!==kd){kr.value=kd;kzReglerFuell(kr);}
-  if(kv)kv.textContent=kd+"\u202f%";
-  var gr=document.getElementById("hiRegGl"),gv=document.getElementById("hiRegGlV"),gd=hiGlasTon();
-  if(gr&&+gr.value!==gd){gr.value=gd;kzReglerFuell(gr);}
-  if(gv)gv.textContent=gd+"\u202f%";
-  if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
-  var ss=document.getElementById("hiSoSeg"),sa=hiSonneAn()?1:0;
-  if(ss)ss.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.s===sa);});
-  var pr=document.getElementById("hiProbe"),tr=document.getElementById("hiRegTp"),tv=document.getElementById("hiRegTpV"),te=hiTempoEigen(),wj=null;
-  try{wj=hiWindJetzt();}catch(e){}
-  if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",HI.wp!=null&&+b.dataset.w===HI.wp);});
-  if(tr&&+tr.value!==te){tr.value=te;kzReglerFuell(tr);}
-  if(tv)tv.textContent="×"+hiZahl(te/100,1);
-  var vp=0,bw=window.innerWidth||390;try{vp=hiTempoPx();}catch(e){}
-  var vt=(vp<10?hiZahl(vp,1):String(Math.round(vp)))+"\u00a0px/s, Bildschirmbreite in "+hiDauerTxt(bw/vp)+".";
-  if(h)h.textContent=(z?"Die Wolken ziehen je nach Wind am Ort: bei Windstille fast gar nicht, ab etwa 60 km/h kaum noch schneller. „Tempo“ ist ein Faktor auf alles."
-        +(HI.wp!=null?" Vorschau "+HI.wp+"\u00a0km/h (1\u00a0min, nochmal tippen = aus): "+vt
-          :wj!=null?" Jetzt "+wj+"\u00a0km/h: "+vt:" Jetzt keine frische Windmessung, mittleres Tempo: "+vt)
-      :"Die Wolken im Hintergrund stehen still."
-      +((hiZugEigen()==null&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „ziehen“ schaltet die Bewegung trotzdem ein.":""))
-    +(hiAn()?"":" Gilt in der Ansicht „Himmel“ – umschalten mit dem Knopf oben neben dem Standort.");
 }
 const LABELS={"clear-day":"Klar","clear-night":"Klar","partly-cloudy-day":"Teils bewölkt","partly-cloudy-night":"Teils bewölkt","cloudy":"Bewölkt","fog":"Nebel","wind":"Windig","rain":"Regen","sleet":"Schneeregen","snow":"Schnee","hail":"Hagel","thunderstorm":"Gewitter"};
 /* v3.88: Zustand aus Messung und Radar (siehe zustandZeigen weiter unten).
@@ -3306,8 +3349,6 @@ function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rg
 /* v6.51 WEICHER START: wartet nach den Hauptdaten auf die Teile, die sonst sichtbar nachruecken (Live-Messung,
    Warnungen, Radar, Stundenregen, Tagesvorhersage) - laengstens SANFT_MAX -, dann blendet alles zusammen ein. */
 var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
-/* v6.52: solange der Inhalt verborgen ist, baut der Himmel nicht um (hiPruefen wartet) - sonst wechselt er vor dem Rest */
-function sanftWartet(){return !!(SANFT&&SANFT.an&&!SANFT.fertig);}
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
