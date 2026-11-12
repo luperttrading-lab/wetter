@@ -1598,16 +1598,16 @@ html.ortzieh{overflow-x:clip}
 #ortPkt .op-d i.zl{background:rgba(255,255,255,.66)}
 #ortPkt .op-d i.ak{background:#fff}
 /* die neue Seite schiebt sich von der Seite herein, aus der der Finger kam (nicht bei "Bewegung reduzieren": nur Blende) */
-/* v6.58 (Nutzer, Bildschirmfilm: "der Bildaufbau sieht nicht gut aus"): nach einem Wisch blendet alles in 0,55 s ein
-   statt in 1 s (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB) */
+/* v6.58 (Nutzer, Bildschirmfilm: "der Bildaufbau sieht nicht gut aus"): nach einem Wisch blendet alles schneller ein als
+   die 1 s des Starts (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB). v6.59: 0,35 statt 0,55 s */
 html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state),
 html.wisch-n.sanft-ein header .plz,html.wisch-v.sanft-ein header .plz,html.wisch-n.sanft-ein #placeName,html.wisch-v.sanft-ein #placeName,
-html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .55s ease!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .35s ease!important;transition-duration:.35s!important}
 @media (prefers-reduced-motion:no-preference){
 html.wisch-n.sanft #app>:not(header):not(.state),html.wisch-n.sanft header .place{transform:translate3d(64px,0,0)}
 html.wisch-v.sanft #app>:not(header):not(.state),html.wisch-v.sanft header .place{transform:translate3d(-64px,0,0)}
-html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
-html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .35s ease,transform .35s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.35s!important}
+html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .35s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.35s!important}
 }
 </style>
 </head>
@@ -2328,7 +2328,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.58</span>
+      <span class="ver">v6.59</span>
     </div>
   </header>
 
@@ -3013,17 +3013,29 @@ function waZeichne(now,still){
 /* v6.28: Die Leinwand liegt fest hinter der Seite (#hi), die Kacheln wandern beim Scrollen darueber - darum je Bild
    ihre Lage messen (9-12 Rechtecke) und dort mit destination-out abschwaechen. Unter dem stehenden Kopf nicht: der
    deckt die Kacheln, und seine Kopie des Regens (waKopf) bekaeme sonst Loecher. */
+/* v6.59: Lage von Leinwand, Kopf und Kacheln hoechstens alle 0,4 s messen (Seitenkoordinaten, beim Zeichnen um die
+   Scrollstrecke versetzt). Vorher je Bild ~10 getBoundingClientRect - jedes erzwang beim Aufbau einer Seite ein neues
+   Layout (im Profil 0,7 s von 6,5 s bei gedrosselter CPU). */
+function waMass(){
+  var M=_wa.km,t=Date.now();
+  if(M&&t-M.t<400&&(!M.kn.length||M.kn[0].isConnected))return M;
+  var kn=document.querySelectorAll("#kz .ki"),o=_wa.cv.getBoundingClientRect(),sy=window.scrollY||0,
+    fest=getComputedStyle(_wa.cv).position==="fixed",kp=document.querySelector("header"),R=[],i,r;
+  for(i=0;i<kn.length;i++){r=kn[i].getBoundingClientRect();R.push([r.left-o.left,r.top+sy,r.width,r.height]);}
+  /* feste Leinwand (Himmel): Kopf steht, Lage im Fenster; sonst rollt alles mit - Lage in der Seite */
+  return _wa.km={t:t,kn:kn,fest:fest,oy:o.top+(fest?0:sy),hb:kp?kp.getBoundingClientRect().bottom+(fest?0:sy):0,R:R};
+}
 function waKacheln(c){
   var ka=waE().ka;if(ka>=100||!_wa.cv||!_wa.B)return;
-  var kn=_wa.kn;if(!kn||!kn.length||!kn[0].isConnected)kn=_wa.kn=document.querySelectorAll("#kz .ki");
-  if(!kn.length)return;
-  var o=_wa.cv.getBoundingClientRect(),W=_wa.B.w,H=_wa.B.hb,kp=document.querySelector("header"),y0=0,i,r,n=0;
-  if(kp)y0=Math.max(0,kp.getBoundingClientRect().bottom-o.top-6);      /* nur in der Ansicht "Himmel" (voll): dort steht der Kopf */
+  var M=waMass();if(!M.R.length)return;
+  var sy=window.scrollY||0,oy=M.fest?M.oy:M.oy-sy,W=_wa.B.w,H=_wa.B.hb,y0,i,r,top,n=0;
+  /* nur in der Ansicht "Himmel" (voll): dort steht der Kopf */
+  y0=Math.max(0,(M.fest?M.hb:M.hb-sy)-oy-6);
   c.save();c.beginPath();c.rect(0,y0,W,Math.max(0,H-y0));c.clip();
   c.globalCompositeOperation="destination-out";c.fillStyle="rgba(0,0,0,"+(1-ka/100).toFixed(3)+")";c.beginPath();
-  for(i=0;i<kn.length;i++){r=kn[i].getBoundingClientRect();
-    if(r.width<4||r.bottom<o.top+y0||r.top>o.top+H)continue;n++;
-    if(c.roundRect)c.roundRect(r.left-o.left,r.top-o.top,r.width,r.height,13);else c.rect(r.left-o.left,r.top-o.top,r.width,r.height);}
+  for(i=0;i<M.R.length;i++){r=M.R[i];top=r[1]-sy-oy;
+    if(r[2]<4||top+r[3]<y0||top>H)continue;n++;
+    if(c.roundRect)c.roundRect(r[0],top,r[2],r[3],13);else c.rect(r[0],top,r[2],r[3]);}
   if(n)c.fill();
   c.restore();
 }
@@ -3034,7 +3046,9 @@ function waKopf(){
   var c=_wa.kcv;
   if(!c){c=document.createElement("canvas");c.id="waK";c.setAttribute("aria-hidden","true");_wa.kcv=c;_wa.kctx=c.getContext("2d");}
   if(c.parentNode!==k)k.appendChild(c);
-  var r=k.getBoundingClientRect(),q=_wa.cv.width/_wa.B.w,w=Math.round(r.width*q),h=Math.round(r.height*q);
+  /* v6.59: Groesse des Kopfs hoechstens alle 0,4 s messen (er steht) */
+  var r=_wa.kr;if(!r||Date.now()-r.t>400){var b=k.getBoundingClientRect();r=_wa.kr={t:Date.now(),width:b.width,height:b.height,left:b.left};}
+  var q=_wa.cv.width/_wa.B.w,w=Math.round(r.width*q),h=Math.round(r.height*q);
   if(w<2||h<2)return;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h;c.style.width=r.width+"px";c.style.height=r.height+"px";}
   _wa.kctx.clearRect(0,0,w,h);_wa.kctx.drawImage(_wa.cv,Math.round(r.left*q),0,w,h,0,0,w,h);
@@ -3045,12 +3059,14 @@ function waLauf(){if(_wa.raf||!_wa.L||_wa.m!=="an"||!waSicht()||document.hidden)
 /* v6.18: ueber dem ganzen Himmel nur jedes zweite Bild (30/s). Gemessen ohne GPU: jedes Bild in doppelter Aufloesung
    68 % eines Kerns, jedes zweite 42 %, dazu 1,5-fach ~35 %; der Regen im frueheren Kasten (klassisch) bleibt bei 60/s. */
 function waSchritt(now){_wa.raf=0;if(!_wa.L||_wa.m!=="an"||!waSicht()||document.hidden)return;
+  /* v6.59: solange die Seite verborgen aufgebaut wird (sanft), ist die Leinwand unsichtbar - nicht zeichnen */
+  var S=window.SANFT;if(S&&S.an&&!S.fertig){waLauf();return;}
   if(_wa.B&&_wa.B.voll&&now-(_wa.tz||0)<30){waLauf();return;}
   _wa.tz=now;waZeichne(now,false);waLauf();}
 /* Stand pruefen und Leinwand anpassen. Gerufen von zustandZeigen (neuer Zustand), kzRender (Kacheln hoeher oder
    niedriger), themaNeuZeichnen (hell/dunkel), ResizeObserver am Kasten und von den Einstellungen. */
 function waPruefen(){
-  _wa.kn=null;
+  _wa.kn=null;_wa.km=null;_wa.kr=null;
   var m=waModus();
   if(_wa.test&&m==="aus")m=waReduziert()?"still":"an";      /* Vorschau zeigt auch bei "Aus" etwas */
   var L=(m==="aus")?null:waLage(),B=L?waBereich():null;
@@ -3252,6 +3268,13 @@ function radarBoden(mmh){
 const GERAETE_TZ=(function(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Berlin";}catch(e){return "Europe/Berlin";}})();
 let TZ=LOC.tz||GERAETE_TZ;
 
+/* v6.59: Datumsformatierer zwischenspeichern. new Intl.DateTimeFormat kostet je Aufruf ein Vielfaches des Formatierens
+   selbst - tzTeile baute bei JEDEM Aufruf einen neuen, und das Planetenbild ruft es tausendfach (gemessen beim Start einer
+   Seite: 27 % der Rechenzeit, vor dem Einblenden). toLocale*String mit Optionen baut intern ebenfalls jedes Mal einen. */
+var _dtfC={};
+function dtf(loc,o){var k=loc+"|"+JSON.stringify(o),C=_dtfC||(_dtfC={});return C[k]||(C[k]=new Intl.DateTimeFormat(loc,o));}
+/* wie Date.toLocale...String(loc,o): ungueltige Daten ergeben "Invalid Date" statt eines Fehlers */
+function dtfS(loc,o,d){var x=new Date(d);return isNaN(x.getTime())?"Invalid Date":dtf(loc,o).format(x);}
 /* Zerlegt einen echten Zeitstempel in die Kalenderfelder der Zone z. */
 function tzTeile(ms,z){
   // Intl.formatToParts wirft bei ungueltigem Datum RangeError. Der alte Code
@@ -3261,7 +3284,7 @@ function tzTeile(ms,z){
   if(ms==null||!isFinite(ms)){const d=new Date();
     return{year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),
            hour:d.getHours(),minute:d.getMinutes(),second:d.getSeconds()};}
-  const f=new Intl.DateTimeFormat("en-US",{timeZone:z||TZ,hour12:false,
+  const f=dtf("en-US",{timeZone:z||TZ,hour12:false,
     year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"});
   const o={};for(const p of f.formatToParts(new Date(ms)))if(p.type!=="literal")o[p.type]=+p.value;
   if(o.hour===24)o.hour=0;                       // en-US liefert gelegentlich 24
@@ -3302,11 +3325,11 @@ function tzUnterschiedMin(ms){
 }
 function tzFremd(){return tzUnterschiedMin()!==0;}
 const fmt1=v=>(v==null||isNaN(v))?"–":v.toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});
-const timeHM=iso=>new Date(iso).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
-const hourShort=iso=>new Date(iso).toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit"}).replace(/[^0-9]/g,"");
-const dateWD=iso=>new Date(iso).toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short",day:"2-digit",month:"2-digit"});
-const dateShort=iso=>new Date(iso).toLocaleDateString("de-DE",{timeZone:TZ,day:"2-digit",month:"2-digit"});
-const ymd=d=>new Date(d).toLocaleDateString("en-CA",{timeZone:TZ});
+const timeHM=iso=>dtfS("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"},iso);
+const hourShort=iso=>dtfS("de-DE",{timeZone:TZ,hour:"2-digit"},iso).replace(/[^0-9]/g,"");
+const dateWD=iso=>dtfS("de-DE",{timeZone:TZ,weekday:"short",day:"2-digit",month:"2-digit"},iso);
+const dateShort=iso=>dtfS("de-DE",{timeZone:TZ,day:"2-digit",month:"2-digit"},iso);
+const ymd=d=>dtfS("en-CA",{timeZone:TZ},d);
 const isToday=iso=>ymd(iso)===ymd(new Date());
 function ageText(iso){const m=Math.round((Date.now()-new Date(iso).getTime())/60000);if(m<1)return"gerade eben";if(m<60)return"vor "+m+" Min";if(m<60*36)return"vor "+Math.round(m/60)+" Std";return"vor "+Math.round(m/1440)+" Tg";}
 function isoDate(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -3430,7 +3453,7 @@ function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rg
 var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
 /* v6.58: nach einem Wisch kuerzer warten und schneller einblenden - die Daten kommen meist aus dem Vorabruf (VORAB) */
-try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=550;SANFT_MAX=1200;}}catch(e){}
+try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=350;SANFT_MAX=800;}}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
 function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt=Date.now();SANFT.tm=setTimeout(sanftZeigen,SANFT_MAX);sanftPruefen();}
@@ -3445,10 +3468,11 @@ function sanftZeigen(){
   try{if(hiAn())hiPruefen(SANFT_EIN_MS);}catch(e){}
   function start(){if(los)return;los=true;
     h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
-    var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v"),ri=h.classList.contains("wisch-n")?1:-1;
-    if(gewischt){setTimeout(function(){try{owAnkunft();}catch(e){}},250);
-      /* v6.58: wer gerade durch die Orte wischt, wischt meist weiter - den naechsten Ort in derselben Richtung schon holen */
-      setTimeout(function(){try{owNachbarVorab(ri);}catch(e){}},SANFT_EIN_MS+1500);}
+    var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v"),ri=h.classList.contains("wisch-v")?-1:1;
+    if(gewischt)setTimeout(function(){try{owAnkunft();}catch(e){}},250);
+    /* v6.59: die Nachbarn in der Liste schon holen, damit der naechste Wisch nicht warten muss (nach einem Wisch die Richtung,
+       in die weitergewischt wird, zuerst) */
+    setTimeout(function(){try{owNachbarnVorab(ri);}catch(e){}},SANFT_EIN_MS+(gewischt?600:1500));
     setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");h.classList.remove("wisch-n");h.classList.remove("wisch-v");},SANFT_EIN_MS+200);}
   /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt */
   try{requestAnimationFrame(function(){requestAnimationFrame(start);});}catch(e){}
@@ -3494,7 +3518,12 @@ function ortGehen(p,opt){
    Stundenregen, 16 Tage); beim Wechsel landen sie in sessionStorage "ortVorab", die neue Seite nimmt sie (vorabNimm) statt
    neu zu laden - je Teil einmal, hoechstens VORAB_MS alt. Abrufe einer Seite brechen beim Neuladen ab, darum wartet das
    Loslassen auf den Vorabruf (hoechstens OW_WARTE ms). Die Adressen kommen fuer beide Seiten aus denselben Funktionen. */
-var VORAB=null,VORAB_MEM={},VORAB_MS=180e3,OW_WARTE=1500,_seiteVorab=0;
+/* v6.59 (Nutzer, Bildschirmfilm 21:30: "das Umschalten dauert immer noch relativ lang" - gemessen: die alte Seite wartete
+   0,3-1,05 s auf den Vorabruf): die Nachbarn in der Liste werden schon geholt, sobald eine Seite steht (owNachbarnVorab), und
+   jeder Teil hat sein eigenes Alter - Radar hoechstens 4 min, Live-Wert 8 min, der Rest VORAB_MS 10 min; aelteres wird beim
+   Ziehen nachgeholt. */
+var VORAB=null,VORAB_MEM={},VORAB_MS=600e3,VORAB_ALT={radar:240e3,live:480e3},OW_WARTE=1500,_seiteVorab=0;
+function vorabMax(n){return VORAB_ALT[n]||VORAB_MS;}
 function urlHaupt(la,lo){var now=new Date(),from=new Date(now-(CHART_PAST_H+2)*3600e3),to=new Date(now.getTime()+CHART_FUT_H*3600e3);
   return "https://api.brightsky.dev/weather?lat="+la+"&lon="+lo+"&date="+isoDate(from)+"&last_date="+isoDate(to)+"&tz=Europe/Berlin";}
 function urlLive(la,lo){return "https://api.brightsky.dev/current_weather?lat="+la+"&lon="+lo;}
@@ -3504,29 +3533,32 @@ function urlRadar7(la,lo){var d0=new Date(Date.now()-65*60e3),d1=new Date(Date.n
 function urlRegenStd(la,lo){return "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone="+encodeURIComponent(GERAETE_TZ);}
 function urlTage(la,lo){return "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone="+encodeURIComponent(GERAETE_TZ);}
 function vorabLL(p){return {la:p.isWettenberg?50.6034:+p.lat,lo:p.isWettenberg?8.6516:+p.lon};}
+/* holt, was fehlt oder zu alt ist (laufende Abrufe werden mitgenommen); das Versprechen erfuellt sich, wenn alles da ist */
 function vorabHolen(p){
-  var q=vorabLL(p),k=q.la+"|"+q.lo,e=VORAB_MEM[k];
-  /* schon geholt (oder unterwegs) - ausser der Hauptabruf ist gescheitert, dann neu */
-  if(e&&Date.now()-e.t<VORAB_MS-30e3&&!(e.fertig&&!e.d.haupt))return e.pr;
-  e={la:q.la,lo:q.lo,t:Date.now(),d:{}};VORAB_MEM[k]=e;
+  var q=vorabLL(p),k=q.la+"|"+q.lo,e=VORAB_MEM[k]||(VORAB_MEM[k]={la:q.la,lo:q.lo,d:{},dt:{},lauf:{}}),t=Date.now(),pr=[];
   var u={haupt:urlHaupt(q.la,q.lo),live:urlLive(q.la,q.lo),warn:urlWarn(q.la,q.lo),radar:urlRadar7(q.la,q.lo),regen:urlRegenStd(q.la,q.lo)};
   /* 16 Tage nur, wenn der Zwischenspeicher des Ziels nicht ohnehin frisch ist (loadCached nimmt ihn dann) */
   try{var fc=JSON.parse(localStorage.getItem("fcCache_"+(+p.lat).toFixed(2)+"_"+(+p.lon).toFixed(2))||"null");
-    if(!fc||Date.now()-fc.t>8*60e3)u.tage=urlTage(q.la,q.lo);}catch(x){u.tage=urlTage(q.la,q.lo);}
-  e.pr=Promise.all(Object.keys(u).map(function(n){
-    return fetchJSON(u[n],n==="haupt"?9000:7000).then(function(j){e.d[n]=j;},function(){});})).then(function(){e.fertig=1;});
-  return e.pr;
+    if(!fc||t-fc.t>8*60e3)u.tage=urlTage(q.la,q.lo);}catch(x){u.tage=urlTage(q.la,q.lo);}
+  Object.keys(u).forEach(function(n){
+    if(e.lauf[n]){pr.push(e.lauf[n]);return;}
+    /* noch mindestens 1 min gueltig: nicht neu holen */
+    if(e.d[n]!=null&&t-e.dt[n]<vorabMax(n)-60e3)return;
+    e.lauf[n]=fetchJSON(u[n],n==="haupt"?9000:7000).then(function(j){e.d[n]=j;e.dt[n]=t;},function(){})
+      .then(function(){delete e.lauf[n];});
+    pr.push(e.lauf[n]);});
+  return Promise.all(pr).then(function(){});
 }
 function vorabSichern(p){
   var q=vorabLL(p),e=VORAB_MEM[q.la+"|"+q.lo];if(!e)return;
-  var d={},n=0;for(var k in e.d){d[k]=e.d[k];n++;}if(!n)return;
-  try{sessionStorage.setItem("ortVorab",JSON.stringify({la:e.la,lo:e.lo,t:e.t,d:d}));}catch(x){}
+  var d={},dt={},n=0,t=Date.now();for(var k in e.d)if(t-e.dt[k]<vorabMax(k)){d[k]=e.d[k];dt[k]=e.dt[k];n++;}if(!n)return;
+  try{sessionStorage.setItem("ortVorab",JSON.stringify({la:e.la,lo:e.lo,d:d,dt:dt}));}catch(x){}
 }
 function vorabNimm(k){
   if(VORAB===null){VORAB=false;
     try{var s=sessionStorage.getItem("ortVorab");sessionStorage.removeItem("ortVorab");
-      if(s){var o=JSON.parse(s);if(o&&o.d&&Math.abs(o.la-LAT)<1e-7&&Math.abs(o.lo-LON)<1e-7&&Date.now()-o.t<VORAB_MS)VORAB=o;}}catch(e){}}
-  if(!VORAB||VORAB.d[k]==null)return null;
+      if(s){var o=JSON.parse(s);if(o&&o.d&&o.dt&&Math.abs(o.la-LAT)<1e-7&&Math.abs(o.lo-LON)<1e-7)VORAB=o;}}catch(e){}}
+  if(!VORAB||VORAB.d[k]==null||!(Date.now()-VORAB.dt[k]<vorabMax(k)))return null;
   var v=VORAB.d[k];delete VORAB.d[k];return v;
 }
 function vorabOder(k,u,ms){var v=vorabNimm(k);return v?Promise.resolve(v):fetchJSON(u,ms);}
@@ -3536,9 +3568,15 @@ function seiteUrl(){
   var v="";try{v=((document.querySelector(".ver")||{}).textContent||"").replace(/[^0-9.]/g,"");}catch(e){}
   return location.pathname+"?v="+(v||Date.now())+"&o="+(/[?&]o=1(&|$)/.test(location.search)?2:1);
 }
-/* die naechste Seite schon in den HTTP-Cache holen (einmal je Seite) */
-function seiteVorab(){if(_seiteVorab)return;_seiteVorab=1;try{fetch(seiteUrl(),{credentials:"same-origin"}).catch(function(){});}catch(e){}}
-function owNachbarVorab(ri){if(document.hidden)return;var L=owListe(),j=L.i+ri;if(j<0||j>=L.a.length)return;vorabHolen(L.a[j]);seiteVorab();}
+/* die naechste Seite schon in den HTTP-Cache holen (hoechstens alle 9 min - der Cache haelt 10) */
+function seiteVorab(){if(Date.now()-_seiteVorab<540e3)return;_seiteVorab=Date.now();try{fetch(seiteUrl(),{credentials:"same-origin"}).catch(function(){});}catch(e){}}
+/* v6.59: beide Nachbarn in der Liste (die Richtung des letzten Wischs zuerst) - nach jedem Start und beim Zurueckkehren */
+function owNachbarnVorab(ri){
+  if(document.hidden)return;var L=owListe();if(L.a.length<2)return;ri=ri||1;
+  [ri,-ri].forEach(function(d){var j=L.i+d;if(j>=0&&j<L.a.length)vorabHolen(L.a[j]);});
+  seiteVorab();
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&SANFT.fertig)setTimeout(function(){try{owNachbarnVorab(1);}catch(e){}},1500);});
 /* v6.56 ORTE WISCHEN. Nur oben (Kopf, Warnungen, Wetterkasten ohne Kacheln): Kacheln, Stundenleiste, Verlauf, Karten und
    Regler wischen selbst waagrecht. Entschieden wird nach 10 px: waagrecht (|dx| > 1,15 |dy|, v6.56: 1,5) = Ortswechsel,
    sonst scrollt die Seite wie immer. Links wischen = naechster Ort der Liste, rechts = voriger; am Ende federt es nur. */
@@ -3624,14 +3662,15 @@ function owLos(){
   owPunkte({a:OW.L.a,i:OW.j},-1,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);clearTimeout(OW.tm);
   h.classList.add("ortlos");
   /* Bewegung reduzieren: nicht wegfliegen, nur ausblenden */
-  owAnim(red?OW.wx:s*W*.6,0,red?200:230,"cubic-bezier(.3,0,.6,1)",null);
+  owAnim(red?OW.wx:s*W*.6,0,red?180:200,"cubic-bezier(.3,0,.6,1)",null);
   var los=false,ziel={lat:p.lat,lon:p.lon,name:p.name,isWettenberg:false,tz:p.tz},
     go=function(){if(los)return;los=true;
       /* falls die Zeitzone noch geholt werden muss: hoechstens 2,5 s */
       ortGehen(ziel,{sofort:1,wisch:s<0?"n":"v",tzMs:2500});};
-  /* v6.58: erst gehen, wenn der Vorabruf (seit Beginn des Wischens) da ist - laengstens OW_WARTE ms nach dem Loslassen */
+  /* v6.58: erst gehen, wenn der Vorabruf (seit Beginn des Wischens) da ist - laengstens OW_WARTE ms nach dem Loslassen.
+     v6.59: nur 120 ms Wegfliegen abwarten (vorher 230) - es laeuft weiter, bis die neue Seite das erste Bild zeigt */
   var pr=vorabHolen(p);
-  setTimeout(function(){pr.then(go,go);},230);
+  setTimeout(function(){pr.then(go,go);},120);
   setTimeout(go,OW_WARTE);
 }
 function owZeit(e){var t=e&&e.timeStamp;return (t&&t>0&&t<1e12)?t:performance.now();}
@@ -10451,7 +10490,13 @@ function astLastSunday(y,month){const last=new Date(Date.UTC(y,month,0));return 
    Gemessen wird am Mittag des Tages, damit die Umstellungsnacht nicht stoert;
    fuer die halbe Stunde Versatz mancher Zonen (Indien, Nepal) faellt die
    Stundenzahl gebrochen aus - das ist richtig so. */
+var _astTzC={};
 function astTzOff(y,m,d){
+  /* v6.59: je Tag und Zone nur einmal rechnen (altaz ruft es fuer jeden Punkt des Planetenbilds) */
+  var k=TZ+"|"+(y*10000+m*100+d),C=_astTzC||(_astTzC={});if(k in C)return C[k];
+  return (C[k]=astTzOffR(y,m,d));
+}
+function astTzOffR(y,m,d){
   const probe=Date.UTC(y,m-1,d,12,0,0);
   try{const t=tzTeile(probe,TZ);
     return (Date.UTC(t.year,t.month-1,t.day,t.hour,t.minute,t.second)-probe)/3600000;

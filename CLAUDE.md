@@ -3594,6 +3594,32 @@ Wischbeginn; die neue Seite holt Messung/Live/Warnungen/Radar nicht mehr selbst,
 Geprueft (Playwright, Touch per CDP und in der Seite): kurz/langsam zurueck (Web-Animation laeuft), senkrecht scrollt, Kachel
 mit Punkten im Modus Auto -> naechster Ort, Schwung rechts -> voriger, Auto + Wischen -> Kachelansicht 0 -> 1 ohne Ortswechsel,
 Standort-Dialog (Loeschen + Wechsel), Himmel / hell / "Bewegung reduzieren". Nicht am iPhone geprueft.
+v6.59 SCHNELLER UMSCHALTEN (Nutzer 12.11., zwei Bildschirmfilme 21:30/21:34: "das Umschalten dauert immer noch relativ
+lang" - der zweite zeigt Apple: Inhalt wechselt im selben Bild, nur der Hintergrund blendet ~1 s ueber). GEMESSEN im ersten
+Film (Bild fuer Bild, Streuung der Temperaturzone, schwarzer Streifen unten = Navigation): je Wechsel 1,07-1,41 s ohne
+Inhalt = alte Seite wartet 0,32-1,05 s auf den Vorabruf + neue Seite 0,36-0,75 s bis zur Blende (dann 0,4 s Blende). Das
+Ziehen und Wegfliegen von v6.58 laeuft (Inhalt faellt in ~0,17 s weg). DREI URSACHEN behoben: (1) FORMATIERER: `tzTeile` baute
+bei JEDEM Aufruf ein neues Intl.DateTimeFormat, das Planetenbild ruft es tausendfach (`altaz` -> `astTzOff`); dazu bauten
+`timeHM`/`hourShort`/`dateWD`/`dateShort`/`ymd` ueber toLocale*String(..., Optionen) intern jedes Mal einen. CPU-Profil der
+neuen Seite (Chromium, CPU 4x gedrosselt): renderPlaneten 2,0 s von 7,5 s, alles VOR dem Einblenden. Jetzt `dtf(loc,o)`
+(Zwischenspeicher je Sprache+Optionen, `_dtfC`) und `dtfS` (wie toLocale*String, ungueltiges Datum -> "Invalid Date" statt
+Fehler), `astTzOff` je Tag und Zone gemerkt (`_astTzC`, Rechnung in `astTzOffR`). Danach loadExtras 2,25 -> 0,22 s,
+render 1,5 -> 0,9 s. Ausgaben geprueft (Node und Seite): gleiche Texte wie vorher. REGEL: nie `new Intl.DateTimeFormat` oder
+toLocale*String mit Optionen in Schleifen - `dtf`/`dtfS` nehmen. (2) WETTER-ANIMATION: `waKacheln`/`waKopf` massen je Bild
+~10 Rechtecke (getBoundingClientRect erzwingt beim Seitenaufbau jedes Mal ein Layout, 0,7 s im Profil). Jetzt `waMass()`
+hoechstens alle 0,4 s (Seitenkoordinaten, beim Zeichnen um scrollY versetzt; `_wa.km`/`_wa.kr`, geloescht in waPruefen), und
+solange die Seite verborgen aufgebaut wird (SANFT.an und nicht fertig), zeichnet `waSchritt` gar nicht. Aussparung hinter den
+Kacheln nachgemessen (Alpha Kachel/daneben 0,1/0,3 bzw. gescrollt 0,3/0,9). (3) VORABRUF FRUEHER: beide Nachbarn in der Liste
+werden geholt, sobald eine Seite steht (`owNachbarnVorab`, 1,5 s nach dem Einblenden, nach einem Wisch 0,6 s und die
+Wischrichtung zuerst; dazu beim Zurueckkehren in die App) samt der naechsten Seite in den HTTP-Cache (`seiteVorab`, hoechstens
+alle 9 min). Jeder Teil hat sein Alter (`VORAB_ALT`: Radar 4 min, Live 8 min, sonst `VORAB_MS` 10 min); `vorabHolen` holt nur,
+was fehlt oder in unter 1 min verfaellt, und nimmt laufende Abrufe mit. Loslassen: nur noch 120 ms Wegfliegen abwarten (vorher
+230), Wegfliegen 200 ms; nach einem Wisch SANFT_MAX 0,8 s und Blende/Hereinschieben 0,35 s (v6.58: 1,2 / 0,55). Pruefstand:
+Navigation 0,5 s nach Wischbeginn (davon 0,3 s die Geste), Hauptdaten der neuen Seite nach 0,37-0,50 s. PREIS: jeder Start mit
+mindestens zwei Orten holt im Hintergrund die Daten beider Nachbarn (je ~6 kleine Abrufe) und einmal die Seite (~250 KB, aus dem
+Cache, wenn juenger als 10 min). GRENZE: ein Ortswechsel bleibt ein Neuladen (1 MB HTML parsen, Himmel-Rauschfelder rechnen,
+rendern) - "im selben Bild" wie Apple geht erst, wenn ein Ort in der Seite gewechselt werden kann (LAT/LON/LOC sind Konstanten,
+~200 Stellen). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
