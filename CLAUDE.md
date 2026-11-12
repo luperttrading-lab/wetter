@@ -3475,6 +3475,34 @@ und mit "Bewegung reduzieren" (Szene, Variablen und Inhalt gemessen deckungsglei
 der alte Himmel mit den Knoepfen da (im Pruefstand 2-3 s, am Handy kuerzer); der Ladekasten erscheint wie bisher erst nach
 1,5 s. Spaeter nachkommende Daten (z. B. Live-Messung nach SANFT_MAX) bauen den Himmel wie bisher noch einmal um - dann
 aber ebenfalls einheitlich (Szene und Farben gleich lang). Nicht am iPhone geprueft.
+v6.53 HIMMEL SCHON BEIM ERSTEN BILD, STREIFEN IN DER SZENE (Nutzer 12.11., Bildschirmfilm 18:05 vom iPhone mit v6.52:
+"es wechselt immer noch mit unterschiedlichen Farben zu Zeitpunkten" - "vor allem Kopf- und Fusszeile, die eine Farbe sind
+und nicht wie das Hintergrundbild"). IM FILM GEMESSEN (30 Bilder/s, `e/regionen.py`): (1) Norden -> Erlental: nach dem
+Neuladen 0,17 s lang (11,33-11,50 s) der GANZE Bildschirm einfarbig - nur der Verlauf von #hi ohne Wolken und Sterne, Kopf und
+Fuss flach, im Kopf fehlte das Wolken-Symbol des Ansicht-Knopfs. Ursache: WebKit malt das erste Bild der neuen Seite, bevor
+das grosse Hauptscript (~10 000 Zeilen) geparst und bis `ansichtAnwenden` gelaufen ist; die Szene entstand erst dort. Auch
+Chromium malt so (first-paint 95 ms, erste Szene 350 ms) - im Pruefstand verdeckte das beim Ortswechsel das Festhalten des
+alten Bilds. (2) Dakar -> Norden: der Kopf (#hiK mit dem Streifen #hiK::after in --hi-r) blendete 0,6-0,8 s LAENGER als Mitte
+und Rand (fertig 7,2 s statt 6,4 s); die Statusleiste selbst folgte --hi-r gleichmaessig. Vermutung: WebKit malt den
+maskierten Streifen nicht in jedem Bild neu, wenn sich nur die geerbte, per @property ueberblendete Farbe aendert.
+JETZT: (a) Das ganze Himmel-Modul (vorher im Hauptscript zwischen sbInit und LABELS, ~600 Zeilen) steht in einem EIGENEN
+fruehen <script> direkt hinter `<div id="hi">`, am Ende `hiPruefen()` - die erste Szene steht VOR dem ersten Bild (gemessen
+Chromium: Szene 147-238 ms, first-paint 164-264 ms; v6.52: 92-100 / 321-377). Dafuer ohne Hauptscript lauffaehig:
+`hiReduziert()` statt waReduziert, `hiMuFrueh()` (Sonnenhoehe aus locProfile, Formel wie _muFallback) wenn `_muFallback`
+fehlt, `typeof _zuIc`, `hiWartet()` (Klasse `sanft` und SANFT.fertig, ersetzt sanftWartet), waWind/themaFarbe liefen schon in
+try. Die Sonne braucht die Lage des Kopfs - den gibt es im fruehen Script noch nicht: Geometrie von der alten Seite
+(`hiWeiter.B`) bzw. vom letzten Mal (`himmelGeo` in localStorage). Die Kopie hinter dem stehenden Kopf (#hiK) baut hiPruefen
+nach, sobald es den Kopf gibt (gleiche Szene, Weg der Wolken bis jetzt, ohne Blende) - auch waehrend des Haltens. `HI.B`
+merkt die Geometrie der stehenden Szene. (b) Der Streifen in Balkenfarbe (v6.47) ist eine Ebene JEDER Szene (`.hiS>.hiB`,
+Farbe inline, gleiche Maske) und blendet mit der Szene per Deckkraft; `#hi::after`/`#hiK::after` sind weg. Weil er jetzt
+UNTER der Regen-Leinwand liegt, laeuft der Regen (`#hi>#waCv`, `#hiK>#waK`) mit der umgekehrten Maske selbst darunter aus -
+gleiches Bild wie vorher (Vergleich alt/neu mit nachgestellter 59-pt-Leiste, oben und gescrollt, mit Regen). --hi-r bleibt
+fuer Statusleiste/Hintergrund (ueberblendet per @property). Geprueft (Playwright): Ortswechsel New York -> Erlental im Video
+- alter Himmel bis zu den Daten unveraendert, dann alle sechs Messstellen inkl. Kopf in derselben Sekunde (15,20-16,30 s);
+Szene/Variablen/Inhalt deckungsgleich auch bei "Bewegung reduzieren"; klassisch hell/dunkel, Fehlerfall ohne Fehler.
+NICHT geaendert, dem Nutzer gesagt: die Statusleiste selbst ist mit dem alten Home-Symbol ein einfarbiger iOS-Balken
+(Haarlinie 10 % dunkler in Zeile 176 auch in diesem Film) - Himmel bis zur Kante nur mit neuem Symbol (v6.44); unten laufen
+die Wolken am Tag absichtlich aus (v6.41, wie Apple). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
