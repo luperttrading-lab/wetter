@@ -3219,6 +3219,34 @@ kommt aus einem um 35 % gesaettigteren S, damit die Karten trotz gedeckterem Him
 60,92,140; Apple 79,130,197). Aufwand unveraendert (17,3 / 18,0 gegen 17,3 % eines Kerns). Geprueft: klar/heiter/wolkig/
 bedeckt/Abend/Nacht/Regen/Nebel, 320-430 pt (320: Kern beruehrt "Live" und Datum, lesbar), Schalter, klassisch. NICHT gebaut:
 Linsenflecken; Ort nach Tageszeit (siehe oben). Kern bewusst kleiner als bei Apple (dort ueberstrahlt er Uhr und Akku).
+v6.40 FARBDURCHSICHT (Nutzer 12.11. 12:28, Bild Luxor v6.39: "das Wort Prognose passt farblich gar nicht - generell noch mal
+gucken, was farblich zusammenpasst und was nicht"). ERST GEMESSEN: Pruefskript (Scratchpad `t58.py`) liest fuer JEDE Schrift
+der Seite die Farbe und - aus einem zweiten Bildschirmfoto mit durchsichtiger Schrift - die Flaeche, die wirklich dahinter
+liegt, und rechnet den Kontrast (WCAG). Ansicht Himmel, klarer Tag, 406 Texte: 29 unter 2 : 1, 42 zwischen 2 und 3; nach dem
+Umbau 5 und 20 (Rest: Schrift ueber dem Sonnenschein mit Saum, ein gesperrter Knopf, ein Messartefakt); Nacht 1 / 2, bedeckt
+1 / 9. DREI URSACHEN: (1) Farben der HELLEN Ansicht ohne dunkles Gegenstueck (#c62828, #7a4dd8, #1c66c4, #1f7a4d, #5c6b80,
+#26334a, #2c3e50, #7a8798) - auch klassisch dunkel kaum lesbar ("Heute noch trocken" 1,5 : 1, "~18:34" 1,3 : 1). Neuer Block
+am ENDE des <style> ("v6.40 FARBDURCHSICHT"), `html:root.dunkel ...` = gilt klassisch dunkel UND Himmel: Ereignis-Warnung
+#ff9d94, Countdown violett #c9bcff, Regenbilanz/Umkreis blau #93c5ff, Vitamin-D gruen #8fe0a8, Nebentexte `--muted`,
+`.pl-note` wieder `--plMut` (das Planetenbild ist am Tag HELL), BfS-Platzhalter dunkle Schrift. (2) Farben aus dem
+Programmcode: `txtF(hex)` hellt eine Kategorie-Farbe fuer SCHRIFT mit Weiss auf, bis die Leuchtdichte reicht (>= 0,5 im
+Himmel, 0,42 klassisch dunkel; hell unveraendert) - Vergleich zu gestern, "Sonne"-Kachel, Luftqualitaet (Karte und Kachel),
+ISS "Himmel ..." und "nicht sichtbar", Vitamin-D-Zeit, "gestrichelt"/"grau" in der BfS-Notiz. Punkte, Balken und Flaechen
+behalten die Originalfarbe. (3) FAST SCHWARZE KAESTEN auf blauem Glas (zweite Messung `t59.py`: alle Flaechen mit eigener
+deckender Farbe): das Abzeichen "Prognose"/"Veraltet" (seit v6.11 ohne Kasten gedacht; `html.dunkel .badge.demo` gewann aber
+gegen `html:root .badge` - jetzt Punkt + Wort wie "Live", "Veraltet" behaelt die Warnfarbe); nur im Himmel: `--stufe`/`--feld`
+als dunkelblaues Glas rgba(6,22,54,.34/.4) (Regenbilanz-Kaesten, Rasen-Knoepfe, Felder; im Fenster `.loc-box` wieder
+deckend), `.met-amp`, `.rz-mehrk`, `.rz-frei2`, `.rz-w`, Zeiger-Schilder im Temperaturverlauf, Rasen-"Ersatz" als
+bernsteinfarbenes Glas; `.uvnote` Deckkraft .95 in `--muted`, grobe ISS-Zeilen .72 statt .5, Fuss heller, `--faint` #bcc7da.
+ZEICHNUNGEN: `hiKarteHex(dunkler)` = die Farbe, die eine Karte im Himmel wirklich hat (Glas ueber dem mittleren Himmel);
+`CO.karte` (Raender/Radieren) nimmt sie, `CO.scheibe`/`CO.rose`/`CO.vitdGrund` eine dunklere Fassung - vorher fest #1a212c
+(schwarzes Feld im Vitamin-D-Bild, schwarze ISS-Scheibe). Gilt nach dem naechsten Zeichnen. STATUSLEISTE: im Nutzerbild
+schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein auf (88,128,185) = Helligkeit 48 % gestiegen; bei
+(61,118,203) = 44 % war die Schrift weiss. `HI.rand` jetzt auf 43 % begrenzt (`hiPassen(...,.43)`), klar -> (78,113,165).
+Mit Sonne (`hison`): auch Abschnittstitel mit dunkelblauem Saum, Stationszeile weiss. NICHT angefasst: UV-Pille (amtliche
+Farbskala), Kategorie-Farben der Rasen-Kaestchen, die gefaerbten "wechselnden" Kacheln (Nutzerwahl 80 %), das helle
+Planetenbild. FALLE im Pruefstand: `netz2.hole(netz2.ALLE)` OHNE Sperre fuer Open-Meteo - haengt die Verbindung, blockiert der
+Python-Handler alle anderen Abrufe und die Seite bleibt leer (Hoehe 852, 10 Texte). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
