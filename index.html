@@ -1570,7 +1570,7 @@ html:root.himmel #stLeiste{display:none}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.44</span>
+      <span class="ver">v6.45</span>
     </div>
   </header>
 
@@ -2058,8 +2058,12 @@ function hiTextur(seed,N,rand,kern){
   /* v6.17: bei geschlossener Decke (thr < 0) laeuft Hell -> Dunkel zwischen dem 10. und 90. Perzentil des Rauschens
      (vorher fast der ganze Wertebereich: die meisten Pixel lagen im Mittelton, die Decke wirkte wie Nebel) */
   var q=hiKl(1-N,0,.999),thr=N>=.985?-1:S[Math.floor(q*(S.length-1))],lo=S[Math.floor(.1*(S.length-1))],hi=S[Math.floor(.9*(S.length-1))];
+  /* v6.45: bei 7/8 lag fast die ganze Wolkenflaeche im dunklen "Kern" (hell war nur der schmale Saum an den Luecken,
+     Fenster thr..thr+0,28) - das Bild war dunkler und blauer als die geschlossene Decke. Ab ~75 % Bedeckung weitet sich
+     das Fenster bis zum 90. Perzentil (wie bei der Decke): hell und dunkel verteilen sich ueber die ganze Wolke. */
+  var wf=hiSm(.74,.9,N),se=thr+.28+(Math.max(hi,thr+.28)-(thr+.28))*wf;
   for(var i=0;i<F.length;i++){
-    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo,hi,f):hiSm(thr,thr+.28,f);
+    var f=F[i],a=thr<0?1:Math.pow(hiSm(thr-.09,thr+.16,f),1.25),s=thr<0?hiSm(lo,hi,f):hiSm(thr,se,f);
     D[i*4]=rand[0]+(kern[0]-rand[0])*s;D[i*4+1]=rand[1]+(kern[1]-rand[1])*s;D[i*4+2]=rand[2]+(kern[2]-rand[2])*s;D[i*4+3]=a*255;}
   c.putImageData(im,0,0);return cv;
 }
@@ -2120,7 +2124,16 @@ function hiFarben(L){
      duerfen heller sein (Grenze 67 statt 56 %, unter der geschlossenen Decke 62 % - dort steht kleine Schrift auf den hellsten Stellen sonst nur noch 2 : 1), die geschlossene Decke ist heller (Wolke 168,176,190 statt 152,162,180,
      Luecke 100,112,134 statt 64,76,96), und die Wolken laufen nach unten aus (C.fade) - unten steht wie bei Apple der
      blaue Himmel, ruhig hinter den Karten. Die Schrift bekommt dafuer den dunkelblauen Saum (C.hell -> Klasse hison). */
-  var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.8,1,N)*(L.nass?1:.88);
+  /* v6.45 (Nutzer 12.11. 13:22, Huettenberg "Bewoelkt" neben Apple "Bewoelkt": "fuer bewoelkt ein bisschen zu blau").
+     GEMESSEN am linken Rand: Apple (98,108,120) Saettigung 18 %, wir (109,136,175) 38 %; unsere Szene bei 100 %
+     Bedeckung hat 20 % - die Farbe stimmt also, sie kam nur zu spaet: Station 88 % (7/8), g war dort 0,31. v6.41 hatte
+     den Beginn von 50 auf 80 % geschoben (Anlass damals "zu dunkel" - das Dunkle war die Decke selbst, die seit v6.41
+     heller ist). Jetzt 74-90 %: 6/8 (75 %) -> 0,01, 80 % -> 0,28, 85 % -> 0,68, 7/8 (88 %) -> 0,84, ab 90 % 0,88. Bis
+     6/8 also weiter helle Wolken vor Blau; ab 7/8 steht oben das Wort "Bewoelkt" - dazu gehoert ein ueberwiegend
+     grauer Himmel. Die grauen Grundfarben dazu etwas neutraler (Grund 90,101,120 / 110,121,140, Luecke 102,113,131;
+     vorher 86,100,124 / 108,122,144 / 100,112,134). Apples Wechsel "Meist bewoelkt" (hell, blau) / "Bewoelkt" (grau) laesst sich
+     aus der Stationsmeldung nicht nachbilden: beide Male meldete sie 88 %. */
+  var h=L.h,N=L.N,tag=hiSm(-5,9,h),daem=Math.max(0,1-Math.abs(h+1)/9),g=hiSm(.74,.9,N)*(L.nass?1:.88);
   /* v6.37 (Nutzer 12.11. 11:28, Apple-Wetter und unsere App fuer denselben Strand: "die Farben sind beim iPhone
      wesentlich besser, die Sonne wird eingeblendet"). GEMESSEN in den Bildern: Apple Himmel oben (68,105,152), unten
      (126,167,219), Wolkenschleier (110,138,173) - blau; bei uns Wolken (129,139,155) = neutrales GRAU ueber dem halben
@@ -2140,11 +2153,11 @@ function hiFarben(L){
      129..161) mit Helligkeit 95-141 nebeneinander. Ursache: helle und dunkle Wolkenfarbe (206,212,222 / 150,160,176)
      wurden von hiPassen beide auf dieselbe Helligkeit gedrueckt. Jetzt Schieferblau mit echtem Abstand: Wolke hell
      (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); bei Regen dunkler. */
-  var gt=hiMix([22,26,36],L.nass?[64,76,98]:[86,100,124],tag),gb=hiMix([44,50,66],L.nass?[86,98,118]:[108,122,144],tag);
+  var gt=hiMix([22,26,36],L.nass?[64,76,98]:[90,101,120],tag),gb=hiMix([44,50,66],L.nass?[86,98,118]:[110,121,140],tag);
   top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
   var rand=hiMix([92,98,138],[196,218,250],tag),kern=hiMix([58,62,98],[102,134,186],tag);
   rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
-  var or=hiMix([78,84,104],L.nass?[140,150,166]:[168,176,190],tag),ok=hiMix([40,45,60],L.nass?[76,88,108]:[100,112,134],tag);
+  var or=hiMix([78,84,104],L.nass?[140,150,166]:[168,176,190],tag),ok=hiMix([40,45,60],L.nass?[76,88,108]:[102,113,131],tag);
   rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
   /* SONNE (v6.37, seit v6.38 Schein ohne Scheibe): nur am Tag, trocken und solange die Sonne durchkommt - voll bis ~55 %
      Bedeckung, ab ~90 % nichts mehr. Tief stehend waermer (und unter 7 Grad schwaecher). Aus: himmelSonne = "0". */
@@ -2364,7 +2377,7 @@ function hiPruefen(){
   var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
   /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
      v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
-  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48]};
+  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
   /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
   HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
   var kk=hiKartenGlas();
@@ -2447,7 +2460,9 @@ function hiKartenGlas(){
   var g=HI.gl;if(!g)return "";
   /* v6.39: der Himmel ist gedeckter geworden - die Karten sollen trotzdem blau bleiben (bei Apple sind sie sogar
      kraeftiger als der Himmel: Karte 79,130,197 auf Himmel 73,115,170). Ziel darum aus einem um 35 % gesaettigteren S. */
-  var Z=hiGlasZiel(hiSatt(g.S,1.35)),G=Z.map(function(v,i){return hiKl((v-(1-g.ka)*g.S[i])/g.ka,0,255);});
+  /* v6.45: unter grauem Himmel weniger Zuschlag (Apple "Bewoelkt": Karte 79,92,107 = Saettigung 26 % auf Himmel 18 %;
+     wir hatten 39 % auf 20 %). gr = Grauanteil des Himmels: 0 -> x1,35 wie bisher, 0,88 -> x0,91. */
+  var Z=hiGlasZiel(hiSatt(g.S,1.35-.5*(g.gr||0))),G=Z.map(function(v,i){return hiKl((v-(1-g.ka)*g.S[i])/g.ka,0,255);});
   var c=hiMix(g.basis,G,hiGlasTon()/100),kk=hiRgb(c,g.ka);
   document.documentElement.style.setProperty("--hi-k",kk);
   HI.gK=c.concat([g.ka]);hiKachelGlas();

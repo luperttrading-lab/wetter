@@ -3327,6 +3327,23 @@ Einspielen wieder da, fremder Eintrag weg; Streifen hell / dunkel / Himmel. ABLA
 Zahnrad -> Einstellungen sichern -> kopieren (zur Sicherheit in Notizen ablegen) -> Symbol loeschen -> Safari, Seite oeffnen,
 Teilen -> Zum Home-Bildschirm -> neue App -> Zahnrad -> Einstellungen sichern -> einfuegen -> Einspielen. Die Rasen-App
 (eigenes Symbol, eigener Speicher) ist nicht betroffen.
+v6.45 "BEWOELKT" WAR ZU BLAU (Nutzer 12.11. 13:22, Huettenberg v6.44 neben Apple "Bewoelkt": "fuer bewoelkt ein bisschen zu
+blau"). GEMESSEN am linken Rand (ohne Schrift): Apple (98,108,120) Saettigung 18 %, Helligkeit 109; wir (109,136,175) 38 %,
+140; Apples Karten (79,92,107) 26 %, unsere 57 %. DATEN: Station meldete 88 % (7/8), Symbol "cloudy", dazu 12 von 30 min
+Sonne - eine Stunde vorher (12:29, Erlental, ebenfalls 88 %) zeigte Apple "Meist bewoelkt" mit hellem blauem Bild. Apples
+Wechsel zwischen den beiden Bildern laesst sich aus unserer Stationsmeldung also NICHT nachbilden (auch nicht ueber die
+Sonnenminuten: die waren um 13 Uhr hoeher als um 12 Uhr). URSACHE bei uns: v6.41 hatte den Beginn des Grauanteils `g` von 50
+auf 80 % Bedeckung geschoben (Anlass "zu dunkel") - bei 7/8 waren es nur noch 0,31. Dunkel war damals aber die Decke
+selbst, und die ist seit v6.41 heller. JETZT `g=hiSm(.74,.9,N)`: 6/8 (75 %) 0,01 - 80 % 0,28 - 85 % 0,68 - 7/8 0,84 - ab 90 %
+0,88. Bis 6/8 weiter helle Wolken vor Blau; ab 7/8, wo oben das Wort "Bewoelkt" steht, ueberwiegend grau. Dazu: graue
+Grundfarben etwas neutraler (Grund 90,101,120 / 110,121,140, Luecke 102,113,131); `hiTextur`: ab ~75 % weitet sich das
+Fenster hell -> dunkel bis zum 90. Perzentil (`wf`, `se`) - bei 7/8 lag sonst fast die ganze Wolke im dunklen "Kern", das
+Bild war dunkler und blauer als die geschlossene Decke; KARTEN: Saettigungszuschlag 1,35 - 0,5 x Grauanteil (`HI.gl.gr`),
+unter grauem Himmel also x0,93 statt x1,35. ERGEBNIS bei 88 % am Tag: Himmel (105,120,144) Saettigung 27 %, Helligkeit 123;
+Karte (97,112,136) 29 %; geschlossene Decke 20 % / 136. Pruefskript (Lesbarkeit, 422 Texte): 2 unter 2 : 1 (bekanntes
+Messartefakt), 14 zwischen 2 und 3, 353 bis 4,5, 53 darueber. Heller als Apple (109) bleibt es mit Absicht (v6.41: "tagsueber
+und nicht Daemmerung"). Auch nachts gilt die Regel (7/8 = dunkle graue Decke statt Dunkelblau). Testlage `?himmel=meist`.
+Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
