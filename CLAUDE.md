@@ -3382,6 +3382,26 @@ Animation, gescrollt, klassisch hell/dunkel (Streifen `#stLeiste` unveraendert).
 in `--hi-r` malt (gefolgert aus der Luma 0,428) und pixelgenau bei 59 pt endet - bleibt eine feine Linie, die deckende
 Strecke der Maske um 1-2 px verlaengern. OFFEN: die Uhr war bei fast gleicher Balkenfarbe einmal schwarz (13:03), einmal
 weiss (13:52) - wonach iOS das waehlt, ist unklar (Vermutung: nach der Farbe beim Start der App).
+v6.48 (Nutzer 12.11. 14:12, stark vergroesserter Ausschnitt "Luxor" v6.47: "bei dem Ortsnamen ist immer noch ein kleiner
+Farbunterschied zu dem Rest oben drueber, quasi ein sehr duenner Strich in einer anderen Farbe"). ZWEI Dinge im Bild.
+(1) DER STRICH GEHOERT iOS, nicht uns: gemessen in VIER Nutzerbildern (Erlental 13:03 v6.42, Huettenberg 13:22 v6.44, Dakar
+13:52 v6.46, Luxor 14:12 v6.47) ist die LETZTE Pixelzeile des Balkens (Zeile 176 von 0-176 = 59 pt) um 10,5 % dunkler als
+der Balken (84,113,154 -> 75,101,138; Faktor 0,893-0,896 = Schwarz mit ~10 % Deckung), ueber die ganze Breite, unabhaengig
+von unserer Seite. iOS zeichnet unter seinem Statusleisten-Feld eine Haarlinie; bis v6.46 ging sie im groesseren Farbsprung
+unter, seit dem weichen Uebergang (v6.47: Balken und Seite gleich, 52,102,176 oben wie unten) ist sie das Einzige, was
+bleibt. Aus der Seite heraus NICHT zu entfernen (sie liegt im Balken, nicht darunter). Verworfen: die Seite darunter
+ebenfalls 10 % dunkler beginnen lassen - aus der Linie wuerde eine Stufe mit Verlauf, eher sichtbarer. Einziger Weg: die
+durchscheinende Statusleiste (v6.44, neues Home-Symbol) - dann zeichnet iOS (vermutlich) weder Balken noch Linie; ob das
+iOS des Nutzers die Angabe beachtet, ist offen. RISIKOLOSER TEST fuer den Nutzer: die App in Safari oeffnen und ein ZWEITES
+Mal zum Home-Bildschirm hinzufuegen (anderer Name), das alte Symbol bleibt mit allen Einstellungen; erst wenn das neue ohne
+Balken startet, Einstellungen uebertragen (Zahnrad > Einstellungen sichern) und das alte loeschen. (2) KASTEN HINTER DER
+STATIONSZEILE (im selben Bild, unser Fehler seit v6.31): `header .place small` und `#hiMini` haben `overflow:hidden` (fuer die
+"..."-Kuerzung) - der Schriftschatten wurde am Elementrand abgeschnitten und stand als Rechteck da. Jetzt 12 px Polster
+ringsum, per negativem Rand ausgeglichen; `.plz` dafuer `display:flow-root` + min-height +4 px (sonst wandert der negative
+Rand durch `.plz` nach aussen: Kopf 3,6 px niedriger, kleine Zeile 12 px hoeher - im Test gemessen), `max-width` +24 px
+(border-box), `pointer-events:none` (die Flaeche liegt ueber `.plz` VOR den Knoepfen). Gemessen alt/neu: Kopf 0-118,6,
+Stationstext 20/85, kleine Zeile 20/90 - identisch; Kuerzung bei 320 pt bleibt; alle vier Knoepfe 57 von 57 Treffpunkten
+(`e/t66.py`, Rundung beachten: elementFromPoint trifft die Ecken runder Knoepfe nicht). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

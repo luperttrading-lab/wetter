@@ -1511,6 +1511,16 @@ html:root.himmel .heat.cold{background:linear-gradient(90deg,rgba(150,205,255,.2
 html:root.himmel .heat.hot .tx{color:#ffdcb4}
 html:root.himmel .heat.cold .tx{color:#d6eaff}
 html:root.himmel .heat{text-shadow:none}
+/* v6.48 (Nutzer 12.11. 14:12, vergroessertes Bild "Luxor"): hinter der Stationszeile stand ein Kasten - der Schriftschatten
+   wurde am Rand des Elements abgeschnitten (overflow:hidden fuer die "..."-Kuerzung, v6.31). Zeile und kleine Scroll-Zeile
+   bekommen 12 px Luft ringsum (Polster, per negativem Rand ausgeglichen): Lage, Kopfhoehe und Kuerzung bleiben gleich. */
+/* .plz als eigener Block (flow-root): sonst wandert der negative Rand der Zeile durch .plz nach aussen und der Kopf
+   wird 3,6 px niedriger (im Test gemessen). Die 4 px Abstand zum Ortsnamen stecken jetzt in min-height und im Rand. */
+html:root.himmel .plz{display:flow-root;min-height:calc(18px * 1.2 + 8px)}
+html:root.himmel header .place small{padding:12px;margin:-8px -12px -12px;max-width:calc(100vw - 76px)}
+html:root.himmel #hiMini{padding:12px;left:-12px;top:-5px;max-width:calc(100vw - 76px)}
+/* die vergroesserte Flaeche liegt (ueber .plz, position:relative) VOR den Knoepfen rechts - sie darf keine Tipps fangen */
+html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:none}
 </style>
 </head>
 <body>
@@ -1600,7 +1610,7 @@ html:root.himmel .heat{text-shadow:none}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.47</span>
+      <span class="ver">v6.48</span>
     </div>
   </header>
 
