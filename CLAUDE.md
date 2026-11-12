@@ -3451,6 +3451,30 @@ Temperaturwechsel, Warnkarten (0 -> 2) und Radar-Kachel aendern sich alle VOR `s
 Fehlerfall, "Bewegung reduzieren" (Dauer 0,7 s). FALLE im Pruefstand: `time.sleep` im Testskript haelt auch den Netz-Umweg
 (`page.route` ueber Python) an - nur `pg.wait_for_timeout` nehmen; die Zeiten dort sind langsamer als am Handy.
 NICHT angefasst: der Knopf "Aktualisieren" (`load()` blendet weiter hart auf den Ladekasten um). Nicht am iPhone geprueft.
+v6.52 EIN ZUG BEIM ORTSWECHSEL (Nutzer 12.11.: "beim Ortswechsel wurde erst der dunkle Bereich geladen, der dann spaeter
+nachgefaerbt wurde - kein fleckiges Auftreten von Elementen oder Regionen wie Kopfzeile, Fusszeile oder Mittelteil").
+GEMESSEN (Video, Farbe je Region ueber die Zeit, `e/regionen.py` im Scratchpad: Rand oben / Kopf / y 300 / 550 / unten / Mitte)
+an v6.51, New York (Tag) -> Erlental (Nacht): nach dem Neuladen (1) der wolkenlose Verlauf aus dem Speicher, (2) der obere
+Streifen und die Statusleiste (`--hi-r`) SOFORT dunkel, waehrend die Mitte blau blieb, (3) eine erste Szene (Sonnenhoehe des
+neuen Orts, Wolken des alten, neues Zufallsmuster) blendete 1,3 s ein, (4) nach den Daten eine zweite, (5) dann erst der
+Inhalt; der Ortsname kam schon beim Laden. JETZT: (a) `hiWeiterMerken()` (in saveGo vor dem Neuladen) legt Muster (`saat`),
+zurueckgelegten Weg der Wolken (`ph`) und Lage (h, N, nass, nebel) in sessionStorage `hiWeiter`; `hiInit` uebernimmt sie
+(hoechstens 15 s alt), die ERSTE Szene der neuen Seite ist damit derselbe Himmel an derselben Stelle und steht SOFORT (keine
+Blende; gilt auch beim Kaltstart - vorher 1,3 s aus dem wolkenlosen Verlauf). (b) Solange der Inhalt verborgen ist
+(`sanftWartet()`), baut `hiPruefen` nicht um. (c) `sanftZeigen` setzt `sanft-ein` und ruft `hiPruefen(SANFT_EIN_MS)`: Szene,
+Inhalt, Ortsname, Stationszeile und Regen-Leinwand (`#waCv`) blenden in DENSELBEN zwei Bildern ein, alle 1,0 s (vorher Inhalt
+0,7 s, Himmel 1,3 s). (d) `--hi-r` (oberer Streifen, Statusleiste, Hintergrund), `--hi-k` (Glas der Karten) und `--hi-t`
+(Kacheln) sind per `@property` als <color> registriert und blenden mit `transition` ueber, Dauer `--hi-bl` = die der Szene
+(sonst sprangen sie); gesetzt erst im Bild, in dem die Szene einzublenden beginnt (`beides()` in hiPruefen). Regler fuer Glas
+und Kacheln setzen `--hi-bl` 0 (sonst folgten sie dem Finger mit 1,3 s Verzug). Bei "Bewegung reduzieren" laeuft die Blende
+ebenfalls (`html:root.sanft-ein .hiS`, `html:root.himmel.sanft-ein` mit !important), sonst wechselt dort alles im selben Moment
+ohne Blende. Ohne @property (Safari vor 16.4) springen die drei Farben zu Beginn der Blende - zeitgleich, nicht vorher.
+Ergebnis (Video): die alte Szene steht bis zu den Daten unveraendert (Farbe an allen sechs Stellen konstant ueber das
+Neuladen), dann aendern sich alle Regionen innerhalb derselben Sekunde; in beiden Richtungen (Tag -> Nacht, Nacht -> Tag)
+und mit "Bewegung reduzieren" (Szene, Variablen und Inhalt gemessen deckungsgleich). PREIS: bis die Daten da sind, steht nur
+der alte Himmel mit den Knoepfen da (im Pruefstand 2-3 s, am Handy kuerzer); der Ladekasten erscheint wie bisher erst nach
+1,5 s. Spaeter nachkommende Daten (z. B. Live-Messung nach SANFT_MAX) bauen den Himmel wie bisher noch einmal um - dann
+aber ebenfalls einheitlich (Szene und Farben gleich lang). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
