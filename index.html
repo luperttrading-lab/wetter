@@ -1521,11 +1521,30 @@ html:root.himmel header .place small{padding:12px;margin:-8px -12px -12px;max-wi
 html:root.himmel #hiMini{padding:12px;left:-12px;top:-5px;max-width:calc(100vw - 76px)}
 /* die vergroesserte Flaeche liegt (ueber .plz, position:relative) VOR den Knoepfen rechts - sie darf keine Tipps fangen */
 html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:none}
+/* v6.51 WEICHER START und ORTSWECHSEL: Inhalt verborgen (sanft) -> in einem Zug einblenden (sanft-ein); vor dem
+   Ortswechsel ausblenden (sanft-aus). Der Himmel #hi und der Ortsname bleiben. Die Blende ist keine Bewegung - sie
+   laeuft auch bei "Bewegung reduzieren" (!important gegen die Sperrregel). */
+html.sanft #app>:not(header):not(.state),html.sanft header .plz{opacity:0}
+html.sanft-ein #app>:not(header):not(.state),html.sanft-ein header .plz{transition:opacity .7s ease!important;transition-duration:.7s!important}
+/* der Inhalt hinter dem Dialog geht schneller weg als der Dialog selbst - sonst scheint er beim Ausblenden kurz durch */
+html.sanft-aus #app>:not(header):not(.state),html.sanft-aus header .plz,html.sanft-aus #placeName{opacity:0!important;transition:opacity .16s ease!important;transition-duration:.16s!important}
+html.sanft-aus .loc-ovl{opacity:0!important;transition:opacity .26s ease!important;transition-duration:.26s!important}
+html.sanft-aus body{pointer-events:none}
+html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
+html.sanft-ort #placeName{animation:sanftLaden .6s ease both;animation-duration:.6s!important}
+@keyframes sanftLaden{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 <div id="stLeiste" aria-hidden="true"></div>
 <script>
+/* v6.51 WEICHER START (Nutzer: "nicht die einzelnen Elemente sehen, nicht so aufploppen"): der Inhalt bleibt verborgen,
+   bis die wichtigen Daten da sind, und blendet dann in einem Zug ein (sanftZeigen im Hauptscript). Der Himmel und der
+   Ortsname stehen sofort. Sicherung: nach 9 s wird in jedem Fall gezeigt. */
+(function(){try{var h=document.documentElement;h.classList.add("sanft");
+  try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
+  setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}},9000);
+}catch(e){}})();
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
    die Wetterabschnitte, Himmel/ISS/PV & Co. sind zu (KLAPP_ZU_NEU). Wer die
    App schon benutzt, behaelt die bisherige Voreinstellung (alles offen) -
@@ -1610,7 +1629,7 @@ html:root.himmel header .place small,html:root.himmel #hiMini{pointer-events:non
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.50</span>
+      <span class="ver">v6.51</span>
     </div>
   </header>
 
@@ -3247,6 +3266,33 @@ function ansichtWeiter(){
 /* v6.11: die Leiste des Browsers bekommt die Farbe des Seitengrunds, nicht mehr die Temperaturfarbe (der Schleier ist weg) */
 function themaFarbe(){try{const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute("content",(hiAn()&&HI.C)?hiRgb(HI.rand||HI.C.top):(_dunkel?"#0d1219":"#f2f3f6"));}catch(e){}}
 function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rgba(c,.34));themaFarbe();}
+/* v6.51 WEICHER START: wartet nach den Hauptdaten auf die Teile, die sonst sichtbar nachruecken (Live-Messung,
+   Warnungen, Radar, Stundenregen, Tagesvorhersage) - laengstens SANFT_MAX -, dann blendet alles zusammen ein. */
+var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=700,SANFT_AUS_MS=270;
+try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
+function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
+function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
+function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt=Date.now();SANFT.tm=setTimeout(sanftZeigen,SANFT_MAX);sanftPruefen();}
+function sanftPruefen(){if(!SANFT.an||SANFT.fertig||!SANFT.haupt)return;for(var k in SANFT.offen)return;sanftZeigen();}
+function sanftZeigen(){
+  if(SANFT.fertig)return;SANFT.fertig=true;clearTimeout(SANFT.tm);
+  var h=document.documentElement,los=false;
+  if(!h.classList.contains("sanft"))return;
+  function start(){if(los)return;los=true;
+    h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
+    setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");},SANFT_EIN_MS+200);}
+  /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt */
+  try{requestAnimationFrame(function(){requestAnimationFrame(start);});}catch(e){}
+  setTimeout(start,300);
+}
+/* vor einem Ortswechsel: Inhalt und Dialog ausblenden, dann weiter (die neue Seite blendet wieder ein) */
+function sanftWeg(dann){
+  var h=document.documentElement;
+  try{h.classList.add("sanft-aus");}catch(e){}
+  setTimeout(function(){try{dann();}catch(e){}
+    setTimeout(function(){h.classList.remove("sanft-aus");},4000);},SANFT_AUS_MS);
+}
+window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("sanft-aus");h.classList.remove("sanft");}});
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
 async function load(silent){
@@ -3264,12 +3310,14 @@ async function load(silent){
     const all=sorted.filter(w=>new Date(w.timestamp)<=now);
     if(!all.length)throw new Error("Keine Messwerte im Zeitfenster.");
     isDemo=false; fullRows=all; chartRows=sorted; chartInit=false; stripInit=false; stripUserScrolled=false;
+    ["live","warn","radar","regen","tage"].forEach(sanftAuf);
     render(all.slice(-WINDOW_HOURS),all,obsSrc,false);
-    tryCurrent(obsSrc);
+    tryCurrent(obsSrc).then(function(){sanftZu("live");},function(){sanftZu("live");});
     _lastFull=_lastFast=Date.now();
     loadExtras();
     backfillPast();
-  }catch(err){console.warn("Live-Abruf:",err);
+    sanftHaupt();
+  }catch(err){console.warn("Live-Abruf:",err);sanftZeigen();
     if(!silent){el("stErrorMsg").textContent="Keine Verbindung zur Wetterstation ("+err.message+").";showState("error");}}
   finally{el("refresh").classList.remove("spin");_loading=false;}
 }
@@ -11285,18 +11333,19 @@ function drawWolken(){
 /* --- Lader (parallel, fehlertolerant) --- */
 /* Cache-Lader: frische Daten aus localStorage (ttlFresh), sonst Fetch;
    bei Fetch-Fehler Fallback auf aeltere Cache-Daten (ttlStale), sonst sichtbare Meldung. */
-function loadCached(key,url,ttlFresh,ttlStale,render,secId,label){
+function loadCached(key,url,ttlFresh,ttlStale,render,secId,label,immer){
   let c=null;try{c=JSON.parse(localStorage.getItem(key)||"null");}catch(e){}
   const age=c?Date.now()-c.t:Infinity;
   const restore=()=>{const sec=el(secId);if(!sec)return;
     const err=sec.querySelector(".sec-err");if(err)err.remove();
     [...sec.children].forEach(ch=>{if(!ch.classList.contains("sect"))ch.classList.remove("hidden");});};
-  if(c&&age<ttlFresh){restore();try{render(c.d);}catch(e){console.warn(key,e);}return;}
+  const zuletzt=()=>{if(immer){try{immer();}catch(e){}}};
+  if(c&&age<ttlFresh){restore();try{render(c.d);}catch(e){console.warn(key,e);}zuletzt();return;}
   fetchJSON(url).then(d=>{
     try{localStorage.setItem(key,JSON.stringify({t:Date.now(),d}));}catch(e){}
-    restore();render(d);
+    restore();render(d);zuletzt();
   }).catch(e=>{
-    console.warn(key,e.message);
+    console.warn(key,e.message);zuletzt();
     if(c&&age<ttlStale){try{restore();render(c.d);return;}catch(e2){}}
     const sec=el(secId);if(!sec)return;
     sec.classList.remove("hidden");
@@ -11803,7 +11852,7 @@ function loadNowcast(){
      sich ein Scheinecho (Windpark, steht still) wie auf der Karte erkennen.
      Trocken rund 1-2 KB, bei Regen einige zehn KB. */
   const d0=new Date(Date.now()-65*60e3),d1=new Date(Date.now()+125*60e3);
-  fetchJSON(`https://api.brightsky.dev/radar?lat=${LAT}&lon=${LON}&distance=7000&format=plain&tz=Europe/Berlin&date=${encodeURIComponent(d0.toISOString())}&last_date=${encodeURIComponent(d1.toISOString())}`,11000).then(d=>{_nowcastHad=true;renderNowcast(d);}).catch(e=>{if(!_nowcastHad)el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);});
+  fetchJSON(`https://api.brightsky.dev/radar?lat=${LAT}&lon=${LON}&distance=7000&format=plain&tz=Europe/Berlin&date=${encodeURIComponent(d0.toISOString())}&last_date=${encodeURIComponent(d1.toISOString())}`,11000).then(d=>{_nowcastHad=true;renderNowcast(d);}).catch(e=>{if(!_nowcastHad)el("nowcastSec").classList.add("hidden");console.warn("radar",e.message);}).then(function(){sanftZu("radar");});
 }
 /* --- Auto-Refresh beim Zurueckkehren in die App ---
    Voll (>30 min alt): kompletter Neuabruf, still (bei Fehler bleibt alter Stand).
@@ -11911,7 +11960,7 @@ function loadExtras(){
   try{renderAirGrid(null);}catch(e){console.warn("airgrid",e);}   // Mond sofort, Rest folgt
   try{renderPlaneten();}catch(e){console.warn("planeten",e);}     // rein berechnet, kein Fetch
   const ll=`latitude=${LAT}&longitude=${LON}`;
-  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{omZeitenAbsolut(d);hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);});
+  fetchJSON(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation,precipitation_probability,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&forecast_days=3&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(d=>{omZeitenAbsolut(d);hoeheMerken(d);_rainHrHad=true;window._ccLayers=(d&&d.hourly&&d.hourly.cloud_cover_low)?d.hourly:window._ccLayers;if(typeof renderMeteors==="function")renderMeteors();renderRainHours(d);renderPrecipToday(d);}).catch(e=>{if(!_rainHrHad)el("rainHrSec").classList.add("hidden");console.warn("rainhr",e.message);}).then(function(){sanftZu("regen");});
   tzNachtragen();  // v2.71: echte Zeitzone des Ortes nachziehen
   ladeSolar10();   // v3.33: 10-Minuten-Strahlung fuer die UV-Saeulen
   uvStationLaden(); // v3.84: Stationsabgleich der schwarzen Kurve
@@ -11920,10 +11969,10 @@ function loadExtras(){
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
   loadCached("wolkCache6"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,sulphur_dioxide,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
-  loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=${encodeURIComponent(GERAETE_TZ)}`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage");
+  loadCached("fcCache"+LOC_KEY,`https://api.open-meteo.com/v1/forecast?${ll}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone=${encodeURIComponent(GERAETE_TZ)}`,10*60e3,12*3600e3,renderForecast,"fcSec","16-Tage-Vorhersage",function(){sanftZu("tage");});
   loadIss();
   loadNowcast();
-  fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(j=>{renderAlerts(j);warnTest();}).catch(e=>{console.warn("alerts",e.message);warnTest();});
+  fetchJSON(`https://api.brightsky.dev/alerts?lat=${LAT}&lon=${LON}`).then(j=>{renderAlerts(j);warnTest();}).catch(e=>{console.warn("alerts",e.message);warnTest();}).then(function(){sanftZu("warn");});
 }
 
 /* --- Demo für die Zusatz-Sektionen (Vorschau) --- */
@@ -13144,8 +13193,11 @@ load();
   el("locPaste2").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste2",true);});
   function saveGo(p){
     const fertig=()=>{try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
-      locZulMerken(p,LOC);                                 // v5.14
-      location.href=location.pathname+"?v="+Date.now();}; // lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37)
+      locZulMerken(p,LOC);
+      try{sessionStorage.setItem("ortWechsel","1");}catch(e){}
+      /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37).
+         v6.51: vorher Inhalt und Dialog ausblenden - die neue Seite blendet wieder ein */
+      sanftWeg(function(){location.href=location.pathname+"?v="+Date.now();});};
     if(p.tz){fertig();return;}
     // Zeitzone des Ortes holen. Open-Meteo liefert mit timezone=auto den
     // IANA-Namen; damit rechnet Intl spaeter auch die Umstelltermine richtig.

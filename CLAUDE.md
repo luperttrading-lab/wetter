@@ -3425,6 +3425,32 @@ Wahl; dem Nutzer das Blatt mit allen Stufen geschickt, er nennt bei Bedarf "schw
 aendern). Nebenbefund, nicht geaendert: die "jetzt"-Linie ist fest rgba(23,32,46,.35) - in der klassischen dunklen Ansicht
 kaum zu sehen. FALLE im Pruefstand: `chartZoom(vh)` OHNE Brennpunkt (fokT, fokPx) gibt eine leere Kurve und "Invalid Date" -
 immer `chartZoom(vh,Date.now(),chartGeom.viewW*.62)`. Nicht am iPhone geprueft.
+v6.51 WEICHER ORTSWECHSEL UND START (Nutzer 12.11. 17:14, Bildschirmfilm Luxor -> Erlental -> Norden: "sanfter umblenden -
+die aktuelle Einstellung ausblenden und die andere einblenden mit den Farben, dass man nicht die einzelnen Elemente sieht;
+das Umstellen kann schon 2 Sekunden dauern, aber so, dass es nicht so aufploppt"). IM FILM GEMESSEN (60 Bilder/s): der
+Ortswechsel LAEDT DIE SEITE NEU (`saveGo` -> `location.href`); Tipp -> 0,53 s Ladekasten "Messwerte werden geladen" ->
+1,2 s Temperatur 7,8 und halbleere Kacheln -> 1,47 s Sprung auf 7,3 (Live-Messung) -> 1,6 s Warnkarte schiebt alles 37 px
+nach unten, Kacheln fuellen sich, Himmel wechselt. JETZT: (1) VOR dem Neuladen `sanftWeg(dann)`: Klasse `sanft-aus` am
+<html> - Inhalt (.16 s) und Dialog (.26 s) blenden aus, der Himmel bleibt; nach `SANFT_AUS_MS` 270 ms wird geladen
+(Marke `ortWechsel` im sessionStorage). (2) Die NEUE Seite beginnt verborgen: das erste Script setzt `sanft`
+(`#app>:not(header):not(.state)` und `header .plz` Deckkraft 0; Kopf mit Ortsname und Himmel stehen sofort, nach einem
+Wechsel blendet der Name ein, `sanft-ort`). (3) `load()` meldet fuenf Teile an, die sonst sichtbar nachruecken
+(`sanftAuf`: live = current_weather, warn = Warnungen, radar = Nowcast, regen = Stundenregen, tage = Tagesvorhersage);
+jeder meldet sich ab, ob er gelingt oder scheitert (`sanftZu`; `loadCached` hat dafuer den neuen letzten Parameter
+`immer`). Sind alle da - laengstens `SANFT_MAX` 1,8 s nach den Hauptdaten (`sanftHaupt`) -, blendet `sanftZeigen()` ALLES
+in einem Zug ein (`sanft-ein`, .7 s; zwei Bilder Vorlauf, damit das Gezeichnete steht). Der Himmel blendet wie bisher
+selbst um (1,3 s ab den ersten Daten). Gilt fuer JEDEN Kaltstart, nicht nur den Ortswechsel; die stille Auffrischung beim
+Zurueckkehren ist unberuehrt. LADEKASTEN: erscheint nur noch, wenn die Hauptdaten laenger als 1,5 s brauchen (weich, CSS-
+Animation `sanftLaden`). FEHLERFALL: `sanftZeigen()` sofort, die Fehlerkarte (`.state`) ist nie verborgen. SICHERUNG: nach
+9 s zeigt das erste Script in jedem Fall; `pageshow` mit `persisted` nimmt die Klassen weg (Zurueck-Cache). Die Blenden
+laufen auch bei "Bewegung reduzieren" (eine Blende ist keine Bewegung; `!important` gegen die Sperrregel). PREIS: bis alles
+steht, dauert es laenger - im Film 1,6 s, jetzt geschaetzt 2,2-2,6 s (0,27 s aus + Neuladen + ~1 s Daten + 0,7 s ein).
+Was nach dem Einblenden noch kommt (UV/Luft, Sonnenminuten, Rasen), rueckt weiter einzeln nach. Geprueft (Playwright,
+`e/t70.py`: Protokoll in der Seite alle 50 ms + Videoaufnahme ueber das Neuladen; `e/t71.py`): Luxor -> Erlental / Norden -
+Temperaturwechsel, Warnkarten (0 -> 2) und Radar-Kachel aendern sich alle VOR `sanft-ein`; hell / dunkel / Himmel,
+Fehlerfall, "Bewegung reduzieren" (Dauer 0,7 s). FALLE im Pruefstand: `time.sleep` im Testskript haelt auch den Netz-Umweg
+(`page.route` ueber Python) an - nur `pg.wait_for_timeout` nehmen; die Zeiten dort sind langsamer als am Handy.
+NICHT angefasst: der Knopf "Aktualisieren" (`load()` blendet weiter hart auf den Ladekasten um). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
