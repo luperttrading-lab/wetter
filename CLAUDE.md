@@ -3170,6 +3170,21 @@ wir). FALLE BEIM BAU: ein Ersetzen "von Marke A bis Marke B" per Skript loeschte
 hiSterne, hiWolke); `node --check` merkt das nicht (fehlende Funktion = Laufzeitfehler), und weil `hiPruefen` den Schluessel
 VOR dem Bauen setzt, blieb der Himmel nach dem ersten Fehler leer. Aufgefallen im Browsertest. Seitdem nach jedem
 Block-Ersetzen: Liste der top-level-Funktionen gegen `git show HEAD:index.html` vergleichen (`fehlen: []`).
+SONNENSTAND BEI APPLE, GEMESSEN (Nutzer 12.11., drittes Apple-Bild 11:44: "weiss nicht, ob der Sonnenstand von der Hoehe
+der echten Sonne abhaengt, Sommer und Winter"). Drei Bilder desselben Orts (Nissi Beach/Ayia Napa, 34,99 N 33,97 O, 393 x 852
+pt), Mitte des Scheins (Schwerpunkt der Pixel mit Mittel > 235, nur y < 100 pt) gegen den gerechneten Sonnenstand (NOAA-Formel):
+10:30 -> x 200 pt (51 %), y 25 pt, Hoehe 35,5 Grad, Azimut 162,9; 11:28 -> 233 pt (59 %), 40 pt, 37,3 / 179,9 (= wahrer Mittag);
+11:44 -> 246 pt (62,5 %), 46 pt, 37,1 / 184,7. BEFUND: waagrecht wandert die Sonne mit der Tageszeit nach rechts (45 pt in 74 min,
+~2,1 pt je Grad Azimut - die ganze Breite waeren ~190 Grad, also eher "Tagesbogen ueber die Bildschirmbreite" als ein echter
+Blick); senkrecht SANK sie um 21 pt, waehrend die echte Sonne um 1,8 Grad stieg bzw. gleich blieb. Eine Lochkamera, die die
+echte Richtung abbildet (Blickrichtung, Neigung, Brennweite frei), passt nicht: bester Rest 54 pt bei ~3 pt Messgenauigkeit.
+Also stilisiert, nicht massstaeblich. OFFEN: ob die Hoehe ueberhaupt eingeht (Sommer/Winter) - aus Bildern EINES Tages nicht zu
+klaeren; moeglicher Stoerfaktor: Apples Hintergrund koennte auf die Lage des Geraets reagieren (ungeprueft). Test, den der
+Nutzer machen kann: zur selben Minute Staedte mit sehr verschiedener Sonnenhoehe (Reykjavik, Giessen, Ayia Napa, Lagos/
+Kapstadt) fotografieren, Handy gleich halten. Apples Versionshinweise zu iOS 15 (nur aus Berichten): Hintergruende, die
+"Sonnenstand, Wolken und Niederschlag genauer darstellen". FUER UNS (meine Empfehlung): Sonne NICHT nach echtem Stand setzen -
+frei ist nur die Luecke zwischen "Live" und Datum; ein wandernder weisser Kern laege morgens auf "Live", abends auf dem Datum,
+im Winter tiefer auf der Temperatur.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
