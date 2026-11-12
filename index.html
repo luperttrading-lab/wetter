@@ -35,7 +35,7 @@
   #bg{position:fixed;inset:0;z-index:0;background:
     radial-gradient(120% 80% at 78% -8%, var(--bg-haze) 0%, var(--haze-aus) 46%),
     linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 42%);transition:background .6s}
-  #app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+  #app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:max(16px,var(--sat,env(safe-area-inset-top,0px))) 16px calc(30px + env(safe-area-inset-bottom))}
 
   header{display:flex;align-items:flex-start;justify-content:space-between;margin:4px 4px 16px}
   .place{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
@@ -588,7 +588,7 @@ html.dunkel .kzreg b{color:#eef2f7}
    viewport-fit=cover randlos, gescrollter Inhalt verschwindet also unter der
    Uhr und den Symbolen. Wie hoch das ist, weiss nur das Geraet - hier
    gemessen statt geraten. */
-#kzSat{position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);pointer-events:none;visibility:hidden}
+#kzSat{position:fixed;top:0;left:0;width:0;height:var(--sat,env(safe-area-inset-top,0px));pointer-events:none;visibility:hidden}
 /* Nachtmodus: die Kacheln muessen auf dem dunklen Karton lesbar bleiben */
 html.dunkel .kz .ki{background:rgba(255,255,255,.07);border-color:#33405a}
 html.dunkel .kz .ki .v{color:#eef2f7}
@@ -1414,7 +1414,7 @@ html.dunkel .evt-s{color:var(--muted)}
    statt +4, unten 6 statt 20, kein negativer Rand, #hiK endet mit dem Kopf (letzte 8 px weich), Version 4 statt 7 px
    unter den Knoepfen. Verdeckt war bis Statusleiste + 84 px, jetzt bis + 58. */
 html:root.himmel header{position:sticky;top:0;z-index:40;isolation:isolate;
-  margin:calc(-1 * max(16px,env(safe-area-inset-top))) -16px 0;padding:calc(max(16px,env(safe-area-inset-top)) + 2px) 20px 6px}
+  margin:calc(-1 * max(16px,var(--sat,env(safe-area-inset-top,0px)))) -16px 0;padding:calc(max(16px,var(--sat,env(safe-area-inset-top,0px))) + 2px) 20px 6px}
 html:root.himmel .kopf-r{gap:4px}
 html:root.himmel #hiK{display:block;position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none;
   -webkit-mask-image:linear-gradient(#000 calc(100% - 8px),transparent);mask-image:linear-gradient(#000 calc(100% - 8px),transparent)}
@@ -1480,7 +1480,7 @@ html:root.himmel.hison #stationTxt{color:#fff}
    Statusleiste ab. In den KLASSISCHEN Ansichten rollt der Inhalt sonst unter die Uhr - dort dieser feste Streifen in
    Seitenfarbe (dunkel) bzw. dunkel fuer die weisse Uhr (hell). Wer die App noch mit "default" angelegt hat, sieht ihn
    nicht (der iOS-Balken liegt darueber). --st-test nur fuer den Pruefstand (Chromium kennt den Rand nicht). */
-#stLeiste{position:fixed;left:0;right:0;top:0;height:var(--st-test,env(safe-area-inset-top,0px));z-index:350;pointer-events:none;background:#27313f}
+#stLeiste{position:fixed;left:0;right:0;top:0;height:var(--sat,env(safe-area-inset-top,0px));z-index:350;pointer-events:none;background:#27313f}
 html.dunkel #stLeiste{background:var(--bg-b)}
 html:root.himmel #stLeiste{display:none}
 /* Sicherung der Einstellungen (Zahnrad) */
@@ -1489,6 +1489,28 @@ html:root.himmel #stLeiste{display:none}
 .es-ta{display:block;width:100%;box-sizing:border-box;font:11px/1.35 ui-monospace,Menlo,monospace;border:1px solid var(--feld-line);background:var(--feld);color:var(--ink);border-radius:9px;padding:7px;margin:6px 0;resize:none}
 .es-m{font-size:12.5px;font-weight:700;min-height:17px;margin-top:6px;color:var(--ink)}
 .es-kn{display:block;width:100%;margin:6px 0 0}
+/* v6.47 (Nutzer 12.11. 13:52, Bild "Region Dakar": "der Streifen oben am Bildschirmrand ist immer noch in einer anderen
+   Farbe ... was machen wir, wenn es dunkel ist ... lass dir was einfallen, dass man den Uebergang nicht sieht").
+   GEMESSEN: Balken 0-59 pt einfarbig (84,113,154) = --hi-r (Mittel des obersten Himmelsstreifens, auf 43 % begrenzt),
+   direkt darunter der Himmel mit Struktur: links (117,145,189), Mitte (126,155,195), rechts (63,110,179) - eine harte
+   Kante ueber die ganze Breite. iOS malt den Balken einfarbig, daran laesst sich (ohne neues Home-Symbol, v6.44) nichts
+   aendern. Also kommt die Seite dem Balken entgegen: ueber Himmel (#hi) und Kopf (#hiK) liegt oben die Balkenfarbe,
+   deckend bis zur Unterkante des Balkens (--sat) und von dort ueber 96 px weich auslaufend (S-Kurve als Maske). An der
+   Naht haben Balken und Seite dieselbe Farbe; sie folgt jedem Himmel (nachts dunkel). Regen (#waCv/#waK) laeuft mit
+   aus. Mit durchscheinender Leiste (neues Symbol) sieht es genauso aus. */
+:root{--sat:var(--st-test,env(safe-area-inset-top,0px))}
+html:root.himmel #hi::after,html:root.himmel #hiK::after{content:"";position:absolute;left:0;top:0;width:100%;height:calc(var(--sat) + 96px);z-index:4;pointer-events:none;background:var(--hi-r,transparent);
+  -webkit-mask-image:linear-gradient(#000 0,#000 var(--sat),rgba(0,0,0,.9) calc(var(--sat) + 19px),rgba(0,0,0,.65) calc(var(--sat) + 38px),rgba(0,0,0,.35) calc(var(--sat) + 58px),rgba(0,0,0,.1) calc(var(--sat) + 77px),transparent calc(var(--sat) + 96px));
+  mask-image:linear-gradient(#000 0,#000 var(--sat),rgba(0,0,0,.9) calc(var(--sat) + 19px),rgba(0,0,0,.65) calc(var(--sat) + 38px),rgba(0,0,0,.35) calc(var(--sat) + 58px),rgba(0,0,0,.1) calc(var(--sat) + 77px),transparent calc(var(--sat) + 96px))}
+/* Hinweis im Kasten ("Warmer Sommertag ...", Frost): im Bild ein fast schwarzer Kasten (48,29,13) mit dunkelbrauner
+   Schrift - in beiden dunklen Ansichten helle Schrift, im Himmel das Glas der Karten mit einem Hauch der Farbe. */
+html.dunkel .heat.hot .tx{color:#ffc48a}
+html.dunkel .heat.cold .tx{color:#a9d4ff}
+html:root.himmel .heat.hot{background:linear-gradient(90deg,rgba(255,170,80,.24),rgba(255,170,80,.06)),var(--hi-k);border:1px solid rgba(255,196,130,.5)}
+html:root.himmel .heat.cold{background:linear-gradient(90deg,rgba(150,205,255,.22),rgba(150,205,255,.05)),var(--hi-k);border:1px solid rgba(170,215,255,.45)}
+html:root.himmel .heat.hot .tx{color:#ffdcb4}
+html:root.himmel .heat.cold .tx{color:#d6eaff}
+html:root.himmel .heat{text-shadow:none}
 </style>
 </head>
 <body>
@@ -1578,7 +1600,7 @@ html:root.himmel #stLeiste{display:none}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.46</span>
+      <span class="ver">v6.47</span>
     </div>
   </header>
 
@@ -2303,7 +2325,7 @@ function hiSzene(ziel,C,L,B,hmax,links){
    "theme-color" - der Himmel geht nicht darunter weiter. Bis v6.13 stand dort die obere Farbe des VERLAUFS; bei
    bedecktem Himmel liegen aber hellere Wolken davor, und man sah eine harte Kante. Jetzt die mittlere Farbe des
    obersten Streifens (64 px), Wolken eingerechnet: Mittel ueber die ganze Texturbreite, weil die Wolken ziehen. */
-function hiRand(C,L,B){
+function hiRand(C,L,B,ohneSonne){
   var c=C.top.slice();
   function lage(tex,sc,a,dy){
     if(!tex)return;
@@ -2317,7 +2339,7 @@ function hiRand(C,L,B){
   /* v6.37: der weite Sonnenschein hellt auch den obersten Streifen auf - im Bild vom 12.11. war die Statusleiste
      (54,112,196) kraeftiger als der Himmel direkt darunter (73,117,181). Mittel ueber die Breite bei y = 32 px. */
   /* v6.39: dazu der Schein der Sonne selbst, gemessen dicht unter der Statusleiste (Kopfunterkante - 60 px) */
-  if(B.sx!=null&&(C.glanz>.02||C.sonne>.03)){var R=hiGlanzR(B),sm=0,ss=0,nn=16,ys=Math.max(16,(B.kb||92)-60);
+  if(!ohneSonne&&B.sx!=null&&(C.glanz>.02||C.sonne>.03)){var R=hiGlanzR(B),sm=0,ss=0,nn=16,ys=Math.max(16,(B.kb||92)-60);
     for(var q=0;q<nn;q++){var dx=(q+.5)/nn*B.w-B.sx,dd=Math.sqrt(dx*dx+(ys-B.sy)*(ys-B.sy));sm+=Math.max(0,1-dd/R);ss+=hiSonneA(dd,B.sr||22);}
     if(C.glanz>.02)c=hiMix(c,[255,244,214],C.glanz*sm/nn);
     if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
@@ -2368,7 +2390,11 @@ function hiPruefen(){
   if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
   /* v6.40: im Bild vom 12.11. 12:28 (v6.39) schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein
      auf (88,128,185) gestiegen (Helligkeit 48 %); bei (61,118,203) = 44 % war die Schrift noch weiss. Grenze 43 %. */
-  HI.rand=hiPassen(hiRand(C,L,B),0,.43);
+  /* v6.47: die Balkenfarbe (HI.rand, --hi-r) OHNE den Sonnenschein - er machte sie grau (Weiss eingemischt, dann
+     abgedunkelt: 91,112,143 ueber blauem Himmel); seit dem weichen Uebergang oben (#hi::after) muss sie den Schein
+     nicht mehr treffen. Das Glas der Karten rechnet weiter mit dem Wert samt Schein (HI.randG). */
+  HI.randG=hiPassen(hiRand(C,L,B),0,.43);
+  HI.rand=hiPassen(hiRand(C,L,B,1),0,.43);
   var neu=[hiSzene(el0,C,L,B,0)],k=document.getElementById("hiK");
   /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
      (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
@@ -2383,10 +2409,10 @@ function hiPruefen(){
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.randG||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1)*1.25,.42,.84):.42;
   /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
      v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
-  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
+  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.randG||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48],gr:C.schleier||0};
   /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
   HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
   var kk=hiKartenGlas();
@@ -2413,7 +2439,11 @@ function hiMini(){
    Jetzt einstellbar: himmelKachel 0-100 %, 0 = wie bisher, 100 = genau das Glas der Karten. Gemischt wird
    VORMULTIPLIZIERT (Farbe x Deckung) - geradlinig gemischt waere die Mitte nachts heller als beide Enden
    (Weiss 11 % -> Dunkelblau 42 % liefe ueber ein Grau mit 26 %). */
-var HI_KA_STD=0;
+/* v6.47 (Nutzer: "die Kacheln oben haben einen anderen Hintergrund als die Container unten"): Voreinstellung 100 =
+   dasselbe Glas wie die Karten (v6.30-v6.46: 0 = helles Grundglas, am Tag grau neben blauen Karten). Ein gespeichertes
+   "0" war die alte Voreinstellung bzw. ein Test am Regler und gilt einmalig nicht mehr (Marke himmelKachelV2). */
+var HI_KA_STD=100;
+try{if(localStorage.getItem("himmelKachelV2")!=="1"){if(parseFloat(localStorage.getItem("himmelKachel"))===0)localStorage.removeItem("himmelKachel");localStorage.setItem("himmelKachelV2","1");}}catch(e){}
 function hiKaDeck(){try{var v=parseFloat(localStorage.getItem("himmelKachel"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_KA_STD;}
 function hiKachelGlas(){
   var t=HI.gT,k=HI.gK;if(!t||!k)return;
@@ -8035,7 +8065,7 @@ function kzRender(){
                    +'<div class="kzhilf waKaZ">Wie stark Karten und Warnmeldung die Farbe des Himmels annehmen: 0 % = dunkles Marineblau wie bisher, 100 % = fast die Himmelsfarbe. Je heller, desto blasser wirken kleine graue Texte.</div>'
                    +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
                    +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
-                   +'<div class="kzhilf waKaZ">0 % = helles Glas wie bisher, 100 % = genauso dicht wie die Karten darunter (Stündlich, Temperaturverlauf …). Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
+                   +'<div class="kzhilf waKaZ">100 % = dasselbe Glas wie die Karten darunter (Stündlich, Temperaturverlauf …), 0 % = ein eigenes, helleres Glas. Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
       const g=el("kzRegGrad"),d=el("kzRegDauer");
       const zieh=()=>kzBewSetzen(g.value,d.value);
       g.addEventListener("input",zieh);d.addEventListener("input",zieh);
