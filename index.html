@@ -1577,6 +1577,31 @@ html.sanft-aus .loc-ovl{opacity:0!important;transition:opacity .26s ease!importa
 html.sanft-aus body{pointer-events:none}
 html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
 @keyframes sanftLaden{from{opacity:0}to{opacity:1}}
+/* v6.56 ORTE WISCHEN (Nutzer 12.11.: "durch links und rechts wischen die Orte der Liste wechseln wie in der iPhone-Wetter-
+   App"): oben im Kopf und im Wetterkasten (nicht auf den Kacheln) folgt der Inhalt dem Finger; der Himmel bleibt stehen.
+   --wx Versatz, --wo Deckkraft; ortlos = loslassen (Sprung zurueck oder weg). Punkte unten wie bei Apple (#ortPkt). */
+html.ortzieh #app>:not(header):not(.state),html.ortzieh header .place{transform:translate3d(var(--wx,0px),0,0);opacity:var(--wo,1);will-change:transform,opacity}
+html.ortlos #app>:not(header):not(.state),html.ortlos header .place{transition:transform .24s cubic-bezier(.25,.8,.3,1),opacity .24s ease!important;transition-duration:.24s!important}
+html.ortlos body{pointer-events:none}
+/* der weggeschobene Inhalt darf die Seite nicht waagrecht verbreitern (sonst liesse sie sich seitlich schieben) */
+html.ortzieh{overflow-x:clip}
+#ortPkt{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:7px 13px 8px;border-radius:16px;background:rgba(12,20,36,.66);color:#fff;font-size:13.5px;font-weight:650;line-height:1.2;opacity:0;pointer-events:none;
+  max-width:calc(100vw - 40px);box-sizing:border-box;text-shadow:none}
+#ortPkt.weich{transition:opacity .3s ease!important;transition-duration:.3s!important}
+#ortPkt .op-n{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ortPkt .op-n:empty{display:none}
+#ortPkt .op-d{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#ortPkt .op-d i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.34)}
+#ortPkt .op-d i.zl{background:rgba(255,255,255,.66)}
+#ortPkt .op-d i.ak{background:#fff}
+/* die neue Seite schiebt sich von der Seite herein, aus der der Finger kam (nicht bei "Bewegung reduzieren": nur Blende) */
+@media (prefers-reduced-motion:no-preference){
+html.wisch-n.sanft #app>:not(header):not(.state),html.wisch-n.sanft header .place{transform:translate3d(64px,0,0)}
+html.wisch-v.sanft #app>:not(header):not(.state),html.wisch-v.sanft header .place{transform:translate3d(-64px,0,0)}
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity 1s ease,transform .8s cubic-bezier(.2,.8,.25,1)!important}
+html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .8s cubic-bezier(.2,.8,.25,1)!important}
+}
 </style>
 </head>
 <body>
@@ -1587,6 +1612,8 @@ html.sanft #stLoading.on{animation:sanftLaden .6s ease 1.5s both}
    sofort (nach einem Ortswechsel der ALTE, v6.52), der Ortsname kommt mit dem Rest. Sicherung: nach 9 s wird gezeigt. */
 (function(){try{var h=document.documentElement;h.classList.add("sanft");
   try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
+  /* v6.56: nach einem Wisch kommt die neue Seite von der passenden Seite herein (n = naechster Ort, v = voriger) */
+  try{var ow=sessionStorage.getItem("ortWisch");if(ow){sessionStorage.removeItem("ortWisch");if(ow==="n"||ow==="v")h.classList.add("wisch-"+ow);}}catch(e){}
   setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}},9000);
 }catch(e){}})();
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
@@ -2286,7 +2313,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.55</span>
+      <span class="ver">v6.56</span>
     </div>
   </header>
 
@@ -2394,6 +2421,7 @@ function hiAnzeigen(){
     <div class="loc-row"><button type="button" id="locGps" class="loc-btn">Eigenen Standort verwenden</button></div>
     <div class="loc-quick">Deine Orte &ndash; lang dr&uuml;cken zum Verschieben:</div>
     <div class="loc-row loc-zul" id="locZul"></div>
+    <div class="loc-hint hidden" id="locZulWisch">Auf der Startseite oben nach links oder rechts wischen: n&auml;chster bzw. voriger Ort dieser Liste.</div>
     <div class="loc-hint hidden" id="locZulLeer">Hier erscheinen die Orte, die du &uuml;bernimmst &ndash; ein Tipp wechselt dann direkt dorthin.</div>
     </div>
     <div class="loc-row" id="locBtnGrp"><button type="button" id="locCancel" class="loc-btn">Abbrechen</button><button type="button" id="locApply" class="loc-btn loc-pri">&Uuml;bernehmen</button></div>
@@ -3400,7 +3428,9 @@ function sanftZeigen(){
   try{if(hiAn())hiPruefen(SANFT_EIN_MS);}catch(e){}
   function start(){if(los)return;los=true;
     h.classList.add("sanft-ein");void h.offsetWidth;h.classList.remove("sanft");
-    setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");},SANFT_EIN_MS+200);}
+    var gewischt=h.classList.contains("wisch-n")||h.classList.contains("wisch-v");
+    if(gewischt)setTimeout(function(){try{owAnkunft();}catch(e){}},250);
+    setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");h.classList.remove("wisch-n");h.classList.remove("wisch-v");},SANFT_EIN_MS+200);}
   /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt */
   try{requestAnimationFrame(function(){requestAnimationFrame(start);});}catch(e){}
   setTimeout(start,300);
@@ -3412,7 +3442,141 @@ function sanftWeg(dann){
   setTimeout(function(){try{dann();}catch(e){}
     setTimeout(function(){h.classList.remove("sanft-aus");},4000);},SANFT_AUS_MS);
 }
-window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("sanft-aus");h.classList.remove("sanft");}});
+window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("sanft-aus");h.classList.remove("sanft");
+  h.classList.remove("ortzieh");h.classList.remove("ortlos");h.style.removeProperty("--wx");h.style.removeProperty("--wo");}});
+/* v6.56: Ortswechsel ohne Dialog - derselbe Weg wie saveGo im Standort-Dialog (Profil, Liste, Himmel weiterreichen,
+   neu laden). opt.wisch = Richtung fuer die neue Seite, opt.sofort = nicht erst ausblenden (der Wisch hat das schon getan),
+   opt.msg = Zeile fuer "Zeitzone wird ermittelt", opt.tzMs = Wartezeit auf die Zeitzone. */
+function ortGehen(p,opt){
+  opt=opt||{};
+  var fertig=function(){try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
+    locZulMerken(p,LOC);
+    try{sessionStorage.setItem("ortWechsel","1");if(opt.wisch)sessionStorage.setItem("ortWisch",opt.wisch);}catch(e){}
+    try{hiWeiterMerken();}catch(e){}
+    /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37) */
+    var neu=function(){location.href=location.pathname+"?v="+Date.now();};
+    if(opt.sofort)neu();else sanftWeg(neu);};
+  if(p.tz){fertig();return;}
+  /* Zeitzone des Ortes holen (Open-Meteo, timezone=auto). Faellt der Abruf aus, wird ohne tz gespeichert - die App nimmt
+     dann die Geraetezone und traegt die echte beim naechsten Datenabruf nach. */
+  if(opt.msg)opt.msg.textContent="Zeitzone wird ermittelt \u2026";
+  var to=new Promise(function(r){setTimeout(function(){r(null);},opt.tzMs||6000);});
+  Promise.race([
+    fetch("https://api.open-meteo.com/v1/forecast?latitude="+p.lat+"&longitude="+p.lon+"&timezone=auto&forecast_days=1")
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    to
+  ]).then(function(j){var t=_tzSan(j&&j.timezone);if(t)p.tz=t;}).catch(function(){}).then(fertig);
+}
+/* v6.56 ORTE WISCHEN. Nur oben (Kopf, Warnungen, Wetterkasten ohne Kacheln): Kacheln, Stundenleiste, Verlauf, Karten und
+   Regler wischen selbst waagrecht. Entschieden wird nach 10 px: deutlich waagrecht (|dx| > 1,5 |dy|) = Ortswechsel,
+   sonst scrollt die Seite wie immer. Links wischen = naechster Ort der Liste, rechts = voriger; am Ende federt es nur. */
+var OW={on:0,art:"",x0:0,y0:0,dx:0,sp:[],L:null,ziel:null,j:-1,schluck:0,tm:0};
+function owListe(){
+  var a=locZulLesen(),i=-1;
+  for(var k=0;k<a.length;k++)if(locGleich(a[k],LOC)){i=k;break;}
+  if(i<0){a.unshift({lat:+LOC.lat,lon:+LOC.lon,name:_locSan(LOC.name),isWettenberg:false,tz:LOC.tz});a=a.slice(0,LOC_ZUL_MAX);i=0;}
+  return {a:a,i:i};
+}
+function owZone(t){
+  if(!t||!t.closest||!t.closest("header,#alerts,#hero"))return false;
+  return !t.closest("#kz,#kzPool,#kzReg,#kzFoot,input,select,textarea,a");
+}
+function owGesperrt(){
+  var h=document.documentElement;
+  if(typeof _kzEdit!=="undefined"&&_kzEdit)return true;
+  if(h.classList.contains("sanft")||h.classList.contains("sanft-aus")||h.classList.contains("ortlos"))return true;
+  if(document.querySelector(".loc-ovl:not(.hidden)"))return true;
+  var m=el("kopfMenu");return !!(m&&m.classList.contains("an"));
+}
+function owPunkte(L,j,txt,deck,weich){
+  var p=el("ortPkt");
+  if(!p){p=document.createElement("div");p.id="ortPkt";p.setAttribute("aria-hidden","true");
+    p.innerHTML='<div class="op-n"></div><div class="op-d"></div>';document.body.appendChild(p);}
+  var d=p.querySelector(".op-d"),n=L.a.length,s="";
+  if(d.childElementCount!==n){for(var k=0;k<n;k++)s+="<i></i>";d.innerHTML=s;}
+  for(var k2=0;k2<n;k2++)d.children[k2].className=k2===L.i?"ak":(k2===j?"zl":"");
+  p.querySelector(".op-n").textContent=txt||"";
+  p.classList.toggle("weich",!!weich);p.style.opacity=String(deck);
+}
+function owPunkteWeg(ms){var p=el("ortPkt");if(!p)return;clearTimeout(OW.tm);
+  OW.tm=setTimeout(function(){p.classList.add("weich");p.style.opacity="0";},ms||0);}
+/* nach dem Wechsel: Punkte kurz zeigen, damit man sieht, wo man in der Liste steht */
+function owAnkunft(){var L=owListe();if(L.a.length<2)return;owPunkte(L,-1,"",0,true);
+  requestAnimationFrame(function(){owPunkte(L,-1,"",1,true);owPunkteWeg(1700);});}
+function owSetzen(dx,deck){var h=document.documentElement;
+  h.style.setProperty("--wx",dx.toFixed(1)+"px");h.style.setProperty("--wo",deck.toFixed(3));}
+function owAufraeumen(){var h=document.documentElement;
+  h.classList.remove("ortzieh");h.classList.remove("ortlos");h.style.removeProperty("--wx");h.style.removeProperty("--wo");}
+function owZurueck(){
+  var h=document.documentElement;
+  if(!h.classList.contains("ortzieh")){owPunkteWeg(0);return;}
+  h.classList.add("ortlos");owSetzen(0,1);owPunkteWeg(0);
+  setTimeout(owAufraeumen,280);
+}
+function owLos(){
+  var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel;
+  OW.schluck=Date.now();
+  owPunkte(OW.L,OW.j,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);
+  h.classList.add("ortlos");
+  /* Bewegung reduzieren: nicht wegfliegen, nur ausblenden */
+  owSetzen(hiReduziert()?OW.dx:s*W*.6,0);
+  setTimeout(function(){
+    /* falls die Zeitzone noch geholt werden muss: hoechstens 2,5 s */
+    ortGehen({lat:p.lat,lon:p.lon,name:p.name,isWettenberg:false,tz:p.tz},{sofort:1,wisch:s<0?"n":"v",tzMs:2500});
+  },230);
+}
+function owZeit(e){var t=e&&e.timeStamp;return (t&&t>0&&t<1e12)?t:performance.now();}
+function owStart(e){
+  OW.on=0;OW.art="";
+  if(!e.touches||e.touches.length!==1)return;
+  if(!owZone(e.target)||owGesperrt())return;
+  var t=e.touches[0];OW.on=1;OW.x0=t.clientX;OW.y0=t.clientY;OW.dx=0;OW.sp=[[owZeit(e),t.clientX]];
+}
+function owZieh(e){
+  if(!OW.on)return;
+  if(!e.touches||e.touches.length!==1){if(OW.art==="h")owZurueck();OW.on=0;return;}
+  var t=e.touches[0],dx=t.clientX-OW.x0,dy=t.clientY-OW.y0;
+  if(!OW.art){
+    if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
+    if(Math.abs(dx)<=1.5*Math.abs(dy)){OW.art="v";OW.on=0;return;}
+    OW.art="h";OW.L=owListe();
+    document.documentElement.classList.add("ortzieh");
+  }
+  e.preventDefault();
+  /* Spur der letzten 100 ms fuer den Schwung beim Loslassen (Zeit des Ereignisses, nicht der Verarbeitung - ist die
+     Seite gerade beschaeftigt, kommen die Bewegungen gebuendelt an) */
+  var jz=owZeit(e);OW.sp.push([jz,t.clientX]);while(OW.sp.length>2&&jz-OW.sp[0][0]>100)OW.sp.shift();
+  OW.dx=dx;
+  var W=innerWidth||390,j=OW.L.i+(dx<0?1:-1),z=(dx!==0&&OW.L.a.length>1)?OW.L.a[j]:null;
+  OW.ziel=z||null;OW.j=z?j:-1;
+  /* ohne Ziel (Ende der Liste) federt es: ein Drittel des Wegs, hoechstens 60 px */
+  var wx=z?dx:(dx<0?-1:1)*Math.min(60,Math.abs(dx)*.3);
+  owSetzen(wx,z?1-.45*Math.min(1,Math.abs(dx)/W):1);
+  if(OW.L.a.length>1){
+    var txt=z?((dx<0?"":"\u2039 ")+z.name+(dx<0?" \u203a":"")):"";
+    owPunkte(OW.L,OW.j,txt,Math.min(1,Math.abs(dx)/36),false);clearTimeout(OW.tm);
+  }
+}
+function owEnde(e){
+  if(!OW.on)return;OW.on=0;
+  if(OW.art!=="h")return;
+  OW.schluck=Date.now();
+  /* Wechsel ab einem Viertel der Breite (hoechstens 100 px) oder mit Schwung (ab 30 px und 0,35 px/ms in dieselbe Richtung) */
+  var W=innerWidth||390,adx=Math.abs(OW.dx),a=OW.sp[0],z=OW.sp[OW.sp.length-1],vx=(a&&z&&z[0]>a[0])?(z[1]-a[1])/(z[0]-a[0]):0;
+  if(OW.ziel&&e&&e.type==="touchend"&&(adx>Math.min(100,W*.25)||(adx>30&&Math.abs(vx)>.35&&(vx<0)===(OW.dx<0))))owLos();
+  else owZurueck();
+}
+(function(){
+  ["header","alerts","hero"].forEach(function(id){
+    var n=id==="header"?document.querySelector("#app>header"):el(id);if(!n)return;
+    n.addEventListener("touchstart",owStart,{passive:true});
+    n.addEventListener("touchmove",owZieh,{passive:false});
+    n.addEventListener("touchend",owEnde,{passive:true});
+    n.addEventListener("touchcancel",owEnde,{passive:true});
+  });
+  /* der Klick, den der Browser nach dem Wisch noch schickt, darf nichts ausloesen (Symbol, Ort, Knoepfe) */
+  document.addEventListener("click",function(e){if(Date.now()-OW.schluck<450){e.preventDefault();e.stopPropagation();}},true);
+})();
 function showState(w){el("stLoading").classList.toggle("on",w==="loading");el("stError").classList.toggle("on",w==="error");el("content").classList.toggle("hidden",w==="loading"||w==="error");el("hero").classList.toggle("hidden",w==="loading"||w==="error");}
 
 async function load(silent){
@@ -13269,7 +13433,7 @@ load();
   function locZulZeigen(){
     const box=el("locZul");let a=locZulLesen();
     if(!a.some(o=>locGleich(o,LOC))){a.unshift({lat:+LOC.lat,lon:+LOC.lon,name:_locSan(LOC.name),tz:LOC.tz});a=a.slice(0,LOC_ZUL_MAX);locZulSchreiben(a);}
-    box.innerHTML="";el("locZulLeer").classList.toggle("hidden",!!a.length);
+    box.innerHTML="";el("locZulLeer").classList.toggle("hidden",!!a.length);el("locZulWisch").classList.toggle("hidden",a.length<2);
     a.forEach((o,i)=>{const hier=locGleich(o,LOC),b=document.createElement("button");b.type="button";b.className="loc-btn loc-go"+(hier?" hier":"");
       b.dataset.i=i;b.textContent=o.name;let x=null;
       if(hier){const t=document.createElement("span");t.className="loc-hier";t.textContent="hier";b.appendChild(t);}
@@ -13359,27 +13523,8 @@ load();
     if(id!=="locName")locSplit(id,false);}));
   el("locPaste").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste",true);});
   el("locPaste2").addEventListener("input",()=>{delete ap.dataset.warned;msg.textContent="";locSplit("locPaste2",true);});
-  function saveGo(p){
-    const fertig=()=>{try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
-      locZulMerken(p,LOC);
-      try{sessionStorage.setItem("ortWechsel","1");}catch(e){}
-      try{hiWeiterMerken();}catch(e){}
-      /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37).
-         v6.51: vorher Inhalt und Dialog ausblenden - die neue Seite blendet wieder ein */
-      sanftWeg(function(){location.href=location.pathname+"?v="+Date.now();});};
-    if(p.tz){fertig();return;}
-    // Zeitzone des Ortes holen. Open-Meteo liefert mit timezone=auto den
-    // IANA-Namen; damit rechnet Intl spaeter auch die Umstelltermine richtig.
-    // Faellt der Abruf aus, wird ohne tz gespeichert — die App nimmt dann die
-    // Geraetezone und traegt die echte beim naechsten Datenabruf nach.
-    if(msg)msg.textContent="Zeitzone wird ermittelt \u2026";
-    const to=new Promise(r=>setTimeout(()=>r(null),6000));
-    Promise.race([
-      fetch("https://api.open-meteo.com/v1/forecast?latitude="+p.lat+"&longitude="+p.lon+"&timezone=auto&forecast_days=1")
-        .then(r=>r.ok?r.json():null).catch(()=>null),
-      to
-    ]).then(j=>{const t=_tzSan(j&&j.timezone);if(t)p.tz=t;}).catch(()=>{}).then(fertig);
-  }
+  /* v6.56: der Weg selbst steht jetzt in ortGehen() (auch fuer das Wischen) */
+  function saveGo(p){ortGehen(p,{msg:msg});}
   ap.onclick=()=>{
     const la=parseFloat(String(el("locLat").value).trim().replace(",",".")),
           lo=parseFloat(String(el("locLon").value).trim().replace(",","."));
