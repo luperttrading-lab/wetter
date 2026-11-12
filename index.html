@@ -1370,14 +1370,16 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    kleine Leinwaende, die der Browser streckt und per transform schiebt - kein JS je Bild). Neue Szene blendet ueber
    die alte (1,3 s). */
 #hi{display:none}
-/* v6.63 (Nutzer, Bildschirmfilm 12.11. 22:27 mit v6.62: der untere Streifen "immer noch"): iOS 26 gibt einer frisch
-   geladenen Seite in den ersten Bildern ein um die Statusleiste (59 pt) zu kurzes Fenster. FEST stehende Elemente (#hi,
-   die Pille) werden an dessen Unterkante abgeschnitten, darunter stand die Farbe des <html>. Was mit der Seite
-   mitlaeuft, malt dort aber (WebKit-Fehler 301108; so fuellen andere Projekte den Streifen). #hiF ist darum ein
-   NICHT fest stehendes Stueck desselben Himmels (dieselbe Szene, um die eigene Lage nach oben geschoben) hinter #hi:
-   sichtbar nur, wo #hi nicht malt. Nur als Home-Bildschirm-App, nur die ersten Sekunden (hiFussWeg). */
-#hiF{display:none}
-html:root.himmel #hiF{display:block;position:absolute;left:0;top:0;width:100%;height:0;z-index:0;overflow:hidden;pointer-events:none}
+/* v6.64 (Nutzer: "der untere Rand blinkt immer noch ... komplette Rueckseite in einer Farbe von oben bis unten, Kopfzeile
+   und Fusszeile identisch, dann den Rest rueberladen"): beim Ortswechsel deckt #hiDeck den Himmel kurz EINFARBIG in der
+   Farbe der Statusleiste (--hi-r = Hintergrund des <html>) zu. In dieser Farbe malt iOS in den ersten Bildern einer neuen
+   Seite auch die untersten 59 pt - auf einer einfarbigen Flaeche ist der Streifen nicht zu sehen. Nur als
+   Home-Bildschirm-App (Klasse hiflach: alte Seite vor dem Neuladen, neue Seite ab dem ersten Bild bis zum Einblenden). */
+#hiDeck{display:none}
+html:root.himmel #hiDeck{display:block;position:fixed;left:0;top:0;right:0;bottom:-200px;z-index:0;pointer-events:none;background:var(--hi-r,#090d26);opacity:0;transition:opacity var(--hf,.2s) ease}
+html:root.himmel.hiflach #hiDeck{opacity:1}
+html:root.himmel header>#hiK{transition:opacity var(--hf,.2s) ease}
+html:root.himmel.hiflach header>#hiK{opacity:0}
 html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26))}
 @property --hi-r{syntax:"<color>";inherits:true;initial-value:#090d26}
 @property --hi-k{syntax:"<color>";inherits:true;initial-value:rgba(22,30,48,.42)}
@@ -1648,6 +1650,8 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
     document.body.style.minHeight=(Math.max(screen.height||0,window.innerHeight||0)+80)+"px";}catch(e){}
   /* v6.63: Fensterhoehe beim Laden mitschreiben (Zeit in ms, innerHeight, sichtbare Hoehe) - steht unter
      "Einstellungen sichern" als Technik-Zeile; am iPhone laesst sich das sonst nicht messen */
+  /* v6.64: als Home-Bildschirm-App beginnt die Seite mit einfarbig zugedecktem Himmel (siehe #hiDeck) */
+  try{if(navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||/[?&]hifuss=1/.test(location.search))h.classList.add("hiflach");}catch(e){}
   try{window._fen=[];var fenN=function(){try{if(window._fen.length<16&&performance.now()<9000)window._fen.push([Math.round(performance.now()),window.innerHeight||0,Math.round((window.visualViewport&&window.visualViewport.height)||0)]);}catch(e){}};
     fenN();window.addEventListener("resize",fenN);if(window.visualViewport)window.visualViewport.addEventListener("resize",fenN);
     document.addEventListener("DOMContentLoaded",fenN);window.addEventListener("load",fenN);
@@ -1663,7 +1667,7 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
       for(k=0;k<za.length&&k<20;k++)pd+=k===ix?'<i class="ak"></i>':"<i></i>";
       pk.id="ortPkt";pk.setAttribute("aria-hidden","true");pk.innerHTML='<div class="op-n"></div><div class="op-d">'+pd+"</div>";
       pk.firstChild.textContent=ow==="n"?nm+" \u203a":"\u2039 "+nm;pk.style.opacity="1";document.body.appendChild(pk);}}}}catch(e){}
-  setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}},9000);
+  setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}h.classList.remove("hiflach");},9000);
 }catch(e){}})();
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
    die Wetterabschnitte, Himmel/ISS/PV & Co. sind zu (KLAPP_ZU_NEU). Wer die
@@ -1727,8 +1731,8 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
 }catch(e){}})();
 </script>
 <div id="bg"></div>
-<div id="hiF" aria-hidden="true"></div>
 <div id="hi" aria-hidden="true"></div>
+<div id="hiDeck" aria-hidden="true"></div>
 <script>
 /* v6.53 (Nutzer 12.11., Bildschirmfilm 18:05 vom iPhone: "es wechselt immer noch mit unterschiedlichen Farben zu
    Zeitpunkten" - "vor allem Kopf- und Fusszeile, die eine Farbe sind und nicht wie das Hintergrundbild"): das Himmel-
@@ -2059,19 +2063,21 @@ function hiRand(C,L,B,ohneSonne){
     if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
   return c;
 }
-/* v6.63: #hiF nur als Home-Bildschirm-App (im Browser gibt es das kurze Fenster nicht; ?hifuss=1 zum Pruefen), und nur
-   die ersten Sekunden - danach ist das Fenster vollstaendig und das Stueck laege nur noch verdeckt hinter #hi. */
-var HI_FUSS=170,HI_FUSS_MS=4000;
+/* v6.64: gilt das kurze Fenster von iOS? Nur als Home-Bildschirm-App (im Browser ?hifuss=1 zum Pruefen) */
 function hiFussAn(){
   if(HI.fussAn==null){var a=false;
     try{a=navigator.standalone===true||!!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||/[?&]hifuss=1/.test(location.search);}catch(e){}
     HI.fussAn=a;}
   return HI.fussAn;
 }
-function hiFussWeg(){
-  HI.fussAus=1;var f=document.getElementById("hiF");if(!f)return;
-  HI.szenen=HI.szenen.filter(function(s){return s.parentNode!==f;});
-  if(f.parentNode)f.parentNode.removeChild(f);
+/* v6.64: Himmel einfarbig zudecken (vor dem Neuladen) bzw. wieder freigeben (ms = Dauer der Blende; fruehestens
+   HI_FLACH_MS nach Seitenbeginn - so lange stand der Streifen im Film hoechstens, 0,28 s, mit Reserve) */
+var HI_FLACH_MS=700;
+function hiFlachAn(){try{if(hiAn()&&hiFussAn()){var h=document.documentElement;h.style.setProperty("--hf",".2s");h.classList.add("hiflach");}}catch(e){}}
+function hiFlachWeg(ms){
+  var h=document.documentElement;if(!h.classList.contains("hiflach")||HI.flachT)return;
+  var w=HI_FLACH_MS-performance.now(),f=function(){HI.flachT=0;h.style.setProperty("--hf",Math.max(200,ms||350)+"ms");h.classList.remove("hiflach");};
+  if(w>0)HI.flachT=setTimeout(f,w);else f();
 }
 /* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
 function hiWeiterMerken(){
@@ -2159,11 +2165,6 @@ function hiPruefen(bl){
   /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
      (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
   if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
-  /* v6.63: das mitlaufende Stueck hinter dem unteren Rand (#hiF, siehe CSS) - blendet wie die anderen Szenen */
-  var fu=HI.fussAus?null:document.getElementById("hiF");
-  if(fu&&hiFussAn()){var fa=Math.max(1,B.h-HI_FUSS);fu.style.top=fa+"px";fu.style.height=(B.h-fa)+"px";
-    neu.push(hiSzene(fu,C,L,B,0,0,fa));
-    if(!HI.fussT)HI.fussT=setTimeout(hiFussWeg,HI_FUSS_MS);}
   var alt=HI.szenen;HI.szenen=neu;
   var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
   /* v6.52: Szenen und die Farben oben (--hi-r), der Karten (--hi-k) und Kacheln (--hi-t) wechseln GLEICH lang (die drei
@@ -2386,7 +2387,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.63</span>
+      <span class="ver">v6.64</span>
     </div>
   </header>
 
@@ -3518,6 +3519,7 @@ function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt
 function sanftPruefen(){if(!SANFT.an||SANFT.fertig||!SANFT.haupt)return;for(var k in SANFT.offen)return;sanftZeigen();}
 function sanftZeigen(){
   if(SANFT.fertig)return;SANFT.fertig=true;clearTimeout(SANFT.tm);
+  try{hiFlachWeg(SANFT_EIN_MS);}catch(e){}
   var h=document.documentElement,los=false;
   if(!h.classList.contains("sanft"))return;
   /* v6.52: den Himmel JETZT bauen - seine Szene blendet in denselben zwei Bildern ein wie der Inhalt, gleich lang.
@@ -3543,7 +3545,7 @@ function sanftWeg(dann){
   setTimeout(function(){try{dann();}catch(e){}
     setTimeout(function(){h.classList.remove("sanft-aus");},4000);},SANFT_AUS_MS);
 }
-window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("sanft-aus");h.classList.remove("sanft");
+window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("hiflach");h.classList.remove("sanft-aus");h.classList.remove("sanft");
   try{owAufraeumen();}catch(x){}}});
 /* v6.56: Ortswechsel ohne Dialog - derselbe Weg wie saveGo im Standort-Dialog (Profil, Liste, Himmel weiterreichen,
    neu laden). opt.wisch = Richtung fuer die neue Seite, opt.sofort = nicht erst ausblenden (der Wisch hat das schon getan),
@@ -3551,6 +3553,7 @@ window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.do
    nicht in die Liste aufnehmen (v6.57: er wurde gerade geloescht). */
 function ortGehen(p,opt){
   opt=opt||{};
+  hiFlachAn();
   var fertig=function(){try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
     locZulMerken(p,opt.ohneAlt?null:LOC);
     try{sessionStorage.setItem("ortWechsel","1");if(opt.wisch)sessionStorage.setItem("ortWisch",opt.wisch);}catch(e){}
@@ -3719,6 +3722,7 @@ function owZurueck(){
 function owLos(){
   var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel,red=hiReduziert();
   OW.schluck=Date.now();
+  hiFlachAn();
   /* die Punkte zeigen jetzt schon das Ziel als aktuellen Ort - die neue Seite uebernimmt die Pille unveraendert */
   owPunkte({a:OW.L.a,i:OW.j},-1,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);clearTimeout(OW.tm);
   h.classList.add("ortlos");

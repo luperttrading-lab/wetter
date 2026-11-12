@@ -3699,6 +3699,22 @@ ohne im Mittel 4-53 Stufen; mit ziehenden Wolken (Wind 60 km/h) ist die Naht bei
 ueblicher Nachbarzeilen (0,56-0,77 gegen 0,56-0,69); Szene steht vor dem ersten Bild (130 gegen 140 ms); nach 5 s ist #hiF
 weg, Neubau des Himmels laeuft; im Browser ohne ?hifuss nichts; Wisch-Regression (`e/t82.py`) Himmel und hell ohne Fehler.
 NICHT am iPhone geprueft - ob mitlaufender Inhalt im kurzen Fenster wirklich malt, ist aus den fremden Berichten gefolgert.
+v6.64 UNTERER STREIFEN: HIMMEL BEIM WECHSEL EINFARBIG (Nutzer 12.11. nach v6.63: "der untere Rand blinkt immer noch -
+komplette Rueckseite in einer Farbe von oben bis unten, Kopfzeile und Fusszeile identisch, dann den Rest rueberladen").
+v6.63 (#hiF, mitlaufendes Stueck Himmel) hat am iPhone NICHT geholfen - auch mitlaufender Inhalt malt in den ersten Bildern
+unter 793 pt offenbar nicht; #hiF, `hiFussWeg`, `HI_FUSS*` sind wieder entfernt (Parameter `ab` von hiSzene bleibt ungenutzt).
+Was feststeht (Filme 22:08, 22:27): der Streifen hat exakt die Farbe der Statusleiste = Hintergrund des <html> (--hi-r).
+JETZT der Vorschlag des Nutzers: `#hiDeck` (fest, hinter #hi im HTML, also darueber; Farbe --hi-r) deckt den Himmel zu,
+solange die Klasse `hiflach` am <html> steht; `#hiK` (Himmel im Kopf) wird dabei durchsichtig. ALTE Seite: `hiFlachAn()` in
+`owLos` und `ortGehen` (Blende 0,2 s, waehrend der Inhalt wegfliegt). NEUE Seite: das erste Script setzt `hiflach` sofort;
+`hiFlachWeg(ms)` in `sanftZeigen` nimmt es weg (Blende = SANFT_EIN_MS, fruehestens `HI_FLACH_MS` 700 ms nach Seitenbeginn;
+Sicherung nach 9 s, pageshow persisted). Auf der einfarbigen Flaeche ist der Streifen unsichtbar, egal warum iOS ihn malt.
+Nur als Home-Bildschirm-App (`hiFussAn`, im Browser `?hifuss=1`) - im Browser bleibt der durchgehende Himmel (v6.52).
+PREIS: beim Ortswechsel und bei jedem Start ist der Himmel kurz einfarbig und blendet mit dem Inhalt ein (die Fortsetzung
+der Wolken ueber das Neuladen, v6.52, sieht man in der App nicht mehr). Geprueft (`e/t95.py`): neue Seite bei 250 ms
+einfarbig von oben bis unten (Spanne 0), Decke blendet mit dem Inhalt aus, ohne ?hifuss unveraendert; Wisch-Regression ohne
+Fehler. Bleibt der Streifen SELBST DANN sichtbar, hat er nicht die Farbe --hi-r der neuen Seite - dann Technik-Zeile
+(Zahnrad > Einstellungen sichern) und Film ansehen; letzter Weg: Ortswechsel ohne Neuladen. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
