@@ -1210,7 +1210,6 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
 .loc-zul .loc-x{width:44px;font-size:18px;font-weight:500;opacity:.45}
 /* v6.55: aktueller Ort markiert, Verschieben per langem Druck */
 .loc-zul .loc-btn.loc-go{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y}
-.loc-zul .loc-hier{position:absolute;top:0;right:0;bottom:0;width:58px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#2e9e4a}
 .loc-zul .loc-btn.hier::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#2e9e4a;margin:0 8px 2px 0;vertical-align:middle}
 .loc-row.loc-zul.sortiert{overflow:visible}
 .loc-zul.sortiert .loc-btn.loc-go{transition:transform .15s ease}
@@ -1283,7 +1282,6 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   html.dunkel .loc-zul .loc-btn.loc-go{background:transparent;border-top-color:rgba(255,255,255,.08);color:#a8cdf0}
   html.dunkel .loc-zul .loc-btn.loc-go:active{background:rgba(255,255,255,.06)}
   html.dunkel .loc-zul .loc-btn.loc-go.zieh{background:#2a3a52;box-shadow:0 6px 18px rgba(0,0,0,.45)}
-  html.dunkel .loc-zul .loc-hier{color:#6fd08a}
   html.dunkel .loc-zul .loc-btn.hier::before{background:#6fd08a}
   html.dunkel .loc-hit{background:var(--card);border-color:var(--line);color:var(--ink)}
   html.dunkel .loc-ovl{background:rgba(4,8,14,.62)}
@@ -2313,7 +2311,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.56</span>
+      <span class="ver">v6.57</span>
     </div>
   </header>
 
@@ -3446,11 +3444,12 @@ window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.do
   h.classList.remove("ortzieh");h.classList.remove("ortlos");h.style.removeProperty("--wx");h.style.removeProperty("--wo");}});
 /* v6.56: Ortswechsel ohne Dialog - derselbe Weg wie saveGo im Standort-Dialog (Profil, Liste, Himmel weiterreichen,
    neu laden). opt.wisch = Richtung fuer die neue Seite, opt.sofort = nicht erst ausblenden (der Wisch hat das schon getan),
-   opt.msg = Zeile fuer "Zeitzone wird ermittelt", opt.tzMs = Wartezeit auf die Zeitzone. */
+   opt.msg = Zeile fuer "Zeitzone wird ermittelt", opt.tzMs = Wartezeit auf die Zeitzone, opt.ohneAlt = den verlassenen Ort
+   nicht in die Liste aufnehmen (v6.57: er wurde gerade geloescht). */
 function ortGehen(p,opt){
   opt=opt||{};
   var fertig=function(){try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
-    locZulMerken(p,LOC);
+    locZulMerken(p,opt.ohneAlt?null:LOC);
     try{sessionStorage.setItem("ortWechsel","1");if(opt.wisch)sessionStorage.setItem("ortWisch",opt.wisch);}catch(e){}
     try{hiWeiterMerken();}catch(e){}
     /* lat/lon abwerfen, damit das gespeicherte Profil greift; ?v= umgeht den HTTP-Cache (v3.37) */
@@ -13436,10 +13435,17 @@ load();
     box.innerHTML="";el("locZulLeer").classList.toggle("hidden",!!a.length);el("locZulWisch").classList.toggle("hidden",a.length<2);
     a.forEach((o,i)=>{const hier=locGleich(o,LOC),b=document.createElement("button");b.type="button";b.className="loc-btn loc-go"+(hier?" hier":"");
       b.dataset.i=i;b.textContent=o.name;let x=null;
-      if(hier){const t=document.createElement("span");t.className="loc-hier";t.textContent="hier";b.appendChild(t);}
-      else{x=document.createElement("span");x.className="loc-x";x.textContent="\u00d7";
+      /* v6.57 (Nutzer: "das hier brauchen wir nicht, den Ort sollte man auch mit x loeschen koennen"): auch der aktuelle Ort
+         hat ein x (der gruene Punkt bleibt); nur wenn er der einzige ist, nicht - dann gaebe es nichts, wohin die App wechselt */
+      if(!hier||a.length>1){x=document.createElement("span");x.className="loc-x";x.textContent="\u00d7";
         x.setAttribute("role","button");x.setAttribute("aria-label",o.name+" aus der Liste entfernen");b.appendChild(x);}
       b.onclick=e=>{if(LZ.war){LZ.war=0;return;}
+        if(x&&e.target===x&&hier){
+          /* den aktuellen Ort loeschen: die App wechselt zum Nachbarn in der Liste (der naechste, am Ende der vorige) und
+             merkt sich den geloeschten dabei NICHT wieder (ohneAlt) */
+          const rest=locZulLesen().filter(y=>!locGleich(y,o)),z=rest[Math.min(i,rest.length-1)];if(!z)return;
+          if(!confirm("\u201e"+o.name+"\u201c aus der Liste l\u00f6schen? Die App wechselt dann zu \u201e"+z.name+"\u201c."))return;
+          locZulSchreiben(rest);ortGehen(z,{msg:msg,ohneAlt:1});return;}
         if(x&&e.target===x){if(!confirm("\u201e"+o.name+"\u201c aus der Liste l\u00f6schen?"))return;locZulSchreiben(locZulLesen().filter(y=>!locGleich(y,o)));locZulZeigen();return;}
         if(hier){hide();return;}
         saveGo(o);};

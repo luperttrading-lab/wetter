@@ -3553,6 +3553,14 @@ Punkte), Tipp danach wirkt, im Bearbeiten und hinter dem Dialog nichts. FALLE im
 Seite nur alle 60-100 ms an - Schwung dort nicht messbar, darum der Test mit `new Touch()/TouchEvent` in der Seite (auch
 die sind verzoegert, aber mit 30-ms-Schritten reicht es). Nicht am iPhone geprueft (Safari-Wischgeste "zurueck" vom
 linken Rand gibt es nur im Browser, nicht in der Home-Bildschirm-App).
+v6.57 (Nutzer, iPhone-Bild Standort-Dialog 20:31: "Das hier brauchen wir nicht. Aber den Ort sollte man auch mit x
+loeschen koennen" - gelesen als das Wort "hier" neben dem aktuellen Ort; Rueckfrage vom Nutzer abgelehnt): Das gruene "hier"
+ist weg (`.loc-hier` samt CSS), der gruene Punkt bleibt; auch der AKTUELLE Ort hat jetzt ein x - ausser er ist der einzige
+(dann gaebe es nichts, wohin die App wechseln koennte). Loeschen des aktuellen Orts: Rueckfrage "„Erlental“ aus der Liste
+loeschen? Die App wechselt dann zu „Muenchen“.", Nachbar = der naechste in der Liste, am Ende der vorige; dann
+`ortGehen(z,{ohneAlt:1})` - `locZulMerken(p,null)`, sonst haette der Wechsel den geloeschten Ort als "verlassenen" gleich
+wieder eingetragen. Geprueft (Playwright): Erlental (Mitte) -> Muenchen, Liste ohne Erlental; Kiel (Ende) -> Muenchen; ein
+einzelner Ort ohne x; Himmel und hell.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
