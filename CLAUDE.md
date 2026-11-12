@@ -3344,6 +3344,18 @@ Karte (97,112,136) 29 %; geschlossene Decke 20 % / 136. Pruefskript (Lesbarkeit,
 Messartefakt), 14 zwischen 2 und 3, 353 bis 4,5, 53 darueber. Heller als Apple (109) bleibt es mit Absicht (v6.41: "tagsueber
 und nicht Daemmerung"). Auch nachts gilt die Regel (7/8 = dunkle graue Decke statt Dunkelblau). Testlage `?himmel=meist`.
 Nicht am iPhone geprueft.
+v6.46 WEICHER SCHRIFTSCHATTEN IM HIMMEL (Nutzer 12.11. nach v6.45: "unten bei Temperaturverlauf und Stuendlich und so ist
+auch der schwarze Schein hinter der weissen Schrift - sieht nicht huebsch aus"). Der enge dunkle Saum (text-shadow 0 0 7px
+.75 + 0 1px 2px .55, seit v6.39/v6.40 fuer die Lesbarkeit am Sonnenschein; ohne `hison` sogar schwarz .45) lag seit v6.41
+auch an bewoelkten Tagen (`hison` = Sonne ODER helle Wolken) um Abschnittstitel, Kopf und die Zeilen im Kasten - auf grauen
+Wolken sieht er wie ein Schmutzrand aus. JETZT ueberall nur ein weiter, schwacher, dunkelblauer Schatten (Titel 0 1px 12px
+.18-.22, Kopf/Kasten 0 1px 10px .2-.26, Wort unter der Temperatur .2; die Temperatur selbst wie seit v6.42). AUSNAHME neue
+Klasse `hisonne` (`C.sonne` > 0,3, gesetzt neben `hison` in `hiPruefen`): Kopf, Zeile "Live / Datum" (`.hero .htop`) und die
+Abschnittstitel behalten einen Saum (0 0 7px .6 + 0 1px 2px .38) - sie liegen am bzw. laufen beim Scrollen ueber den weissen
+Kern des Scheins; mit weichem Schatten verschwand dort "Temperaturverlauf" zur Haelfte (im Test gesehen). Auf blauem Himmel
+faellt der dunkelblaue Saum kaum auf. Die uebrigen Zeilen im Kasten (Gefuehlt, Heute bisher, Vergleich) sind auch bei Sonne
+weich. Geprueft (Playwright, `e/t62.py`: alt gegen neu, Lagen meist / bedeckt / klar / nacht, Titel in Bildmitte und direkt
+unter dem Kopf): Titel und kleine Kopfzeilen auf den hellsten Wolken lesbar. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
