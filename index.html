@@ -1497,7 +1497,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.37</span>
+      <span class="ver">v6.38</span>
     </div>
   </header>
 
@@ -2048,7 +2048,7 @@ function hiFarben(L){
   rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
   var or=hiMix([78,84,104],L.nass?[124,134,152]:[152,162,180],tag),ok=hiMix([40,45,60],L.nass?[58,68,86]:[64,76,96],tag);
   rand=hiMix(rand,or,g);kern=hiMix(kern,ok,g);
-  /* SONNE (v6.37): Scheibe mit Schein, nur am Tag, trocken und solange die Sonne durchkommt - voll bis ~55 %
+  /* SONNE (v6.37, seit v6.38 Schein ohne Scheibe): nur am Tag, trocken und solange die Sonne durchkommt - voll bis ~55 %
      Bedeckung, ab ~90 % nichts mehr. Tief stehend waermer (und unter 7 Grad schwaecher). Aus: himmelSonne = "0". */
   var so=(L.nass||!hiSonneAn())?0:hiSm(.5,7,h)*(1-hiSm(.55,.92,N));
   return {top:hiPassen(top,0),bot:hiPassen(bot,0,.4+.1*tag),rand:hiPassen(rand,1),kern:hiPassen(kern,1),sterne:1-hiSm(-9,-3,h),glanz:tag*(1-g)*.2,schleier:g,
@@ -2059,14 +2059,24 @@ function hiSonneSetzen(v){try{localStorage.setItem("himmelSonne",v?"1":"0");}cat
 /* Die Sonne liegt UNTER den Wolken (sie ziehen davor vorbei), ein schwaecherer Schein noch einmal DARUEBER - eine
    Wolke vor der Sonne leuchtet dann auf, statt sie einfach auszuknipsen. Nur CSS-Verlaeufe, steht still, kostet
    nichts. Ort: links der Mitte knapp unter dem Kopf, in der Luecke zwischen "Live" und dem Datum ueber der grossen
-   Temperatur (B.sx/B.sy aus hiPruefen) - dort liegt bei 320-430 pt kein Text unter der Scheibe. */
+   Temperatur (B.sx/B.sy aus hiPruefen) - dort liegt bei 320-430 pt kein Text unter dem Kern.
+   v6.38 (Nutzer: "als Kugel, als Scheibe wie den Mond ist schwierig - die Sonne ist so strahlend, dass man sie nicht
+   wirklich sieht"): KEINE Scheibe mehr. Gemessen in seinem Apple-Bild: Kern fast weiss (Radius ~31 pt), danach
+   faellt die Helligkeit stetig ueber ~200 pt ab, groesster Sprung zwischen Nachbarpixeln 4 von 255 - es gibt keinen
+   Rand; im Pressebild (iOS 15, "Sunnyvale") dazu Strahlen. Jetzt ein Kern, der ohne Kante auslaeuft, und vier
+   feine Lichtstreifen (acht Strahlen, ungleich lang) als gedrehte Ellipsen. HI_STRAHL: Winkel, halbe Laenge und
+   Dicke in Kernradien, Deckkraft. */
+var HI_STRAHL=[[14,2.7,.34,.7],[58,1.9,.3,.55],[103,2.4,.32,.62],[149,1.7,.28,.5]];
 function hiSonne(s,C,B,vorn){
   var x=B.sx.toFixed(0)+"px "+B.sy.toFixed(0)+"px",r=B.sr,f=C.sonneF.map(Math.round).join(","),d=document.createElement("div");
   d.className="hiSo";
   d.style.cssText="width:"+B.w+"px;height:"+B.h+"px;opacity:"+C.sonne.toFixed(2)+";background:"+(vorn
     ?"radial-gradient(circle "+(r*3.4).toFixed(0)+"px at "+x+",rgba("+f+",.3),rgba("+f+",.1) 42%,rgba("+f+",0))"
-    :"radial-gradient(circle "+r.toFixed(0)+"px at "+x+",#fff 0,#fff 56%,rgba(255,255,255,.72) 74%,rgba(255,255,255,0)),"
-     +"radial-gradient(circle "+(r*5.2).toFixed(0)+"px at "+x+",rgba("+f+",.7),rgba("+f+",.34) 22%,rgba("+f+",.14) 48%,rgba("+f+",.04) 76%,rgba("+f+",0))");
+    :"radial-gradient(circle "+(r*5.2).toFixed(0)+"px at "+x+",#fff 0,rgba(255,255,255,.97) 7%,rgba(255,255,255,.82) 12%,rgba("+f+",.56) 18%,rgba("+f+",.32) 26%,rgba("+f+",.17) 38%,rgba("+f+",.08) 56%,rgba("+f+",.03) 78%,rgba("+f+",0))");
+  if(!vorn)HI_STRAHL.forEach(function(q){
+    var L=r*q[1],h=r*q[2],e=document.createElement("i");
+    e.style.cssText="display:block;position:absolute;left:"+(B.sx-L).toFixed(1)+"px;top:"+(B.sy-h/2).toFixed(1)+"px;width:"+(2*L).toFixed(1)+"px;height:"+h.toFixed(1)+"px;transform:rotate("+q[0]+"deg);background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,255,255,"+q[3]+"),rgba(255,255,255,"+(q[3]*.38).toFixed(2)+") 34%,rgba(255,255,255,0))";
+    d.appendChild(e);});
   s.appendChild(d);
 }
 /* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
