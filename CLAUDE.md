@@ -3185,6 +3185,19 @@ Kapstadt) fotografieren, Handy gleich halten. Apples Versionshinweise zu iOS 15 
 "Sonnenstand, Wolken und Niederschlag genauer darstellen". FUER UNS (meine Empfehlung): Sonne NICHT nach echtem Stand setzen -
 frei ist nur die Luecke zwischen "Live" und Datum; ein wandernder weisser Kern laege morgens auf "Live", abends auf dem Datum,
 im Winter tiefer auf der Temperatur.
+NACHTRAG 12.11. 12:10 (Nutzer macht den Staedtetest: Dakar und Luxor zur selben Minute, Vorschau-Blatt "Stadt hinzufuegen",
+Blatt beginnt 59 pt unter der Oberkante). Gemessen: Dakar Schein bei x 139 pt (35 %), 63 pt unter der Blattkante - echte Sonne
+48,6 Grad hoch, Azimut 141, 104 min VOR dem wahren Mittag, Tagesanteil (Aufgang 0 .. Untergang 1) 0,347; Luxor x 251 pt (64 %),
+55 pt - 40,5 Grad, Azimut 211, 97 min NACH Mittag, Tagesanteil 0,650. WAAGRECHT passt am besten der TAGESANTEIL: Steigung im
+Blatt (251-139)/(0,650-0,347) = 370 pt je ganzem Tag, in der Ayia-Napa-Reihe (Vollbild) (246-200)/(0,526-0,406) = 378 pt -
+beide ~ Bildschirmbreite (393 pt), auf 2 % gleich; mit Azimut oder Stundenwinkel allein streuen die fuenf Punkte 16-19 pt.
+Also: Sonnenaufgang am linken Rand, Untergang am rechten; im Blatt steht der wahre Mittag bei 49,7 % (Mitte), im Vollbild bei
+59-60 % (Versatz ~38 pt, Grund unbekannt). Gegenprobe Pressebild Sunnyvale 17:41 (Untergang 19:58): Tagesanteil ~0,83 ->
+erwartet ~81 %, im Bild ~80 %. SENKRECHT weiter kein Zusammenhang "hoehere Sonne = hoeher im Bild": Dakar (48,6 Grad) steht
+8 pt TIEFER als Luxor (40,5 Grad); in Ayia Napa sank der Schein 21 pt bei gleicher Sonnenhoehe (dort vom oberen Bildrand
+angeschnitten - die Hoehenwerte sind unsicher). Fuer Sommer/Winter (Hoehe) taugt der Test nicht: 49 gegen 41 Grad ist zu wenig
+Abstand; es braeuchte z. B. Reykjavik oder Oslo (um 10 Grad) gegen eine Stadt mit fast senkrechter Sonne. Die Jahreszeit geht
+aber ueber die TAGESLAENGE ein (gleiche Uhrzeit = anderer Tagesanteil).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
