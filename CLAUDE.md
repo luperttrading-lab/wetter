@@ -3730,6 +3730,34 @@ SELBEN Bild, in dem `sanft` faellt, mit derselben Dauer und Kurve (ease). Nach e
 alle 15 ms): Decke 1 -> 0 und Inhalt 0 -> 1 beginnen im selben Bild und enden zusammen, auch bei "Bewegung reduzieren";
 ohne ?hifuss unveraendert; Wisch-Regression (`e/t82.py`) ohne Fehler. PREIS: nach einem Wisch steht alles 0,2 s spaeter.
 Nicht am iPhone geprueft - springt der Himmel dort weiter, laeuft auch element.animate nicht, dann Film ansehen.
+v6.66 (Nutzer 12.11., Bildschirmfilm 23:22 mit v6.65: "es blinkt immer noch ein bisschen, wenn du es fein aufgeloest
+anguckst, und teilweise bleibt es beim Schieben stecken"). GEMESSEN (120 Bilder/s, Farbe je Bereich, Versatz des Inhalts per
+Kreuzkorrelation): die Blenden aus v6.65 laufen weich (Web-Animation wirkt). DREI Fehler uebrig. (1) AUFBLITZEN: in den ersten
+6-7 Bildern JEDER neuen Seite eine fast schwarze Flaeche (11,16,35) statt der Farbe der alten Seite, im Kopf fehlt dabei das
+Wolken-Symbol (Hauptscript laeuft noch); dann Sprung auf die richtige Farbe. Ursache: --hi-r ist per @property animierbar
+registriert (v6.52, Grundwert #090d26); beim Laden bekam <html> mit der Klasse "himmel" den Uebergang, und die gemerkte Farbe
+galt als AENDERUNG vom Grundwert aus. Ohne "Bewegung reduzieren" blendete die neue Seite 1,3 s von fast Schwarz auf (im
+Pruefstand nachgestellt, `e/t97.py`); mit "reduzieren" ist der Uebergang zwar sofort fertig, am iPhone aber erst gezeichnet,
+wenn der Hauptfaden frei ist - bis dahin steht der Grundwert [Folgerung aus dem Film, nicht am Geraet belegt]. Jetzt setzt
+das erste Script `style.transition="none"` auf <html>, bevor es Klassen und Farben setzt; das Himmel-Script nimmt es nach zwei
+Bildern (spaetestens 400 ms) wieder weg. Pruefstand: erstes Bild der neuen Seite = Farbe der alten (83,113,158). (2) SCHIEBEN
+HAENGT: beim Losziehen sprang der Inhalt um 42-53 px und stand dann 0,15-0,23 s still (9-14 Bilder), ebenso nach dem
+Loslassen. Ursachen: Klassen am <html> (ortzieh: overflow-x:clip -> neues Layout; ortlos: pointer-events am body -> alle
+~3100 Elemente neu; hiflach) und das Anlegen eigener Ebenen fuer die bewegten Bloecke erst beim ersten Versatz. Jetzt
+`html{overflow-x:clip}` fest, `#alerts,#hero,#content,#app>.foot,header .place{will-change:transform}` dauerhaft (einziger
+fester Baustein darin ist #kzSat, ein unsichtbarer Messpunkt), Zustand als JS-Merker `OW.zieht`/`OW.los` statt Klassen, die
+Decke auf der ALTEN Seite per Inline-Stil + Web-Animation (keine Klasse; pageshow raeumt auf). Chromium, Prozessor sechsfach
+gedrosselt (`e/t99.py`): Stil-Neuberechnung beim Wisch 31 -> 12 ms, Malen 44 -> 29 ms, groesste Bildluecke beim Losziehen
+93-145 -> 61-76 ms (`e/t98.py`). (3) "BEWEGUNG REDUZIEREN" IST BEIM NUTZER WOHL AN [Wahrscheinlich]: im Film flog der Inhalt
+nach dem Loslassen nie weiter, sondern verblasste an Ort und Stelle (der Zweig fuer "reduzieren"), und zwischen den Wechseln
+bewegt sich nichts (Wolken, Symbole). Darum (a) fliegt der Inhalt jetzt IMMER weiter und die neue Seite schiebt sich IMMER von
+der Seite herein - das setzt nur die Fingerbewegung fort, wie iOS selbst beim Blaettern (v6.56 hatte das bei "reduzieren"
+abgeschaltet, das war meine Wahl); (b) die Blenden des Himmels (neue Szene `.hiS`, Farben --hi-r/-k/-t) laufen auch bei
+"reduzieren" (!important gegen die Sperre `*{transition-duration:.001ms}`) - im Film sprang eine spaeter nachkommende Szene
+in EINEM Bild (3,64 s und 8,07 s). Eine Blende ist keine Bewegung (Grundsatz seit v4.73). Die Technik-Zeile (Zahnrad >
+Einstellungen sichern) nennt jetzt "Bewegung reduzieren an/aus". Bildvergleich alt/neu (Himmel, oben und gescrollt):
+Aufbau gleich. Wisch-Regression (`e/t82.py` himmel / himmel red / hell) ohne Fehler. Nicht am iPhone geprueft. GRENZE: jeder
+Ortswechsel ist weiter ein Neuladen (1 MB HTML); ganz ohne Uebergangsbild ginge es nur mit einem Ortswechsel IN der Seite.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
