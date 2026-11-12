@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#f2f3f6">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Wetter">
 <title>Wetter · Ort</title>
 <style>
@@ -1370,6 +1370,14 @@ html:root.dunkel #strip .now{background:rgba(255,255,255,.09)}
    kleine Leinwaende, die der Browser streckt und per transform schiebt - kein JS je Bild). Neue Szene blendet ueber
    die alte (1,3 s). */
 #hi{display:none}
+/* v6.63 (Nutzer, Bildschirmfilm 12.11. 22:27 mit v6.62: der untere Streifen "immer noch"): iOS 26 gibt einer frisch
+   geladenen Seite in den ersten Bildern ein um die Statusleiste (59 pt) zu kurzes Fenster. FEST stehende Elemente (#hi,
+   die Pille) werden an dessen Unterkante abgeschnitten, darunter stand die Farbe des <html>. Was mit der Seite
+   mitlaeuft, malt dort aber (WebKit-Fehler 301108; so fuellen andere Projekte den Streifen). #hiF ist darum ein
+   NICHT fest stehendes Stueck desselben Himmels (dieselbe Szene, um die eigene Lage nach oben geschoben) hinter #hi:
+   sichtbar nur, wo #hi nicht malt. Nur als Home-Bildschirm-App, nur die ersten Sekunden (hiFussWeg). */
+#hiF{display:none}
+html:root.himmel #hiF{display:block;position:absolute;left:0;top:0;width:100%;height:0;z-index:0;overflow:hidden;pointer-events:none}
 html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26))}
 @property --hi-r{syntax:"<color>";inherits:true;initial-value:#090d26}
 @property --hi-k{syntax:"<color>";inherits:true;initial-value:rgba(22,30,48,.42)}
@@ -1540,6 +1548,7 @@ html:root.himmel #stLeiste{display:none}
 .es-t b{color:var(--ink)}
 .es-ta{display:block;width:100%;box-sizing:border-box;font:11px/1.35 ui-monospace,Menlo,monospace;border:1px solid var(--feld-line);background:var(--feld);color:var(--ink);border-radius:9px;padding:7px;margin:6px 0;resize:none}
 .es-m{font-size:12.5px;font-weight:700;min-height:17px;margin-top:6px;color:var(--ink)}
+.es-d{font-size:10.5px;line-height:1.4;color:var(--faint);margin:12px 0 0;word-break:break-word}
 .es-kn{display:block;width:100%;margin:6px 0 0}
 /* v6.47 (Nutzer 12.11. 13:52, Bild "Region Dakar": "der Streifen oben am Bildschirmrand ist immer noch in einer anderen
    Farbe ... was machen wir, wenn es dunkel ist ... lass dir was einfallen, dass man den Uebergang nicht sieht").
@@ -1600,7 +1609,7 @@ html.ortlos body{pointer-events:none}
 #app>header,#alerts,#hero{touch-action:pan-y}
 /* der weggeschobene Inhalt darf die Seite nicht waagrecht verbreitern (sonst liesse sie sich seitlich schieben) */
 html.ortzieh{overflow-x:clip}
-#ortPkt{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;
+#ortPkt{position:fixed;left:50%;bottom:max(calc(env(safe-area-inset-bottom,0px) + 16px),calc(var(--sat,0px) + 6px));transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;
   padding:7px 13px 8px;border-radius:16px;background:rgba(12,20,36,.66);color:#fff;font-size:13.5px;font-weight:650;line-height:1.2;opacity:0;pointer-events:none;
   max-width:calc(100vw - 40px);box-sizing:border-box;text-shadow:none}
 #ortPkt.weich{transition:opacity .3s ease!important;transition-duration:.3s!important}
@@ -1637,6 +1646,12 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
      an dvh/env, die in diesem Moment nicht sicher sind - das hier nicht. */
   try{if(navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))
     document.body.style.minHeight=(Math.max(screen.height||0,window.innerHeight||0)+80)+"px";}catch(e){}
+  /* v6.63: Fensterhoehe beim Laden mitschreiben (Zeit in ms, innerHeight, sichtbare Hoehe) - steht unter
+     "Einstellungen sichern" als Technik-Zeile; am iPhone laesst sich das sonst nicht messen */
+  try{window._fen=[];var fenN=function(){try{if(window._fen.length<16&&performance.now()<9000)window._fen.push([Math.round(performance.now()),window.innerHeight||0,Math.round((window.visualViewport&&window.visualViewport.height)||0)]);}catch(e){}};
+    fenN();window.addEventListener("resize",fenN);if(window.visualViewport)window.visualViewport.addEventListener("resize",fenN);
+    document.addEventListener("DOMContentLoaded",fenN);window.addEventListener("load",fenN);
+    if(window.requestAnimationFrame)requestAnimationFrame(function(){fenN();requestAnimationFrame(fenN);});}catch(e){}
   try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
   /* v6.56: nach einem Wisch kommt die neue Seite von der passenden Seite herein (n = naechster Ort, v = voriger) */
   try{var ow=sessionStorage.getItem("ortWisch");if(ow){sessionStorage.removeItem("ortWisch");if(ow==="n"||ow==="v"){h.classList.add("wisch-"+ow);
@@ -1712,6 +1727,7 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
 }catch(e){}})();
 </script>
 <div id="bg"></div>
+<div id="hiF" aria-hidden="true"></div>
 <div id="hi" aria-hidden="true"></div>
 <script>
 /* v6.53 (Nutzer 12.11., Bildschirmfilm 18:05 vom iPhone: "es wechselt immer noch mit unterschiedlichen Farben zu
@@ -1992,20 +2008,23 @@ function hiWolke(sz,tex,B,sc,v0,a,dy,off,hmax,fade){
   sz.appendChild(c);
 }
 function hiGlanzR(B){return (B.aw||B.w)*.8;}
-function hiSzene(ziel,C,L,B,hmax,links){
+function hiSzene(ziel,C,L,B,hmax,links,ab){
   var s=document.createElement("div");s.className="hiS";
   var g="linear-gradient("+hiRgb(C.top)+","+hiRgb(C.bot)+")";
   var son=C.sonne>.03&&B.sx!=null;
+  /* v6.63: fuss = das Stueck fuer #hiF (unterer Rand): gleiche Szene, um ab nach oben geschoben; Sterne (enden bei 86 %),
+     Sonne und der Balkenstreifen oben liegen ausserhalb und fallen weg */
+  var fuss=typeof ab==="number"&&ab>0;
   /* v6.37: der weite Schein sitzt an der Sonne (vorher fest oben rechts) */
   if(C.glanz>.02)g="radial-gradient(circle "+hiGlanzR(B).toFixed(0)+"px at "+(B.sx!=null?B.sx:B.w*.86).toFixed(0)+"px "+(B.sx!=null?B.sy:B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
-  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"");
-  if(C.sterne>.02)hiSterne(s,B,C.sterne,hmax);
-  if(son)hiSonne(s,C,B,0);
+  s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"")+(fuss?";top:"+(-ab).toFixed(1)+"px":"");
+  if(C.sterne>.02&&!fuss)hiSterne(s,B,C.sterne,hmax);
+  if(son&&!fuss)hiSonne(s,C,B,0);
   if(L.N>.04&&HI.texF&&HI.texN){
     var nh=hiNah(L);
     if(L.N<.985)hiWolke(s,HI.texF,B,1.7,3.2,.6,-B.h*.05,0,hmax,C.fade);      // unter einer geschlossenen Decke saehe man sie nicht
     hiWolke(s,HI.texN,B,nh.sc,nh.v,nh.a,-B.h*.1,40,hmax,C.fade);
-    if(son)hiSonne(s,C,B,1);}
+    if(son&&!fuss)hiSonne(s,C,B,1);}
   /* v6.17: je bedeckter, desto staerker ein Schleier ueber den Wolken - oben etwas dunkler, die untere Haelfte laeuft
      in die Grundfarbe aus (bei Apple ist der Himmel hinter den Karten ebenfalls ruhig; die Karten bleiben lesbar) */
   if(C.schleier>.03){var v=document.createElement("div");v.className="hiV";
@@ -2013,7 +2032,7 @@ function hiSzene(ziel,C,L,B,hmax,links){
     s.appendChild(v);}
   /* v6.53: der Streifen in Balkenfarbe oben (v6.47) gehoert zur Szene und blendet mit ihr - als eigene Ebene (#hi::after,
      Farbe per Variable) hing er am iPhone beim Ueberblenden hinter dem Rest her */
-  if(C.band){var bd=document.createElement("div");bd.className="hiB";bd.style.background=C.band;s.appendChild(bd);}
+  if(C.band&&!fuss){var bd=document.createElement("div");bd.className="hiB";bd.style.background=C.band;s.appendChild(bd);}
   ziel.appendChild(s);return s;
 }
 /* v6.14 (Nutzer-Bild vom iPhone, 10.11. 22:45): die Statusleiste ist dort ein deckender Balken in der Farbe
@@ -2039,6 +2058,20 @@ function hiRand(C,L,B,ohneSonne){
     if(C.glanz>.02)c=hiMix(c,[255,244,214],C.glanz*sm/nn);
     if(C.sonne>.03)c=hiMix(c,C.sonneF||[255,250,238],C.sonne*ss/nn);}
   return c;
+}
+/* v6.63: #hiF nur als Home-Bildschirm-App (im Browser gibt es das kurze Fenster nicht; ?hifuss=1 zum Pruefen), und nur
+   die ersten Sekunden - danach ist das Fenster vollstaendig und das Stueck laege nur noch verdeckt hinter #hi. */
+var HI_FUSS=170,HI_FUSS_MS=4000;
+function hiFussAn(){
+  if(HI.fussAn==null){var a=false;
+    try{a=navigator.standalone===true||!!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||/[?&]hifuss=1/.test(location.search);}catch(e){}
+    HI.fussAn=a;}
+  return HI.fussAn;
+}
+function hiFussWeg(){
+  HI.fussAus=1;var f=document.getElementById("hiF");if(!f)return;
+  HI.szenen=HI.szenen.filter(function(s){return s.parentNode!==f;});
+  if(f.parentNode)f.parentNode.removeChild(f);
 }
 /* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
 function hiWeiterMerken(){
@@ -2126,6 +2159,11 @@ function hiPruefen(bl){
   /* v6.13: der Ausschnitt hinter dem stehenden Kopf - gleiche Szene, um die Lage des Kopfs nach links geschoben
      (auf breiten Fenstern sitzt die App mittig), 40 px hoeher gebaut als der Kopf, falls der noch waechst */
   if(k)neu.push(hiSzene(k,C,L,B,(k.offsetHeight||110)+40,-k.getBoundingClientRect().left));
+  /* v6.63: das mitlaufende Stueck hinter dem unteren Rand (#hiF, siehe CSS) - blendet wie die anderen Szenen */
+  var fu=HI.fussAus?null:document.getElementById("hiF");
+  if(fu&&hiFussAn()){var fa=Math.max(1,B.h-HI_FUSS);fu.style.top=fa+"px";fu.style.height=(B.h-fa)+"px";
+    neu.push(hiSzene(fu,C,L,B,0,0,fa));
+    if(!HI.fussT)HI.fussT=setTimeout(hiFussWeg,HI_FUSS_MS);}
   var alt=HI.szenen;HI.szenen=neu;
   var root=document.documentElement,o=hiRgb(C.top),u=hiRgb(C.bot);
   /* v6.52: Szenen und die Farben oben (--hi-r), der Karten (--hi-k) und Kacheln (--hi-t) wechseln GLEICH lang (die drei
@@ -2348,7 +2386,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.62</span>
+      <span class="ver">v6.63</span>
     </div>
   </header>
 
@@ -8738,6 +8776,16 @@ function einstEinspielen(txt){
   }catch(e){return "Speichern ist fehlgeschlagen: "+e.message;}
   location.reload();return "";
 }
+/* v6.63: Fenstermasse beim Laden dieser Seite (window._fen aus dem ersten Script) - fuer die Fehlersuche am iPhone */
+function fensterDiag(){
+  try{const f=window._fen||[];if(!f.length)return "";
+    const probe=v=>{const d=document.createElement("div");d.style.cssText="position:fixed;left:0;top:0;width:0;visibility:hidden;pointer-events:none;height:"+v;document.body.appendChild(d);const h=Math.round(d.getBoundingClientRect().height);d.remove();return h;};
+    const t=[];f.forEach(e=>{const w=e[1]+(e[2]&&e[2]!==e[1]?"/"+e[2]:"");if(!t.length||t[t.length-1].w!==w)t.push({w:w,z:e[0]});});
+    return "Technik (Fehlersuche): Fenster beim Laden "+t.map(x=>x.w+" px @ "+(x.z/1000).toFixed(2).replace(".",",")+" s").join(" → ")
+      +" · jetzt "+window.innerHeight+" · Bildschirm "+screen.height+" · Rand oben/unten "+probe("env(safe-area-inset-top,0px)")+"/"+probe("env(safe-area-inset-bottom,0px)")
+      +" · lvh "+probe("100lvh")+" · dvh "+probe("100dvh")+" · App-Modus "+(navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)?"ja":"nein");
+  }catch(e){return "";}
+}
 function einstDialog(){
   const js=einstSicherung();let n=0;try{n=Object.keys(JSON.parse(js).daten).length;}catch(e){}
   const esc=t=>t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
@@ -8748,7 +8796,8 @@ function einstDialog(){
     +'<div class="es-m" id="esMeld"></div>'
     +'<div class="es-t"><b>Wiederherstellen:</b> Sicherung in das Feld einfügen, dann „Einspielen“. Die App lädt danach neu.</div>'
     +'<textarea class="es-ta" id="esEin" rows="3" placeholder="Sicherung hier einfügen"></textarea>'
-    +'<button type="button" class="loc-btn es-kn" id="esLad">Einspielen</button>');
+    +'<button type="button" class="loc-btn es-kn" id="esLad">Einspielen</button>'
+    +'<div class="es-d">'+esc(fensterDiag())+'</div>');
   const meld=t=>{const m=el("esMeld");if(m)m.textContent=t;};
   el("esKop").onclick=()=>{
     const ta=el("esAus"),ok=()=>meld("Kopiert – jetzt in der neuen App einfügen."),von=()=>{try{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);document.execCommand("copy");ok();}catch(e){meld("Bitte den Text im Feld von Hand markieren und kopieren.");}};
