@@ -36,7 +36,7 @@
        Statusleiste "default" ist 100dvh nur Bildschirm MINUS Statusleiste (793 von 852 pt). Solange #hero/#content beim Laden
        verborgen sind, war das Dokument genau so hoch - darunter malt iOS die Farbe des <html>, der feste Himmel #hi kommt dort
        nicht hin. Darum die beiden Raender dazu: das Dokument ist nie kuerzer als der Bildschirm. */
-    min-height:calc(100dvh + var(--sat,0px) + env(safe-area-inset-bottom,0px))}
+    min-height:calc(100dvh + 2*var(--sat,0px) + env(safe-area-inset-bottom,0px))}
   #bg{position:fixed;inset:0;z-index:0;background:
     radial-gradient(120% 80% at 78% -8%, var(--bg-haze) 0%, var(--haze-aus) 46%),
     linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 42%);transition:background .6s}
@@ -1631,6 +1631,12 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
    bis die wichtigen Daten da sind, und blendet dann in einem Zug ein (sanftZeigen im Hauptscript). Der Himmel steht
    sofort (nach einem Ortswechsel der ALTE, v6.52), der Ortsname kommt mit dem Rest. Sicherung: nach 9 s wird gezeigt. */
 (function(){try{var h=document.documentElement;h.classList.add("sanft");
+  /* v6.62: als Home-Bildschirm-App die Seite fest hoeher als den Bildschirm machen - in den ersten Bildern einer neuen Seite
+     (solange das Hauptscript den Web-Prozess belegt) rechnet iOS mit einem um die Statusleiste kuerzeren Fenster; ist das
+     Dokument dann nur so hoch, bleiben unten 59 pt in der Farbe der Statusleiste stehen. Die CSS-Regel am body (v6.61) haengt
+     an dvh/env, die in diesem Moment nicht sicher sind - das hier nicht. */
+  try{if(navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))
+    document.body.style.minHeight=(Math.max(screen.height||0,window.innerHeight||0)+80)+"px";}catch(e){}
   try{if(sessionStorage.getItem("ortWechsel")){sessionStorage.removeItem("ortWechsel");h.classList.add("sanft-ort");}}catch(e){}
   /* v6.56: nach einem Wisch kommt die neue Seite von der passenden Seite herein (n = naechster Ort, v = voriger) */
   try{var ow=sessionStorage.getItem("ortWisch");if(ow){sessionStorage.removeItem("ortWisch");if(ow==="n"||ow==="v"){h.classList.add("wisch-"+ow);
@@ -2342,7 +2348,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.61</span>
+      <span class="ver">v6.62</span>
     </div>
   </header>
 
@@ -3580,6 +3586,9 @@ function vorabOder(k,u,ms){var v=vorabNimm(k);return v?Promise.resolve(v):fetchJ
    prueft den Cache immer nach). Beide Fassungen liegen nach dem ersten Abruf 10 min im HTTP-Cache. */
 function seiteUrl(){
   var v="";try{v=((document.querySelector(".ver")||{}).textContent||"").replace(/[^0-9.]/g,"");}catch(e){}
+  /* v6.62: weiss die Versionspruefung von einer neueren Fassung online, deren Nummer nehmen - neue Adresse = frisch vom
+     Server. Sonst kam eine neue Fassung beim Wischen bis zu 10 min lang nicht an (die Seiten ?v=<alt> lagen im Cache). */
+  if(window._verOnline)v=window._verOnline;
   return location.pathname+"?v="+(v||Date.now())+"&o="+(/[?&]o=1(&|$)/.test(location.search)?2:1);
 }
 /* die naechste Seite schon in den HTTP-Cache holen (hoechstens alle 9 min - der Cache haelt 10) */
@@ -13015,6 +13024,8 @@ function checkUpdate(vomNutzer){
       const dort=_verNum(vTxt);
       if(!dort)return false;
       if(dort<=hier){if(vomNutzer)updFluechtig("Version <b>v"+eigen+"</b> ist aktuell");return true;}
+      /* v6.62: fuer seiteUrl merken und die neue Seite gleich in den HTTP-Cache holen */
+      try{window._verOnline=String(vTxt).replace(/[^0-9.]/g,"");_seiteVorab=0;}catch(e){}
       updBalken(vTxt);return true;
     };
     /* Weg 1: die kleine Datei */

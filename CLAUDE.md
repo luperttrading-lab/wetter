@@ -3646,6 +3646,25 @@ unveraendert, beide Raender 0). Folge: waehrend des Ladens und in der Fehleranze
 Nachgestellt (Playwright, Fenster 393 x 793, --st-test 59 px): Dokument beim Laden 852 statt 793, danach wie vorher. Das
 +200 px an #hi (v6.60) bleibt - es deckt jetzt die Strecke unter dem Layout-Fenster. Die Voreil-Zeit der Statusleiste (v6.60,
 -0,12 s) hat gewirkt (Nutzer: "oben richtig gut"). Nicht am iPhone geprueft.
+v6.62 (Nutzer 12.11. ~22:20, wenige Minuten nach v6.61, ohne Film: "die Fusszeile laedt immer noch falsch"). NICHT
+ENTSCHEIDBAR, welche Fassung er sah: seit v6.58 kommen die Wisch-Seiten `?v=<Version>&o=1|2` bis zu 10 min aus dem HTTP-Cache -
+eine neue Fassung kam beim Wischen erst nach dem Update-Balken (oder nach Ablauf des Cache) an. Im Film 22:08 stand oben
+"v6.60". ZWEI AENDERUNGEN: (1) NEUE FASSUNG SOFORT: findet `checkUpdate` online eine hoehere Nummer, merkt es sie in
+`window._verOnline`; `seiteUrl()` nimmt dann DIESE Nummer (neue Adresse = frisch vom Server), `_seiteVorab` wird zurueckgesetzt.
+Der naechste Wisch laedt damit die neue Fassung, auch ohne Tipp auf den Balken. (2) UNTERER STREIFEN SICHERER: im Film 22:08
+nachgesehen - in den Streifen-Bildern fehlt im Kopf das Wolken-Symbol des Ansicht-Knopfs (setzt erst das Hauptscript), die
+feste Pille `#ortPkt` (Unterkante 801 pt) ist bei 793 pt ABGESCHNITTEN, Kopfknoepfe stehen richtig (safe-area-inset-top gilt
+schon). Also: der Streifen steht genau so lange, wie das Hauptscript (1 MB) den Web-Prozess belegt, und ALLES unterhalb 793 pt
+fehlt, auch feste Elemente - das Dokument endet dort. Erklaerung (aus dem WebKit-Aufbau gefolgert, nicht am Geraet belegt): nach
+dem Laden einer Seite rechnet iOS zuerst mit Fenster minus Statusleiste; die Korrektur (viewport-fit=cover -> volle Hoehe)
+erreicht den Web-Prozess erst, wenn das Hauptscript durch ist. Die CSS-Regel aus v6.61 haengt an dvh/env in genau diesem
+Moment. Darum zusaetzlich im ERSTEN Script, nur als Home-Bildschirm-App (`navigator.standalone` bzw. display-mode standalone):
+`document.body.style.minHeight = max(screen.height, innerHeight) + 80 px` - feste Zahl, unabhaengig von dvh/env; die CSS-Regel
+hat jetzt 2 x --sat Reserve. Nachgestellt (Playwright, Fenster 793, screen 852, standalone erzwungen): Dokument ab dem ersten
+Zustand 932 px, im Browser unveraendert 852. BLEIBT ES AUCH MIT v6.62 (Versionsnummer oben rechts im Film pruefen!), dann malt
+iOS in diesen Bildern grundsaetzlich nur 793 pt - aus der Seite heraus nicht zu aendern, weil Statusleiste und unterer Rest
+DIESELBE Farbe bekommen (Hintergrund des <html>); dann hilft nur, das Neuladen beim Ortswechsel abzuschaffen (Ort in der Seite
+wechseln - grosser Umbau, LAT/LON/LOC an ~200 Stellen, dazu alle Zwischenstaende je Ort).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
