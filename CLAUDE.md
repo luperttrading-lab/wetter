@@ -2972,6 +2972,32 @@ genau 0; gescrollt bleiben Kacheln unter dem Kopf unveraendert (Faktor 1,0); Auf
 Kerns (kein Unterschied), `waZeichne` ~1,1 ms. Klassische Ansichten unveraendert (Leinwand endet ueber den Kacheln).
 Die Karten darunter (`--hi-k`, 42-74 % deckend) und die Schrift direkt auf dem Himmel bleiben wie sie waren - dafuer
 ist der Regler "Staerke". Nicht am iPhone geprueft.
+v6.29 (Nutzer 12.11. 08:07, zwei iPhone-Bilder der Einstellungen: "das sind die Standardeinstellungen, die du bitte
+uebernehmen sollst" + "ob wir die Staerke des Regens oder Niesel oder die Windstaerke fuer die Wolken mit beruecksichtigen
+koennen"). (1) VOREINSTELLUNGEN, alle vom Nutzer am Geraet gewaehlt: Wechsel der Kacheln Blende 0,5 s (war 1,5) und
+Faerbung 80 % (war aus) - `KZ_WE_STD`; Wetter-Animation Staerke 80 % / Kacheln 50 % - `WA_E_STD` (v6.28 hatte 100 / 30
+als meine Wahl); Wettersymbole Stufe 3 (war 2) - `sbStufe()`; unveraendert bestaetigt: Wackeln 1,0 Grad / 0,6 s, Auto +
+Wischen, Takt 4 s, Bewegt, Wolken ziehen. Wer selbst etwas gespeichert hat, behaelt es; "Bewegung reduzieren" entscheidet
+ohne eigene Wahl weiter (Symbole 0, Standbild, Wolken stehen). ZEILE UNTER DEM ORT fest 18 px: Test aus v6.14 entfernt
+(`HI_MINI_GR`, `hiMiniGr`, `hiMiniSetzen`, `#hmSeg`, `--hmg`), gespeichertes `hiMiniGr` wird geloescht. Damit ist auch die
+offene Frage "Blende kuerzer?" (v6.21) erledigt.
+(2) WETTERABHAENGIG. Schon da (v6.07): Regen in fuenf Stufen nach der Bodenrate des Radars (Niesel unter 0,5 mm/h,
+dann 0,5-8 mm/h dichter/laenger/schneller), der Wind kippt den Regen, Windstriche ab Boeen 62 km/h. NEU: (a) OHNE Radar
+(Ausland - Anlass Barcelona, Kachel "kein Radar") stand fest die mittlere Stufe (1,5 mm/h); jetzt `waStationsRate()`:
+10-Minuten-Summe x 6, sonst 30 Minuten x 2, sonst Stundensumme der Zeile (`snap.p60`, bei "Prognose" die erwartete),
+sonst wie bisher. Das Wort oben bleibt dort "Regen" (Niesel nennt nur das Radar). (b) WOLKENTEMPO nach Wind:
+`hiTempo()` = 0,3 + Wind/17, begrenzt 0,3-3,6 (Windstille 2 px/s, 12 km/h 7 px/s wie bisher, 30 km/h 14, ab ~55 km/h
+25 px/s; ferne Lage je 46 %), Wind aus `waWind()` (Mittelwind, 60 % der Boee, ab Sturm die Boee, auf 5 km/h gerundet,
+Messung hoechstens 2 h alt; Station ohne Windmesser oder alte Messung -> Faktor 1). Das ist der Wind in 10 m Hoehe -
+in Wolkenhoehe weht es meist staerker und aus anderer Richtung; fuer ein Hintergrundbild genuegt das. Die Lage der
+Textur haengt am aufsummierten Weg `HI.s` (nicht an der Uhr): beim Tempowechsel springt nichts (gemessen <= 1,8 px).
+Schritte je Sekunde = Tempo / 0,7 px, 4 bis 20 (vorher fest 10 fuer beide Lagen). BEWUSST NICHT: die Zugrichtung - ein
+Handy hat kein Norden, links/rechts haette keine Bedeutung und wuerde nur Fragen wecken ("warum heute andersherum?").
+Ansehen im Browser `?himmel=wolkig&hwind=40`. Gemessen (Chromium ohne GPU, Bedeckung 68 %, 6 s): Wind 0 / 12 / 30 /
+60 km/h = 7 / 14 / 18 / 22 % eines Kerns; gegen v6.28 bei Faktor 1 kein Unterschied (11,5-11,8 gegen 8,8-15,5 %).
+Geprueft (Playwright): Voreinstellungen ohne Speicher (alle Regler und Schalter wie im Nutzerbild), gespeicherte Werte
+bleiben, Tempo je Wind, echter Weg ueber `snap` (auch ohne Wind und 3 h alt), sechs Regenfaelle ohne Radar, Radar
+unveraendert. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
