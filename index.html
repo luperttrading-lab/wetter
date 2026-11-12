@@ -31,7 +31,12 @@
      wird gescrollt und getippt, nicht markiert — Eingabefelder ausgenommen. */
   body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
-  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;color:var(--ink);min-height:100dvh}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;color:var(--ink);min-height:100dvh;
+    /* v6.61 (Nutzer, Bildschirmfilm 22:08: unten 59 pt lang 0,1-0,2 s die Farbe der Statusleiste): als Home-Bildschirm-App mit
+       Statusleiste "default" ist 100dvh nur Bildschirm MINUS Statusleiste (793 von 852 pt). Solange #hero/#content beim Laden
+       verborgen sind, war das Dokument genau so hoch - darunter malt iOS die Farbe des <html>, der feste Himmel #hi kommt dort
+       nicht hin. Darum die beiden Raender dazu: das Dokument ist nie kuerzer als der Bildschirm. */
+    min-height:calc(100dvh + var(--sat,0px) + env(safe-area-inset-bottom,0px))}
   #bg{position:fixed;inset:0;z-index:0;background:
     radial-gradient(120% 80% at 78% -8%, var(--bg-haze) 0%, var(--haze-aus) 46%),
     linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 42%);transition:background .6s}
@@ -2337,7 +2342,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.60</span>
+      <span class="ver">v6.61</span>
     </div>
   </header>
 
