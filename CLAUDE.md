@@ -3715,6 +3715,21 @@ der Wolken ueber das Neuladen, v6.52, sieht man in der App nicht mehr). Geprueft
 einfarbig von oben bis unten (Spanne 0), Decke blendet mit dem Inhalt aus, ohne ?hifuss unveraendert; Wisch-Regression ohne
 Fehler. Bleibt der Streifen SELBST DANN sichtbar, hat er nicht die Farbe --hi-r der neuen Seite - dann Technik-Zeile
 (Zahnrad > Einstellungen sichern) und Film ansehen; letzter Weg: Ortswechsel ohne Neuladen. Nicht am iPhone geprueft.
+v6.65 HIMMEL UND INHALT BLENDEN ZUSAMMEN EIN (Nutzer 12.11., Bildschirmfilm 23:12 mit v6.64: "das Blinken unten ist jetzt
+weg ... es knallt noch etwas rein, statt dass es sanft eingeblendet wird"). GEMESSEN im Film (60 Bilder/s, Farbe links Mitte /
+unten, Streuung der Temperaturzone): bei allen fuenf Wechseln und beim Start erscheint der Himmel in EINEM Bild (z. B. 3,77 s:
+Mitte (11,16,35) -> (28,33,65), kein Zwischenwert), und zwar 0,15-0,45 s NACH dem Inhalt (Inhalt 3,39-3,57 s); auch das
+Zudecken auf der alten Seite geschah in 2 Bildern. Zwei Ursachen: (1) die Decke #hiDeck blendete per CSS-Uebergang mit einer
+im selben Bild gesetzten Variablen (--hf) - am iPhone lief er nicht (wie die Variablen-Uebergaenge beim Ziehen, v6.58; ob
+dort "Bewegung reduzieren" die Dauer auf 0 setzte, ist offen); (2) die Decke wartete bis HI_FLACH_MS 700 ms nach Seitenbeginn,
+der Inhalt nicht. JETZT: `hiFlachBl(zu,ms)` blendet #hiDeck und #hiK als WEB-ANIMATION (element.animate, wie owAnim), die
+Klasse `hiflach` setzt nur den Endzustand (CSS ohne transition, --hf entfaellt). `sanftZeigen` wartet, solange die Decke noch
+gesperrt ist (`hiFlachRest()`, HI_FLACH_MS jetzt 450 ms - der Streifen stand hoechstens 0,28 s), und ruft `hiFlachWeg` im
+SELBEN Bild, in dem `sanft` faellt, mit derselben Dauer und Kurve (ease). Nach einem Wisch Blende/Hereinschieben 0,55 statt
+0,35 s (SANFT_EIN_MS und die drei CSS-Regeln wisch-n/-v), beim Start weiter 1 s. Gemessen (Playwright, `e/t96.py`, ?hifuss=1,
+alle 15 ms): Decke 1 -> 0 und Inhalt 0 -> 1 beginnen im selben Bild und enden zusammen, auch bei "Bewegung reduzieren";
+ohne ?hifuss unveraendert; Wisch-Regression (`e/t82.py`) ohne Fehler. PREIS: nach einem Wisch steht alles 0,2 s spaeter.
+Nicht am iPhone geprueft - springt der Himmel dort weiter, laeuft auch element.animate nicht, dann Film ansehen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
