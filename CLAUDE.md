@@ -3665,6 +3665,40 @@ Zustand 932 px, im Browser unveraendert 852. BLEIBT ES AUCH MIT v6.62 (Versionsn
 iOS in diesen Bildern grundsaetzlich nur 793 pt - aus der Seite heraus nicht zu aendern, weil Statusleiste und unterer Rest
 DIESELBE Farbe bekommen (Hintergrund des <html>); dann hilft nur, das Neuladen beim Ortswechsel abzuschaffen (Ort in der Seite
 wechseln - grosser Umbau, LAT/LON/LOC an ~200 Stellen, dazu alle Zwischenstaende je Ort).
+v6.63 UNTERER STREIFEN: EIN MITLAUFENDES STUECK HIMMEL (Nutzer 12.11., Bildschirmfilm 22:27: "Immer noch - das bekommst
+du bestimmt hin, oben bei der Kopfzeile hast du es ja auch geschafft"). GEMESSEN im Film (Bild fuer Bild): oben rechts steht
+v6.62 - die feste Mindesthoehe war also geladen und hat NICHTS bewirkt. Bei allen vier Wechseln stehen ab dem ERSTEN Bild der
+neuen Seite 6-17 Bilder (0,1-0,28 s) lang die untersten 59 pt (ab 793 von 852) in exakt der Farbe der Statusleiste desselben
+Bilds ((11,16,35), (42,46,75), (69,75,92), (59,102,170)). Darueber aendert sich in dieser Zeit nichts (Bilddifferenz 0,01 von
+255, derselbe Himmel wie auf der alten Seite), die FEST stehende Pille ist bei 793 pt abgeschnitten, das Wolken-Symbol des
+Ansicht-Knopfs steht schon - "der Streifen dauert, solange das Hauptscript laeuft" (v6.62) ist damit NICHT belegt, und die
+Dokumenthoehe (v6.61/v6.62) ist nicht die Ursache. ERKLAERUNG (Websuche 12.11.; WebKit-Fehler 301108 "REGRESSION (iOS 26):
+meta viewport does not work correctly for viewport-fit=cover", offen, letzter Kommentar 12.11.2026; die Einzelheiten nur aus
+den Beschreibungen fremder Projekte, die ihn umgehen - nicht am Geraet belegt): als Home-Bildschirm-App bekommt die Seite
+unter iOS 26 ein um die Statusleiste zu kurzes Fenster. Fest stehende Elemente koennen im Rest darunter NICHT malen,
+mitlaufender Inhalt schon (so fuellen andere den Streifen: html{min-height:...}). Bei uns passiert das nur in den ersten
+Bildern jeder neu geladenen Seite; unser Himmel (#hi) steht fest und der Inhalt ist in dem Moment verborgen (sanft) - uebrig
+blieb die Farbe des <html>. JETZT `#hiF` (im HTML VOR #hi, gleiche Ebene, #hi malt darueber): ein NICHT fest stehendes
+Stueck desselben Himmels - `hiSzene(fu,C,L,B,0,0,ab)` baut dieselbe Szene, um die Lage des Stuecks nach oben geschoben
+(Parameter `ab`: ohne Sterne - die enden bei 86 % -, ohne Sonne und Balkenstreifen), Behaelter position:absolute, die untersten
+`HI_FUSS` 170 px des ersten Bildschirms. hiPruefen baut es mit den anderen Szenen (gleiche Blende, gleicher Weg der Wolken);
+sichtbar ist es nur, wo #hi nicht malt. Nur als Home-Bildschirm-App (`hiFussAn`: navigator.standalone / display-mode
+standalone; im Browser `?hifuss=1`), nur die ersten `HI_FUSS_MS` 4 s (`hiFussWeg` entfernt es samt Szene). PILLE (#ortPkt):
+unten jetzt mindestens --sat + 6 px (iPhone 65 statt 50 px) - sie laege sonst im Streifen und wuerde abgeschnitten.
+STATUSLEISTE WIEDER "default" (vorher seit v6.44 black-translucent): derselbe WebKit-Fehler trifft laut mehreren Projekten
+genau die durchscheinende Leiste mit viewport-fit=cover - ein NEU angelegtes Symbol haette den Streifen dann DAUERHAFT
+(fest stehende Elemente malen dort nie). Die Empfehlung aus v6.44/v6.48 (neues Symbol fuer "Himmel bis zur Kante") ist damit
+ZURUECKGENOMMEN; das alte Symbol mit deckender Leiste ist unter iOS 26 der bessere Weg. "Einstellungen sichern" bleibt.
+TECHNIK-ZEILE: das erste Script schreibt die Fensterhoehe beim Laden mit (`window._fen`: Zeit, innerHeight, sichtbare Hoehe;
+bei resize, DOMContentLoaded, load, zwei Bilder), `fensterDiag()` zeigt sie klein unter Zahnrad > "Einstellungen sichern"
+("Fenster beim Laden 793 px @ 0,03 s -> 852 px @ 0,31 s, Bildschirm, Raender, lvh, dvh, App-Modus") - bleibt der Streifen,
+ist das die erste echte Messung vom Geraet (Bildschirmfoto davon erbitten, nicht wieder raten). GEPRUEFT (Playwright,
+`e/t93.py`, `e/t94.py`): das kurze Fenster nachgestellt mit `#hi{clip-path:inset(0 0 calc(100% - 793px) 0)}` - mit #hiF
+weicht der untere Rand hoechstens 1 von 255 Stufen vom vollen Himmel ab (Nacht, Nacht bedeckt, bedeckt, heiter, Regen),
+ohne im Mittel 4-53 Stufen; mit ziehenden Wolken (Wind 60 km/h) ist die Naht bei 793 px nicht groesser als der Unterschied
+ueblicher Nachbarzeilen (0,56-0,77 gegen 0,56-0,69); Szene steht vor dem ersten Bild (130 gegen 140 ms); nach 5 s ist #hiF
+weg, Neubau des Himmels laeuft; im Browser ohne ?hifuss nichts; Wisch-Regression (`e/t82.py`) Himmel und hell ohne Fehler.
+NICHT am iPhone geprueft - ob mitlaufender Inhalt im kurzen Fenster wirklich malt, ist aus den fremden Berichten gefolgert.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
