@@ -1340,7 +1340,7 @@ html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height
 @keyframes hiZug{to{transform:translate3d(-50%,0,0)}}
 html.hizug .hiS>canvas.hiW{animation-duration:var(--hd,200s)!important;animation-iteration-count:infinite!important}
 html.histeh .hiS>canvas.hiW{animation:none}
-html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#c3cee0;--faint:#a2b0c6}
+html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#cdd7e7;--faint:#b1bdd1}
 /* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
    man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
@@ -1371,6 +1371,17 @@ html:root.himmel .kzfoot{opacity:.75;color:#fff}
 html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 8px rgba(0,0,0,.45)}
 html:root.himmel .kalle button{color:rgba(255,255,255,.8)}
 html:root.himmel .loc-box{background:#141a23}
+/* v6.36: Warnkarte im Himmel - dasselbe Glas wie die Karten (folgt Tag, Nacht und Wetter), auffaellig durch Rand,
+   Balken, Titel und einen Schein in der Warnfarbe. Vorher fest dunkelbraun (#4a2410) - ein Fremdkoerper auf Blau. */
+html:root.himmel .alert{background:linear-gradient(90deg,rgba(var(--wf),.26),rgba(var(--wf),.05) 60%),var(--hi-k,rgba(22,30,48,.6));
+  border-width:2px;border-left-width:7px;border-color:rgb(var(--wr));color:#fff;
+  box-shadow:0 0 0 1px rgba(var(--wf),.22),0 6px 22px -8px rgba(var(--wf),.7)}
+html:root.himmel .alert .at,html:root.himmel .alert .ai{color:rgb(var(--wt))}
+html:root.himmel .alert .ad{color:#fff;opacity:.93}
+html:root.himmel .alert.minor{--wf:250,204,21;--wr:250,204,21;--wt:253,230,110}
+html:root.himmel .alert.moderate{--wf:249,115,22;--wr:251,140,60;--wt:255,198,138}
+html:root.himmel .alert.severe{--wf:239,68,68;--wr:244,90,90;--wt:255,184,184}
+html:root.himmel .alert.extreme{--wf:217,70,239;--wr:224,100,242;--wt:247,200,255}
 html.dunkel .evt-s{color:var(--muted)}
 
 /* ===== v6.13 STEHENDER KOPF (Schritt 3 von Entwurf E) =====
@@ -1486,7 +1497,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.35</span>
+      <span class="ver">v6.36</span>
     </div>
   </header>
 
@@ -1704,8 +1715,8 @@ function themaNeuZeichnen(){
 }catch(err){console.warn("ansicht",err&&err.message);}}
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
-  get muted(){  return _dunkel?(hiAn()?"#c3cee0":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint
-  get faint(){  return _dunkel?(hiAn()?"#a2b0c6":"#7c8a9e"):"#9aa7b8";},
+  get muted(){  return _dunkel?(hiAn()?"#cdd7e7":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
+  get faint(){  return _dunkel?(hiAn()?"#b1bdd1":"#7c8a9e"):"#9aa7b8";},
   get karte(){  return _dunkel?"#1a212c":"#ffffff";},   // Flaeche der Kachel = "weisser" Rand um Punkte
   get gitter(){ return _dunkel?"rgba(255,255,255,.10)":"rgba(15,23,42,.09)";},
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
@@ -2164,13 +2175,13 @@ function hiPruefen(){
      theme-color (137,143,154) - iOS nimmt dort offenbar den Hintergrund des <html>. Der bekommt jetzt sofort die
      Randfarbe (--hi-r), und das erste Script setzt sie beim naechsten Start aus dem Speicher. */
   var rr=hiRgb(HI.rand||C.top);root.style.setProperty("--hi-r",rr);
-  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42,kk="rgba("+(L.nebel?"28,31,36":"22,30,48")+","+ka.toFixed(2)+")";
-  /* v6.21: im Nebel ist der Himmel neutral grau - das Glas dann ebenfalls ohne Blau (marineblaue Karten stachen heraus) */
-  root.style.setProperty("--hi-k",kk);
-  /* v6.30: Grundglas der Kacheln (wie bisher) und Glas der Karten merken - hiKachelGlas mischt nach der Einstellung */
+  var lm=Math.max(hiLum(hiMix(C.top,C.bot,.5)),.8*hiLum(HI.rand||C.top)),ka=lm>.19?hiKl((lm-.19)/(lm-.1),.42,.74):.42;
+  /* v6.21: im Nebel ist der Himmel neutral grau - das dunkle Grundglas dann ebenfalls ohne Blau.
+     v6.36: das Glas der Karten nimmt die Farbe des Himmels an (hiKartenGlas) - S = mittlerer Himmel mit Wolken */
+  HI.gl={S:hiMix(hiMix(C.top,C.bot,.5),HI.rand||C.top,.4),ka:+ka.toFixed(2),basis:L.nebel?[28,31,36]:[22,30,48]};
+  /* v6.30: Grundglas der Kacheln (wie bisher) merken - hiKachelGlas mischt nach der Einstellung zum Glas der Karten */
   HI.gT=L.nebel?[22,25,30,.36]:lm>.25?[14,26,52,.32]:[255,255,255,.11];
-  HI.gK=(L.nebel?[28,31,36]:[22,30,48]).concat([+ka.toFixed(2)]);
-  hiKachelGlas();
+  var kk=hiKartenGlas();
   var zeigen=function(){neu.forEach(function(s){s.classList.add("an");});};
   if(window.requestAnimationFrame)requestAnimationFrame(function(){requestAnimationFrame(zeigen);});else zeigen();
   setTimeout(function(){zeigen();alt.forEach(function(s){if(s.parentNode)s.parentNode.removeChild(s);});
@@ -2200,6 +2211,42 @@ function hiKachelGlas(){
   var t=HI.gT,k=HI.gK;if(!t||!k)return;
   var p=hiKaDeck()/100,a=t[3]+(k[3]-t[3])*p,c=[0,1,2].map(function(i){return a>0?(t[i]*t[3]*(1-p)+k[i]*k[3]*p)/a:0;});
   document.documentElement.style.setProperty("--hi-t",hiRgb(c,+a.toFixed(3)));
+}
+/* v6.36 GLAS IN HIMMELSFARBE (Nutzer 12.11., Vergleich mit Apple-Wetter: "die Containerfarbe an den Hintergrund
+   anpassen wie beim iPhone, auch die Warnmeldung - auffaellig, aber passend, je nach Tag, Nacht und Wetter").
+   Gemessen in den Bildern: Apple Himmel (74,118,176), Karte (79,129,196) - fast dieselbe Farbe; bei uns Himmel
+   (53,108,185), Kacheln (50,60,78) - dunkles Marineblau, das Glas war fest (22,30,48). Jetzt: Zielfarbe der Karte =
+   Farbton des mittleren Himmels, am Tag dunkler (Leuchtdichte x0,8, hoechstens 0,16 = weisse Schrift mindestens
+   5:1), in der Nacht etwas heller als der Himmel; daraus die Glasfarbe bei unveraenderter Deckung (ka).
+   Regler "Karten: Farbe" (himmelGlas): 0 = dunkles Glas wie bis v6.35, 100 = die Zielfarbe. */
+var HI_GLAS_STD=70;
+function hiGlasTon(){try{var v=parseFloat(localStorage.getItem("himmelGlas"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_GLAS_STD;}
+/* Leuchtdichte nach WCAG (mit Gamma) - hiLum oben ist die lineare "Helligkeit" der Himmelsfarben */
+function hiY(c){
+  function g(v){v=Math.max(0,Math.min(255,v))/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+  return .2126*g(c[0])+.7152*g(c[1])+.0722*g(c[2]);
+}
+function hiGlasZiel(S){
+  var y=hiY(S),yt=Math.min(.16,Math.max(y*.8,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
+  if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
+    for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
+  else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
+  return c;
+}
+function hiKartenGlas(){
+  var g=HI.gl;if(!g)return "";
+  var Z=hiGlasZiel(g.S),G=Z.map(function(v,i){return hiKl((v-(1-g.ka)*g.S[i])/g.ka,0,255);});
+  var c=hiMix(g.basis,G,hiGlasTon()/100),kk=hiRgb(c,g.ka);
+  document.documentElement.style.setProperty("--hi-k",kk);
+  HI.gK=c.concat([g.ka]);hiKachelGlas();
+  return kk;
+}
+function hiGlasSetzen(v){
+  try{localStorage.setItem("himmelGlas",String(+v));}catch(e){}
+  var kk=hiKartenGlas();
+  /* das erste Script malt beim naechsten Start mit dem gemerkten Glas (Feld 5 von himmelFarbe) */
+  try{var a=String(localStorage.getItem("himmelFarbe")||"").split("|");if(kk&&a.length>=5){a[4]=kk;localStorage.setItem("himmelFarbe",a.join("|"));}}catch(e){}
+  hiAnzeigen();
 }
 function hiKaSetzen(v){try{localStorage.setItem("himmelKachel",String(+v));}catch(e){}hiKachelGlas();hiAnzeigen();}
 /* Wolken ziehen oder stehen: ohne eigene Wahl entscheidet "Bewegung reduzieren" (dann stehen sie); eine eigene Wahl
@@ -2251,6 +2298,9 @@ function hiAnzeigen(){
   var kr=document.getElementById("hiRegKa"),kv=document.getElementById("hiRegKaV"),kd=hiKaDeck();
   if(kr&&+kr.value!==kd){kr.value=kd;kzReglerFuell(kr);}
   if(kv)kv.textContent=kd+"\u202f%";
+  var gr=document.getElementById("hiRegGl"),gv=document.getElementById("hiRegGlV"),gd=hiGlasTon();
+  if(gr&&+gr.value!==gd){gr.value=gd;kzReglerFuell(gr);}
+  if(gv)gv.textContent=gd+"\u202f%";
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",+b.dataset.h===z);});
   var pr=document.getElementById("hiProbe"),tr=document.getElementById("hiRegTp"),tv=document.getElementById("hiRegTpV"),te=hiTempoEigen(),wj=null;
   try{wj=hiWindJetzt();}catch(e){}
@@ -7740,6 +7790,9 @@ function kzRender(){
                    +'<div class="kzhilf" id="hiHilf"></div>'
                    +'<div class="waprobe waKaZ" id="hiProbe"><span>Vorschau km/h:</span><button type="button" data-w="0">0</button><button type="button" data-w="10">10</button><button type="button" data-w="35">35</button><button type="button" data-w="70">70</button></div>'
                    +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegTp" min="50" max="300" step="10"><b id="hiRegTpV">–</b></label>'
+                   +'<div class="kzregt waKaZ">Karten: Farbe</div>'
+                   +'<label class="waKaZ"><span>Himmel</span><input type="range" id="hiRegGl" min="0" max="100" step="5"><b id="hiRegGlV">–</b></label>'
+                   +'<div class="kzhilf waKaZ">Wie stark Karten und Warnmeldung die Farbe des Himmels annehmen: 0 % = dunkles Marineblau wie bisher, 100 % = fast die Himmelsfarbe. Je heller, desto blasser wirken kleine graue Texte.</div>'
                    +'<div class="kzregt waKaZ">Kacheln oben: Glas</div>'
                    +'<label class="waKaZ"><span>Deckung</span><input type="range" id="hiRegKa" min="0" max="100" step="5"><b id="hiRegKaV">–</b></label>'
                    +'<div class="kzhilf waKaZ">0 % = helles Glas wie bisher, 100 % = genauso dicht wie die Karten darunter (Stündlich, Temperaturverlauf …). Die blaue Färbung wechselnder Kacheln kommt obendrauf.</div>';
@@ -7753,6 +7806,7 @@ function kzRender(){
       as.value=waE().st;ak.value=waE().ka;
       [as,ak].forEach(x=>x.addEventListener("input",az));
       const hk=el("hiRegKa");hk.value=hiKaDeck();hk.addEventListener("input",()=>hiKaSetzen(hk.value));
+      const hg=el("hiRegGl");hg.value=hiGlasTon();hg.addEventListener("input",()=>hiGlasSetzen(hg.value));
       const ht=el("hiRegTp");ht.value=hiTempoEigen();ht.addEventListener("input",()=>hiTempoSetzen(ht.value));
       el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
       [g,d,wt,wb,wf,as,ak,hk,ht].forEach(kzRegler);

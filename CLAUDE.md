@@ -3096,6 +3096,28 @@ stehen (Einstellung oder "Bewegung reduzieren"), und in den klassischen Ansichte
 Striche, klassisch hell/dunkel Striche; Richtung an einem gesetzten Strich gemessen (innen +50 px = im Bild -50 px, alle
 drei Ansichten), Wolken -37 px in 1 s bei 35 km/h; gespeicherte 130 % bleiben. FALLE beim Messen: die Verschiebung per
 Kreuzkorrelation zweier Bilder taugt bei 7 Strichen nicht (lieferte einmal +38 statt -32 px). Nicht am iPhone geprueft.
+v6.36 GLAS IN HIMMELSFARBE (Nutzer 12.11. 10:50, drei iPhone-Bilder: unsere App Norden bei blauem Himmel mit Warnkarte
+"Sturmboeen", daneben Apple-Wetter "Nissi Beach": "die Containerfarbe an den Hintergrund anpassen wie beim iPhone, auch die
+Warnmeldung - auffaellig, aber passend zum Hintergrund, je nach Helligkeit, Tag oder Nacht oder Wetter"). GEMESSEN: Apple
+Himmel (74,118,176), Karte (79,129,196) - fast dieselbe Farbe; bei uns Himmel (53,108,185), Kacheln (50,60,78), Warnkarte
+(74,36,16) mit Rand (234,122,47). Das Glas der Karten war fest Marineblau (22,30,48), nur die Deckung folgte der Helligkeit.
+(1) KARTEN: `hiKartenGlas()` (von `hiPruefen`, Daten in `HI.gl` = {S mittlerer Himmel mit Wolken, ka Deckung wie bisher
+0,42-0,74, basis dunkles Glas}). `hiGlasZiel(S)`: Zielfarbe der Karte = Farbton von S, am Tag dunkler (Leuchtdichte nach WCAG
+`hiY` x0,8, hoechstens 0,16), nachts etwas heller als der Himmel (+0,012 bis 0,048); daraus die Glasfarbe G = (Ziel -
+(1-ka) S) / ka. REGLER "Karten: Farbe > Himmel" 0-100 % (`himmelGlas`, `hiGlasTon`, `hiGlasSetzen`, `HI_GLAS_STD` 70 = MEINE
+Wahl): 0 = dunkles Glas wie bis v6.35, 100 = die Zielfarbe; dazwischen geradlinig gemischt. Beispiel klarer Tag: Glas
+rgba(38,71,118,.7) statt rgba(22,30,48,.7), Karte im Bild (43,82,137) statt (34,57,94). Gemessen bei 70 % in acht Lagen
+(klar, heiter, wolkig, bedeckt, Regen, Abend, Nacht, Nebel): weisse Schrift 7,5-14,6 : 1, kleine graue Schrift 4,0-7,7 : 1;
+bei 100 % am Tag weiss ~5 : 1. `--muted` / `--faint` (und `CO.muted/faint`) im Himmel dafuer etwas heller (#cdd7e7 / #b1bdd1).
+Die Kacheln oben folgen ueber "Deckung" (v6.30: 100 % = Glas der Karten); ihr helles Grundglas ist unveraendert. Der Regler
+setzt nur die CSS-Variable (kein Neubau der Szene) und traegt das Glas in Feld 5 von `himmelFarbe` nach (erstes Script).
+(2) WARNKARTE in der Ansicht "Himmel": dasselbe Glas wie die Karten, darueber ein Verlauf in der Warnfarbe (26 % links ->
+5 % bei 60 %), Rand 2 px + Balken 7 px, Titel und Zeichen in heller Warnfarbe, Text weiss, Schein (box-shadow) in der
+Warnfarbe - `--wf` / `--wr` / `--wt` je Stufe (gelb, orange, rot, violett). Blau und Orange sind Gegenfarben: durchscheinend
+gemischt wird es grau-braun, darum traegt die Flaeche nur wenig Warnfarbe, Rand und Titel tragen sie. Klassische Ansichten
+unveraendert (hell cremefarben, dunkel braun). Geprueft (Playwright): acht Lagen x Regler 0 / 70 / 100 mit `?warntest`,
+Regler in den Einstellungen, Wert und Glas ueberleben Neuladen (erstes Script malt schon mit dem neuen Glas), hell/dunkel
+unveraendert. Nicht am iPhone geprueft. OFFEN: Wert des Reglers vom Nutzer.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
