@@ -3065,6 +3065,19 @@ nebeneinander, darum die Vorschau. Der Hilfetext nennt den Wind, mit dem gerade 
 Bedeckung 68 %): Vorschau 0 / 10 / 35 / 60 / 90 km/h = 9 / 10 / 23 / 23 / 23 % eines Kerns (nahe Lage ab 14 px/s bei
 20 Schritten/s gedeckelt). Echte Orte 12.11.: Norden 18,5 px/s (fern 8,4), Erlental 2,2 px/s. Kurve und Deckel sind MEINE
 Wahl - der Nutzer stellt mit Vorschau und "Tempo" ein und nennt den Wert. Nicht am iPhone geprueft.
+v6.34 (Nutzer 12.11. nach v6.33: "ein bisschen schneller - bei 30-35 km/h, was ja schon ziemlich windig ist, fast nur ein
+bisschen zu langsam; ein Regler mit Faktor, dabei stehen, wie schnell, dann sage ich dir den Wert"): Den Regler "Tempo" gab
+es seit v6.33 (50-160 %, Anzeige in Prozent). Jetzt Bereich x0,5 bis x3,0 (`HI_TEMPO_MIN/MAX`, Speicher weiter
+`himmelTempo` in Prozent, Schritt 0,1), Anzeige als FAKTOR ("x1,4"), und der Hilfetext nennt, was gerade gezeichnet wird:
+"Vorschau 35 km/h (1 min, nochmal tippen = aus): 26 px/s, Bildschirmbreite in 15 s." bzw. "Jetzt 10 km/h: 4,3 px/s, ..."
+(`hiTempoPx()` = Tempo der nahen Lage, 7 bzw. im Nebel 3 px/s x `hiTempo()`; `hiDauerTxt`). WIND-VORSCHAU 60 statt 20 s
+(`HI_PROBE_MS`), jeder Zug am Regler verlaengert sie, Tipp auf den aktiven Knopf beendet sie (`hiWindProbeEnde`). Der
+Faktor gilt fuer die GANZE Kurve (auch Windstille und Sturm): bei 35 km/h x1,0 = 18,5 px/s, x1,5 = 28, x2 = 37, x3 = 56;
+70 km/h x3 = 86 px/s. Gemessen (Chromium ohne GPU, Bedeckung 68 %, 6 s): 35 km/h x1 / x1,5 / x2 / x3 = 23 / 27 / 33 / 30 %
+eines Kerns, 70 km/h x3 = 29 % - der Aufwand ist bei 20 Schritten/s gedeckelt (ab x2 laeuft auch die ferne Lage mit 20),
+schneller heisst nur groessere Schritte (x3 bei 35 km/h: 2,8 px je Schritt). Voreinstellung bleibt x1,0, bis der Nutzer
+einen Wert nennt - dann entscheiden: `HI_WIND.vm` (ganze Kurve) anheben oder nur die Mitte (`w0` kleiner). Nicht am
+iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
