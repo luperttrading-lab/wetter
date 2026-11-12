@@ -3198,6 +3198,27 @@ erwartet ~81 %, im Bild ~80 %. SENKRECHT weiter kein Zusammenhang "hoehere Sonne
 angeschnitten - die Hoehenwerte sind unsicher). Fuer Sommer/Winter (Hoehe) taugt der Test nicht: 49 gegen 41 Grad ist zu wenig
 Abstand; es braeuchte z. B. Reykjavik oder Oslo (um 10 Grad) gegen eine Stadt mit fast senkrechter Sonne. Die Jahreszeit geht
 aber ueber die TAGESLAENGE ein (gleiche Uhrzeit = anderer Tagesanteil).
+v6.39 GROSSE SONNE MIT WEITEM SCHEIN, HIMMEL GEDECKTER (Nutzer 12.11. 12:12, unsere v6.38 "Luxor" neben Apple "Luxor": "ich
+haette gern die Sonne so gross und mit dem groesseren Schein aussen rum aehnlich wie auf der iPhone-App, den Hintergrund noch
+ein bisschen in der Farbe angepasst"). GEMESSEN bei Apple (Ringmittel um die Sonne, Hintergrund ~128 von 255): fast weiss
+(245) nur bis 15-20 pt, danach LANGSAMER Abfall - 222 bei 30 pt, 195 bei 45, 177 bei 60, 157 bei 80, 149 bei 110, weg erst bei
+~190 pt; blasser Ring bei ~155 pt; Stern mit etwa acht weichen Zacken. Unsere v6.38: fast weiss bis 16 pt, bei 64 pt schon
+nichts mehr - gross wirkt Apples Sonne durch den Schein, nicht durch den Kern. JETZT `HI_SONNE_P` = Apples Profil x 0,93 als
+Liste [Abstand in `B.sr`, Deckkraft] (ein Verlauf, Radius 7,92 r; `B.sr` = 6,1 % der Kopfbreite, 17-27 px, 24 bei 393 pt),
+`HI_STRAHL` = vier breite kurze Ellipsen (achtzackiger Stern) + drei feine lange Strahlen, `HI_RING` [6,3 r, halbe Breite
+0,7 r, Deckkraft 0,075] innen warm / aussen kuehl. Ort: weiter 41 % der Kopfbreite, jetzt 0,7 r unter der Kopfunterkante
+(`B.kb`). LESBARKEIT: der Schein liegt hinter Kopf, "Live" und Datum (bei 55 pt Abstand ~40 % Weiss) - mit Sonne (Klasse
+`hison` am <html>, ab `C.sonne` > 0,3) bekommen Kopf und Kasten einen dunkelblauen Schriftsaum (text-shadow 0 0 7px
+rgba(6,32,78,.7)), `.htop` volle Deckkraft. `hiSonneA(d,r)` liefert das Profil auch fuer `hiRand`: die Farbe der Statusleiste
+rechnet den Schein dicht unter der Leiste (Kopfunterkante - 60 px) mit, als MITTEL ueber die Breite - die Leiste ist
+einfarbig, der Schein nicht: direkt ueber der Sonne ist sie etwas dunkler, in den Ecken etwas heller als der Himmel darunter
+(sauber ginge es nur mit `black-translucent`, v6.14). HIMMEL: Apple oben (63,100,150), Mitte (73,115,170), unten
+(121,164,219); wir oben (61,118,203), unten (84,132,198). Jetzt etwa auf halbem Weg: `hiFarben` Tag oben (52,102,176), unten
+(104,150,212) mit Grenze 53 % -> (97,140,198); weiter Schein `glanz` .12. KARTEN: `hiSatt(c,k)` - das Ziel in `hiKartenGlas`
+kommt aus einem um 35 % gesaettigteren S, damit die Karten trotz gedeckterem Himmel blau bleiben (klar: 51,92,152; ohne
+60,92,140; Apple 79,130,197). Aufwand unveraendert (17,3 / 18,0 gegen 17,3 % eines Kerns). Geprueft: klar/heiter/wolkig/
+bedeckt/Abend/Nacht/Regen/Nebel, 320-430 pt (320: Kern beruehrt "Live" und Datum, lesbar), Schalter, klassisch. NICHT gebaut:
+Linsenflecken; Ort nach Tageszeit (siehe oben). Kern bewusst kleiner als bei Apple (dort ueberstrahlt er Uhr und Akku).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
