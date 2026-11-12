@@ -1369,9 +1369,17 @@ html:root.himmel,html:root.himmel body{background:var(--hi-r,var(--hi-o,#090d26)
 @property --hi-r{syntax:"<color>";inherits:true;initial-value:#090d26}
 @property --hi-k{syntax:"<color>";inherits:true;initial-value:rgba(22,30,48,.42)}
 @property --hi-t{syntax:"<color>";inherits:true;initial-value:rgba(255,255,255,.11)}
-html:root.himmel{transition:--hi-r var(--hi-bl,1.3s) ease,--hi-k var(--hi-bl,1.3s) ease,--hi-t var(--hi-bl,1.3s) ease}
-html:root.himmel #hi{display:block;position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:0;overflow:hidden;pointer-events:none;
-  background:linear-gradient(var(--hi-o,#090d26),var(--hi-u,#363e70))}
+/* v6.60 (Nutzer: "Kopf- und Fusszeile ist immer noch farbig anders"; Bildschirmfilm 21:30 Bild fuer Bild): mit dem alten
+   Home-Symbol malt iOS die Statusleiste selbst in der Farbe des <html> - und zieht ihr beim Ueberblenden 0,05-0,2 s
+   hinterher. --hi-r laeuft darum 0,12 s VORAUS (negative Verzoegerung = startet schon weiter), die Leiste kommt so etwa
+   gleichzeitig mit dem Himmel an. */
+html:root.himmel{transition:--hi-r var(--hi-bl,1.3s) ease -.12s,--hi-k var(--hi-bl,1.3s) ease,--hi-t var(--hi-bl,1.3s) ease}
+/* v6.60: unten fehlten beim Seitenwechsel 0,1-0,3 s lang ~60 pt Himmel (dort stand die Farbe der Statusleiste) - iOS
+   meldet in den ersten Bildern einer neuen Seite ein um die Statusleiste kuerzeres Fenster (Vermutung). #hi reicht darum
+   200 px ueber die Szene hinaus (hiPruefen setzt die Hoehe: Szene + 200), darunter seine untere Farbe. Liegt die Luecke
+   ausserhalb der Web-Ansicht, zeigt iOS dort die Farbe des <html> - dann hilft das nicht (am iPhone nicht pruefbar). */
+html:root.himmel #hi{display:block;position:fixed;left:0;top:0;bottom:-200px;width:100%;z-index:0;overflow:hidden;pointer-events:none;
+  background:linear-gradient(var(--hi-o,#090d26),var(--hi-u,#363e70)) top/100% 100lvh no-repeat,var(--hi-u,#363e70)}
 .hiS{position:absolute;left:0;top:0;overflow:hidden;opacity:0;transition:opacity 1.3s ease}
 .hiS.an{opacity:1}
 .hiS>canvas,.hiS>.hiV,.hiS>.hiSo{position:absolute;left:0;top:0;display:block}
@@ -2092,7 +2100,8 @@ function hiPruefen(bl){
   /* Weg bis jetzt mit dem ALTEN Tempo aufsummieren, dann gilt das neue */
   var jz=performance.now();if(!HI.t0){HI.t0=jz;HI.s=0;}else HI.s+=(jz-HI.sT)/1000*(HI.f||1);
   HI.sT=jz;HI.f=tf;
-  el0.style.height=B.h+"px";
+  /* v6.60: 200 px Reserve unter der Szene (dort die untere Farbe von #hi) - siehe die Regel fuer #hi */
+  el0.style.height=(B.h+200)+"px";
   if(L.N>.04){HI.texF=hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35));HI.texN=hiTextur(29+HI.saat,L.N,C.rand,C.kern);}
   /* v6.40: im Bild vom 12.11. 12:28 (v6.39) schrieb iOS Uhr und Akku SCHWARZ - die Leiste war durch den Sonnenschein
      auf (88,128,185) gestiegen (Helligkeit 48 %); bei (61,118,203) = 44 % war die Schrift noch weiss. Grenze 43 %. */
@@ -2328,7 +2337,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.59</span>
+      <span class="ver">v6.60</span>
     </div>
   </header>
 

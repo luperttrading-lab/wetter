@@ -3620,6 +3620,18 @@ mindestens zwei Orten holt im Hintergrund die Daten beider Nachbarn (je ~6 klein
 Cache, wenn juenger als 10 min). GRENZE: ein Ortswechsel bleibt ein Neuladen (1 MB HTML parsen, Himmel-Rauschfelder rechnen,
 rendern) - "im selben Bild" wie Apple geht erst, wenn ein Ort in der Seite gewechselt werden kann (LAT/LON/LOC sind Konstanten,
 ~200 Stellen). Nicht am iPhone geprueft.
+v6.60 (Nutzer 12.11.: "die Kopf- und Fusszeile ist immer noch farbig anders"). GEMESSEN im Bildschirmfilm 21:30 (v6.58,
+Farbe je Bild: Statusleiste links neben der Uhr, Himmel am linken Rand knapp darunter, Mitte, unterster Streifen):
+(1) Ruhend stimmen Statusleiste und Himmel darunter ueberein (z. B. 88,100,121 / 88,100,121), aber beim UEBERBLENDEN zieht
+die Leiste 0,05-0,2 s hinterher (Norden -> New York: Himmel ab 4,46 s, Leiste ab 4,54 s, fertig 5,04 statt 4,89 s). Mit dem
+alten Home-Symbol (Statusleiste "default") malt iOS die Leiste SELBST in der Farbe des <html> (--hi-r) und folgt ihr verzoegert.
+Jetzt laeuft der Uebergang von --hi-r 0,12 s voraus (negative transition-delay). (2) Beim Seitenwechsel zeigten die
+untersten ~60 pt (Bildzeile 2376 von 2556 = 792 pt = Bildschirm minus Statusleiste) 0,1-0,3 s lang die Farbe der
+Statusleiste statt Himmel. Vermutung: iOS zeigt eine neue Seite in den ersten Bildern mit einem um die Statusleiste kuerzeren
+Fenster. #hi reicht jetzt 200 px ueber die Szene hinaus (Hoehe Szene + 200 in hiPruefen, CSS bottom:-200px, darunter die untere
+Farbe). Liegt die Luecke ausserhalb der Web-Ansicht, malt iOS dort die <html>-Farbe und das hilft nicht - am iPhone nicht
+pruefbar. DIE EIGENTLICHE LOESUNG fuer die Kopfzeile bleibt das neue Home-Symbol (black-translucent seit v6.44, siehe v6.48:
+zweites Symbol anlegen, Einstellungen sichern/einspielen) - dann gibt es keine Leiste von iOS und keine Haarlinie mehr.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
