@@ -2955,6 +2955,23 @@ Kurve, senkrechtes Wischen scrollt die Seite, load() nach Beruehrung haelt / nac
 kein Fehler der App - gemessen 6,3-7,8 Grad, MOSMIX sagte fuer 07 Uhr noch 2,9 Grad (Warmluft kam frueher). Die
 Stundenzeilen kamen dabei von NORDERNEY (03631, Insel, 14 km), "Live" von Norden-Leybuchtpolde (02763). Angeboten, nicht
 gebaut: Vorhersage an die letzte Messung anhaengen (Abweichung klingt ueber einige Stunden ab).
+v6.28 (Nutzer, iPhone-Bild Barcelona 12.11. 06:45, Ansicht "Himmel" bei Regen: "der Regen ist vor oder hinter den
+Kacheln etwas stark"): Die Regen-Leinwand `#waCv` liegt seit v6.18 fest hinter der Seite (`#hi`); das Glas der Kacheln
+(`--hi-t`, nachts 11 % Weiss) liess die Striche fast voll durch, sie liefen quer durch die kleinen Kacheltexte. Jetzt
+`waKacheln(c)` in `waZeichne` (nach Regen/Schnee/Nebel/Windstrichen, VOR dem Blitz - der hellt alles gleich auf): je Bild
+die Lage der Kacheln messen (`#kz .ki`, 6-12 Rechtecke, Liste in `_wa.kn`, von `waPruefen` verworfen) und dort per
+`destination-out` abschwaechen (Ecken 13 px). Unter dem stehenden Kopf NICHT (clip ab Kopfunterkante - 6 px) - seine
+Kopie des Regens (`waKopf`) bekaeme sonst Loecher. Im Standbild zieht ein Scroll-Ereignis (rAF) die Aussparung nach.
+ZWEI REGLER unter Kacheln waehlen > Einstellungen > Wetter-Animation (`wetterAnimE` = {st,ka}, `waE()`, `waESetzen`):
+"Staerke" 30-160 % (Faktor auf alle Deckkraefte in `waFarben` und den Nebel, Voreinstellung 100) und "Kacheln" 0-100 %
+= Rest hinter den Kacheln (Voreinstellung 30, MEINE Wahl - noch nicht vom Nutzer bestaetigt; nur in der Ansicht "Himmel"
+sichtbar, `.kzreg.wakl`). Wer an einem Regler zieht und es regnet gerade nicht, bekommt 25 s Regen-Vorschau OHNE Sprung
+nach oben (`waProbeHalten`, `waProbe(n,bleib)`); eine laufende Vorschau wird verlaengert statt neu gebaut. Gemessen
+(Playwright, gleiche Tropfen, stehendes Bild): mittlere Deckkraft in den Kacheln 0,503 -> 0,149 (Faktor 0,296), bei 0 %
+genau 0; gescrollt bleiben Kacheln unter dem Kopf unveraendert (Faktor 1,0); Aufwand ohne GPU 57/49 % gegen 58/51 % eines
+Kerns (kein Unterschied), `waZeichne` ~1,1 ms. Klassische Ansichten unveraendert (Leinwand endet ueber den Kacheln).
+Die Karten darunter (`--hi-k`, 42-74 % deckend) und die Schrift direkt auf dem Himmel bleiben wie sie waren - dafuer
+ist der Regler "Staerke". Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

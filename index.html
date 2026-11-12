@@ -548,6 +548,7 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .waprobe button{padding:7px 11px;font:600 12px system-ui;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);cursor:pointer}
 .waprobe button.on{background:#d79636;border-color:#d79636;color:#fff}
 .kzreg.wsch .kzTaktZ{display:none}
+.kzreg.wakl .waKaZ{display:none}
 .kz .k.kzalt>.ki{opacity:.6}   /* v4.82: Quelle veraltet */
 .kz .k:has(.kzdots)>.ki{box-shadow:inset 0 0 0 999px rgba(47,134,207,var(--kzwf,0))}
 .kzregt{margin-top:12px;font-weight:700}
@@ -1451,7 +1452,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.27</span>
+      <span class="ver">v6.28</span>
     </div>
   </header>
 
@@ -2183,6 +2184,24 @@ try{var _waQ=new URLSearchParams(location.search);if(_waQ.has("wettertest")){_wa
 function waReduziert(){return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);}
 function waEigen(){try{var m=localStorage.getItem("wetterAnim");return (m==="aus"||m==="still"||m==="an")?m:null;}catch(e){return null;}}
 function waModus(){return waEigen()||(waReduziert()?"still":"an");}
+/* v6.28 (Nutzer, Barcelona 12.11. 06:45: "der Regen ist vor oder hinter den Kacheln etwas stark"): in der Ansicht
+   "Himmel" faellt der Niederschlag hinter den Kacheln oben - deren Glas (11 % Weiss) liess die Striche fast voll durch,
+   sie liefen quer durch die kleinen Texte. Jetzt bleibt hinter den Kacheln nur ein Teil stehen (waKacheln). Wie viel,
+   ist nur am Geraet zu beurteilen - darum zwei Regler unter "Wetter-Animation": Staerke (alles) und Kacheln (Rest
+   hinter den Kacheln), gespeichert in wetterAnimE. */
+var WA_E_STD={st:100,ka:30},_waE=null;
+function waE(){
+  if(_waE)return _waE;
+  var o={st:WA_E_STD.st,ka:WA_E_STD.ka};
+  try{var j=JSON.parse(localStorage.getItem("wetterAnimE")||"null");
+    if(j){if(isFinite(j.st))o.st=Math.max(30,Math.min(160,+j.st));if(isFinite(j.ka))o.ka=Math.max(0,Math.min(100,+j.ka));}}catch(e){}
+  _waE=o;return o;
+}
+function waESetzen(st,ka){
+  _waE={st:+st,ka:+ka};try{localStorage.setItem("wetterAnimE",JSON.stringify(_waE));}catch(e){}
+  waProbeHalten();waAnzeigen();
+  if(_wa.L&&_wa.m!=="an")waZeichne(performance.now(),true);
+}
 /* Bodenrate mm/h -> Tropfenbild (n je 10 000 px2, v px/s, l und w px). Unter 0,5 mm/h Niesel - so heisst es dann
    auch oben; darueber stufenweise von "leicht" (0,5) bis "stark" (ab 8 mm/h). */
 function waRegen(b){
@@ -2233,9 +2252,9 @@ function waBereich(){
   return (w>=120&&hb>=40)?{w:w,hb:hb}:null;
 }
 function waFarben(){
-  var d=document.documentElement.classList.contains("dunkel"),a=WA_A;
-  return d?{regen:"rgba(170,205,245,"+a+")",schnee:"rgba(238,244,255,"+Math.min(1,a+.3)+")",nebel:"205,212,224",strich:"rgba(205,220,240,"+(a*1.05)+")",blitz:"205,220,255",d:d}
-          :{regen:"rgba(55,105,175,"+a+")",schnee:"rgba(120,145,182,"+Math.min(1,a+.25)+")",nebel:"150,158,172",strich:"rgba(70,95,130,"+(a*1.1)+")",blitz:"170,195,255",d:d};
+  var d=document.documentElement.classList.contains("dunkel"),f=waE().st/100,z=function(x){return Math.min(1,x*f).toFixed(3);},a=z(WA_A);
+  return d?{regen:"rgba(170,205,245,"+a+")",schnee:"rgba(238,244,255,"+z(WA_A+.3)+")",nebel:"205,212,224",strich:"rgba(205,220,240,"+z(WA_A*1.05)+")",blitz:"205,220,255",d:d,f:f}
+          :{regen:"rgba(55,105,175,"+a+")",schnee:"rgba(120,145,182,"+z(WA_A+.25)+")",nebel:"150,158,172",strich:"rgba(70,95,130,"+z(WA_A*1.1)+")",blitz:"170,195,255",d:d,f:f};
 }
 function waStrichNeu(B,start){var R=Math.random;return {x:start?R()*B.w:-110-R()*B.w*.5,y:R()*B.hb,len:45+R()*70,v:420+R()*360,ph:R()*6.3};}
 function waBauen(L,B){
@@ -2246,6 +2265,10 @@ function waBauen(L,B){
     if(window.IntersectionObserver)new IntersectionObserver(function(es){_wa.sicht=es[es.length-1].isIntersecting;if(_wa.sicht){_wa.last=performance.now();waLauf();}}).observe(h);
     if(window.ResizeObserver)new ResizeObserver(function(){waPruefen();}).observe(h);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){_wa.last=performance.now();waLauf();}});
+    /* v6.28: im Standbild wandern die Kacheln beim Scrollen ueber das stehende Bild - Aussparung nachziehen */
+    window.addEventListener("scroll",function(){
+      if(_wa.sraf||!_wa.L||_wa.m!=="still"||!_wa.B||!_wa.B.voll)return;
+      _wa.sraf=requestAnimationFrame(function(){_wa.sraf=0;if(_wa.L&&_wa.m==="still")waZeichne(performance.now(),true);});},{passive:true});
   }
   var soll=B.voll?document.getElementById("hi"):h;
   if(soll&&c.parentNode!==soll){if(B.voll)soll.appendChild(c);else soll.insertBefore(c,soll.firstChild);}
@@ -2269,7 +2292,7 @@ function waZeichne(now,still){
   c.clearRect(0,0,B.w,B.hb);
   /* Nebel: weiche Flecken, langsam nach rechts */
   for(i=0;i<_wa.nebel.length;i++){p=_wa.nebel[i];p.x+=p.v*dt;if(p.x-p.r>B.w)p.x=-p.r;
-    var g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r),a=p.a*.8*(col.d?.85:1.7);
+    var g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r),a=Math.min(1,p.a*.8*(col.d?.85:1.7)*col.f);
     g.addColorStop(0,"rgba("+col.nebel+","+a+")");g.addColorStop(1,"rgba("+col.nebel+",0)");c.fillStyle=g;c.fillRect(p.x-p.r,p.y-p.r,2*p.r,2*p.r);}
   /* Regen: ein Strich je Tropfen, schraeg nach Wind */
   if(L.regen){var r=L.regen,vx=r.v*_wa.kipp,ext=B.hb*_wa.kipp,lx=r.l*_wa.kipp;c.strokeStyle=col.regen;c.lineWidth=r.w;c.lineCap="round";c.beginPath();
@@ -2290,12 +2313,31 @@ function waZeichne(now,still){
     for(i=0;i<_wa.strich.length;i++){p=_wa.strich[i];p.x+=p.v*dt;p.ph+=dt*3;if(p.x-p.len>B.w)_wa.strich[i]=p=waStrichNeu(B,false);
       var y=p.y+Math.sin(p.ph)*3;c.moveTo(p.x,y);c.quadraticCurveTo(p.x-p.len/2,y-2,p.x-p.len,y+1);}
     c.stroke();}
+  /* v6.28: hinter den Kacheln bleibt nur ein Teil stehen - vor dem Blitz, der hellt den ganzen Himmel gleich auf */
+  if(B.voll)waKacheln(c);
   /* Gewitter: alle 6-14 s ein weiches Aufhellen (zwei kurze Stoesse, dann Ausklingen) - nie im Standbild */
   if(L.blitz&&!still){
     if(!_wa.blitz&&now>=_wa.blitzNext){_wa.blitz=now;_wa.blitzNext=now+6000+Math.random()*8000;}
     if(_wa.blitz){var e=now-_wa.blitz,ab=e<70?.38:e<150?.08:e<230?.26:e<600?.26*(1-(e-230)/370):0;
       if(e>600)_wa.blitz=0;if(ab>0){c.fillStyle="rgba("+col.blitz+","+(ab*.65)+")";c.fillRect(0,0,B.w,B.hb);}}}
   if(B.voll)waKopf();
+}
+/* v6.28: Die Leinwand liegt fest hinter der Seite (#hi), die Kacheln wandern beim Scrollen darueber - darum je Bild
+   ihre Lage messen (9-12 Rechtecke) und dort mit destination-out abschwaechen. Unter dem stehenden Kopf nicht: der
+   deckt die Kacheln, und seine Kopie des Regens (waKopf) bekaeme sonst Loecher. */
+function waKacheln(c){
+  var ka=waE().ka;if(ka>=100||!_wa.cv||!_wa.B)return;
+  var kn=_wa.kn;if(!kn||!kn.length||!kn[0].isConnected)kn=_wa.kn=document.querySelectorAll("#kz .ki");
+  if(!kn.length)return;
+  var o=_wa.cv.getBoundingClientRect(),W=_wa.B.w,H=_wa.B.hb,kp=document.querySelector("header"),y0=0,i,r,n=0;
+  if(kp)y0=Math.max(0,kp.getBoundingClientRect().bottom-o.top-6);      /* nur in der Ansicht "Himmel" (voll): dort steht der Kopf */
+  c.save();c.beginPath();c.rect(0,y0,W,Math.max(0,H-y0));c.clip();
+  c.globalCompositeOperation="destination-out";c.fillStyle="rgba(0,0,0,"+(1-ka/100).toFixed(3)+")";c.beginPath();
+  for(i=0;i<kn.length;i++){r=kn[i].getBoundingClientRect();
+    if(r.width<4||r.bottom<o.top+y0||r.top>o.top+H)continue;n++;
+    if(c.roundRect)c.roundRect(r.left-o.left,r.top-o.top,r.width,r.height,13);else c.rect(r.left-o.left,r.top-o.top,r.width,r.height);}
+  if(n)c.fill();
+  c.restore();
 }
 /* Der stehende Kopf deckt den Himmel mit einer eigenen Szene (#hiK) - ohne Kopie hoerte der Regen an seiner Unterkante
    auf. Darum nach jedem Bild der oberste Streifen der Regen-Leinwand in eine zweite, kleine (#waK). */
@@ -2320,6 +2362,7 @@ function waSchritt(now){_wa.raf=0;if(!_wa.L||_wa.m!=="an"||!waSicht()||document.
 /* Stand pruefen und Leinwand anpassen. Gerufen von zustandZeigen (neuer Zustand), kzRender (Kacheln hoeher oder
    niedriger), themaNeuZeichnen (hell/dunkel), ResizeObserver am Kasten und von den Einstellungen. */
 function waPruefen(){
+  _wa.kn=null;
   var m=waModus();
   if(_wa.test&&m==="aus")m=waReduziert()?"still":"an";      /* Vorschau zeigt auch bei "Aus" etwas */
   var L=(m==="aus")?null:waLage(),B=L?waBereich():null;
@@ -2329,16 +2372,30 @@ function waPruefen(){
   if(key!==_wa.key){_wa.key=key;waBauen(L,B);}
   if(m==="an"){waLauf();}else{waStop();waZeichne(performance.now(),true);}
 }
-function waProbe(n){
+function waProbeEnde(){_wa.test=null;_wa.key="";waPruefen();waAnzeigen();}
+function waProbe(n,bleib){
   clearTimeout(_wa.testT);_wa.test=n;_wa.testFest=false;_wa.key="";
-  _wa.testT=setTimeout(function(){_wa.test=null;_wa.key="";waPruefen();waAnzeigen();},12000);
+  _wa.testT=setTimeout(waProbeEnde,bleib?25000:12000);
   waPruefen();waAnzeigen();
+  if(bleib)return;
   try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
+}
+/* v6.28: wer an den Reglern zieht, soll sehen, was sie tun - ist gerade nichts zu sehen, laeuft die Regen-Vorschau
+   (ohne nach oben zu springen); eine laufende Vorschau wird verlaengert statt neu begonnen (sonst spraenge der Regen).
+   25 s statt 12: die Kacheln liegen ueber den Reglern, man muss erst hochscrollen. */
+function waProbeHalten(){
+  if(_wa.test&&!_wa.testFest){clearTimeout(_wa.testT);_wa.testT=setTimeout(waProbeEnde,25000);return;}
+  if(!_wa.L&&!_wa.test)waProbe("regen",true);
 }
 function waAnzeigen(){
   var m=waModus(),seg=document.getElementById("waSeg"),h=document.getElementById("waHilf"),pr=document.getElementById("waProbe");
   if(seg)seg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.w===m);});
   if(pr)pr.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",b.dataset.p===_wa.test);});
+  var E=waE(),rg=document.getElementById("kzReg"),eh=document.getElementById("waEHilf");
+  if(rg)rg.classList.toggle("wakl",!hiAn());
+  [["waRegSt",E.st],["waRegKa",E.ka]].forEach(function(a){var i=document.getElementById(a[0]),o=document.getElementById(a[0]+"V");
+    if(i&&+i.value!==a[1]){i.value=a[1];kzReglerFuell(i);}if(o)o.textContent=a[1]+"\u202f%";});
+  if(eh)eh.textContent="Stärke: wie kräftig Regen, Schnee und Nebel gezeichnet werden."+(hiAn()?" Kacheln: wie viel davon hinter den Kacheln oben zu sehen bleibt (0 % = nichts).":"")+" Beim Ziehen läuft 25 Sekunden lang Regen zur Ansicht.";
   if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
     m==="still"?"Die Wetterlage steht als ruhiges Bild "+(hiAn()?"im Himmel hinter den Karten.":"oben im Kasten.")+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
     :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Vorschau: 12 Sekunden.";
@@ -7491,6 +7548,9 @@ function kzRender(){
                    +'<div class="kzregt">Wetter-Animation</div>'
                    +'<div class="kzseg" id="waSeg"><button type="button" data-w="aus">Aus</button><button type="button" data-w="still">Standbild</button><button type="button" data-w="an">Bewegt</button></div>'
                    +'<div class="kzhilf" id="waHilf"></div>'
+                   +'<label><span>Stärke</span><input type="range" id="waRegSt" min="30" max="160" step="10"><b id="waRegStV">–</b></label>'
+                   +'<label class="waKaZ"><span>Kacheln</span><input type="range" id="waRegKa" min="0" max="100" step="5"><b id="waRegKaV">–</b></label>'
+                   +'<div class="kzhilf" id="waEHilf"></div>'
                    +'<div class="waprobe" id="waProbe"><span>Vorschau:</span><button type="button" data-p="regen">Regen</button><button type="button" data-p="schnee">Schnee</button><button type="button" data-p="gewitter">Gewitter</button><button type="button" data-p="nebel">Nebel</button><button type="button" data-p="sturm">Sturm</button></div>'
                    +'<div class="kzregt">Wettersymbole bewegen</div>'
                    +'<div class="kzseg" id="sbSeg"><button type="button" data-s="0">Aus</button><button type="button" data-s="1">1</button><button type="button" data-s="2">2</button><button type="button" data-s="3">3</button></div>'
@@ -7507,7 +7567,10 @@ function kzRender(){
       const wt=el("kzRegTakt"),wb=el("kzRegBl"),wf=el("kzRegFarbe"),wz=()=>kzWeSetzen(wt.value,wb.value,wf.value);
       [wt,wb,wf].forEach(x=>x.addEventListener("input",wz));
       el("kzSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();kzWeSetzen(wt.value,wb.value,wf.value,b.dataset.m);});
-      [g,d,wt,wb,wf].forEach(kzRegler);
+      const as=el("waRegSt"),ak=el("waRegKa"),az=()=>waESetzen(as.value,ak.value);
+      as.value=waE().st;ak.value=waE().ka;
+      [as,ak].forEach(x=>x.addEventListener("input",az));
+      [g,d,wt,wb,wf,as,ak].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();waProbe(b.dataset.p);});
       el("sbSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();sbSetzen(+b.dataset.s);});
