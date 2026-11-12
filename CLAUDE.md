@@ -3632,6 +3632,20 @@ Fenster. #hi reicht jetzt 200 px ueber die Szene hinaus (Hoehe Szene + 200 in hi
 Farbe). Liegt die Luecke ausserhalb der Web-Ansicht, malt iOS dort die <html>-Farbe und das hilft nicht - am iPhone nicht
 pruefbar. DIE EIGENTLICHE LOESUNG fuer die Kopfzeile bleibt das neue Home-Symbol (black-translucent seit v6.44, siehe v6.48:
 zweites Symbol anlegen, Einstellungen sichern/einspielen) - dann gibt es keine Leiste von iOS und keine Haarlinie mehr.
+v6.61 UNTERER RAND BEIM SEITENWECHSEL (Nutzer 12.11., Bildschirmfilm 22:08 mit v6.60: "oben sieht man keinen Farbwechsel
+mehr - aber die Fussleiste ist immer erst noch in der [falschen] Farbe, bevor die richtige kommt; die muesste man vorladen").
+GEMESSEN (Bild fuer Bild, linke Randspalte): bei JEDEM der fuenf Wechsel standen 6-11 Bilder (0,1-0,2 s) lang die untersten
+59 pt (ab Zeile 793 von 852) EXAKT in der Farbe der Statusleiste (= Hintergrund des <html>, --hi-r), darueber der Himmel bis
+793 pt. 59 pt = safe-area-inset-top. URSACHE (damit ist die Vermutung aus v6.60 ersetzt): als Home-Bildschirm-App mit
+Statusleiste "default" ist `100dvh` nur Bildschirm MINUS Statusleiste; `body{min-height:100dvh}` machte das Dokument, solange
+`showState("loading")` #hero und #content verbirgt, genau 793 pt hoch. iOS zeigt unterhalb des Dokuments die Farbe des <html>;
+ein festes Element (#hi, auch mit den +200 px aus v6.60) kann dort nicht malen - feste Elemente vergroessern das Dokument
+nicht. Sobald die Daten da sind, ist das Dokument ~7900 px hoch und der Streifen weg. JETZT `body{min-height:calc(100dvh +
+var(--sat) + env(safe-area-inset-bottom))}`: nie kuerzer als der Bildschirm (iPhone: 793 + 59 + 34 = 886 pt; am Rechner
+unveraendert, beide Raender 0). Folge: waehrend des Ladens und in der Fehleranzeige laesst sich die Seite um ~34 pt schieben.
+Nachgestellt (Playwright, Fenster 393 x 793, --st-test 59 px): Dokument beim Laden 852 statt 793, danach wie vorher. Das
++200 px an #hi (v6.60) bleibt - es deckt jetzt die Strecke unter dem Layout-Fenster. Die Voreil-Zeit der Statusleiste (v6.60,
+-0,12 s) hat gewirkt (Nutzer: "oben richtig gut"). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
