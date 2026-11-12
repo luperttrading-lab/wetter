@@ -1486,7 +1486,7 @@ html:root.himmel.himini #hiMini{opacity:1}
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.31</span>
+      <span class="ver">v6.32</span>
     </div>
   </header>
 
@@ -2306,6 +2306,24 @@ function waWind(){
   var wind=hw?+s.wind:0,boe=hb?+s.gust:0;
   return Math.round((boe>=WA_STURM?boe:Math.max(wind,boe*.6))/5)*5;
 }
+/* v6.32 (Nutzer: "wie stark der Regen ist ... und beim Schnee genauso"): der Regen hatte seine Stufen seit v6.07,
+   der Schnee fiel immer gleich (2,4 Flocken je 10 000 px2, 42 px/s). Jetzt fuenf Stufen nach der Menge in mm/h
+   (Wasser): 0,2 / 0,4 / 0,9 / 1,9 / 4 - von einzelnen kleinen Flocken bis dichtem Treiben mit groesseren Flocken, die
+   schneller sinken. null = Menge unbekannt -> die bisherige mittlere Dichte. */
+function waStufe(b,lo,hi){return Math.round(Math.max(0,Math.min(1,Math.log10(b/lo)/Math.log10(hi/lo)))*4)/4;}
+function waSchnee(b){
+  if(b==null||!isFinite(b)||!(b>0))return {n:2.4,v:42,g:1};
+  var t=waStufe(b,.2,4);
+  return {n:+(1.1+6.4*t).toFixed(2),v:Math.round(34+28*t),g:+(.85+.5*t).toFixed(2)};
+}
+/* Menge fuer die Animation: beim Regen die Bodenrate aus zustandZeigen (_zuMb). Bei Schnee, Schneeregen und Hagel setzt
+   zustandZeigen sie nicht (das Radar misst die Rate, nicht die Art) - dann hier dieselbe geeichte Radarrate, sobald
+   das Radar etwas sieht; ohne Radar die Station (waStationsRate). */
+function waRate(){
+  if(_zuMb!=null)return _zuMb;
+  try{if(_nowMmh!=null&&isFinite(_nowMmh)&&_nowMmh>=.1){var r=radarBoden(_nowMmh);if(isFinite(r)&&r>0)return r;}}catch(e){}
+  return waStationsRate();
+}
 function waLage(){
   if(_wa.test)return waFest(_wa.test);
   var ic=_zuIc;if(!ic)return null;
@@ -2313,12 +2331,13 @@ function waLage(){
   /* Was nur die Station meldet (kein Radar am Ort), gilt nur bei frischer Messung */
   if(!frisch&&_zuMb==null)return null;
   var wind=(frisch&&isFinite(s.wind))?+s.wind:0,boe=(frisch&&isFinite(s.gust))?+s.gust:0,sturm=boe>=WA_STURM,L=null;
-  var mb=_zuMb!=null?_zuMb:waStationsRate();
+  var mb=waRate();
   if(ic==="thunderstorm")L={regen:waRegen(mb!=null?Math.max(mb,2):5),blitz:true};
   else if(ic==="rain")L={regen:waRegen(mb)};
   else if(ic==="hail")L={regen:{n:4,v:900,l:9,w:1.8}};
-  else if(ic==="sleet")L={regen:{n:1.4,v:600,l:12,w:1},schnee:{n:1.2,v:70}};
-  else if(ic==="snow")L={schnee:{n:2.4,v:42}};
+  else if(ic==="sleet"){var q=(mb!=null&&mb>0)?.6+1.6*waStufe(mb,.2,4):1;     /* Schneeregen: beide Anteile mit der Menge dichter */
+    L={regen:{n:+(1.4*q).toFixed(2),v:600,l:12,w:1},schnee:{n:+(1.2*q).toFixed(2),v:70,g:1}};}
+  else if(ic==="snow")L={schnee:waSchnee(mb)};
   else if(ic==="fog")L={nebel:true};
   else if(sturm||ic==="wind")L={streifen:true};
   if(L)L.wind=Math.round((sturm?boe:Math.max(wind,boe*.6))/5)*5;
@@ -2365,7 +2384,7 @@ function waBauen(L,B){
   var fl=B.w*B.hb/1e4,kipp=Math.min(.75,(L.wind||0)/90),ext=B.hb*kipp;   /* schraeger Regen kommt von links ins Bild */
   _wa.kipp=kipp;
   if(L.regen){n=Math.round(L.regen.n*fl*WA_K);for(i=0;i<n;i++)_wa.regen.push({x:R()*(B.w+ext)-ext,y:R()*B.hb,f:.8+R()*.4});}
-  if(L.schnee){n=Math.round(L.schnee.n*fl*WA_K);for(i=0;i<n;i++)_wa.schnee.push({x:R()*B.w,y:R()*B.hb,r:1+R()*1.8,p:R()*6.3,f:.7+R()*.6});}
+  if(L.schnee){n=Math.round(L.schnee.n*fl*WA_K);for(i=0;i<n;i++)_wa.schnee.push({x:R()*B.w,y:R()*B.hb,r:(1+R()*1.8)*(L.schnee.g||1),p:R()*6.3,f:.7+R()*.6});}
   if(L.nebel)for(i=0;i<(B.voll?10:5);i++)_wa.nebel.push({x:R()*B.w,y:B.hb*(.15+R()*.75),r:90+R()*100,v:5+R()*9,a:.18+R()*.17});
   if(L.streifen){n=Math.max(5,Math.round(fl*WA_K));for(i=0;i<n;i++)_wa.strich.push(waStrichNeu(B,true));}
   if(L.blitz)_wa.blitzNext=performance.now()+1500+R()*3000;
@@ -2482,7 +2501,7 @@ function waAnzeigen(){
   if(eh)eh.textContent="Stärke: wie kräftig Regen, Schnee und Nebel gezeichnet werden."+(hiAn()?" Kacheln: wie viel davon hinter den Kacheln oben zu sehen bleibt (0 % = nichts).":"")+" Beim Ziehen läuft 25 Sekunden lang Regen zur Ansicht.";
   if(h)h.textContent=m==="aus"?"Keine Wetter-Animation.":
     m==="still"?"Die Wetterlage steht als ruhiges Bild "+(hiAn()?"im Himmel hinter den Karten.":"oben im Kasten.")+((!waEigen()&&waReduziert())?" Dein Gerät hat „Bewegung reduzieren“ eingeschaltet – „Bewegt“ schaltet die Bewegung trotzdem ein.":"")
-    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Niesel bis Starkregen nach der gemessenen Menge, der Wind kippt den Regen. Vorschau: 12 Sekunden.";
+    :"Regen, Schnee, Gewitter, Nebel und Sturm bewegen sich "+(hiAn()?"im Himmel hinter den Karten":"oben im Kasten")+" – nur, wenn es am Ort gerade so ist. Regen und Schnee fallen je nach gemessener Menge schwächer oder stärker, der Wind kippt den Regen. Vorschau: 12 Sekunden.";
 }
 
 /* v4.07: Die 10- und 30-Minuten-Summen derselben Station, unabhaengig davon,

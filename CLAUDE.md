@@ -3036,6 +3036,19 @@ und auf 17/17, Pause -> "Weiter" -> weg, Hinweis einmal / nach Neuladen nicht / 
 vorgeschlagen): die Ansicht (Himmel / hell / dunkel) ebenfalls ins Menue, dann waeren es wieder drei Knoepfe. Die
 CSS-Regeln `.kalle` und `.kzfoot .wahl` sind tot und stehen noch. Zurueckholen aus `wetter-giessen-v6_30.html`.
 Nicht am iPhone geprueft.
+v6.32 (Nutzer 12.11.: "der Wind beeinflusst, wie schnell die Wolken ziehen - kannst du das mit dem Regen auch machen,
+wie stark er ist, ob es nieselt oder sehr stark regnet, oder haben wir das schon? Und beim Schnee genauso"). REGEN: gab
+es schon (v6.07 `waRegen`: Niesel unter 0,5 mm/h, dann fuenf Stufen 0,5 / 1 / 2 / 4 / 8 mm/h dichter, laenger, schneller;
+v6.29 ohne Radar aus der Station) - nichts geaendert. SCHNEE fiel immer gleich (2,4 Flocken je 10 000 px2, 42 px/s);
+jetzt `waSchnee(mm/h)` in fuenf Stufen (`waStufe(b,.2,4)`, Grenzen 0,29 / 0,61 / 1,3 / 2,75 mm/h Wasser): Dichte
+1,1 -> 7,5, Sinktempo 34 -> 62 px/s, Flockengroesse x0,85 -> x1,35 (`L.schnee.g`); bei 393 x 852 sind das 33 / 81 /
+130 / 178 / 226 Flocken. Menge unbekannt -> wie bisher 2,4 / 42. SCHNEEREGEN: beide Anteile x0,6 bis x2,2. Hagel fest.
+MENGE: `waRate()` = `_zuMb` (setzt `zustandZeigen` nur beim Regen), sonst die geeichte Radarrate `radarBoden(_nowMmh)`
+ab 0,1 mm/h (bei Schnee/Schneeregen setzt zustandZeigen `_zuMb` nicht - das Radar misst die Rate, nicht die Art),
+sonst `waStationsRate()`. Das Wort oben bleibt "Schnee" (keine Staerkestufen im Text). Die Stufen sind MEINE Wahl,
+nicht an echtem Schneefall geprueft (12.11. kein Schnee) - bei Bedarf nachstellen. Geprueft (Playwright, erzwungener
+Zustand): Schnee mit Radar 0,12-6 mm/h und ohne Radar (10-min-, Stundensumme, nichts), Schneeregen, Regen unveraendert;
+Zeichnen bei starkem Schnee 2,1 ms je Bild. Vorschau-Knopf "Schnee" zeigt weiter die mittlere Dichte.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
