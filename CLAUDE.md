@@ -3950,6 +3950,20 @@ im Fuss, LIZENZEN.md (IEM: public domain, Nennung erwuenscht - gelesen 13.11.). 
 Buenos Aires SABE 4,8 km "23 °C Klar, Heute bisher 23/24, wie gestern"; Dakar GOOY 7,7 km 29 °C; New York JRB (Heliport Wall
 Street) 1,3 km 7,8 °C Regen; Barcelona LEBL 13,6 km; Nissi Beach -> Larnaca LCLK 34,7 km; Wettenberg unveraendert (kein Abruf).
 Pruefstand: `netz2.ALLE` braucht "iastate.edu". Nicht am iPhone geprueft.
+v6.84 (Nutzer 13.11., Bilder Luxor und Norden: "wenn es fuer stuendlich international keine Sonnenminuten oder Wind gibt,
+diesen Container kleiner machen"; "beim Temperaturverlauf einen Button fuer 7 Tage oben rechts"; "den aktuellen Tag den
+Hintergrund etwas einfaerben und einen Knopf fuer wieder aktuelle Ansicht"). (1) STUNDENLEISTE: `renderStrip` merkt, ob
+IRGENDEINE Zelle Regenwahrscheinlichkeit (`_hatPP`), Sonnenminuten (`_hatSS`) oder Boeen (`_hatBo`) hat, und setzt am
+#strip `ohne-pp` / `ohne-ss` / `ohne-bo` - die leeren Zeilen fallen weg (Luxor 164 -> 111 px Zellhoehe). Innerhalb der Leiste
+bleiben die Plaetze fest (v3.03). Folge: in Wettenberg faellt die %-Zeile weg, solange keine Stunde >= 20 % hat (7 px).
+(2) TEMPERATURVERLAUF: links der Knopf "Jetzt" (Pfeil + Wort, `#chartZoom`, `recenterChart`) - sichtbar, sobald die Ansicht
+nicht der Standard ist (anderer Zoom ODER mehr als 3 h von jetzt verschoben; `chartZoomPille` laeuft jetzt auch beim
+Verschieben ueber `updateChartJump`); bis v6.83 stand dort die Spanne "7 Tage" + Pfeil und las sich wie eine Beschriftung.
+Rechts der Knopf "7 Tage" (`#chart7`, `chart7Tage` = chartZoom(168) um jetzt), sichtbar, solange nicht 7 Tage zu sehen sind.
+Das Wort "jetzt" an der Linie entfaellt, wenn es unter einen der Knoepfe fiele. (3) HEUTE: Hintergrund des heutigen Tags
+(Mitternacht bis Mitternacht, Grenzen wie die Tageslinien) `CO.heute` - dunkel/Himmel 9 % Weiss, hell 12 % Gelb
+(`CHART_HEUTE_A`, MEINE Wahl), Wochentag darunter fett in Schriftfarbe. Geprueft (`e/t125.py`: Luxor Himmel, Wettenberg Himmel
+und hell): Knoepfe 48 h -> 7 Tage -> Jetzt -> 6 h verschoben -> Jetzt. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

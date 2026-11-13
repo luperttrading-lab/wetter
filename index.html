@@ -700,6 +700,9 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .col .xtra .sx small{font-size:9px;font-weight:500;opacity:.65;margin-left:1px}
   .col .xtra .leer{visibility:hidden}
   .col .xtra .leer::after{content:"0"}   /* haelt die Zeilenhoehe */
+  /* v6.84: Zeilen ohne einen einzigen Wert in der ganzen Leiste fallen weg */
+  #strip.ohne-pp .col .pp,#strip.ohne-ss .col .ssbar,#strip.ohne-ss .col .xtra .sx,#strip.ohne-bo .col .xtra .bx,
+  #strip.ohne-ss.ohne-bo .col .xtra{display:none}
   .col.fc .ic{opacity:.6}
   /* v6.81 (Nutzer, Norden 13.11.: "die Wolken in der stuendlichen Anzeige haben nicht genug Kontrast"): in den dunklen
      Ansichten (Himmel, dunkel) Prognose-Symbole voll deckend - bei 60 % lagen weisse Wolken auf blauem Glas bei 2,2-2,4 : 1;
@@ -717,6 +720,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   /* v6.27: Spanne nach dem Zoomen (Antippen = Standard) und die Zeile mit dem Bedienhinweis */
   .chart-zoom{position:absolute;left:38px;top:-3px;z-index:4;appearance:none;-webkit-appearance:none;border:0;margin:0;font:700 10px/1 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#5c6b80;padding:4px 7px;border-radius:8px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.1);display:inline-flex;align-items:center;gap:5px;cursor:pointer}
   .chart-zoom[hidden]{display:none}
+  .chart-zoom.chart-7{left:auto;right:4px}   /* v6.84 */
   html.dunkel .chart-zoom{background:rgba(26,33,44,.88);color:var(--ink)}
   .chart-hint{font-size:10.5px;line-height:1.3;color:var(--faint);text-align:center;margin-top:4px}
   .chart-cursor{position:absolute;top:0;bottom:0;left:calc(50% + 16px);transform:translateX(-50%);width:0;pointer-events:none;z-index:3}
@@ -2541,7 +2545,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.83</span>
+      <span class="ver">v6.84</span>
     </div>
   </header>
 
@@ -2574,7 +2578,7 @@ function hiAnzeigen(){
     <div id="stdSec"><div class="sect">Stündlich</div>
     <div class="strip-card"><div class="strip" id="strip"></div></div></div>
     <div id="chartSec"><div class="sect">Temperaturverlauf</div>
-    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div><button type="button" class="chart-zoom" id="chartZoom" hidden aria-label="Standardansicht"><span></span><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button></div><div class="chart-hint">Zwei Finger: mehr oder weniger Tage · Doppeltipp: zurück zu jetzt</div></div></div>
+    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div><button type="button" class="chart-zoom" id="chartZoom" hidden aria-label="Zurueck zur aktuellen Ansicht"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span>Jetzt</span></button><button type="button" class="chart-zoom chart-7" id="chart7" aria-label="7 Tage zeigen">7 Tage</button></div><div class="chart-hint">Zwei Finger: mehr oder weniger Tage · Doppeltipp: zurück zu jetzt</div></div></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
@@ -2762,7 +2766,7 @@ function themaNeuZeichnen(){
   if(typeof renderBilanz==="function"&&document.getElementById("bilanzCard"))renderBilanz();
   if(window._kachelArg&&typeof renderTiles==="function")renderTiles(window._kachelArg.s,window._kachelArg.d);
 }catch(err){console.warn("ansicht",err&&err.message);}}
-var CHART_TAG_A=[.3,.24];
+var CHART_TAG_A=[.3,.24],CHART_HEUTE_A=[.09,.12];
 const CO={
   get text(){   return _dunkel?"#e7edf5":"#17202e";},
   get muted(){  return _dunkel?(hiAn()?"#e2e9f4":"#a3b2c6"):"#5c6b80";},   // v6.12: auf Glas heller, wie --muted / --faint; v6.36 noch etwas heller (Glas in Himmelsfarbe)
@@ -2772,6 +2776,8 @@ const CO={
   get gitterF(){return _dunkel?"rgba(255,255,255,.14)":"rgba(15,23,42,.15)";},
   /* v6.50: Tagesgrenzen im Temperaturverlauf - deutlicher als das Gitter, damit man die Tage zaehlen kann */
   get tagLinie(){return _dunkel?"rgba(255,255,255,"+CHART_TAG_A[0]+")":"rgba(15,23,42,"+CHART_TAG_A[1]+")";},
+  /* v6.84: Hintergrund des heutigen Tags im Temperaturverlauf */
+  get heute(){  return _dunkel?"rgba(255,255,255,"+CHART_HEUTE_A[0]+")":"rgba(247,183,51,"+CHART_HEUTE_A[1]+")";},
   get achse(){  return _dunkel?"#93a3b8":"#1c2432";},
   get rahmen(){ return _dunkel?"#4d5b6e":"#2a3340";},
   get bogen(){  return _dunkel?"#46536a":"#e2e7ee";},
@@ -4446,6 +4452,9 @@ function kReglerAnzeigen(){
 }
 function renderStrip(rows){
   const h=el("strip");h.innerHTML="";let prev=null,nowEl=null;
+  /* v6.84: welche Zeilen haben in IRGENDEINER Zelle einen Wert? Leere Zeilen fallen weg (Ausland: oft weder
+     Regenwahrscheinlichkeit noch Sonnenminuten noch Boeen) - innerhalb der Leiste bleiben die Plaetze fest (v3.03). */
+  let _hatPP=false,_hatSS=false,_hatBo=false;
   const nowMs=Date.now();let nowIdx=-1;for(let i=rows.length-1;i>=0;i--){if(new Date(rows[i].timestamp).getTime()<=nowMs){nowIdx=i;break;}}
   if(nowIdx<0)nowIdx=rows.length-1;
   // v4.29: Zeilen nach Zeitstempel, damit jede Zelle den Sonnenwert der
@@ -4525,7 +4534,7 @@ function renderStrip(rows){
        Stunde VOR dem Stempel, nur Vorhersage) - die Zelle T zeigt also den Wert mit Stempel T+1 wie bei der Sonne.
        Nur KOMMENDE Stunden, nicht "jetzt" (dort gelten Messung und Radar), ab STRIP_PP_MIN, auf 5 % gerundet. */
     const _ppW=(!isNow&&_tMs>nowMs&&_nx&&_nx._fc&&typeof _nx.precipitation_probability==="number"&&isFinite(_nx.precipitation_probability))?_nx.precipitation_probability:null;
-    const _pp=(_ppW!=null&&_ppW>=STRIP_PP_MIN)?Math.round(_ppW/5)*5+"\u202f%":"";
+    const _pp=(_ppW!=null&&_ppW>=STRIP_PP_MIN)?Math.round(_ppW/5)*5+"\u202f%":"";if(_pp)_hatPP=true;if(_ss!=null)_hatSS=true;if(_bo!=null)_hatBo=true;
     let _ic=_rk.icon||"cloudy";
     if(_ic==="cloudy"&&!night&&_ss!=null&&_moegl>=20&&_ss>=0.9*_moegl)_ic="partly-cloudy-day";
     if(_rk._live)_ic=sonneStuetztIcon(_ic,_rk._ss30,_rk._ss60,_tMs);   // v4.30: wie oben im Zustand
@@ -4536,6 +4545,7 @@ function renderStrip(rows){
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });
+  h.classList.toggle("ohne-pp",!_hatPP);h.classList.toggle("ohne-ss",!_hatSS);h.classList.toggle("ohne-bo",!_hatBo);
   requestAnimationFrame(()=>{if(!stripUserScrolled){const t=nowEl?(nowEl.offsetLeft+nowEl.offsetWidth/2-h.clientWidth/2):h.scrollWidth;h.scrollLeft=Math.max(0,Math.min(h.scrollWidth-h.clientWidth,t));}if(typeof updateStripJump==="function")updateStripJump();});
   try{sbLeiste();}catch(e){console.warn("symbole",e);}
 }
@@ -4649,6 +4659,13 @@ function chartMalen(){
   for(let i=a;i<=b;i++){if(!rows[i]._cn)continue;let j=i;while(j<b&&rows[j+1]._cn)j++;
     const l=i>0?(rows[i-1]._ct+rows[i]._ct)/2:rows[i]._ct-1800e3,r=j<n-1?(rows[j]._ct+rows[j+1]._ct)/2:rows[j]._ct+1800e3;
     ctx.fillRect(X(l),y0,X(r)-X(l),y1-y0);i=j;}
+  /* v6.84 (Nutzer: "den aktuellen Tag den Hintergrund etwas einfaerben"): heute von Mitternacht bis Mitternacht, Grenzen
+     wie die gestrichelten Tageslinien */
+  const hk=ymd(new Date());
+  {let fi=-1,li=-1;for(let i=0;i<n;i++){if(rows[i]._cd===hk){if(fi<0)fi=i;li=i;}}
+   if(fi>=0){const l=fi>0?(rows[fi]._ct-rows[fi-1]._ct<=3600e3?rows[fi]._ct:(rows[fi-1]._ct+rows[fi]._ct)/2):rows[fi]._ct,
+       r=li<n-1?(rows[li+1]._ct-rows[li]._ct<=3600e3?rows[li+1]._ct:(rows[li]._ct+rows[li+1]._ct)/2):rows[li]._ct;
+     ctx.fillStyle=CO.heute;ctx.fillRect(X(l),y0,X(r)-X(l),y1-y0);}}
   // horizontale Gridlines (Labels auf der fixen Achse)
   SK.T.forEach(v=>{const y=Y(v);ctx.strokeStyle=CO.band;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(gA,y);ctx.lineTo(gB,y);ctx.stroke();});
   // Tagesgrenzen: alle im Bild samt je einer davor und danach (ein Tag hat hoechstens 25 Stundenzeilen)
@@ -4674,7 +4691,8 @@ function chartMalen(){
       const tx=fern?(xb-xa>=62?tg.wd+" "+tg.dm:(xb-xa>=38?tg.dm:tg.wd)):tg.wd,w=ctx.measureText(tx).width;
       const va=Math.max(xa,vA),vb=Math.min(xb,vB);if(vb-va<w+12)continue;
       const x=Math.max(va+w/2+6,Math.min(vb-w/2-6,(xa+xb)/2));
-      ctx.fillText(tx,x,y1+5);belegt.push([x-w/2-6,x+w/2+6]);
+      if(rows[iz]._cd===hk){ctx.save();ctx.font="700 10px -apple-system,system-ui,sans-serif";ctx.fillStyle=CO.text;ctx.fillText(tx,x,y1+5);ctx.restore();}
+      else ctx.fillText(tx,x,y1+5);belegt.push([x-w/2-6,x+w/2+6]);
     }
   }else{
     /* zu eng fuer jeden Tag: am Montag das Datum - rechts neben seiner Linie; liegt die links ausserhalb, am linken
@@ -4704,7 +4722,8 @@ function chartMalen(){
   // jetzt-Linie + aktueller Punkt
   if(g.obsMs>=g.tMin&&g.obsMs<=g.tMax){const nx=X(g.obsMs);
     if(nx>vA-40&&nx<vB+40){ctx.strokeStyle="rgba(23,32,46,.35)";ctx.setLineDash([3,3]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(nx,y0);ctx.lineTo(nx,y1);ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle=CO.muted;ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";ctx.fillText("jetzt",nx,1);
+      ctx.fillStyle=CO.muted;ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";
+      if(!(_chart7An&&nx-vA>viewW-78)&&!(_chartJetztAn&&nx-vA<64))ctx.fillText("jetzt",nx,1);
       const oi=Math.min(n-1,chartIdx(rows,g.obsMs)),obs=rows[oi];
       if(obs){const ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(nx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(nx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=CO.karte;ctx.stroke();}}}
   // links vom ersten Wert: was mit aelteren Werten ist
@@ -4752,7 +4771,19 @@ function animateScrollTo(target){stopAnim();const g=chartGeom;if(!g)return;
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);chartSetzeZeit(tA+(tB-tA)*e);_momRAF=k<1?requestAnimationFrame(step):0;};
   _momRAF=requestAnimationFrame(step);}
 function chartSpanne(h){if(h<47.5)return Math.round(h)+" Std";const t=h/24,r=Math.round(t*2)/2;return (t<9.5&&r!==Math.round(r)?String(r).replace(".",","):Math.round(t))+" Tage";}
-function chartZoomPille(){const p=el("chartZoom");if(!p)return;const std=Math.abs(chartViewH-CHART_VIEW_H)<.5;p.hidden=std;if(!std)p.firstChild.textContent=chartSpanne(chartViewH);}
+/* v6.84 (Nutzer 13.11.: "einen Button fuer 7 Tage oben rechts" und "einen Knopf fuer wieder aktuelle Ansicht"): links
+   "Jetzt" (zurueck zu 2 Tagen um jetzt), sobald die Ansicht davon abweicht - anderer Zoom oder mehr als 3 h verschoben;
+   rechts "7 Tage", solange nicht schon 7 Tage zu sehen sind. Bis v6.83 stand links die Spanne ("7 Tage" + Pfeil) - sie las
+   sich wie eine Beschriftung, nicht wie ein Knopf. */
+var _chart7An=true,_chartJetztAn=false;
+function chartZoomPille(){
+  const p=el("chartZoom"),s7=el("chart7");if(!p)return;
+  const g=chartGeom,std=Math.abs(chartViewH-CHART_VIEW_H)<.5;let weg=false;
+  if(g&&std){const m=chartT(g,chartScrollX+g.viewW/2),ref=g.obsMs||Date.now();weg=Math.abs(m-ref)>3*3600e3;}
+  const zj=!std||weg;if(p.hidden===zj)p.hidden=!zj;_chartJetztAn=zj;
+  if(s7){const z7=Math.abs(chartViewH-168)>=.5;if(s7.hidden===z7)s7.hidden=!z7;_chart7An=z7;}
+}
+function chart7Tage(){const g=chartGeom;if(!g)return;stopAnim();chartZoom(168,g.obsMs||Date.now(),g.viewW*.62);}
 /* neue Spanne; die Zeit fokT bleibt an der Stelle fokPx (vom linken Rand der Kurve) */
 function chartZoom(vh,fokT,fokPx){
   vh=Math.max(CHART_VIEW_MIN,Math.min(CHART_VIEW_MAX,vh));
@@ -4822,7 +4853,7 @@ async function chartHistLaden(){
     if(pinch){if(e.touches.length<2){pinch=null;if(e.touches.length===1){einer(e.touches[0]);dir="x";}}return;}
     if(!drag)return;drag=false;
     if(warPinch){warPinch=false;dir=null;return;}
-    if(dir===null){const n=Date.now();if(e.target&&e.target.closest&&e.target.closest("#chartZoom"))tapT=0;else if(n-tapT<320){tapT=0;recenterChart();}else tapT=n;}
+    if(dir===null){const n=Date.now();if(e.target&&e.target.closest&&e.target.closest("#chartZoom,#chart7"))tapT=0;else if(n-tapT<320){tapT=0;recenterChart();}else tapT=n;}
     else if(dir==="x"&&Math.abs(vx)>0.06)animateScrollTo(Math.round(chartScrollX-vx*170));
     dir=null;},{passive:true});
   fl.addEventListener("touchcancel",()=>{pinch=null;drag=false;dir=null;warPinch=false;},{passive:true});
@@ -4836,7 +4867,8 @@ async function chartHistLaden(){
   host.addEventListener("mousedown",e=>{md=true;mx0=e.clientX;sT=_chartMitteT;stopAnim();_chartTouchT=Date.now();});
   window.addEventListener("mousemove",e=>{if(md)zieh(e.clientX-mx0);});
   window.addEventListener("mouseup",()=>{md=false;});
-  const zp=el("chartZoom");if(zp)zp.addEventListener("click",chartStandard);
+  const zp=el("chartZoom");if(zp)zp.addEventListener("click",recenterChart);
+  const z7=el("chart7");if(z7)z7.addEventListener("click",chart7Tage);
 })();
 
 /* v3.00: gezeichnete Symbole statt Textzeichen — die Unicode-Sonne wird von
@@ -13981,7 +14013,7 @@ function recenterStrip(){const h=el("strip");const nowEl=h.querySelector(".col.n
   s.addEventListener("dblclick",recenterStrip);
   s.addEventListener("scroll",()=>{if(!_sjRAF)_sjRAF=requestAnimationFrame(()=>{_sjRAF=0;updateStripJump();});},{passive:true});})();
 let _sjRAF=0;
-function updateChartJump(){}
+function updateChartJump(){try{chartZoomPille();}catch(e){}}   /* v6.84: Knopf "Jetzt" folgt dem Verschieben */
 function updateStripJump(){}
 /* v4.19: Die beiden Knoepfe "Zurueck zu jetzt" sind entfallen - in der
    Titelzeile sitzt jetzt der Klappknopf. Die Funktion bleibt erhalten:
