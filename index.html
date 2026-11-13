@@ -2591,7 +2591,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.94</span>
+      <span class="ver">v6.95</span>
     </div>
   </header>
 
@@ -7294,14 +7294,15 @@ function klappAlle(auf){KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec.
 const dropMini=`<svg width="9" height="12" viewBox="0 0 9 12"><path d="M4.5 0C4.5 0 0 5.4 0 8.2A4.5 4.5 0 0 0 9 8.2C9 5.4 4.5 0 4.5 0Z" fill="currentColor"/></svg>`;
 
 /* --- Render: Warnungen --- */
-/* v6.94 (Nutzer: Warnungen mit X wegdruecken): weggedrueckt bleibt eine Warnung aus bis zu ihrem Ende (expires,
-   ohne Ende 24 h); hoehere Stufe oder neuer Beginn = neuer Schluessel -> erscheint wieder. Speicher warnWeg. */
-function warnWegLesen(){let o={};try{o=JSON.parse(localStorage.getItem("warnWeg")||"{}")||{};}catch(e){}
-  const n=Date.now();Object.keys(o).forEach(k=>{if(!(o[k]>n))delete o[k];});return o;}
-function warnWegHat(k){return !!warnWegLesen()[k];}
-function warnWegSetzen(k,exp){const o=warnWegLesen();let t=exp?new Date(exp).getTime():NaN;if(!(t>Date.now()))t=Date.now()+864e5;
-  o[k]=t;try{localStorage.setItem("warnWeg",JSON.stringify(o));}catch(e){}}
-function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
+/* v6.95 (Nutzer: Warnungen per x ausblenden, beim naechsten Oeffnen wieder da): nur im Speicher der Seite. "Oeffnen" =
+   Neuladen oder Rueckkehr in die App nach mindestens 5 min im Hintergrund - dann wird die Liste geleert und neu gezeichnet. */
+var _warnWeg={},_warnLetzt=null,_warnVersteckt=0;
+try{localStorage.removeItem("warnWeg");}catch(e){}
+function warnWegHat(k){return !!_warnWeg[k];}
+function warnWegSetzen(k){_warnWeg[k]=1;}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){_warnVersteckt=Date.now();return;}
+  if(_warnVersteckt&&Date.now()-_warnVersteckt>=3e5&&Object.keys(_warnWeg).length){_warnWeg={};try{if(_warnLetzt)renderAlerts(_warnLetzt);}catch(e){}}});
+function renderAlerts(j){_warnLetzt=j;const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
   document.documentElement.classList.toggle("warnfrost",al.some(a=>/frost|gl(ä|ae)tte|glatteis/i.test((a.event_de||"")+" "+(a.headline_de||"")+" "+(a.event_en||""))));if(!al.length)return;
   const rank={minor:1,moderate:2,severe:3,extreme:4};
   const isHeat=a=>/hitze|uv-?index/i.test(a.event_de||a.event_en||"");
