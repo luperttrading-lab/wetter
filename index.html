@@ -561,6 +561,12 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .kzreg.wakl .waKaZ{display:none!important}
 /* v6.31: Fusszeile der Kacheln nur noch im Bearbeiten und solange der Wechsel angehalten ist */
 .kzfoot.leer{display:none}
+/* v6.75: schwebendes "Fertig" (kzFixPruefen) */
+#kzFertigFix{position:fixed;left:50%;bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px));z-index:60;transform:translate(-50%,12px);
+  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;border:0;font:inherit;font-size:15px;font-weight:700;
+  background:#1c1c1e;color:#fff;border-radius:12px;padding:11px 34px;box-shadow:0 4px 18px rgba(0,0,0,.28);cursor:pointer}
+#kzFertigFix.an{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+html.dunkel #kzFertigFix{background:#e6e9ef;color:#111;box-shadow:0 4px 18px rgba(0,0,0,.45)}
 .kopf-kn{display:flex;gap:8px}
 /* v6.31: mit vier Knoepfen ist der Block links schmaler (393 pt: 209 statt 247 px) - die Stationszeile braeche um.
    Sie steht aber UNTER den Knoepfen, auf Hoehe der Versionsnummer: darf also breiter sein als der Block (laeuft
@@ -2501,7 +2507,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.74</span>
+      <span class="ver">v6.75</span>
     </div>
   </header>
 
@@ -9065,7 +9071,22 @@ function kopfTipZeigen(){
   t.addEventListener("click",kopfTipWeg);setTimeout(kopfTipWeg,9000);
   window.addEventListener("scroll",kopfTipWeg,{passive:true,once:true});
 }
-function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();}
+function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();kzFixPruefen();}
+/* v6.75 (Nutzer 13.11.: "bei Einstellungen sollte der Fertig-Knopf unten immer zu sehen sein, nicht nur ganz unten, wenn
+   man hinscrollt"): solange Kacheln/Einstellungen offen sind und der Knopf im Fuss nicht im Bild ist, schwebt ein zweiter
+   "Fertig" unten in der Mitte (#kzFertigFix, im <body> - in #hero ginge position:fixed nicht, dort gilt will-change:transform,
+   v6.66). Er tut dasselbe wie der im Fuss. */
+function kzFixPruefen(){
+  let b=document.getElementById("kzFertigFix");
+  const f=document.getElementById("kzFertig");
+  let zeigen=false;
+  if(_kzEdit&&f){const r=f.getBoundingClientRect(),H=window.innerHeight||800;zeigen=!(r.height>0&&r.top<H-8&&r.bottom>8);}
+  if(!b){if(!zeigen)return;b=document.createElement("button");b.type="button";b.id="kzFertigFix";b.textContent="Fertig";
+    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();_kzRegAuf=false;kzEditSetzen(false);});document.body.appendChild(b);}
+  b.classList.toggle("an",zeigen);
+}
+window.addEventListener("scroll",()=>{if(!_kzEdit&&!document.getElementById("kzFertigFix"))return;if(window._kzFixR)return;window._kzFixR=requestAnimationFrame(()=>{window._kzFixR=0;kzFixPruefen();});},{passive:true});
+window.addEventListener("resize",()=>{try{kzFixPruefen();}catch(e){}});
 function kzGhost(tile,x,y){
   document.querySelectorAll(".kzghost").forEach(q=>q.remove());   // nie zwei Geister
   const g=document.createElement("div");g.className="kzghost";const r=tile.getBoundingClientRect();
@@ -9131,7 +9152,7 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
     const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();});   // v5.32: in den ersten freien Platz
   if(foot)foot.addEventListener("click",e=>{
     if(e.target.closest("#kzPause")){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}   // v5.32
-    if(e.target.closest("#kzZahn")){_kzRegAuf=!_kzRegAuf;kzRender();if(_kzRegAuf)kzBewAnwenden(false);return;}
+    if(e.target.closest("#kzZahn")){_kzRegAuf=!_kzRegAuf;kzRender();if(_kzRegAuf)kzBewAnwenden(false);kzFixPruefen();return;}
     if(e.target.closest("#kzFertig")){_kzRegAuf=false;kzEditSetzen(false);}
     else if(e.target.closest("#kzWahlBtn"))kzEditSetzen(true);});
   /* v4.81 (Nutzer): Beim Scrollen neben den Reglern ging der Bearbeiten-Modus
@@ -9139,7 +9160,7 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
      noch ein TIPPEN (<= 10 px Bewegung, kein Abbruch durchs Scrollen), und nie
      auf Hoehe von Kacheln, Reglern und Fuss (auch nicht im Rand daneben). */
   let _kzAussen=null;
-  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzPool,#kzFoot,#kzReg"))return;
+  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzPool,#kzFoot,#kzReg,#kzFertigFix"))return;
     const a=el("kz").getBoundingClientRect(),b=el("kzFoot").getBoundingClientRect();
     if(e.clientY>=a.top-12&&e.clientY<=b.bottom+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
   document.addEventListener("pointercancel",()=>{_kzAussen=null;},true);

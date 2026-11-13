@@ -3860,6 +3860,13 @@ arbeitet dabei in jedem Bild - im Pruefstand (ohne GPU) ~33 % eines Kerns, vergl
 Verlauf (dWind, auch Nebelbaender) nimmt die Farben aus --wnd0/1/2; in den dunklen Ansichten (Himmel, dunkel) fast weiss
 (#e4ecf6 -> #fff) statt graublau (#8aa2bd -> #6d88a8), Pustestriche 1,95 statt 1,7 breit. Helle Ansicht: Farben wie bisher.
 Geprueft (`e/t112.py`): Kopf und Stundenleiste alt/neu (Bild), Funkeln 40/100 % und Tempo x2 weich, Kopf im Gleichtakt.
+v6.75 (Nutzer 13.11.: "bei Einstellungen sollte der Fertig-Knopf unten immer zu sehen sein, nicht nur ganz unten, wenn man
+hinscrollt"): `kzFixPruefen()` - solange Kacheln waehlen / Einstellungen offen sind (_kzEdit) und "Fertig" im Fuss (#kzFertig)
+nicht im Bild ist, schwebt unten in der Mitte ein zweites "Fertig" (#kzFertigFix, im <body>; in #hero ginge position:fixed
+nicht - dort gilt will-change:transform seit v6.66), blendet in 0,2 s ein/aus, tut dasselbe wie der Knopf im Fuss. Geprueft
+am Scroll-Ereignis (rAF), bei kzEditSetzen und am Zahnrad im Fuss; der Aussentipp-Schliesser kennt den Knopf. Hell: dunkler
+Knopf, dunkle Ansichten: heller. Geprueft (`e/t113.py`, Himmel und hell): offen -> schwebt, Fuss im Bild -> weg, hoch -> wieder
+da, Tipp -> Bearbeiten zu.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
