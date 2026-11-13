@@ -3807,6 +3807,23 @@ Nutzer gewaehlt): --hif = 1 - 0,8 x Wert (40 % -> 0,68; 100 % -> 0,2), 0 % = Kla
 Nachthimmel (20 s)" (`hiNachtProbe`, HI.test = "nacht") zum Ansehen am Tag. Geprueft (`e/t106.py`, `e/t107.py`): Nacht klar
 49/11 funkelnde Sterne, Nacht bedeckt und Tag 0, Regler 0 / 100 (kleinste Helligkeit 0,22), "Bewegung reduzieren" laeuft,
 Vorschau. Nicht am iPhone geprueft.
+v6.70 WISCHEN WEICHER (Nutzer 13.11., Bildschirmfilm 08:22 mit v6.68: "der Uebergang von einer zur anderen Farbe ist sehr
+krass und sprunghaft - beim Wischen den Nachbarn schon mit reinziehen und den Hintergrund mit aus- und einblenden sanfter").
+GEMESSEN im Film: beim Loslassen sprang der Himmel in ~0,1 s auf die Zielfarbe (Statusleiste in einem Bild); beim ersten
+Wechsel kam die neue Seite in EINEM Bild herein, beim zweiten blendete sie 0,3 s. JETZT: (1) VORSCHAU BEIM ZIEHEN
+(`owVorFarbe`, `owVorStil`, `owVorWeg`): steht das Ziel fest und ist seine Farbe bekannt (`hiZiel`, v6.68), bekommt die Decke
+diese Farbe und blendet mit dem Finger ein - Deckkraft OW_VOR_MAX (0,7) x Weg / halbe Breite; im Kopf dieselbe Farbe als
+Schicht `.hiKd` ueber seiner Himmels-Kopie (sonst stuende der Kopf heller da). Gesetzt im selben Bild wie die Verschiebung
+(owSetzen). Abbruch: zurueck in 240 ms. Loslassen: `hiFlachAn` blendet von der erreichten Deckkraft auf 1 (250 ms,
+`hiFlachBl(zu,ms,vd,vk)`), Statusleiste (--hi-r) in 300 ms. Die Statusleiste folgt NICHT schon beim Ziehen (--hi-r am
+<html> je Bild = ganze Seite neu berechnen, v6.66). Nur als Home-Bildschirm-App; ohne Daten des Ziels keine Vorschau.
+(2) ANKUNFT: `sanftRuhig(start,500)` startet die Blende erst, wenn drei Bilder hintereinander im normalen Takt kamen
+(Abstand unter 40 ms), laengstens 500 ms - eine Blende, die beginnt, waehrend die Seite noch rechnet, ist vorbei, bevor das
+naechste Bild steht (Vermutung zum Film, im Pruefstand nicht nachstellbar). Nach einem Wisch 0,8 statt 0,55 s
+(SANFT_EIN_MS und die CSS-Regeln wisch-n/-v). Geprueft (`e/t108.py`, standalone nachgestellt, Touch per CDP): 60 / 150 /
+20 px gezogen -> Decke und Kopfschicht 0,21 / 0,53 / 0,07 in der Zielfarbe; Abbruch -> 0 in 0,5 s; ganzer Wisch -> 0,61 ->
+1; neue Seite blendet in 0,73 s in 20 Bildern; "Bewegung reduzieren" ebenso; Wisch-Regression `e/t82.py` ohne Fehler.
+Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

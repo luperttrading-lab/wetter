@@ -1626,15 +1626,17 @@ html{overflow-x:clip}
 #ortPkt .op-d i.ak{background:#fff}
 /* die neue Seite schiebt sich von der Seite herein, aus der der Finger kam (nicht bei "Bewegung reduzieren": nur Blende) */
 /* v6.58 (Nutzer, Bildschirmfilm: "der Bildaufbau sieht nicht gut aus"): nach einem Wisch blendet alles schneller ein als
-   die 1 s des Starts (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB). v6.59: 0,35 statt 0,55 s */
+   die 1 s des Starts (SANFT_EIN_MS) - die Daten liegen dann meist schon bereit (Vorabruf, VORAB). v6.59: 0,35 statt 0,55 s.
+   v6.70 (Nutzer: "den Hintergrund mit aus- und einblenden sanfter"): 0,8 s */
+#hiK>.hiKd{position:absolute;left:0;top:0;right:0;bottom:0;z-index:4;pointer-events:none;opacity:0}
 html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state),
 html.wisch-n.sanft-ein header .plz,html.wisch-v.sanft-ein header .plz,html.wisch-n.sanft-ein #placeName,html.wisch-v.sanft-ein #placeName,
-html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .55s ease!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein #waCv,html.wisch-v.sanft-ein #waCv{transition:opacity .8s ease!important;transition-duration:.8s!important}
 @media all{
 html.wisch-n.sanft #app>:not(header):not(.state),html.wisch-n.sanft header .place{transform:translate3d(64px,0,0)}
 html.wisch-v.sanft #app>:not(header):not(.state),html.wisch-v.sanft header .place{transform:translate3d(-64px,0,0)}
-html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
-html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .55s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.55s!important}
+html.wisch-n.sanft-ein #app>:not(header):not(.state),html.wisch-v.sanft-ein #app>:not(header):not(.state){transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.8s!important}
+html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transition:transform .8s cubic-bezier(.2,.8,.25,1)!important;transition-duration:.8s!important}
 }
 /* v6.66: Blenden des Himmels laufen auch bei "Bewegung reduzieren" - die Sperre oben (*{transition-duration:.001ms})
    liess eine spaeter nachkommende neue Szene und die Farben oben in EINEM Bild springen (Film 12.11. 23:22, 3,64 s und 8,07 s) */
@@ -2129,9 +2131,10 @@ function hiFussAn(){
 var HI_FLACH_MS=450;
 /* v6.65: die Blende der Decke laeuft als Web-Animation (wie owAnim seit v6.58) - als CSS-Uebergang sprang sie am iPhone
    in einem Bild (Film 12.11. 23:12). Die Klasse hiflach setzt nur den Endzustand. */
-function hiFlachBl(zu,ms){
+function hiFlachBl(zu,ms,vd,vk){
   var d=document.getElementById("hiDeck"),k=document.getElementById("hiK");
-  [[d,zu?0:1,zu?1:0],[k,zu?1:0,zu?0:1]].forEach(function(x){
+  /* v6.70: vd/vk = Deckkraft beim Start (die Vorschau beim Ziehen hat die Decke schon halb eingeblendet) */
+  [[d,vd!=null?vd:(zu?0:1),zu?1:0],[k,vk!=null?vk:(zu?1:0),zu?0:1]].forEach(function(x){
     try{if(x[0]&&x[0].animate)x[0].animate([{opacity:x[1]},{opacity:x[2]}],{duration:ms,easing:"ease"});}catch(e){}});
 }
 /* v6.66: auf der ALTEN Seite ohne Klasse am <html> (die kostete eine Neuberechnung der ganzen Seite, waehrend der Inhalt
@@ -2148,8 +2151,10 @@ function hiFlachAn(T){try{if(hiAn()&&hiFussAn()){var h=document.documentElement,
     d.style.background=f;d.dataset.f=f;
     try{if(alt&&d.animate)d.animate([{backgroundColor:alt},{backgroundColor:f}],{duration:150,easing:"ease"});}catch(e){}
     h.style.setProperty("--hi-bl","150ms");h.style.setProperty("--hi-r",f);return true;}
-  d.style.background=f;d.dataset.f=f;d.style.opacity="1";if(k)k.style.opacity="0";hiFlachBl(1,200);
-  h.style.setProperty("--hi-bl","200ms");h.style.setProperty("--hi-r",f);}}catch(e){}return false;}
+  var vd=parseFloat(d.style.opacity),vk=k?parseFloat(k.style.opacity):NaN;
+  d.style.background=f;d.dataset.f=f;d.style.opacity="1";if(k)k.style.opacity="0";
+  hiFlachBl(1,250,isFinite(vd)?vd:0,isFinite(vk)?vk:1);
+  h.style.setProperty("--hi-bl","300ms");h.style.setProperty("--hi-r",f);}}catch(e){}return false;}
 function hiFlachWeg(ms){
   var h=document.documentElement;if(!h.classList.contains("hiflach"))return;
   h.classList.remove("hiflach");hiFlachBl(0,Math.max(200,ms||350));
@@ -2471,7 +2476,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.69</span>
+      <span class="ver">v6.70</span>
     </div>
   </header>
 
@@ -3596,7 +3601,7 @@ function setHaze(t){const c=thermal(t);el("bg").style.setProperty("--bg-haze",rg
 var SANFT={an:false,fertig:false,haupt:0,offen:{},tm:0},SANFT_MAX=1800,SANFT_EIN_MS=1000,SANFT_AUS_MS=270;
 try{SANFT.an=document.documentElement.classList.contains("sanft");}catch(e){}
 /* v6.58: nach einem Wisch kuerzer warten und schneller einblenden - die Daten kommen meist aus dem Vorabruf (VORAB) */
-try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=550;SANFT_MAX=800;}}catch(e){}
+try{if(/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className)){SANFT_EIN_MS=800;SANFT_MAX=800;}}catch(e){}
 function sanftAuf(n){if(SANFT.an&&!SANFT.fertig)SANFT.offen[n]=1;}
 function sanftZu(n){if(!SANFT.an||SANFT.fertig)return;delete SANFT.offen[n];sanftPruefen();}
 function sanftHaupt(){if(!SANFT.an||SANFT.fertig||SANFT.haupt)return;SANFT.haupt=Date.now();SANFT.tm=setTimeout(sanftZeigen,SANFT_MAX);sanftPruefen();}
@@ -3622,9 +3627,21 @@ function sanftZeigen(){
        in die weitergewischt wird, zuerst) */
     setTimeout(function(){try{owNachbarnVorab(ri);}catch(e){}},SANFT_EIN_MS+(gewischt?600:1500));
     setTimeout(function(){h.classList.remove("sanft-ein");h.classList.remove("sanft-ort");h.classList.remove("wisch-n");h.classList.remove("wisch-v");},SANFT_EIN_MS+200);}
-  /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt */
-  try{requestAnimationFrame(function(){requestAnimationFrame(start);});}catch(e){}
-  setTimeout(start,300);
+  /* zwei Bilder abwarten: was gerade gezeichnet wurde, soll stehen, bevor die Blende beginnt.
+     v6.70 (Bildschirmfilm 13.11. 08:22: beim ersten Wechsel kam die neue Seite in EINEM Bild, beim zweiten blendete sie
+     0,3 s): startet die Blende, waehrend die Seite noch rechnet, ist sie vorbei, bevor das naechste Bild gezeichnet wird.
+     Darum erst, wenn drei Bilder hintereinander im normalen Takt kamen (Abstand unter 40 ms) - laengstens 500 ms. */
+  sanftRuhig(start,500);
+}
+function sanftRuhig(f,max){
+  var t0=performance.now(),last=0,n=0,fertig=false;
+  function los(){if(fertig)return;fertig=true;f();}
+  function schritt(t){if(fertig)return;
+    if(last&&t-last<40)n++;else n=0;last=t;
+    if(n>=3||t-t0>max){los();return;}
+    requestAnimationFrame(schritt);}
+  try{requestAnimationFrame(schritt);}catch(e){}
+  setTimeout(los,max+300);
 }
 /* vor einem Ortswechsel: Inhalt und Dialog ausblenden, dann weiter (die neue Seite blendet wieder ein) */
 function sanftWeg(dann){
@@ -3833,7 +3850,32 @@ function owStil(wx,wo){var t=wx?"translate3d("+wx.toFixed(1)+"px,0,0)":"",o=wo<1
   (OW.els||[]).forEach(function(n){n.style.transform=t;n.style.opacity=o;});}
 /* je Bild hoechstens einmal setzen - kommen die Bewegungen gebuendelt, zaehlt nur die letzte */
 function owSetzen(dx,deck){OW.wx=dx;OW.wo=deck;if(OW.raf)return;
-  OW.raf=requestAnimationFrame(function(){OW.raf=0;owStil(OW.wx,OW.wo);});}
+  OW.raf=requestAnimationFrame(function(){OW.raf=0;owStil(OW.wx,OW.wo);owVorStil(OW.vx||0);});}
+/* v6.70 (Nutzer 13.11., Bildschirmfilm 08:22: "der Uebergang von einer zur anderen Farbe ist sehr krass und sprunghaft -
+   beim Wischen den Nachbarn schon mit reinziehen"): waehrend des Ziehens blendet die Farbe des Ziels (hiZiel, vorab
+   gerechnet) mit dem Finger ein - halbe Bildschirmbreite = OW_VOR_MAX, beim Loslassen fehlt nur noch der Rest (hiFlachAn
+   beginnt dort). Im Kopf liegt dieselbe Farbe als Schicht ueber seiner Himmels-Kopie (.hiKd), sonst stuende er heller da.
+   Nur als Home-Bildschirm-App (wie die Decke). Die Statusleiste folgt erst beim Loslassen (--hi-r am <html> je Bild
+   neu zu setzen hiesse, die ganze Seite neu zu berechnen - v6.66). Ohne Daten des Ziels keine Vorschau. */
+var OW_VOR_MAX=.7;
+function owVorFarbe(z){
+  if(!z||!hiAn()||!hiFussAn())return null;
+  var T=null;try{T=hiZiel(z);}catch(e){T=null;}
+  var d=el("hiDeck"),k=el("hiK");if(!T||!d)return null;
+  d.style.background=T.rr;d.dataset.f=T.rr;
+  if(k){var o=k.querySelector(".hiKd");if(!o){o=document.createElement("div");o.className="hiKd";k.appendChild(o);}o.style.background=T.rr;}
+  return T;
+}
+function owVorStil(x){
+  var d=el("hiDeck"),k=el("hiK"),o=k&&k.querySelector(".hiKd"),v=x>0?x.toFixed(3):"";
+  if(d&&d.style.opacity!=="1")d.style.opacity=v;if(o)o.style.opacity=v;
+}
+function owVorWeg(ms){
+  var x0=OW.vx||0;OW.vx=0;OW.vz=null;OW.vT=null;if(!(x0>0))return;
+  owVorStil(0);
+  var k=el("hiK");[el("hiDeck"),k&&k.querySelector(".hiKd")].forEach(function(n){
+    try{if(n&&n.animate)n.animate([{opacity:x0},{opacity:0}],{duration:ms,easing:"cubic-bezier(.25,.8,.3,1)"});}catch(e){}});
+}
 /* Loslassen: Web-Animation von der aktuellen Lage zum Ziel; der Endzustand steht vorher schon als Stil da (die Animation
    laeuft darueber und hinterlaesst nichts - auch ohne Web-Animationen stimmt das Ende) */
 function owAnim(wx,wo,ms,ease,dann){
@@ -3847,12 +3889,13 @@ function owAnim(wx,wo,ms,ease,dann){
 function owAufraeumen(){var h=document.documentElement;
   if(OW.raf){cancelAnimationFrame(OW.raf);OW.raf=0;}
   (OW.an||[]).forEach(function(a){try{a.cancel();}catch(e){}});OW.an=[];
-  owStil(0,1);OW.els=null;OW.wx=0;OW.wo=1;OW.zieht=0;OW.los=0;}
+  owStil(0,1);OW.els=null;OW.wx=0;OW.wo=1;OW.zieht=0;OW.los=0;OW.vz=null;OW.vT=null;}
 function owZurueck(){
   var h=document.documentElement;
   if(!OW.zieht){owPunkteWeg(0);return;}
   OW.los=1;owPunkteWeg(0);
   owAnim(0,1,240,"cubic-bezier(.25,.8,.3,1)",owAufraeumen);
+  owVorWeg(240);
 }
 function owLos(){
   var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel,red=hiReduziert();
@@ -3915,6 +3958,8 @@ function owZieh(e){
   OW.dx=dx;
   var W=innerWidth||390,j=OW.L.i+(dx<0?1:-1),z=(dx!==0&&OW.L.a.length>1)?OW.L.a[j]:null;
   OW.ziel=z||null;OW.j=z?j:-1;if(z)vorabHolen(z);
+  if(z!==OW.vz){OW.vz=z;OW.vT=owVorFarbe(z);}
+  OW.vx=OW.vT?OW_VOR_MAX*Math.min(1,Math.abs(dx)/(W*.5)):0;
   /* ohne Ziel (Ende der Liste) federt es: ein Drittel des Wegs, hoechstens 60 px */
   var wx=z?dx:(dx<0?-1:1)*Math.min(60,Math.abs(dx)*.3);
   owSetzen(wx,z?1-.45*Math.min(1,Math.abs(dx)/W):1);
