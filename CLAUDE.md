@@ -3964,6 +3964,26 @@ Das Wort "jetzt" an der Linie entfaellt, wenn es unter einen der Knoepfe fiele. 
 (Mitternacht bis Mitternacht, Grenzen wie die Tageslinien) `CO.heute` - dunkel/Himmel 9 % Weiss, hell 12 % Gelb
 (`CHART_HEUTE_A`, MEINE Wahl), Wochentag darunter fett in Schriftfarbe. Geprueft (`e/t125.py`: Luxor Himmel, Wettenberg Himmel
 und hell): Knoepfe 48 h -> 7 Tage -> Jetzt -> 6 h verschoben -> Jetzt. Nicht am iPhone geprueft.
+v6.85 KNOEPFE IM TEMPERATURVERLAUF NEU GEORDNET (Nutzer 13.11.: "7 Tage und Jetzt beide oben rechts, den Platz rechts
+weg nehmen, der leer ist, und links lieber die Tage einblenden - ueberlegen, welche Logik und Steuerung Sinn macht"). ZWEI
+Fragen, zwei Knoepfe, beide oben rechts in `#chartKn`: WIE VIEL = `#chartSp`, nennt das Ziel ("7 Tage" mit Lupe minus, in der
+weiten Ansicht ab 100 h "2 Tage" mit Lupe plus; `chartSpanneWahl(h)` setzt Spanne UND natuerliche Lage). WO = "Jetzt"
+(`#chartZoom`), nur sichtbar, wenn die Kurve von ihrer natuerlichen Lage weggeschoben ist (`chartWeg`: mehr als
+max(3 h, 6 % der Breite)), fuehrt dorthin zurueck und LAESST den Zoom (v6.84 setzte auf 2 Tage zurueck). NATUERLICHE LAGE
+(`chartNatur`): bis 60 h jetzt in der Mitte (Cursor auf jetzt, wie bisher); darueber das Ende der Vorhersage am rechten Rand
+(`CHART_RAND_R` 6 px) - kein leerer Platz rechts, links dafuer mehr vergangene Tage (7 Tage in Wettenberg: So-Sa, jetzt bei
+76 %; vorher jetzt bei 62 % und rechts 12 % leer). Jetzt nie naeher als 15 % am linken Rand. Zusammenziehen auf mehr als
+60 h laesst das Ende ebenfalls am rechten Rand (vorher 88 %). Nach rechts schieben geht weiter wie bisher (bis das Ende
+unter dem Cursor steht - der Wert der letzten Stunden ist sonst nicht ablesbar), dann erscheint "Jetzt". `drawChart` haelt
+die natuerliche Lage, wenn die Kurve dort stand (neue Daten, nachgeladene 30 Tage); sonst wie bisher die Stelle.
+DOPPELTIPP: erst zurueck zu jetzt, steht es schon dort, zurueck auf 2 Tage. VERWORFEN: Umschalter "2 Tage | 7 Tage" (zeigt
+den Zustand, waere klarer) - neben "Jetzt" 24 px zu breit, er deckte bei 393 pt den Wert des Cursors. PLATZ (`chartKnMessen`,
+bei jeder Aenderung der Knoepfe): stoesst die Gruppe an den Wert des Cursors (Mitte + 34 px), faellt zuerst die Lupe weg
+(`eng1`, 393 pt mit "Jetzt"), dann das Wort "Jetzt" (`eng2`, 320 pt - nur das Zeichen). Das Wort "jetzt" an der Linie entfaellt
+unter den Knoepfen (`_chartKnL`). Geprueft (`e/t126.py`: Himmel 393/320, hell; 7 Tage, -30 h, Jetzt, Zusammenziehen auf
+400 h, +60 h, Doppeltipp zweimal, -8 h, Knopf): Ende 6 px vom Rand, Jetzt erscheint/verschwindet wie beschrieben, Abstand zum
+Cursorwert 17-67 px. Luxor im Pruefstand ohne aeltere Werte (Open-Meteo gesperrt): Daten kuerzer als 7 Tage -> der Anfang
+steht in der Mitte, rechts bleiben 80 px - mit den 30 Tagen (Open-Meteo) am Geraet nicht. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
