@@ -1644,13 +1644,9 @@ html.wisch-n.sanft-ein header .place,html.wisch-v.sanft-ein header .place{transi
 html:root .hiS{transition-duration:var(--hi-bl,1.3s)!important}
 html:root.himmel{transition-duration:var(--hi-bl,1.3s)!important}
 }
-/* v6.69 STERNE FUNKELN (hiSterne): Helligkeit 100 % -> --hif und zurueck, 5 Stufen je Sekunde. Laeuft auch bei "Bewegung
-   reduzieren" (eine Helligkeit ist keine Bewegung, v4.73) - aus nur ueber den Regler (0 % = Klasse hifk0). */
-@keyframes hiFunkel{from{opacity:1}to{opacity:var(--hif,.68)}}
-.hiS>.hiFk{position:absolute;display:block;width:10px;height:10px;pointer-events:none;
-  animation:hiFunkel var(--fd,3s) steps(var(--fs,30)) var(--fv,0s) infinite alternate}
-html:root .hiS>.hiFk{animation-duration:var(--fd,3s)!important;animation-iteration-count:infinite!important}
-html:root.hifk0 .hiS>.hiFk{animation:none}
+/* v6.69 STERNE FUNKELN (hiSterne, hiFunkelAnim): seit v6.72 Web-Animation je Stern (laeuft auch bei "Bewegung reduzieren",
+   die CSS-Sperre gilt dafuer nicht - eine Helligkeit ist keine Bewegung, v4.73); aus nur ueber den Regler (0 %). */
+.hiS>.hiFk{position:absolute;display:block;width:10px;height:10px;pointer-events:none;will-change:opacity,transform}
 </style>
 </head>
 <body>
@@ -2010,36 +2006,51 @@ function hiMass(){
   return {w:document.documentElement.clientWidth||window.innerWidth||390,h:Math.max(ih,Math.min(sh,ih+200))};
 }
 /* v6.69 (Nutzer 13.11.: "wenn es dunkel und klar ist, dass die Sterne minimal funkeln"): fk = funkeln (klar, trocken, kein
-   Nebel). Dann stehen die helleren Sterne (rund jeder fuenfte, q > 0,8) nicht auf der Leinwand, sondern als kleine
-   eigene Flaechen (.hiFk), deren Helligkeit langsam zwischen 100 % und --hif schwankt - jeder Stern mit eigener Dauer
-   (1,8-4,4 s je Richtung) und eigenem Versatz, nach der UHR gerechnet: der Kopf (#hiK) funkelt im selben Takt. 5 Stufen
-   je Sekunde (steps; ein Schritt aendert die Helligkeit um 1-4 Punkte), sonst setzte der Kompositor jedes Bild neu zusammen
-   (v6.15) - gemessen ohne GPU: 10 Stufen/s +10 % eines Kerns. Staerke: Regler (himmelFunkeln). */
+   Nebel). Dann stehen die helleren Sterne nicht auf der Leinwand, sondern als kleine eigene Flaechen (.hiFk).
+   v6.72 (Nutzer: "auch bei 100 % kaum Funkeln"): v6.69 liess die Helligkeit langsam (1,8-4,4 s je Richtung) und
+   gleichmaessig schwanken - auf einem 2-px-Punkt sieht man das kaum, echte Sterne flackern UNRUHIG. Jetzt (hiFunkelAnim):
+   jeder Stern springt alle 0,2-0,6 s auf eine neue, zufaellige Helligkeit (meist hell, selten tief), ab und zu blitzt er
+   etwas groesser auf; dazu funkelt rund jeder dritte Stern (q > 0,7, vorher jeder fuenfte), mindestens 1 px Radius.
+   Stufen auf einem gemeinsamen 0,2-s-Raster nach der Uhr - alle Sterne wechseln im selben Moment (der Kompositor arbeitet
+   5x je Sekunde, nicht in jedem Bild, v6.69), der Kopf (#hiK) funkelt im Gleichtakt. Als Web-Animation statt CSS: var()
+   in @keyframes kennt nicht jeder Safari [Vermutung zur Ursache von "kaum Funkeln"], die Werte stehen jetzt fest drin. */
 function hiSterne(sz,B,a,hmax,fk){
   var hs=Math.min(B.h*.86,hmax||1e9),d=Math.min(2,window.devicePixelRatio||1),c=document.createElement("canvas");
   c.width=Math.round(B.w*d);c.height=Math.round(hs*d);c.style.cssText="width:"+B.w+"px;height:"+hs.toFixed(1)+"px;opacity:"+a.toFixed(2);
   var g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
   var z=(7+HI.saat)|0;function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
-  var n=Math.round(B.w*B.h/900),fs=[],jt=Date.now()/1000;
+  var n=Math.round(B.w*B.h/900),fs=[];
   for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
     if(al<.03||y>hs+5)continue;
     var fb=q>.9?"255,236,214":"236,240,255";
-    /* Dauer und Versatz ganze Vielfache von 0,2 s: dann wechseln ALLE Sterne im selben Moment (5x je Sekunde) - mit
-       beliebigen Werten lagen die Stufen von 49 Sternen verstreut, der Kompositor arbeitete fast in jedem Bild */
-    if(fk&&q>.8&&al>.3){var A=(al*a).toFixed(3),hh=Math.imul(i+1,2654435761)>>>0,dur=(9+hh%14)*.2,
-        v=-((jt+((hh>>>10)%97)*.2)%(2*dur));
-      fs.push('<i class="hiFk" style="left:'+(x-5).toFixed(1)+'px;top:'+(y-5).toFixed(1)+'px;--fd:'+dur.toFixed(2)+'s;--fs:'+Math.round(dur*5)+';--fv:'+v.toFixed(2)+'s;background:radial-gradient(circle,rgba('+fb+','+A+') 0,rgba('+fb+','+A+') '+r+'px,rgba('+fb+',0) '+(r+.8).toFixed(1)+'px)'
+    if(fk&&q>.7&&al>.25){var A=(al*a).toFixed(3),hh=Math.imul(i+1,2654435761)>>>0,rf=Math.max(r,1);
+      fs.push('<i class="hiFk" data-h="'+hh+'" style="left:'+(x-5).toFixed(1)+'px;top:'+(y-5).toFixed(1)+'px;background:radial-gradient(circle,rgba('+fb+','+A+') 0,rgba('+fb+','+A+') '+rf+'px,rgba('+fb+',0) '+(rf+.8).toFixed(1)+'px)'
         +(q>.97?',radial-gradient(circle,rgba(236,240,255,'+(.12*a).toFixed(3)+') 0,rgba(236,240,255,'+(.12*a).toFixed(3)+') 4px,rgba(236,240,255,0) 4.6px)':'')+'"></i>');
       continue;}
     g.fillStyle="rgba("+fb+","+al.toFixed(3)+")";g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
     if(q>.97){g.fillStyle="rgba(236,240,255,.12)";g.beginPath();g.arc(x,y,4,0,6.3);g.fill();}}
   sz.appendChild(c);
-  if(fs.length)sz.insertAdjacentHTML("beforeend",fs.join(""));
+  if(fs.length){sz.insertAdjacentHTML("beforeend",fs.join(""));sz.querySelectorAll(".hiFk").forEach(hiFunkelAnim);}
 }
-var HI_FK_STD=40;
+var HI_FK_STD=40,HI_FK_TAKT=200;
+/* je Stern eine Folge aus dem eigenen Zufall (gleich in #hi und #hiK): 10-22 Stufen zu 0,2 s, jede Helligkeit haelt 1-3
+   Stufen; Helligkeit 1 - 0,92 x Staerke x v^1,6 (v gleichverteilt: meist hell), in jedem achten Wert ein Aufblitzen
+   (voll hell, 1 + 0,6 x Staerke so gross). Dauer und Versatz Vielfache von 0,2 s, Versatz nach der Uhr. */
+function hiFunkelAnim(n){
+  try{if(n._fa){n._fa.cancel();n._fa=null;}}catch(e){}
+  var s=hiFunkeln()/100;if(!(s>0)||!n.animate)return;
+  var hh=+n.dataset.h||1,z=hh|0,k=[],st=10+hh%13,j=0;
+  function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
+  while(j<st){var lang=1+Math.floor(R()*3),bl=R()>.875,v=Math.pow(R(),1.6),
+      o=bl?1:+(1-.92*s*v).toFixed(3),sc=bl?(1+.6*s).toFixed(2):"1";
+    for(var m=0;m<lang&&j<st;m++,j++)k.push({offset:j/st,opacity:o,transform:"scale("+sc+")",easing:"step-end"});}
+  k.push({offset:1,opacity:k[0].opacity,transform:k[0].transform});
+  var P=st*HI_FK_TAKT,off=((hh>>>8)%st)*HI_FK_TAKT;
+  try{n._fa=n.animate(k,{duration:P,iterations:Infinity,delay:-((Date.now()+off)%P)});}catch(e){}
+}
 function hiFunkeln(){try{var v=parseFloat(localStorage.getItem("himmelFunkeln"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_FK_STD;}
-/* 0 % = still; 40 % (Voreinstellung) = Helligkeit 100 -> 68 %; 100 % = 100 -> 20 % */
-function hiFunkelStil(){var v=hiFunkeln(),r=document.documentElement;r.style.setProperty("--hif",(1-.8*v/100).toFixed(2));r.classList.toggle("hifk0",v<=0);}
+/* 0 % = still; Regler wirkt sofort auf alle funkelnden Sterne (Animation neu) */
+function hiFunkelStil(){try{document.querySelectorAll(".hiS>.hiFk").forEach(hiFunkelAnim);}catch(e){}}
 function hiFunkelSetzen(v){try{localStorage.setItem("himmelFunkeln",String(+v));}catch(e){}hiFunkelStil();hiAnzeigen();}
 /* Vorschau am Tag: 20 s klarer Nachthimmel (wie ?himmel=nacht), danach wieder die echte Lage */
 function hiNachtProbe(){
@@ -2476,7 +2487,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.71</span>
+      <span class="ver">v6.72</span>
     </div>
   </header>
 

@@ -3835,6 +3835,16 @@ Stempel 07:00 (Abzeichen "Prognose", "vor 37 Min") - vor Sonnenaufgang, Bright S
 Untergang, jetzt danach -> Mond). NEBENBEFUND im selben Bild, nicht geaendert: "Heute bisher ↓ 27,7" lag UEBER der grossen
 Zahl 26,9 - "bisher" zaehlt nur Messungen (Dakar: SYNOP der Nacht), die grosse Zahl war die MOSMIX-Vorhersage (Messung
 aelter als 90 min, v6.22).
+v6.72 FUNKELN SICHTBAR (Nutzer 13.11.: "auch bei 100 % kaum Funkeln"): v6.69 liess die Helligkeit langsam (1,8-4,4 s je
+Richtung) und gleichmaessig schwanken - auf einem 2-px-Stern kaum zu sehen; dazu stand der Zielwert als var() in @keyframes
+(nicht jeder Safari kennt das - [Vermutung], am iPhone nicht nachgeprueft). Jetzt `hiFunkelAnim(n)` = Web-Animation je
+Stern mit festen Werten (CSS-Keyframes und --hif/hifk0 entfernt): Folge aus dem eigenen Zufall des Sterns (data-h, gleich in
+#hi und #hiK), 10-22 Stufen zu 0,2 s, jede Helligkeit haelt 1-3 Stufen, Helligkeit 1 - 0,92 x Staerke x v^1,6 (meist hell),
+in jedem achten Wert ein Aufblitzen (voll hell, 1 + 0,6 x Staerke so gross). Funkelnd ist jetzt rund jeder dritte Stern
+(q > 0,7, Deckkraft > 0,25; 393 pt ~77, Kopf ~20), Radius mindestens 1 px. Raster 0,2 s nach der Uhr (alle Stufen gleichzeitig).
+Web-Animationen gelten auch bei "Bewegung reduzieren" (die CSS-Sperre greift dort nicht). Regler wirkt sofort (Animationen neu).
+Gemessen (`e/t110.py`): 40 % Helligkeit 0,65-1,0, 100 % 0,09-1,0 mit Aufblitzen; Kopf und Himmel gleich; ohne GPU 45-47 %
+gegen 37 % eines Kerns ohne Funkeln (mehr Sterne, Groesse mitanimiert) - am iPhone mit GPU deutlich weniger.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
