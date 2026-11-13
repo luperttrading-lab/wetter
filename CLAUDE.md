@@ -3850,6 +3850,16 @@ kleine Sonne unten ausblenden"): in der Ansicht "Himmel" entfaellt das Symbol ne
 (Klasse hisonne = C.sonne > 0,3) und das Symbol clear-day oder partly-cloudy-day ist (`#condIc[data-ic]`, gesetzt in
 zustandZeigen nach tagNachtJetzt). Mond, Wolken, Regen, Nebel bleiben; "Ohne Sonne" und die klassischen Ansichten zeigen es
 wie bisher; das Wort schaltet per Tipp weiter die Bewegung der Symbole. Geprueft (`e/t111.py`, Dakar per page.clock).
+v6.74 (Nutzer 13.11., Bild Norden 09:02 mit v6.73: "die Sterne - das ist mehr Blinken und kein Funkeln", "das Wind-Symbol
+ist nicht deutlich genug", "lass das Sonnensymbol drin - sonst muessten wir sie alle raus machen oder keins"). (1) v6.73
+ZURUECKGENOMMEN: das kleine Symbol neben dem Wort steht immer (auch die Sonne bei sichtbarer Sonne im Himmel). (2) FUNKELN
+WEICH (`hiFunkelAnim`): statt Stufen (0,2 s) und Aufblitzen je Stern 8-14 zufaellige Helligkeiten (1 - 0,85 x Staerke x
+v^1,4, meist hell), dazwischen 0,25-0,7 s sanft ueberblendet (ease-in-out), an hellen Stellen kaum groesser (bis 1 + 0,25 x
+Staerke). Neuer Regler "Tempo" x0,5-x2,0 (`himmelFunkelTempo`, `HI_FK_TP_STD` 100) teilt die Dauern. Der Kompositor
+arbeitet dabei in jedem Bild - im Pruefstand (ohne GPU) ~33 % eines Kerns, vergleichbar mit v6.72. (3) WINDSTRICHE: der
+Verlauf (dWind, auch Nebelbaender) nimmt die Farben aus --wnd0/1/2; in den dunklen Ansichten (Himmel, dunkel) fast weiss
+(#e4ecf6 -> #fff) statt graublau (#8aa2bd -> #6d88a8), Pustestriche 1,95 statt 1,7 breit. Helle Ansicht: Farben wie bisher.
+Geprueft (`e/t112.py`): Kopf und Stundenleiste alt/neu (Bild), Funkeln 40/100 % und Tempo x2 weich, Kopf im Gleichtakt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
