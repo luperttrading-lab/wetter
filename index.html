@@ -700,7 +700,13 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .col .xtra .sx small{font-size:9px;font-weight:500;opacity:.65;margin-left:1px}
   .col .xtra .leer{visibility:hidden}
   .col .xtra .leer::after{content:"0"}   /* haelt die Zeilenhoehe */
-  .col.fc .ic{opacity:.6}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
+  .col.fc .ic{opacity:.6}
+  /* v6.81 (Nutzer, Norden 13.11.: "die Wolken in der stuendlichen Anzeige haben nicht genug Kontrast"): in den dunklen
+     Ansichten (Himmel, dunkel) Prognose-Symbole voll deckend - bei 60 % lagen weisse Wolken auf blauem Glas bei 2,2-2,4 : 1;
+     die Prognose erkennt man an der schraegen, blassen Uhrzeit. Regen, Schnee, Hagel und die Gewitterwolke hell
+     (Blau auf blauem Glas 1,1-1,3 : 1). Gemessen mit e/t122.py ueber 10 Himmel-Lagen, dunkel und hell. */
+  html.dunkel .col.fc .ic{opacity:1}
+  html:root.dunkel{--icRe:#c4e2ff;--icSn:#eef7ff;--icHa:#eef6ff;--icHs:#b8d4ee;--icG0:#e6eaf0;--icG1:#b0bac8;--icS2:#ffbd38}.col.fc .t{font-style:italic;color:var(--faint)}.col.fc .v{opacity:.72}
   .hsep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;padding:0 7px;margin:6px 1px;border-left:1px dashed var(--line)}
   .hsep span{font-size:10.5px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;transform:rotate(180deg);font-variant-numeric:tabular-nums}
   .chart-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);padding:12px 10px 8px;touch-action:pan-y}
@@ -2535,7 +2541,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.80</span>
+      <span class="ver">v6.81</span>
     </div>
   </header>
 
@@ -2842,9 +2848,9 @@ var SB_STUFEN=[null,
   {rot:48,puls:4.6,pa:.05,wd:.85,wt:7.5,td:1.15,tf:3.4,ws:1.1,blitz:3.8}];
 function iconTeile(name){
   const f=n=>+n.toFixed(2);
-  const dSun=id=>`<radialGradient id="${id}s" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fffbe8"/><stop offset="46%" stop-color="#ffd447"/><stop offset="100%" stop-color="#f4a01c"/></radialGradient><filter id="${id}gs" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#c47a00" flood-opacity="0.3"/></filter>`;
+  const dSun=id=>`<radialGradient id="${id}s" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fffbe8"/><stop offset="46%" stop-color="#ffd447"/><stop offset="100%" style="stop-color:var(--icS2,#f4a01c)"/></radialGradient><filter id="${id}gs" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#c47a00" flood-opacity="0.3"/></filter>`;
   const dCloud=id=>`<linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e2ec"/></linearGradient><filter id="${id}f" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.25" flood-color="#1c2b40" flood-opacity="0.16"/></filter>`;
-  const dDark=id=>`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c2cbd8"/><stop offset="1" stop-color="#7f8c9e"/></linearGradient>`;
+  const dDark=id=>`<linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--icG0,#c2cbd8)"/><stop offset="1" style="stop-color:var(--icG1,#7f8c9e)"/></linearGradient>`;
   /* userSpaceOnUse: ein Verlauf in objectBoundingBox ist auf einer waagerechten Linie ohne Hoehe undefiniert (v4.08) */
   const dWind=id=>`<linearGradient id="${id}w" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="22" y2="0"><stop offset="0" style="stop-color:var(--wnd0,#9fb2c8)" stop-opacity="0"/><stop offset="38%" style="stop-color:var(--wnd1,#8aa2bd)"/><stop offset="100%" style="stop-color:var(--wnd2,#6d88a8)"/></linearGradient><filter id="${id}wf" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy=".9" stdDeviation=".7" flood-color="#25384f" flood-opacity="0.18"/></filter>`;
   const dMoon=id=>`<linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6cf"/><stop offset="100%" stop-color="#e8cf82"/></linearGradient>`;
@@ -2866,14 +2872,14 @@ function iconTeile(name){
       for(let y=a-RP;y<24.6;y+=RP){
         if(!bew&&(y+RL<16.2||y+RL+RW/2>24.06))continue;
         const xm=x-RK*(y+RL/2-20);
-        h+=`<line x1="${f(xm+RK*RL/2)}" y1="${f(y)}" x2="${f(xm-RK*RL/2)}" y2="${f(y+RL)}" stroke="#3f8bd6" stroke-width="${RW}" stroke-linecap="round"/>`;}
+        h+=`<line x1="${f(xm+RK*RL/2)}" y1="${f(y)}" x2="${f(xm-RK*RL/2)}" y2="${f(y+RL)}" style="stroke:var(--icRe,#3f8bd6)" stroke-width="${RW}" stroke-linecap="round"/>`;}
       return h;}).join(""),a:{t:"regen",x:-RK*RP,y:RP}});
   /* einzelner Strich (Schneeregen): etwas laenger (2,2), sonst geht er neben den Flocken unter; gleiche Neigung,
      faellt von hinter der Wolke bis an den unteren Rand */
   const strich=(x,y,i)=>{const SL=2.2,ya=12.1-y,yb=21.8-y;
-    return {d:[],b:()=>`<line x1="${f(x+RK*SL/2)}" y1="${y}" x2="${f(x-RK*SL/2)}" y2="${f(y+SL)}" stroke="#3f8bd6" stroke-width="${RW}" stroke-linecap="round"/>`,a:{t:"fall",x0:f(-RK*ya),y0:ya,x1:f(-RK*yb),y1:yb,ph:V4[i],tk:1.25}};};
-  const flocke=(x,y,i)=>({d:[],b:()=>[0,60,120].map(a=>`<line x1="${f(x-1.75)}" y1="${y}" x2="${f(x+1.75)}" y2="${y}" stroke="#79aee0" stroke-width=".8" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join(""),a:{t:"flocke",sx:[.45,-.4,.4,-.45][i],ph:V4[i]}});
-  const korn=(x,y,i)=>({d:[],b:()=>`<circle cx="${x}" cy="${y}" r="1.2" fill="#bcd8f0" stroke="#7fa9cd" stroke-width=".4"/>`,a:{t:"fall",x0:0,y0:-2.5,x1:0,y1:1.6,ph:V4[i],tk:.85}});
+    return {d:[],b:()=>`<line x1="${f(x+RK*SL/2)}" y1="${y}" x2="${f(x-RK*SL/2)}" y2="${f(y+SL)}" style="stroke:var(--icRe,#3f8bd6)" stroke-width="${RW}" stroke-linecap="round"/>`,a:{t:"fall",x0:f(-RK*ya),y0:ya,x1:f(-RK*yb),y1:yb,ph:V4[i],tk:1.25}};};
+  const flocke=(x,y,i)=>({d:[],b:()=>[0,60,120].map(a=>`<line x1="${f(x-1.75)}" y1="${y}" x2="${f(x+1.75)}" y2="${y}" style="stroke:var(--icSn,#79aee0)" stroke-width=".8" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join(""),a:{t:"flocke",sx:[.45,-.4,.4,-.45][i],ph:V4[i]}});
+  const korn=(x,y,i)=>({d:[],b:()=>`<circle cx="${x}" cy="${y}" r="1.2" style="fill:var(--icHa,#bcd8f0);stroke:var(--icHs,#7fa9cd)" stroke-width=".4"/>`,a:{t:"fall",x0:0,y0:-2.5,x1:0,y1:1.6,ph:V4[i],tk:.85}});
   /* der Blitz ragte frueher unten aus dem Feld und wurde abgeschnitten (v4.08) - er endet bei 24,2 */
   const blitz={d:[],b:()=>`<path d="M13.2 15.4l-3.4 4.9h2.4l-1.4 3.9 4.4-5.5h-2.6l1.4-3.3z" fill="#f7a81b" stroke="#e08c00" stroke-width=".35" stroke-linejoin="round"/>`,a:{t:"blitz"}};
   const nebelband=(y,x1,len,i)=>({d:[dWind],b:id=>`<path d="M${f(x1-len)} ${y}h${len}" fill="none" stroke="url(#${id}w)" stroke-width="1.7" stroke-linecap="round"/>`,a:{t:"pendel",u:"ws",k:1,dur:.7,ph:i*.24}});
