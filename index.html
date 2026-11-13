@@ -2559,7 +2559,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.90</span>
+      <span class="ver">v6.91</span>
     </div>
   </header>
 
@@ -4510,7 +4510,12 @@ function renderStrip(rows){
        Leiste leer. Sonst stuende in einer gemessenen Zelle ein Prognosewert,
        ohne dass man es ihr ansieht. */
     const _tMs=new Date(r.timestamp).getTime();
-    const _nx=_nachStempel.get(_tMs+3600e3);
+    let _nx=_nachStempel.get(_tMs+3600e3);
+    /* v6.91: ist die Folgezeile noch Vorhersage, oben aber schon die Messung ihrer Stunde (Live, sunshine_60), gilt die */
+    if(_nx&&_nx._fc&&!r._fc&&_kopfMess&&!_kopfMess._fc&&new Date(_kopfMess.timestamp).getTime()===_tMs+3600e3){
+      const _km=_kopfMess,_s60=(typeof _km.sunshine==="number")?_km.sunshine:_km._ss60;
+      if(typeof _s60==="number"&&isFinite(_s60))_nx={_fc:false,sunshine:_s60};
+    }
     const _nxOk=!!_nx&&(!!_nx._fc===!!r._fc);
     const _moegl=sonnenMoeglich(_tMs+3600e3);   // 0..60, fuer T bis T+1
     const _ssRoh=(_nxOk&&typeof _nx.sunshine==="number"&&isFinite(_nx.sunshine))?Math.max(0,Math.min(60,_nx.sunshine)):null;

@@ -4021,6 +4021,10 @@ v6.90 (Nutzer 13.11., Bild Erlental 14:23: "zweimal Frostwarnung", "die Frostwar
 ruhiger: Rand 1 px (75 %), Balken 4 statt 7 px, kein farbiger Schein, Lichtkante + weicher Schatten wie die Karten (v6.89).
 (3) `hiSonneX()`: Sonne nach dem Tagesanteil (Aufgang 12 %, Untergang 88 % der Kopfbreite, 2-%-Schritte, sunMoment); die
 Klemme zwischen "Live" und Datum (v6.37) ist weg. Geprueft (`e/t131.py`): 9 / 12:30 / 16 Uhr -> 24 / 52 / 82 %, mit Warnung.
+v6.91 (Nutzer 13.11. 14:34, Bild Erlental: in der Stundenleiste fehlten bei "13 Uhr" die Sonnenminuten): die Zelle T
+nimmt die Sonne aus der Zeile T+1 (v4.29) und mischt Messung und Vorhersage nicht - die 14:00-Zeile war noch MOSMIX, die
+Messung 14:00 stand nur oben (Live, `_kopfMess`). Jetzt nimmt die gemessene Zelle dann `sunshine` bzw. `_ss60` dieser
+Live-Messung, wenn ihr Stempel genau T+1 ist. Nur Syntax und Laden ohne Fehler geprueft (Fall im Pruefstand nicht nachgestellt).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
