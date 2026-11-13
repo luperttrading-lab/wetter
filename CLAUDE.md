@@ -3794,6 +3794,19 @@ der Himmel laeuft wie v6.52 weiter. Geprueft (`e/t105.py`, standalone nachgestel
 alten Seite sofort (99,111,131), erste Bilder der neuen Seite dieselbe Farbe, nach dem Einblenden --hi-r unveraendert;
 Wisch 2,5 s nach dem Start (Vorabruf noch nicht fertig) -> Farbe beim Gehen nachgezogen; "Bewegung reduzieren";
 Wisch-Regression `e/t82.py` himmel / himmel red / hell ohne Fehler. Nicht am iPhone geprueft.
+v6.69 STERNE FUNKELN (Nutzer 13.11.: "wenn wir Dunkelheit haben und es ist klar, dass die Sterne minimal funkeln"):
+`hiSterne(sz,B,a,hmax,fk)` - bei fk (Bedeckung < 60 %, trocken, kein Nebel; hiSzene) stehen die helleren Sterne (q > 0,8,
+Deckkraft > 0,3; bei 393 pt rund 50, im Kopf ~11) nicht auf der Leinwand, sondern als <i class="hiFk"> (10 px, radialer
+Verlauf, wie der Leinwandstern). CSS-Animation `hiFunkel` Helligkeit 100 % -> --hif, alternate, steps; Dauer je Stern
+1,8-4,4 s, Versatz nach der UHR - der Kopf (#hiK) funkelt im Gleichtakt (geprueft: gleicher Stern, gleiche Helligkeit).
+AUFWAND: Dauer und Versatz sind ganze Vielfache von 0,2 s, 5 Stufen je Sekunde - so wechseln ALLE Sterne im selben Moment.
+Gemessen ohne GPU (Nacht klar, 6 s): ohne Funkeln 22-23 %, verstreute Stufen (10/s und 5/s) 30-34 %, ausgerichtet 25-26 %
+eines Kerns. Laeuft auch bei "Bewegung reduzieren" (Helligkeit ist keine Bewegung, v4.73; !important gegen die Sperre).
+REGLER Einstellungen > Himmel > Sterne > "Funkeln" 0-100 % (`himmelFunkeln`, `HI_FK_STD` 40 = MEINE Wahl, noch nicht vom
+Nutzer gewaehlt): --hif = 1 - 0,8 x Wert (40 % -> 0,68; 100 % -> 0,2), 0 % = Klasse hifk0, Sterne stehen. Knopf "klarer
+Nachthimmel (20 s)" (`hiNachtProbe`, HI.test = "nacht") zum Ansehen am Tag. Geprueft (`e/t106.py`, `e/t107.py`): Nacht klar
+49/11 funkelnde Sterne, Nacht bedeckt und Tag 0, Regler 0 / 100 (kleinste Helligkeit 0,22), "Bewegung reduzieren" laeuft,
+Vorschau. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
