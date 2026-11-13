@@ -3881,6 +3881,11 @@ Kacheln waehlen / Einstellungen offen sind (html.kzsockel), haben #content und d
 unsichtbar) und der Hinweis #heat (Frost/Hitze, liegt in #hero) ist aus - die Seite endet unter dem Fuss des Bearbeitens,
 ueber dem Sockel. NICHT display:none: ein verstecktes Canvas waere 0 px breit (siehe "Die Falle"); geprueft: Breiten der
 Diagramme vor und nach dem Schliessen gleich (`e/t116.py`, Himmel und hell; Seite 7855 -> 2898 px, nach Fertig wieder 7855).
+v6.78 (Nutzer 13.11., Bild v6.77: "das Ziehen und Entfernen muss oben bei den Kacheln stehen"): der Hinweis "ziehen zum
+Sortieren · ⊖ entfernt" steht direkt unter den Kacheln in eigenem Element #kzHint (zwischen #kz und #kzPool), nicht mehr im
+Fuss unter den Einstellungen; der Fuss ist im Bearbeiten leer (Fertig im Sockel, v6.76). Der Aussentipp-Schliesser nimmt als
+Unterkante das unterste sichtbare Teil (kz, kzHint, kzPool, kzReg, kzFoot); owZone kennt #kzHint. Im Himmel weiss wie der Fuss.
+Geprueft (`e/t118.py`, Himmel und hell).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
