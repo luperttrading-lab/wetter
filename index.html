@@ -1647,6 +1647,10 @@ html:root.himmel{transition-duration:var(--hi-bl,1.3s)!important}
 /* v6.69 STERNE FUNKELN (hiSterne, hiFunkelAnim): seit v6.72 Web-Animation je Stern (laeuft auch bei "Bewegung reduzieren",
    die CSS-Sperre gilt dafuer nicht - eine Helligkeit ist keine Bewegung, v4.73); aus nur ueber den Regler (0 %). */
 .hiS>.hiFk{position:absolute;display:block;width:10px;height:10px;pointer-events:none;will-change:opacity,transform}
+/* v6.73 (Nutzer 13.11., Bild Dakar: "wir haben die Sonne dick oben am Himmel - die kleine Sonne unten koennten wir
+   ausblenden"): steht die Sonne im Himmel (Klasse hisonne, v6.46), entfaellt das kleine Sonnensymbol neben "Klar" /
+   "Teils bewoelkt"; das Wort bleibt und schaltet per Tipp weiter die Bewegung der Symbole. Mond, Wolken, Regen bleiben. */
+html:root.himmel.hisonne #condIc[data-ic="clear-day"],html:root.himmel.hisonne #condIc[data-ic="partly-cloudy-day"]{display:none}
 </style>
 </head>
 <body>
@@ -2487,7 +2491,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.72</span>
+      <span class="ver">v6.73</span>
     </div>
   </header>
 
@@ -9231,6 +9235,7 @@ function zustandZeigen(){
   const _sl=(_feinLive&&(now()-_feinLive.ts)<60*60000)?_feinLive:null;
   if(_sl){const neu=sonneStuetztIcon(ic,_sl.ss30,_sl.ss60,Date.now());if(neu!==ic){ic=neu;tx=LABELS[neu]||tx;}}
   ic=tagNachtJetzt(ic);
+  il.dataset.ic=ic;
   /* nur neu einsetzen, wenn sich Symbol oder Stufe aendern - sonst begaenne die Bewegung bei jeder Datenlieferung von vorn */
   {const k=ic+"|"+sbStufe()+"|"+sbGroesse();if(il._sbK!==k||il.firstElementChild!==il._sbN){il.innerHTML=symbGross(ic);il._sbK=k;il._sbN=il.firstElementChild;}}
   tl.textContent=tx;sbInit();
