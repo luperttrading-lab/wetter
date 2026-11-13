@@ -3845,6 +3845,11 @@ in jedem achten Wert ein Aufblitzen (voll hell, 1 + 0,6 x Staerke so gross). Fun
 Web-Animationen gelten auch bei "Bewegung reduzieren" (die CSS-Sperre greift dort nicht). Regler wirkt sofort (Animationen neu).
 Gemessen (`e/t110.py`): 40 % Helligkeit 0,65-1,0, 100 % 0,09-1,0 mit Aufblitzen; Kopf und Himmel gleich; ohne GPU 45-47 %
 gegen 37 % eines Kerns ohne Funkeln (mehr Sterne, Groesse mitanimiert) - am iPhone mit GPU deutlich weniger.
+v6.73 (Nutzer 13.11., Bild Dakar v6.71: "wir haben die Sonne dick oben am Himmel - Geschmackssache, aber wir koennten die
+kleine Sonne unten ausblenden"): in der Ansicht "Himmel" entfaellt das Symbol neben dem Wort, wenn die Sonne im Himmel steht
+(Klasse hisonne = C.sonne > 0,3) und das Symbol clear-day oder partly-cloudy-day ist (`#condIc[data-ic]`, gesetzt in
+zustandZeigen nach tagNachtJetzt). Mond, Wolken, Regen, Nebel bleiben; "Ohne Sonne" und die klassischen Ansichten zeigen es
+wie bisher; das Wort schaltet per Tipp weiter die Bewegung der Symbole. Geprueft (`e/t111.py`, Dakar per page.clock).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
