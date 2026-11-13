@@ -2174,9 +2174,11 @@ function hiMond(L,B){
       sep=Math.acos(Math.max(-1,Math.min(1,cs)))/R,mo=moonInfo(n0);
     var nacht=1-hiSm(-8,-1,so.alt),tagv=hiSm(35,60,sep)*hiSm(15,40,mo.illum)*.55;
     var v=Math.max(nacht,tagv)*(1-hiSm(.6,.92,L.N))*hiSm(0,5,m.alt);if(v<.05)return null;
-    var az=((m.az%360)+360)%360,f=Math.max(.12,Math.min(.88,.12+.76*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75;
+    var az=((m.az%360)+360)%360,f=Math.max(.06,Math.min(.94,.06+.88*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75;
     if(C_SON(B)&&Math.abs(mx-B.sx)<B.sr*3.2)mx=B.sx+(mx<B.sx?-1:1)*B.sr*3.2;
-    return {x:mx,y:B.kb+B.sr*1.1,r:r,v:+v.toFixed(2),svg:hiMondSvg(mo,mondHellDreh(mo.frac)),k:Math.round(mx/4)+"."+mo.illum+"."+Math.round(v*10)};
+    if(az>180)mx=Math.min(x0+aw*.94,mx+aw*.1*(1-hiSm(2,35,m.alt)));
+    var my=B.kb+B.sr*(1.1+.7*(1-hiSm(2,35,m.alt)));
+    return {x:mx,y:my,r:r,v:+v.toFixed(2),svg:hiMondSvg(mo,mondHellDreh(mo.frac)),k:Math.round(mx/4)+"."+Math.round(my/4)+"."+mo.illum+"."+Math.round(v*10)};
   }catch(e){return null;}}
 /* Sichel ohne dunkle Scheibe: nur die beleuchtete Seite des Mondfotos (Maske = Gegenstueck der Schattenmaske von moonSvg) */
 function hiMondSvg(mo,dreh){var R=18,cx=20,cy=20,frac=mo.frac,rx=Math.abs(Math.cos(2*Math.PI*frac))*R,wax=frac<.5,
@@ -2606,7 +2608,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.98</span>
+      <span class="ver">v6.99</span>
     </div>
   </header>
 

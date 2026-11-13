@@ -4058,6 +4058,9 @@ vierte statt fuenfte kleine Stern (393 pt ~54).
 v6.98 (Nutzer, Bild der Einstellungen: "als Standardeinstellung verwenden"): Sterne Voreinstellung Kleine Sterne 100 %
 (`HI_FK_STD`), Grosse Sterne 40 % (unveraendert), Funkel-Tempo x1,5 (`HI_FK_TP_STD` 150). Wolken x2,0 und "Mit Sonne" waren
 schon Voreinstellung. Gespeicherte Werte bleiben.
+v6.99 (Nutzer, Bild Dakar 21:05: "wenn der Mond bald untergeht, weiter rechts und tiefer"): `hiMond` waagrecht 6-94 % statt
+12-88 % der Kopfbreite (Osten links, Westen rechts), senkrecht tiefer, je tiefer er steht: y = kb + sr x (1,1 + 0,7 x (1 -
+hiSm(2,35,Hoehe))) - ab 35 Grad wie bisher, am Horizont 0,7 Sonnenradien (~17 px) tiefer - mehr ueberdeckt die grosse Temperatur; im Westen tief zusaetzlich bis 10 % weiter rechts (neben das Grad-Zeichen). Werte MEINE Wahl.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
