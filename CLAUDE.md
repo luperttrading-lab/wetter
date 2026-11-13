@@ -3874,6 +3874,13 @@ Knopf"): statt des schwebenden Knopfs (v6.75) eine feste Leiste ueber die ganze 
 weisse Leiste mit dunklem Knopf, dunkel/Himmel Glas mit hellem Knopf. Einblenden 0,22 s von unten. Geprueft (`e/t114.py`,
 `e/t115.py`). Frage des Nutzers "Was macht der Einstellungen-Knopf da unten?" beantwortet (klappt den Einstellungsblock auf/zu;
 im Kachel-Bearbeiten der Weg zu den Einstellungen); ob er bleibt, steht aus.
+v6.77 (Nutzer 13.11., Bild Buenos Aires v6.76: "Einstellungen-Knopf weg machen" und "wenn wir bei Einstellungen sind,
+sollte man unten am Ende enden und nicht im Wetter weiter nach unten scrollen"): (1) der Knopf "Einstellungen" im Fuss des
+Bearbeitens (#kzZahn) ist entfernt - Kacheln waehlen und Einstellungen sind zwei Punkte im Menue am Zahnrad oben. (2) solange
+Kacheln waehlen / Einstellungen offen sind (html.kzsockel), haben #content und der Quellenfuss Hoehe 0 (overflow hidden,
+unsichtbar) und der Hinweis #heat (Frost/Hitze, liegt in #hero) ist aus - die Seite endet unter dem Fuss des Bearbeitens,
+ueber dem Sockel. NICHT display:none: ein verstecktes Canvas waere 0 px breit (siehe "Die Falle"); geprueft: Breiten der
+Diagramme vor und nach dem Schliessen gleich (`e/t116.py`, Himmel und hell; Seite 7855 -> 2898 px, nach Fertig wieder 7855).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
