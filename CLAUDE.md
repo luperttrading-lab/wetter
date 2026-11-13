@@ -4041,6 +4041,10 @@ v6.94 (Nutzer 13.11.: "Warnungen mit einem X wegdruecken"): jede echte Warnkarte
 Tippflaeche). Weggedrueckt bleibt sie aus bis zu ihrem Ende (`expires`, ohne Ende 24 h), Speicher `warnWeg` {Schluessel:
 Ablauf}, Schluessel = Ereignis|Stufe|Beginn - wird die Warnung hochgestuft oder beginnt neu, erscheint sie wieder.
 Testkarten (`?warntest`) ohne x. Geprueft (Playwright): x blendet aus, Neuzeichnen laesst sie weg.
+v6.95 (Nutzer: "beim naechsten Oeffnen der App wieder anzeigen"): das x aus v6.94 gilt nur noch bis zum naechsten
+Oeffnen - Merker im Speicher der Seite (`_warnWeg`), geleert beim Neuladen oder bei Rueckkehr nach >= 5 min im Hintergrund
+(visibilitychange, `renderAlerts(_warnLetzt)`). Alter Eintrag `warnWeg` wird geloescht. Kuerzere Pausen (App kurz
+gewechselt) lassen die Warnung weg - 5 min ist MEINE Wahl.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
