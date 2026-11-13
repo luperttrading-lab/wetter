@@ -3892,6 +3892,17 @@ Tagen 8-16 (Deckkraft .58) weniger. Jetzt Regenwahrscheinlichkeit, Menge und Bal
 Stundenleiste (`.col .pp`, gleiches Problem) hellblau: Himmel #b8dcff (Balken #a6d2ff), dunkel #9fd0ff (#8cc4ff); der kleine
 Tropfen (`dropMini`) folgt der Schrift (currentColor - hell unveraendert #2f86cf). Blasse Tage im Dunklen .68 statt .58.
 Geprueft (`e/t119.py`, eingespielte 16 Tage, alt/neu/dunkel).
+v6.80 (Nutzer 13.11., zwei Bilder Buenos Aires v6.79: "kein Regenradar fuer Buenos Aires und bei der Landkarte kann man
+den Text unten nicht lesen"): (1) Bright Sky antwortet ausserhalb des DWD-Radars mit HTTP 404 "lat/lon lies outside the radar
+data range" (geprueft: Buenos Aires, Barcelona, auch PARIS; Wettenberg 200). Bis v6.79 stand dann eine leere graue Karte mit
+"Radar nicht erreichbar (HTTP 404)". Jetzt `RK.aussen` (404 im Fehlertext), Klasse `rk-aussen` an #radarSec blendet Karte,
+Schieber und Legende aus, `#rkNote` sagt in 14 px `RK_AUSSEN_TXT` ("Kein Regenradar fuer diesen Ort - das DWD-Radar reicht nur
+ueber Deutschland und die Grenzgebiete. Die Wolkenkarte ... gibt es ueberall."); kein neuer Abruf fuer 5 min. Andere Fehler
+(Netz, Zeitueberschreitung) wie bisher "Radar nicht erreichbar". Ein weltweites Radar gibt es in der App NICHT. (2) Beschriftung
+der Wolkenregler (`.wolkctl`, "sichtbar ab / voll deckend ab") war fest #5b6879 - auf dunklem Glas unlesbar; jetzt --muted /
+Zahl --ink in den dunklen Ansichten. Dazu war die gewaehlte Stufe (Schleier / Normal / Nur dicht, `.wpre.on`) im Dunklen nicht
+markiert (`html.dunkel .wpre` schlug `.wpre.on`). Geprueft (`e/t120.py`, `e/t121.py`; im Pruefstand macht netz2 aus einem 404
+einen Netzfehler - der Test spielt die echte 404-Antwort per eigener Route ein): Himmel / dunkel / hell, Wettenberg unveraendert.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
