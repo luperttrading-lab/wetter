@@ -3984,6 +3984,26 @@ unter den Knoepfen (`_chartKnL`). Geprueft (`e/t126.py`: Himmel 393/320, hell; 7
 400 h, +60 h, Doppeltipp zweimal, -8 h, Knopf): Ende 6 px vom Rand, Jetzt erscheint/verschwindet wie beschrieben, Abstand zum
 Cursorwert 17-67 px. Luxor im Pruefstand ohne aeltere Werte (Open-Meteo gesperrt): Daten kuerzer als 7 Tage -> der Anfang
 steht in der Mitte, rechts bleiben 80 px - mit den 30 Tagen (Open-Meteo) am Geraet nicht. Nicht am iPhone geprueft.
+v6.86 STUFENSCHALTER UND CURSOR AUF JETZT (Nutzer 13.11., zwei iPhone-Bilder New York v6.85: "wenn man auf Jetzt drueckt,
+muesste der Punkt mit dem weissen Rand auch auf jetzt springen"; "in der Standardstellung steht 7 Tage, auf 7 Tage steht
+2 Tage - das ist das Ziel, man koennte aber denken, es ist die aktuelle Anzeige"; "Plus und Minus sind nicht schlecht - die
+aktuelle Anzahl Tage einblenden wie frueher"). (1) STUFENSCHALTER `#chartSp`: Lupe minus (`#chartSpM`, mehr Tage) | aktuelle
+Spanne (`#chartSpT`, `chartSpanne`, jetzt auch "1 Tag") | Lupe plus (`#chartSpP`, weniger Tage); Stufen `CHART_STUFEN` 12 h,
+1, 2, 7, 14, 30 Tage (`chartStufe(r)`), am Ende gesperrt (blass). Zusammenziehen bleibt stufenlos, die Mitte nennt jede
+Spanne ("4 Tage"). Aus der natuerlichen Lage fuehrt eine Stufe in die natuerliche Lage der neuen Spanne; ist die Kurve
+verschoben, wird um den Cursor gezoomt (er bleibt auf seiner Zeit). (2) CURSOR beweglich: `chartCurF` = Anteil der Breite
+(bis v6.85 fest 0,5). In der natuerlichen Lage steht er genau auf jetzt (`chartNaturF`: 2 Tage 50 %, 7 Tage 76 %, 14 Tage 87 %,
+30 Tage 93 %); beim Schieben bleibt er an seiner Stelle auf dem Bildschirm, beim Zusammenziehen auch. "Jetzt" und der
+Doppeltipp fuehren Kurve UND Cursor zurueck (`animateScrollTo(ziel,fZ)` blendet beides in 0,34 s). "Jetzt" erscheint, wenn
+Kurve ODER Cursor von der natuerlichen Lage weg sind (`chartWeg`: Kurve > max(3 h, 6 %), Cursor > 4 % der Breite). Der
+Cursorkasten (`.chart-cursor`) bekommt `left` in px (`g.offL` = Lage der Kurve in der Zeile + Breite x chartCurF); Wert und
+Uhrzeit bleiben in der Karte (`updateCursor` verschiebt sie am Rand, gemessen nur in den aeusseren 85 px). (3) KNOEPFE in
+einer eigenen Leiste UEBER der Kurve (`.chart-kn`, 26 px): rechts der Stufenschalter, links davon "Jetzt" - auf der Kurve
+haetten sie den Cursor bei 76-93 % verdeckt. Damit entfallen `chartKnMessen`, `_chartKnL`, `eng1/eng2`; das Wort "jetzt" an der
+Linie steht wieder immer (am Rand der Kurve hineingerueckt, vorher abgeschnitten "jet"). Die Karte ist 26 px hoeher.
+Geprueft (`e/t127.py`: Himmel 393/320 pt, hell; Start, minus, -40 h, Jetzt, minus 14 / 30 (minus gesperrt), plus, -72 h,
+plus verschoben, Doppeltipp zweimal, plus bis 12 h (plus gesperrt), Zusammenziehen auf 100 h): Cursor in natuerlicher Lage
+0 min neben jetzt, Ende 6 px vom Rand, Pillen mindestens 11 px vom Kartenrand. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -720,13 +720,15 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   /* v6.27: Spanne nach dem Zoomen (Antippen = Standard) und die Zeile mit dem Bedienhinweis */
   .chart-zoom{appearance:none;-webkit-appearance:none;border:0;margin:0;font:700 10px/1 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#5c6b80;padding:4px 7px;border-radius:8px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.1);display:inline-flex;align-items:center;gap:5px;cursor:pointer}
   .chart-zoom[hidden]{display:none}
-  /* v6.85: beide Knoepfe oben rechts - "Jetzt" (nur wenn verschoben) und die Spanne (Lupe minus = 7 Tage, plus = 2 Tage) */
-  .chart-kn{position:absolute;right:4px;top:-3px;z-index:4;display:flex;gap:5px;align-items:center}
-  .chart-zoom{white-space:nowrap}
-  #chartSp .plus{display:none}
-  #chartSp.rein .plus{display:inline}
-  .chart-kn.eng1 #chartSp svg{display:none}
-  .chart-kn.eng2 #chartZoom span{display:none}
+  /* v6.86: Leiste UEBER der Kurve (die Kurve bleibt frei, der Cursor darf ueberall stehen): "Jetzt" (nur wenn
+     verschoben) und die Spanne als Stufenschalter - Lupe minus = mehr Tage, Lupe plus = weniger, dazwischen die Spanne */
+  .chart-kn{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:-4px 0 5px;min-height:26px}
+  .chart-kn .chart-zoom{white-space:nowrap;height:26px;padding:0 10px;font-size:11px;border-radius:9px}
+  .chart-sp{display:inline-flex;align-items:center;height:26px;border-radius:9px;background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(15,23,42,.1);color:#5c6b80}
+  .chart-sp button{appearance:none;-webkit-appearance:none;border:0;margin:0;padding:0;background:none;color:inherit;width:32px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .chart-sp button:disabled{opacity:.3;cursor:default}
+  .chart-sp span{font:700 11px/1 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums;min-width:44px;text-align:center;white-space:nowrap}
+  html.dunkel .chart-sp{background:rgba(26,33,44,.88);color:var(--ink)}
   html.dunkel .chart-zoom{background:rgba(26,33,44,.88);color:var(--ink)}
   .chart-hint{font-size:10.5px;line-height:1.3;color:var(--faint);text-align:center;margin-top:4px}
   .chart-cursor{position:absolute;top:0;bottom:0;left:calc(50% + 16px);transform:translateX(-50%);width:0;pointer-events:none;z-index:3}
@@ -2551,7 +2553,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.85</span>
+      <span class="ver">v6.86</span>
     </div>
   </header>
 
@@ -2584,7 +2586,7 @@ function hiAnzeigen(){
     <div id="stdSec"><div class="sect">Stündlich</div>
     <div class="strip-card"><div class="strip" id="strip"></div></div></div>
     <div id="chartSec"><div class="sect">Temperaturverlauf</div>
-    <div class="chart-card"><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div><div class="chart-kn" id="chartKn"><button type="button" class="chart-zoom" id="chartZoom" hidden aria-label="Zurück zu jetzt"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span>Jetzt</span></button><button type="button" class="chart-zoom" id="chartSp" data-h="168" aria-label="7 Tage zeigen"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.6"/><path d="M15 15l5.5 5.5"/><path d="M7 10h6"/><path class="plus" d="M10 7v6"/></svg><span>7 Tage</span></button></div></div><div class="chart-hint">Zwei Finger: mehr oder weniger Tage · Doppeltipp: zurück zu jetzt</div></div></div>
+    <div class="chart-card"><div class="chart-kn" id="chartKn"><button type="button" class="chart-zoom" id="chartZoom" hidden aria-label="Zurück zu jetzt"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span>Jetzt</span></button><div class="chart-sp" id="chartSp" role="group" aria-label="Zeitspanne"><button type="button" id="chartSpM" aria-label="Mehr Tage zeigen"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.6"/><path d="M15 15l5.5 5.5"/><path d="M7 10h6"/></svg></button><span id="chartSpT">2 Tage</span><button type="button" id="chartSpP" aria-label="Weniger Tage zeigen"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.6"/><path d="M15 15l5.5 5.5"/><path d="M7 10h6"/><path d="M10 7v6"/></svg></button></div></div><div class="chart-row"><canvas id="chartAxis"></canvas><div class="chart-scroll" id="chartScroll"><canvas id="chart"></canvas></div><div class="chart-cursor" id="chartCursor"><div class="cc-val" id="ccVal"></div><div class="cc-line"></div><div class="cc-dot" id="ccDot"></div><div class="cc-time" id="ccTime"></div></div></div><div class="chart-hint">Zwei Finger: mehr oder weniger Tage · Doppeltipp: zurück zu jetzt</div></div></div>
     <div id="nowcastSec" class="hidden"><div class="sect">Niederschlag · nächste 2 Std</div><div class="nowcard" id="nowcard"></div></div>
     <div id="radarSec" data-modus="regen"><div class="sect">Wolken &amp; Regen</div><div class="kt-schalter" id="ktSchalter" role="tablist"><button type="button" data-m="wolken">Wolken</button><button type="button" data-m="regen">Regen</button></div><div class="nowcard rk-card"><div class="rk-wrap"><canvas id="radarCv"></canvas><div id="rkZeit" class="rk-zeit"></div></div><div class="rk-ctl"><button type="button" id="rkPlay" class="rk-play" aria-label="Abspielen">&#9654;</button><input type="range" id="rkSchieber" min="0" max="0" step="1" value="0" aria-label="Zeitpunkt"></div><div class="rk-leg" id="rkLeg"></div><div class="uvnote" id="rkNote">Radar wird beim Aufklappen geladen</div></div><div id="wolkenSec" class="hidden"><div class="sect" id="wolkenTitle">Wolken im Umkreis</div><div class="nowcard"><canvas id="wolkenCv"></canvas><div class="wolkpre"><button type="button" class="wpre" data-a="5" data-b="60">Schleier</button><button type="button" class="wpre" data-a="20" data-b="80">Normal</button><button type="button" class="wpre" data-a="50" data-b="95">Nur dicht</button></div><div class="wolkctl"><label>sichtbar ab <b id="wolkE0v">22</b>&#8202;%</label><input type="range" id="wolkE0" min="0" max="95" step="1" value="22"><label>voll deckend ab <b id="wolkE1v">72</b>&#8202;%</label><input type="range" id="wolkE1" min="5" max="100" step="1" value="72"></div><div class="uvnote" style="margin-top:8px;text-align:center">wei&#223; = Wolken &#183; freie Sicht auf die Karte = klarer Himmel &#183; <span style="color:#e8000b">&#9679;</span> dein Standort<br>Untergrund: Esri-Satellit &#183; Grenzen &#169; GeoBasis-DE / BKG (2026) &#183; Wolken: Open-Meteo-Modell, stündlich &#183; hohe Schleierwolken z&#228;hlen abgeschw&#228;cht</div></div></div></div>
     <div id="rainHrSec" class="hidden"><div class="sect">Regen · nächste 24 Std</div><div class="nowcard" id="rainHrCard"></div></div>
@@ -4622,7 +4624,7 @@ function chartGeoBauen(){
   let obsMs=tMin;for(let i=n-1;i>=0;i--){if(rows[i]._ct<=nowMs){obsMs=rows[i]._ct;break;}}
   let bMin=Infinity,bMax=-Infinity;for(let i=0;i<basis.length;i++){const v=basis[i].temperature;if(v<bMin)bMin=v;if(v>bMax)bMax=v;}
   const alt=chartGeom,g={tMin:tMin,tMax:tMax,W:W,viewW:viewW,H:H,x0:lead,x1:W-lead,y0:padT,y1:H-padB,padT:padT,padB:padB,rows:rows,nH:n-basis.length,obsMs:obsMs,pxPerH:pxPerH,bMin:bMin,bMax:bMax,lo:alt?alt.lo:0,hi:alt?alt.hi:1};
-  g.nowX=(obsMs>=tMin&&obsMs<=tMax)?chartX(g,obsMs):null;
+  g.nowX=(obsMs>=tMin&&obsMs<=tMax)?chartX(g,obsMs):null;g.offL=host.offsetLeft||0;
   chartGeom=g;return g;
 }
 function drawChart(rows){
@@ -4635,11 +4637,11 @@ function drawChart(rows){
   let warNatur=false;try{warNatur=chartInit&&!!chartGeom&&!chartWeg(chartGeom);}catch(e){}
   const g=chartGeoBauen();if(!g)return;
   const mx=Math.max(0,g.W-g.viewW);
-  if(!chartInit||warNatur){chartScrollX=chartNatur(g);chartInit=true;}
+  if(!chartInit||warNatur){chartScrollX=chartNatur(g);chartCurF=chartNaturF(g,chartScrollX);chartInit=true;}
   else if(_chartMitteT!=null)chartScrollX=Math.max(0,Math.min(mx,chartX(g,_chartMitteT)-g.viewW/2));
   else chartScrollX=Math.max(0,Math.min(mx,chartScrollX));
   _chartMitteT=chartT(g,chartScrollX+g.viewW/2);
-  _chartAchse="";_chartKnL=null;
+  _chartAchse="";
   chartZoomPille();chartMalen();
   requestAnimationFrame(updateCursor);if(typeof updateChartJump==="function")updateChartJump();
 }
@@ -4731,7 +4733,7 @@ function chartMalen(){
   if(g.obsMs>=g.tMin&&g.obsMs<=g.tMax){const nx=X(g.obsMs);
     if(nx>vA-40&&nx<vB+40){ctx.strokeStyle="rgba(23,32,46,.35)";ctx.setLineDash([3,3]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(nx,y0);ctx.lineTo(nx,y1);ctx.stroke();ctx.setLineDash([]);
       ctx.fillStyle=CO.muted;ctx.font="700 9px -apple-system,system-ui,sans-serif";ctx.textBaseline="top";ctx.textAlign="center";
-      if(!(_chartKnL!=null&&nx-vA+14>_chartKnL))ctx.fillText("jetzt",nx,1);
+      if(nx>=vA&&nx<=vB)ctx.fillText("jetzt",Math.max(vA+13,Math.min(vB-13,nx)),1);
       const oi=Math.min(n-1,chartIdx(rows,g.obsMs)),obs=rows[oi];
       if(obs){const ly=Y(obs.temperature),cc=thermal(obs.temperature);ctx.beginPath();ctx.arc(nx,ly,6,0,7);ctx.fillStyle=rgba(cc,.2);ctx.fill();ctx.beginPath();ctx.arc(nx,ly,3.5,0,7);ctx.fillStyle=rgb(cc);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=CO.karte;ctx.stroke();}}}
   // links vom ersten Wert: was mit aelteren Werten ist
@@ -4747,7 +4749,7 @@ function chartMalen(){
 function updateCursor(){
   const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;
   /* Zeit unter dem fixen Cursor (Bildschirmmitte), nie ausserhalb der Daten */
-  const rows=g.rows,n=rows.length,ct=Math.max(g.tMin,Math.min(g.tMax,chartT(g,chartScrollX+g.viewW/2)));
+  const px=g.viewW*chartCurF,rows=g.rows,n=rows.length,ct=Math.max(g.tMin,Math.min(g.tMax,chartT(g,chartScrollX+px)));
   const i=chartIdx(rows,ct);let temp;
   if(i<=0)temp=rows[0].temperature;else if(i>=n)temp=rows[n-1].temperature;
   else{const t0=rows[i-1]._ct,t1=rows[i]._ct,f=t1>t0?(ct-t0)/(t1-t0):0;temp=rows[i-1].temperature+(rows[i].temperature-rows[i-1].temperature)*f;}
@@ -4757,6 +4759,10 @@ function updateCursor(){
   tEl.textContent=d.toLocaleDateString("de-DE",{timeZone:TZ,weekday:"short"})+(fern?" "+d.toLocaleDateString("de-DE",{timeZone:TZ,day:"numeric",month:"numeric"}):"")+" "+d.toLocaleTimeString("de-DE",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+(fut?" · Prog.":"");
   tEl.classList.toggle("fc",fut);
   const y=g.y1-(g.y1-g.y0)*((temp-g.lo)/(g.hi-g.lo));dEl.style.top=y+"px";dEl.style.background=rgb(thermal(temp));
+  /* v6.86: der Cursor steht nicht mehr fest in der Mitte (chartCurF); Wert und Uhrzeit bleiben in der Zeile */
+  const cur=el("chartCursor"),L=g.offL+px,rw=g.offL+g.viewW;if(cur){const ls=L.toFixed(1)+"px";if(cur.style.left!==ls)cur.style.left=ls;}
+  [vEl,tEl].forEach(e=>{let d=0;if(L<85||L>rw-85){const w=e.offsetWidth;d=Math.max(w/2-L,Math.min(0,rw-L-w/2));}
+    const tr=d?"translateX(calc(-50% + "+d.toFixed(1)+"px))":"";if(e.style.transform!==tr)e.style.transform=tr;});
 }
 function drawAxis(lo,hi,H,padT,padB,T){
   const dpr=Math.min(window.devicePixelRatio||1,3),W=cax.clientWidth||32;
@@ -4774,44 +4780,47 @@ function stopAnim(){if(_momRAF){cancelAnimationFrame(_momRAF);_momRAF=0;}}
 /* v6.27: Schwung und Ziehen rechnen in ZEIT, nicht in Pixeln - kommen unterwegs aeltere Werte dazu (oder aendert sich
    der Zoom), verschieben sich alle gedachten Pixel, und die Kurve spraenge an eine falsche Stelle. */
 function chartSetzeZeit(t){const g=chartGeom;if(g)setScrollX(chartX(g,t)-g.viewW/2);}
-function animateScrollTo(target){stopAnim();const g=chartGeom;if(!g)return;
-  const tA=chartT(g,chartScrollX+g.viewW/2),tB=chartT(g,target+g.viewW/2),t0=performance.now(),dur=340;
-  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);chartSetzeZeit(tA+(tB-tA)*e);_momRAF=k<1?requestAnimationFrame(step):0;};
+function animateScrollTo(target,fZ){stopAnim();const g=chartGeom;if(!g)return;
+  const tA=chartT(g,chartScrollX+g.viewW/2),tB=chartT(g,target+g.viewW/2),fA=chartCurF,fB=fZ==null?fA:fZ,t0=performance.now(),dur=340;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);chartCurF=fA+(fB-fA)*e;chartSetzeZeit(tA+(tB-tA)*e);_momRAF=k<1?requestAnimationFrame(step):0;};
   _momRAF=requestAnimationFrame(step);}
-function chartSpanne(h){if(h<47.5)return Math.round(h)+" Std";const t=h/24,r=Math.round(t*2)/2;return (t<9.5&&r!==Math.round(r)?String(r).replace(".",","):Math.round(t))+" Tage";}
-/* v6.85 (Nutzer 13.11.: "7 Tage und Jetzt beide oben rechts, den leeren Platz rechts weg, links lieber die Tage"):
-   ZWEI Fragen, zwei Knoepfe. Wie viel: "7 Tage" (Lupe minus) bzw. in der weiten Ansicht "2 Tage" (Lupe plus) - der Knopf
-   nennt, wohin er fuehrt; ein Umschalter "2 Tage | 7 Tage" waere klarer, passt aber neben "Jetzt" nicht am Wert des
-   Cursors vorbei (393 pt: 24 px zu breit). Wo: "Jetzt" erscheint nur, wenn die Kurve von ihrer natuerlichen Lage
-   weggeschoben ist, und fuehrt dorthin zurueck - der Zoom bleibt. Natuerliche Lage (chartNatur): bis 60 h jetzt in der
-   Mitte (dort steht der Cursor), darueber das Ende der Vorhersage am rechten Rand - kein leerer Platz rechts, links
-   dafuer mehr vergangene Tage. Weiter nach rechts schieben geht weiter (bis das Ende unter dem Cursor steht).
+function chartSpanne(h){if(Math.abs(h-24)<.5)return "1 Tag";if(h<47.5)return Math.round(h)+" Std";const t=h/24,r=Math.round(t*2)/2;return (t<9.5&&r!==Math.round(r)?String(r).replace(".",","):Math.round(t))+" Tage";}
+/* v6.85/v6.86 (Nutzer 13.11.: "7 Tage und Jetzt oben rechts, den leeren Platz rechts weg, links lieber die Tage" und
+   "beim Druck auf Jetzt muss der Punkt mit dem weissen Rand auf jetzt springen"; "2 Tage/7 Tage nennt das Ziel - man koennte
+   denken, es ist die aktuelle Anzeige - die aktuelle Anzahl Tage einblenden wie frueher, Plus und Minus sind gut").
+   Zwei Fragen, zwei Bedienelemente in der Leiste UEBER der Kurve. WIE VIEL: Stufenschalter Lupe minus | Spanne | Lupe plus
+   (CHART_STUFEN 12 h, 1, 2, 7, 14, 30 Tage; Zusammenziehen dazwischen ist frei, die Mitte nennt jede Spanne). WO: "Jetzt" -
+   nur sichtbar, wenn die Kurve oder der Cursor von der natuerlichen Lage weg ist, fuehrt dorthin zurueck, der Zoom bleibt.
+   NATUERLICHE LAGE (chartNatur): bis 60 h jetzt in der Mitte, darueber das Ende der Vorhersage am rechten Rand (kein leerer
+   Platz). Der CURSOR (Punkt, Wert, Uhrzeit) steht seit v6.86 nicht mehr fest in der Mitte: chartCurF = Anteil der Breite,
+   in der natuerlichen Lage genau auf jetzt (chartNaturF), beim Schieben bleibt er an seiner Stelle auf dem Bildschirm.
+   Stufe aus der natuerlichen Lage = natuerliche Lage der neuen Spanne; ist die Kurve verschoben, wird um den Cursor gezoomt.
    Doppeltipp: erst zurueck zu jetzt, steht es schon dort, zurueck auf 2 Tage. */
-var _chartJetztAn=false,_chartKnL=null,CHART_RAND_R=6;
+var _chartJetztAn=false,CHART_RAND_R=6,chartCurF=.5,CHART_STUFEN=[12,24,48,168,336,720];
 function chartNatur(g){g=g||chartGeom;if(!g)return 0;
   const mx=Math.max(0,g.W-g.viewW),ref=g.obsMs||Date.now();let s;
   if(chartViewH<=60)s=chartX(g,ref)-g.viewW/2;
   /* jetzt nie naeher als 15 % am linken Rand (falls die Vorhersage einmal laenger reicht als die Spanne) */
   else s=Math.min(g.x1+CHART_RAND_R-g.viewW,chartX(g,ref)-g.viewW*.15);
   return Math.max(0,Math.min(mx,s));}
-function chartWeg(g){g=g||chartGeom;if(!g)return false;return Math.abs(chartScrollX-chartNatur(g))>Math.max(g.pxPerH*3,g.viewW*.06);}
+function chartNaturF(g,s){g=g||chartGeom;if(!g)return .5;if(s==null)s=chartNatur(g);const ref=g.obsMs||Date.now();
+  if(!(ref>=g.tMin&&ref<=g.tMax))return .5;return Math.max(.05,Math.min(.95,(chartX(g,ref)-s)/g.viewW));}
+function chartWeg(g){g=g||chartGeom;if(!g)return false;const s=chartNatur(g);
+  return Math.abs(chartScrollX-s)>Math.max(g.pxPerH*3,g.viewW*.06)||Math.abs(chartCurF-chartNaturF(g,s))>.04;}
 function chartZoomPille(){
-  const p=el("chartZoom"),sp=el("chartSp");if(!p)return;
-  const zj=chartWeg();if(p.hidden===zj){p.hidden=!zj;_chartKnL=null;}_chartJetztAn=zj;
-  /* weit (ab 100 h) -> "2 Tage", sonst "7 Tage" */
-  if(sp){const rein=chartViewH>100;if(sp.classList.contains("rein")!==rein){sp.classList.toggle("rein",rein);
-    sp.dataset.h=rein?CHART_VIEW_H:168;sp.lastChild.textContent=rein?"2 Tage":"7 Tage";sp.setAttribute("aria-label",rein?"2 Tage zeigen":"7 Tage zeigen");_chartKnL=null;}}
-  if(_chartKnL==null)chartKnMessen();
+  const p=el("chartZoom");if(!p)return;
+  const zj=chartWeg();if(p.hidden===zj)p.hidden=!zj;_chartJetztAn=zj;
+  const t=el("chartSpT");if(t){const x=chartSpanne(chartViewH);if(t.textContent!==x)t.textContent=x;}
+  const m=el("chartSpM"),pl=el("chartSpP");
+  if(m){const d=!CHART_STUFEN.some(x=>x>chartViewH*1.05);if(m.disabled!==d)m.disabled=d;}
+  if(pl){const d=!CHART_STUFEN.some(x=>x<chartViewH/1.05);if(pl.disabled!==d)pl.disabled=d;}
 }
-/* Lage der Knoepfe (vom linken Rand der Kurve): darunter entfaellt das Wort "jetzt" an der Linie. Stoesst die Gruppe an
-   den Wert des Cursors (Mitte + 34 px), faellt zuerst die Lupe weg, dann das Wort "Jetzt" (nur das Zeichen bleibt). */
-function chartKnMessen(){const k=el("chartKn"),h=el("chartScroll"),row=k&&k.parentNode;if(!k||!h||!k.offsetWidth)return;
-  k.classList.remove("eng1","eng2");const r=row.getBoundingClientRect(),grenze=r.left+r.width/2+16+34;
-  if(k.getBoundingClientRect().left<grenze)k.classList.add("eng1");
-  if(k.getBoundingClientRect().left<grenze)k.classList.add("eng2");
-  _chartKnL=k.getBoundingClientRect().left-h.getBoundingClientRect().left;}
+/* r = +1 mehr Tage (Lupe minus), -1 weniger (Lupe plus) */
+function chartStufe(r){const h=chartViewH,z=r>0?CHART_STUFEN.find(x=>x>h*1.05):CHART_STUFEN.slice().reverse().find(x=>x<h/1.05);
+  if(!z)return;const g=chartGeom;if(!g||!chartWeg(g)){chartSpanneWahl(z);return;}
+  stopAnim();const px=g.viewW*chartCurF;chartZoom(z,chartT(g,chartScrollX+px),px);}
 function chartSpanneWahl(h){stopAnim();chartViewH=Math.max(CHART_VIEW_MIN,Math.min(CHART_VIEW_MAX,h));
-  const g=chartGeoBauen();if(!g)return;chartScrollX=chartNatur(g);
+  const g=chartGeoBauen();if(!g)return;chartScrollX=chartNatur(g);chartCurF=chartNaturF(g,chartScrollX);
   _chartMitteT=chartT(g,chartScrollX+g.viewW/2);_chartTouchT=Date.now();chartNeu();chartZoomPille();}
 /* neue Spanne; die Zeit fokT bleibt an der Stelle fokPx (vom linken Rand der Kurve) */
 function chartZoom(vh,fokT,fokPx){
@@ -4829,7 +4838,7 @@ function chartZoom(vh,fokT,fokPx){
 }
 function chartStandard(){stopAnim();chartViewH=CHART_VIEW_H;_chartMitteT=null;chartInit=false;if(_chartBasis)drawChart(_chartBasis);}
 function recenterChart(){const g=chartGeom;if(!g)return;
-  if(chartWeg(g)){animateScrollTo(chartNatur(g));return;}
+  if(chartWeg(g)){const z=chartNatur(g);animateScrollTo(z,chartNaturF(g,z));return;}
   if(Math.abs(chartViewH-CHART_VIEW_H)>=.5)chartSpanneWahl(CHART_VIEW_H);}
 /* Aeltere Stundenwerte, einmal je Seitenaufruf. Bright Sky hat fuer deutsche Stationen das Archiv; liefert es (im
    Ausland) nichts, das Modell von Open-Meteo wie bei backfillPast - mit timeformat=unixtime, weil dessen Zeitangaben
@@ -4895,7 +4904,7 @@ async function chartHistLaden(){
   window.addEventListener("mousemove",e=>{if(md)zieh(e.clientX-mx0);});
   window.addEventListener("mouseup",()=>{md=false;});
   const zp=el("chartZoom");if(zp)zp.addEventListener("click",recenterChart);
-  const sp=el("chartSp");if(sp)sp.addEventListener("click",()=>chartSpanneWahl(+sp.dataset.h));
+  const sm=el("chartSpM"),sq=el("chartSpP");if(sm)sm.addEventListener("click",()=>chartStufe(1));if(sq)sq.addEventListener("click",()=>chartStufe(-1));
 })();
 
 /* v3.00: gezeichnete Symbole statt Textzeichen — die Unicode-Sonne wird von
