@@ -2416,7 +2416,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.66</span>
+      <span class="ver">v6.67</span>
     </div>
   </header>
 
@@ -3773,12 +3773,25 @@ function owLos(){
   setTimeout(go,OW_WARTE);
 }
 function owZeit(e){var t=e&&e.timeStamp;return (t&&t>0&&t<1e12)?t:performance.now();}
+/* v6.67 (Nutzer: "beim Wischen bleibt der Bildschirm manchmal in der Haelfte stecken"): Bewegung und Loslassen gehen an das
+   Element, auf dem der Finger AUFGESETZT hat. Wird es mitten im Wischen ersetzt (kzRender baut alle Kacheln per innerHTML
+   neu, bei jeder Datenlieferung), haengt es nicht mehr im Dokument - die Ereignisse steigen dann nicht mehr bis #hero auf,
+   der Inhalt blieb verschoben stehen. Darum hoeren touchmove/touchend/touchcancel direkt an diesem Element mit. */
 function owStart(e){
-  OW.on=0;OW.art="";
+  /* haengt noch ein alter Wisch (Ende verloren): zuerst sauber zurueck */
+  if(OW.zieht&&!OW.los)owZurueck();
+  owLoesen();OW.on=0;OW.art="";
   if(!e.touches||e.touches.length!==1)return;
   if(!owZone(e.target)||owGesperrt())return;
   var t=e.touches[0];OW.on=1;OW.x0=t.clientX;OW.y0=t.clientY;OW.dx=0;OW.sp=[[owZeit(e),t.clientX]];
+  var z=e.target;if(z&&z.addEventListener){OW.tz=z;
+    z.addEventListener("touchmove",owZieh,{passive:false});
+    z.addEventListener("touchend",owEnde,{passive:true});
+    z.addEventListener("touchcancel",owEnde,{passive:true});}
 }
+function owLoesen(){var z=OW.tz;OW.tz=null;if(!z)return;
+  try{z.removeEventListener("touchmove",owZieh,{passive:false});z.removeEventListener("touchend",owEnde,{passive:true});
+    z.removeEventListener("touchcancel",owEnde,{passive:true});}catch(x){}}
 function owZieh(e){
   if(!OW.on)return;
   if(!e.touches||e.touches.length!==1){if(OW.art==="h")owZurueck();OW.on=0;return;}
@@ -3807,6 +3820,7 @@ function owZieh(e){
   }
 }
 function owEnde(e){
+  owLoesen();
   if(!OW.on)return;OW.on=0;
   if(OW.art!=="h")return;
   OW.schluck=Date.now();
@@ -3819,10 +3833,11 @@ function owEnde(e){
   ["header","alerts","hero"].forEach(function(id){
     var n=id==="header"?document.querySelector("#app>header"):el(id);if(!n)return;
     n.addEventListener("touchstart",owStart,{passive:true});
-    n.addEventListener("touchmove",owZieh,{passive:false});
-    n.addEventListener("touchend",owEnde,{passive:true});
-    n.addEventListener("touchcancel",owEnde,{passive:true});
   });
+  /* Rueckfall: haengt ein Wisch trotzdem (Ende auf anderem Weg verloren), bringt ihn die naechste Beruehrung irgendwo oder
+     das Verlassen der App zurueck */
+  document.addEventListener("touchstart",function(e){if(OW.zieht&&!OW.los){OW.on=0;owLoesen();owZurueck();}},{capture:true,passive:true});
+  document.addEventListener("visibilitychange",function(){if(document.hidden&&OW.zieht&&!OW.los){OW.on=0;owLoesen();owZurueck();}});
   /* der Klick, den der Browser nach dem Wisch noch schickt, darf nichts ausloesen (Symbol, Ort, Knoepfe) */
   document.addEventListener("click",function(e){if(Date.now()-OW.schluck<450){e.preventDefault();e.stopPropagation();}},true);
 })();

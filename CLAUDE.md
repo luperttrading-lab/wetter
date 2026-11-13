@@ -3758,6 +3758,19 @@ in EINEM Bild (3,64 s und 8,07 s). Eine Blende ist keine Bewegung (Grundsatz sei
 Einstellungen sichern) nennt jetzt "Bewegung reduzieren an/aus". Bildvergleich alt/neu (Himmel, oben und gescrollt):
 Aufbau gleich. Wisch-Regression (`e/t82.py` himmel / himmel red / hell) ohne Fehler. Nicht am iPhone geprueft. GRENZE: jeder
 Ortswechsel ist weiter ein Neuladen (1 MB HTML); ganz ohne Uebergangsbild ginge es nur mit einem Ortswechsel IN der Seite.
+v6.67 (Nutzer 13.11. 07:04, iPhone-Bild "Region Dakar": Inhalt ~100 pt nach rechts verschoben, nicht verblasst, Pille
+"< Buenos Aires" steht - "beim Wischen bleibt der Bildschirm manchmal in der Haelfte stecken"). URSACHE (im Pruefstand
+nachgestellt, `e/t103.py`): touchmove/touchend gehen an das Element, auf dem der Finger AUFGESETZT hat, und steigen von dort
+auf. `kzRender` baut alle Kacheln per innerHTML neu (bei jeder Datenlieferung - nach einem Ortswechsel trudeln noch Sekunden
+lang Daten ein); beginnt der Wisch auf einer Kachel und wird sie dabei ersetzt, haengt das Element nicht mehr im Dokument, die
+Ereignisse erreichen #hero nicht mehr - `owEnde` lief nie, der Inline-Versatz blieb stehen (Chromium: 22,5 px, Pille sichtbar).
+Gilt fuer jedes ersetzte Element im Kopf oder Kasten. JETZT: `owStart` haengt touchmove/touchend/touchcancel an das beruehrte
+Element selbst (`OW.tz`, `owLoesen` nimmt sie wieder ab) statt an die Bereiche - an das Ziel selbst wird ein Ereignis auch
+ohne Dokument zugestellt. RUECKFALL: eine Beruehrung irgendwo (document, capture) oder das Verlassen der App
+(visibilitychange) bei haengendem Wisch (`OW.zieht` ohne `OW.los`) federt ihn zurueck. Geprueft (Playwright, CDP-Touch):
+kzRender mitten im Wisch kurz -> zurueck, weit -> Ortswechsel; Temperatur neu geschrieben, touchcancel, verlorenes Ende +
+Tipp in der Stundenleiste, verlorenes Ende + App verlassen -> alles zurueck (`e/t104.py`); Wisch-Regression `e/t82.py`
+himmel / himmel red / hell ohne Fehler. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
