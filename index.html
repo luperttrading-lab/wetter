@@ -574,6 +574,12 @@ html.himmel #kzSockel{background:var(--hi-k,rgba(22,30,48,.85))}
 html.kzsockel #kzFertig{display:none}
 html.kzsockel .kzfoot:has(.kzhint) .kzfr{justify-content:flex-start}
 html.kzsockel body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+/* v6.77 (Nutzer 13.11.: "Einstellungen-Knopf weg" - der Block ist ueber das Zahnrad oben erreichbar; "bei Einstellungen
+   sollte man unten am Ende enden und nicht im Wetter weiter nach unten scrollen"): solange Kacheln waehlen / Einstellungen
+   offen sind, ist alles unter dem Wetterkasten weg. NICHT display:none - ein verstecktes Canvas waere 0 px breit und nach dem
+   Schliessen verzerrt (siehe "Die Falle"); Hoehe 0 laesst die Breiten stehen. */
+html.kzsockel #content,html.kzsockel #app>.foot{height:0;overflow:hidden;visibility:hidden;margin:0;padding:0;border:0}
+html.kzsockel #heat{display:none}
 .kopf-kn{display:flex;gap:8px}
 /* v6.31: mit vier Knoepfen ist der Block links schmaler (393 pt: 209 statt 247 px) - die Stationszeile braeche um.
    Sie steht aber UNTER den Knoepfen, auf Hoehe der Versionsnummer: darf also breiter sein als der Block (laeuft
@@ -2514,7 +2520,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.76</span>
+      <span class="ver">v6.77</span>
     </div>
   </header>
 
@@ -8914,7 +8920,7 @@ function kzRender(){
   if(pool){pool.classList.toggle("on",_kzEdit);
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
   if(foot)foot.innerHTML=_kzEdit
-    ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="zahn${_kzRegAuf?" an":""}" id="kzZahn" title="Einstellungen">${KZ_GEAR}Einstellungen</span><span class="fertig" id="kzFertig">Fertig</span></span>`
+    ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="fertig" id="kzFertig">Fertig</span></span>`
     :((_kzPause&&kzWe().modus!=="wischen"&&box.querySelector(".kzdots"))?`<span></span><span class="kzpause an" id="kzPause" role="button">${KZ_WEITER}Weiter</span>`:"");
   /* v6.31 (Nutzer: "verdeckt zu viel vom wichtigen Startbildschirm"): "Kacheln waehlen" und "Pause" stehen im Menue am
      Zahnrad oben; hier bleibt nur der Fuss des Bearbeitens und, solange angehalten ist, der Knopf "Weiter" */
