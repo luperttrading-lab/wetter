@@ -2553,7 +2553,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.86</span>
+      <span class="ver">v6.87</span>
     </div>
   </header>
 
@@ -2729,7 +2729,7 @@ function locZulMerken(neu,alt){
 }
 const LOC_KEY="_"+LOC.lat.toFixed(2)+"_"+LOC.lon.toFixed(2); // Cache-Suffix pro Standort
 /* Wetter-Koordinaten: im Wettenberg-Profil stationsnah (DWD 01639), sonst = Standort */
-const LAT=LOC.isWettenberg?50.6034:LOC.lat, LON=LOC.isWettenberg?8.6516:LOC.lon, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48, CHART_VIEW_H=48;
+const LAT=LOC.isWettenberg?50.6034:LOC.lat, LON=LOC.isWettenberg?8.6516:LOC.lon, WINDOW_HOURS=72, CHART_PAST_H=72, CHART_FUT_H=48, CHART_VIEW_H=168;
 const OLD_MIN=90;
 
 /* ---------- thermische Skala (nur Zahl/Akzent) ---------- */
@@ -4744,7 +4744,7 @@ function chartMalen(){
   const ak=lo+"|"+hi+"|"+H+"|"+SK.T.length;
   if(ak!==_chartAchse){_chartAchse=ak;drawAxis(lo,hi,H,g.padT,g.padB,SK.T);}
   /* aeltere Werte holen, sobald jemand herauszoomt oder dem Anfang nahe kommt - nie von allein beim Start */
-  if(!_chartHist&&!_chartHistLaedt&&_chartTouchT&&(chartViewH>60||tA<g.tMin+(tB-tA)*.5))chartHistLaden();
+  if(!_chartHist&&!_chartHistLaedt&&(chartViewH>60||_chartTouchT&&tA<g.tMin+(tB-tA)*.5))chartHistLaden();
 }
 function updateCursor(){
   const g=chartGeom;if(!g||!g.rows||g.rows.length<2)return;

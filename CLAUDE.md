@@ -4004,6 +4004,10 @@ Linie steht wieder immer (am Rand der Kurve hineingerueckt, vorher abgeschnitten
 Geprueft (`e/t127.py`: Himmel 393/320 pt, hell; Start, minus, -40 h, Jetzt, minus 14 / 30 (minus gesperrt), plus, -72 h,
 plus verschoben, Doppeltipp zweimal, plus bis 12 h (plus gesperrt), Zusammenziehen auf 100 h): Cursor in natuerlicher Lage
 0 min neben jetzt, Ende 6 px vom Rand, Pillen mindestens 11 px vom Kartenrand. Nicht am iPhone geprueft.
+v6.87 (Nutzer 13.11.: "die 7-Tage-Einstellung als Standard beim Temperaturverlauf"): `CHART_VIEW_H` 168 statt 48 - Start,
+"zurueck auf Standard" (Doppeltipp-Stufe 2) und load() ohne Beruehrung zeigen 7 Tage, Ende am rechten Rand, Cursor auf
+jetzt (77 %). Damit links keine Luecke bleibt, laedt `chartHistLaden` die 30 Tage jetzt schon beim Start, sobald die Spanne
+ueber 60 h liegt (vorher erst nach Beruehrung) - ein Abruf je Seitenaufruf, ~445 KB roh (Bright Sky). Geprueft (`e/t128.py`).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
