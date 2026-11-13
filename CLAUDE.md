@@ -4061,6 +4061,14 @@ schon Voreinstellung. Gespeicherte Werte bleiben.
 v6.99 (Nutzer, Bild Dakar 21:05: "wenn der Mond bald untergeht, weiter rechts und tiefer"): `hiMond` waagrecht 6-94 % statt
 12-88 % der Kopfbreite (Osten links, Westen rechts), senkrecht tiefer, je tiefer er steht: y = kb + sr x (1,1 + 0,7 x (1 -
 hiSm(2,35,Hoehe))) - ab 35 Grad wie bisher, am Horizont 0,7 Sonnenradien (~17 px) tiefer - mehr ueberdeckt die grosse Temperatur; im Westen tief zusaetzlich bis 10 % weiter rechts (neben das Grad-Zeichen). Werte MEINE Wahl.
+v7.00 SUEDHALBKUGEL (Nutzer 13.11., Bilder Kapstadt/Luanda: "Norden in die Mitte?", "Mond nahe am Aequator von unten
+angestrahlt?"): (1) PANORAMA: bei Breite < 0 Achse um 180 Grad verschoben (`PL_SH`, `PLS(az)`, `XS` = Achse im verschobenen
+Raum, `X` = rohes Azimut), Mitte NORDEN, Westen links, Osten rechts; Kompass-Strich und -Pfeil ebenso. Himmelskarte/Blick
+unveraendert. (2) HIMMEL: Mond (`hiMond`) nach verschobenem Azimut, tief im Westen nach LINKS geschoben; Sonne (`hiSonneX`,
+`hiSued()`) laeuft rechts -> links. Vorher sprang der Mond auf der Suedhalbkugel beim Durchgang durch Norden vom linken an den
+rechten Rand. (3) `mondHellDreh`: unter dem Horizont die Lage beim naechstgelegenen Unter-/Aufgang (Suche +-15 h, 10 min)
+statt der Grundzeichnung (die war der Blick der Nordhalbkugel). Geprueft gegen PyEphem: Kapstadt 13.11. 20:10 Mond 36,1 Grad
+260 Grad, Saturn 47,9/39; Luanda 22:08 (Mond unter) helle Seite -168 Grad vom Zenit (PyEphem -165). Wettenberg unveraendert.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

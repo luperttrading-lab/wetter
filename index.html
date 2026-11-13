@@ -2028,8 +2028,10 @@ function hiSonne(s,C,B,vorn){
 /* v6.53: Sonnenhoehe ohne Hauptscript (gleiche Formel wie _muFallback), Ort aus dem gespeicherten Profil */
 /* v6.90 (Nutzer: "die Sonne koennte je nach Uhrzeit von links nach rechts wandern"): Lage nach dem Tagesanteil
    (Aufgang 12 %, Untergang 88 % der Kopfbreite - so macht es auch Apple, gemessen v6.38), in Schritten von 2 %. */
+/* v7.00: Suedhalbkugel - die Sonne laeuft von rechts nach links (Blick nach Norden) */
+function hiSued(){try{if(typeof AST_LAT!=="undefined")return AST_LAT<0;var p=JSON.parse(localStorage.getItem("locProfile")||"null");return !!(p&&+p.lat<0);}catch(e){return false;}}
 function hiSonneX(){try{if(typeof sunMoment!=="function")return .41;var t=new Date(),a=sunMoment(t,true),u=sunMoment(t,false);
-  if(a==null||u==null||u<=a)return .41;var f=Math.max(0,Math.min(1,(Date.now()-a)/(u-a)));return Math.round((.12+.76*f)*50)/50;}catch(e){return .41;}}
+  if(a==null||u==null||u<=a)return .41;var f=Math.max(0,Math.min(1,(Date.now()-a)/(u-a)));if(hiSued())f=1-f;return Math.round((.12+.76*f)*50)/50;}catch(e){return .41;}}
 function hiMuFrueh(ms,la0,lo0){
   var la=50.6481,lo=8.6743;try{var p=JSON.parse(localStorage.getItem("locProfile")||"null");if(p&&isFinite(p.lat)&&isFinite(p.lon)){la=+p.lat;lo=+p.lon;}}catch(e){}
   /* v6.68: auch fuer einen anderen Ort (Farbe des naechsten Orts vor dem Wechsel, hiZiel) */
@@ -2174,9 +2176,10 @@ function hiMond(L,B){
       sep=Math.acos(Math.max(-1,Math.min(1,cs)))/R,mo=moonInfo(n0);
     var nacht=1-hiSm(-8,-1,so.alt),tagv=hiSm(35,60,sep)*hiSm(15,40,mo.illum)*.55;
     var v=Math.max(nacht,tagv)*(1-hiSm(.6,.92,L.N))*hiSm(0,5,m.alt);if(v<.05)return null;
-    var az=((m.az%360)+360)%360,f=Math.max(.06,Math.min(.94,.06+.88*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75;
+    var sued=AST_LAT<0,az=(((m.az+(sued?180:0))%360)+360)%360,f=Math.max(.06,Math.min(.94,.06+.88*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75;
     if(C_SON(B)&&Math.abs(mx-B.sx)<B.sr*3.2)mx=B.sx+(mx<B.sx?-1:1)*B.sr*3.2;
-    if(az>180)mx=Math.min(x0+aw*.94,mx+aw*.1*(1-hiSm(2,35,m.alt)));
+    /* v7.00: Westen = rechts (Nordhalbkugel) bzw. links (Suedhalbkugel, Blick nach Norden) */
+    var west=((m.az%360)+360)%360>180;if(west&&!sued)mx=Math.min(x0+aw*.94,mx+aw*.1*(1-hiSm(2,35,m.alt)));if(west&&sued)mx=Math.max(x0+aw*.06,mx-aw*.1*(1-hiSm(2,35,m.alt)));
     var my=B.kb+B.sr*(1.1+.7*(1-hiSm(2,35,m.alt)));
     return {x:mx,y:my,r:r,v:+v.toFixed(2),svg:hiMondSvg(mo,mondHellDreh(mo.frac)),k:Math.round(mx/4)+"."+Math.round(my/4)+"."+mo.illum+"."+Math.round(v*10)};
   }catch(e){return null;}}
@@ -2608,7 +2611,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.99</span>
+      <span class="ver">v7.00</span>
     </div>
   </header>
 
@@ -6867,7 +6870,11 @@ function mondBogen(ms){
 function mondHellDreh(frac){
   try{const n0=new Date(),min=plNowMin()+(Date.now()%60000)/60000,
       jd=jdFromDate(n0.getFullYear(),n0.getMonth()+1,n0.getDate())+min/1440;
-    const m=altaz('mond',jd,AST_LAT),so=altaz('sonne',jd,AST_LAT);if(!(m.alt>0))return 0;
+    let m=altaz('mond',jd,AST_LAT),so=altaz('sonne',jd,AST_LAT);
+    /* v7.00 (Nutzer, Luanda 22:08, Mond seit 21:45 unter): unter dem Horizont die Lage beim naechstgelegenen Untergang bzw.
+       Aufgang (Suche +-15 h in 10-min-Schritten) statt der Grundzeichnung - die ist der Blick der Nordhalbkugel */
+    if(!(m.alt>0)){let j=null;for(let k=1;k<=90&&j==null;k++)for(const sg of [-1,1]){const jj=jd+sg*k/144;if(altaz('mond',jj,AST_LAT).alt>0){j=jj;break;}}
+      if(j==null)return 0;m=altaz('mond',j,AST_LAT);so=altaz('sonne',j,AST_LAT);}
     const R=Math.PI/180,a1=m.alt*R,a2=so.alt*R,dAz=(so.az-m.az)*R;
     const th=Math.atan2(Math.sin(dAz)*Math.cos(a2),Math.cos(a1)*Math.sin(a2)-Math.sin(a1)*Math.cos(a2)*Math.cos(dAz))/R;
     return th-(frac<0.5?90:-90);}catch(e){return 0;}
@@ -11819,6 +11826,9 @@ function skyTheme(sunAlt){
 }
 function plNowMin(){const t=tzTeile(Date.now());return t.hour*60+t.minute;}
 function plQ5(m){return m-(((m%5)+5)%5);} // letzte volle 5-Minuten-Marke
+/* v7.00: Suedhalbkugel - Panorama mit NORDEN in der Mitte (Blick nach Norden: Westen links, Osten rechts); Achse um 180 Grad verschoben */
+var PL_SH=(typeof AST_LAT!=="undefined"&&AST_LAT<0)?180:0;
+function PLS(a){return PL_SH?((a+PL_SH)%360+360)%360:a;}
 function drawPlaneten(){
   const cv=el("planetenCv");if(!cv)return;
   const W=cv.clientWidth;if(!W||W<140)return;
@@ -11845,7 +11855,7 @@ function drawPlaneten(){
       for(let t=0;t<=1440;t+=6){const p=altaz(n,dayBase+t/1440,AST_LAT),su=altaz('sonne',dayBase+t/1440,AST_LAT).alt;arc.push({az:p.az,alt:p.alt,t,vis:p.alt>0&&su<dkA});}
       arcs[n]=arc;});
     let azMin=999,azMax=-999,altMax=15;
-    for(const n of PL_BODIES)for(const p of arcs[n]){if(!p.vis)continue;azMin=Math.min(azMin,p.az);azMax=Math.max(azMax,p.az);altMax=Math.max(altMax,p.alt);}
+    for(const n of PL_BODIES)for(const p of arcs[n]){if(!p.vis)continue;const z=PLS(p.az);azMin=Math.min(azMin,z);azMax=Math.max(azMax,z);altMax=Math.max(altMax,p.alt);}
     if(azMin>azMax){azMin=200;azMax=340;}
     const pad=(azMax-azMin)*0.08+4;azMin-=pad;azMax+=pad;
     altMax=Math.max(24,Math.min(50,altMax+5));
@@ -11862,7 +11872,7 @@ function drawPlaneten(){
       leg:a>0&&p.alt>0};});
 
   const mL=26,mR=10,mT=84,mB=22,pw=W-mL-mR,ph=H-mT-mB;
-  const X=az=>mL+(az-azMin)/(azMax-azMin)*pw,Y=al=>mT+(altMax-al)/(altMax-altMin)*ph,
+  const XS=v=>mL+(v-azMin)/(azMax-azMin)*pw,X=az=>XS(PLS(az)),Y=al=>mT+(altMax-al)/(altMax-altMin)*ph,
     YZ=al=>al<=altMax?Y(al):(mT-(Math.min(al,76)-altMax)/(76-altMax)*(mT-10)); // Stauchzone wie bei der Sonne (76 deckt alle Koerper bis 47,3N: Wintermond 71,3, Venus-Extrem 75,0 Grad)
   const rgba=(hex,al)=>{const n=parseInt(hex.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${al})`;};
 
@@ -11907,7 +11917,7 @@ function drawPlaneten(){
   }
 
   ctx.font='9px system-ui,sans-serif';
-  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){ctx.strokeStyle=rgba(thGrid,.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(a),mT);ctx.lineTo(X(a),mT+ph);ctx.stroke();}
+  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){ctx.strokeStyle=rgba(thGrid,.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(XS(a),mT);ctx.lineTo(XS(a),mT+ph);ctx.stroke();}
   for(let al=Math.ceil(altMin/10)*10;al<=altMax;al+=10){ctx.strokeStyle=al===0?thZero:rgba(thGrid,.55);ctx.lineWidth=al===0?2:1;ctx.beginPath();ctx.moveTo(mL,Y(al));ctx.lineTo(mL+pw,Y(al));ctx.stroke();ctx.fillStyle=plInk(gradAt(Math.min(1,Math.max(0,(Y(al)-mT)/ph))),'#1c2f45','#eef2f8');ctx.textAlign='right';ctx.fillText(al+'\u00b0',mL-4,Y(al)+3);}
   /* Zone oberhalb altMax: sanft gestauchte Fortsetzung der Achse, Linien wie unten */
   {const zs=(mT-10)/(76-altMax);
@@ -11920,7 +11930,7 @@ function drawPlaneten(){
   const baseY=mT+ph;
   const compass={0:'N',45:'NO',90:'O',135:'SO',180:'S',225:'SW',270:'W',315:'NW',360:'N'};
   ctx.textAlign='center';
-  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){const k=norm360(a),card=compass[k];ctx.strokeStyle=card?thAxis:rgba(thGrid,.8);ctx.lineWidth=card?1.5:1;ctx.beginPath();ctx.moveTo(X(a),baseY);ctx.lineTo(X(a),baseY+(card?6:3));ctx.stroke();if(card){ctx.font='700 11px system-ui,sans-serif';ctx.fillStyle=botInk;ctx.fillText(card,X(a),baseY+17);}}
+  for(let a=Math.ceil(azMin/15)*15;a<=azMax;a+=15){const k=norm360(a+PL_SH),card=compass[k];ctx.strokeStyle=card?thAxis:rgba(thGrid,.8);ctx.lineWidth=card?1.5:1;ctx.beginPath();ctx.moveTo(XS(a),baseY);ctx.lineTo(XS(a),baseY+(card?6:3));ctx.stroke();if(card){ctx.font='700 11px system-ui,sans-serif';ctx.fillStyle=botInk;ctx.fillText(card,XS(a),baseY+17);}}
 
   PL_BODIES.forEach(n=>{const arc=arcs[n];const col=n==='mond'?thMoon:P_COL[n];
     ctx.strokeStyle=rgba(col,.82);ctx.lineWidth=2;ctx.beginPath();let pen=false,pAz=null;
@@ -11939,13 +11949,13 @@ function drawPlaneten(){
        altMax zielte (04.10. 07:40: Mond 64 Grad, Ring unter "Jetzt"). */
     const ctx=sctx||cv.getContext("2d");
     const D16k=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-    let a=PL_KOMP.hd;while(a<azMin)a+=360;while(a-360>=azMin)a-=360;
+    let a=PLS(PL_KOMP.hd);while(a<azMin)a+=360;while(a-360>=azMin)a-=360;
     const rot='#ff4d6d',txt=Math.round(PL_KOMP.hd)+'\u00b0 '+D16k[Math.round(PL_KOMP.hd/22.5)%16]
       +(PL_KOMP.acc!=null?' \u00b1'+Math.round(PL_KOMP.acc)+'\u00b0':'');
     ctx.save();ctx.font='700 10px -apple-system,system-ui,sans-serif';ctx.textBaseline='bottom';
     if(a<=azMax){
-      const x=X(a);
-      if(PL_KOMP.acc!=null){const b=Math.max(1,X(a+PL_KOMP.acc)-x);
+      const x=XS(a);
+      if(PL_KOMP.acc!=null){const b=Math.max(1,XS(a+PL_KOMP.acc)-x);
         ctx.fillStyle=rgba(rot,.14);ctx.fillRect(Math.max(mL,x-b),mT,Math.min(mL+pw,x+b)-Math.max(mL,x-b),ph);}
       ctx.strokeStyle=rot;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,mT);ctx.lineTo(x,mT+ph);ctx.stroke();
       ctx.textAlign=x>mL+pw-60?'right':x<mL+60?'left':'center';
@@ -11954,7 +11964,7 @@ function drawPlaneten(){
       ctx.fillStyle=rot;ctx.fillText(txt,x,mT+ph-4);
     }else{
       // ausserhalb: kuerzerer Weg links oder rechts herum
-      const links=((azMin-PL_KOMP.hd+360)%360)<((PL_KOMP.hd-azMax+360)%360);
+      const links=((azMin-PLS(PL_KOMP.hd)+360)%360)<((PLS(PL_KOMP.hd)-azMax+360)%360);
       const x=links?mL+4:mL+pw-4,y=mT+ph/2;
       ctx.fillStyle=rot;ctx.beginPath();
       if(links){ctx.moveTo(x,y);ctx.lineTo(x+12,y-8);ctx.lineTo(x+12,y+8);}else{ctx.moveTo(x,y);ctx.lineTo(x-12,y-8);ctx.lineTo(x-12,y+8);}
@@ -11973,15 +11983,15 @@ function drawPlaneten(){
         const y=YZ(hh);
         ctx.strokeStyle=rot;ctx.lineWidth=2;ctx.setLineDash([6,4]);
         ctx.beginPath();ctx.moveTo(mL,y);ctx.lineTo(mL+pw,y);ctx.stroke();ctx.setLineDash([]);
-        const tw=ctx.measureText(ht).width;let lx=(a<=azMax&&X(a)<mL+pw/2)?mL+pw-tw-6:mL+4;
-        if(y<mT&&a<=azMax){const xr=X(a);lx=xr+14+tw<mL+pw?xr+14:xr-14-tw;}   // oben bei den Raedern: Beschriftung direkt neben den Ring
+        const tw=ctx.measureText(ht).width;let lx=(a<=azMax&&XS(a)<mL+pw/2)?mL+pw-tw-6:mL+4;
+        if(y<mT&&a<=azMax){const xr=XS(a);lx=xr+14+tw<mL+pw?xr+14:xr-14-tw;}   // oben bei den Raedern: Beschriftung direkt neben den Ring
         ctx.fillStyle=rgba('#ffffff',.85);ctx.fillRect(lx-3,y-15,tw+6,13);
         ctx.fillStyle=rot;ctx.textAlign='left';ctx.fillText(ht,lx,y-8.5);
-        if(a<=azMax){const x=X(a);
+        if(a<=azMax){const x=XS(a);
           ctx.lineWidth=2.5;ctx.strokeStyle='#ffffff';ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.stroke();
           ctx.lineWidth=2;ctx.strokeStyle=rot;ctx.stroke();}
       }else{
-        const oben=hh>76,y=oben?mT-2:mT+ph-2,x=(a<=azMax)?X(a):mL+pw/2;
+        const oben=hh>76,y=oben?mT-2:mT+ph-2,x=(a<=azMax)?XS(a):mL+pw/2;
         ctx.fillStyle=rot;ctx.beginPath();
         if(oben){ctx.moveTo(x,y-10);ctx.lineTo(x-8,y+2);ctx.lineTo(x+8,y+2);}
         else{ctx.moveTo(x,y+12);ctx.lineTo(x-8,y);ctx.lineTo(x+8,y);}
