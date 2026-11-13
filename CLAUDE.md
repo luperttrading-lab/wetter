@@ -4055,6 +4055,9 @@ nicht unter 0,80. Werte MEINE Wahl. Nicht am iPhone geprueft.
 v6.97 (Nutzer: "bei kleinen Sternen bei 0 und 100 % keinen Unterschied"): die blendenden kleinen Sterne waren 0,6 px
 und oft blass (Deckkraft al) - ihr Verschwinden fiel nicht auf. Jetzt Radius 1,1 px, Deckkraft mindestens 0,75, jeder
 vierte statt fuenfte kleine Stern (393 pt ~54).
+v6.98 (Nutzer, Bild der Einstellungen: "als Standardeinstellung verwenden"): Sterne Voreinstellung Kleine Sterne 100 %
+(`HI_FK_STD`), Grosse Sterne 40 % (unveraendert), Funkel-Tempo x1,5 (`HI_FK_TP_STD` 150). Wolken x2,0 und "Mit Sonne" waren
+schon Voreinstellung. Gespeicherte Werte bleiben.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
