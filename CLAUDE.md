@@ -3918,6 +3918,17 @@ Schnee/Hagel 3,1-3,3, Sonne 2,6-2,9 und Gewitter 2,6 (Gelb bzw. Grau auf Blau - 
 knapp). Dunkel: alles ueber 4. HELL UNVERAENDERT: weisse Wolken auf weisser Karte 1,1-1,6 : 1 - die Zeichnung (v4.08) lebt
 dort vom Schatten; eine Kontur waere ein Gestaltungswechsel, dem Nutzer angeboten. 16-Tage-Liste ab Tag 8 bleibt gedimmt
 (Absicht, v5.19). Bild alt/neu: `e/symbole_alt_neu.png` (wolkig, Nacht, bedeckt).
+v6.82 (Nutzer 13.11.: "wenn nichts gemessen ist, lass die Zeile wegfallen und pruefe, ob wir woanders Daten herbekommen"):
+ohne Messung heute (`d.hiMeas`/`d.loMeas` beide null) entfaellt "Heute bisher ↓ –° ↑ –°", ohne Wert von gestern (`dT`) die
+Zeile "keine Vergleichsdaten von gestern" (style.display in paintHero). QUELLEN AUSSERHALB DES DWD (geprueft 13.11.): Bright
+Sky `current_weather` liefert fuer Buenos Aires, Barcelona, Paris, New York, Dakar, Luxor, Tokio, Ayia Napa 404 - nur
+MOSMIX-Vorhersage. aviationweather.gov (NOAA, METAR weltweit, auch `stationinfo?bbox=`) hat KEINEN CORS-Kopf - im Browser
+nicht nutzbar. Iowa Environmental Mesonet (IEM, Iowa State University) hat CORS `*` und METAR weltweit:
+`mesonet.agron.iastate.edu/api/1/currents.json?station=SABE` (letzte Meldung, `max_tmpf`/`min_tmpf` des Ortstags, Grad
+Fahrenheit), `.../obhistory.json?station=SABE&network=AR__ASOS` (Meldungen des Tages), Stationsliste je Land
+`.../geojson/network/AR__ASOS.geojson` (Netz = Laendercode + "__ASOS", USA je Bundesstaat). Geprueft: SABE, LEBL, LFPG,
+GOOY, HELX, RJTT, LCLK frisch (09:00Z); KJFK so nicht (US-Kennung ohne K). METAR = Flughafen, meist stuendlich, GANZE Grad.
+Nicht eingebaut - Entscheidung des Nutzers steht aus (fehlt: naechste Station zum Ort, z. B. feste Stationsliste im Repo).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
