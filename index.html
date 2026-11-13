@@ -1503,9 +1503,10 @@ html:root.himmel .loc-box{background:#141a23}
 /* v6.36: Warnkarte im Himmel - dasselbe Glas wie die Karten (folgt Tag, Nacht und Wetter), auffaellig durch Rand,
    Balken, Titel und einen Schein in der Warnfarbe. Vorher fest dunkelbraun (#4a2410) - ein Fremdkoerper auf Blau. */
 html:root.himmel .alert{background:linear-gradient(90deg,rgba(var(--wf),.26),rgba(var(--wf),.05) 60%),var(--hi-k,rgba(22,30,48,.6));
-  border-width:2px;border-left-width:7px;border-color:rgb(var(--wr));color:#fff;
-  box-shadow:0 0 0 1px rgba(var(--wf),.22),0 6px 22px -8px rgba(var(--wf),.7)}
+  border-width:1px;border-left-width:4px;border-color:rgba(var(--wr),.75);color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 3px 10px rgba(0,12,35,.2)}
 html:root.himmel .alert .at,html:root.himmel .alert .ai{color:rgb(var(--wt))}
+html.warnfrost #heat.cold{display:none!important}
 html:root.himmel .alert .ad{color:#fff;opacity:.93}
 html:root.himmel .alert.minor{--wf:250,204,21;--wr:250,204,21;--wt:253,230,110}
 html:root.himmel .alert.moderate{--wf:249,115,22;--wr:251,140,60;--wt:255,198,138}
@@ -2022,6 +2023,10 @@ function hiSonne(s,C,B,vorn){
 /* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
    im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
 /* v6.53: Sonnenhoehe ohne Hauptscript (gleiche Formel wie _muFallback), Ort aus dem gespeicherten Profil */
+/* v6.90 (Nutzer: "die Sonne koennte je nach Uhrzeit von links nach rechts wandern"): Lage nach dem Tagesanteil
+   (Aufgang 12 %, Untergang 88 % der Kopfbreite - so macht es auch Apple, gemessen v6.38), in Schritten von 2 %. */
+function hiSonneX(){try{if(typeof sunMoment!=="function")return .41;var t=new Date(),a=sunMoment(t,true),u=sunMoment(t,false);
+  if(a==null||u==null||u<=a)return .41;var f=Math.max(0,Math.min(1,(Date.now()-a)/(u-a)));return Math.round((.12+.76*f)*50)/50;}catch(e){return .41;}}
 function hiMuFrueh(ms,la0,lo0){
   var la=50.6481,lo=8.6743;try{var p=JSON.parse(localStorage.getItem("locProfile")||"null");if(p&&isFinite(p.lat)&&isFinite(p.lon)){la=+p.lat;lo=+p.lon;}}catch(e){}
   /* v6.68: auch fuer einen anderen Ort (Farbe des naechsten Orts vor dem Wechsel, hiZiel) */
@@ -2290,12 +2295,11 @@ function hiPruefen(bl){
   var L=(erst&&HI.weiterL)?HI.weiterL:hiLage(),B=hiMass(),C=hiFarben(L),tf=hiTempo();HI.weiterL=null;
   /* v6.37: Ort der Sonne = 41 % der Kopfbreite, eine gute Scheibe unter der Unterkante des stehenden Kopfs */
   try{var kr0=document.querySelector("header").getBoundingClientRect();
-    if(kr0.width>0){B.aw=kr0.width;B.sr=Math.max(17,Math.min(27,kr0.width*.061));B.sx=kr0.left+kr0.width*.41;B.kb=Math.max(0,kr0.top)+kr0.height;B.sy=B.kb+B.sr*.7;
+    if(kr0.width>0){B.aw=kr0.width;B.sr=Math.max(17,Math.min(27,kr0.width*.061));B.sx=kr0.left+kr0.width*hiSonneX();B.kb=Math.max(0,kr0.top)+kr0.height;B.sy=B.kb+B.sr*.7;
       /* schmale Geraete (320 pt): die Scheibe bleibt zwischen "Live" und dem Datum, mit 8 px Abstand zu beiden */
       var bd0=document.getElementById("badge"),wn0=document.querySelector("#hero .when");
       if(bd0&&wn0){var b1=bd0.getBoundingClientRect(),w1=wn0.getBoundingClientRect();
-        if(b1.width>0&&w1.width>0){var lo0=b1.right+B.sr*.83+8,hi0=w1.left-B.sr*.83-8;
-          B.sx=hi0>=lo0?Math.max(lo0,Math.min(hi0,B.sx)):(b1.right+w1.left)/2;}}}}catch(e){}
+        if(b1.width>0&&w1.width>0&&false){}}}}catch(e){}
   /* v6.53: im fruehen Script gibt es den Kopf noch nicht - Lage der Sonne von der alten Seite bzw. vom letzten Mal */
   if(B.sx==null){var gq=HI.weiterB;if(!gq){try{gq=JSON.parse(localStorage.getItem("himmelGeo")||"null");}catch(e){gq=null;}}
     if(gq&&gq.sx!=null&&Math.abs(gq.w-B.w)<2){B.aw=gq.aw;B.sr=gq.sr;B.sx=gq.sx;B.kb=gq.kb;B.sy=gq.sy;}}
@@ -2555,7 +2559,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.89</span>
+      <span class="ver">v6.90</span>
     </div>
   </header>
 
@@ -7253,7 +7257,8 @@ function klappAlle(auf){KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec.
 const dropMini=`<svg width="9" height="12" viewBox="0 0 9 12"><path d="M4.5 0C4.5 0 0 5.4 0 8.2A4.5 4.5 0 0 0 9 8.2C9 5.4 4.5 0 4.5 0Z" fill="currentColor"/></svg>`;
 
 /* --- Render: Warnungen --- */
-function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];if(!al.length)return;
+function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
+  document.documentElement.classList.toggle("warnfrost",al.some(a=>/frost|gl(ä|ae)tte|glatteis/i.test((a.event_de||"")+" "+(a.headline_de||"")+" "+(a.event_en||""))));if(!al.length)return;
   const rank={minor:1,moderate:2,severe:3,extreme:4};
   const isHeat=a=>/hitze|uv-?index/i.test(a.event_de||a.event_en||"");
   // mehrere Hitze-Warnungen -> nur die höchste Stufe behalten
