@@ -4029,6 +4029,14 @@ v6.92 (Nutzer 13.11., Bild Tokio 00:00): (1) TIEFE NACHT dunkler - in `hiFarben`
 Verlauf oben 50 % / unten 42 % Richtung (3,5,18) / (12,15,40), mal (1 - Grauanteil): klare Nacht dunkler, Sterne treten heraus,
 bedeckt unveraendert. (2) Funkeln Voreinstellung 50 % (`HI_FK_STD`, Nutzerwahl). (3) "Fertig" nach Einstellungen / Kacheln
 waehlen springt zurueck an die Scrollstelle, an der das Zahnrad-Menue geoeffnet wurde (`_kzScrollVor`). Geprueft (Playwright).
+v6.93 MOND IM HIMMEL (Nutzer 13.11., Foto Mondsichel: "einblenden, wenn es klar oder teilweise bewoelkt ist - auch tagsueber,
+wenn er weit genug weg ist von der Sonne"): `hiMond(L,B)` (altaz Mond/Sonne, moonInfo) -> Ebene `.hiMo` in jeder Szene unter den
+Wolken. Ueber dem Horizont, nicht bei Regen/Nebel, Wolken blenden aus (1 - hiSm(.6,.92,N)); nachts voll (Sonne unter -8 Grad), am
+Tag hoechstens 55 % und nur ab 35 Grad Abstand zur Sonne (voll ab 60) und ab 15 % beleuchtet (voll ab 40). Waagrecht nach Azimut
+(O links 12 %, W rechts 88 %), mindestens 3,2 Sonnenradien neben der Sonne, Hoehe kb + 1,1 sr, Radius 0,75 sr. `hiMondSvg`: nur die
+beleuchtete Seite (Maske = Gegenstueck der Schattenmaske von moonSvg), Drehung mondHellDreh, weicher Schein. Im Szenenschluessel
+(`HI.M.k`). Liegt bei Warnkarten wie die Sonne hinter der ersten Karte. Schwellen MEINE Wahl. Geprueft 13.11. 17:00 (Sichel 17 %),
+20.11. 21:00 (82 %), 20.11. 15:00 (Tag, blass).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
