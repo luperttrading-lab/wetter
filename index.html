@@ -2541,7 +2541,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.82</span>
+      <span class="ver">v6.83</span>
     </div>
   </header>
 
@@ -2616,7 +2616,7 @@ function hiAnzeigen(){
     <p class="hint">In der Claude-Vorschau gibt es keinen Internet-Zugang – Live-Daten erscheinen erst auf echtem Hosting (z. B. GitHub&nbsp;Pages).</p>
   </div>
 
-  <div class="foot">Quellen: DWD über <a href="https://brightsky.dev" target="_blank" rel="noopener">Bright&nbsp;Sky</a> (Messung, Radar, Warnungen) · Pollenflug DWD · UV/Luft &amp; 7-Tage über <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>/CAMS · Gefühlt, Sonne &amp; Mond berechnet · Zeiten Europe/Berlin.</div>
+  <div class="foot">Quellen: DWD über <a href="https://brightsky.dev" target="_blank" rel="noopener">Bright&nbsp;Sky</a> (Messung, Radar, Warnungen) · Pollenflug DWD · UV/Luft &amp; 7-Tage über <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>/CAMS · außerhalb Deutschlands Flughafen-Messungen (METAR) über das <a href="https://mesonet.agron.iastate.edu" target="_blank" rel="noopener">Iowa Environmental Mesonet</a> der Iowa State University · Gefühlt, Sonne &amp; Mond berechnet · Zeiten Europe/Berlin.</div>
 </div>
 
 <div id="locOverlay" class="loc-ovl hidden" role="dialog" aria-label="Standort einstellen">
@@ -4075,6 +4075,11 @@ async function load(silent){
     ["live","warn","radar","regen","tage"].forEach(sanftAuf);
     render(all.slice(-WINDOW_HOURS),all,obsSrc,false);
     tryCurrent(obsSrc).then(function(){sanftZu("live");},function(){sanftZu("live");});
+    /* v6.83: keine Bright-Sky-Messung juenger als MESS_VOR_MIN -> Flughafen-Messung (METAR) holen */
+    {let _lm=null;for(let i=all.length-1;i>=0;i--){if(!all[i]._fc){_lm=all[i];break;}}
+     if(!_lm||Date.now()-new Date(_lm.timestamp).getTime()>MESS_VOR_MIN*60000){sanftAuf("metar");
+       metarLaden().then(function(){if(METAR.pts&&fullRows&&fullRows.length)render(fullRows.slice(-WINDOW_HOURS),fullRows,window._lastSrc||obsSrc,false);})
+         .catch(function(){}).then(function(){sanftZu("metar");});}}
     _lastFull=_lastFast=Date.now();
     loadExtras();
     backfillPast();
@@ -4147,6 +4152,82 @@ async function tryCurrent(obsSrc){
   }catch(e){}
 }
 
+/* v6.83 FLUGHAFEN-MESSUNG (METAR) ausserhalb des DWD-Gebiets (Nutzer 13.11., Buenos Aires: "wenn nichts gemessen ist ...
+   pruefe, ob wir woanders Daten herbekommen" -> "Mach es so"). Bright Sky hat dort nur MOSMIX-Vorhersage. Messwerte kommen
+   vom Iowa Environmental Mesonet (IEM, Iowa State University; CORS erlaubt, kein Schluessel): obhistory.json je Station und
+   Ortstag. Die naechste Station steht in metar-stationen.json (tools/metar_stationen.py, ~5600 METAR/ASOS weltweit, 100 KB
+   gzip, nur geladen, wenn gebraucht). Geholt wird nur, wenn Bright Sky keine Messung juenger als MESS_VOR_MIN hat; Station
+   hoechstens METAR_KM entfernt. Die Punkte haben die Felder einer Bright-Sky-Zeile (_fc:false, _metar:true) - render()
+   nimmt sie wie eine DWD-Messung fuer Kopf, "Heute bisher" und "Vergleich zu gestern". Temperatur in GANZEN Grad, wenn die
+   Meldung keine T-Gruppe hat (ausserhalb der USA fast immer) -> _ganz, angezeigt ohne Nachkommastelle. */
+var METAR={L:null,lp:null,st:null,key:"",pts:null,t:0,lauf:null},METAR_KM=40;
+var METAR_WOLKE={CLR:0,SKC:0,NSC:0,NCD:0,FEW:19,SCT:44,BKN:75,OVC:100,VV:100};
+function metarListe(){
+  if(METAR.L)return Promise.resolve(METAR.L);
+  if(!METAR.lp)METAR.lp=fetchJSON("metar-stationen.json",15000).then(function(j){METAR.L=j;return j;},function(e){METAR.lp=null;throw e;});
+  return METAR.lp;
+}
+function metarStation(L,la,lo){
+  if(!L||!L.s)return null;var R=Math.PI/180,best=null,bd=1e9,cl=Math.cos(la*R);
+  for(var i=0;i<L.s.length;i++){var x=L.s[i],dy=(x[2]-la)*111.2,dx=(x[3]-lo)*111.2*cl;
+    if(dx>180)continue;var d=dx*dx+dy*dy;if(d<bd){bd=d;best=x;}}
+  if(!best)return null;
+  /* genau: Grosskreis */
+  var p1=la*R,p2=best[2]*R,dp=p2-p1,dl=(best[3]-lo)*R,a=Math.sin(dp/2)*Math.sin(dp/2)+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2),
+      km=2*6371*Math.asin(Math.min(1,Math.sqrt(a)));
+  return km<=METAR_KM?{id:best[0],netz:L.netze[best[1]],lat:best[2],lon:best[3],name:best[4],km:km}:null;
+}
+function metarPunkt(x){
+  if(!x||x.tmpf==null||!x.utc_valid)return null;
+  var ts=new Date(String(x.utc_valid).replace(/Z?$/,"Z")).getTime();if(!isFinite(ts))return null;
+  var raw=String(x.raw||"");
+  var C=function(f){return f==null?null:Math.round((f-32)/0.18)/10;};
+  /* ganze Grad: keine T-Gruppe (Zehntel) in der Meldung UND der Wert ist ganzzahlig */
+  var ganz=!/\bT[01]\d{3}[01]\d{3}\b/.test(raw)&&Math.abs(C(x.tmpf)-Math.round(C(x.tmpf)))<.05;
+  var w=(Array.isArray(x.wxcodes)?x.wxcodes.join(" "):String(x.wxcodes||"")).toUpperCase();
+  var cov=null;["skyc1","skyc2","skyc3","skyc4"].forEach(function(k){var c=x[k];if(c&&METAR_WOLKE[c]!=null)cov=Math.max(cov==null?0:cov,METAR_WOLKE[c]);});
+  if(cov==null&&/\b(CAVOK|SKC|CLR|NSC|NCD)\b/.test(raw))cov=0;
+  var cond="dry",ic=null;
+  if(/TS/.test(w)){cond="thunderstorm";ic="thunderstorm";}
+  else if(/(GR|GS)/.test(w)){cond="hail";ic="hail";}
+  else if(/FZ(RA|DZ)|PL/.test(w)||(/(SN|SG)/.test(w)&&/(RA|DZ)/.test(w))){cond="sleet";ic="sleet";}
+  else if(/(SN|SG)/.test(w)){cond="snow";ic="snow";}
+  else if(/(RA|DZ|UP)/.test(w)){cond="rain";ic="rain";}
+  else if(/(^|[^A-Z])(FZ)?FG/.test(w)&&!/(MI|BC|PR)FG/.test(w)){cond="fog";ic="fog";}
+  var nacht=isNight(ts);
+  if(!ic)ic=cov==null?null:cov>=80?"cloudy":cov>=25?(nacht?"partly-cloudy-night":"partly-cloudy-day"):(nacht?"clear-night":"clear-day");
+  var kn=function(v){return v==null?null:Math.round(v*1.852);};
+  var druck=x.mslp!=null?x.mslp:(x.alti!=null?Math.round(x.alti*338.639)/10:null);
+  var p1=x.p01i!=null&&x.p01i>=0?Math.round(x.p01i*254)/10:null;
+  return {timestamp:new Date(ts).toISOString(),temperature:C(x.tmpf),dew_point:C(x.dwpf),
+    relative_humidity:x.relh!=null?Math.round(x.relh):null,wind_speed:kn(x.sknt),wind_direction:x.drct,
+    wind_gust_speed:kn(x.gust),visibility:x.vsby!=null?Math.round(x.vsby*1609.34):null,cloud_cover:cov,
+    pressure_msl:druck,precipitation:p1,icon:ic,condition:cond,_fc:false,_metar:true,_ganz:ganz};
+}
+/* Holt Ortstag heute und gestern (gestern fuer "Vergleich zu gestern"); IEM speichert 10 min zwischen */
+function metarLaden(){
+  var key=LAT+"/"+LON;
+  if(METAR.key===key&&METAR.t&&Date.now()-METAR.t<10*60e3)return Promise.resolve();
+  if(METAR.lauf)return METAR.lauf;
+  METAR.lauf=metarListe().then(function(L){
+    var st=metarStation(L,LAT,LON);METAR.key=key;
+    if(!st){METAR.st=null;METAR.pts=null;METAR.t=Date.now();return;}
+    var u=function(d){return "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station="+encodeURIComponent(st.id)+"&network="+encodeURIComponent(st.netz)+"&date="+d;};
+    var heute=ymd(new Date()),gestern=ymd(new Date(Date.now()-86400e3));
+    return Promise.all([fetchJSON(u(heute),9000),fetchJSON(u(gestern),9000).catch(function(){return {data:[]};})]).then(function(r){
+      var m={};[].concat(r[1].data||[],r[0].data||[]).forEach(function(x){var p=metarPunkt(x);if(p)m[p.timestamp]=p;});
+      METAR.pts=Object.keys(m).sort().map(function(k){return m[k];});METAR.st=st;METAR.t=Date.now();
+    });
+  }).catch(function(e){console.warn("METAR",e&&e.message);}).then(function(){METAR.lauf=null;});
+  return METAR.lauf;
+}
+/* juengste Flughafen-Messung, wenn sie hoechstens MESS_VOR_MIN alt ist */
+function metarJetzt(){
+  if(!METAR.pts||!METAR.pts.length||METAR.key!==LAT+"/"+LON)return null;
+  var n=Date.now();for(var i=METAR.pts.length-1;i>=0;i--){var t=new Date(METAR.pts[i].timestamp).getTime();
+    if(t>n+5*60e3)continue;return n-t<=MESS_VOR_MIN*60000?METAR.pts[i]:null;}
+  return null;
+}
 function render(rows,all,src,demo){
   isDemo=demo; lastRows=rows; showState(null);
   let cur=rows.at(-1),messAll=all;_kopfMess=null;
@@ -4158,7 +4239,10 @@ function render(rows,all,src,demo){
     if(m&&Date.now()-new Date(m.timestamp).getTime()<=MESS_VOR_MIN*60000){
       const tM=new Date(m.timestamp).getTime();
       messAll=all.filter(r=>!r._fc&&r!==m&&new Date(r.timestamp).getTime()<=tM).concat([m]);cur=m;_kopfMess=m;}
+    else{const mp=metarJetzt();   /* v6.83: keine frische DWD-Messung -> Flughafen */
+      if(mp){const tM=new Date(mp.timestamp).getTime();messAll=METAR.pts.filter(r=>new Date(r.timestamp).getTime()<=tM);cur=mp;_kopfMess=mp;}}
   }
+  const _met=!!(cur&&cur._metar);
   /* kurz nach Mitternacht ist die letzte Messung von gestern - "heute" richtet sich dann nach der letzten Zeile */
   const today=isToday(cur.timestamp)||isToday(rows.at(-1).timestamp);
   window._lastSrc=src; // v2.28: fuer Backfill-Rerender; Label setzt der eine Schreiber unten
@@ -4169,8 +4253,11 @@ function render(rows,all,src,demo){
   {const _ot=String((src&&src.observation_type)||"").toLowerCase();
     const _nm=src.station_name&&!src.dwd_station_id?" · "+String(src.station_name).toLowerCase().replace(/(^|[\s\-\/])\S/g,function(m){return m.toUpperCase();}):"";
     {const st=el("stationTxt");
-     st.dataset.basis=(demo?"Demo":(_ot==="forecast"?"MOSMIX-Prognose":"Live"))+(src.dwd_station_id?" · DWD "+src.dwd_station_id:_nm)+(dist?" · "+dist:"");
-     st.textContent=st.dataset.basis+hoeheSuffix()+tzSuffix();}} // v2.28 / v2.71 Ortszeit / v2.94 Hoehe
+     if(_met&&METAR.st){   /* v6.83 */
+       st.dataset.basis="Flughafen "+METAR.st.name+" ("+METAR.st.id+") · "+METAR.st.km.toLocaleString("de-DE",{maximumFractionDigits:1})+" km";
+       st.textContent=st.dataset.basis+tzSuffix();}
+     else{st.dataset.basis=(demo?"Demo":(_ot==="forecast"?"MOSMIX-Prognose":"Live"))+(src.dwd_station_id?" · DWD "+src.dwd_station_id:_nm)+(dist?" · "+dist:"");
+     st.textContent=st.dataset.basis+hoeheSuffix()+tzSuffix();}}} // v2.28 / v2.71 Ortszeit / v2.94 Hoehe
 
   // aktuelle Werte (Snapshot)
   const wind=cur.wind_speed!=null?cur.wind_speed:latestOf(messAll,"wind_speed");
@@ -4185,7 +4272,7 @@ function render(rows,all,src,demo){
      Minuten 0,0 mm gemessen hatte. Die Zeilen sind seit jeher mit _fc
      markiert, nur wurde das bei condition nicht gelesen. */
   snap={temp:cur.temperature,icon:cur.icon,condition:cur._fc?null:cur.condition,ts:cur.timestamp,rh,wind,
-    p10:cur.p10,p30:cur.p30,p60:(cur.p60!=null?cur.p60:cur.precipitation),_fc:!!cur._fc,
+    p10:cur.p10,p30:cur.p30,p60:(cur.p60!=null?cur.p60:cur.precipitation),_fc:!!cur._fc,_metar:_met,ganz:!!cur._ganz,
     dir:cur.wind_direction!=null?cur.wind_direction:latestOf(messAll,"wind_direction"),
     gust:latestOf(messAll,"wind_gust_speed"),press:latestOf(messAll,"pressure_msl"),
     dew:latestOf(messAll,"dew_point"),cloud:latestOf(messAll,"cloud_cover"),vis:latestOf(messAll,"visibility")};
@@ -4198,7 +4285,7 @@ function render(rows,all,src,demo){
   const hi=Math.max(...base.map(r=>r.temperature)), lo=Math.min(...base.map(r=>r.temperature));
   // bisher GEMESSENES Tageshoch/-tief: nur reale Messungen bis jetzt (ohne Prognose-Stunden)
   const _nowMeas=Date.now();
-  const measRows=all.filter(r=>isToday(r.timestamp)&&!r._fc&&new Date(r.timestamp).getTime()<=_nowMeas);
+  const measRows=(_met?METAR.pts:all).filter(r=>isToday(r.timestamp)&&!r._fc&&new Date(r.timestamp).getTime()<=_nowMeas);
   const measVals=measRows.map(r=>r.temperature);
   // aktuellen Live-Messwert sicher einbeziehen: sein Bright-Sky-Zeitstempel kann minimal vorausliegen
   // und fiele sonst aus dem gemessenen Tageshoch/-tief, obwohl er als "jetzt" angezeigt wird
@@ -4208,10 +4295,10 @@ function render(rows,all,src,demo){
   const precip=sum(todayRows,"precipitation"), sunMin=sum(todayRows,"sunshine"), solar=sum(todayRows,"solar");
   // Trends
   const now=Date.now();
-  const press3=valueAt(all,now-3*3600e3,"pressure_msl",1.5);
-  const temp24=valueAt(all.filter(r=>!r._fc),now-24*3600e3,"temperature",2);
+  const press3=valueAt(_met?METAR.pts:all,now-3*3600e3,"pressure_msl",1.5);
+  const temp24=valueAt(_met?METAR.pts:all.filter(r=>!r._fc),now-24*3600e3,"temperature",2);
   const feel=feelsLike(snap.temp,snap.rh,snap.wind);
-  const der={hi,lo,hiMeas,loMeas,precip,sunH:sunMin/60,solar,press3,temp24,feel};
+  const der={hi,lo,hiMeas,loMeas,precip,sunH:sunMin/60,solar,press3,temp24,feel,ganz:_met&&measRows.every(r=>r._ganz)};
 
   setHaze(snap.temp);
   paintHero(snap,demo,today,der);
@@ -4231,12 +4318,12 @@ function paintHero(s,demo,today,d){
   el("staleBox").classList.toggle("on",!today);
 
   const badge=el("badge");badge.className="badge"+(demo?" demo":(!today?" stale":(s._fc?" demo":"")));
-  badge.textContent=demo?"Demo-Snapshot":(!today?"Veraltet":(s._live?"Live · aktuell":(s._fc?"Prognose":"Live · DWD")));
+  badge.textContent=demo?"Demo-Snapshot":(!today?"Veraltet":(s._live?"Live · aktuell":(s._fc?"Prognose":(s._metar?"Live · Flughafen":"Live · DWD"))));
 
   if(!today){el("staleSub").innerHTML="Letzter Messwert: <b>"+dateWD(s.ts)+"</b>, "+timeHM(s.ts)+" Uhr ("+ageText(s.ts)+")";el("heat").classList.remove("on");return;}
 
   const c=thermal(s.temp);
-  el("temp").innerHTML=fmt1(s.temp)+'<span class="deg">°C</span>';el("temp").style.color=rgb(c);
+  el("temp").innerHTML=(s.ganz?String(Math.round(s.temp)):fmt1(s.temp))+'<span class="deg">°C</span>';el("temp").style.color=rgb(c);
   _condIcon=s.icon||"cloudy";_condText=LABELS[s.icon]||"\u2014";
   /* v3.88: Bright Sky liefert neben dem Icon ein Feld "condition" aus der
      Stationsmeldung. Beide koennen auseinanderlaufen: Roellbach meldete am
@@ -4248,9 +4335,10 @@ function paintHero(s,demo,today,d){
   _condP10=(s.p10!=null)?+s.p10:null;_condP30=(s.p30!=null)?+s.p30:null;
   zustandZeigen();
   _kz.hero={d,s};kzRender();                                   // v3.89: Kacheln
-  const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
-  el("hiV").textContent="↑ "+(d.hiMeas!=null?fmt1(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?fmt1(d.loMeas):"–")+"°";
-  el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+fmt1(d.hiMeas-d.loMeas)+"°":"";
+  const fe=el("feelV");fe.textContent=d.feel!=null?(s.ganz?Math.round(d.feel):fmt1(d.feel))+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
+  const _f=v=>d.ganz?String(Math.round(v)):fmt1(v);   /* v6.83: METAR in ganzen Grad */
+  el("hiV").textContent="↑ "+(d.hiMeas!=null?_f(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?_f(d.loMeas):"–")+"°";
+  el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+_f(d.hiMeas-d.loMeas)+"°":"";
   /* v6.82 (Nutzer, Buenos Aires: "wenn nichts gemessen ist, lass die Zeile wegfallen"): ohne Messung heute keine Zeile
      "Heute bisher ↓ –° ↑ –°" und unten keine Zeile "keine Vergleichsdaten von gestern" */
   el("hiV").parentNode.style.display=(d.hiMeas==null&&d.loMeas==null)?"none":"";
@@ -4444,7 +4532,7 @@ function renderStrip(rows){
     /* v6.22: Nebel/Dunst aus der gemessenen Sicht wie oben im Kopf - nicht in Vorhersagezeilen, nicht in nassen Stunden */
     if(!_rk._fc&&!_rk._om&&!radarNass(_rk.condition)){const _sz=sichtZustand(_ic,_rk.visibility);if(_sz)_ic=_sz.ic;}
     if(isNow)_ic=tagNachtJetzt(_ic);   // v6.71: Tag/Nacht nach dem Sonnenstand jetzt, wie oben im Kopf
-    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div><div class="pp">${_pp}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${fmt1(_rk.temperature)}°</div>${_unten}`;
+    cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div><div class="pp">${_pp}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${_rk._ganz?Math.round(_rk.temperature):fmt1(_rk.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
   });

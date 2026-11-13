@@ -3929,6 +3929,27 @@ Fahrenheit), `.../obhistory.json?station=SABE&network=AR__ASOS` (Meldungen des T
 `.../geojson/network/AR__ASOS.geojson` (Netz = Laendercode + "__ASOS", USA je Bundesstaat). Geprueft: SABE, LEBL, LFPG,
 GOOY, HELX, RJTT, LCLK frisch (09:00Z); KJFK so nicht (US-Kennung ohne K). METAR = Flughafen, meist stuendlich, GANZE Grad.
 Nicht eingebaut - Entscheidung des Nutzers steht aus (fehlt: naechste Station zum Ort, z. B. feste Stationsliste im Repo).
+v6.83 FLUGHAFEN-MESSUNG AUSSERHALB DES DWD-GEBIETS (Nutzer 13.11. auf den Vorschlag aus v6.82: "Mach es so"). Hat Bright
+Sky keine Messung juenger als MESS_VOR_MIN (90 min) - im Ausland nur MOSMIX, z. B. Buenos Aires, Dakar, New York; auch wenn
+eine SYNOP-Station dort nachts zuletzt gemeldet hat (Barcelona, Larnaka) -, holt `load()` die naechste METAR-Station vom Iowa
+Environmental Mesonet (`metarLaden`, Modul `METAR` vor `render`): Station aus `metar-stationen.json` (5584 METAR/ASOS-Stationen,
+die in 3 Tagen gemeldet haben, 228 KB / 100 KB gzip, gebaut von `tools/metar_stationen.py` aus IEM currents.json
+networkclass=ASOS - von Hand neu bauen), hoechstens `METAR_KM` 40 km; dann obhistory.json fuer Ortstag heute und gestern (IEM
+speichert 10 min, App ebenso). `metarPunkt` macht daraus Zeilen im Bright-Sky-Format (_fc:false, _metar:true): Grad F -> C
+auf 0,1, Knoten -> km/h, Meilen -> m, Druck mslp sonst QNH, Bedeckung aus skyc (FEW 19 / SCT 44 / BKN 75 / OVC 100 %, CAVOK
+0), Symbol und condition aus wxcodes (TS, GR/GS, FZRA/PL/RASN, SN, RA/DZ, FG ohne MI/BC/PR), sonst Bedeckung (< 25 klar,
+< 80 teils, sonst bewoelkt; wie Bright Sky). `render()`: ist keine DWD-Messung frisch, nimmt `metarJetzt()` die juengste
+Meldung (<= 90 min) als `_kopfMess` -> Kopf (Temperatur, Symbol, Wort, Gefuehlt, Wind fuer Kacheln, Himmel), Zelle "jetzt",
+"Heute bisher" (Meldungen von heute), "Vergleich zu gestern" (`valueAt` 24 h zurueck), Luftdrucktrend. Abzeichen "Live ·
+Flughafen", Stationszeile "Flughafen <Name> (<ICAO>) · 4,8 km". GANZE GRAD: ausserhalb der USA meldet METAR ganze Grad - ohne
+T-Gruppe und bei ganzzahligem Wert (`_ganz`) stehen Temperatur, Heute bisher, Gefuehlt und Zelle "jetzt" ohne Nachkommastelle
+("23 °C" statt "23,0"); US-Stationen haben Zehntel (T-Gruppe) und bleiben bei einer Stelle. Stundenleiste (ausser "jetzt") und
+Temperaturverlauf bleiben MOSMIX. Kein Vorabruf fuer den Wisch-Nachbarn: nach einem Wisch in eine Stadt ohne DWD-Messung kann
+oben kurz "Prognose" stehen, bis die Meldung da ist (`sanftAuf("metar")` haelt die Blende hoechstens SANFT_MAX). Quellvermerk
+im Fuss, LIZENZEN.md (IEM: public domain, Nennung erwuenscht - gelesen 13.11.). Geprueft (`e/t124.py`, echte Daten 13.11.):
+Buenos Aires SABE 4,8 km "23 °C Klar, Heute bisher 23/24, wie gestern"; Dakar GOOY 7,7 km 29 °C; New York JRB (Heliport Wall
+Street) 1,3 km 7,8 °C Regen; Barcelona LEBL 13,6 km; Nissi Beach -> Larnaca LCLK 34,7 km; Wettenberg unveraendert (kein Abruf).
+Pruefstand: `netz2.ALLE` braucht "iastate.edu". Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
