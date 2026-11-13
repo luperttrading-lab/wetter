@@ -3886,6 +3886,12 @@ Sortieren · ⊖ entfernt" steht direkt unter den Kacheln in eigenem Element #kz
 Fuss unter den Einstellungen; der Fuss ist im Bearbeiten leer (Fertig im Sockel, v6.76). Der Aussentipp-Schliesser nimmt als
 Unterkante das unterste sichtbare Teil (kz, kzHint, kzPool, kzReg, kzFoot); owZone kennt #kzHint. Im Himmel weiss wie der Fuss.
 Geprueft (`e/t118.py`, Himmel und hell).
+v6.79 (Nutzer 13.11., Bild 16-Tage-Liste Buenos Aires: "das Blau vom Regen hat teilweise nicht genug Kontrast"): in den
+dunklen Ansichten stand dasselbe Blau wie hell (#2f86cf, Menge #3a7bd5) auf blauem/violettem Glas - um 2 : 1, in den blassen
+Tagen 8-16 (Deckkraft .58) weniger. Jetzt Regenwahrscheinlichkeit, Menge und Balken in der 16-Tage-Liste UND die Zahl in der
+Stundenleiste (`.col .pp`, gleiches Problem) hellblau: Himmel #b8dcff (Balken #a6d2ff), dunkel #9fd0ff (#8cc4ff); der kleine
+Tropfen (`dropMini`) folgt der Schrift (currentColor - hell unveraendert #2f86cf). Blasse Tage im Dunklen .68 statt .58.
+Geprueft (`e/t119.py`, eingespielte 16 Tage, alt/neu/dunkel).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
