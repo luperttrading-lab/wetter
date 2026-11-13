@@ -561,12 +561,19 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .kzreg.wakl .waKaZ{display:none!important}
 /* v6.31: Fusszeile der Kacheln nur noch im Bearbeiten und solange der Wechsel angehalten ist */
 .kzfoot.leer{display:none}
-/* v6.75: schwebendes "Fertig" (kzFixPruefen) */
-#kzFertigFix{position:fixed;left:50%;bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px));z-index:60;transform:translate(-50%,12px);
-  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;border:0;font:inherit;font-size:15px;font-weight:700;
-  background:#1c1c1e;color:#fff;border-radius:12px;padding:11px 34px;box-shadow:0 4px 18px rgba(0,0,0,.28);cursor:pointer}
-#kzFertigFix.an{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
-html.dunkel #kzFertigFix{background:#e6e9ef;color:#111;box-shadow:0 4px 18px rgba(0,0,0,.45)}
+/* v6.76: Sockel mit "Fertig" (kzFixPruefen) */
+#kzSockel{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(250,250,252,.94);border-top:1px solid rgba(0,0,0,.08);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  transform:translate3d(0,110%,0);transition:transform .22s ease;pointer-events:none}
+#kzSockel.an{transform:none;pointer-events:auto}
+#kzSockel button{display:block;width:100%;max-width:440px;margin:0 auto;border:0;font:inherit;font-size:16px;font-weight:700;
+  background:#1c1c1e;color:#fff;border-radius:12px;padding:12px 0;cursor:pointer}
+html.dunkel #kzSockel{background:rgba(16,21,31,.9);border-top-color:rgba(255,255,255,.08)}
+html.dunkel #kzSockel button{background:#e6e9ef;color:#111}
+html.himmel #kzSockel{background:var(--hi-k,rgba(22,30,48,.85))}
+html.kzsockel #kzFertig{display:none}
+html.kzsockel .kzfoot:has(.kzhint) .kzfr{justify-content:flex-start}
+html.kzsockel body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .kopf-kn{display:flex;gap:8px}
 /* v6.31: mit vier Knoepfen ist der Block links schmaler (393 pt: 209 statt 247 px) - die Stationszeile braeche um.
    Sie steht aber UNTER den Knoepfen, auf Hoehe der Versionsnummer: darf also breiter sein als der Block (laeuft
@@ -2507,7 +2514,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.75</span>
+      <span class="ver">v6.76</span>
     </div>
   </header>
 
@@ -9072,21 +9079,17 @@ function kopfTipZeigen(){
   window.addEventListener("scroll",kopfTipWeg,{passive:true,once:true});
 }
 function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();kzFixPruefen();}
-/* v6.75 (Nutzer 13.11.: "bei Einstellungen sollte der Fertig-Knopf unten immer zu sehen sein, nicht nur ganz unten, wenn
-   man hinscrollt"): solange Kacheln/Einstellungen offen sind und der Knopf im Fuss nicht im Bild ist, schwebt ein zweiter
-   "Fertig" unten in der Mitte (#kzFertigFix, im <body> - in #hero ginge position:fixed nicht, dort gilt will-change:transform,
-   v6.66). Er tut dasselbe wie der im Fuss. */
+/* v6.75 (Nutzer 13.11.: "bei Einstellungen sollte der Fertig-Knopf unten immer zu sehen sein"): erst ein schwebender Knopf.
+   v6.76 (Nutzer: "Fertig fest als Sockel waere besser als der uebergeblendete Knopf"): SOCKEL - eine feste Leiste ueber die
+   ganze Breite am unteren Rand (#kzSockel, im <body>; in #hero ginge position:fixed nicht, dort gilt will-change:transform,
+   v6.66), solange Kacheln waehlen / Einstellungen offen sind. Darin "Fertig"; der Knopf im Fuss entfaellt dann (Klasse
+   kzsockel am <html>), die Seite bekommt unten so viel Platz, dass nichts unter der Leiste verschwindet. */
 function kzFixPruefen(){
-  let b=document.getElementById("kzFertigFix");
-  const f=document.getElementById("kzFertig");
-  let zeigen=false;
-  if(_kzEdit&&f){const r=f.getBoundingClientRect(),H=window.innerHeight||800;zeigen=!(r.height>0&&r.top<H-8&&r.bottom>8);}
-  if(!b){if(!zeigen)return;b=document.createElement("button");b.type="button";b.id="kzFertigFix";b.textContent="Fertig";
-    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();_kzRegAuf=false;kzEditSetzen(false);});document.body.appendChild(b);}
-  b.classList.toggle("an",zeigen);
+  let b=document.getElementById("kzSockel");const zeigen=!!_kzEdit;
+  if(!b){if(!zeigen)return;b=document.createElement("div");b.id="kzSockel";b.innerHTML='<button type="button">Fertig</button>';
+    b.querySelector("button").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();_kzRegAuf=false;kzEditSetzen(false);});document.body.appendChild(b);}
+  b.classList.toggle("an",zeigen);document.documentElement.classList.toggle("kzsockel",zeigen);
 }
-window.addEventListener("scroll",()=>{if(!_kzEdit&&!document.getElementById("kzFertigFix"))return;if(window._kzFixR)return;window._kzFixR=requestAnimationFrame(()=>{window._kzFixR=0;kzFixPruefen();});},{passive:true});
-window.addEventListener("resize",()=>{try{kzFixPruefen();}catch(e){}});
 function kzGhost(tile,x,y){
   document.querySelectorAll(".kzghost").forEach(q=>q.remove());   // nie zwei Geister
   const g=document.createElement("div");g.className="kzghost";const r=tile.getBoundingClientRect();
@@ -9160,7 +9163,7 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
      noch ein TIPPEN (<= 10 px Bewegung, kein Abbruch durchs Scrollen), und nie
      auf Hoehe von Kacheln, Reglern und Fuss (auch nicht im Rand daneben). */
   let _kzAussen=null;
-  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzPool,#kzFoot,#kzReg,#kzFertigFix"))return;
+  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzPool,#kzFoot,#kzReg,#kzSockel"))return;
     const a=el("kz").getBoundingClientRect(),b=el("kzFoot").getBoundingClientRect();
     if(e.clientY>=a.top-12&&e.clientY<=b.bottom+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
   document.addEventListener("pointercancel",()=>{_kzAussen=null;},true);
