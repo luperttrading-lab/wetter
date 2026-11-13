@@ -4010,6 +4010,11 @@ jetzt (77 %). Damit links keine Luecke bleibt, laedt `chartHistLaden` die 30 Tag
 ueber 60 h liegt (vorher erst nach Beruehrung) - ein Abruf je Seitenaufruf, ~445 KB roh (Bright Sky). Geprueft (`e/t128.py`).
 v6.88 (Nutzer 13.11.: "nur plus und minus mit einem Kreis drum, nicht die Lupe"): Stufenschalter im Temperaturverlauf
 mit Kreis + Minus/Plus (SVG 15 px = Schrifthoehe, Kreis r 10,5, Strich 2,4) statt Lupen (15 px).
+v6.89 (Nutzer 13.11.: "Kontrast Kachel/Container zum Hintergrund manchmal fast null - minimal hoeher und etwas plastisch,
+bei allen Wetterlagen"): `hiGlasZiel` am Tag 1,12 : 1 dunkler als der mittlere Himmel (v6.43: 1,0), nachts unveraendert.
+Karten und Kacheln oben (`.kz .ki`) im Himmel plastisch: Lichtkante oben (inset 1px weiss .2), Schattenkante unten
+(inset -1px .18), weicher Schatten 0 3px 10px, dazu ein Verlauf oben hell -> unten minimal dunkler (background-image;
+`.kz .ki` darum background-color). Geprueft (`e/t130.py`): klar, meist, bedeckt, Regen, Nacht, Abend.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
