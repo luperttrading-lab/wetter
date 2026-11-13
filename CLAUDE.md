@@ -3771,6 +3771,29 @@ ohne Dokument zugestellt. RUECKFALL: eine Beruehrung irgendwo (document, capture
 kzRender mitten im Wisch kurz -> zurueck, weit -> Ortswechsel; Temperatur neu geschrieben, touchcancel, verlorenes Ende +
 Tipp in der Stundenleiste, verlorenes Ende + App verlassen -> alles zurueck (`e/t104.py`); Wisch-Regression `e/t82.py`
 himmel / himmel red / hell ohne Fehler. Nicht am iPhone geprueft.
+v6.68 FARBE DES NAECHSTEN ORTS (Nutzer 13.11., Bildschirmfilm 07:11 mit v6.66: "den Uebergang zwischendrin" - gemessen:
+nach dem Ausblenden der alten Seite 13 Bilder (0,22 s) fast schwarz (11,16,35) = Grundwert #090d26 der registrierten Farbe
+--hi-r, waehrend Statusleiste und unterster Streifen die gemerkte Farbe (34,37,50) hatten; im Kopf fehlte der Wolken-Knopf
+(Hauptscript lief noch), im selben Bild wie der Knopf sprang die Decke auf die richtige Farbe. Nutzer: "die Notfarbe gleich
+in der richtigen Farbe der Seite, die dann kommt - wir laden schon die beiden naechsten"). JETZT: (1) `hiZiel(p)` rechnet aus
+den VORAB geholten Daten (v6.58/v6.59: Live-Messung, sonst letzte Stundenzeile) die Lage des Ziels wie `hiLage` -
+Sonnenhoehe am Ziel (`hiMuFrueh(ms,la,lo)`), Bedeckung, nass (Meldung nur mit feinen Werten wie zustandZeigen), Nebel/Dunst
+(`sichtZustand`) - und daraus Verlauf (o/u) und Farbe der Statusleiste (rr) mit DEMSELBEN Wolkenmuster (HI.saat, zwei
+Texturen, `hiRand(...,tex)`), wie die neue Seite sie rechnet. Merker `HI_ZIEL` je Ort 3 min; `owNachbarnVorab` rechnet beide
+Nachbarn gleich nach ihrem Vorabruf (6-11 ms je Ort im Pruefstand), nur als Home-Bildschirm-App. (2) `hiFlachAn(T)`: die
+alte Seite deckt gleich in der ZIELfarbe zu (Decke mit fester Farbe als Inline-Stil, --hi-r = Statusleiste zieht in 200 ms
+mit); kommt die Farbe erst beim Gehen (Vorabruf lief noch), blendet die Decke in 150 ms um und `ortGehen` wartet 160 ms.
+Ohne Daten bleibt die Farbe dieses Orts. (3) `hiZielMerken(T)` schreibt die Zielfarben in `himmelFarbe` (Feld 5 Glas
+bleibt), `hiWeiterMerken(T)` die Ziel-Lage in `hiWeiter` - die neue Seite beginnt mit Statusleiste, Decke und Himmel (unter
+der Decke) des NEUEN Orts; die echte Rechnung nach den Daten trifft meist denselben Himmel (Pruefstand: --hi-r vorher =
+nachher, Lage gleich bis auf 0,5 Grad Sonnenhoehe). (4) Das erste Script haengt eine Regel `html:root.himmel #hiDeck
+{background:<gemerkte Farbe>}` an <head> - die Decke haengt in den ersten Bildern nicht mehr an der Variablen (deren
+Grundwert war das Schwarz; warum Safari ihn dort zeigte, ist [Vermutung]: die vererbte registrierte Farbe kam bei den
+Kindern von <html> erst nach dem Hauptscript an). Im Browser (nicht Home-Bildschirm) unveraendert: dort gibt es keine Decke,
+der Himmel laeuft wie v6.52 weiter. Geprueft (`e/t105.py`, standalone nachgestellt): Erlental -> Muenchen, Decke auf der
+alten Seite sofort (99,111,131), erste Bilder der neuen Seite dieselbe Farbe, nach dem Einblenden --hi-r unveraendert;
+Wisch 2,5 s nach dem Start (Vorabruf noch nicht fertig) -> Farbe beim Gehen nachgezogen; "Bewegung reduzieren";
+Wisch-Regression `e/t82.py` himmel / himmel red / hell ohne Fehler. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

@@ -1740,7 +1740,11 @@ html:root.himmel{transition-duration:var(--hi-bl,1.3s)!important}
     var hf=String(localStorage.getItem("himmelFarbe")||"").split("|"),hre=/^rgba\([\d,. ]+\)$/;
     if(hf.length>=2&&hre.test(hf[0])&&hre.test(hf[1])){document.documentElement.style.setProperty("--hi-o",hf[0]);document.documentElement.style.setProperty("--hi-u",hf[1]);}
     if(hf.length>=5&&hre.test(hf[4]))document.documentElement.style.setProperty("--hi-k",hf[4]);
-    if(hf.length>=6&&hre.test(hf[5]))document.documentElement.style.setProperty("--hi-r",hf[5]);
+    if(hf.length>=6&&hre.test(hf[5])){document.documentElement.style.setProperty("--hi-r",hf[5]);
+      /* v6.68 (Bildschirmfilm 13.11. 07:11): in den ersten Bildern der neuen Seite zeigte die Decke am iPhone 0,22 s den
+         Grundwert der registrierten Farbe (#090d26, fast schwarz) statt der gemerkten - Statusleiste und unterer Rand hatten
+         sie. Die Decke bekommt die Farbe darum fest, nicht ueber die Variable. */
+      try{var st0=document.createElement("style");st0.textContent="html:root.himmel #hiDeck{background:"+hf[5]+"}";document.head.appendChild(st0);}catch(e4){}}
   }
 }catch(e){}})();
 </script>
@@ -1958,8 +1962,10 @@ function hiSonne(s,C,B,vorn){
 /* Sonnenhoehe am Ort (auf halbe Grad), Bedeckung aus der Stationsmessung, sonst aus dem Symbol; nass = Regen/Schnee
    im Kopf. Solange noch keine Daten da sind, gilt der Himmel vom letzten Mal (himmelFarbe traegt N und nass mit). */
 /* v6.53: Sonnenhoehe ohne Hauptscript (gleiche Formel wie _muFallback), Ort aus dem gespeicherten Profil */
-function hiMuFrueh(ms){
+function hiMuFrueh(ms,la0,lo0){
   var la=50.6481,lo=8.6743;try{var p=JSON.parse(localStorage.getItem("locProfile")||"null");if(p&&isFinite(p.lat)&&isFinite(p.lon)){la=+p.lat;lo=+p.lon;}}catch(e){}
+  /* v6.68: auch fuer einen anderen Ort (Farbe des naechsten Orts vor dem Wechsel, hiZiel) */
+  if(isFinite(la0)&&isFinite(lo0)&&la0!==null&&lo0!==null){la=+la0;lo=+lo0;}
   var d=new Date(ms),N=Math.floor((ms-Date.UTC(d.getUTCFullYear(),0,0))/864e5),g=2*Math.PI*(N-1)/365;
   var decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
   var eot=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
@@ -2057,8 +2063,8 @@ function hiSzene(ziel,C,L,B,hmax,links,ab){
    "theme-color" - der Himmel geht nicht darunter weiter. Bis v6.13 stand dort die obere Farbe des VERLAUFS; bei
    bedecktem Himmel liegen aber hellere Wolken davor, und man sah eine harte Kante. Jetzt die mittlere Farbe des
    obersten Streifens (64 px), Wolken eingerechnet: Mittel ueber die ganze Texturbreite, weil die Wolken ziehen. */
-function hiRand(C,L,B,ohneSonne){
-  var c=C.top.slice();
+function hiRand(C,L,B,ohneSonne,tex){
+  var c=C.top.slice(),tF=tex?tex.F:HI.texF,tN=tex?tex.N:HI.texN;
   function lage(tex,sc,a,dy){
     if(!tex)return;
     var th=B.w*sc*HI_TH/HI_TW,r0=Math.floor(((-dy)/th*HI_TH)%HI_TH),n=Math.max(1,Math.min(HI_TH-r0,Math.round(64/th*HI_TH))),d;
@@ -2066,7 +2072,7 @@ function hiRand(C,L,B,ohneSonne){
     var sr=0,sg=0,sb=0,sa=0;for(var i=0;i<d.length;i+=4){var al=d[i+3]/255;sr+=d[i]*al;sg+=d[i+1]*al;sb+=d[i+2]*al;sa+=al;}
     if(sa>0)c=hiMix(c,[sr/sa,sg/sa,sb/sa],sa/(d.length/4)*a);
   }
-  if(L.N>.04){var nh=hiNah(L);if(L.N<.985)lage(HI.texF,1.7,.6,-B.h*.05);lage(HI.texN,nh.sc,nh.a,-B.h*.1);}
+  if(L.N>.04){var nh=hiNah(L);if(L.N<.985)lage(tF,1.7,.6,-B.h*.05);lage(tN,nh.sc,nh.a,-B.h*.1);}
   if(C.schleier>.03)c=hiMix(c,C.top,.58*C.schleier*(1-32/(.34*B.h)));       // der Schleier bei y = 32 px
   /* v6.37: der weite Sonnenschein hellt auch den obersten Streifen auf - im Bild vom 12.11. war die Statusleiste
      (54,112,196) kraeftiger als der Himmel direkt darunter (73,117,181). Mittel ueber die Breite bei y = 32 px. */
@@ -2096,9 +2102,20 @@ function hiFlachBl(zu,ms){
 }
 /* v6.66: auf der ALTEN Seite ohne Klasse am <html> (die kostete eine Neuberechnung der ganzen Seite, waehrend der Inhalt
    wegfliegen soll) - Endzustand als Inline-Stil, die Blende als Web-Animation */
-function hiFlachAn(){try{if(hiAn()&&hiFussAn()){var h=document.documentElement,d=document.getElementById("hiDeck"),k=document.getElementById("hiK");
-  if(h.classList.contains("hiflach")||(d&&d.style.opacity==="1"))return;
-  if(d)d.style.opacity="1";if(k)k.style.opacity="0";hiFlachBl(1,200);}}catch(e){}}
+/* v6.68 (Nutzer 13.11.: "die Notfarbe gleich in der richtigen Farbe der Seite, die dann kommt"): T = Farben des Ziels
+   (hiZiel), sonst die Farbe der Statusleiste dieses Orts. Die Decke bekommt die Farbe DIREKT (nicht ueber die Variable),
+   die Statusleiste (--hi-r = Hintergrund des <html>) zieht mit. Rueckgabe true = Farbe erst jetzt geaendert (die Decke stand
+   schon) - dann wartet ortGehen die kurze Blende ab. */
+function hiFlachAn(T){try{if(hiAn()&&hiFussAn()){var h=document.documentElement,d=document.getElementById("hiDeck"),k=document.getElementById("hiK");
+  if(h.classList.contains("hiflach")||!d)return false;
+  var f=(T&&T.rr)||hiRgb(HI.rand||(HI.C&&HI.C.top)||[9,13,38]),alt=d.style.backgroundColor;
+  if(d.style.opacity==="1"){
+    if(!T||!T.rr||d.dataset.f===T.rr)return false;
+    d.style.background=f;d.dataset.f=f;
+    try{if(alt&&d.animate)d.animate([{backgroundColor:alt},{backgroundColor:f}],{duration:150,easing:"ease"});}catch(e){}
+    h.style.setProperty("--hi-bl","150ms");h.style.setProperty("--hi-r",f);return true;}
+  d.style.background=f;d.dataset.f=f;d.style.opacity="1";if(k)k.style.opacity="0";hiFlachBl(1,200);
+  h.style.setProperty("--hi-bl","200ms");h.style.setProperty("--hi-r",f);}}catch(e){}return false;}
 function hiFlachWeg(ms){
   var h=document.documentElement;if(!h.classList.contains("hiflach"))return;
   h.classList.remove("hiflach");hiFlachBl(0,Math.max(200,ms||350));
@@ -2106,9 +2123,10 @@ function hiFlachWeg(ms){
 /* wie lange die neue Seite noch zugedeckt bleiben muss (ms; 0 = kann aufgehen) */
 function hiFlachRest(){try{if(document.documentElement.classList.contains("hiflach"))return Math.max(0,HI_FLACH_MS-performance.now());}catch(e){}return 0;}
 /* v6.52: vor dem Neuladen beim Ortswechsel den Himmel merken - Muster (saat), zurueckgelegter Weg der Wolken, Lage */
-function hiWeiterMerken(){
+function hiWeiterMerken(T){
   if(!hiAn()||!HI.L||!HI.sT)return;
-  var jz=performance.now(),L=HI.L;
+  /* v6.68: hinter der Decke (Home-Bildschirm-App) gleich der Himmel des NEUEN Orts - gleiches Muster, eigene Lage */
+  var jz=performance.now(),L=(T&&T.L&&hiFussAn())?T.L:HI.L;
   var B=HI.B||{};
   sessionStorage.setItem("hiWeiter",JSON.stringify({saat:HI.saat,ph:HI.ph0+(HI.s||0)+(jz-HI.sT)/1000*(HI.f||1),f:HI.f||1,t:Date.now(),
     L:{h:L.h,N:L.N,nass:L.nass?1:0,nebel:L.nebel?1:0},B:B.sx!=null?{w:B.w,aw:B.aw,sr:B.sr,sx:B.sx,sy:B.sy,kb:B.kb}:null}));
@@ -2416,7 +2434,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.67</span>
+      <span class="ver">v6.68</span>
     </div>
   </header>
 
@@ -3579,7 +3597,8 @@ function sanftWeg(dann){
     setTimeout(function(){h.classList.remove("sanft-aus");},4000);},SANFT_AUS_MS);
 }
 window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.documentElement;h.classList.remove("hiflach");
-  try{["hiDeck","hiK"].forEach(function(i){var n=document.getElementById(i);if(n)n.style.opacity="";});OW.los=0;OW.zieht=0;}catch(x){}h.classList.remove("sanft-aus");h.classList.remove("sanft");
+  try{["hiDeck","hiK"].forEach(function(i){var n=document.getElementById(i);if(n)n.style.opacity="";});OW.los=0;OW.zieht=0;}catch(x){}
+  try{if(HI.rand)h.style.setProperty("--hi-r",hiRgb(HI.rand));}catch(x){}h.classList.remove("sanft-aus");h.classList.remove("sanft");
   try{owAufraeumen();}catch(x){}}});
 /* v6.56: Ortswechsel ohne Dialog - derselbe Weg wie saveGo im Standort-Dialog (Profil, Liste, Himmel weiterreichen,
    neu laden). opt.wisch = Richtung fuer die neue Seite, opt.sofort = nicht erst ausblenden (der Wisch hat das schon getan),
@@ -3587,16 +3606,20 @@ window.addEventListener("pageshow",function(e){if(e.persisted){var h=document.do
    nicht in die Liste aufnehmen (v6.57: er wurde gerade geloescht). */
 function ortGehen(p,opt){
   opt=opt||{};
-  hiFlachAn();
+  /* v6.68: Farbe des Ziels, wenn seine Daten schon da sind (Nachbarn holt die App vorab) */
+  var T=null;try{T=hiZiel(p);}catch(e){T=null;}
+  var spaet=hiFlachAn(T);
   var fertig=function(){try{localStorage.setItem("locProfile",JSON.stringify(p));}catch(e){}
     locZulMerken(p,opt.ohneAlt?null:LOC);
     try{sessionStorage.setItem("ortWechsel","1");if(opt.wisch)sessionStorage.setItem("ortWisch",opt.wisch);}catch(e){}
-    try{hiWeiterMerken();}catch(e){}
+    try{hiWeiterMerken(T);}catch(e){}
+    try{hiZielMerken(T);}catch(e){}
     try{vorabSichern(p);}catch(e){}
     /* lat/lon abwerfen, damit das gespeicherte Profil greift. v6.58: feste Adresse je Version statt ?v=Zeit (v3.37) - die
        Seite darf aus dem HTTP-Cache kommen (GitHub Pages: 10 min), siehe seiteUrl */
     var neu=function(){location.href=seiteUrl();};
-    if(opt.sofort)neu();else sanftWeg(neu);};
+    /* v6.68: kam die Farbe des Ziels erst jetzt, die kurze Blende (150 ms) noch abwarten */
+    if(opt.sofort){if(spaet)setTimeout(neu,160);else neu();}else sanftWeg(neu);};
   if(p.tz){fertig();return;}
   /* Zeitzone des Ortes holen (Open-Meteo, timezone=auto). Faellt der Abruf aus, wird ohne tz gespeichert - die App nimmt
      dann die Geraetezone und traegt die echte beim naechsten Datenabruf nach. */
@@ -3649,6 +3672,46 @@ function vorabSichern(p){
   var d={},dt={},n=0,t=Date.now();for(var k in e.d)if(t-e.dt[k]<vorabMax(k)){d[k]=e.d[k];dt[k]=e.dt[k];n++;}if(!n)return;
   try{sessionStorage.setItem("ortVorab",JSON.stringify({la:e.la,lo:e.lo,d:d,dt:dt}));}catch(x){}
 }
+/* v6.68 FARBE DES NAECHSTEN ORTS (Nutzer 13.11., Bildschirmfilm 07:11: 0,22 s fast schwarz zwischen zwei Orten; "die
+   Notfarbe gleich in der richtigen Farbe der Seite, die dann kommt" - "wir laden schon die beiden naechsten"). Aus den
+   vorab geholten Daten (Live-Messung, sonst letzte Stundenzeile) die Lage des Ziels wie hiLage: Sonnenhoehe am Ziel,
+   Bedeckung, nass (Meldung nur mit feinen Werten, wie zustandZeigen), Nebel/Dunst (sichtZustand). Daraus Verlauf und
+   Farbe der Statusleiste mit demselben Wolkenmuster (HI.saat), wie die neue Seite sie rechnet. Ohne Daten: null - dann
+   bleibt die Farbe dieses Orts. Gemerkt je Ort 3 min (zwei Wolkenbilder kosten einige Millisekunden). */
+var HI_ZIEL={};
+function hiZielLage(p){
+  var q=vorabLL(p),e=VORAB_MEM[q.la+"|"+q.lo]||VORAB_MEM[(+p.lat)+"|"+(+p.lon)];if(!e)return null;
+  var t=Date.now(),w=null;
+  if(e.d.live&&e.d.live.weather&&t-e.dt.live<vorabMax("live"))w=e.d.live.weather;
+  if(!w&&e.d.haupt&&e.d.haupt.weather&&t-e.dt.haupt<vorabMax("haupt")){var rs=e.d.haupt.weather;
+    for(var i=rs.length-1;i>=0;i--){var ti=Date.parse(rs[i].timestamp);if(isFinite(ti)&&ti<=t){w=rs[i];break;}}}
+  if(!w)return null;
+  var ts=Date.parse(w.timestamp);if(isFinite(ts)&&t-ts>3*3600e3)return null;
+  var mu=hiMuFrueh(t,q.la,q.lo),h=Math.round(Math.asin(hiKl(mu,-1,1))*360/Math.PI)/2;
+  var ic=String(w.icon||""),cond=String(w.condition||""),p10=w.precipitation_10,p30=w.precipitation_30;
+  var fein=(p10!=null&&isFinite(p10))||(p30!=null&&isFinite(p30)),nf=(p10>0)||(p30>0);
+  var nass=(/^(rain|sleet|snow|hail|thunderstorm)$/.test(cond)||radarNass(ic))&&(!fein||nf)?1:0;
+  var N=(w.cloud_cover!=null&&isFinite(w.cloud_cover))?w.cloud_cover/100:(/^clear/.test(ic)?.05:/^partly/.test(ic)?.45:.95);
+  var sz=nass?null:sichtZustand(ic,w.visibility);
+  if(ic==="fog"||(sz&&sz.ic==="fog"))return {h:h,N:1,nass:0,nebel:1};
+  return {h:h,N:nass?Math.max(N,.92):hiKl(N),nass:nass};
+}
+function hiZiel(p){
+  if(!p||!hiAn())return null;
+  var q=vorabLL(p),k=q.la+"|"+q.lo,c=HI_ZIEL[k],t=Date.now();
+  if(c&&t-c.t<180e3&&c.s===HI.saat)return c.v;
+  var L=hiZielLage(p);if(!L)return null;
+  var C=hiFarben(L),B=HI.B||hiMass(),tex=null;
+  if(L.N>.04)tex={F:hiTextur(11+HI.saat,Math.min(1,L.N*.92),hiMix(C.rand,C.top,.35),hiMix(C.kern,C.top,.35)),N:hiTextur(29+HI.saat,L.N,C.rand,C.kern)};
+  var v={L:L,o:hiRgb(C.top),u:hiRgb(C.bot),rr:hiRgb(hiPassen(hiRand(C,L,B,1,tex),0,.43))};
+  HI_ZIEL[k]={t:t,s:HI.saat,v:v};return v;
+}
+/* die neue Seite beginnt mit diesen Farben (erstes Script: Verlauf, Statusleiste, Decke); Feld 5 (Glas) bleibt */
+function hiZielMerken(T){
+  if(!T||!hiFussAn())return;
+  var a=String(localStorage.getItem("himmelFarbe")||"").split("|");
+  localStorage.setItem("himmelFarbe",T.o+"|"+T.u+"|"+T.L.N.toFixed(2)+"|"+(T.L.nebel?2:T.L.nass?1:0)+"|"+(a[4]||"")+"|"+T.rr);
+}
 function vorabNimm(k){
   if(VORAB===null){VORAB=false;
     try{var s=sessionStorage.getItem("ortVorab");sessionStorage.removeItem("ortVorab");
@@ -3671,7 +3734,9 @@ function seiteVorab(){if(Date.now()-_seiteVorab<540e3)return;_seiteVorab=Date.no
 /* v6.59: beide Nachbarn in der Liste (die Richtung des letzten Wischs zuerst) - nach jedem Start und beim Zurueckkehren */
 function owNachbarnVorab(ri){
   if(document.hidden)return;var L=owListe();if(L.a.length<2)return;ri=ri||1;
-  [ri,-ri].forEach(function(d){var j=L.i+d;if(j>=0&&j<L.a.length)vorabHolen(L.a[j]);});
+  [ri,-ri].forEach(function(d){var j=L.i+d;if(j>=0&&j<L.a.length){var p=L.a[j];
+    /* v6.68: die Farbe des Nachbarn gleich mitrechnen, sobald seine Daten da sind (nicht erst beim Loslassen) */
+    vorabHolen(p).then(function(){if(hiAn()&&hiFussAn())setTimeout(function(){try{hiZiel(p);}catch(e){}},30);});}});
   seiteVorab();
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&SANFT.fertig)setTimeout(function(){try{owNachbarnVorab(1);}catch(e){}},1500);});
@@ -3755,7 +3820,9 @@ function owZurueck(){
 function owLos(){
   var h=document.documentElement,W=innerWidth||390,s=OW.dx<0?-1:1,p=OW.ziel,red=hiReduziert();
   OW.schluck=Date.now();
-  hiFlachAn();
+  /* v6.68: gleich in der Farbe des Ziels zudecken, wenn sie schon bekannt ist */
+  var T0=null;try{T0=hiZiel(p);}catch(e){T0=null;}
+  hiFlachAn(T0);
   /* die Punkte zeigen jetzt schon das Ziel als aktuellen Ort - die neue Seite uebernimmt die Pille unveraendert */
   owPunkte({a:OW.L.a,i:OW.j},-1,(s<0?"":"\u2039 ")+p.name+(s<0?" \u203a":""),1,false);clearTimeout(OW.tm);
   OW.los=1;
