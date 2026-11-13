@@ -3867,6 +3867,13 @@ nicht - dort gilt will-change:transform seit v6.66), blendet in 0,2 s ein/aus, t
 am Scroll-Ereignis (rAF), bei kzEditSetzen und am Zahnrad im Fuss; der Aussentipp-Schliesser kennt den Knopf. Hell: dunkler
 Knopf, dunkle Ansichten: heller. Geprueft (`e/t113.py`, Himmel und hell): offen -> schwebt, Fuss im Bild -> weg, hoch -> wieder
 da, Tipp -> Bearbeiten zu.
+v6.76 (Nutzer 13.11., zwei iPhone-Bilder Buenos Aires v6.75: "Fertig fest als Sockel waere besser als der uebergeblendete
+Knopf"): statt des schwebenden Knopfs (v6.75) eine feste Leiste ueber die ganze Breite am unteren Rand (#kzSockel, im
+<body>, Polster + safe-area unten), solange Kacheln waehlen / Einstellungen offen sind; darin "Fertig" (breit, hoechstens
+440 px). Der Knopf im Fuss entfaellt dann (html.kzsockel #kzFertig), der Body bekommt unten 76 px + safe-area Platz. Hell
+weisse Leiste mit dunklem Knopf, dunkel/Himmel Glas mit hellem Knopf. Einblenden 0,22 s von unten. Geprueft (`e/t114.py`,
+`e/t115.py`). Frage des Nutzers "Was macht der Einstellungen-Knopf da unten?" beantwortet (klappt den Einstellungsblock auf/zu;
+im Kachel-Bearbeiten der Weg zu den Einstellungen); ob er bleibt, steht aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
