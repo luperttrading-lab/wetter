@@ -4045,6 +4045,13 @@ v6.95 (Nutzer: "beim naechsten Oeffnen der App wieder anzeigen"): das x aus v6.9
 Oeffnen - Merker im Speicher der Seite (`_warnWeg`), geleert beim Neuladen oder bei Rueckkehr nach >= 5 min im Hintergrund
 (visibilitychange, `renderAlerts(_warnLetzt)`). Alter Eintrag `warnWeg` wird geloescht. Kuerzere Pausen (App kurz
 gewechselt) lassen die Warnung weg - 5 min ist MEINE Wahl.
+v6.96 FUNKELN IN ZWEI ARTEN (Nutzer 13.11.: "nur die kleinen ein- und ausblenden, bei 100 % ganz an und aus - Funkeln,
+kein Blinken"): `hiSterne` markiert `data-k`: "g" = grosse Sterne (q > 0,8, 393 pt ~64) flackern schnell und leicht
+(0,08-0,22 s je Schritt, Tiefe bis 50 % x Regler "Grosse Sterne" `himmelFlackern`, `HI_FL_STD` 40); "k" = jeder fuenfte kleine
+Stern (~38) bleibt 2-7 s voll, sinkt in 0,8-2,4 s weich ab (Tiefe = Regler "Kleine Sterne", Schluessel weiter `himmelFunkeln`,
+100 % = ganz weg), haelt 0,2-1 s, taucht ebenso weich wieder auf; eigener Takt je Stern, kein Groessenwechsel mehr. Tempo
+teilt beide. Regler `hiRegFl` in der kzRegler-Liste. Geprueft (Playwright, ?himmel=nacht, 100/40 %): kleine bis 0,02, grosse
+nicht unter 0,80. Werte MEINE Wahl. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
