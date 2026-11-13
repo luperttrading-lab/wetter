@@ -1964,6 +1964,8 @@ function hiFarben(L){
      (152,162,180), Luecke dunkel (64,76,96), Grund oben (70,82,102) / unten (84,97,112); bei Regen dunkler. */
   var gt=hiMix([22,26,36],L.nass?[64,76,98]:[90,101,120],tag),gb=hiMix([44,50,66],L.nass?[86,98,118]:[110,121,140],tag);
   top=hiMix(top,gt,g);bot=hiMix(bot,gb,g);
+  /* v6.92: tiefe Nacht (Sonne ab -10 Grad, voll ab -18) dunkler, damit die Sterne herauskommen */
+  var tief=(1-hiSm(-18,-10,h))*(1-g);top=hiMix(top,[3,5,18],.5*tief);bot=hiMix(bot,[12,15,40],.42*tief);
   var rand=hiMix([92,98,138],[196,218,250],tag),kern=hiMix([58,62,98],[102,134,186],tag);
   rand=hiMix(rand,[255,206,170],daem*.5);kern=hiMix(kern,[196,150,150],daem*.4);
   var or=hiMix([78,84,104],L.nass?[140,150,166]:[168,176,190],tag),ok=hiMix([40,45,60],L.nass?[76,88,108]:[102,113,131],tag);
@@ -2092,7 +2094,7 @@ function hiSterne(sz,B,a,hmax,fk){
   sz.appendChild(c);
   if(fs.length){sz.insertAdjacentHTML("beforeend",fs.join(""));sz.querySelectorAll(".hiFk").forEach(hiFunkelAnim);}
 }
-var HI_FK_STD=40;
+var HI_FK_STD=50;
 /* je Stern eine Folge aus dem eigenen Zufall (gleich in #hi und #hiK): 10-22 Stufen zu 0,2 s, jede Helligkeit haelt 1-3
    Stufen; Helligkeit 1 - 0,92 x Staerke x v^1,6 (v gleichverteilt: meist hell), in jedem achten Wert ein Aufblitzen
    (voll hell, 1 + 0,6 x Staerke so gross). Dauer und Versatz Vielfache von 0,2 s, Versatz nach der Uhr. */
@@ -2559,7 +2561,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.91</span>
+      <span class="ver">v6.92</span>
     </div>
   </header>
 
@@ -9261,6 +9263,7 @@ function kopfMenuTun(a){
   if(a==="sich"){einstDialog();return;}
   if(a==="auf"||a==="zu"){klappAlle(a==="auf");return;}
   if(a==="pause"){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}
+  _kzScrollVor=window.scrollY;
   _kzRegAuf=(a==="einst");kzEditSetzen(true);if(_kzRegAuf)kzBewAnwenden(false);
   /* Kacheln bzw. Regler ins Bild holen - im Himmel steht der Kopf, das Zahnrad ist auch weit unten erreichbar */
   requestAnimationFrame(()=>{const z=el(a==="einst"?"kzReg":"kz");if(!z)return;
@@ -9281,7 +9284,10 @@ function kopfTipZeigen(){
   t.addEventListener("click",kopfTipWeg);setTimeout(kopfTipWeg,9000);
   window.addEventListener("scroll",kopfTipWeg,{passive:true,once:true});
 }
-function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();kzFixPruefen();}
+var _kzScrollVor=null;
+function kzEditSetzen(on){_kzEdit=!!on;if(!on)_kzRegAuf=false;
+  /* v6.92: nach Fertig zurueck an die Stelle, von der aus das Menue geoeffnet wurde */
+  if(!on&&_kzScrollVor!=null){const y=_kzScrollVor;_kzScrollVor=null;requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(0,y)));}if(!on){_kzDrag=null;const g=document.querySelector(".kzghost");if(g)g.remove();kzSpeichern();}kzRender();kzFixPruefen();}
 /* v6.75 (Nutzer 13.11.: "bei Einstellungen sollte der Fertig-Knopf unten immer zu sehen sein"): erst ein schwebender Knopf.
    v6.76 (Nutzer: "Fertig fest als Sockel waere besser als der uebergeblendete Knopf"): SOCKEL - eine feste Leiste ueber die
    ganze Breite am unteren Rand (#kzSockel, im <body>; in #hero ginge position:fixed nicht, dort gilt will-change:transform,

@@ -4025,6 +4025,10 @@ v6.91 (Nutzer 13.11. 14:34, Bild Erlental: in der Stundenleiste fehlten bei "13 
 nimmt die Sonne aus der Zeile T+1 (v4.29) und mischt Messung und Vorhersage nicht - die 14:00-Zeile war noch MOSMIX, die
 Messung 14:00 stand nur oben (Live, `_kopfMess`). Jetzt nimmt die gemessene Zelle dann `sunshine` bzw. `_ss60` dieser
 Live-Messung, wenn ihr Stempel genau T+1 ist. Nur Syntax und Laden ohne Fehler geprueft (Fall im Pruefstand nicht nachgestellt).
+v6.92 (Nutzer 13.11., Bild Tokio 00:00): (1) TIEFE NACHT dunkler - in `hiFarben` ab Sonnenhoehe -10 Grad (voll ab -18)
+Verlauf oben 50 % / unten 42 % Richtung (3,5,18) / (12,15,40), mal (1 - Grauanteil): klare Nacht dunkler, Sterne treten heraus,
+bedeckt unveraendert. (2) Funkeln Voreinstellung 50 % (`HI_FK_STD`, Nutzerwahl). (3) "Fertig" nach Einstellungen / Kacheln
+waehlen springt zurueck an die Scrollstelle, an der das Zahnrad-Menue geoeffnet wurde (`_kzScrollVor`). Geprueft (Playwright).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
