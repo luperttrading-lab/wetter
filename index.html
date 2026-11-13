@@ -2086,8 +2086,9 @@ function hiSterne(sz,B,a,hmax,fk){
   for(var i=0;i<n;i++){var x=R()*B.w,y=R()*B.h,q=R(),r=q>.97?1.5:q>.8?1:.6,al=(.35+R()*.65)*(1-hiSm(.5,.85,y/B.h));
     if(al<.03||y>hs+5)continue;
     var fb=q>.9?"255,236,214":"236,240,255";
-    if(fk&&q>.7&&al>.25){var A=(al*a).toFixed(3),hh=Math.imul(i+1,2654435761)>>>0,rf=Math.max(r,1);
-      fs.push('<i class="hiFk" data-h="'+hh+'" style="left:'+(x-5).toFixed(1)+'px;top:'+(y-5).toFixed(1)+'px;background:radial-gradient(circle,rgba('+fb+','+A+') 0,rgba('+fb+','+A+') '+rf+'px,rgba('+fb+',0) '+(rf+.8).toFixed(1)+'px)'
+    var hh=Math.imul(i+1,2654435761)>>>0,gk=q>.8;
+    if(fk&&al>.2&&(gk||hh%5===0)){var A=(al*a).toFixed(3),rf=gk?Math.max(r,1):r;
+      fs.push('<i class="hiFk" data-k="'+(gk?"g":"k")+'" data-h="'+hh+'" style="left:'+(x-5).toFixed(1)+'px;top:'+(y-5).toFixed(1)+'px;background:radial-gradient(circle,rgba('+fb+','+A+') 0,rgba('+fb+','+A+') '+rf+'px,rgba('+fb+',0) '+(rf+.8).toFixed(1)+'px)'
         +(q>.97?',radial-gradient(circle,rgba(236,240,255,'+(.12*a).toFixed(3)+') 0,rgba(236,240,255,'+(.12*a).toFixed(3)+') 4px,rgba(236,240,255,0) 4.6px)':'')+'"></i>');
       continue;}
     g.fillStyle="rgba("+fb+","+al.toFixed(3)+")";g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
@@ -2104,18 +2105,29 @@ var HI_FK_STD=50;
    v^1,4), dazwischen 0,25-0,7 s sanft ueberblendet (ease-in-out), an hellen Stellen kaum merklich groesser (bis 1 + 0,25 x
    Staerke). Tempo-Regler teilt die Dauern. Der Kompositor arbeitet dabei in jedem Bild (am Rechner ohne GPU messbar, am
    iPhone mit GPU guenstig). Folge aus dem eigenen Zufall des Sterns, Versatz nach der Uhr - Kopf und Himmel gleich. */
+/* v6.96 (Nutzer: "nur die kleinen ein- und ausblenden, bei 100 % ganz aus - Funkeln, kein Blinken"): zwei Arten.
+   KLEINE (data-k="k", jeder fuenfte kleine Stern): bleibt lange voll, sinkt dann in 0,8-2,4 s weich ab (Tiefe = Regler
+   "Kleine Sterne", 100 % = ganz weg), haelt kurz, taucht ebenso weich wieder auf; Pausen 2-7 s, eigener Takt je Stern.
+   GROSSE (data-k="g", q > 0,8): bleiben sichtbar und flackern schnell und leicht (0,08-0,22 s je Schritt, Tiefe = Regler
+   "Grosse Sterne" x 0,5). Tempo teilt beide Dauern. */
 function hiFunkelAnim(n){
   try{if(n._fa){n._fa.cancel();n._fa=null;}}catch(e){}
-  var s=hiFunkeln()/100,tp=hiFunkelTempo()/100;if(!(s>0)||!n.animate)return;
-  var hh=+n.dataset.h||1,z=hh|0,m=8+hh%7,t=[0],v=[],g=[],k=[],i;
+  if(!n.animate)return;
+  var gk=n.dataset.k==="g",s=(gk?hiFlackern():hiFunkeln())/100,tp=hiFunkelTempo()/100;
+  if(!(s>0)){n.style.opacity="";return;}
+  var hh=+n.dataset.h||1,z=hh|0,k=[],t=0,i;
   function R(){z=Math.imul(z^(z>>>15),2246822519)+1013904223|0;return ((z^(z>>>13))>>>0)/4294967295;}
-  for(i=0;i<m;i++){var x=Math.pow(R(),1.4);v.push(+(1-.85*s*x).toFixed(3));g.push(+(1+.25*s*Math.pow(1-x,3)).toFixed(3));t.push(t[i]+(.25+.45*R())/tp);}
-  var P=t[m];
-  for(i=0;i<m;i++)k.push({offset:t[i]/P,opacity:v[i],transform:"scale("+g[i]+")",easing:"ease-in-out"});
-  k.push({offset:1,opacity:v[0],transform:"scale("+g[0]+")"});
+  function add(dt,o){t+=dt/tp;k.push([t,o]);}
+  k.push([0,1]);
+  if(gk){var m=14+hh%9;for(i=0;i<m;i++)add(.08+.14*R(),+(1-.5*s*Math.pow(R(),1.3)).toFixed(3));add(.12,1);}
+  else{var m2=2+hh%3;for(i=0;i<m2;i++){var tief=+(1-s*(.7+.3*R())).toFixed(3);add(2+5*R(),1);add(.8+1.6*R(),tief);add(.2+.8*R(),tief);add(.8+1.6*R(),1);}}
+  var P=t,kf=k.map(function(e){return {offset:e[0]/P,opacity:e[1],easing:"ease-in-out"};});
   var D=Math.round(P*1000);
-  try{n._fa=n.animate(k,{duration:D,iterations:Infinity,delay:-((Date.now()+hh%977)%D)});}catch(e){}
+  try{n._fa=n.animate(kf,{duration:D,iterations:Infinity,delay:-((Date.now()+hh%977)%D)});}catch(e){}
 }
+var HI_FL_STD=40;
+function hiFlackern(){try{var v=parseFloat(localStorage.getItem("himmelFlackern"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_FL_STD;}
+function hiFlackernSetzen(v){try{localStorage.setItem("himmelFlackern",String(+v));}catch(e){}hiFunkelStil();hiAnzeigen();}
 var HI_FK_TP_STD=100;
 function hiFunkelTempo(){try{var v=parseFloat(localStorage.getItem("himmelFunkelTempo"));if(isFinite(v))return Math.max(50,Math.min(200,v));}catch(e){}return HI_FK_TP_STD;}
 function hiFunkelTempoSetzen(v){try{localStorage.setItem("himmelFunkelTempo",String(+v));}catch(e){}hiFunkelStil();hiAnzeigen();}
@@ -2544,6 +2556,9 @@ function hiAnzeigen(){
   var fr=document.getElementById("hiRegFk"),fv=document.getElementById("hiRegFkV"),fd=hiFunkeln();
   if(fr&&+fr.value!==fd){fr.value=fd;kzReglerFuell(fr);}
   if(fv)fv.textContent=fd+"\u202f%";
+  var flr=document.getElementById("hiRegFl"),flv=document.getElementById("hiRegFlV"),fld=hiFlackern();
+  if(flr&&+flr.value!==fld){flr.value=fld;kzReglerFuell(flr);}
+  if(flv)flv.textContent=fld+"\u202f%";
   var ftr=document.getElementById("hiRegFkT"),ftv=document.getElementById("hiRegFkTV"),ftd=hiFunkelTempo();
   if(ftr&&+ftr.value!==ftd){ftr.value=ftd;kzReglerFuell(ftr);}
   if(ftv)ftv.textContent="\u00d7"+hiZahl(ftd/100,1);
@@ -2591,7 +2606,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.95</span>
+      <span class="ver">v6.96</span>
     </div>
   </header>
 
@@ -9088,10 +9103,11 @@ function kzRender(){
                    +'<div class="kzseg waKaZ" id="hiSoSeg"><button type="button" data-s="1">Mit Sonne</button><button type="button" data-s="0">Ohne Sonne</button></div>'
                    +'<div class="kzhilf waKaZ">Die Sonne steht am Taghimmel, solange es trocken ist und sie durchkommt (bis etwa 90 % Bewölkung); Wolken ziehen vor ihr vorbei.</div>'
                    +'<div class="kzregt">Sterne</div>'
-                   +'<label class="waKaZ"><span>Funkeln</span><input type="range" id="hiRegFk" min="0" max="100" step="5"><b id="hiRegFkV">–</b></label>'
+                   +'<label class="waKaZ"><span>Kleine Sterne</span><input type="range" id="hiRegFk" min="0" max="100" step="5"><b id="hiRegFkV">–</b></label>'
+                   +'<label class="waKaZ"><span>Große Sterne</span><input type="range" id="hiRegFl" min="0" max="100" step="5"><b id="hiRegFlV">–</b></label>'
                    +'<label class="waKaZ"><span>Tempo</span><input type="range" id="hiRegFkT" min="50" max="200" step="10"><b id="hiRegFkTV">–</b></label>'
                    +'<div class="waprobe waKaZ" id="hiFkProbe"><span>Vorschau:</span><button type="button">klarer Nachthimmel (20 s)</button></div>'
-                   +'<div class="kzhilf waKaZ">Nur bei Dunkelheit und klarem Himmel (bis etwa halb bewölkt): etwa jeder dritte Stern wird unruhig etwas dunkler und wieder heller. 0 % = die Sterne stehen still; Tempo: wie schnell.</div>'
+                   +'<div class="kzhilf waKaZ">Nur bei Dunkelheit und klarem Himmel (bis etwa halb bewölkt): Kleine Sterne: einzelne verschwinden langsam und tauchen wieder auf (100 % = ganz weg). Große Sterne: flackern leicht. 0 % = still; Tempo: wie schnell.</div>'
                    +'<div class="kzregt">Farbe der Karten</div>'
                    +'<label class="waKaZ"><span>Himmel</span><input type="range" id="hiRegGl" min="0" max="100" step="5"><b id="hiRegGlV">–</b></label>'
                    +'<div class="kzhilf waKaZ">Wie stark Karten und Warnmeldung die Farbe des Himmels annehmen: 0 % = dunkles Marineblau wie bisher, 100 % = fast die Himmelsfarbe. Je heller, desto blasser wirken kleine graue Texte.</div>'
@@ -9135,10 +9151,11 @@ function kzRender(){
       const hg=el("hiRegGl");hg.value=hiGlasTon();hg.addEventListener("input",()=>hiGlasSetzen(hg.value));
       const ht=el("hiRegTp");ht.value=hiTempoEigen();ht.addEventListener("input",()=>hiTempoSetzen(ht.value));
       const hf=el("hiRegFk");hf.value=hiFunkeln();hf.addEventListener("input",()=>hiFunkelSetzen(hf.value));
+      const hfl=el("hiRegFl");hfl.value=hiFlackern();hfl.addEventListener("input",()=>hiFlackernSetzen(hfl.value));
       const hfT=el("hiRegFkT");hfT.value=hiFunkelTempo();hfT.addEventListener("input",()=>hiFunkelTempoSetzen(hfT.value));
       el("hiFkProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiNachtProbe();});
       el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
-      [g,d,wt,wb,wf,as,ak,hk,hg,ht,hf,hfT].forEach(kzRegler);
+      [g,d,wt,wb,wf,as,ak,hk,hg,ht,hf,hfl,hfT].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();
         if(b.dataset.p==="sturm"&&hiWolkenZiehen()){
