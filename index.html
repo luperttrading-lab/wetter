@@ -993,6 +993,10 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .wolkctl{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center;margin-top:10px;font-size:12.5px;color:#5b6879}
   .wolkctl input[type=range]{width:100%;accent-color:#1c66c4}
   .wolkctl b{font-variant-numeric:tabular-nums}
+  html.dunkel .wolkctl{color:var(--muted)}html.dunkel .wolkctl b{color:var(--ink)}   /* v6.80: war fest #5b6879 */
+  html.dunkel .wpre.on{background:#1c66c4;border-color:#1c66c4;color:#fff}   /* v6.80: gewaehlte Stufe war im Dunklen nicht markiert */
+  #radarSec.rk-aussen .rk-wrap,#radarSec.rk-aussen .rk-ctl,#radarSec.rk-aussen .rk-leg{display:none}
+  #radarSec.rk-aussen #rkNote{font-size:14px;line-height:1.45;color:var(--ink);text-align:center;padding:14px 8px 10px;margin:0}
   /* v2.96: Diagnose (aendert sich stuendlich) und Legende (aendert sich nie)
      getrennt. Vorher stand beides in einem Block, und jede neue Zahl ging in
      der Erklaerung unter. Reihenfolge der Diagnose ist fest, damit das Auge
@@ -2531,7 +2535,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.79</span>
+      <span class="ver">v6.80</span>
     </div>
   </header>
 
@@ -12268,7 +12272,11 @@ function radarLaden(){
     if(i<0){const n=Date.now();i=0;RK.frames.forEach((f,k)=>{if(f.t<=n)i=k;});}
     RK.idx=i;const sch=el("rkSchieber");if(sch){sch.max=RK.frames.length-1;sch.value=i;}
     radarZeichnen();
-  }).catch(e=>{RK.laeuft=false;RK.fehler="Radar nicht erreichbar ("+(e&&e.message||e)+")";radarZeichnen();});
+  }).catch(e=>{RK.laeuft=false;
+    /* v6.80: Bright Sky antwortet ausserhalb des DWD-Radars mit 404 "lat/lon lies outside the radar data range"
+       (Buenos Aires, Barcelona, auch Paris) - dann keine leere Karte, sondern eine Erklaerung */
+    RK.aussen=/\b404\b/.test(String(e&&e.message||e));if(RK.aussen)RK.geladen=Date.now();
+    RK.fehler=RK.aussen?RK_AUSSEN_TXT:"Radar nicht erreichbar ("+(e&&e.message||e)+")";radarZeichnen();});
 }
 /* v4.46: SCHEINECHOS (Clutter) ausblenden. Anlass: bei Norden stand am
    27.09.2026 ueber Stunden ein Fleck mit "31 mm/h" an der Emsmuendung bei
@@ -12549,7 +12557,10 @@ function rkZugZeichnen(x,P,W,H,nurFlaechen){
   return fl;
 }
 let _rkBg=null,_rkBgKey="";
+var RK_AUSSEN_TXT="Kein Regenradar f\u00fcr diesen Ort \u2013 das DWD-Radar reicht nur \u00fcber Deutschland und die Grenzgebiete. Die Wolkenkarte (oben \u201eWolken\u201c) gibt es \u00fcberall.";
 function radarZeichnen(){
+  const sec=el("radarSec");if(sec)sec.classList.toggle("rk-aussen",!!RK.aussen);
+  if(RK.aussen){const n=el("rkNote");if(n)n.textContent=RK_AUSSEN_TXT;return;}
   const cv=el("radarCv");if(!cv||klappZu("radarSec"))return;
   const W=Math.max(160,Math.round(cv.clientWidth||cv.parentElement.clientWidth||320));
   const F=rkFenster(),N=Math.pow(2,F.z)*256;
