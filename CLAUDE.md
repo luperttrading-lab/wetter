@@ -4015,6 +4015,12 @@ bei allen Wetterlagen"): `hiGlasZiel` am Tag 1,12 : 1 dunkler als der mittlere H
 Karten und Kacheln oben (`.kz .ki`) im Himmel plastisch: Lichtkante oben (inset 1px weiss .2), Schattenkante unten
 (inset -1px .18), weicher Schatten 0 3px 10px, dazu ein Verlauf oben hell -> unten minimal dunkler (background-image;
 `.kz .ki` darum background-color). Geprueft (`e/t130.py`): klar, meist, bedeckt, Regen, Nacht, Abend.
+v6.90 (Nutzer 13.11., Bild Erlental 14:23: "zweimal Frostwarnung", "die Frostwarnung oben macht das schoene Bild kaputt",
+"die Sonne koennte je nach Uhrzeit von links nach rechts wandern"): (1) Steht eine DWD-Warnung zu Frost/Glaette/Glatteis
+(`renderAlerts` setzt `html.warnfrost`), entfaellt der eigene Hinweis "Frost moeglich" (#heat.cold). (2) Warnkarte im Himmel
+ruhiger: Rand 1 px (75 %), Balken 4 statt 7 px, kein farbiger Schein, Lichtkante + weicher Schatten wie die Karten (v6.89).
+(3) `hiSonneX()`: Sonne nach dem Tagesanteil (Aufgang 12 %, Untergang 88 % der Kopfbreite, 2-%-Schritte, sunMoment); die
+Klemme zwischen "Live" und Datum (v6.37) ist weg. Geprueft (`e/t131.py`): 9 / 12:30 / 16 Uhr -> 24 / 52 / 82 %, mit Warnung.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
