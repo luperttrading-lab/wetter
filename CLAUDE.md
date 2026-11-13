@@ -3824,6 +3824,17 @@ naechste Bild steht (Vermutung zum Film, im Pruefstand nicht nachstellbar). Nach
 20 px gezogen -> Decke und Kopfschicht 0,21 / 0,53 / 0,07 in der Zielfarbe; Abbruch -> 0 in 0,5 s; ganzer Wisch -> 0,61 ->
 1; neue Seite blendet in 0,73 s in 20 Bildern; "Bewegung reduzieren" ebenso; Wisch-Regression `e/t82.py` ohne Fehler.
 Nicht am iPhone geprueft.
+v6.71 (Nutzer 13.11., zwei iPhone-Bilder "Region Dakar" 08:37 deutscher Zeit = 07:37 Ortszeit: "oben das Mondsymbol unter
+der Temperatur, die Sonne ist schon da, unten in der Sonnenanzeige war auch schon Sonnenaufgang - irgendwas stimmt nicht").
+Himmel und Sonnenkarte hatten RECHT (Aufgang 07:09, 28 min vorher); falsch war das Symbol: oben stand die MOSMIX-Zeile mit
+Stempel 07:00 (Abzeichen "Prognose", "vor 37 Min") - vor Sonnenaufgang, Bright Sky gibt ihr "clear-night". Jetzt
+`tagNachtJetzt(ic)`: fuer Kopf (`zustandZeigen`, nach allen anderen Schritten) und die Zelle "jetzt" der Stundenleiste
+(Symbol und Klasse night) entscheidet der Sonnenstand JETZT am Ort (`isNight(Date.now())`), nicht der Stempel der Zeile -
+-day/-night wird getauscht, das Wort bleibt ("Klar"). Geprueft (`e/t109.py`, Uhr per page.clock, Dakar echte Daten):
+07:37 UTC Zeile 07:00 clear-night -> Kopf und "jetzt" clear-day; 06:50 UTC bleibt Nacht. Gleiches gilt abends (Zeile vor
+Untergang, jetzt danach -> Mond). NEBENBEFUND im selben Bild, nicht geaendert: "Heute bisher ↓ 27,7" lag UEBER der grossen
+Zahl 26,9 - "bisher" zaehlt nur Messungen (Dakar: SYNOP der Nacht), die grosse Zahl war die MOSMIX-Vorhersage (Messung
+aelter als 90 min, v6.22).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

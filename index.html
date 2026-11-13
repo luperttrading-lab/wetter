@@ -2476,7 +2476,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.70</span>
+      <span class="ver">v6.71</span>
     </div>
   </header>
 
@@ -4300,7 +4300,7 @@ function renderStrip(rows){
     const day=ymd(r.timestamp);
     if(prev&&day!==prev){const sep=document.createElement("div");sep.className="hsep";sep.innerHTML=`<span>${dateShort(r.timestamp)}</span>`;h.appendChild(sep);}
     prev=day;
-    const isNow=i===nowIdx, night=isNight(r.timestamp);
+    const isNow=i===nowIdx, night=isNight(isNow?Date.now():r.timestamp);
     const cell=document.createElement("div");
     /* v6.22: steht oben eine Messung statt der Vorhersagezeile der laufenden Stunde, zeigt die Zelle "jetzt" dieselbe */
     const _rk=(isNow&&r._fc&&_kopfMess)?_kopfMess:r;
@@ -4374,6 +4374,7 @@ function renderStrip(rows){
     if(_rk._live)_ic=sonneStuetztIcon(_ic,_rk._ss30,_rk._ss60,_tMs);   // v4.30: wie oben im Zustand
     /* v6.22: Nebel/Dunst aus der gemessenen Sicht wie oben im Kopf - nicht in Vorhersagezeilen, nicht in nassen Stunden */
     if(!_rk._fc&&!_rk._om&&!radarNass(_rk.condition)){const _sz=sichtZustand(_ic,_rk.visibility);if(_sz)_ic=_sz.ic;}
+    if(isNow)_ic=tagNachtJetzt(_ic);   // v6.71: Tag/Nacht nach dem Sonnenstand jetzt, wie oben im Kopf
     cell.innerHTML=`<div class="t">${isNow?"jetzt":hourShort(r.timestamp)+" Uhr"}</div><div class="ic" data-ic="${_ic}">${icon(_ic,28)}</div><div class="pp">${_pp}</div>${_ssBar}<div class="v" style="color:${rgb(thermal(_rk.temperature))}">${fmt1(_rk.temperature)}°</div>${_unten}`;
     if(isNow)nowEl=cell;
     h.appendChild(cell);
@@ -9153,6 +9154,11 @@ function radarNass(ic){return /rain|sleet|snow|hail|thunder/.test(ic||"");}
    aber 20 moegliche. Nur "cloudy" wird ersetzt, nachts nie. Dieselbe Regel
    gilt fuer die Jetzt-Zelle der Stundenleiste, damit oben und unten dasselbe
    steht. */
+/* v6.71 (Nutzer 13.11., Dakar 07:37 Ortszeit: "oben das Mondsymbol unter der Temperatur, und die Sonne ist schon da - unten
+   in der Sonnenanzeige war auch schon Sonnenaufgang"): die Zeile, die oben stand (MOSMIX, Stempel 07:00), lag VOR dem
+   Sonnenaufgang 07:09 - Bright Sky gibt ihr darum das Nachtsymbol. Fuer das, was JETZT gilt (Kopf, Zelle "jetzt"),
+   entscheidet der Sonnenstand jetzt am Ort, nicht der Stempel der Zeile. */
+function tagNachtJetzt(ic){if(!/-(day|night)$/.test(ic||""))return ic;return ic.replace(/-(day|night)$/,isNight(Date.now())?"-night":"-day");}
 function sonneStuetztIcon(ic,ss30,ss60,ms){
   if(ic!=="cloudy"||isNight(ms))return ic;
   if(typeof ss30==="number"&&isFinite(ss30))return ss30>=27?"partly-cloudy-day":ic;
@@ -9213,6 +9219,7 @@ function zustandZeigen(){
   // v4.30: Sonnenminuten der Live-Abfrage stuetzen das Icon (siehe sonneStuetztIcon)
   const _sl=(_feinLive&&(now()-_feinLive.ts)<60*60000)?_feinLive:null;
   if(_sl){const neu=sonneStuetztIcon(ic,_sl.ss30,_sl.ss60,Date.now());if(neu!==ic){ic=neu;tx=LABELS[neu]||tx;}}
+  ic=tagNachtJetzt(ic);
   /* nur neu einsetzen, wenn sich Symbol oder Stufe aendern - sonst begaenne die Bewegung bei jeder Datenlieferung von vorn */
   {const k=ic+"|"+sbStufe()+"|"+sbGroesse();if(il._sbK!==k||il.firstElementChild!==il._sbN){il.innerHTML=symbGross(ic);il._sbK=k;il._sbN=il.firstElementChild;}}
   tl.textContent=tx;sbInit();
