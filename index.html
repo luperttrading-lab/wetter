@@ -520,7 +520,9 @@ html.dunkel .kzfoot .kzpause.an{background:#e8edf3;color:#111;border-color:#e8ed
 .kzfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--muted);font-weight:600;position:relative;min-height:18px}
 .kzfoot .fertig{background:#1c1c1e;color:#fff;border-radius:9px;padding:7px 14px;font-weight:700;cursor:pointer}
 /* v4.75 (Nutzer): Minus im Hinweis wie auf den Kacheln; Zahnrad als eigener Knopf mit Abstand zu "Fertig" */
-.kzfoot .kzminI{display:inline-block;width:16px;height:16px;border-radius:50%;background:#6b7280;color:#fff;font-weight:800;line-height:15px;text-align:center;font-size:13px;vertical-align:middle;position:relative;top:-1px;margin:0 1px}
+#kzHint{font-size:12px;color:var(--muted);font-weight:600}
+#kzHint:not(:empty){margin-top:8px}
+.kzfoot .kzminI,#kzHint .kzminI{display:inline-block;width:16px;height:16px;border-radius:50%;background:#6b7280;color:#fff;font-weight:800;line-height:15px;text-align:center;font-size:13px;vertical-align:middle;position:relative;top:-1px;margin:0 1px}
 .kzfoot .kzgear{width:20px;height:20px;fill:currentColor;vertical-align:middle;position:relative;top:-1px;margin-right:5px}
 .kzfoot .wahl .kzgear{width:17px;height:17px;margin-right:4px}
 .kzfoot .zahn{display:inline-flex;align-items:center}
@@ -637,9 +639,9 @@ html.dunkel .kz .k>.kzmin{background:#9aa7b8;color:#111}
 html.dunkel .kzghost{background:#26313f;border-color:#33405a;color:#eef2f7}
 html.dunkel .kzghost .l,html.dunkel .kzghost .s{color:#9aa7b8}
 html.dunkel .kzpool .kp{background:#26313f;border-color:#4a5568;color:#e6e9ef}
-html.dunkel .kzfoot{color:#9aa7b8}
+html.dunkel .kzfoot,html.dunkel #kzHint{color:#9aa7b8}
 html.dunkel .kzfoot .fertig{background:#e6e9ef;color:#111}
-html.dunkel .kzfoot .kzminI{background:#9aa7b8;color:#111}
+html.dunkel .kzfoot .kzminI,html.dunkel #kzHint .kzminI{background:#9aa7b8;color:#111}
 html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .heat.cold{background:linear-gradient(90deg,#e8f3ff,#dbeafe);border:1px solid #b9d8f5}
   .heat .ic{width:18px;height:18px;flex:none}
@@ -1463,7 +1465,7 @@ html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11))}
 html:root.himmel .kz .ki .l{color:rgba(255,255,255,.76)}
 html:root.himmel .kz .ki .s{color:rgba(255,255,255,.82)}
 html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
-html:root.himmel .kzfoot{opacity:.75;color:#fff}
+html:root.himmel .kzfoot,html:root.himmel #kzHint{opacity:.75;color:#fff;text-shadow:none}
 html:root.himmel .ksect .sect,html:root.himmel .kalle button,html:root.himmel .ksect .kknopf,html:root.himmel .foot{text-shadow:0 1px 12px rgba(6,24,60,.18)}
 html:root.himmel .kalle button{color:rgba(255,255,255,.8)}
 html:root.himmel .loc-box{background:#141a23}
@@ -2520,7 +2522,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.77</span>
+      <span class="ver">v6.78</span>
     </div>
   </header>
 
@@ -2545,7 +2547,7 @@ function hiAnzeigen(){
       <span class="hl">Heute bisher <span class="dn" id="loV">–</span>&nbsp;&nbsp;<span class="up" id="hiV">–</span><span class="dl" id="dlV"></span></span>
     </div>
     <div class="ydiff" id="ydiffBox"><b id="ydiffV">–</b><span class="ys" id="ydiffS">–</span></div>
-    <div id="kzSat"></div><div class="kz" id="kz"></div><div class="kzpool" id="kzPool"></div><div class="kzreg" id="kzReg"></div><div class="kzfoot" id="kzFoot"></div>
+    <div id="kzSat"></div><div class="kz" id="kz"></div><div class="kzhintz" id="kzHint"></div><div class="kzpool" id="kzPool"></div><div class="kzreg" id="kzReg"></div><div class="kzfoot" id="kzFoot"></div>
     <div class="heat" id="heat"><span class="ic" id="heatIc"></span><div class="tx" id="heatTx"></div></div>
   </section>
 
@@ -3850,7 +3852,7 @@ function owListe(){
 }
 function owZone(t){
   if(!t||!t.closest||!t.closest("header,#alerts,#hero"))return false;
-  if(t.closest("#kzPool,#kzReg,#kzFoot,input,select,textarea,a"))return false;
+  if(t.closest("#kzHint,#kzPool,#kzReg,#kzFoot,input,select,textarea,a"))return false;
   /* v6.58 (Nutzer: "auch nicht, wenn man auf den Kacheln links rechts wischt"): Kachelwechsel "Automatisch" (Voreinstellung)
      = Wischen wechselt auch auf den Kacheln den Ort; in "Wischen" / "Auto + Wischen" schaltet ein Wisch auf einer wechselnden
      Kachel (mit Punkten) weiter deren Ansicht um - auf den anderen Kacheln wechselt er den Ort */
@@ -8919,8 +8921,12 @@ function kzRender(){
     if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();sbAnzeigen();hiAnzeigen();}}
   if(pool){pool.classList.toggle("on",_kzEdit);
     pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
+  /* v6.78 (Nutzer 13.11.: "das Ziehen und Entfernen muss oben bei den Kacheln stehen"): der Hinweis steht direkt unter den
+     Kacheln (#kzHint), nicht mehr im Fuss unter den Einstellungen; "Fertig" steht seit v6.76 im Sockel - der Fuss ist im
+     Bearbeiten leer */
+  {const hz=el("kzHint");if(hz)hz.innerHTML=_kzEdit?`ziehen zum Sortieren · <span class="kzminI">−</span> entfernt`:"";}
   if(foot)foot.innerHTML=_kzEdit
-    ?`<span class="kzhint">ziehen zum Sortieren · <span class="kzminI">−</span> entfernt</span><span class="kzfr"><span class="fertig" id="kzFertig">Fertig</span></span>`
+    ?""
     :((_kzPause&&kzWe().modus!=="wischen"&&box.querySelector(".kzdots"))?`<span></span><span class="kzpause an" id="kzPause" role="button">${KZ_WEITER}Weiter</span>`:"");
   /* v6.31 (Nutzer: "verdeckt zu viel vom wichtigen Startbildschirm"): "Kacheln waehlen" und "Pause" stehen im Menue am
      Zahnrad oben; hier bleibt nur der Fuss des Bearbeitens und, solange angehalten ist, der Knopf "Weiter" */
@@ -9169,9 +9175,10 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
      noch ein TIPPEN (<= 10 px Bewegung, kein Abbruch durchs Scrollen), und nie
      auf Hoehe von Kacheln, Reglern und Fuss (auch nicht im Rand daneben). */
   let _kzAussen=null;
-  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzPool,#kzFoot,#kzReg,#kzSockel"))return;
-    const a=el("kz").getBoundingClientRect(),b=el("kzFoot").getBoundingClientRect();
-    if(e.clientY>=a.top-12&&e.clientY<=b.bottom+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
+  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzHint,#kzPool,#kzFoot,#kzReg,#kzSockel"))return;
+    /* v6.78: Unterkante = was als letztes zu sehen ist (der Fuss ist im Bearbeiten leer) */
+    const a=el("kz").getBoundingClientRect(),bu=Math.max(...["kz","kzHint","kzPool","kzReg","kzFoot"].map(i=>{const n=el(i);return n?n.getBoundingClientRect().bottom:0;}));
+    if(e.clientY>=a.top-12&&e.clientY<=bu+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
   document.addEventListener("pointercancel",()=>{_kzAussen=null;},true);
   document.addEventListener("pointerup",e=>{const p=_kzAussen;_kzAussen=null;if(!p||!_kzEdit)return;
     if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)return;kzGhostWeg();_kzZuT=Date.now();kzEditSetzen(false);},true);
