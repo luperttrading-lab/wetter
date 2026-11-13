@@ -1457,7 +1457,7 @@ html:root.himmel{--card:var(--hi-k,rgba(22,30,48,.42));--muted:#e2e9f4;--faint:#
 /* v6.15: KEIN Weichzeichner (backdrop-filter) mehr hinter Karten und Kacheln. Ueber dem weichen, gemalten Himmel sieht
    man den Unterschied kaum (nachts scheinen einzelne Sterne durch), er verdoppelte aber den Aufwand, sobald sich ein
    Symbol bewegt (gemessen ohne GPU: 38-41 % eines Kerns mit, 17-24 % ohne). */
-html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard{box-shadow:none}
+html:root.himmel .strip-card,html:root.himmel .chart-card,html:root.himmel .nowcard,html:root.himmel .kz .ki{box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,10,30,.18),0 3px 10px rgba(0,12,35,.2),0 1px 2px rgba(0,12,35,.16);background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 45%,rgba(0,10,30,.06))}
 html:root.himmel .pvtage button.on,html:root.himmel .pvsicht button.on,html:root.himmel .mj-tip{color:#1a212c}
 /* v6.46 (Nutzer: "bei Temperaturverlauf und Stuendlich und so ist auch der schwarze Schein hinter der weissen Schrift -
    sieht nicht huebsch aus"): Schriftschatten im Himmel nur noch WEICH (weit, schwach, dunkelblau statt schwarz) - kein
@@ -1492,7 +1492,7 @@ html:root.himmel .feel .hl,html:root.himmel .feel .hl .dn,html:root.himmel .feel
 html:root.himmel .ydiff{justify-content:center;text-align:center;color:rgba(255,255,255,.85)}
 html:root.himmel .ydiff .ys{color:rgba(255,255,255,.85)}
 html:root.himmel .when .a{color:rgba(255,255,255,.8)}
-html:root.himmel .kz .ki{background:var(--hi-t,rgba(255,255,255,.11))}
+html:root.himmel .kz .ki{background-color:var(--hi-t,rgba(255,255,255,.11))}
 html:root.himmel .kz .ki .l{color:rgba(255,255,255,.76)}
 html:root.himmel .kz .ki .s{color:rgba(255,255,255,.82)}
 html:root.himmel .kz,html:root.himmel .kzfoot{text-shadow:none}
@@ -2423,7 +2423,9 @@ function hiGlasZiel(S){
      Wir bisher (v6.42): 1,2 : 1 dunkler als der Himmel und durchscheinend. Jetzt wie Apple: Ziel = Leuchtdichte des
      mittleren Himmels (Verhaeltnis 1,0), hoechstens 0,21 (weiss >= 4,0 : 1), und das Glas deckt am Tag bis 84 %
      (hiPruefen) - eine ruhige, einheitliche Flaeche statt durchscheinender Wolken. */
-  var y=hiY(S),yt=Math.min(.21,Math.max(y,Math.min(y+.012,.048))),c=S.slice(),i,f,t;
+  /* v6.89 (Nutzer: "manchmal fast gar kein Kontrast der Kachel zum Hintergrund - minimal hoeher, etwas plastisch"):
+     Ziel am Tag 1,12 : 1 dunkler als der mittlere Himmel (v6.43: 1,0); nachts wie bisher etwas heller. */
+  var y=hiY(S),yt=Math.min(.21,y>.048?(y+.05)/1.12-.05:Math.min(y+.012,.048)),c=S.slice(),i,f,t;
   if(y>yt){f=Math.pow(yt/Math.max(y,1e-4),1/2.2);
     for(i=0;i<12;i++){c=S.map(function(v){return v*f;});if(hiY(c)<=yt)break;f*=.97;}}
   else for(t=.01;t<=.5&&hiY(c)<yt;t+=.01)c=hiMix(S,[150,165,200],t);
@@ -2553,7 +2555,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.88</span>
+      <span class="ver">v6.89</span>
     </div>
   </header>
 
