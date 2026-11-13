@@ -4052,6 +4052,9 @@ Stern (~38) bleibt 2-7 s voll, sinkt in 0,8-2,4 s weich ab (Tiefe = Regler "Klei
 100 % = ganz weg), haelt 0,2-1 s, taucht ebenso weich wieder auf; eigener Takt je Stern, kein Groessenwechsel mehr. Tempo
 teilt beide. Regler `hiRegFl` in der kzRegler-Liste. Geprueft (Playwright, ?himmel=nacht, 100/40 %): kleine bis 0,02, grosse
 nicht unter 0,80. Werte MEINE Wahl. Nicht am iPhone geprueft.
+v6.97 (Nutzer: "bei kleinen Sternen bei 0 und 100 % keinen Unterschied"): die blendenden kleinen Sterne waren 0,6 px
+und oft blass (Deckkraft al) - ihr Verschwinden fiel nicht auf. Jetzt Radius 1,1 px, Deckkraft mindestens 0,75, jeder
+vierte statt fuenfte kleine Stern (393 pt ~54).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

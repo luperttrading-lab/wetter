@@ -2087,7 +2087,7 @@ function hiSterne(sz,B,a,hmax,fk){
     if(al<.03||y>hs+5)continue;
     var fb=q>.9?"255,236,214":"236,240,255";
     var hh=Math.imul(i+1,2654435761)>>>0,gk=q>.8;
-    if(fk&&al>.2&&(gk||hh%5===0)){var A=(al*a).toFixed(3),rf=gk?Math.max(r,1):r;
+    if(fk&&al>.2&&(gk||hh%4===0)){var A=((gk?al:Math.max(al,.75))*a).toFixed(3),rf=gk?Math.max(r,1):1.1;
       fs.push('<i class="hiFk" data-k="'+(gk?"g":"k")+'" data-h="'+hh+'" style="left:'+(x-5).toFixed(1)+'px;top:'+(y-5).toFixed(1)+'px;background:radial-gradient(circle,rgba('+fb+','+A+') 0,rgba('+fb+','+A+') '+rf+'px,rgba('+fb+',0) '+(rf+.8).toFixed(1)+'px)'
         +(q>.97?',radial-gradient(circle,rgba(236,240,255,'+(.12*a).toFixed(3)+') 0,rgba(236,240,255,'+(.12*a).toFixed(3)+') 4px,rgba(236,240,255,0) 4.6px)':'')+'"></i>');
       continue;}
@@ -2606,7 +2606,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.96</span>
+      <span class="ver">v6.97</span>
     </div>
   </header>
 
