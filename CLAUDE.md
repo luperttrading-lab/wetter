@@ -4008,6 +4008,8 @@ v6.87 (Nutzer 13.11.: "die 7-Tage-Einstellung als Standard beim Temperaturverlau
 "zurueck auf Standard" (Doppeltipp-Stufe 2) und load() ohne Beruehrung zeigen 7 Tage, Ende am rechten Rand, Cursor auf
 jetzt (77 %). Damit links keine Luecke bleibt, laedt `chartHistLaden` die 30 Tage jetzt schon beim Start, sobald die Spanne
 ueber 60 h liegt (vorher erst nach Beruehrung) - ein Abruf je Seitenaufruf, ~445 KB roh (Bright Sky). Geprueft (`e/t128.py`).
+v6.88 (Nutzer 13.11.: "nur plus und minus mit einem Kreis drum, nicht die Lupe"): Stufenschalter im Temperaturverlauf
+mit Kreis + Minus/Plus (SVG 15 px = Schrifthoehe, Kreis r 10,5, Strich 2,4) statt Lupen (15 px).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
