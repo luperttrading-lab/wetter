@@ -3903,6 +3903,21 @@ der Wolkenregler (`.wolkctl`, "sichtbar ab / voll deckend ab") war fest #5b6879 
 Zahl --ink in den dunklen Ansichten. Dazu war die gewaehlte Stufe (Schleier / Normal / Nur dicht, `.wpre.on`) im Dunklen nicht
 markiert (`html.dunkel .wpre` schlug `.wpre.on`). Geprueft (`e/t120.py`, `e/t121.py`; im Pruefstand macht netz2 aus einem 404
 einen Netzfehler - der Test spielt die echte 404-Antwort per eigener Route ein): Himmel / dunkel / hell, Wettenberg unveraendert.
+v6.81 KONTRAST DER WETTERSYMBOLE (Nutzer 13.11., Bild Norden v6.79: "die Wolken in der stuendlichen Anzeige haben nicht
+genuegend Kontrast - generell ueberall kontrollieren, Tag, Nacht, Wetterlagen"). GEMESSEN (`e/t122.py`: alle 12 Symbole als
+Prognose-Zelle Tag/Nacht, Messzelle, Zelle "jetzt", 16-Tage-Liste nah/fern; Ansicht Himmel in 10 Lagen, dunkel, hell; je
+Symbol Median-Kontrast der Symbolpixel gegen die Zelle, oberer Teil / unterer Teil = Niederschlag; `e/t122a.py` fasst
+zusammen). Im Nutzerbild hatte die Wolke (172,193,224) auf (72,121,190): weiss mit 55 % Deckung - Ursache
+`.col.fc .ic{opacity:.6}` (Prognose-Stunden gedimmt). Himmel vorher: Prognose-Wolken 2,2-2,4 : 1, Regenstriche (#3f8bd6
+auf blauem Glas) 1,1-1,3, Schnee 1,4-1,8, Gewitterwolke 1,4-1,7. JETZT nur in den dunklen Ansichten (html.dunkel = Himmel und
+dunkel): Prognose-Symbole voll deckend (Prognose erkennt man an der schraegen, blassen Uhrzeit und den gedimmten Werten),
+Farben ueber CSS-Variablen in `iconTeile` (style= statt Attribut; Rueckfall = alte Farbe): Regen/Schneeregen `--icRe`
+#c4e2ff, Flocken `--icSn` #eef7ff, Hagel `--icHa`/`--icHs`, Gewitterwolke `--icG0`/`--icG1` #e6eaf0 -> #b0bac8, Rand der Sonne
+`--icS2` #ffbd38. Danach im Himmel: Wolken 3,3-3,9, Regenstriche 2,9-3,0 (in der Liste bei 26 px 2,2 - duenne Striche),
+Schnee/Hagel 3,1-3,3, Sonne 2,6-2,9 und Gewitter 2,6 (Gelb bzw. Grau auf Blau - Farbkontrast hoch, Helligkeitskontrast
+knapp). Dunkel: alles ueber 4. HELL UNVERAENDERT: weisse Wolken auf weisser Karte 1,1-1,6 : 1 - die Zeichnung (v4.08) lebt
+dort vom Schatten; eine Kontur waere ein Gestaltungswechsel, dem Nutzer angeboten. 16-Tage-Liste ab Tag 8 bleibt gedimmt
+(Absicht, v5.19). Bild alt/neu: `e/symbole_alt_neu.png` (wolkig, Nacht, bedeckt).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
