@@ -2541,7 +2541,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.81</span>
+      <span class="ver">v6.82</span>
     </div>
   </header>
 
@@ -4251,6 +4251,9 @@ function paintHero(s,demo,today,d){
   const fe=el("feelV");fe.textContent=d.feel!=null?fmt1(d.feel)+"°":"–";if(d.feel!=null)fe.style.color=rgb(thermal(d.feel));
   el("hiV").textContent="↑ "+(d.hiMeas!=null?fmt1(d.hiMeas):"–")+"°";el("loV").textContent="↓ "+(d.loMeas!=null?fmt1(d.loMeas):"–")+"°";
   el("dlV").textContent=(d.hiMeas!=null&&d.loMeas!=null)?"\u0394 "+fmt1(d.hiMeas-d.loMeas)+"°":"";
+  /* v6.82 (Nutzer, Buenos Aires: "wenn nichts gemessen ist, lass die Zeile wegfallen"): ohne Messung heute keine Zeile
+     "Heute bisher ↓ –° ↑ –°" und unten keine Zeile "keine Vergleichsdaten von gestern" */
+  el("hiV").parentNode.style.display=(d.hiMeas==null&&d.loMeas==null)?"none":"";
 
   /* Temperaturdifferenz zu gestern — gleiche Datenbasis und gleiche Rundung
      (ganze Grad) wie die Kachel "Vergleich zu gestern" weiter unten,
@@ -4258,6 +4261,7 @@ function paintHero(s,demo,today,d){
      0,5-K-Schwelle, damit "genauso warm" nie neben einem Pfeil steht. */
   const dT=d.temp24!=null&&Number.isFinite(s.temp)?(s.temp-d.temp24):null;
   const yV=el("ydiffV"),yS=el("ydiffS");
+  el("ydiffBox").style.display=dT==null?"none":"";
   if(dT==null){yV.textContent="\u2013";yV.style.color="#9aa7b8";yS.textContent="keine Vergleichsdaten von gestern";}
   else{const near=Math.abs(dT)<0.5;
     yV.textContent=(near?"\u2248":dT>0?"\u2191":"\u2193")+" "+Math.abs(dT).toFixed(0)+"°";
