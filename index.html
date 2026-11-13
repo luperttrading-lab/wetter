@@ -788,6 +788,7 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   /* Warnbanner */
   .alert{display:flex;gap:10px;align-items:flex-start;border-radius:16px;padding:11px 13px;margin-bottom:11px;box-shadow:var(--shadow-s);border:1px solid}
   .alert .ai{width:19px;height:19px;flex:none;margin-top:1px}
+  .alert .alx{flex:none;margin:-6px -7px -6px 0;width:32px;height:32px;border:0;background:none;color:inherit;font-size:22px;line-height:1;opacity:.75;cursor:pointer;padding:0}
   .alert .at{font-size:13.5px;font-weight:780;line-height:1.25}
   .alert .ad{font-size:12px;font-weight:500;margin-top:3px;line-height:1.35;opacity:.9}
   .alert.minor{background:#fffbeb;border-color:#fde68a;color:#92500e}
@@ -2590,7 +2591,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v6.93</span>
+      <span class="ver">v6.94</span>
     </div>
   </header>
 
@@ -7293,6 +7294,13 @@ function klappAlle(auf){KLAPP_ABS.forEach(([id])=>{const sec=el(id);if(sec&&sec.
 const dropMini=`<svg width="9" height="12" viewBox="0 0 9 12"><path d="M4.5 0C4.5 0 0 5.4 0 8.2A4.5 4.5 0 0 0 9 8.2C9 5.4 4.5 0 4.5 0Z" fill="currentColor"/></svg>`;
 
 /* --- Render: Warnungen --- */
+/* v6.94 (Nutzer: Warnungen mit X wegdruecken): weggedrueckt bleibt eine Warnung aus bis zu ihrem Ende (expires,
+   ohne Ende 24 h); hoehere Stufe oder neuer Beginn = neuer Schluessel -> erscheint wieder. Speicher warnWeg. */
+function warnWegLesen(){let o={};try{o=JSON.parse(localStorage.getItem("warnWeg")||"{}")||{};}catch(e){}
+  const n=Date.now();Object.keys(o).forEach(k=>{if(!(o[k]>n))delete o[k];});return o;}
+function warnWegHat(k){return !!warnWegLesen()[k];}
+function warnWegSetzen(k,exp){const o=warnWegLesen();let t=exp?new Date(exp).getTime():NaN;if(!(t>Date.now()))t=Date.now()+864e5;
+  o[k]=t;try{localStorage.setItem("warnWeg",JSON.stringify(o));}catch(e){}}
 function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
   document.documentElement.classList.toggle("warnfrost",al.some(a=>/frost|gl(ä|ae)tte|glatteis/i.test((a.event_de||"")+" "+(a.headline_de||"")+" "+(a.event_en||""))));if(!al.length)return;
   const rank={minor:1,moderate:2,severe:3,extreme:4};
@@ -7324,8 +7332,10 @@ function renderAlerts(j){const box=el("alerts");box.innerHTML="";let al=(j&&j.al
     if(t1)sub=(g.onset&&new Date(g.onset)>new Date()?t0+" \u2013 "+t1:"bis "+t1)+" Uhr";
     else if(a.headline_de)sub=a.headline_de;
     if(/VORAB/i.test(a.headline_de||""))sub="Vorabinformation"+(sub?" \u00b7 "+sub:"");
+    const wk=g.k+"|"+sev+"|"+(g.onset||"");if(warnWegHat(wk))return;
     const div=document.createElement("div");div.className="alert "+sev;
-    div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${sub?`<div class="ad">${sub}</div>`:""}</div>`;
+    div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div style="flex:1;min-width:0"><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${sub?`<div class="ad">${sub}</div>`:""}</div><button class="alx" aria-label="Warnung ausblenden">\u00d7</button>`;
+    div.querySelector(".alx").onclick=e=>{e.stopPropagation();warnWegSetzen(wk,g.expires);div.style.transition="opacity .25s";div.style.opacity="0";setTimeout(()=>div.remove(),260);};
     box.appendChild(div);});
   if(bestHeat)el("heat").classList.remove("on");}
 

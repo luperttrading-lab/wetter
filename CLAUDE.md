@@ -4037,6 +4037,10 @@ Tag hoechstens 55 % und nur ab 35 Grad Abstand zur Sonne (voll ab 60) und ab 15 
 beleuchtete Seite (Maske = Gegenstueck der Schattenmaske von moonSvg), Drehung mondHellDreh, weicher Schein. Im Szenenschluessel
 (`HI.M.k`). Liegt bei Warnkarten wie die Sonne hinter der ersten Karte. Schwellen MEINE Wahl. Geprueft 13.11. 17:00 (Sichel 17 %),
 20.11. 21:00 (82 %), 20.11. 15:00 (Tag, blass).
+v6.94 (Nutzer 13.11.: "Warnungen mit einem X wegdruecken"): jede echte Warnkarte hat rechts ein x (`.alx`, 32 px
+Tippflaeche). Weggedrueckt bleibt sie aus bis zu ihrem Ende (`expires`, ohne Ende 24 h), Speicher `warnWeg` {Schluessel:
+Ablauf}, Schluessel = Ereignis|Stufe|Beginn - wird die Warnung hochgestuft oder beginnt neu, erscheint sie wieder.
+Testkarten (`?warntest`) ohne x. Geprueft (Playwright): x blendet aus, Neuzeichnen laesst sie weg.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
