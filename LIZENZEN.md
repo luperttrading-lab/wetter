@@ -35,6 +35,15 @@ seit v6.06 fest). Wege:
   je 1000 [Sicher, Preisseite]; ob das kommerziell erlaubt ist, steht dort nicht.
 - Sentinel-2 (EOX) oder OSM-Kacheln - Lizenzen je Jahrgang/Anbieter vorher pruefen.
 
+## Iowa Environmental Mesonet (seit v6.83)
+
+[Sicher, gelesen 13.11.2026 auf mesonet.agron.iastate.edu/disclaimer.php] "The materials found on this website are in the
+public domain and may be used freely by anyone for any lawful purpose. Attributing the Iowa Environmental Mesonet of Iowa
+State University would be appreciated." Genutzt fuer Flughafen-Messungen (METAR) ausserhalb des DWD-Gebiets: obhistory.json
+je Station und Ortstag (2 Abrufe je Laden, nur dort), Stationsliste `metar-stationen.json` (einmal von Hand gebaut,
+`tools/metar_stationen.py`). Kein Schluessel, CORS erlaubt. Quellvermerk steht im Fuss der App. Die Rohdaten selbst sind
+METAR-Meldungen der Wetterdienste der Laender (ueber NOAA/WMO) - [Vermutung] ebenfalls frei verbreitet, nicht einzeln geprueft.
+
 ## Open-Meteo
 
 [Sicher] Freie Stufe nur nicht kommerziell, 600 Abrufe/min, 5000/h, 10.000/Tag, 300.000/Monat; die
