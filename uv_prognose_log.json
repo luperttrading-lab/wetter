@@ -1041,6 +1041,17 @@
   }
  },
  "2026-11-15": {
+  "morgens": {
+   "erw": 0.48,
+   "erw_roh": 0.29,
+   "erw_tag": 0.48,
+   "erw_zeit": "2026-11-15T11:03:46.315Z",
+   "gueltig": true,
+   "klar": 1.02,
+   "mess": null,
+   "uhr": "00:23",
+   "version": "v7.02"
+  },
   "vortag": {
    "erw": 0.5,
    "erw_roh": 0.31,
