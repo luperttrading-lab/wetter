@@ -4069,6 +4069,11 @@ unveraendert. (2) HIMMEL: Mond (`hiMond`) nach verschobenem Azimut, tief im West
 rechten Rand. (3) `mondHellDreh`: unter dem Horizont die Lage beim naechstgelegenen Unter-/Aufgang (Suche +-15 h, 10 min)
 statt der Grundzeichnung (die war der Blick der Nordhalbkugel). Geprueft gegen PyEphem: Kapstadt 13.11. 20:10 Mond 36,1 Grad
 260 Grad, Saturn 47,9/39; Luanda 22:08 (Mond unter) helle Seite -168 Grad vom Zenit (PyEphem -165). Wettenberg unveraendert.
+v7.01 (Nutzer, Bild Bearbeiten: "kann den Mond nicht hinter den Wind setzen" + "Kachel auf eine andere: diese nach rechts,
+die anderen verschieben"): `kzVerschieben` - auf eine Kachel fallen lassen FUEGT EIN (folgende ruecken bis zur ersten Luecke
+nach rechts, die Luecke wird verbraucht) statt zu tauschen (v5.32). Breite Kacheln (Mond) zaehlen zwei Zellen: am alten Platz
+bleiben zwei Luecken, am neuen wird eine folgende Luecke mit verbraucht - vorher blieb neben dem Mond eine Geisterluecke stehen
+bzw. er rutschte in die naechste Reihe. Geprueft mit Node an drei Faellen; nicht am iPhone.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

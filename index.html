@@ -2611,7 +2611,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.00</span>
+      <span class="ver">v7.01</span>
     </div>
   </header>
 
@@ -9376,7 +9376,13 @@ function kzGhostBewegen(x,y){if(!_kzDrag)return;_kzDrag.g.style.left=(x-_kzDrag.
 function kzZielMarke(to){_kzDrag.ziel=to;document.querySelectorAll("#kz .kzziel").forEach(q=>q.classList.remove("kzziel"));
   if(to!=null){const z=document.querySelector(`#kz [data-slot="${to}"]`);if(z&&z.dataset.id!==_kzDrag.id)z.classList.add("kzziel");}}
 function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDrag.id,a=kzSlots(),from=a.indexOf(d);if(from<0||from===to)return;
-  while(a.length<=to)a.push(null);const x=a[to];a[to]=d;a[from]=x||null;   // Kachel: Tausch; freier Platz: alter Platz wird frei
+  // v7.01 (Nutzer): auf eine Kachel = EINFUEGEN, die folgenden ruecken nach rechts bis zur ersten Luecke (vorher Tausch, v5.32).
+  // Breite Kacheln belegen zwei Zellen: am alten Platz bleiben zwei Luecken, am neuen wird eine folgende Luecke verbraucht.
+  const w=KZ_DEF[d]&&KZ_DEF[d].breit?2:1;
+  while(a.length<=to+2)a.push(null);
+  a[from]=null;if(w===2){a.splice(from+1,0,null);if(to>from)to++;}
+  if(a[to]==null){a[to]=d;if(w===2&&a[to+1]==null)a.splice(to+1,1);}
+  else{a.splice(to,0,d);let n=w;for(let i=to+1;i<a.length&&n>0;i++)if(a[i]==null){a.splice(i,1);i--;n--;}}
   while(a.length&&!a[a.length-1])a.pop();_kzWahl=a;}
 (function(){
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
