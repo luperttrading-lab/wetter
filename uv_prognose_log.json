@@ -1012,6 +1012,13 @@
   }
  },
  "2026-11-14": {
+  "abends": {
+   "gueltig": true,
+   "mess": 0.98,
+   "mess_zeit": "2026-11-14T10:45:00.000Z",
+   "uhr": "21:54",
+   "version": "v7.02"
+  },
   "morgens": {
    "erw": 0.87,
    "erw_roh": 0.74,
@@ -1033,33 +1040,44 @@
    "version": "v7.00"
   }
  },
+ "2026-11-15": {
+  "vortag": {
+   "erw": 0.5,
+   "erw_roh": 0.31,
+   "erw_zeit": "2026-11-15T11:00:00.000Z",
+   "gueltig": true,
+   "klar": 1.02,
+   "uhr": "21:54",
+   "version": "v7.02"
+  }
+ },
  "_auswertung": {
   "hinweis": "ab 10 Tagen: Richtung belastbar, Groesse noch grob",
   "korrektur": {
    "hinweis": "p_fit aus Rohwerten (Morgen + Vortag); p_app = UV_ERW_P in index.html",
-   "n": 64,
+   "n": 66,
    "p_app": 0.6,
    "p_fit": 0.58
   },
   "morgens": {
    "bias": -0.24,
-   "bias_pct": -14.1,
+   "bias_pct": -14.0,
    "mae": 0.28,
-   "n": 34,
+   "n": 35,
    "sd": 0.27
   },
   "morgens_seit_korrektur": {
-   "bias": -0.25,
-   "bias_pct": -22.5,
-   "mae": 0.25,
-   "n": 2,
-   "sd": 0.23
+   "bias": -0.2,
+   "bias_pct": -18.7,
+   "mae": 0.2,
+   "n": 3,
+   "sd": 0.18
   },
   "vortag": {
    "bias": -0.24,
-   "bias_pct": -13.5,
-   "mae": 0.29,
-   "n": 30,
+   "bias_pct": -13.4,
+   "mae": 0.28,
+   "n": 31,
    "sd": 0.27
   }
  }
