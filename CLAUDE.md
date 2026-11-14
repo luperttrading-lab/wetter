@@ -4074,6 +4074,10 @@ die anderen verschieben"): `kzVerschieben` - auf eine Kachel fallen lassen FUEGT
 nach rechts, die Luecke wird verbraucht) statt zu tauschen (v5.32). Breite Kacheln (Mond) zaehlen zwei Zellen: am alten Platz
 bleiben zwei Luecken, am neuen wird eine folgende Luecke mit verbraucht - vorher blieb neben dem Mond eine Geisterluecke stehen
 bzw. er rutschte in die naechste Reihe. Geprueft mit Node an drei Faellen; nicht am iPhone.
+v7.02 (Nutzer, Bild Kapstadt 18:12: "Mond 50 % groesser oder ein Regler 0-100 %"): Regler Einstellungen > Himmel > Mond >
+"Groesser" 0-100 % (`himmelMondGr`, `hiMondGr`, `HI_MO_STD` 50 = Voreinstellung), Radius = 0,75 sr x (1 + Wert/100), Radius im
+Szenenschluessel. Geprueft: 54 -> 72 px bei 50 -> 100 %. Frage Suedhalbkugel beantwortet: Blick nach Norden, Osten (Aufgang)
+rechts, Westen (Untergang) links - so seit v7.00.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

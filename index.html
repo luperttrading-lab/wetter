@@ -2128,6 +2128,10 @@ function hiFunkelAnim(n){
   try{n._fa=n.animate(kf,{duration:D,iterations:Infinity,delay:-((Date.now()+hh%977)%D)});}catch(e){}
 }
 var HI_FL_STD=40;
+/* v7.02 (Nutzer): Mond im Himmel 0-100 % groesser, Voreinstellung 50 % */
+var HI_MO_STD=50,_hiMoT=0;
+function hiMondGr(){try{var v=parseFloat(localStorage.getItem("himmelMondGr"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_MO_STD;}
+function hiMondGrSetzen(v){try{localStorage.setItem("himmelMondGr",String(+v));}catch(e){}hiAnzeigen();clearTimeout(_hiMoT);_hiMoT=setTimeout(function(){try{HI.key="";hiPruefen();}catch(e){}},150);}
 function hiFlackern(){try{var v=parseFloat(localStorage.getItem("himmelFlackern"));if(isFinite(v))return Math.max(0,Math.min(100,v));}catch(e){}return HI_FL_STD;}
 function hiFlackernSetzen(v){try{localStorage.setItem("himmelFlackern",String(+v));}catch(e){}hiFunkelStil();hiAnzeigen();}
 var HI_FK_TP_STD=150;
@@ -2176,12 +2180,12 @@ function hiMond(L,B){
       sep=Math.acos(Math.max(-1,Math.min(1,cs)))/R,mo=moonInfo(n0);
     var nacht=1-hiSm(-8,-1,so.alt),tagv=hiSm(35,60,sep)*hiSm(15,40,mo.illum)*.55;
     var v=Math.max(nacht,tagv)*(1-hiSm(.6,.92,L.N))*hiSm(0,5,m.alt);if(v<.05)return null;
-    var sued=AST_LAT<0,az=(((m.az+(sued?180:0))%360)+360)%360,f=Math.max(.06,Math.min(.94,.06+.88*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75;
+    var sued=AST_LAT<0,az=(((m.az+(sued?180:0))%360)+360)%360,f=Math.max(.06,Math.min(.94,.06+.88*(az-90)/180)),aw=B.aw||B.w,x0=B.sx-aw*hiSonneX(),mx=x0+aw*f,r=B.sr*.75*(1+hiMondGr()/100);
     if(C_SON(B)&&Math.abs(mx-B.sx)<B.sr*3.2)mx=B.sx+(mx<B.sx?-1:1)*B.sr*3.2;
     /* v7.00: Westen = rechts (Nordhalbkugel) bzw. links (Suedhalbkugel, Blick nach Norden) */
     var west=((m.az%360)+360)%360>180;if(west&&!sued)mx=Math.min(x0+aw*.94,mx+aw*.1*(1-hiSm(2,35,m.alt)));if(west&&sued)mx=Math.max(x0+aw*.06,mx-aw*.1*(1-hiSm(2,35,m.alt)));
     var my=B.kb+B.sr*(1.1+.7*(1-hiSm(2,35,m.alt)));
-    return {x:mx,y:my,r:r,v:+v.toFixed(2),svg:hiMondSvg(mo,mondHellDreh(mo.frac)),k:Math.round(mx/4)+"."+Math.round(my/4)+"."+mo.illum+"."+Math.round(v*10)};
+    return {x:mx,y:my,r:r,v:+v.toFixed(2),svg:hiMondSvg(mo,mondHellDreh(mo.frac)),k:Math.round(mx/4)+"."+Math.round(my/4)+"."+Math.round(r)+"."+mo.illum+"."+Math.round(v*10)};
   }catch(e){return null;}}
 /* Sichel ohne dunkle Scheibe: nur die beleuchtete Seite des Mondfotos (Maske = Gegenstueck der Schattenmaske von moonSvg) */
 function hiMondSvg(mo,dreh){var R=18,cx=20,cy=20,frac=mo.frac,rx=Math.abs(Math.cos(2*Math.PI*frac))*R,wax=frac<.5,
@@ -2564,6 +2568,9 @@ function hiAnzeigen(){
   var flr=document.getElementById("hiRegFl"),flv=document.getElementById("hiRegFlV"),fld=hiFlackern();
   if(flr&&+flr.value!==fld){flr.value=fld;kzReglerFuell(flr);}
   if(flv)flv.textContent=fld+"\u202f%";
+  var mgr=document.getElementById("hiRegMo"),mgv=document.getElementById("hiRegMoV"),mgd=hiMondGr();
+  if(mgr&&+mgr.value!==mgd){mgr.value=mgd;kzReglerFuell(mgr);}
+  if(mgv)mgv.textContent="+"+mgd+"\u202f%";
   var ftr=document.getElementById("hiRegFkT"),ftv=document.getElementById("hiRegFkTV"),ftd=hiFunkelTempo();
   if(ftr&&+ftr.value!==ftd){ftr.value=ftd;kzReglerFuell(ftr);}
   if(ftv)ftv.textContent="\u00d7"+hiZahl(ftd/100,1);
@@ -2611,7 +2618,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.01</span>
+      <span class="ver">v7.02</span>
     </div>
   </header>
 
@@ -9111,6 +9118,8 @@ function kzRender(){
                    +'<div class="kzregt">Sonne</div>'
                    +'<div class="kzseg waKaZ" id="hiSoSeg"><button type="button" data-s="1">Mit Sonne</button><button type="button" data-s="0">Ohne Sonne</button></div>'
                    +'<div class="kzhilf waKaZ">Die Sonne steht am Taghimmel, solange es trocken ist und sie durchkommt (bis etwa 90 % Bewölkung); Wolken ziehen vor ihr vorbei.</div>'
+                   +'<div class="kzregt">Mond</div>'
+                   +'<label class="waKaZ"><span>Größer</span><input type="range" id="hiRegMo" min="0" max="100" step="5"><b id="hiRegMoV">–</b></label>'
                    +'<div class="kzregt">Sterne</div>'
                    +'<label class="waKaZ"><span>Kleine Sterne</span><input type="range" id="hiRegFk" min="0" max="100" step="5"><b id="hiRegFkV">–</b></label>'
                    +'<label class="waKaZ"><span>Große Sterne</span><input type="range" id="hiRegFl" min="0" max="100" step="5"><b id="hiRegFlV">–</b></label>'
@@ -9161,10 +9170,11 @@ function kzRender(){
       const ht=el("hiRegTp");ht.value=hiTempoEigen();ht.addEventListener("input",()=>hiTempoSetzen(ht.value));
       const hf=el("hiRegFk");hf.value=hiFunkeln();hf.addEventListener("input",()=>hiFunkelSetzen(hf.value));
       const hfl=el("hiRegFl");hfl.value=hiFlackern();hfl.addEventListener("input",()=>hiFlackernSetzen(hfl.value));
+      const hmo=el("hiRegMo");hmo.value=hiMondGr();hmo.addEventListener("input",()=>hiMondGrSetzen(hmo.value));
       const hfT=el("hiRegFkT");hfT.value=hiFunkelTempo();hfT.addEventListener("input",()=>hiFunkelTempoSetzen(hfT.value));
       el("hiFkProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiNachtProbe();});
       el("hiProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();hiWindProbe(+b.dataset.w);});
-      [g,d,wt,wb,wf,as,ak,hk,hg,ht,hf,hfl,hfT].forEach(kzRegler);
+      [g,d,wt,wb,wf,as,ak,hk,hg,ht,hf,hfl,hfT,hmo].forEach(kzRegler);
       el("waSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();try{localStorage.setItem("wetterAnim",b.dataset.w);}catch(_){}_wa.key="";waPruefen();waAnzeigen();});
       el("waProbe").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();
         if(b.dataset.p==="sturm"&&hiWolkenZiehen()){
