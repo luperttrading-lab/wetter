@@ -2208,7 +2208,9 @@ function hiSzene(ziel,C,L,B,hmax,links,ab){
   /* v6.37: der weite Schein sitzt an der Sonne (vorher fest oben rechts) */
   if(C.glanz>.02)g="radial-gradient(circle "+hiGlanzR(B).toFixed(0)+"px at "+(B.sx!=null?B.sx:B.w*.86).toFixed(0)+"px "+(B.sx!=null?B.sy:B.h*.06).toFixed(0)+"px,rgba(255,244,214,"+C.glanz.toFixed(3)+"),rgba(255,244,214,0)),"+g;
   s.style.cssText="width:"+B.w+"px;height:"+B.h+"px;background:"+g+(links?";left:"+links.toFixed(1)+"px":"")+(fuss?";top:"+(-ab).toFixed(1)+"px":"");
-  if(C.sterne>.02&&!fuss)hiSterne(s,B,C.sterne,hmax,L.N<.6&&!L.nass&&!L.nebel);
+  /* v7.04: Sterne nach Bedeckung - ab 50 % schwaecher, ab 85 % keine ("Bewoelkt" = keine Sterne) */
+  var stA=C.sterne*(1-hiSm(.5,.85,L.N||0));
+  if(stA>.02&&!fuss)hiSterne(s,B,stA,hmax,L.N<.6&&!L.nass&&!L.nebel);
   if(son&&!fuss)hiSonne(s,C,B,0);
   if(HI.M&&!fuss)hiMondEbene(s,HI.M);
   if(L.N>.04&&HI.texF&&HI.texN){
@@ -2618,7 +2620,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.03</span>
+      <span class="ver">v7.04</span>
     </div>
   </header>
 

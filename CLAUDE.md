@@ -4082,6 +4082,8 @@ v7.03 (Nutzer, Bild New York 07:56: Kachel Mond "↓ 20:46 · ↑ 12:01" - der U
 sucht ab Mitternacht des GERAETS (Berlin = NY 18 Uhr am Vortag). Die Kachel nimmt jetzt `mondNaechste(jetzt)`: naechster
 Aufgang und naechster Untergang ab jetzt, zeitlich sortiert. Geprueft NY 15.11. 07:56: "↑ 12:01 · ↓ 21:49". Uhrzeiten in Ortszeit
 (Nutzer: so lassen). Die Mondkarte unten (moonPhys) unveraendert.
+v7.04 (Nutzer, Erlental 15.11. 17:54: "bewoelkt, aber Sterne"): Station meldete 88 %, die Wolkentextur liess 12 % Luecken
+mit Sternen. Sterne jetzt x (1 - hiSm(.5,.85,N)) - ab 85 % Bedeckung keine.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
