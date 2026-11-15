@@ -4078,6 +4078,10 @@ v7.02 (Nutzer, Bild Kapstadt 18:12: "Mond 50 % groesser oder ein Regler 0-100 %"
 "Groesser" 0-100 % (`himmelMondGr`, `hiMondGr`, `HI_MO_STD` 50 = Voreinstellung), Radius = 0,75 sr x (1 + Wert/100), Radius im
 Szenenschluessel. Geprueft: 54 -> 72 px bei 50 -> 100 %. Frage Suedhalbkugel beantwortet: Blick nach Norden, Osten (Aufgang)
 rechts, Westen (Untergang) links - so seit v7.00.
+v7.03 (Nutzer, Bild New York 07:56: Kachel Mond "↓ 20:46 · ↑ 12:01" - der Untergang war von GESTERN Abend): `moonPhys`
+sucht ab Mitternacht des GERAETS (Berlin = NY 18 Uhr am Vortag). Die Kachel nimmt jetzt `mondNaechste(jetzt)`: naechster
+Aufgang und naechster Untergang ab jetzt, zeitlich sortiert. Geprueft NY 15.11. 07:56: "↑ 12:01 · ↓ 21:49". Uhrzeiten in Ortszeit
+(Nutzer: so lassen). Die Mondkarte unten (moonPhys) unveraendert.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

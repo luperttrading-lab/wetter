@@ -2618,7 +2618,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.02</span>
+      <span class="ver">v7.03</span>
     </div>
   </header>
 
@@ -6834,6 +6834,14 @@ function _moonAlt(ms){const jd=ms/86400000+2440587.5,p=moonPos(jd),H=(_gmst(jd)+
    Deshalb wird das Fenster auf 48 Stunden verlaengert und, was im ersten Tag
    fehlt, aus dem zweiten genommen. Die Felder rise und set bleiben, was sie
    waren; neu ist nur riseTag / setTag - 0 fuer heute, 1 fuer morgen. */
+/* v7.03 (Nutzer, New York 07:56: Kachel zeigte den Untergang von gestern Abend): naechster Auf- und Untergang AB JETZT.
+   moonPhys sucht ab Mitternacht des GERAETS (Berlin) - an fremden Orten liegt die oft am Vortag. */
+function mondNaechste(ms){const h0=0.125,step=120000;let prev=_moonAlt(ms)-h0,rise=null,set=null;
+  for(let t=ms+step;t<=ms+2*86400000;t+=step){const cur=_moonAlt(t)-h0;
+    if(prev<0&&cur>=0&&rise==null)rise=t-step+prev/(prev-cur)*step;
+    if(prev>0&&cur<=0&&set==null)set=t-step+prev/(prev-cur)*step;
+    prev=cur;if(rise!=null&&set!=null)break;}
+  return {rise,set};}
 function moonPhys(date){const dist=moonPos(date.getTime()/86400000+2440587.5).dist;
   const start=new Date(date);start.setHours(0,0,0,0);const s=start.getTime(),h0=0.125,step=120000;
   let prev=_moonAlt(s)-h0,rise=null,set=null;
@@ -8904,9 +8912,9 @@ const KZ_DEF={
        kosten 17 Zeichen und sind dabei schmaler als die Woerter, das reicht
        auch bei 375 px Geraetebreite. Dieselben Zeichen benutzt der
        Mondkasten weiter unten seit jeher, die Bedeutung ist also eingefuehrt. */
-    const t=[];
-    if(ph.rise!=null)t.push([ph.rise,"\u2191 "+kzHM(ph.rise)]);
-    if(ph.set!=null)t.push([ph.set,"\u2193 "+kzHM(ph.set)]);
+    const t=[],nx=mondNaechste(d.getTime());
+    if(nx.rise!=null)t.push([nx.rise,"\u2191 "+kzHM(nx.rise)]);
+    if(nx.set!=null)t.push([nx.set,"\u2193 "+kzHM(nx.set)]);
     t.sort((a,b)=>a[0]-b[0]);
     const zeilen=t.map(([ms,txt])=>txt);
     /* In der Kachel zaehlt die Richtung, nicht der Fachname: "zunehmend" sagt
