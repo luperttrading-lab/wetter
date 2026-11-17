@@ -1671,6 +1671,16 @@ html{overflow-x:clip}
 #ortPkt{position:fixed;left:50%;bottom:max(calc(env(safe-area-inset-bottom,0px) + 16px),calc(var(--sat,0px) + 6px));transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;
   padding:7px 13px 8px;border-radius:16px;background:rgba(12,20,36,.66);color:#fff;font-size:13.5px;font-weight:650;line-height:1.2;opacity:0;pointer-events:none;
   max-width:calc(100vw - 40px);box-sizing:border-box;text-shadow:none}
+#ortPkt{cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* v7.05: Ortswahl ueber die Pille */
+#ortWahl .ow-l{display:flex;flex-direction:column;margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#ortWahl .ow-l button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:0 14px;min-height:48px;font-size:17px;font-weight:600;color:var(--ink);border-top:1px solid var(--line);cursor:pointer}
+#ortWahl .ow-l button:first-child{border-top:0}
+#ortWahl .ow-l button.ak::after{content:"";width:9px;height:9px;border-radius:50%;background:#3fae5a;margin-left:auto}
+#ortWahl .ow-l button:active{background:rgba(127,140,160,.18)}
+#ortWahl .ow-t{font-size:20px;font-weight:700;margin:0}
+#ortWahl{align-items:flex-end}
+#ortWahl .ow-x{all:unset;box-sizing:border-box;display:block;width:100%;margin-top:12px;min-height:46px;line-height:46px;text-align:center;border-radius:12px;font-size:16px;font-weight:650;background:rgba(127,140,160,.2);color:var(--ink);cursor:pointer}
 #ortPkt.weich{transition:opacity .3s ease!important;transition-duration:.3s!important}
 #ortPkt .op-n{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #ortPkt .op-n:empty{display:none}
@@ -1737,7 +1747,7 @@ html:root.dunkel{--wnd0:#e4ecf6;--wnd1:#eef3fa;--wnd2:#ffffff}
     if(ix>=0&&za.length>1){var nm=String(lp.name||"").replace(/[<>&"'`]/g,"").slice(0,40),pd="",pk=document.createElement("div");
       for(k=0;k<za.length&&k<20;k++)pd+=k===ix?'<i class="ak"></i>':"<i></i>";
       pk.id="ortPkt";pk.setAttribute("aria-hidden","true");pk.innerHTML='<div class="op-n"></div><div class="op-d">'+pd+"</div>";
-      pk.firstChild.textContent=ow==="n"?nm+" \u203a":"\u2039 "+nm;pk.style.opacity="1";document.body.appendChild(pk);}}}}catch(e){}
+      pk.firstChild.textContent=ow==="n"?nm+" \u203a":"\u2039 "+nm;pk.style.opacity="1";pk.style.pointerEvents="auto";document.body.appendChild(pk);}}}}catch(e){}
   setTimeout(function(){try{if(typeof sanftZeigen==="function")sanftZeigen();else h.classList.remove("sanft");}catch(e){h.classList.remove("sanft");}h.classList.remove("hiflach");},9000);
 }catch(e){}})();
 /* v5.08 (Nutzer: "beim Start weniger Einblendungen"): Neue sehen zuerst nur
@@ -2620,7 +2630,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.04</span>
+      <span class="ver">v7.05</span>
     </div>
   </header>
 
@@ -3975,15 +3985,34 @@ function owPunkte(L,j,txt,deck,weich){
   for(var k2=0;k2<n;k2++)d.children[k2].className=k2===L.i?"ak":(k2===j?"zl":"");
   p.querySelector(".op-n").textContent=txt||"";
   p.classList.toggle("weich",!!weich);p.style.opacity=String(deck);
+  p.style.pointerEvents=deck>.3&&!OW.zieht?"auto":"none";
 }
 function owPunkteWeg(ms){var p=el("ortPkt");if(!p)return;clearTimeout(OW.tm);
-  OW.tm=setTimeout(function(){p.classList.add("weich");p.style.opacity="0";},ms||0);}
+  OW.tm=setTimeout(function(){p.classList.add("weich");p.style.opacity="0";p.style.pointerEvents="none";},ms||0);}
+/* v7.05 (Nutzer: "auf die Pille druecken -> Fenster nur mit den Orten zum Aussuchen, einhaendig"): Tipp auf #ortPkt */
+function ortWahlZeigen(){
+  var L=owListe();if(L.a.length<2)return;
+  var p=el("ortPkt");if(p){clearTimeout(OW.tm);p.style.opacity="0";p.style.pointerEvents="none";}
+  var ov=el("ortWahl");
+  if(!ov){ov=document.createElement("div");ov.id="ortWahl";ov.className="loc-ovl";document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){
+      if(Date.now()-(ov._auf||0)<400){e.stopPropagation();return;}
+      var b=e.target.closest("button[data-i]");
+      if(b){var z=ov._L.a[+b.dataset.i];ov.classList.add("hidden");if(z&&!locGleich(z,LOC))ortGehen(z,{});return;}
+      if(e.target===ov||e.target.closest(".ow-x"))ov.classList.add("hidden");},true);}
+  var h='<div class="loc-box"><h3 class="ow-t">Ort w\u00e4hlen</h3><div class="ow-l">';
+  L.a.forEach(function(o,k){h+='<button data-i="'+k+'"'+(k===L.i?' class="ak"':"")+">"+escHtmlOw(o.name)+"</button>";});
+  h+='</div><button class="ow-x">Schlie\u00dfen</button></div>';
+  ov._L=L;ov.innerHTML=h;ov.classList.remove("hidden");ov._auf=Date.now();
+}
+function escHtmlOw(t){return String(t||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+document.addEventListener("click",function(e){var t=e.target;if(t&&t.closest&&t.closest("#ortPkt")){e.stopPropagation();ortWahlZeigen();}});
 /* nach dem Wechsel: Punkte kurz zeigen, damit man sieht, wo man in der Liste steht */
 function owAnkunft(){var L=owListe();if(L.a.length<2)return;
   /* v6.58: steht die Pille schon seit dem ersten Bild (erstes Script), wird sie nur noch ausgeblendet */
-  var p=el("ortPkt");if(p&&p.style.opacity==="1"){owPunkteWeg(1300);return;}
+  var p=el("ortPkt");if(p&&p.style.opacity==="1"){owPunkteWeg(2500);return;}
   owPunkte(L,-1,"",0,true);
-  requestAnimationFrame(function(){owPunkte(L,-1,"",1,true);owPunkteWeg(1700);});}
+  requestAnimationFrame(function(){owPunkte(L,-1,"",1,true);owPunkteWeg(2500);});}
 /* die Bloecke, die gerade zu sehen sind - nur sie werden verschoben (der Kopf mit den Knoepfen bleibt, sein Ortsname geht mit) */
 function owElemente(){
   var a=[],H=innerHeight||800;

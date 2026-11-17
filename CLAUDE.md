@@ -4084,6 +4084,10 @@ Aufgang und naechster Untergang ab jetzt, zeitlich sortiert. Geprueft NY 15.11. 
 (Nutzer: so lassen). Die Mondkarte unten (moonPhys) unveraendert.
 v7.04 (Nutzer, Erlental 15.11. 17:54: "bewoelkt, aber Sterne"): Station meldete 88 %, die Wolkentextur liess 12 % Luecken
 mit Sternen. Sterne jetzt x (1 - hiSm(.5,.85,N)) - ab 85 % Bedeckung keine.
+v7.05 (Nutzer 17.11.: "auf die Pille mit dem Ortsnamen druecken -> Fenster nur mit den Orten, einhaendig"): #ortPkt
+ist antippbar, solange sichtbar (pointerEvents nur bei Deckkraft > .3, nicht beim Ziehen), nach Ankunft 2,5 statt 1,3-1,7 s.
+Tipp -> `ortWahlZeigen()`: Fenster #ortWahl (loc-ovl, UNTEN ausgerichtet fuer den Daumen), Liste owListe(), aktueller Ort
+mit gruenem Punkt, Tipp -> ortGehen. Geprueft (Playwright): 3 Orte, Wechsel nach Norden.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
