@@ -4088,6 +4088,14 @@ v7.05 (Nutzer 17.11.: "auf die Pille mit dem Ortsnamen druecken -> Fenster nur m
 ist antippbar, solange sichtbar (pointerEvents nur bei Deckkraft > .3, nicht beim Ziehen), nach Ankunft 2,5 statt 1,3-1,7 s.
 Tipp -> `ortWahlZeigen()`: Fenster #ortWahl (loc-ovl, UNTEN ausgerichtet fuer den Daumen), Liste owListe(), aktueller Ort
 mit gruenem Punkt, Tipp -> ortGehen. Geprueft (Playwright): 3 Orte, Wechsel nach Norden.
+v7.06 OPEN-METEO-TAGESLIMIT (Nutzer 18.11.: Wolkenkarte "Tageslimit erreicht", 10 Orte): Open-Meteo zaehlt je Punkt einer
+Mehrorts-Abfrage. (1) Wolkenkarte 6x6 = 36 statt 100 Punkte (`WOLK` nx/ny, bikubisch hochgerechnet wie bisher), (2) nur in der
+Ansicht "Wolken" geladen (`wolkenLaden()`, auch beim Umschalten in `karteModusSetzen`), (3) 60 statt 30 min frisch, Schluessel
+`wolkCache7`. (4) Nachbar-Vorabruf (`vorabHolen(p,1)`) ohne Open-Meteo (Stundenregen, 16 Tage); der Vorabruf beim Ziehen holt
+sie weiter. RASEN: Open-Meteo-Antworten im Geraet je Ort (`rzOmCache`, Stunden 2 h, Tagesmittel 6 h, je Art hoechstens 3 Orte) -
+vorher holte jedes Neuladen beide neu; Klima-Archiv je Ort (`rzKlima_<lat>_<lon>`, 0,1 Grad) und nach Fehler 6 h Pause
+(`rzKlimaFehl`) - im Pruefstand kam bei jedem Laden 429 und es wurde jedesmal neu versucht. Den Heimatort-Gedanken (Rasen nur an
+einem Ort) nicht gebaut: es gibt keinen gespeicherten Rasen-Ort; der Zwischenspeicher deckt das Neuladen ab.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

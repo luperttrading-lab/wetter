@@ -2630,7 +2630,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.05</span>
+      <span class="ver">v7.06</span>
     </div>
   </header>
 
@@ -3862,12 +3862,14 @@ function urlRegenStd(la,lo){return "https://api.open-meteo.com/v1/forecast?latit
 function urlTage(la,lo){return "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=16&timezone="+encodeURIComponent(GERAETE_TZ);}
 function vorabLL(p){return {la:p.isWettenberg?50.6034:+p.lat,lo:p.isWettenberg?8.6516:+p.lon};}
 /* holt, was fehlt oder zu alt ist (laufende Abrufe werden mitgenommen); das Versprechen erfuellt sich, wenn alles da ist */
-function vorabHolen(p){
+function vorabHolen(p,ohneOM){
   var q=vorabLL(p),k=q.la+"|"+q.lo,e=VORAB_MEM[k]||(VORAB_MEM[k]={la:q.la,lo:q.lo,d:{},dt:{},lauf:{}}),t=Date.now(),pr=[];
   var u={haupt:urlHaupt(q.la,q.lo),live:urlLive(q.la,q.lo),warn:urlWarn(q.la,q.lo),radar:urlRadar7(q.la,q.lo),regen:urlRegenStd(q.la,q.lo)};
   /* 16 Tage nur, wenn der Zwischenspeicher des Ziels nicht ohnehin frisch ist (loadCached nimmt ihn dann) */
   try{var fc=JSON.parse(localStorage.getItem("fcCache_"+(+p.lat).toFixed(2)+"_"+(+p.lon).toFixed(2))||"null");
     if(!fc||t-fc.t>8*60e3)u.tage=urlTage(q.la,q.lo);}catch(x){u.tage=urlTage(q.la,q.lo);}
+  /* v7.06: Nachbar-Vorabruf ohne Open-Meteo (Tageslimit) */
+  if(ohneOM){delete u.regen;delete u.tage;}
   Object.keys(u).forEach(function(n){
     if(e.lauf[n]){pr.push(e.lauf[n]);return;}
     /* noch mindestens 1 min gueltig: nicht neu holen */
@@ -3946,7 +3948,7 @@ function owNachbarnVorab(ri){
   if(document.hidden)return;var L=owListe();if(L.a.length<2)return;ri=ri||1;
   [ri,-ri].forEach(function(d){var j=L.i+d;if(j>=0&&j<L.a.length){var p=L.a[j];
     /* v6.68: die Farbe des Nachbarn gleich mitrechnen, sobald seine Daten da sind (nicht erst beim Loslassen) */
-    vorabHolen(p).then(function(){if(hiAn()&&hiFussAn())setTimeout(function(){try{hiZiel(p);}catch(e){}},30);});}});
+    vorabHolen(p,1).then(function(){if(hiAn()&&hiFussAn())setTimeout(function(){try{hiZiel(p);}catch(e){}},30);});}});
   seiteVorab();
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&SANFT.fertig)setTimeout(function(){try{owNachbarnVorab(1);}catch(e){}},1500);});
@@ -8164,8 +8166,18 @@ function rzSonne(tag,lat,lon){   // Sonnenstand -0,833 Grad, auf rund eine Minut
   return {auf:ms(Jt-w),unter:ms(Jt+w)};}
 const rzRhTd=(T,Td)=>(T==null||Td==null)?80:Math.min(100,100*Math.exp(17.625*Td/(243.04+Td))/Math.exp(17.625*T/(243.04+T)));
 /* ---- Daten ---- */
+/* v7.06: Open-Meteo-Antworten des Rasenteils im Geraet je Ort (Stunden 2 h, Tagesmittel 6 h) - vorher holte jedes
+   Neuladen der Seite (Ortswechsel, App oeffnen) beide Abfragen neu; hoechstens 3 Orte gemerkt. */
+async function rzOmCache(art,ms,url,to){
+  const k="rzOm_"+art+"_"+rzOrt();let c=null;try{c=JSON.parse(localStorage.getItem(k)||"null");}catch(e){}
+  if(c&&c.d&&Date.now()-c.t<ms)return c.d;
+  const d=await fetchJSON(url,to);
+  try{const alle=Object.keys(localStorage).filter(x=>x.indexOf("rzOm_"+art+"_")===0&&x!==k)
+      .map(x=>{let t=0;try{t=JSON.parse(localStorage.getItem(x)).t;}catch(e){}return [x,t];}).sort((a,b)=>b[1]-a[1]);
+    alle.slice(2).forEach(x=>localStorage.removeItem(x[0]));localStorage.setItem(k,JSON.stringify({t:Date.now(),d}));}catch(e){}
+  return d;}
 async function rzOpenMeteo(){
-  const d=await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
+  const d=await rzOmCache("h",2*36e5,"https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
     +"&hourly=precipitation,precipitation_probability,temperature_2m,relative_humidity_2m,sunshine_duration,wind_speed_10m,et0_fao_evapotranspiration,cloud_cover"
     +"&daily=sunrise,sunset&past_days=14&forecast_days=15&timezone=auto&timeformat=unixtime",15000);
   const h=d.hourly,Z=[];
@@ -8184,21 +8196,24 @@ async function rzOpenMeteo(){
    ERA5, +-7 Tage geglaettet, je Ort ein Jahr im Geraet gemerkt). Das Archiv zaehlt bei Open-Meteo je 2 Wochen
    Daten als eine Abfrage - 8 Jahre sind rund 200, darum nur einmal je Ort. */
 async function rzTagesTemp(){
-  const d=await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
+  const d=await rzOmCache("t",6*36e5,"https://api.open-meteo.com/v1/forecast?latitude="+LOC.lat+"&longitude="+LOC.lon
     +"&daily=temperature_2m_mean&past_days=60&forecast_days=16&timezone=auto",15000);
   const T={};d.daily.time.forEach((t,i)=>{const v=d.daily.temperature_2m_mean[i];if(v!=null)T[t]=+v;});
   RASEN.TAGT=T;RASEN.TAGT_BIS=Object.keys(T).sort().pop()||"";}
 const RZ_KLIMA_JAHRE=[2018,2025];
 async function rzKlimaLaden(){
-  let k=null;try{k=JSON.parse(localStorage.getItem("rzKlima")||"null");}catch(e){}
+  const kk="rzKlima_"+LOC.lat.toFixed(1)+"_"+LOC.lon.toFixed(1);   // v7.06: je Ort statt nur einer
+  let k=null;try{k=JSON.parse(localStorage.getItem(kk)||localStorage.getItem("rzKlima")||"null");}catch(e){}
   if(k&&k.m&&Math.abs(k.lat-LOC.lat)<0.15&&Math.abs(k.lon-LOC.lon)<0.15&&Date.now()-k.t<365*864e5){RASEN.KLIMA=k.m;return;}
-  const d=await fetchJSON("https://archive-api.open-meteo.com/v1/archive?latitude="+LOC.lat+"&longitude="+LOC.lon
-    +"&start_date="+RZ_KLIMA_JAHRE[0]+"-01-01&end_date="+RZ_KLIMA_JAHRE[1]+"-12-31&daily=temperature_2m_mean&timezone=auto",30000);
+  /* v7.06: nach einem Fehler (meist 429) 6 h nicht erneut - sonst jedes Neuladen wieder */
+  try{if(Date.now()-(+localStorage.getItem("rzKlimaFehl")||0)<6*36e5)throw new Error("Klima pausiert");}catch(e){if(e.message==="Klima pausiert")throw e;}
+  let d;try{d=await fetchJSON("https://archive-api.open-meteo.com/v1/archive?latitude="+LOC.lat+"&longitude="+LOC.lon
+    +"&start_date="+RZ_KLIMA_JAHRE[0]+"-01-01&end_date="+RZ_KLIMA_JAHRE[1]+"-12-31&daily=temperature_2m_mean&timezone=auto",30000);}catch(e){try{localStorage.setItem("rzKlimaFehl",String(Date.now()));}catch(x){}throw e;}
   const sum={},n={};d.daily.time.forEach((t,i)=>{const v=d.daily.temperature_2m_mean[i];if(v==null)return;const md=t.slice(5);sum[md]=(sum[md]||0)+v;n[md]=(n[md]||0)+1;});
   const tage=[];for(let x=Date.UTC(2024,0,1);x<Date.UTC(2025,0,1);x+=864e5)tage.push(new Date(x).toISOString().slice(5,10));   // 366 Kalendertage
   const roh=tage.map(md=>n[md]?sum[md]/n[md]:null);if(roh.filter(v=>v!=null).length<300)throw new Error("Klima unvollstaendig");
   const m={};tage.forEach((md,i)=>{let s=0,c=0;for(let j=-7;j<=7;j++){const v=roh[(i+j+366)%366];if(v!=null){s+=v;c++;}}m[md]=Math.round(s/c*10)/10;});
-  RASEN.KLIMA=m;try{localStorage.setItem("rzKlima",JSON.stringify({lat:LOC.lat,lon:LOC.lon,t:Date.now(),m}));}catch(e){}}
+  RASEN.KLIMA=m;try{localStorage.setItem(kk,JSON.stringify({lat:LOC.lat,lon:LOC.lon,t:Date.now(),m}));}catch(e){}}
 function rzStation(d,q){const alle=(d.sources||[]).filter(x=>x.dwd_station_id===q.dwd_station_id);
   return {name:(alle.find(x=>/[a-zäöü]/.test(x.station_name))||q).station_name,km:Math.round((q.distance||0)/1000)};}
 async function rzBrightSky(){   // Rueckfall: vergangene Stunden gemessen, danach MOSMIX (Luftfeuchte aus dem Taupunkt)
@@ -10988,9 +11003,9 @@ const _smooth=(e0,e1,v)=>{let t=(v-e0)/(e1-e0);t=t<0?0:t>1?1:t;return t*t*(3-2*t
 function _wolkP(k,d){try{const v=parseFloat(localStorage.getItem(k));return isFinite(v)?v:d}catch(e){return d}}
 let WOLK_E0=_wolkP("wolkE0",20),WOLK_E1=_wolkP("wolkE1",80);   // v2.66: Alltagsvorgabe // v2.18: Smoothstep-Eckpunkte per Regler
 const WOLK=(function(){ // 10x10 Kachelzentren (v2.31: aeusserer Kranz weg, -31% API-Last)
-  if(LOC.isWettenberg)return {latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:10,ny:10,z:9}; // kalibriertes Original-Fenster
+  if(LOC.isWettenberg)return {latN:51.05,latS:50.05,lonW:7.8045,lonE:9.4955,nx:6,ny:6,z:9}; // kalibriertes Original-Fenster
   const dLon=66/(111.32*Math.cos(LOC.lat*Math.PI/180)); // halbe Breite 66 km, halbe Hoehe 0,5 Grad
-  return {latN:LOC.lat+0.5,latS:LOC.lat-0.5,lonW:LOC.lon-dLon,lonE:LOC.lon+dLon,nx:10,ny:10,z:9};
+  return {latN:LOC.lat+0.5,latS:LOC.lat-0.5,lonW:LOC.lon-dLon,lonE:LOC.lon+dLon,nx:6,ny:6,z:9};
 })();
 const WOLK_TILE="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const HOME_LAT=LOC.lat, HOME_LON=LOC.lon;   // Standort aus LOC-Profil: Karten-Pin + Astronomie (Wetter nutzt im Wettenberg-Profil stationsnahe LAT/LON)
@@ -12547,11 +12562,13 @@ function rkAbfrageKm(){
    v4.69: der ruhende Code (Stundenwerte, Zeitverschiebung der Wolken) ist entfernt;
    zurueckholen aus wetter-giessen-v4_68.html. */
 function karteModus(){try{const v=localStorage.getItem("karte_modus");if(v==="wolken"||v==="regen")return v;}catch(e){}return "regen";}
+function wolkenLaden(){loadCached("wolkCache7"+LOC_KEY,wolkenURL(),60*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");}
 function karteModusSetzen(m){
   try{localStorage.setItem("karte_modus",m);}catch(e){}
   const sec=el("radarSec");if(sec)sec.dataset.modus=m;
   document.querySelectorAll("#ktSchalter button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
   if(m!=="regen")radarAbspielen(false);
+  if(m==="wolken")wolkenLaden();
   if(!klappZu("radarSec"))radarOeffnen();
 }
 function radarOeffnen(){
@@ -13101,7 +13118,8 @@ function loadExtras(){
   uvDurchlassLaden(); // v4.26: gemessener Exponent statt fester Konstante
   regenRadarLaden();  // v4.27: Radar-Eichung fuer die angezeigte Regenmenge
   renderRadolan(); // genauere DWD-Radar-Tagessumme; ueberschreibt den Open-Meteo-Wert oben, sobald da
-  loadCached("wolkCache6"+LOC_KEY,wolkenURL(),30*60e3,6*3600e3,renderWolken,"wolkenSec","Wolkenkarte");
+  /* v7.06: Wolkenkarte nur in der Ansicht "Wolken" (100 bzw. jetzt 36 Punkte zaehlen bei Open-Meteo einzeln) */
+  if(karteModus()==="wolken")wolkenLaden();
   fetchJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&current=uv_index,european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,sulphur_dioxide,grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&hourly=uv_index,uv_index_clear_sky&past_days=1&forecast_days=2&timezone=${encodeURIComponent(GERAETE_TZ)}`).then(renderAirGrid).catch(e=>console.warn("air",e.message));
   /* v6.58: 16 Tage aus dem Vorabruf landen im Zwischenspeicher - loadCached nimmt sie dann sofort */
   {const vt=vorabNimm("tage");if(vt){try{localStorage.setItem("fcCache"+LOC_KEY,JSON.stringify({t:Date.now(),d:vt}));}catch(e){}}}
