@@ -1191,6 +1191,8 @@ html.dunkel .kzfoot .zahn{background:rgba(255,255,255,.06);color:#e6e9ef}
   .fc-row .hiT{font-size:13.5px;font-weight:750;width:28px;font-variant-numeric:tabular-nums}
   .fc-row .track{flex:1;height:5px;border-radius:3px;background:#eef2f7;position:relative}
   .fc-row .fill{position:absolute;height:100%;border-radius:3px}
+  .fc-row .fc0{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:1px;background:#55637a;z-index:1}
+  html.dunkel .fc-row .fc0{background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
   .lvl{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
   /* v3.94: "Bewegung reduzieren" (iPhone: Einstellungen > Bedienungshilfen >
      Bewegung). Die verbreitete Kurzfassung setzt nur die Dauer auf .001ms.
@@ -2630,7 +2632,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.06</span>
+      <span class="ver">v7.07</span>
     </div>
   </header>
 
@@ -9994,6 +9996,8 @@ function renderForecast(j){
   _kz.tage=days;kzStandSetzen("fc");kzRender();                            // v3.89: Kacheln "Morgen", "Regen 7 Tage"
   if(_bilLetzte)bilanzZeichne(_bilLetzte);
   const aMax=Math.max(...days.map(x=>x.hi)),aMin=Math.min(...days.map(x=>x.lo)),span=Math.max(1,aMax-aMin);
+  /* v7.07 (Nutzer): Gefrierpunkt als feiner senkrechter Strich in jeder Temperaturbahn, wenn 0 Grad im Bereich liegt */
+  const nullL=(aMin<0&&aMax>0)?`<i class="fc0" style="left:${((0-aMin)/span*100).toFixed(1)}%"></i>`:"";
   const titleEl=sec.querySelector(".sect");if(titleEl)titleEl.textContent=days.length+"-Tage-Vorhersage";
   const _rt=_restToday();
   let html="";days.forEach((x,i)=>{
@@ -10004,7 +10008,7 @@ function renderForecast(j){
     const ppPct=_pp!=null&&_pp>=10?`${dropMini}${_pp}%`:"";
     const mmShow=_mm!=null&&_mm>=0.1;
     const mmTxt=mmShow?`<span class="mmbar" style="height:${Math.max(2,Math.min(16,Math.round(_mm/15*16)))}px"></span><span class="mmv">${_mm>=10?Math.round(_mm):fmt1(_mm)} mm</span>`:"";
-    html+=`<div class="fc-row${i>=7?" far":""}"><div class="wd">${wd}</div><div class="fi" data-ic="${ic}" data-gr="26">${icon(ic,26)}</div><div class="pp">${ppPct}${mmTxt}</div><div class="rng"><div class="lo">${Math.round(x.lo)}°</div><div class="track"><div class="fill" style="left:${left}%;width:${width}%;background:linear-gradient(90deg,${rgb(thermal(x.lo))},${rgb(thermal(x.hi))})"></div></div><div class="hiT">${Math.round(x.hi)}°</div></div></div>`;
+    html+=`<div class="fc-row${i>=7?" far":""}"><div class="wd">${wd}</div><div class="fi" data-ic="${ic}" data-gr="26">${icon(ic,26)}</div><div class="pp">${ppPct}${mmTxt}</div><div class="rng"><div class="lo">${Math.round(x.lo)}°</div><div class="track"><div class="fill" style="left:${left}%;width:${width}%;background:linear-gradient(90deg,${rgb(thermal(x.lo))},${rgb(thermal(x.hi))})"></div>${nullL}</div><div class="hiT">${Math.round(x.hi)}°</div></div></div>`;
   });
   if(days.length>7)html+=`<div class="fc-note">Tag 8–${days.length} ist Langfristtrend — deutlich geringere Vorhersagegüte, eher Tendenz als genaue Werte.</div>`;
   el("fcList").innerHTML=html;sec.classList.remove("hidden");

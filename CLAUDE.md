@@ -4096,6 +4096,11 @@ sie weiter. RASEN: Open-Meteo-Antworten im Geraet je Ort (`rzOmCache`, Stunden 2
 vorher holte jedes Neuladen beide neu; Klima-Archiv je Ort (`rzKlima_<lat>_<lon>`, 0,1 Grad) und nach Fehler 6 h Pause
 (`rzKlimaFehl`) - im Pruefstand kam bei jedem Laden 429 und es wurde jedesmal neu versucht. Den Heimatort-Gedanken (Rasen nur an
 einem Ort) nicht gebaut: es gibt keinen gespeicherten Rasen-Ort; der Zwischenspeicher deckt das Neuladen ab.
+v7.07 (Nutzer 18.11., Bild 16-Tage-Liste Erlental: "bei null einen kleinen senkrechten weissen Strich, dann sieht man, wo der
+Gefrierpunkt ist"): `renderForecast` legt in jede Temperaturbahn `<i class="fc0">` bei (0 - aMin)/span, nur wenn 0 Grad im
+Bereich aller 16 Tage liegt (gleiche Stelle in jeder Zeile, auch ausserhalb des farbigen Balkens). 2 px, 3 px ueber/unter die
+Bahn; dunkle Ansichten weiss mit dunklem Rand, hell graublau #55637a (weiss verschwand auf der hellen Bahn). Geprueft mit
+eingespielten 16 Tagen (12..-5 Grad), Himmel und hell.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
