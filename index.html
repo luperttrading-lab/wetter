@@ -421,6 +421,12 @@ html.dunkel .ml-warn{color:#ffd28a}
 #mlIcsInfo{margin-top:2px}
 /* v7.11 mehrere Adressen */
 .ml-adr{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.ml-adrz{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.ml-aend{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:13px;font-weight:700;padding:4px 11px 4px 9px;border-radius:999px;
+  border:1.5px solid #2f86cf;background:rgba(47,134,207,.1);color:#1c5f9e;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ml-aend svg{width:13px;height:13px;flex:none}
+.ml-aend:active{transform:scale(.96)}
+html.dunkel .ml-aend{border-color:#8cc4ff;background:rgba(120,180,255,.16);color:#d6eaff}
 .ml-adr button{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:650;padding:5px 11px;border-radius:999px;border:1.5px solid rgba(127,140,160,.35);background:transparent;color:inherit;cursor:pointer}
 .ml-adr button.an{background:rgba(47,134,207,.16);border-color:#2f86cf}
 html.dunkel .ml-adr button.an{background:rgba(120,180,255,.2);border-color:#8cc4ff}
@@ -2683,7 +2689,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.15</span>
+      <span class="ver">v7.16</span>
     </div>
   </header>
 
@@ -9206,7 +9212,7 @@ function mlOrtKurz(){return String(LOC&&LOC.name||"").split(/\s*[\/,]\s*/).filte
 function mlHierEinrichten(){const L=mlListe();kzGrossZeigen("");const inn=el("kzGrossIn");if(!inn)return;
   inn._mlSetup=true;inn._mlModus="neu";inn._mlHier=true;inn._mlO=L.length?L[0].o:null;inn._mlEin=false;inn._mlIcs=null;mlZeichne(inn);}
 function mlAktiv(){const V=mlVerfuegbar();return V.find(a=>a.o===MUELL.sel)||V.find(a=>mlZuHause(a))||V[0]||null;}
-function mlLabel(A){return mlIcs(A)?"Kalender "+(A.h&&A.h.n||A.pn):(A.pn||"")+(A.sn&&A.sn!==A.pn?", "+A.sn:"");}
+function mlLabel(A){return mlIcs(A)?"Kalender "+(A.h&&A.h.n||A.pn):(A.pn||"")+(A.sn&&A.sn!==A.pn?", "+A.sn:"")+(A.h?" "+A.h:"");}
 function mlWahl(A){A=A||MUELL.A;if(A&&Array.isArray(A.fr))return A.fr;
   if(A&&!mlIcs(A)&&mlKd(A)==="lkgi")return MUELL_STD.slice();
   /* sonst: alle Tonnen mit bekannter Art, ohne Container, Schadstoff, Sperrmuell - "Ferien", "Faelligkeit Abfallgebuehr",
@@ -9266,8 +9272,12 @@ function mlHtml(root){
   // mehrere Adressen: Knoepfe zum Umschalten, gruener Punkt = gilt am angezeigten Ort
   if(L.length>1)h+='<div class="ml-adr">'+L.map(a=>`<button type="button" data-mlo="${mlEsc(a.o)}" class="${a.o===A.o?"an":""}">`
       +(mlZuHause(a)?'<i class="ml-hier"></i>':"")+mlEsc(mlLabel(a))+"</button>").join("")+"</div>";
-  h+='<div class="kzg-sub">'+(mlIcs(A)?"Kalenderdatei für "+mlEsc(A.h&&A.h.n||A.pn):`${mlEsc(A.pn)}, ${mlEsc(A.sn)}${A.h?" "+mlEsc(A.h):""}`)
-    +(hier?"":" · nur im Fenster, nicht in der Kachel hier")+"</div>";
+  // v7.16 (Nutzer: "die gespeicherte Adresse muss man irgendwo aendern koennen") - Knopf direkt neben der Adresse;
+  // vorher nur im zugeklappten Teil "Tonnen und Adresse", den man nicht findet
+  h+='<div class="kzg-sub ml-adrz"><span>'+(mlIcs(A)?"Kalenderdatei für "+mlEsc(A.h&&A.h.n||A.pn):`${mlEsc(A.pn)}, ${mlEsc(A.sn)}${A.h?" "+mlEsc(A.h):""}`)
+    +(hier?"":" · nur im Fenster, nicht in der Kachel hier")+'</span><button type="button" class="ml-aend" data-mlk="adr">'
+    +'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11.2 2.3l2.5 2.5-8.2 8.2-3.1.6.6-3.1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+    +(mlIcs(A)?"neue Datei":"ändern")+"</button></div>";
   const C=MUELL.c;
   if(!C){h+=`<div class="kzg-sub">${mlIcs(A)?"Die Termine aus der Kalenderdatei fehlen - bitte unter „Tonnen und Adresse“ neu einlesen."
       :MUELL.fehler[A.o]?"Keine Daten ("+mlEsc(MUELL.fehler[A.o])+")":"Termine werden geladen …"}</div>`
@@ -9282,7 +9292,7 @@ function mlHtml(root){
     if(mlIcs(A)&&bis&&mlTage(bis)<45)h+=`<div class="kzg-sub ml-warn">Die Kalenderdatei reicht nur bis ${mlDatum(bis)} – bitte die neue Datei deines Abfallbetriebs einlesen.</div>`;
     if(mlDatei(A)&&C.oh)h+=`<div class="kzg-sub ml-warn">Für ${mlEsc(A.sn)} ${mlEsc(A.h)} hat der Landkreis keinen eigenen Abfuhrplan – auch auf seiner Seite erscheint keiner. `
       +(C.oh!=="-"&&C.oh!==1?`Gezeigt werden die Termine von Nr. ${mlEsc(C.oh)} (nächstes Haus auf derselben Straßenseite), Tonnen, die es dort nicht gibt, wie bei den meisten Häusern der Straße.`
-        :"Gezeigt werden die Termine der meisten Häuser der Straße.")+` Stimmt etwas nicht, unter „Tonnen und Adresse“ eine Nachbarnummer wählen.</div>`;
+        :"Gezeigt werden die Termine der meisten Häuser der Straße.")+` Stimmt etwas nicht, über „ändern“ eine Nachbarnummer wählen.</div>`;
     if(mlDatei(A)&&(!bis||mlTage(bis)<30))h+=`<div class="kzg-sub ml-warn">Der Kalender reicht ${bis?"nur bis "+mlDatum(bis):"nicht weiter"} – der Landkreis hat das nächste Jahr noch nicht veröffentlicht. Die App holt es, sobald es da ist (wöchentlich geprüft).</div>`;}
   // Tonnen zum An- und Abwaehlen: alle, die es an dieser Adresse gibt
   const fr=C?Object.keys(C.fr).filter(f=>C.d.some(x=>x[1].includes(f))):[],sel=mlWahl(A),ht=mlHeimText(A);
