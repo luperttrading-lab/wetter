@@ -4206,6 +4206,50 @@ getPlaces oder Nominatim, wird beim naechsten Laden neu gefragt). In v7.12 stand
 Oeffnen von "Kacheln waehlen" da. Geprueft (`t712b.py`, `t712.py`): Huettenberg normal und im Bearbeiten ohne Muell-Kachel, Plaetze
 dahinter mit echtem data-slot, Pool-Eintrag sofort, Einrichtung "Ortsteil" -> Reiskirchen -> Kachel Do 26.11. Bio; Wettenberg weiter
 "Strasse"; Wetzlar ok:false; Norden im Bearbeiten ohne Kachel. Nicht am iPhone geprueft.
+v7.14 MUELL NORDEN AUTOMATISCH (Nutzer 20.11.: "fuer Norden eine Moeglichkeit finden, automatisch - du hattest vorhin die
+Seite, wo ich den Muell abfrage, koennen wir das importieren?"). Der Landkreis Aurich fuehrt den Kalender ueber C-Trace
+(`apps.c-trace.de/web.aurich-abfallkalender`, Sitzungs-ID im Pfad per Umleitung von /Abfallkalender); KEIN CORS-Kopf (am 20.11.
+wieder geprueft: OData und Kalenderdatei). Darum DATEI-QUELLE: `muell_aurich.py` + Workflow `muell-aurich.yml` (Mo 02:17 UTC
++ Handstart mit "voll") schreiben `muell-aurich.json` auf main (wie pollen.json). Schnittstelle: OData.svc/Strassen
+($filter Ort/Gebiet/Name, Ort/Name; Norden 584 Strassen), Funktion AktuelleObjekte?gemeinde=&ort=&strasse= (Hausnummern),
+abfallkalender/cal?Ort=&Gemeinde=&Strasse=&Hausnr=&Abfall=0|1|...|299 = ICS je HAUSNUMMER (leere Hausnummer -> HTTP 500;
+SUMMARY "Abfuhr: Biotonne|Blaue Tonne|Gelbe Tonne|Reststoff"; ~37 KB, nur das laufende Jahr - 2026 bis 24.-28.12.).
+Keine Bezirke in der Schnittstelle -> je Strasse Stichproben: erste/mittlere/letzte Nummer, gerade und ungerade getrennt,
+bei Abweichung halbieren. Verglichen werden nur Termine ab heute - 7 Tage (`AB_TAG`): neue Objekte haben Termine erst ab
+Einzug (Alleestrasse 6a ab 28.08.) und galten sonst als "andere Abfuhr". Ergebnis echt verschieden: Altendeichsweg 5 (Blau
+20.11., Gelb 27.11.) gegen 28 (Gelb 30.11., Blau 4.12.) - am Dienst gegengeprueft. FORMAT: fr = Tonnennamen, t = Kalender je
+{Tonnen-Index: "JJJJMMTT d d d" (erstes Datum, dann Tagesabstaende)}, g.Norden = {o: Ort, b: Rahmen, s: {Strasse: Kalender
+| [Standard, "h1|h2|...", {Hausnummer: Kalender}]}}. Voller Lauf nur ohne Datei, nach 35 Tagen oder wenn die Stichprobe
+(6 Strassen) abweicht - so kommt der Jahreskalender 2027 von selbst; vergangene Termine der letzten Woche bleiben beim
+Jahreswechsel stehen. Ein voller Lauf: ~5000 Abrufe, ~80 min (0,25 s Pause). Erster Lauf aus dem Pruefstand (siehe
+Commit). APP: `MUELL_DATEI_K` = [Schluessel, Name, Rahmen, Datei, Quelle] (Kreis-Liste wie MUELL_KREISE, `mlKreis` sucht in
+beiden), Adresse k "datei:aurich", o "datei:aurich|Norden|Strasse[|Hausnummer]", Rahmen = Gemeinde (kein Nominatim).
+`mlOrteHolen/mlStrHolen/mlHnHolen` liefern AWIDO-Form (key/value) aus Dienst bzw. Datei; Hausnummer nur bei geteilten
+Strassen; `mlDateiDaten` baut die Termine, Tonnen-Schluessel = NAME (Index wechselt je Lauf). Datei je Sitzung 6 h
+zwischengespeichert. `mlHierPruefen`: liegt der Ort im Rahmen einer Datei-Quelle, sofort ok (kein Abruf) -> "+ Muellabfuhr
+fuer Norden" unter "Kacheln waehlen", Einrichtung mit "Landkreis Aurich (Norden)" vorbelegt. Leere Termine (Jahresende vor
+dem neuen Kalender) sind kein Fehler; Hinweis "Der Kalender reicht nur bis ... - der Landkreis hat das naechste Jahr noch nicht
+veroeffentlicht", ab 30 Tagen vor dem Ende. Kalenderdatei-Import nimmt jetzt auch "Abfuhr: " vor dem Namen weg. Weitere
+Gemeinden des Kreises: in `GEMEINDEN` (Python) UND im Rahmen von MUELL_DATEI_K eintragen. LIZENZEN.md: C-Trace ungeklaert,
+AWIDO nachgetragen. Geprueft (`t714.py`, Testdatei 20 Strassen): Norden ohne Kachel -> Pool-Eintrag -> Landkreis Aurich /
+Norden / Altendeichsweg / Hausnummer 28 -> Termine = Dienst, Kachel Mo 23.11. Bio; Wettenberg unveraendert. Nicht am iPhone
+geprueft. HAUSNUMMERN OHNE PLAN (Nutzer: "Marschweg 3 wird gar nicht angeboten, da wohnt mein Freund"): der Dienst kennt das
+Objekt (AktuelleObjekte: 1, 2, 3, 12, 13, 14, 16, 17), liefert fuer 3/14/16/17 aber HTTP 500 - auch seine eigene Seite zeigt
+dort keinen Plan. Die Tonnen-Saetze unterscheiden sich je Haus (Nr. 1 ohne Biotonne; Gelbe Tonne 4-woechentlich in zwei Touren,
+Nr. 13 in beiden) - eine Strasse "ohne Hausnummer" gibt es im Dienst nicht. Jetzt viertes Feld der geteilten Strasse = Nummern
+ohne Plan ("3|14|16|17"); sie stehen in der Auswahl als "3 (kein eigener Plan)" und bekommen den Standard der Strasse, das Fenster
+sagt das ("vor allem bei der Gelben Tonne kann es abweichen"). Der erste volle Lauf lief noch mit dem alten Skript, das vierte
+Feld kam per einmaligem Nachlauf (je geteilte Strasse ein AktuelleObjekte-Abruf). Dazu holt `holen()` ueber EINE offene
+Verbindung (`_get`, http.client mit Tunnel durch HTTPS_PROXY; Umleitung oder Fehler -> neuer Versuch ueber urlopen): 0,9 -> 0,68 s
+je Abruf, der Rest ist der Dienst selbst. NACHBAR-REGEL (Nutzer: "bei 3 nehmen wir 1, bei 2 die 4"): eine Nummer ohne Plan bekommt in
+der App (`mlDateiDaten`, `mlHnNr`) den Kalender des naechsten Hauses auf DERSELBEN Strassenseite (gleiche Paritaet, kleinster
+Abstand, bei Gleichstand die kleinere Nummer), Tonnen, die es dort nicht gibt, aus dem Standard der Strasse (Marschweg 3 -> Nr. 1:
+Gelbe Tonne 10.12., Biotonne aus dem Standard); der Hinweis nennt die Nummer. NUR WO NOETIG (Nutzer: "brauchen wir ueberhaupt
+Hausnummern?"): `vereinen()` macht aus einer geteilten Strasse EINE, wenn sich die Haeuser nur in den Tonnen unterscheiden, nicht
+in den Tagen (je Tonne gleiche Termine bei allen, die sie haben) - dann nur Strasse, Tonnen per Haken. In der Testdatei (20
+Strassen) waren 6 geteilt, vereint wurde nur eine: die anderen haben echte Unterschiede (Altendeichsweg zwei Bezirke - Rest
+18.11. gegen 25.11.; Gelbe Tonne in zwei Touren; Einzelobjekte mit Zusatzleerungen). ERST VEROEFFENTLICHT mit 21 Strassen
+(Testdatei + Marschweg, Nutzer wollte probieren), die volle Datei folgte nach dem ersten vollen Lauf.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
