@@ -4121,6 +4121,14 @@ Fehler 3 min Pause, nur wenn die Kachel gewaehlt ist. Bestandsnutzer bekommen di
 ihrer Orte (LOC oder locZuletzt) im Umkreis von 25 km um Giessen liegt; neue Nutzer finden sie im Pool. Geprueft (Playwright,
 echte AWIDO-Daten, Himmel und hell, 320/375/393 pt): Einrichtung Wettenberg -> Weiherstrasse, Liste, Papier dazu (8.12. Papier +
 Bio), Kachel und "Danach"; bei 320 pt bricht "Rest Gelb" um (wie die Kachel Wind). Nicht am iPhone geprueft.
+v7.09 (Nutzer zu v7.08: "nicht fuer alle Orte, sondern nur fuer den Heimat-Standort"): die Kachel `muell` erscheint nur,
+wenn der angezeigte Ort (LOC) im Rahmen der Gemeinde der Muell-Adresse liegt, plus ~1,5 km Rand (`mlZuHause`, Rahmen der 17
+Gemeinden `MUELL_GEM` aus OSM/Nominatim, abgefragt 20.11.2026). Wettenberg und Giessen-Mitte (1,1 km neben dem Rahmen): ja;
+Huettenberg, Norden: nein. Ohne Adresse oder bei unbekannter Gemeinde: ueberall (sonst liesse sie sich nicht einrichten).
+ALLGEMEIN neu: eine Kachel darf `weg()` liefern - `kzRender` setzt sie dann ausserhalb des Bearbeitens wie einen freien Platz
+(Luecke bleibt, v5.32), am Ende faellt der Platz ganz weg (sonst bliebe eine leere Reihe). Im Bearbeiten steht sie da mit
+"nur zu Hause", damit man sie verschieben oder entfernen kann. Weg = kein Abruf. Geprueft (Playwright, vier Orte): Kachelflaeche
+214 -> 140 px, wenn die Muell-Kachel allein in der letzten Reihe stand.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

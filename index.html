@@ -2653,7 +2653,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.08</span>
+      <span class="ver">v7.09</span>
     </div>
   </header>
 
@@ -8918,6 +8918,19 @@ var MUELL_STD=["BA","RA2","GT"];
 var MUELL_KURZ={RA2:"Rest",RA4:"Rest 4W",AP:"Papier",BA:"Bio",GT:"Gelb",GA:"Garten"};
 var MUELL_FARBE={RA2:"#6b7280",RA4:"#6b7280",BA:"#5b9e3a",AP:"#2f78d0",GT:"#f2c40f",GA:"#b07a3a"};
 var MUELL_WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+/* v7.09 (Nutzer: "nicht fuer alle Orte, sondern nur fuer den Heimat-Standort"): die Kachel erscheint nur, wenn der
+   angezeigte Ort (LOC) in der Gemeinde der Muell-Adresse liegt oder hoechstens ~1,5 km daneben. Rahmen der 17 Gemeinden
+   (Sued, Nord, West, Ost) aus OpenStreetMap/Nominatim, abgefragt 20.11.2026. Wettenberg: Giessen-Mitte liegt 1,1 km
+   unter dem Rahmen und zaehlt noch, Huettenberg (12 km) nicht. */
+var MUELL_GEM={"Allendorf (Lumda)":[50.646,50.708,8.780,8.864],"Biebertal":[50.603,50.699,8.519,8.627],"Buseck":[50.568,50.649,8.731,8.861],
+  "Fernwald":[50.531,50.593,8.739,8.824],"Grünberg":[50.555,50.690,8.850,9.069],"Heuchelheim":[50.565,50.605,8.610,8.643],
+  "Hungen":[50.426,50.528,8.795,9.002],"Langgöns":[50.416,50.517,8.529,8.703],"Laubach":[50.488,50.582,8.907,9.134],
+  "Lich":[50.457,50.558,8.738,8.927],"Linden":[50.502,50.564,8.616,8.711],"Lollar":[50.632,50.704,8.646,8.728],
+  "Pohlheim":[50.475,50.558,8.689,8.790],"Rabenau":[50.630,50.709,8.828,8.955],"Reiskirchen":[50.547,50.632,8.802,8.925],
+  "Staufenberg":[50.634,50.696,8.718,8.809],"Wettenberg":[50.594,50.699,8.598,8.696]};
+// ohne Adresse oder bei unbekannter Gemeinde: ueberall (sonst liesse sie sich nie einrichten)
+function mlZuHause(){const A=mlAdr(),b=A&&MUELL_GEM[A.pn];if(!b)return true;
+  const la=+LOC.lat,lo=+LOC.lon;return la>=b[0]-.0135&&la<=b[1]+.0135&&lo>=b[2]-.021&&lo<=b[3]+.021;}
 function mlEsc(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function mlAdr(){try{const a=JSON.parse(localStorage.getItem("muellAdr")||"null");return a&&a.o?a:null;}catch(e){return null;}}
 function mlWahl(){try{const a=JSON.parse(localStorage.getItem("muellFr")||"null");if(Array.isArray(a))return a;}catch(e){}return MUELL_STD.slice();}
@@ -8959,6 +8972,7 @@ function mlKommend(){
 function mlTonnen(fr){return fr.length<=2?fr.map(f=>mlPunkt(f)+(MUELL_KURZ[f]||mlName(f))).join(" "):fr.map(mlPunkt).join("")+" "+fr.length+" Tonnen";}
 function mlKachel(){
   if(!mlAdr())return {l:"Müll",v:"Adresse?",s:"antippen"};
+  if(!mlZuHause())return {l:"Müll",v:"–",s:"nur zu Hause"};   // v7.09: sichtbar nur im Bearbeiten
   if(!mlBereit())return {l:"Müll",v:"–",s:MUELL.fehler?"keine Daten":"lädt"};
   const K=mlKommend();if(!K.length)return {l:"Müll",v:"–",s:"keine Termine"};
   const a={l:"Müll",v:mlWann(K[0][0]),s:mlTonnen(K[0][1])};
@@ -8983,6 +8997,7 @@ function mlHtml(root){
   const fr=MUELL.c?Object.keys(MUELL.c.fr).filter(f=>MUELL.c.d.some(x=>x[1].includes(f))):[],sel=mlWahl();
   h+=`<details class="ml-ein"${root._mlEin?" open":""}><summary>Tonnen und Adresse</summary>`
     +(fr.length?'<div class="ml-fr">'+fr.map(f=>`<label><input type="checkbox" data-mlf="${mlEsc(f)}"${sel.includes(f)?" checked":""}>${mlPunkt(f)}${mlEsc(mlName(f))}</label>`).join("")+"</div>":"")
+    +(MUELL_GEM[A.pn]?`<div class="kzg-sub" style="margin:8px 0 0">Die Kachel erscheint nur, wenn oben ein Ort in ${mlEsc(A.pn)} oder direkt daneben eingestellt ist.</div>`:"")
     +'<div class="loc-row"><button type="button" class="loc-btn" data-mlk="adr">Adresse ändern</button></div></details>';
   if(MUELL.c){const t=new Date(MUELL.c.t);
     h+=`<div class="ml-q">Quelle: EKW Landkreis Gießen (AWIDO) · Stand ${t.getDate()}.${t.getMonth()+1}. ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")} · Feiertage sind eingerechnet</div>`;}
@@ -9233,7 +9248,7 @@ const KZ_DEF={
   // v5.44: Rasen-Planer - Kachel "Gras jetzt" <-> "Maehen", Tipp oeffnet die Grossansicht mit Einstellungen
   rasen:{name:"Rasen mähen",kurz:"Rasen",ziel:{text:"Rasen"},gross(){return rzGross();},r(){return rzKachel();}},
   // v7.08: Muellabfuhr (EKW Landkreis Giessen), Tipp oeffnet Liste und Adresswahl
-  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},gross(){return mlGross();},r(){return mlKachel();}}
+  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){return !mlZuHause();},gross(){return mlGross();},r(){return mlKachel();}}
 };
 /* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
    noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
@@ -9313,7 +9328,10 @@ function kzPassen(box){
   new ResizeObserver(en=>{const w=Math.round(en[0].contentRect.width);if(w&&w!==w0){w0=w;requestAnimationFrame(()=>kzPassen(b));}}).observe(b);})();
 function kzRender(){
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
-  const S=kzSlots(),ord=S.filter(Boolean);
+  /* v7.09: eine Kachel mit weg() (Muell nur am Heimatort) steht ausserhalb des Bearbeitens wie ein freier Platz da;
+     am Ende faellt der Platz ganz weg, sonst bliebe eine leere Reihe stehen */
+  const S=kzSlots().map(id=>id&&!_kzEdit&&KZ_DEF[id].weg&&KZ_DEF[id].weg()?null:id),ord=S.filter(Boolean);
+  if(!_kzEdit)while(S.length&&!S[S.length-1])S.pop();
   if(_kzEdit){let c=0;S.forEach(id=>{const w=id&&KZ_DEF[id].breit?2:1;if(c+w>3)c=0;c=(c+w)%3;});for(let i=c?3-c:3;i>0;i--)S.push(null);}
   box.classList.toggle("edit",_kzEdit);
   box.innerHTML=S.map((id,si)=>{if(!id)return `<div class="kzleer" data-slot="${si}"></div>`;let x=null;try{x=KZ_DEF[id].r();}catch(e){console.warn("Kachel",id,e);}
