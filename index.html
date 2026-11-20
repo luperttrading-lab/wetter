@@ -407,7 +407,6 @@ html.dunkel .ml-warn{color:#ffd28a}
 .ml-adr button.an{background:rgba(47,134,207,.16);border-color:#2f86cf}
 html.dunkel .ml-adr button.an{background:rgba(120,180,255,.2);border-color:#8cc4ff}
 .ml-hier{width:8px;height:8px;border-radius:50%;background:#2e9e4a;flex:0 0 auto}
-.ml-ub{margin-top:10px}
 .loc-box .ml-weg{color:#c62828}
 html.dunkel .loc-box .ml-weg{color:#ff9d94}
 :is(.loc-box,.nowcard) .rz .rz-reg label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0}
@@ -2666,7 +2665,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.11</span>
+      <span class="ver">v7.12</span>
     </div>
   </header>
 
@@ -9062,7 +9061,9 @@ function mlHeimOrte(){const a=[{lat:+LOC.lat,lon:+LOC.lon,name:LOC.name}];
 function mlKreisKand(){const la=+LOC.lat,lo=+LOC.lon;
   return MUELL_KREISE.filter(r=>la>=r[2]&&la<=r[3]&&lo>=r[4]&&lo<=r[5]).sort((a,b)=>(a[3]-a[2])*(a[5]-a[4])-(b[3]-b[2])*(b[5]-b[4])).map(r=>r[0]);}
 function mlKreisVor(){return mlKreisKand()[0]||null;}
-function mlOrtTreffer(L){const n=String(LOC&&LOC.name||"");return L.find(x=>{const r=mlNameRein(x.value);return r.length>2&&n.includes(r);})||null;}
+// zuerst nach dem angezeigten Namen, dann nach der Gemeinde laut Nominatim (v7.12)
+function mlOrtTreffer(L){const H=MUELL.hier,f=n=>L.find(x=>{const r=mlNameRein(x.value);return r.length>2&&n.includes(r);});
+  return f(String(LOC&&LOC.name||""))||(H&&H.gem?f(H.gem):null)||null;}
 // Gemeindename fuer die Kartensuche: "SLF-RU-Allendorf" -> "Allendorf", "VG Altenkirchen - Flammersfeld" -> "Altenkirchen"
 function mlNameRein(v){return String(v||"").replace(/^[A-ZÄÖÜ]{2,4}-[A-ZÄÖÜ]{2,4}-/,"").replace(/^(Gemeinde|Stadt|Markt|VG|Verbandsgemeinde)\s+/i,"")
   .split(/\s+-\s+|\s+mit\s+|\s*\(|\s*\//)[0].trim();}
@@ -9072,7 +9073,13 @@ function mlNameRein(v){return String(v||"").replace(/^[A-ZÄÖÜ]{2,4}-[A-ZÄÖ�
    `ueberall`, sonst gar keine (weg). Das FENSTER zeigt jede Adresse von ueberall (Knoepfe oben). Termine aller Adressen in
    `muellTermine` {o: {t, fr, d}} - bewusst ohne "cache" im Namen: "Einstellungen sichern" laesst /cache/i weg, und die
    Termine einer Kalenderdatei lassen sich nicht neu holen. Bis v7.10: `muellAdr` / `muellFr` / `muellCache` (einmalig
-   uebernommen, dann geloescht). */
+   uebernommen, dann geloescht).
+   v7.12 (Nutzer zum Haekchen "auch an allen anderen Orten zeigen": "macht keinen Sinn, dass ich den Wettenberger Muell an
+   den anderen Orten habe - an anderen Orten muss ich den Muell unten anklicken koennen, wenn er fuer diesen Ort vorhanden
+   ist, und dann die Einstellung, dass es zu meiner Strasse passt"): Schalter `ueberall` ENTFERNT (gespeicherte Flags werden
+   geloescht). Die Kachel zeigt nur noch die Adresse dieses Orts. Liegt der Ort in einem AWIDO-Gebiet und gibt es hier noch
+   keine Adresse (`mlHierMoeglich`), steht unter "Kacheln waehlen" der Eintrag "+ Muellabfuhr fuer <Ort>" - Tipp oeffnet
+   gleich die Einrichtung, Kreis und Gemeinde vorbelegt (`mlHierEinrichten`). */
 var MUELL_MAX=8;
 function mlListe(){try{const a=JSON.parse(localStorage.getItem("muellAdressen")||"null");if(Array.isArray(a))return a.filter(x=>x&&x.o);}catch(e){}return [];}
 function mlListeSpeichern(L){try{localStorage.setItem("muellAdressen",JSON.stringify(L.slice(0,MUELL_MAX)));}catch(e){}}
@@ -9089,6 +9096,8 @@ try{if(!localStorage.getItem("muellAdressen")){const a=JSON.parse(localStorage.g
     localStorage.setItem("muellAdressen",JSON.stringify([a]));
     const c=JSON.parse(localStorage.getItem("muellCache")||"null");if(c&&c.o===a.o)localStorage.setItem("muellTermine",JSON.stringify({[a.o]:{t:c.t,fr:c.fr,d:c.d}}));}
   ["muellAdr","muellFr","muellCache"].forEach(k=>localStorage.removeItem(k));}}catch(e){}
+// v7.12: Schalter "ueberall" gibt es nicht mehr
+try{const L=mlListe();if(L.some(x=>"ueberall" in x)){L.forEach(x=>delete x.ueberall);mlListeSpeichern(L);}}catch(e){}
 // Kontext: die Hilfen mlName/mlKat/mlFarbe/mlKurz lesen MUELL.c - jede Ansicht setzt vorher ihre Adresse
 function mlSetz(A){MUELL.A=A||null;MUELL.c=A?(mlTermine()[A.o]||null):null;return MUELL.c;}
 function mlZuHause(A){if(!A)return true;const la=+LOC.lat,lo=+LOC.lon;
@@ -9096,7 +9105,29 @@ function mlZuHause(A){if(!A)return true;const la=+LOC.lat,lo=+LOC.lon;
   const b=mlRahmen(A);if(!b)return true;
   const ma=(b[0]+b[1])/2,mo=(b[2]+b[3])/2,ha=Math.max((b[1]-b[0])/2+.0135,.027),ho=Math.max((b[3]-b[2])/2+.021,.042);
   return Math.abs(la-ma)<=ha&&Math.abs(lo-mo)<=ho;}
-function mlVerfuegbar(){return mlListe().filter(A=>mlZuHause(A)||A.ueberall);}
+function mlVerfuegbar(){return mlListe().filter(A=>mlZuHause(A));}
+// v7.12: hier noch keine Adresse, aber der Ort liegt in einem AWIDO-Gebiet -> Angebot unter "Kacheln waehlen"
+function mlHierMoeglich(){return !mlVerfuegbar().length&&mlHierPruefen().ok===true;}
+/* Gibt es den Ort im AWIDO-Kalender? Der Kreis-RAHMEN allein taugt nicht: Wetzlar liegt im Rahmen des Lahn-Dill-Kreises,
+   hat aber eigene Abfuhr (fehlt in getPlaces wie die Stadt Giessen). Darum muss eine Gemeinde des Kreises so heissen wie
+   der Ort - erst nach dem angezeigten Namen, sonst nach der Gemeinde laut Nominatim (Ortsteile wie "Erlental"). Einmal je
+   Ort; bis zur Antwort kein Angebot, danach zeichnet das Bearbeiten neu. */
+function mlHierKey(){return (+LOC.lat).toFixed(3)+","+(+LOC.lon).toFixed(3);}
+function mlHierPruefen(){const k=mlHierKey();if(MUELL.hier&&MUELL.hier.k===k)return MUELL.hier;
+  const H=MUELL.hier={k,ok:null},kand=mlKreisKand();if(!kand.length){H.ok=false;return H;}
+  (async()=>{const such=async()=>{for(const kd of kand){let L=MUELL.orte[kd];
+        if(!L){try{L=MUELL.orte[kd]=await fetchJSON(MUELL_API+"getPlaces/client="+encodeURIComponent(kd),15000);}catch(e){continue;}}
+        const t=mlOrtTreffer(L);if(t)return {kd,t};}return null;};
+    let r=await such();
+    if(!r){try{const j=await fetchJSON("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat="+(+LOC.lat)+"&lon="+(+LOC.lon),9000);
+        const a=j&&j.address||{};H.gem=a.municipality||a.city||a.town||a.village||"";}catch(e){}
+      if(H.gem)r=await such();}
+    if(MUELL.hier!==H)return;H.ok=!!r;if(r)H.kd=r.kd;
+    if(_kzEdit)try{kzRender();}catch(e){}})().catch(()=>{});
+  return H;}
+function mlOrtKurz(){return String(LOC&&LOC.name||"").split(/\s*[\/,]\s*/).filter(Boolean).pop()||"diesen Ort";}
+function mlHierEinrichten(){const L=mlListe();kzGrossZeigen("");const inn=el("kzGrossIn");if(!inn)return;
+  inn._mlSetup=true;inn._mlModus="neu";inn._mlHier=true;inn._mlO=L.length?L[0].o:null;inn._mlEin=false;inn._mlIcs=null;mlZeichne(inn);}
 function mlAktiv(){const V=mlVerfuegbar();return V.find(a=>a.o===MUELL.sel)||V.find(a=>mlZuHause(a))||V[0]||null;}
 function mlLabel(A){return mlIcs(A)?"Kalender "+(A.h&&A.h.n||A.pn):(A.pn||"")+(A.sn&&A.sn!==A.pn?", "+A.sn:"");}
 function mlWahl(A){A=A||MUELL.A;if(A&&Array.isArray(A.fr))return A.fr;
@@ -9138,29 +9169,25 @@ function mlKachel(){
   if(!A)return {l:"Müll",v:"–",s:"nur zu Hause"};   // v7.09: sichtbar nur im Bearbeiten
   if(!mlBereit(A))return {l:"Müll",v:"–",s:mlIcs(A)?"Datei fehlt":MUELL.fehler[A.o]?"keine Daten":"lädt"};
   mlSetz(A);const K=mlKommend(A);if(!K.length)return {l:"Müll",v:"–",s:mlIcs(A)?"neue Datei":"keine Termine"};
-  // zeigt die Kachel eine Adresse von woanders (Schalter "ueberall"), steht deren Ort in der Beschriftung
-  // kurze Namen mit "Müll" davor, laengere allein (die Beschriftung hat ~10 Zeichen Platz)
-  const on=mlNameRein(mlIcs(A)?(A.h&&A.h.n||A.pn):A.pn);
-  const l=mlZuHause(A)?"Müll":on.length<=6?"Müll "+on:on.length<=11?on:on.slice(0,10)+".";
-  const a={l,v:mlWann(K[0][0]),s:mlTonnen(K[0][1])};
+  const a={l:"Müll",v:mlWann(K[0][0]),s:mlTonnen(K[0][1])};
   if(K[1])a.alt=[{l:"Danach",v:mlWann(K[1][0]),s:mlTonnen(K[1][1])}];
   return a;}
 /* ---- Grossansicht ---- */
 function mlGross(){const inn=el("kzGrossIn"),L=mlListe(),A=mlAktiv()||L[0];
-  if(inn){inn._mlSetup=!L.length;inn._mlModus=L.length?null:"neu";inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;}
+  if(inn){inn._mlSetup=!L.length;inn._mlModus=L.length?null:"neu";inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;inn._mlHier=false;}
   L.forEach(a=>mlBereit(a));return {html:mlHtml(inn||{}),nach:mlBinden};}
 function mlGezeigt(root){const L=mlListe();return L.find(x=>x.o===root._mlO)||mlAktiv()||L[0]||null;}
 function mlHtml(root){
   const L=mlListe(),kopf='<div class="kzg-titel">Müllabfuhr</div>';
   if(!L.length||root._mlSetup){const E=root._mlModus==="neu"?null:mlGezeigt(root);mlSetz(null);
-    return '<div class="ml" data-ml="1">'+kopf+mlSetupHtml(E,L.length>0)+"</div>";}
+    return '<div class="ml" data-ml="1">'+kopf+mlSetupHtml(E,L.length>0,root._mlHier)+"</div>";}
   const A=mlGezeigt(root);mlSetz(A);const K=mlKreis(mlKd(A)),hier=mlZuHause(A);
   let h='<div class="ml" data-ml="1">'+kopf;
   // mehrere Adressen: Knoepfe zum Umschalten, gruener Punkt = gilt am angezeigten Ort
   if(L.length>1)h+='<div class="ml-adr">'+L.map(a=>`<button type="button" data-mlo="${mlEsc(a.o)}" class="${a.o===A.o?"an":""}">`
       +(mlZuHause(a)?'<i class="ml-hier"></i>':"")+mlEsc(mlLabel(a))+"</button>").join("")+"</div>";
   h+='<div class="kzg-sub">'+(mlIcs(A)?"Kalenderdatei für "+mlEsc(A.h&&A.h.n||A.pn):`${mlEsc(A.pn)}, ${mlEsc(A.sn)}${A.h?" "+mlEsc(A.h):""}`)
-    +(hier?"":A.ueberall?" · in der Kachel auch hier":" · nur im Fenster, nicht in der Kachel hier")+"</div>";
+    +(hier?"":" · nur im Fenster, nicht in der Kachel hier")+"</div>";
   const C=MUELL.c;
   if(!C){h+=`<div class="kzg-sub">${mlIcs(A)?"Die Termine aus der Kalenderdatei fehlen - bitte unter „Tonnen und Adresse“ neu einlesen."
       :MUELL.fehler[A.o]?"Keine Daten ("+mlEsc(MUELL.fehler[A.o])+")":"Termine werden geladen …"}</div>`
@@ -9178,7 +9205,6 @@ function mlHtml(root){
   h+=`<details class="ml-ein"${root._mlEin?" open":""}><summary>Tonnen und Adresse</summary>`
     +(fr.length?'<div class="ml-fr">'+fr.map(f=>`<label><input type="checkbox" data-mlf="${mlEsc(f)}"${sel.includes(f)?" checked":""}>${mlPunkt(f)}${mlEsc(mlName(f))}</label>`).join("")+"</div>":"")
     +(ht?`<div class="kzg-sub" style="margin:8px 0 0">Die Kachel zeigt diese Adresse, wenn oben ein Ort ${ht} eingestellt ist.</div>`:"")
-    +`<div class="ml-fr ml-ub"><label><input type="checkbox" data-mlu="1"${A.ueberall?" checked":""}>In der Kachel auch an allen anderen Orten zeigen</label></div>`
     +'<div class="loc-row ml-knr">'
     +`<button type="button" class="loc-btn" data-mlk="adr">${mlIcs(A)?"Neue Datei / Ort":"Adresse ändern"}</button>`
     +(L.length<MUELL_MAX?'<button type="button" class="loc-btn" data-mlk="dazu">Weitere Adresse</button>':"")
@@ -9189,12 +9215,16 @@ function mlHtml(root){
       :`<div class="ml-q">Quelle: ${mlKd(A)==="lkgi"?"EKW Landkreis Gießen":mlEsc(K?K[1]:mlKd(A))} (AWIDO) · Stand ${st} · Feiertage sind eingerechnet</div>`;}
   return h+"</div>";
 }
-function mlSetupHtml(E,mitListe){
+function mlSetupHtml(E,mitListe,hier){
   // ohne AWIDO-Gebiet am angezeigten Ort (z. B. Norden) gleich die Kalenderdatei
-  const kv=E&&!mlIcs(E)?mlKd(E):(E&&mlIcs(E)?"ics":mlKreisVor()||"ics");
-  return '<div class="kzg-sub">'+(E?"Adresse ändern: ":mitListe?"Weitere Adresse - die Kachel zeigt sie, wenn oben ihr Ort eingestellt ist. ":"Einmal die Adresse wählen, an der deine Tonnen stehen. ")
-    +'Die Liste enthält die Gebiete, deren Abfuhrkalender über den Dienst AWIDO läuft (Landkreis Gießen ohne die Stadt Gießen); '
-    +'für alle anderen ganz unten „Anderer Kreis: Kalenderdatei“.</div><div class="ml-set">'
+  const H=MUELL.hier,hk=H&&H.ok&&H.k===mlHierKey()?H.kd:null;   // v7.12: Kreis, in dem der Ort gefunden wurde
+  const kv=E&&!mlIcs(E)?mlKd(E):(E&&mlIcs(E)?"ics":hk||mlKreisVor()||"ics");
+  const ok=mlEsc(mlOrtKurz());
+  const intro=hier&&!E?`Müllabfuhr für ${ok}: Straße wählen. Die Kachel zeigt sie, wenn oben ${ok} eingestellt ist – deine anderen Adressen bleiben an ihrem Ort.`
+    :(E?"Adresse ändern: ":mitListe?"Weitere Adresse - die Kachel zeigt sie, wenn oben ihr Ort eingestellt ist. ":"Einmal die Adresse wählen, an der deine Tonnen stehen. ")
+      +'Die Liste enthält die Gebiete, deren Abfuhrkalender über den Dienst AWIDO läuft (Landkreis Gießen ohne die Stadt Gießen); '
+      +'für alle anderen ganz unten „Anderer Kreis: Kalenderdatei“.';
+  return '<div class="kzg-sub">'+intro+'</div><div class="ml-set">'
     +'<label>Landkreis / Gebiet<select id="mlK"><option value="">Gebiet wählen</option>'
     +MUELL_KREISE.map(r=>`<option value="${r[0]}"${r[0]===kv?" selected":""}>${mlEsc(r[1])}</option>`).join("")
     +`<option value="ics"${kv==="ics"?" selected":""}>Anderer Kreis: Kalenderdatei</option></select></label>`
@@ -9221,24 +9251,24 @@ function mlNeuZeichnen(){const r=el("kzGrossIn"),ov=el("kzGrossOv");
 function mlZeichne(root){root.innerHTML=mlHtml(root);mlBinden(root);}
 function mlOpt(sel,L,leer,wahl){sel.innerHTML=(leer?`<option value="">${leer}</option>`:"")+L.map(x=>`<option value="${mlEsc(x.key)}"${x.key===wahl?" selected":""}>${mlEsc(x.value)}</option>`).join("");}
 // nach dem Speichern: neue/geaenderte Adresse zeigen; gilt sie hier, auch in der Kachel
-function mlFertig(root,A){root._mlSetup=false;root._mlModus=null;root._mlIcs=null;root._mlO=A.o;
-  if(mlZuHause(A)||A.ueberall)MUELL.sel=A.o;mlZeichne(root);try{kzRender();}catch(e){}}
+function mlFertig(root,A){root._mlHier=false;root._mlSetup=false;root._mlModus=null;root._mlIcs=null;root._mlO=A.o;
+  if(mlZuHause(A))MUELL.sel=A.o;mlZeichne(root);try{kzRender();}catch(e){}}
 function mlBinden(root){
   const q=s=>root.querySelector(s),G=mlGezeigt(root);
   root.querySelectorAll("[data-mlo]").forEach(b=>b.onclick=()=>{root._mlO=b.dataset.mlo;
-    const A=mlListe().find(x=>x.o===root._mlO);if(A){mlBereit(A);if(mlZuHause(A)||A.ueberall){MUELL.sel=A.o;try{kzRender();}catch(e){}}}mlZeichne(root);});
+    const A=mlListe().find(x=>x.o===root._mlO);if(A){mlBereit(A);if(mlZuHause(A)){MUELL.sel=A.o;try{kzRender();}catch(e){}}}mlZeichne(root);});
   root.querySelectorAll("[data-mlk]").forEach(b=>b.onclick=()=>{const k=b.dataset.mlk;
     if(k==="neu"&&G){MUELL.versucht[G.o]=0;delete MUELL.fehler[G.o];mlLaden(G);mlZeichne(root);}
-    else if(k==="adr"){root._mlSetup=true;root._mlModus=null;root._mlIcs=null;mlZeichne(root);}
-    else if(k==="dazu"){root._mlSetup=true;root._mlModus="neu";root._mlIcs=null;mlZeichne(root);}
-    else if(k==="abbr"){root._mlSetup=false;root._mlModus=null;mlZeichne(root);}
+    else if(k==="adr"){root._mlHier=false;root._mlSetup=true;root._mlModus=null;root._mlIcs=null;mlZeichne(root);}
+    else if(k==="dazu"){root._mlHier=false;root._mlSetup=true;root._mlModus="neu";root._mlIcs=null;mlZeichne(root);}
+    else if(k==="abbr"){root._mlHier=false;root._mlSetup=false;root._mlModus=null;mlZeichne(root);}
     else if(k==="weg"&&G){if(!confirm("„"+mlLabel(G)+"“ löschen?"))return;
       mlListeSpeichern(mlListe().filter(x=>x.o!==G.o));mlTermineSetz(G.o,null);if(MUELL.sel===G.o)MUELL.sel=null;
       const R=mlListe();root._mlO=R.length?(mlAktiv()||R[0]).o:null;root._mlSetup=!R.length;root._mlModus=R.length?null:"neu";
       mlZeichne(root);try{kzRender();}catch(e){}}
     else if(k==="ok"){
       const L=mlListe(),E=root._mlModus==="neu"?null:G,iE=E?L.findIndex(x=>x.o===E.o):-1;
-      const speichern=A=>{if(E){A.ueberall=E.ueberall;if(mlIcs(E)!==mlIcs(A)||mlKd(E)!==mlKd(A)||mlIcs(A))delete A.fr;else if(E.fr)A.fr=E.fr;
+      const speichern=A=>{if(E){if(mlIcs(E)!==mlIcs(A)||mlKd(E)!==mlKd(A)||mlIcs(A))delete A.fr;else if(E.fr)A.fr=E.fr;
           L[iE]=A;if(E.o!==A.o)mlTermineSetz(E.o,null);}else L.push(A);mlListeSpeichern(L);};
       if(q("#mlK").value==="ics"){const I=root._mlIcs;if(!I||!I.d.length)return;const o=mlHeimOrte()[+q("#mlHeim").value]||mlHeimOrte()[0];
         const A={typ:"ics",o:"ics:"+Date.now(),pn:o.name,sn:I.datei||"",h:{lat:+o.lat,lon:+o.lon,n:o.name}};
@@ -9250,8 +9280,6 @@ function mlBinden(root){
   root.querySelectorAll("[data-mlf]").forEach(c=>c.onchange=()=>{if(!G)return;
     mlAdrSetz(G.o,{fr:[...root.querySelectorAll("[data-mlf]")].filter(x=>x.checked).map(x=>x.dataset.mlf)});
     root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
-  root.querySelectorAll("[data-mlu]").forEach(c=>c.onchange=()=>{if(!G)return;mlAdrSetz(G.o,{ueberall:c.checked?true:null});
-    if(c.checked&&!mlZuHause(G))MUELL.sel=G.o;root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
   const det=q(".ml-ein");if(det)det.addEventListener("toggle",()=>{root._mlEin=det.open;});
   const KS=q("#mlK");if(!KS)return;
   const P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),HW=q("#mlHw"),OK=q('[data-mlk="ok"]'),HIN=q("#mlHin"),AW=q("#mlAw"),IW=q("#mlIcsW");
@@ -9675,7 +9703,12 @@ function kzRender(){
     }
     if(_kzEdit&&_kzRegAuf){kzBewAnwenden(false);kzWeAnzeigen();waAnzeigen();sbAnzeigen();hiAnzeigen();}}
   if(pool){pool.classList.toggle("on",_kzEdit);
-    pool.innerHTML=_kzEdit?Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${KZ_DEF[id].name}</div>`).join(""):"";}
+    /* v7.12: Muell fuer den angezeigten Ort einrichten - nur wenn es hier noch keine Adresse gibt und der Ort in einem
+       AWIDO-Gebiet liegt; ist die Kachel noch nicht gewaehlt, traegt ihr eigener Eintrag diesen Namen */
+    let mh=false;try{mh=_kzEdit&&mlListe().length>0&&mlHierMoeglich();}catch(e){}
+    const mhN=mh?"Müllabfuhr für "+mlEsc(mlOrtKurz()):"";
+    pool.innerHTML=_kzEdit?(mh&&ord.includes("muell")?`<div class="kp" data-mlhier="1"><b>+</b>${mhN}</div>`:"")
+      +Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).sort((x,y)=>mh?(y==="muell")-(x==="muell"):0).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${id==="muell"&&mh?mhN:KZ_DEF[id].name}</div>`).join(""):"";}
   /* v6.78 (Nutzer 13.11.: "das Ziehen und Entfernen muss oben bei den Kacheln stehen"): der Hinweis steht direkt unter den
      Kacheln (#kzHint), nicht mehr im Fuss unter den Einstellungen; "Fertig" steht seit v6.76 im Sockel - der Fuss ist im
      Bearbeiten leer */
@@ -9928,8 +9961,11 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState!=="visible"&&_kzDrag){kzGhostWeg();kzRender();}});
   box.addEventListener("click",e=>{const m=e.target.closest(".kzmin");if(!m)return;e.preventDefault();e.stopPropagation();
     const a=kzSlots(),i=a.indexOf(m.dataset.min);if(i>=0)a[i]=null;while(a.length&&!a[a.length-1])a.pop();_kzWahl=a;kzSpeichern();kzRender();});   // v5.32: Platz bleibt frei
-  if(pool)pool.addEventListener("click",e=>{const p=e.target.closest(".kp");if(!p)return;const id=p.dataset.add;if(!KZ_DEF[id])return;
-    const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();});   // v5.32: in den ersten freien Platz
+  if(pool)pool.addEventListener("click",e=>{const p=e.target.closest(".kp");if(!p)return;
+    if(p.dataset.mlhier){mlHierEinrichten();return;}   // v7.12
+    const id=p.dataset.add;if(!KZ_DEF[id])return;
+    const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();
+    if(id==="muell"&&mlListe().length&&mlHierMoeglich())mlHierEinrichten();});   // v5.32: in den ersten freien Platz
   if(foot)foot.addEventListener("click",e=>{
     if(e.target.closest("#kzPause")){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}   // v5.32
     if(e.target.closest("#kzZahn")){_kzRegAuf=!_kzRegAuf;kzRender();if(_kzRegAuf)kzBewAnwenden(false);kzFixPruefen();return;}
