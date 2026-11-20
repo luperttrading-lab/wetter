@@ -1,7 +1,7 @@
 {
   "datum": "2026-11-20",
-  "summe_mm": 4.3,
-  "stunden_ok": 10,
+  "summe_mm": 4.91,
+  "stunden_ok": 11,
   "stunden_erwartet": 11,
   "stunden": [
     {
@@ -46,8 +46,7 @@
     },
     {
       "stunde": "11:00",
-      "mm": null,
-      "status": "noch nicht verfuegbar"
+      "mm": 0.61
     }
   ],
   "umgebung_3x3": [
@@ -57,7 +56,7 @@
           410,
           424
         ],
-        "mm": 4.8,
+        "mm": 5.4,
         "eigenes": false
       },
       {
@@ -65,7 +64,7 @@
           410,
           425
         ],
-        "mm": 5.4,
+        "mm": 5.8,
         "eigenes": false
       },
       {
@@ -73,7 +72,7 @@
           410,
           426
         ],
-        "mm": 5.3,
+        "mm": 5.7,
         "eigenes": false
       }
     ],
@@ -83,7 +82,7 @@
           409,
           424
         ],
-        "mm": 4.6,
+        "mm": 5.0,
         "eigenes": false
       },
       {
@@ -91,7 +90,7 @@
           409,
           425
         ],
-        "mm": 4.1,
+        "mm": 4.8,
         "eigenes": true
       },
       {
@@ -99,7 +98,7 @@
           409,
           426
         ],
-        "mm": 4.3,
+        "mm": 4.9,
         "eigenes": false
       }
     ],
@@ -109,7 +108,7 @@
           408,
           424
         ],
-        "mm": 4.5,
+        "mm": 5.3,
         "eigenes": false
       },
       {
@@ -117,7 +116,7 @@
           408,
           425
         ],
-        "mm": 4.2,
+        "mm": 5.0,
         "eigenes": false
       },
       {
@@ -125,16 +124,16 @@
           408,
           426
         ],
-        "mm": 4.4,
+        "mm": 5.4,
         "eigenes": false
       }
     ]
   ],
   "letzter_regen": {
     "datum": "2026-11-20",
-    "mm": 4.3
+    "mm": 4.91
   },
-  "aktualisiert": "2026-11-20T10:07:00+00:00",
+  "aktualisiert": "2026-11-20T10:37:01+00:00",
   "quelle": "DWD RADOLAN-RW (1 km, stationsgeeicht)",
   "methode": "bilinear, 50.6480N 8.6741E",
   "orte": {
@@ -143,8 +142,8 @@
       "lat": 50.6479651,
       "lon": 8.6740943,
       "datum": "2026-11-20",
-      "summe_mm": 4.3,
-      "stunden_ok": 10,
+      "summe_mm": 4.91,
+      "stunden_ok": 11,
       "stunden_erwartet": 11,
       "stunden": [
         {
@@ -189,8 +188,7 @@
         },
         {
           "stunde": "11:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.61
         }
       ],
       "umgebung_3x3": [
@@ -200,7 +198,7 @@
               410,
               424
             ],
-            "mm": 4.8,
+            "mm": 5.4,
             "eigenes": false
           },
           {
@@ -208,7 +206,7 @@
               410,
               425
             ],
-            "mm": 5.4,
+            "mm": 5.8,
             "eigenes": false
           },
           {
@@ -216,7 +214,7 @@
               410,
               426
             ],
-            "mm": 5.3,
+            "mm": 5.7,
             "eigenes": false
           }
         ],
@@ -226,7 +224,7 @@
               409,
               424
             ],
-            "mm": 4.6,
+            "mm": 5.0,
             "eigenes": false
           },
           {
@@ -234,7 +232,7 @@
               409,
               425
             ],
-            "mm": 4.1,
+            "mm": 4.8,
             "eigenes": true
           },
           {
@@ -242,7 +240,7 @@
               409,
               426
             ],
-            "mm": 4.3,
+            "mm": 4.9,
             "eigenes": false
           }
         ],
@@ -252,7 +250,7 @@
               408,
               424
             ],
-            "mm": 4.5,
+            "mm": 5.3,
             "eigenes": false
           },
           {
@@ -260,7 +258,7 @@
               408,
               425
             ],
-            "mm": 4.2,
+            "mm": 5.0,
             "eigenes": false
           },
           {
@@ -268,14 +266,14 @@
               408,
               426
             ],
-            "mm": 4.4,
+            "mm": 5.4,
             "eigenes": false
           }
         ]
       ],
       "letzter_regen": {
         "datum": "2026-11-20",
-        "mm": 4.3
+        "mm": 4.91
       },
       "methode": "bilinear, 50.6480N 8.6741E"
     },
@@ -285,7 +283,7 @@
       "lon": 8.6226918,
       "datum": "2026-11-20",
       "summe_mm": 7.09,
-      "stunden_ok": 10,
+      "stunden_ok": 11,
       "stunden_erwartet": 11,
       "stunden": [
         {
@@ -330,8 +328,7 @@
         },
         {
           "stunde": "11:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
@@ -426,7 +423,7 @@
       "lon": 7.2066,
       "datum": "2026-11-20",
       "summe_mm": 0.0,
-      "stunden_ok": 10,
+      "stunden_ok": 11,
       "stunden_erwartet": 11,
       "stunden": [
         {
@@ -471,8 +468,7 @@
         },
         {
           "stunde": "11:00",
-          "mm": null,
-          "status": "noch nicht verfuegbar"
+          "mm": 0.0
         }
       ],
       "umgebung_3x3": [
