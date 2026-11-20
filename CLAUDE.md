@@ -4272,6 +4272,16 @@ Adresse vorbelegt (Abbrechen fuehrt zurueck), Uebernehmen ERSETZT sie. Bei Kalen
 oben nennen jetzt auch die Hausnummer (`mlLabel`). Hinweis bei Nummern ohne Plan: "ueber „ändern“ eine Nachbarnummer waehlen".
 Geprueft (`t716.py`): Wettenberg Weiherstrasse -> "schul" -> Schulstrasse (ein Treffer, gleich gewaehlt) -> ersetzt, weiter 2
 Adressen; Norden Marschweg 3 -> 1, Kachel folgt (Nr. 1 ohne Biotonne: "Do 3.12. Rest").
+v7.17 (Nutzer: "wenn ich die Kachel loesche und wieder hinzufuege, die gespeicherte Adresse einblenden statt direkt zu
+uebernehmen" + "nicht gefunden, dass ich erst den Muell einfuegen, dann auf die Kachel und dann auf die Einstellung tippen
+muss"): Hinzufuegen aus "Kacheln waehlen" (`data-add="muell"`) oeffnet jetzt gleich das Fenster (`mlGespeichert`, Flag
+`_mlBest`): oben ein Kasten "Kachel hinzugefuegt - sie zeigt deine gespeicherte Adresse: Norden, Marschweg 3" mit "Adresse
+aendern" und "Passt so" (gruen mit Glanz, schliesst das Fenster). Keine Adresse hier, aber moeglich, oder noch gar keine ->
+gleich die Einrichtung. Der Pool-Eintrag nennt die gespeicherte Adresse schon vorher ("Müllabfuhr · Marschweg 3",
+`mlPoolName`). Dabei behoben: ein Tipp IN einem Fenster (`.loc-ovl`) beendete "Kacheln waehlen" (Aussentipp-Regel v4.81) -
+nach "Passt so" stand man ploetzlich ausserhalb. Geprueft (`t717.py`, Himmel und hell): Minus -> Pool-Eintrag mit Adresse ->
+Kasten -> Passt so (Fenster zu, Bearbeiten bleibt) -> nochmal -> Adresse aendern (vorbelegt Marschweg 3) -> Abbrechen; ohne
+Adresse -> Einrichtung mit Landkreis Aurich vorbelegt.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
