@@ -394,6 +394,24 @@ html.dunkel .mld{box-shadow:0 0 0 1px rgba(255,255,255,.45)}
 .ml-q{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.4}
 .loc-box .ml-set label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 10px}
 .loc-box .ml-set label[hidden]{display:none}
+.loc-box .ml-set #mlSq{margin-top:4px;font-weight:400}
+.ml-vor{display:block;margin-top:4px;border:1.5px solid #dbe3ee;border-radius:10px;overflow:hidden;background:#fff}
+.ml-vor[hidden]{display:none}
+.ml-vor button{display:block;width:100%;text-align:left;font:inherit;font-size:15.5px;font-weight:600;color:#1c4f86;background:none;border:0;
+  border-top:1px solid #e3e9f1;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ml-vor button:first-child{border-top:0}
+.ml-vor button:active{background:rgba(28,75,120,.08)}
+.ml-vor small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 12px;border-top:1px solid #e3e9f1}
+.ml-vor small:first-child{border-top:0}
+html.dunkel .ml-vor{background:var(--feld);border-color:var(--feld-line)}
+html.dunkel .ml-vor button{color:#b5d7ff;border-top-color:rgba(255,255,255,.08)}
+html.dunkel .ml-vor button:active{background:rgba(255,255,255,.06)}
+html.dunkel .ml-vor small{border-top-color:rgba(255,255,255,.08)}
+.loc-box .loc-btn.ml-bereit{position:relative;overflow:hidden;background:#2e9e4a;border-color:#2e9e4a;color:#fff;box-shadow:0 0 0 3px rgba(46,158,74,.22)}
+html.dunkel .loc-box .loc-btn.ml-bereit{background:#2f9b4c;border-color:#62c87c;color:#fff;box-shadow:0 0 0 3px rgba(98,200,124,.2)}
+.ml-glanz{display:none;position:absolute;top:0;bottom:0;left:0;width:40%;pointer-events:none;transform:translateX(-130%);
+  background:linear-gradient(105deg,rgba(255,255,255,0) 22%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 78%)}
+.ml-bereit .ml-glanz{display:block}
 .loc-box .ml select{display:block;width:100%;box-sizing:border-box;margin-top:4px;font-size:16px;padding:9px 11px;border:1.5px solid #dbe3ee;border-radius:10px;background:#f7fafd;color:#1c2a3a}
 html.dunkel .loc-box .ml select{background:var(--feld);border-color:var(--feld-line);color:var(--ink)}
 .loc-box .ml input[type=checkbox]{width:18px;height:18px;padding:0;margin:0;border:0;background:none;-webkit-appearance:checkbox;appearance:auto;accent-color:#2563c9;flex:0 0 auto}
@@ -2665,7 +2683,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.14</span>
+      <span class="ver">v7.15</span>
     </div>
   </header>
 
@@ -9296,7 +9314,8 @@ function mlSetupHtml(E,mitListe,hier){
     +MUELL_KREISE.concat(MUELL_DATEI_K).sort((a,b)=>a[1].localeCompare(b[1],"de")).map(r=>`<option value="${r[0]}"${r[0]===kv?" selected":""}>${mlEsc(r[1])}</option>`).join("")
     +`<option value="ics"${kv==="ics"?" selected":""}>Anderer Kreis: Kalenderdatei</option></select></label>`
     +'<div id="mlAw"><label>Gemeinde<select id="mlP" disabled><option value="">–</option></select></label>'
-    +'<label id="mlSw"><span id="mlSl">Straße</span><select id="mlS" disabled><option value="">–</option></select></label>'
+    +'<label id="mlSw"><span id="mlSl">Straße</span><input id="mlSq" type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" hidden>'
+    +'<span class="ml-vor" id="mlSv" hidden></span><select id="mlS" disabled><option value="">–</option></select></label>'
     +'<label id="mlHw" hidden><span id="mlHl">Hausnummer</span><select id="mlH"></select></label></div>'
     +'<div id="mlIcsW" hidden><div class="kzg-sub">Auf der Internetseite deines Abfallbetriebs den Abfuhrkalender für deine Adresse '
     +'als Kalenderdatei (.ics, „iCal“) herunterladen. Am iPhone: lange auf den Link drücken → „Verknüpfte Datei laden“, sie liegt '
@@ -9316,6 +9335,14 @@ function mlGeo(A){const K=mlKreis(mlKd(A));if(!K||mlKd(A)==="lkgi"||mlIcs(A)||ml
 function mlNeuZeichnen(){const r=el("kzGrossIn"),ov=el("kzGrossOv");
   if(r&&ov&&!ov.classList.contains("hidden")&&r.querySelector('[data-ml="1"]')&&!r._mlSetup)mlZeichne(r);}
 function mlZeichne(root){root.innerHTML=mlHtml(root);mlBinden(root);}
+// v7.15 (Nutzer): ist alles gewaehlt, wird "Uebernehmen" gruen und ein Glanz laeuft von links nach rechts. Web-Animation
+// statt CSS: die CSS-Sperre bei "Bewegung reduzieren" haette ihn abgeschaltet (Wunsch des Nutzers, der die Einstellung nutzt)
+function mlGlanz(b){if(!b)return;const g=document.createElement("i");g.className="ml-glanz";b.appendChild(g);let an=null;
+  const pr=()=>{const ok=!b.disabled;b.classList.toggle("ml-bereit",ok);
+    if(ok&&!an&&g.animate)an=g.animate([{transform:"translateX(-130%)"},{transform:"translateX(-130%)",offset:.2,easing:"ease-in-out"},
+      {transform:"translateX(330%)",offset:.7},{transform:"translateX(330%)"}],{duration:2600,iterations:Infinity});
+    else if(!ok&&an){an.cancel();an=null;}};
+  new MutationObserver(pr).observe(b,{attributes:true,attributeFilter:["disabled"]});pr();}
 function mlOpt(sel,L,leer,wahl){sel.innerHTML=(leer?`<option value="">${leer}</option>`:"")+L.map(x=>`<option value="${mlEsc(x.key)}"${x.h!=null?` data-h="${mlEsc(x.h)}"`:""}${x.key===wahl?" selected":""}>${mlEsc(x.value)}</option>`).join("");}
 // nach dem Speichern: neue/geaenderte Adresse zeigen; gilt sie hier, auch in der Kachel
 function mlFertig(root,A){root._mlHier=false;root._mlSetup=false;root._mlModus=null;root._mlIcs=null;root._mlO=A.o;
@@ -9350,13 +9377,34 @@ function mlBinden(root){
   const det=q(".ml-ein");if(det)det.addEventListener("toggle",()=>{root._mlEin=det.open;});
   const KS=q("#mlK");if(!KS)return;
   const P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),HW=q("#mlHw"),OK=q('[data-mlk="ok"]'),HIN=q("#mlHin"),AW=q("#mlAw"),IW=q("#mlIcsW");
+  mlGlanz(OK);
+  // v7.15 (Nutzer): Strasse eintippen - Auswahlliste und Vorschlaege folgen der Eingabe, ein einziger Treffer ist gleich gewaehlt.
+  // Nur ab 13 Eintraegen (Norden 584, Wettenberg ~150); Umlaute, "Straße"/"Strasse"/"Str." und Satzzeichen zaehlen nicht.
+  const SQ=q("#mlSq"),SV=q("#mlSv");let SL=[];
+  const nrm=t=>String(t).toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")
+    .replace(/strasse|str\./g,"str").replace(/[^a-z0-9]+/g," ").trim();
+  const sucheSetz=L=>{SL=L.filter(x=>x.value);SQ.value="";SV.hidden=true;SQ.hidden=SL.length<=12;
+    SQ.placeholder=q("#mlSl").textContent+" eintippen …";};
+  SQ.oninput=()=>{const t=nrm(SQ.value),art=q("#mlSl").textContent,vor=S.value;
+    if(!t){mlOpt(S,SL,art+" wählen",vor);SV.hidden=true;return;}
+    const T=SL.map(x=>{const n=nrm(x.value);return [n.startsWith(t)?0:(" "+n).includes(" "+t)?1:n.includes(t)?2:-1,x];})
+      .filter(z=>z[0]>=0).sort((a,b)=>a[0]-b[0]||a[1].value.localeCompare(b[1].value,"de")).map(z=>z[1]);
+    const da=T.some(x=>x.key===vor);
+    mlOpt(S,T,T.length?(T.length===1?"":T.length+" Treffer – wählen"):"kein Treffer",da?vor:"");
+    if(T.length===1){SV.hidden=true;if(vor!==T[0].key){S.value=T[0].key;HIN.textContent="";hausnr(T[0].key);}return;}
+    if(!da){OK.disabled=true;HW.hidden=true;}
+    SV._T=T;SV.innerHTML=T.length?T.slice(0,6).map((x,i)=>`<button type="button" data-i="${i}">${mlEsc(x.value)}</button>`).join("")
+      +(T.length>6?`<small>und ${T.length-6} weitere in der Liste darunter</small>`:""):"<small>Nichts gefunden – anders schreiben?</small>";
+    SV.hidden=false;};
+  SV.onclick=e=>{const b=e.target.closest("button[data-i]");if(!b)return;e.preventDefault();const x=SV._T[+b.dataset.i];
+    mlOpt(S,[x],"",x.key);SQ.value=x.value;SV.hidden=true;SQ.blur();HIN.textContent="";hausnr(x.key);};
   const A=root._mlModus==="neu"?null:G;   // vorbelegt aus der Adresse, die geaendert wird
   const kd=()=>KS.value;
   const fehler=e=>{HIN.textContent="Abfall-Dienst nicht erreichbar ("+(e&&e.message||e)+") – später nochmal versuchen.";};
   const strassen=p=>{S.disabled=true;OK.disabled=true;HW.hidden=true;mlOpt(S,[],"wird geladen …");
     const da=mlStrHolen(kd(),p);
     da.then(L=>{const art=mlStrArt(L);q("#mlSl").textContent=art;q("#mlSw").hidden=L.length===1;
-      mlOpt(S,L,L.length>1?art+" wählen":"",A&&A.p===p?A.s:"");S.disabled=false;if(S.value)hausnr(S.value);}).catch(fehler);};
+      mlOpt(S,L,L.length>1?art+" wählen":"",A&&A.p===p?A.s:"");S.disabled=false;sucheSetz(L);if(S.value)hausnr(S.value);}).catch(fehler);};
   const hausnr=s=>{OK.disabled=true;HW.hidden=true;S.dataset.o="";
     const da=mlHnHolen(kd(),s);
     da.then(L=>{if(!L.length){S.dataset.o=s;OK.disabled=false;return;}
@@ -9380,7 +9428,7 @@ function mlBinden(root){
       if(!L){try{L=MUELL.orte[k]=await fetchJSON(MUELL_API+"getPlaces/client="+encodeURIComponent(k),15000);}catch(e){continue;}}
       if(mlOrtTreffer(L)){if(!KS._hand&&KS.value!==k&&root.contains(KS)){KS.value=k;gemeinden();}return;}}})();
   P.onchange=()=>{HIN.textContent="";if(P.value)strassen(P.value);else{mlOpt(S,[],"–");S.disabled=true;OK.disabled=true;HW.hidden=true;}};
-  S.onchange=()=>{HIN.textContent="";if(S.value)hausnr(S.value);else{OK.disabled=true;HW.hidden=true;}};
+  S.onchange=()=>{HIN.textContent="";SV.hidden=true;if(S.value)hausnr(S.value);else{OK.disabled=true;HW.hidden=true;}};
   const DA=q("#mlDatei"),INF=q("#mlIcsInfo");
   if(DA)DA.onchange=()=>{const f=DA.files&&DA.files[0];root._mlIcs=null;OK.disabled=true;INF.textContent="";if(!f)return;
     if(f.size>3e6){INF.textContent="Die Datei ist zu groß für einen Abfuhrkalender.";return;}
