@@ -4101,6 +4101,26 @@ Gefrierpunkt ist"): `renderForecast` legt in jede Temperaturbahn `<i class="fc0"
 Bereich aller 16 Tage liegt (gleiche Stelle in jeder Zeile, auch ausserhalb des farbigen Balkens). 2 px, 3 px ueber/unter die
 Bahn; dunkle Ansichten weiss mit dunklem Rand, hell graublau #55637a (weiss verschwand auf der hellen Bahn). Geprueft mit
 eingespielten 16 Tagen (12..-5 Grad), Himmel und hell.
+v7.08 MUELLABFUHR (Nutzer 20.11., Bild der EKW-App: "eine Karte, die sagt, wann der naechste Muell abgeholt wird").
+QUELLE: der EKW Landkreis Giessen nutzt AWIDO (Link "lkgi.app.awido.de" auf lkgi.de/kalender-app-und-abfall-abc/). Der Dienst
+`https://awido.cubefour.de/WebServices/Awido.Service.svc/secure/` antwortet mit CORS "*" - die App fragt DIREKT, keine Action:
+getPlaces/client=lkgi (17 Gemeinden, die STADT Giessen fehlt - eigene Abfuhr), getGroupedStreets/<Gemeinde>?selectedOID=
+<Gemeinde>&client=lkgi, getStreetAddons/<Strasse>?client=lkgi (ein Eintrag mit leerem Wert = ganze Strasse, sonst Hausnummern),
+getData/<oid>?fractions=&client=lkgi (~130 KB: fracts = Tonnenarten mit snm RA2/RA4/AP/BA/GT/GA, son:true = Schadstoff-
+Sondertermine; calendar dt "20261124", fr ["BA"]). Gemessen fuer Wettenberg/Weiherstrasse: Bio 24.11., Rest + Gelb 1.12.
+(= EKW-App des Nutzers), Termine bis 28.12.2027, Feiertage schon verschoben (30.12., 6.1.). KACHEL `muell` ("Muellabfuhr",
+Modul `MUELL`/`ml*` vor KZ_DEF): "MUELL / Di 24.11. / Punkt Bio", zweite Ansicht "Danach"; heute/morgen als Wort; ein Termin
+zaehlt bis 12 Uhr des Tages; Unterzeile bis zwei Tonnen mit Namen, ab drei nur Punkte + "3 Tonnen". Farben `MUELL_FARBE`
+(Rest grau, Bio gruen, Papier blau, Gelb gelb, Garten braun). Datum in deutscher Zeit (`mlTag`), egal welcher Ort oben steht -
+die Adresse ist die der eigenen Tonnen (`muellAdr`), auf Reisen bleiben die Termine von zu Hause. Ohne Adresse "Adresse? /
+antippen". GROSSANSICHT (`mlGross`): naechste 10 Termine mit "in X Tagen" und Pillen, aufklappbar "Tonnen und Adresse"
+(Haekchen je Tonnenart an der Adresse, `muellFr`, Voreinstellung wie in der EKW-App des Nutzers Bio / Rest 2-woechentlich /
+Gelb - Papier und Garten abgewaehlt, Rest 4-woechentlich auch) und "Adresse aendern"; Einrichtung mit drei Auswahllisten,
+Gemeinde vorbelegt, wenn ihr Name im angezeigten Ort steht. Daten (`muellCache`, nur Datum + Tonnen) alle 12 h neu, nach
+Fehler 3 min Pause, nur wenn die Kachel gewaehlt ist. Bestandsnutzer bekommen die Kachel einmalig (`kzMuellNeu`), wenn einer
+ihrer Orte (LOC oder locZuletzt) im Umkreis von 25 km um Giessen liegt; neue Nutzer finden sie im Pool. Geprueft (Playwright,
+echte AWIDO-Daten, Himmel und hell, 320/375/393 pt): Einrichtung Wettenberg -> Weiherstrasse, Liste, Papier dazu (8.12. Papier +
+Bio), Kachel und "Danach"; bei 320 pt bricht "Rest Gelb" um (wie die Kachel Wind). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
