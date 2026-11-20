@@ -4250,6 +4250,21 @@ in den Tagen (je Tonne gleiche Termine bei allen, die sie haben) - dann nur Stra
 Strassen) waren 6 geteilt, vereint wurde nur eine: die anderen haben echte Unterschiede (Altendeichsweg zwei Bezirke - Rest
 18.11. gegen 25.11.; Gelbe Tonne in zwei Touren; Einzelobjekte mit Zusatzleerungen). ERST VEROEFFENTLICHT mit 21 Strassen
 (Testdatei + Marschweg, Nutzer wollte probieren), die volle Datei folgte nach dem ersten vollen Lauf.
+v7.15 (Nutzer, Bild der Einrichtung Norden/Marschweg 3: "die Strasse eintippen, dass automatisch in der Liste vorgescrollt
+wird - bei 200 Strassen muss man unnoetig weit scrollen" und "wenn alles gueltig eingegeben ist, Uebernehmen gefaerbt mit einem
+leichten Glanzdurchlauf von links nach rechts"): (1) SUCHFELD `#mlSq` ueber der Strassen-Auswahl, nur ab 13 Eintraegen
+(`sucheSetz`). Ein <select> laesst sich am iPhone nicht antippen-und-tippen (es oeffnet das Rad) - darum filtert das Feld die
+Auswahl selbst ("10 Treffer - waehlen") und zeigt bis 6 Vorschlaege als Zeilen darunter (`#mlSv`, "und 4 weitere in der Liste
+darunter"); EIN Treffer ist sofort gewaehlt (Hausnummer erscheint). Vergleich ohne Gross/klein, Umlaute (ae/oe/ue/ss),
+"Strasse"/"Straße"/"Str." = "str", Satzzeichen weg; Reihenfolge: Anfang des Namens, dann Wortanfang ("depser" ->
+Alf-Depser-Straße), dann irgendwo. Leeres Feld = ganze Liste, die Wahl bleibt. Beschriftung folgt `mlStrArt` ("Ortsteil
+eintippen ..."). (2) GLANZ: `mlGlanz(OK)` beobachtet das disabled-Attribut von "Uebernehmen" (MutationObserver - alle Wege,
+die den Knopf freigeben, ohne Einzelaufrufe); frei -> Klasse `ml-bereit` (gruen #2e9e4a, Ring) und eine WEB-ANIMATION eines
+Lichtstreifens `.ml-glanz` (2,6 s je Umlauf, Durchlauf 1,3 s, dann Pause). Web-Animation, weil die CSS-Sperre bei "Bewegung
+reduzieren" (beim Nutzer vermutlich an, v6.66) eine CSS-Animation abschalten wuerde. Verlauf 105 Grad mit transparenten
+Raendern ab 22/78 % - bei 0/100 % blieben an den Ecken des schraegen Streifens sichtbare Kanten. Geprueft (`t715.py`, hell und
+Himmel, reduced_motion): "alt" -> 10 Treffer, "marschw" -> Marschweg gewaehlt, Hausnummer, Knopf gruen mit laufender Animation;
+"xyz" -> nichts gefunden, Knopf aus; Vorschlag antippen waehlt. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
