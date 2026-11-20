@@ -401,6 +401,15 @@ html.dunkel .loc-box .ml select{background:var(--feld);border-color:var(--feld-l
 .ml-warn{color:#9a5b00;font-weight:650}
 html.dunkel .ml-warn{color:#ffd28a}
 #mlIcsInfo{margin-top:2px}
+/* v7.11 mehrere Adressen */
+.ml-adr{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.ml-adr button{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:650;padding:5px 11px;border-radius:999px;border:1.5px solid rgba(127,140,160,.35);background:transparent;color:inherit;cursor:pointer}
+.ml-adr button.an{background:rgba(47,134,207,.16);border-color:#2f86cf}
+html.dunkel .ml-adr button.an{background:rgba(120,180,255,.2);border-color:#8cc4ff}
+.ml-hier{width:8px;height:8px;border-radius:50%;background:#2e9e4a;flex:0 0 auto}
+.ml-ub{margin-top:10px}
+.loc-box .ml-weg{color:#c62828}
+html.dunkel .loc-box .ml-weg{color:#ff9d94}
 :is(.loc-box,.nowcard) .rz .rz-reg label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0}
 :is(.loc-box,.nowcard) .rz label.rz-hk{display:flex;font-size:13px;font-weight:600;color:var(--ink);margin:9px 0}
 :is(.loc-box,.nowcard) .rz label.rz-hk small{font-weight:500}
@@ -2657,7 +2666,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.10</span>
+      <span class="ver">v7.11</span>
     </div>
   </header>
 
@@ -8922,7 +8931,7 @@ function rzGrossBinden(root){
    C-Trace - ohne CORS, aus dem Browser nicht abrufbar) eine KALENDERDATEI (.ics), die die App im Geraet liest
    (`mlIcsLesen`), mit gewaehltem Heimatort (`A.h`). Farben und Kurznamen der Tonnen nach Art (`MUELL_KAT`), nicht nach
    Kennung - jeder Kreis hat eigene Kennungen. */
-var MUELL={c:null,lade:false,versucht:0,fehler:null,orte:{},str:{},hn:{}};
+var MUELL={c:null,A:null,sel:null,tc:null,lade:{},versucht:{},fehler:{},orte:{},str:{},hn:{}};
 var MUELL_API="https://awido.cubefour.de/WebServices/Awido.Service.svc/secure/";
 var MUELL_STD=["BA","RA2","GT"];   // nur Landkreis Giessen (EKW-App des Nutzers); sonst alle Tonnen der Adresse
 var MUELL_WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
@@ -8991,32 +9000,15 @@ var MUELL_GEM={"Allendorf (Lumda)":[50.646,50.708,8.780,8.864],"Biebertal":[50.6
   "Pohlheim":[50.475,50.558,8.689,8.790],"Rabenau":[50.630,50.709,8.828,8.955],"Reiskirchen":[50.547,50.632,8.802,8.925],
   "Staufenberg":[50.634,50.696,8.718,8.809],"Wettenberg":[50.594,50.699,8.598,8.696]};
 function mlEsc(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function mlAdr(){try{const a=JSON.parse(localStorage.getItem("muellAdr")||"null");return a&&a.o?a:null;}catch(e){return null;}}
 function mlKd(A){return (A&&A.k)||"lkgi";}   // Adressen aus v7.08/v7.09 haben keinen Kreis: Giessen
 function mlKreis(k){return MUELL_KREISE.find(r=>r[0]===k)||null;}
 function mlIcs(A){return !!(A&&A.typ==="ics");}
 function mlKm(a,b,c,d){const r=Math.PI/180,x=(d-b)*r*Math.cos((a+c)/2*r),y=(c-a)*r;return 6371*Math.hypot(x,y);}
 // Rahmen [S,N,W,O] der Heimat: Gemeinde (Tabelle bzw. A.b), sonst der Kreis; mindestens +-3 km um die Mitte, 1,5 km Rand
 function mlRahmen(A){const K=mlKreis(mlKd(A));return A.b||(mlKd(A)==="lkgi"&&MUELL_GEM[A.pn])||(K?K.slice(2):null);}
-function mlZuHause(){const A=mlAdr();if(!A)return true;const la=+LOC.lat,lo=+LOC.lon;
-  if(mlIcs(A))return !A.h||mlKm(la,lo,A.h.lat,A.h.lon)<=MUELL_HEIM_KM;
-  const b=mlRahmen(A);if(!b)return true;
-  const ma=(b[0]+b[1])/2,mo=(b[2]+b[3])/2,ha=Math.max((b[1]-b[0])/2+.0135,.027),ho=Math.max((b[3]-b[2])/2+.021,.042);
-  return Math.abs(la-ma)<=ha&&Math.abs(lo-mo)<=ho;}
 function mlHeimText(A){if(mlIcs(A))return A.h?"im Umkreis von "+MUELL_HEIM_KM+" km um "+mlEsc(A.h.n||A.pn):"";
   if(A.b||(mlKd(A)==="lkgi"&&MUELL_GEM[A.pn]))return "in "+mlEsc(A.pn)+" oder direkt daneben";
   const K=mlKreis(mlKd(A));return K?"im Gebiet "+mlEsc(K[1]):"";}
-function mlWahl(){try{const a=JSON.parse(localStorage.getItem("muellFr")||"null");if(Array.isArray(a))return a;}catch(e){}
-  const A=mlAdr();if(!mlIcs(A)&&mlKd(A)==="lkgi")return MUELL_STD.slice();
-  /* sonst: alle Tonnen mit bekannter Art, ohne Container, Schadstoff, Sperrmuell - "Ferien", "Faelligkeit Abfallgebuehr",
-     "Repair Cafe" stehen bei manchen Kreisen als eigene "Tonne" im Kalender (geprueft an allen 48 Kreisen, 20.11.) */
-  if(!MUELL.c)return [];const F=Object.keys(MUELL.c.fr),je={};
-  /* je Art nur EINE Tonne vor, die mit dem kuerzesten Namen: Lahn-Dill fuehrt "Bioabfall" und "Bioabfall 1.100"
-     (Grossbehaelter), der Giessener Kalender "Restabfall 2-woechentlich" und "4-woechentlich" - ein Haushalt hat eine */
-  F.forEach(f=>{const k=mlKat(f),nm=mlName(f);if(!k||k[1]==="Schadst."||k[1]==="Sperrm."||/container|1\.?100|gro(ß|ss)beh/i.test(nm))return;
-    if(!je[k[1]]||nm.length<mlName(je[k[1]]).length)je[k[1]]=f;});
-  const w=F.filter(f=>Object.values(je).includes(f));return w.length?w:F;}
-// Termine gelten in deutscher Zeit, egal welcher Ort angezeigt wird
 function mlTag(ms){return dtf("en-CA",{timeZone:"Europe/Berlin",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(ms)).replace(/-/g,"");}
 function mlStd(ms){return +dtf("en-GB",{timeZone:"Europe/Berlin",hour:"2-digit",hourCycle:"h23"}).format(new Date(ms));}
 function mlUTC(dt){return Date.UTC(+dt.slice(0,4),+dt.slice(4,6)-1,+dt.slice(6,8));}
@@ -9029,46 +9021,8 @@ function mlFarbe(f){const k=mlKat(f),C=MUELL.c;return k?k[2]:((C&&C.fr[f]&&C.fr[
 function mlKurz(f){const k=mlKat(f),nm=mlName(f);if(!k)return nm.split(/[\s,(]/)[0].slice(0,8);
   return k[1]==="Rest"&&/4[-\s]?w|vierw/i.test(nm)?"Rest 4W":k[1];}
 function mlPunkt(f){return `<span class="mld" style="background:${mlFarbe(f)}"></span>`;}
-function mlLaden(){
-  const A=mlAdr();if(!A||MUELL.lade||mlIcs(A))return;MUELL.lade=true;MUELL.versucht=Date.now();
-  fetchJSON(MUELL_API+"getData/"+encodeURIComponent(A.o)+"?fractions=&client="+encodeURIComponent(mlKd(A)),15000).then(j=>{
-    // Namen tragen teils HTML ("Weihnachts&shy;baeume") - einmal entschluesseln
-    const ent=t=>{const x=document.createElement("textarea");x.innerHTML=String(t);return x.value.replace(/\u00ad/g,"").trim();};
-    const fr={};(j&&j.fracts||[]).forEach(f=>{if(f&&f.snm&&!f.son)fr[f.snm]={nm:ent(f.nm||f.snm),bg:String(f.bg||"")};});
-    const ab=mlTag(Date.now()-7*864e5);
-    const d=(j&&j.calendar||[]).filter(x=>x&&Array.isArray(x.fr)&&x.dt>=ab).map(x=>[String(x.dt),x.fr.filter(f=>fr[f])]).filter(x=>x[1].length);
-    if(!d.length)throw new Error("keine Termine");
-    Object.keys(fr).forEach(f=>{if(!d.some(x=>x[1].includes(f)))delete fr[f];});   // nur Tonnen, die es hier gibt
-    MUELL.c={o:A.o,t:Date.now(),fr,d};MUELL.fehler=null;
-    try{localStorage.setItem("muellCache",JSON.stringify(MUELL.c));}catch(e){}
-  }).catch(e=>{MUELL.fehler=String(e&&e.message||e);}).finally(()=>{MUELL.lade=false;
-    try{kzRender();}catch(e){}mlNeuZeichnen();});
-}
-function mlBereit(){
-  const A=mlAdr();if(!A)return false;
-  if(!MUELL.c||MUELL.c.o!==A.o){MUELL.c=null;try{const C=JSON.parse(localStorage.getItem("muellCache")||"null");if(C&&C.o===A.o&&Array.isArray(C.d))MUELL.c=C;}catch(e){}}
-  if(mlIcs(A))return !!MUELL.c;   // Kalenderdatei: nichts nachzuladen
-  const alt=MUELL.c?Date.now()-MUELL.c.t:Infinity;
-  if(!MUELL.lade&&alt>12*36e5&&Date.now()-MUELL.versucht>(MUELL.fehler?3*6e4:6e4))mlLaden();
-  return !!MUELL.c;
-}
-// kommende Termine mit den gewaehlten Tonnen; der heutige zaehlt bis 12 Uhr (abgeholt wird ab 6 Uhr)
-function mlKommend(){
-  if(!MUELL.c)return [];const heu=mlTag(Date.now()),vor=mlStd(Date.now())<12,sel=mlWahl();
-  return MUELL.c.d.filter(x=>x[0]>heu||(x[0]===heu&&vor)).map(x=>[x[0],x[1].filter(f=>sel.includes(f))]).filter(x=>x[1].length);
-}
-// Kachel-Unterzeile: bis zwei Tonnen mit Namen ("● Rest ● Gelb"), ab drei nur Punkte ("●●● 3 Tonnen")
 function mlTonnen(fr){const u=[];fr.forEach(f=>{if(!u.some(g=>mlKurz(g)===mlKurz(f)))u.push(f);});   // "Bio Bio" -> "Bio"
   return u.length<=2?u.map(f=>mlPunkt(f)+mlKurz(f)).join(" "):u.map(mlPunkt).join("")+" "+u.length+" Tonnen";}
-function mlKachel(){
-  const A=mlAdr();if(!A)return {l:"Müll",v:"Adresse?",s:"antippen"};
-  if(!mlZuHause())return {l:"Müll",v:"–",s:"nur zu Hause"};   // v7.09: sichtbar nur im Bearbeiten
-  if(!mlBereit())return {l:"Müll",v:"–",s:mlIcs(A)?"Datei fehlt":MUELL.fehler?"keine Daten":"lädt"};
-  const K=mlKommend();if(!K.length)return {l:"Müll",v:"–",s:mlIcs(A)?"neue Datei":"keine Termine"};
-  const a={l:"Müll",v:mlWann(K[0][0]),s:mlTonnen(K[0][1])};
-  if(K[1])a.alt=[{l:"Danach",v:mlWann(K[1][0]),s:mlTonnen(K[1][1])}];
-  return a;
-}
 /* ---- Kalenderdatei (v7.10): VEVENT mit DTSTART und SUMMARY; ganztaegig (VALUE=DATE), Ortszeit oder UTC ("Z", manche
    Anbieter legen ganztaegige Termine auf 23 Uhr UTC am Vortag - darum ueber die deutsche Zeit); RRULE FREQ=DAILY/WEEKLY
    mit INTERVAL, COUNT, UNTIL, EXDATE. Gleiche SUMMARY = eine Tonnenart. Behalten: 7 Tage zurueck bis 2 Jahre voraus. ---- */
@@ -9101,46 +9055,146 @@ function mlIcsLesen(txt){
   const d=Object.keys(tage).sort().map(dt=>[dt,tage[dt]]);
   return {fr,d,n,bis:d.length?d[d.length-1][0]:null};
 }
-/* ---- Grossansicht: Liste der naechsten Termine, darunter Tonnen und Adresse ---- */
-function mlGross(){const inn=el("kzGrossIn");if(inn){inn._mlSetup=!mlAdr();inn._mlEin=false;inn._mlIcs=null;}
-  if(mlAdr())mlBereit();return {html:mlHtml(inn||{}),nach:mlBinden};}
+function mlHeimOrte(){const a=[{lat:+LOC.lat,lon:+LOC.lon,name:LOC.name}];
+  try{locZulLesen().forEach(o=>{if(!a.some(x=>mlKm(x.lat,x.lon,o.lat,o.lon)<.5))a.push(o);});}catch(e){}return a;}
+/* vorbelegter Kreis: der kleinste Rahmen, in dem der angezeigte Ort liegt. Rahmen ueberlappen (Huettenberg liegt in denen
+   von Landkreis Giessen UND Lahn-Dill) - darum prueft mlBinden danach, in welchem Kandidaten eine Gemeinde so heisst wie der Ort. */
+function mlKreisKand(){const la=+LOC.lat,lo=+LOC.lon;
+  return MUELL_KREISE.filter(r=>la>=r[2]&&la<=r[3]&&lo>=r[4]&&lo<=r[5]).sort((a,b)=>(a[3]-a[2])*(a[5]-a[4])-(b[3]-b[2])*(b[5]-b[4])).map(r=>r[0]);}
+function mlKreisVor(){return mlKreisKand()[0]||null;}
+function mlOrtTreffer(L){const n=String(LOC&&LOC.name||"");return L.find(x=>{const r=mlNameRein(x.value);return r.length>2&&n.includes(r);})||null;}
+// Gemeindename fuer die Kartensuche: "SLF-RU-Allendorf" -> "Allendorf", "VG Altenkirchen - Flammersfeld" -> "Altenkirchen"
+function mlNameRein(v){return String(v||"").replace(/^[A-ZÄÖÜ]{2,4}-[A-ZÄÖÜ]{2,4}-/,"").replace(/^(Gemeinde|Stadt|Markt|VG|Verbandsgemeinde)\s+/i,"")
+  .split(/\s+-\s+|\s+mit\s+|\s*\(|\s*\//)[0].trim();}
+/* ---- v7.11 MEHRERE ADRESSEN (Nutzer 20.11.: "den Muell auch von woanders anzeigen, wenn ich es unbedingt einfuegen will -
+   nicht standardmaessig in allen Orten"): `muellAdressen` = Liste (hoechstens MUELL_MAX), je Adresse eigene Tonnenwahl `fr`
+   und Schalter `ueberall`. Die KACHEL zeigt die Adresse, deren Heimat den angezeigten Ort umfasst (mlZuHause), sonst eine mit
+   `ueberall`, sonst gar keine (weg). Das FENSTER zeigt jede Adresse von ueberall (Knoepfe oben). Termine aller Adressen in
+   `muellTermine` {o: {t, fr, d}} - bewusst ohne "cache" im Namen: "Einstellungen sichern" laesst /cache/i weg, und die
+   Termine einer Kalenderdatei lassen sich nicht neu holen. Bis v7.10: `muellAdr` / `muellFr` / `muellCache` (einmalig
+   uebernommen, dann geloescht). */
+var MUELL_MAX=8;
+function mlListe(){try{const a=JSON.parse(localStorage.getItem("muellAdressen")||"null");if(Array.isArray(a))return a.filter(x=>x&&x.o);}catch(e){}return [];}
+function mlListeSpeichern(L){try{localStorage.setItem("muellAdressen",JSON.stringify(L.slice(0,MUELL_MAX)));}catch(e){}}
+function mlAdrSetz(o,p){const L=mlListe(),i=L.findIndex(x=>x.o===o);if(i<0)return;Object.assign(L[i],p);
+  Object.keys(p).forEach(k=>{if(p[k]==null)delete L[i][k];});mlListeSpeichern(L);}
+function mlTermine(){if(!MUELL.tc){try{MUELL.tc=JSON.parse(localStorage.getItem("muellTermine")||"null")||{};}catch(e){MUELL.tc={};}}return MUELL.tc;}
+function mlTermineSetz(o,c){const T=mlTermine();if(c)T[o]=c;else delete T[o];
+  // nur Termine von Adressen, die es noch gibt
+  const L=mlListe().map(x=>x.o);Object.keys(T).forEach(k=>{if(!L.includes(k)&&k!==o)delete T[k];});
+  try{localStorage.setItem("muellTermine",JSON.stringify(T));}catch(e){}}
+// Uebernahme aus v7.08-v7.10 (eine Adresse)
+try{if(!localStorage.getItem("muellAdressen")){const a=JSON.parse(localStorage.getItem("muellAdr")||"null");
+  if(a&&a.o){const fr=JSON.parse(localStorage.getItem("muellFr")||"null");if(Array.isArray(fr))a.fr=fr;
+    localStorage.setItem("muellAdressen",JSON.stringify([a]));
+    const c=JSON.parse(localStorage.getItem("muellCache")||"null");if(c&&c.o===a.o)localStorage.setItem("muellTermine",JSON.stringify({[a.o]:{t:c.t,fr:c.fr,d:c.d}}));}
+  ["muellAdr","muellFr","muellCache"].forEach(k=>localStorage.removeItem(k));}}catch(e){}
+// Kontext: die Hilfen mlName/mlKat/mlFarbe/mlKurz lesen MUELL.c - jede Ansicht setzt vorher ihre Adresse
+function mlSetz(A){MUELL.A=A||null;MUELL.c=A?(mlTermine()[A.o]||null):null;return MUELL.c;}
+function mlZuHause(A){if(!A)return true;const la=+LOC.lat,lo=+LOC.lon;
+  if(mlIcs(A))return !A.h||mlKm(la,lo,A.h.lat,A.h.lon)<=MUELL_HEIM_KM;
+  const b=mlRahmen(A);if(!b)return true;
+  const ma=(b[0]+b[1])/2,mo=(b[2]+b[3])/2,ha=Math.max((b[1]-b[0])/2+.0135,.027),ho=Math.max((b[3]-b[2])/2+.021,.042);
+  return Math.abs(la-ma)<=ha&&Math.abs(lo-mo)<=ho;}
+function mlVerfuegbar(){return mlListe().filter(A=>mlZuHause(A)||A.ueberall);}
+function mlAktiv(){const V=mlVerfuegbar();return V.find(a=>a.o===MUELL.sel)||V.find(a=>mlZuHause(a))||V[0]||null;}
+function mlLabel(A){return mlIcs(A)?"Kalender "+(A.h&&A.h.n||A.pn):(A.pn||"")+(A.sn&&A.sn!==A.pn?", "+A.sn:"");}
+function mlWahl(A){A=A||MUELL.A;if(A&&Array.isArray(A.fr))return A.fr;
+  if(A&&!mlIcs(A)&&mlKd(A)==="lkgi")return MUELL_STD.slice();
+  /* sonst: alle Tonnen mit bekannter Art, ohne Container, Schadstoff, Sperrmuell - "Ferien", "Faelligkeit Abfallgebuehr",
+     "Repair Cafe" stehen bei manchen Kreisen als eigene "Tonne" im Kalender (geprueft an allen 48 Kreisen, 20.11.) */
+  if(!MUELL.c)return [];const F=Object.keys(MUELL.c.fr),je={};
+  /* je Art nur EINE Tonne vor, die mit dem kuerzesten Namen: Lahn-Dill fuehrt "Bioabfall" und "Bioabfall 1.100"
+     (Grossbehaelter), der Giessener Kalender "Restabfall 2-woechentlich" und "4-woechentlich" - ein Haushalt hat eine */
+  F.forEach(f=>{const k=mlKat(f),nm=mlName(f);if(!k||k[1]==="Schadst."||k[1]==="Sperrm."||/container|1\.?100|gro(ß|ss)beh/i.test(nm))return;
+    if(!je[k[1]]||nm.length<mlName(je[k[1]]).length)je[k[1]]=f;});
+  const w=F.filter(f=>Object.values(je).includes(f));return w.length?w:F;}
+function mlLaden(A){
+  if(!A||mlIcs(A)||MUELL.lade[A.o])return;const o=A.o;MUELL.lade[o]=1;MUELL.versucht[o]=Date.now();
+  fetchJSON(MUELL_API+"getData/"+encodeURIComponent(o)+"?fractions=&client="+encodeURIComponent(mlKd(A)),15000).then(j=>{
+    // Namen tragen teils HTML ("Weihnachts&shy;baeume") - einmal entschluesseln
+    const ent=t=>{const x=document.createElement("textarea");x.innerHTML=String(t);return x.value.replace(/­/g,"").trim();};
+    const fr={};(j&&j.fracts||[]).forEach(f=>{if(f&&f.snm&&!f.son)fr[f.snm]={nm:ent(f.nm||f.snm),bg:String(f.bg||"")};});
+    const ab=mlTag(Date.now()-7*864e5);
+    const d=(j&&j.calendar||[]).filter(x=>x&&Array.isArray(x.fr)&&x.dt>=ab).map(x=>[String(x.dt),x.fr.filter(f=>fr[f])]).filter(x=>x[1].length);
+    if(!d.length)throw new Error("keine Termine");
+    Object.keys(fr).forEach(f=>{if(!d.some(x=>x[1].includes(f)))delete fr[f];});   // nur Tonnen, die es hier gibt
+    if(mlListe().some(x=>x.o===o))mlTermineSetz(o,{t:Date.now(),fr,d});delete MUELL.fehler[o];
+  }).catch(e=>{MUELL.fehler[o]=String(e&&e.message||e);}).finally(()=>{delete MUELL.lade[o];
+    try{kzRender();}catch(e){}mlNeuZeichnen();});
+}
+function mlBereit(A){if(!A)return false;const C=mlTermine()[A.o];
+  if(mlIcs(A))return !!C;   // Kalenderdatei: nichts nachzuladen
+  const alt=C?Date.now()-C.t:Infinity,vs=MUELL.versucht[A.o]||0;
+  if(!MUELL.lade[A.o]&&alt>12*36e5&&Date.now()-vs>(MUELL.fehler[A.o]?3*6e4:6e4))mlLaden(A);
+  return !!C;}
+// kommende Termine mit den gewaehlten Tonnen; der heutige zaehlt bis 12 Uhr (abgeholt wird ab 6 Uhr)
+function mlKommend(A){
+  if(!MUELL.c)return [];const heu=mlTag(Date.now()),vor=mlStd(Date.now())<12,sel=mlWahl(A);
+  return MUELL.c.d.filter(x=>x[0]>heu||(x[0]===heu&&vor)).map(x=>[x[0],x[1].filter(f=>sel.includes(f))]).filter(x=>x[1].length);}
+function mlKachel(){
+  if(!mlListe().length)return {l:"Müll",v:"Adresse?",s:"antippen"};
+  const A=mlAktiv();mlSetz(A);
+  if(!A)return {l:"Müll",v:"–",s:"nur zu Hause"};   // v7.09: sichtbar nur im Bearbeiten
+  if(!mlBereit(A))return {l:"Müll",v:"–",s:mlIcs(A)?"Datei fehlt":MUELL.fehler[A.o]?"keine Daten":"lädt"};
+  mlSetz(A);const K=mlKommend(A);if(!K.length)return {l:"Müll",v:"–",s:mlIcs(A)?"neue Datei":"keine Termine"};
+  // zeigt die Kachel eine Adresse von woanders (Schalter "ueberall"), steht deren Ort in der Beschriftung
+  // kurze Namen mit "Müll" davor, laengere allein (die Beschriftung hat ~10 Zeichen Platz)
+  const on=mlNameRein(mlIcs(A)?(A.h&&A.h.n||A.pn):A.pn);
+  const l=mlZuHause(A)?"Müll":on.length<=6?"Müll "+on:on.length<=11?on:on.slice(0,10)+".";
+  const a={l,v:mlWann(K[0][0]),s:mlTonnen(K[0][1])};
+  if(K[1])a.alt=[{l:"Danach",v:mlWann(K[1][0]),s:mlTonnen(K[1][1])}];
+  return a;}
+/* ---- Grossansicht ---- */
+function mlGross(){const inn=el("kzGrossIn"),L=mlListe(),A=mlAktiv()||L[0];
+  if(inn){inn._mlSetup=!L.length;inn._mlModus=L.length?null:"neu";inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;}
+  L.forEach(a=>mlBereit(a));return {html:mlHtml(inn||{}),nach:mlBinden};}
+function mlGezeigt(root){const L=mlListe();return L.find(x=>x.o===root._mlO)||mlAktiv()||L[0]||null;}
 function mlHtml(root){
-  const A=mlAdr(),kopf='<div class="kzg-titel">Müllabfuhr</div>';
-  if(!A||root._mlSetup)return '<div class="ml" data-ml="1">'+kopf+mlSetupHtml(A)+"</div>";
-  const K=mlKreis(mlKd(A));
-  let h='<div class="ml" data-ml="1">'+kopf+'<div class="kzg-sub">'+(mlIcs(A)?"Kalenderdatei für "+mlEsc(A.pn)
-      :`${mlEsc(A.pn)}, ${mlEsc(A.sn)}${A.h?" "+mlEsc(A.h):""}`)+"</div>";
-  if(!MUELL.c){h+=`<div class="kzg-sub">${mlIcs(A)?"Die Termine aus der Kalenderdatei fehlen - bitte unter „Tonnen und Adresse“ neu einlesen."
-      :MUELL.fehler?"Keine Daten ("+mlEsc(MUELL.fehler)+")":"Termine werden geladen …"}</div>`
-    +(MUELL.fehler&&!mlIcs(A)?'<div class="loc-row"><button type="button" class="loc-btn" data-mlk="neu">Erneut versuchen</button></div>':"");}
-  else{const KK=mlKommend().slice(0,10);
+  const L=mlListe(),kopf='<div class="kzg-titel">Müllabfuhr</div>';
+  if(!L.length||root._mlSetup){const E=root._mlModus==="neu"?null:mlGezeigt(root);mlSetz(null);
+    return '<div class="ml" data-ml="1">'+kopf+mlSetupHtml(E,L.length>0)+"</div>";}
+  const A=mlGezeigt(root);mlSetz(A);const K=mlKreis(mlKd(A)),hier=mlZuHause(A);
+  let h='<div class="ml" data-ml="1">'+kopf;
+  // mehrere Adressen: Knoepfe zum Umschalten, gruener Punkt = gilt am angezeigten Ort
+  if(L.length>1)h+='<div class="ml-adr">'+L.map(a=>`<button type="button" data-mlo="${mlEsc(a.o)}" class="${a.o===A.o?"an":""}">`
+      +(mlZuHause(a)?'<i class="ml-hier"></i>':"")+mlEsc(mlLabel(a))+"</button>").join("")+"</div>";
+  h+='<div class="kzg-sub">'+(mlIcs(A)?"Kalenderdatei für "+mlEsc(A.h&&A.h.n||A.pn):`${mlEsc(A.pn)}, ${mlEsc(A.sn)}${A.h?" "+mlEsc(A.h):""}`)
+    +(hier?"":A.ueberall?" · in der Kachel auch hier":" · nur im Fenster, nicht in der Kachel hier")+"</div>";
+  const C=MUELL.c;
+  if(!C){h+=`<div class="kzg-sub">${mlIcs(A)?"Die Termine aus der Kalenderdatei fehlen - bitte unter „Tonnen und Adresse“ neu einlesen."
+      :MUELL.fehler[A.o]?"Keine Daten ("+mlEsc(MUELL.fehler[A.o])+")":"Termine werden geladen …"}</div>`
+    +(MUELL.fehler[A.o]&&!mlIcs(A)?'<div class="loc-row"><button type="button" class="loc-btn" data-mlk="neu">Erneut versuchen</button></div>':"");}
+  else{const KK=mlKommend(A).slice(0,10);
     h+=KK.length?'<div class="ml-l">'+KK.map(([dt,fr],i)=>{const n=mlTage(dt);
         return `<div class="ml-d${i?"":" ml-1"}">${mlDatum(dt)}<small>${n<=0?"heute":n===1?"morgen":"in "+n+" Tagen"}</small></div>`
           +`<div class="ml-f">${fr.map(f=>`<span class="ml-p">${mlPunkt(f)}${mlEsc(mlName(f))}</span>`).join("")}</div>`;}).join("")+"</div>"
       :'<div class="kzg-sub">Keine Termine für die gewählten Tonnen.</div>';
     // Kalenderdatei: rechtzeitig an die Datei fuers naechste Jahr erinnern
-    const bis=MUELL.c.d.length?MUELL.c.d[MUELL.c.d.length-1][0]:null;
+    const bis=C.d.length?C.d[C.d.length-1][0]:null;
     if(mlIcs(A)&&bis&&mlTage(bis)<45)h+=`<div class="kzg-sub ml-warn">Die Kalenderdatei reicht nur bis ${mlDatum(bis)} – bitte die neue Datei deines Abfallbetriebs einlesen.</div>`;}
   // Tonnen zum An- und Abwaehlen: alle, die es an dieser Adresse gibt
-  const fr=MUELL.c?Object.keys(MUELL.c.fr).filter(f=>MUELL.c.d.some(x=>x[1].includes(f))):[],sel=mlWahl(),ht=mlHeimText(A);
+  const fr=C?Object.keys(C.fr).filter(f=>C.d.some(x=>x[1].includes(f))):[],sel=mlWahl(A),ht=mlHeimText(A);
   h+=`<details class="ml-ein"${root._mlEin?" open":""}><summary>Tonnen und Adresse</summary>`
     +(fr.length?'<div class="ml-fr">'+fr.map(f=>`<label><input type="checkbox" data-mlf="${mlEsc(f)}"${sel.includes(f)?" checked":""}>${mlPunkt(f)}${mlEsc(mlName(f))}</label>`).join("")+"</div>":"")
-    +(ht?`<div class="kzg-sub" style="margin:8px 0 0">Die Kachel erscheint nur, wenn oben ein Ort ${ht} eingestellt ist.</div>`:"")
-    +`<div class="loc-row"><button type="button" class="loc-btn" data-mlk="adr">${mlIcs(A)?"Neue Datei / Adresse":"Adresse ändern"}</button></div></details>`;
-  if(MUELL.c){const t=new Date(MUELL.c.t),st=`${t.getDate()}.${t.getMonth()+1}. ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
-    const bis=MUELL.c.d.length?MUELL.c.d[MUELL.c.d.length-1][0]:null;
+    +(ht?`<div class="kzg-sub" style="margin:8px 0 0">Die Kachel zeigt diese Adresse, wenn oben ein Ort ${ht} eingestellt ist.</div>`:"")
+    +`<div class="ml-fr ml-ub"><label><input type="checkbox" data-mlu="1"${A.ueberall?" checked":""}>In der Kachel auch an allen anderen Orten zeigen</label></div>`
+    +'<div class="loc-row ml-knr">'
+    +`<button type="button" class="loc-btn" data-mlk="adr">${mlIcs(A)?"Neue Datei / Ort":"Adresse ändern"}</button>`
+    +(L.length<MUELL_MAX?'<button type="button" class="loc-btn" data-mlk="dazu">Weitere Adresse</button>':"")
+    +'</div><div class="loc-row"><button type="button" class="loc-btn ml-weg" data-mlk="weg">Diese Adresse löschen</button></div></details>';
+  if(C){const t=new Date(C.t),st=`${t.getDate()}.${t.getMonth()+1}. ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
+    const bis=C.d.length?C.d[C.d.length-1][0]:null;
     h+=mlIcs(A)?`<div class="ml-q">Quelle: deine Kalenderdatei${A.sn?" „"+mlEsc(A.sn)+"“":""} · eingelesen ${st}${bis?" · Termine bis "+mlDatum(bis):""}</div>`
       :`<div class="ml-q">Quelle: ${mlKd(A)==="lkgi"?"EKW Landkreis Gießen":mlEsc(K?K[1]:mlKd(A))} (AWIDO) · Stand ${st} · Feiertage sind eingerechnet</div>`;}
   return h+"</div>";
 }
-// Ortsliste fuer den Heimatort der Kalenderdatei: der angezeigte Ort zuerst, dann "Deine Orte"
-function mlHeimOrte(){const a=[{lat:+LOC.lat,lon:+LOC.lon,name:LOC.name}];
-  try{locZulLesen().forEach(o=>{if(!a.some(x=>mlKm(x.lat,x.lon,o.lat,o.lon)<.5))a.push(o);});}catch(e){}return a;}
-function mlSetupHtml(A){
+function mlSetupHtml(E,mitListe){
   // ohne AWIDO-Gebiet am angezeigten Ort (z. B. Norden) gleich die Kalenderdatei
-  const kv=A&&!mlIcs(A)?mlKd(A):(A&&mlIcs(A)?"ics":mlKreisVor()||"ics");
-  return '<div class="kzg-sub">Einmal die Adresse wählen, an der deine Tonnen stehen. Die Liste enthält die Gebiete, '
-    +'deren Abfuhrkalender über den Dienst AWIDO läuft (Landkreis Gießen ohne die Stadt Gießen); für alle anderen ganz unten „Anderer Kreis: Kalenderdatei“.</div><div class="ml-set">'
+  const kv=E&&!mlIcs(E)?mlKd(E):(E&&mlIcs(E)?"ics":mlKreisVor()||"ics");
+  return '<div class="kzg-sub">'+(E?"Adresse ändern: ":mitListe?"Weitere Adresse - die Kachel zeigt sie, wenn oben ihr Ort eingestellt ist. ":"Einmal die Adresse wählen, an der deine Tonnen stehen. ")
+    +'Die Liste enthält die Gebiete, deren Abfuhrkalender über den Dienst AWIDO läuft (Landkreis Gießen ohne die Stadt Gießen); '
+    +'für alle anderen ganz unten „Anderer Kreis: Kalenderdatei“.</div><div class="ml-set">'
     +'<label>Landkreis / Gebiet<select id="mlK"><option value="">Gebiet wählen</option>'
     +MUELL_KREISE.map(r=>`<option value="${r[0]}"${r[0]===kv?" selected":""}>${mlEsc(r[1])}</option>`).join("")
     +`<option value="ics"${kv==="ics"?" selected":""}>Anderer Kreis: Kalenderdatei</option></select></label>`
@@ -9151,56 +9205,57 @@ function mlSetupHtml(A){
     +'als Kalenderdatei (.ics, „iCal“) herunterladen. Am iPhone: lange auf den Link drücken → „Verknüpfte Datei laden“, sie liegt '
     +'dann in „Dateien“ unter „Downloads“. Die Datei bleibt im Gerät, nichts wird hochgeladen.</div>'
     +'<label>Kalenderdatei<input type="file" id="mlDatei" accept=".ics,text/calendar"></label>'
-    +'<label>Deine Tonnen stehen in<select id="mlHeim">'+mlHeimOrte().map((o,i)=>`<option value="${i}">${mlEsc(o.name)}</option>`).join("")+'</select></label>'
+    +'<label>Die Tonnen stehen in<select id="mlHeim">'+mlHeimOrte().map((o,i)=>`<option value="${i}">${mlEsc(o.name)}</option>`).join("")+'</select></label>'
     +'<div class="kzg-sub" id="mlIcsInfo"></div></div>'
     +'<div class="kzg-sub" id="mlHin"></div>'
-    +'<div class="loc-row">'+(A?'<button type="button" class="loc-btn" data-mlk="abbr">Abbrechen</button>':"")
+    +'<div class="loc-row">'+(mitListe?'<button type="button" class="loc-btn" data-mlk="abbr">Abbrechen</button>':"")
     +'<button type="button" class="loc-btn loc-pri" data-mlk="ok" disabled>Übernehmen</button></div></div>';
 }
-/* vorbelegter Kreis: der kleinste Rahmen, in dem der angezeigte Ort liegt. Rahmen ueberlappen (Huettenberg liegt in denen
-   von Landkreis Giessen UND Lahn-Dill) - darum prueft mlBinden danach, in welchem Kandidaten eine Gemeinde so heisst wie der Ort. */
-function mlKreisKand(){const la=+LOC.lat,lo=+LOC.lon;
-  return MUELL_KREISE.filter(r=>la>=r[2]&&la<=r[3]&&lo>=r[4]&&lo<=r[5]).sort((a,b)=>(a[3]-a[2])*(a[5]-a[4])-(b[3]-b[2])*(b[5]-b[4])).map(r=>r[0]);}
-function mlKreisVor(){return mlKreisKand()[0]||null;}
-function mlOrtTreffer(L){const n=String(LOC&&LOC.name||"");return L.find(x=>{const r=mlNameRein(x.value);return r.length>2&&n.includes(r);})||null;}
-// Gemeindename fuer die Kartensuche: "SLF-RU-Allendorf" -> "Allendorf", "VG Altenkirchen - Flammersfeld" -> "Altenkirchen"
-function mlNameRein(v){return String(v||"").replace(/^[A-ZÄÖÜ]{2,4}-[A-ZÄÖÜ]{2,4}-/,"").replace(/^(Gemeinde|Stadt|Markt|VG|Verbandsgemeinde)\s+/i,"")
-  .split(/\s+-\s+|\s+mit\s+|\s*\(|\s*\//)[0].trim();}
 function mlGeo(A){const K=mlKreis(mlKd(A));if(!K||mlKd(A)==="lkgi"||mlIcs(A))return;const nm=mlNameRein(A.pn);if(!nm)return;
   const vb=[K[4]-.05,K[3]+.05,K[5]+.05,K[2]-.05].join(",");
   fetchJSON("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=de&bounded=1&viewbox="+vb+"&q="+encodeURIComponent(nm),9000).then(L=>{
-    const a=mlAdr();if(!L||!L[0]||!L[0].boundingbox||!a||a.o!==A.o)return;
-    const b=L[0].boundingbox.map(Number);if(b.some(x=>!isFinite(x)))return;a.b=b;
-    try{localStorage.setItem("muellAdr",JSON.stringify(a));}catch(e){}try{kzRender();}catch(e){}mlNeuZeichnen();}).catch(()=>{});}
+    if(!L||!L[0]||!L[0].boundingbox)return;const b=L[0].boundingbox.map(Number);if(b.some(x=>!isFinite(x)))return;
+    mlAdrSetz(A.o,{b});try{kzRender();}catch(e){}mlNeuZeichnen();}).catch(()=>{});}
 function mlNeuZeichnen(){const r=el("kzGrossIn"),ov=el("kzGrossOv");
   if(r&&ov&&!ov.classList.contains("hidden")&&r.querySelector('[data-ml="1"]')&&!r._mlSetup)mlZeichne(r);}
 function mlZeichne(root){root.innerHTML=mlHtml(root);mlBinden(root);}
 function mlOpt(sel,L,leer,wahl){sel.innerHTML=(leer?`<option value="">${leer}</option>`:"")+L.map(x=>`<option value="${mlEsc(x.key)}"${x.key===wahl?" selected":""}>${mlEsc(x.value)}</option>`).join("");}
+// nach dem Speichern: neue/geaenderte Adresse zeigen; gilt sie hier, auch in der Kachel
+function mlFertig(root,A){root._mlSetup=false;root._mlModus=null;root._mlIcs=null;root._mlO=A.o;
+  if(mlZuHause(A)||A.ueberall)MUELL.sel=A.o;mlZeichne(root);try{kzRender();}catch(e){}}
 function mlBinden(root){
-  const q=s=>root.querySelector(s);
+  const q=s=>root.querySelector(s),G=mlGezeigt(root);
+  root.querySelectorAll("[data-mlo]").forEach(b=>b.onclick=()=>{root._mlO=b.dataset.mlo;
+    const A=mlListe().find(x=>x.o===root._mlO);if(A){mlBereit(A);if(mlZuHause(A)||A.ueberall){MUELL.sel=A.o;try{kzRender();}catch(e){}}}mlZeichne(root);});
   root.querySelectorAll("[data-mlk]").forEach(b=>b.onclick=()=>{const k=b.dataset.mlk;
-    if(k==="neu"){MUELL.versucht=0;MUELL.fehler=null;mlLaden();mlZeichne(root);}
-    else if(k==="adr"){root._mlSetup=true;root._mlIcs=null;mlZeichne(root);}
-    else if(k==="abbr"){root._mlSetup=false;mlZeichne(root);}
+    if(k==="neu"&&G){MUELL.versucht[G.o]=0;delete MUELL.fehler[G.o];mlLaden(G);mlZeichne(root);}
+    else if(k==="adr"){root._mlSetup=true;root._mlModus=null;root._mlIcs=null;mlZeichne(root);}
+    else if(k==="dazu"){root._mlSetup=true;root._mlModus="neu";root._mlIcs=null;mlZeichne(root);}
+    else if(k==="abbr"){root._mlSetup=false;root._mlModus=null;mlZeichne(root);}
+    else if(k==="weg"&&G){if(!confirm("„"+mlLabel(G)+"“ löschen?"))return;
+      mlListeSpeichern(mlListe().filter(x=>x.o!==G.o));mlTermineSetz(G.o,null);if(MUELL.sel===G.o)MUELL.sel=null;
+      const R=mlListe();root._mlO=R.length?(mlAktiv()||R[0]).o:null;root._mlSetup=!R.length;root._mlModus=R.length?null:"neu";
+      mlZeichne(root);try{kzRender();}catch(e){}}
     else if(k==="ok"){
+      const L=mlListe(),E=root._mlModus==="neu"?null:G,iE=E?L.findIndex(x=>x.o===E.o):-1;
+      const speichern=A=>{if(E){A.ueberall=E.ueberall;if(mlIcs(E)!==mlIcs(A)||mlKd(E)!==mlKd(A)||mlIcs(A))delete A.fr;else if(E.fr)A.fr=E.fr;
+          L[iE]=A;if(E.o!==A.o)mlTermineSetz(E.o,null);}else L.push(A);mlListeSpeichern(L);};
       if(q("#mlK").value==="ics"){const I=root._mlIcs;if(!I||!I.d.length)return;const o=mlHeimOrte()[+q("#mlHeim").value]||mlHeimOrte()[0];
         const A={typ:"ics",o:"ics:"+Date.now(),pn:o.name,sn:I.datei||"",h:{lat:+o.lat,lon:+o.lon,n:o.name}};
-        MUELL.c={o:A.o,t:Date.now(),fr:I.fr,d:I.d};
-        try{localStorage.setItem("muellAdr",JSON.stringify(A));localStorage.setItem("muellCache",JSON.stringify(MUELL.c));localStorage.removeItem("muellFr");}catch(e){}
-        MUELL.fehler=null;root._mlSetup=false;root._mlIcs=null;mlZeichne(root);try{kzRender();}catch(e){}return;}
+        speichern(A);mlTermineSetz(A.o,{t:Date.now(),fr:I.fr,d:I.d});mlFertig(root,A);return;}
       const KS=q("#mlK"),P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),hw=!q("#mlHw").hidden,o=hw?H.value:S.dataset.o;if(!o||!KS.value)return;
-      const alt=mlAdr();
+      if(L.some((x,i)=>x.o===o&&i!==iE)){q("#mlHin").textContent="Diese Adresse ist schon gespeichert.";return;}
       const A={k:KS.value,p:P.value,pn:P.selectedOptions[0].textContent,s:S.value,sn:S.selectedOptions[0].textContent,o,h:hw?H.selectedOptions[0].textContent:""};
-      try{localStorage.setItem("muellAdr",JSON.stringify(A));localStorage.removeItem("muellCache");
-        // andere Gemeinde oder anderer Kreis: Tonnenwahl zuruecksetzen (die Kennungen gelten nur dort)
-        if(!alt||mlIcs(alt)||mlKd(alt)!==A.k)localStorage.removeItem("muellFr");}catch(e){}
-      MUELL.c=null;MUELL.fehler=null;MUELL.versucht=0;root._mlSetup=false;mlLaden();mlGeo(A);mlZeichne(root);try{kzRender();}catch(e){}}});
-  root.querySelectorAll("[data-mlf]").forEach(c=>c.onchange=()=>{
-    const sel=[...root.querySelectorAll("[data-mlf]")].filter(x=>x.checked).map(x=>x.dataset.mlf);
-    try{localStorage.setItem("muellFr",JSON.stringify(sel));}catch(e){}root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
+      speichern(A);MUELL.versucht[o]=0;delete MUELL.fehler[o];mlLaden(A);mlGeo(A);mlFertig(root,A);}});
+  root.querySelectorAll("[data-mlf]").forEach(c=>c.onchange=()=>{if(!G)return;
+    mlAdrSetz(G.o,{fr:[...root.querySelectorAll("[data-mlf]")].filter(x=>x.checked).map(x=>x.dataset.mlf)});
+    root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
+  root.querySelectorAll("[data-mlu]").forEach(c=>c.onchange=()=>{if(!G)return;mlAdrSetz(G.o,{ueberall:c.checked?true:null});
+    if(c.checked&&!mlZuHause(G))MUELL.sel=G.o;root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
   const det=q(".ml-ein");if(det)det.addEventListener("toggle",()=>{root._mlEin=det.open;});
   const KS=q("#mlK");if(!KS)return;
-  const P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),HW=q("#mlHw"),OK=q('[data-mlk="ok"]'),HIN=q("#mlHin"),A=mlAdr(),AW=q("#mlAw"),IW=q("#mlIcsW");
+  const P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),HW=q("#mlHw"),OK=q('[data-mlk="ok"]'),HIN=q("#mlHin"),AW=q("#mlAw"),IW=q("#mlIcsW");
+  const A=root._mlModus==="neu"?null:G;   // vorbelegt aus der Adresse, die geaendert wird
   const kd=()=>KS.value;
   const fehler=e=>{HIN.textContent="Abfall-Dienst nicht erreichbar ("+(e&&e.message||e)+") – später nochmal versuchen.";};
   const strassen=p=>{S.disabled=true;OK.disabled=true;HW.hidden=true;mlOpt(S,[],"wird geladen …");
@@ -9219,10 +9274,10 @@ function mlBinden(root){
     const da=MUELL.orte[k]?Promise.resolve(MUELL.orte[k]):fetchJSON(MUELL_API+"getPlaces/client="+encodeURIComponent(k),15000).then(L=>MUELL.orte[k]=L);
     da.then(L=>{if(kd()!==k)return;
       // vorbelegt: die gespeicherte Gemeinde, sonst die, deren Name im angezeigten Ort steht ("Giessen / Wettenberg")
-      let w=A&&mlKd(A)===k?A.p:"";if(!w){const t=mlOrtTreffer(L);if(t)w=t.key;}
+      let w=A&&!mlIcs(A)&&mlKd(A)===k?A.p:"";if(!w){const t=mlOrtTreffer(L);if(t)w=t.key;}
       mlOpt(P,L,L.length>1?"Gemeinde wählen":"",w);P.disabled=false;if(P.value)strassen(P.value);}).catch(fehler);};
   KS.onchange=()=>{KS._hand=1;gemeinden();};
-  // ohne gespeicherte Adresse: unter mehreren Kandidaten den nehmen, der eine Gemeinde mit dem Namen des Orts hat
+  // neue Adresse: unter mehreren Kandidaten den nehmen, der eine Gemeinde mit dem Namen des Orts hat
   const kand=A?[]:mlKreisKand();
   if(kand.length>1)(async()=>{for(const k of kand){let L=MUELL.orte[k];
       if(!L){try{L=MUELL.orte[k]=await fetchJSON(MUELL_API+"getPlaces/client="+encodeURIComponent(k),15000);}catch(e){continue;}}
@@ -9442,7 +9497,7 @@ const KZ_DEF={
   // v5.44: Rasen-Planer - Kachel "Gras jetzt" <-> "Maehen", Tipp oeffnet die Grossansicht mit Einstellungen
   rasen:{name:"Rasen mähen",kurz:"Rasen",ziel:{text:"Rasen"},gross(){return rzGross();},r(){return rzKachel();}},
   // v7.08: Muellabfuhr (EKW Landkreis Giessen), Tipp oeffnet Liste und Adresswahl
-  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){return !mlZuHause();},gross(){return mlGross();},r(){return mlKachel();}}
+  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){return mlListe().length>0&&!mlAktiv();},gross(){return mlGross();},r(){return mlKachel();}}
 };
 /* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
    noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
