@@ -422,6 +422,10 @@ html.dunkel .ml-warn{color:#ffd28a}
 /* v7.11 mehrere Adressen */
 .ml-adr{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
 .ml-adrz{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.ml-best{margin:4px 0 12px;padding:12px 12px 2px;border-radius:12px;border:1.5px solid #2f86cf;background:rgba(47,134,207,.08)}
+.ml-best .kzg-sub{margin:0}
+.ml-besta{font-size:17px;font-weight:750;margin:4px 0 10px}
+html.dunkel .ml-best{border-color:#8cc4ff;background:rgba(120,180,255,.12)}
 .ml-aend{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:13px;font-weight:700;padding:4px 11px 4px 9px;border-radius:999px;
   border:1.5px solid #2f86cf;background:rgba(47,134,207,.1);color:#1c5f9e;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ml-aend svg{width:13px;height:13px;flex:none}
@@ -2689,7 +2693,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.16</span>
+      <span class="ver">v7.17</span>
     </div>
   </header>
 
@@ -9211,6 +9215,14 @@ function mlHierPruefen(){const k=mlHierKey();if(MUELL.hier&&MUELL.hier.k===k)ret
 function mlOrtKurz(){return String(LOC&&LOC.name||"").split(/\s*[\/,]\s*/).filter(Boolean).pop()||"diesen Ort";}
 function mlHierEinrichten(){const L=mlListe();kzGrossZeigen("");const inn=el("kzGrossIn");if(!inn)return;
   inn._mlSetup=true;inn._mlModus="neu";inn._mlHier=true;inn._mlO=L.length?L[0].o:null;inn._mlEin=false;inn._mlIcs=null;mlZeichne(inn);}
+/* v7.17 (Nutzer: "wenn ich die Kachel loesche und wieder hinzufuege, die gespeicherte Adresse einblenden statt direkt zu
+   uebernehmen"): beim Hinzufuegen aus "Kacheln waehlen" gleich das Fenster mit der Adresse oben und "Passt so" / "Adresse aendern" */
+// Name im Pool: mit der gespeicherten Adresse dieses Orts ("Muellabfuhr · Marschweg 3"), damit man vorher sieht, was kommt
+function mlPoolName(mh,mhN){if(mh)return mhN;let A=null;try{A=mlAktiv();}catch(e){}
+  return A&&!mlIcs(A)&&A.sn?"Müllabfuhr · "+mlEsc(A.sn+(A.h?" "+A.h:"")):KZ_DEF.muell.name;}
+function mlGespeichert(){kzGrossZeigen("");const inn=el("kzGrossIn"),A=mlAktiv();if(!inn)return;
+  inn._mlSetup=false;inn._mlModus=null;inn._mlHier=false;inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;inn._mlBest=!!A;
+  if(A)mlBereit(A);mlZeichne(inn);}
 function mlAktiv(){const V=mlVerfuegbar();return V.find(a=>a.o===MUELL.sel)||V.find(a=>mlZuHause(a))||V[0]||null;}
 function mlLabel(A){return mlIcs(A)?"Kalender "+(A.h&&A.h.n||A.pn):(A.pn||"")+(A.sn&&A.sn!==A.pn?", "+A.sn:"")+(A.h?" "+A.h:"");}
 function mlWahl(A){A=A||MUELL.A;if(A&&Array.isArray(A.fr))return A.fr;
@@ -9260,7 +9272,7 @@ function mlKachel(){
   return a;}
 /* ---- Grossansicht ---- */
 function mlGross(){const inn=el("kzGrossIn"),L=mlListe(),A=mlAktiv()||L[0];
-  if(inn){inn._mlSetup=!L.length;inn._mlModus=L.length?null:"neu";inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;inn._mlHier=false;}
+  if(inn){inn._mlSetup=!L.length;inn._mlModus=L.length?null:"neu";inn._mlO=A?A.o:null;inn._mlEin=false;inn._mlIcs=null;inn._mlHier=false;inn._mlBest=false;}
   L.forEach(a=>mlBereit(a));return {html:mlHtml(inn||{}),nach:mlBinden};}
 function mlGezeigt(root){const L=mlListe();return L.find(x=>x.o===root._mlO)||mlAktiv()||L[0]||null;}
 function mlHtml(root){
@@ -9269,6 +9281,9 @@ function mlHtml(root){
     return '<div class="ml" data-ml="1">'+kopf+mlSetupHtml(E,L.length>0,root._mlHier)+"</div>";}
   const A=mlGezeigt(root);mlSetz(A);const K=mlKreis(mlKd(A)),hier=mlZuHause(A);
   let h='<div class="ml" data-ml="1">'+kopf;
+  if(root._mlBest&&A)h+='<div class="ml-best"><div class="kzg-sub">Kachel hinzugefügt – sie zeigt deine gespeicherte Adresse:</div>'
+    +`<div class="ml-besta">${mlEsc(mlLabel(A))}</div><div class="loc-row"><button type="button" class="loc-btn" data-mlk="adr">Adresse ändern</button>`
+    +'<button type="button" class="loc-btn" data-mlk="passt">Passt so</button></div></div>';
   // mehrere Adressen: Knoepfe zum Umschalten, gruener Punkt = gilt am angezeigten Ort
   if(L.length>1)h+='<div class="ml-adr">'+L.map(a=>`<button type="button" data-mlo="${mlEsc(a.o)}" class="${a.o===A.o?"an":""}">`
       +(mlZuHause(a)?'<i class="ml-hier"></i>':"")+mlEsc(mlLabel(a))+"</button>").join("")+"</div>";
@@ -9363,7 +9378,8 @@ function mlBinden(root){
     const A=mlListe().find(x=>x.o===root._mlO);if(A){mlBereit(A);if(mlZuHause(A)){MUELL.sel=A.o;try{kzRender();}catch(e){}}}mlZeichne(root);});
   root.querySelectorAll("[data-mlk]").forEach(b=>b.onclick=()=>{const k=b.dataset.mlk;
     if(k==="neu"&&G){MUELL.versucht[G.o]=0;delete MUELL.fehler[G.o];mlLaden(G);mlZeichne(root);}
-    else if(k==="adr"){root._mlHier=false;root._mlSetup=true;root._mlModus=null;root._mlIcs=null;mlZeichne(root);}
+    else if(k==="passt"){root._mlBest=false;const z=el("kzGrossZu");if(z)z.click();}
+    else if(k==="adr"){root._mlBest=false;root._mlHier=false;root._mlSetup=true;root._mlModus=null;root._mlIcs=null;mlZeichne(root);}
     else if(k==="dazu"){root._mlHier=false;root._mlSetup=true;root._mlModus="neu";root._mlIcs=null;mlZeichne(root);}
     else if(k==="abbr"){root._mlHier=false;root._mlSetup=false;root._mlModus=null;mlZeichne(root);}
     else if(k==="weg"&&G){if(!confirm("„"+mlLabel(G)+"“ löschen?"))return;
@@ -9385,6 +9401,7 @@ function mlBinden(root){
     mlAdrSetz(G.o,{fr:[...root.querySelectorAll("[data-mlf]")].filter(x=>x.checked).map(x=>x.dataset.mlf)});
     root._mlEin=true;mlZeichne(root);try{kzRender();}catch(e){}});
   const det=q(".ml-ein");if(det)det.addEventListener("toggle",()=>{root._mlEin=det.open;});
+  mlGlanz(q('[data-mlk="passt"]'));
   const KS=q("#mlK");if(!KS)return;
   const P=q("#mlP"),S=q("#mlS"),H=q("#mlH"),HW=q("#mlHw"),OK=q('[data-mlk="ok"]'),HIN=q("#mlHin"),AW=q("#mlAw"),IW=q("#mlIcsW");
   mlGlanz(OK);
@@ -9840,7 +9857,7 @@ function kzRender(){
     let mh=false;try{mh=_kzEdit&&mlListe().length>0&&mlHierMoeglich();}catch(e){}
     const mhN=mh?"Müllabfuhr für "+mlEsc(mlOrtKurz()):"";
     pool.innerHTML=_kzEdit?(mh&&ord.includes("muell")?`<div class="kp" data-mlhier="1"><b>+</b>${mhN}</div>`:"")
-      +Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).sort((x,y)=>mh?(y==="muell")-(x==="muell"):0).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${id==="muell"&&mh?mhN:KZ_DEF[id].name}</div>`).join(""):"";}
+      +Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).sort((x,y)=>mh?(y==="muell")-(x==="muell"):0).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${id==="muell"?mlPoolName(mh,mhN):KZ_DEF[id].name}</div>`).join(""):"";}
   /* v6.78 (Nutzer 13.11.: "das Ziehen und Entfernen muss oben bei den Kacheln stehen"): der Hinweis steht direkt unter den
      Kacheln (#kzHint), nicht mehr im Fuss unter den Einstellungen; "Fertig" steht seit v6.76 im Sockel - der Fuss ist im
      Bearbeiten leer */
@@ -10097,7 +10114,8 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
     if(p.dataset.mlhier){mlHierEinrichten();return;}   // v7.12
     const id=p.dataset.add;if(!KZ_DEF[id])return;
     const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();
-    if(id==="muell"&&mlListe().length&&mlHierMoeglich())mlHierEinrichten();});   // v5.32: in den ersten freien Platz
+    // v7.17: gespeicherte Adresse hier -> zeigen und fragen; keine hier, aber moeglich (oder noch gar keine) -> Einrichtung
+    if(id==="muell"){if(mlAktiv())mlGespeichert();else if(!mlListe().length||mlHierMoeglich())mlHierEinrichten();}});   // v5.32: in den ersten freien Platz
   if(foot)foot.addEventListener("click",e=>{
     if(e.target.closest("#kzPause")){_kzPause=!_kzPause;kzWechselLauf();kzRender();return;}   // v5.32
     if(e.target.closest("#kzZahn")){_kzRegAuf=!_kzRegAuf;kzRender();if(_kzRegAuf)kzBewAnwenden(false);kzFixPruefen();return;}
@@ -10108,7 +10126,7 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
      noch ein TIPPEN (<= 10 px Bewegung, kein Abbruch durchs Scrollen), und nie
      auf Hoehe von Kacheln, Reglern und Fuss (auch nicht im Rand daneben). */
   let _kzAussen=null;
-  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzHint,#kzPool,#kzFoot,#kzReg,#kzSockel"))return;
+  document.addEventListener("pointerdown",e=>{_kzAussen=null;if(!_kzEdit||e.target.closest("#kz,#kzHint,#kzPool,#kzFoot,#kzReg,#kzSockel,.loc-ovl"))return;   // v7.17: Tipps in einem Fenster beenden das Bearbeiten nicht
     /* v6.78: Unterkante = was als letztes zu sehen ist (der Fuss ist im Bearbeiten leer) */
     const a=el("kz").getBoundingClientRect(),bu=Math.max(...["kz","kzHint","kzPool","kzReg","kzFoot"].map(i=>{const n=el(i);return n?n.getBoundingClientRect().bottom:0;}));
     if(e.clientY>=a.top-12&&e.clientY<=bu+12)return;_kzAussen={x:e.clientX,y:e.clientY};},true);
