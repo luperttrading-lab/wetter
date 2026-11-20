@@ -4249,7 +4249,13 @@ Hausnummern?"): `vereinen()` macht aus einer geteilten Strasse EINE, wenn sich d
 in den Tagen (je Tonne gleiche Termine bei allen, die sie haben) - dann nur Strasse, Tonnen per Haken. In der Testdatei (20
 Strassen) waren 6 geteilt, vereint wurde nur eine: die anderen haben echte Unterschiede (Altendeichsweg zwei Bezirke - Rest
 18.11. gegen 25.11.; Gelbe Tonne in zwei Touren; Einzelobjekte mit Zusatzleerungen). ERST VEROEFFENTLICHT mit 21 Strassen
-(Testdatei + Marschweg, Nutzer wollte probieren), die volle Datei folgte nach dem ersten vollen Lauf.
+(Testdatei + Marschweg, Nutzer wollte probieren), die volle Datei folgte nach dem ersten vollen Lauf. ERSTER VOLLER LAUF
+(20.11., aus dem Pruefstand, noch mit urlopen ohne offene Verbindung): 584 Strassen im Dienst, 7520 Abrufe, 7131 s (~2 h).
+558 Strassen mit Kalender; 26 ohne (Sondereintraege wie "Div. Standorte Stadt Norden", "Kiosk/Wetterschutzgebäude",
+"dummystrasse", Polder, Strassen ohne Objekte). 220 geteilt; der Nachlauf trug 798 Hausnummern ohne Plan in 155 Strassen ein
+(Stichprobe 15 von 15 auch beim zweiten Abruf ohne Plan: Wohnungen "Whg. 13", "Baustelle", Haus B) und vereinte 84 Strassen,
+die sich nur in den Tonnen unterschieden -> 136 Strassen brauchen eine Hausnummer, 422 nicht. 373 Kalender, Datei 82 KB
+(21,6 KB gzip). Die Auswahl heisst in Norden "Strasse oder Ortsteil" (viele Namen ohne Strassenwort: Altenbürgerlande, Polder).
 v7.15 (Nutzer, Bild der Einrichtung Norden/Marschweg 3: "die Strasse eintippen, dass automatisch in der Liste vorgescrollt
 wird - bei 200 Strassen muss man unnoetig weit scrollen" und "wenn alles gueltig eingegeben ist, Uebernehmen gefaerbt mit einem
 leichten Glanzdurchlauf von links nach rechts"): (1) SUCHFELD `#mlSq` ueber der Strassen-Auswahl, nur ab 13 Eintraegen
