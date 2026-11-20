@@ -4156,6 +4156,23 @@ Kachel "Fr 27.11. Bio / Mo 30.11. Papier"; Norden mit Testdatei (UTC, RRULE, EXD
 AWIDO-ICS-Export Weiherstrasse 2026 (`awido.cubefour.de/Customer/lkgi/KalenderICS.aspx?oid=..&jahr=2026`, Warnhinweis
 "reicht nur bis 30.12."); alte Giessen-Adresse ohne Kreis unveraendert. Am iPhone nicht geprueft (Dateiwahl aus "Dateien").
 Bestandsnutzer in einem AWIDO-Gebiet ausser um Giessen bekommen die Kachel einmalig (`kzMuellNeu2`).
+v7.11 MEHRERE MUELL-ADRESSEN (Nutzer 20.11.: "den Muell auch von woanders anzeigen lassen, wenn ich es unbedingt
+einfuegen will - nicht standardmaessig in allen Orten"). Speicher `muellAdressen` = Liste (hoechstens `MUELL_MAX` 8), je
+Adresse {o, typ, k, p, pn, s, sn, b|h, fr, ueberall}; Termine `muellTermine` = {o:{t,fr,d}} - bewusst OHNE "cache" im Namen,
+sonst nimmt "Einstellungen sichern" (v6.44, laesst /cache/i weg) eine eingelesene Kalenderdatei nicht mit. Einmalige
+Umstellung aus `muellAdr` / `muellFr` / `muellCache` (Tonnenwahl bleibt), danach werden die alten Schluessel geloescht.
+KACHEL zeigt `mlAktiv()`: zuerst eine im Fenster gewaehlte Adresse (`MUELL.sel`, nur diese Sitzung), dann die Adresse, deren
+Heimat (Gemeinde-Rahmen bzw. Umkreis der Kalenderdatei, v7.09/v7.10) den angezeigten Ort umfasst, dann eine Adresse mit
+Haekchen "In der Kachel auch an allen anderen Orten zeigen" (`ueberall`) - sonst keine Kachel (weg(), Luecke). Zeigt sie eine
+Adresse von woanders, steht deren Ort in der Beschriftung ("MUELL NORDEN", lange Namen allein: "WETTENBERG"). FENSTER: oben
+Knoepfe je Adresse (gruener Punkt = Heimat ist hier), ein Tipp zeigt deren Termine von ueberall; Kopfzeile sagt "nur im Fenster,
+nicht in der Kachel hier" bzw. "in der Kachel auch hier". Unter "Tonnen und Adresse": Tonnen je Adresse, Haekchen `ueberall`,
+"Adresse aendern", "Weitere Adresse" (gleiche Einrichtung wie v7.10, AWIDO oder Kalenderdatei; doppelte Adresse wird
+abgewiesen), "Diese Adresse loeschen" (Rueckfrage, nimmt Termine mit). Abrufe je Adresse (`MUELL.lade/versucht/fehler` nach o),
+AWIDO nur fuer Adressen, die gerade gezeigt werden. Geprueft (Playwright `t711.py`, echte AWIDO-Daten + Kalenderdatei Norden):
+Umstellung behaelt die Tonnenwahl; Kalenderdatei fuer Norden von Wettenberg aus angelegt; Kachel Wettenberg = Wettenberg,
+Norden = Norden, Huettenberg ohne Kachel; Haekchen -> Huettenberg "WETTENBERG", Norden behaelt die eigene; Loeschen; keine
+Fehler. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
