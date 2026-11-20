@@ -21,7 +21,7 @@ Vergangene Termine aus der alten Datei bleiben eine Woche stehen (Jahreswechsel)
 
 Aufruf: python3 muell_aurich.py [--voll] [--max N]   (--max: nur N Strassen, zum Pruefen)
 """
-import json, re, sys, time, hashlib, datetime, urllib.request, urllib.parse, urllib.error
+import json, os, re, ssl, sys, time, hashlib, datetime, http.client, urllib.request, urllib.parse, urllib.error
 
 B = "https://apps.c-trace.de/web.aurich-abfallkalender"
 UA = {"User-Agent": "Mozilla/5.0 (wetter-app muellkalender; github.com/luperttrading-lab/wetter)"}
@@ -57,6 +57,45 @@ ABRUFE = 0
 AB_TAG = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y%m%d")
 
 
+_VB = None
+
+
+def _get(url, h):
+    """GET ueber EINE offene Verbindung (keep-alive). Mit urlopen baut jeder Abruf Proxy-Tunnel und TLS
+    neu auf - gemessen ~0,7 s je Abruf, bei ~5000 Abrufen ueber eine Stunde nur dafuer."""
+    global _VB
+    if _VB is None:
+        host = urllib.parse.urlsplit(B).hostname
+        ctx = ssl.create_default_context()
+        px = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+        if px:
+            u = urllib.parse.urlsplit(px)
+            _VB = http.client.HTTPSConnection(u.hostname, u.port or 80, timeout=40, context=ctx)
+            _VB.set_tunnel(host, 443)
+        else:
+            _VB = http.client.HTTPSConnection(host, 443, timeout=40, context=ctx)
+    t = urllib.parse.urlsplit(url)
+    try:
+        _VB.request("GET", t.path + ("?" + t.query if t.query else ""), headers=h)
+        r = _VB.getresponse()
+        body = r.read()
+    except Exception:
+        try:
+            _VB.close()
+        except Exception:
+            pass
+        _VB = None
+        raise
+    if (r.getheader("Connection") or "").lower() == "close":
+        _VB.close()
+        _VB = None
+    if r.status >= 400:
+        raise urllib.error.HTTPError(url, r.status, r.reason, r.headers, None)
+    if r.status >= 300:
+        raise IOError("Umleitung %s" % r.status)   # neuer Versuch ueber urlopen (folgt der Umleitung)
+    return body
+
+
 def holen(url, acc=None, versuche=3):
     global ABRUFE
     h = dict(UA)
@@ -66,6 +105,8 @@ def holen(url, acc=None, versuche=3):
         try:
             ABRUFE += 1
             time.sleep(PAUSE)
+            if i == 0:
+                return _get(url, h)
             with urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=40) as f:
                 return f.read()
         except urllib.error.HTTPError as e:
@@ -159,7 +200,9 @@ def strasse_lesen(gem, ort, strasse, cache):
         return None
     if len(kals) == 1:
         return ("all", json.loads(kals.pop()))
-    return ("hn", [(h, alle[h]) for h in nums if alle.get(h)])
+    # Hausnummern, fuer die der Dienst keinen Plan liefert (HTTP 500 - auch auf seiner eigenen Seite kommt dann
+    # nichts, z. B. Marschweg 3): bleiben waehlbar, die App zeigt den Standard der Strasse mit Hinweis
+    return ("hn", [(h, alle[h]) for h in nums if alle.get(h)], [h for h in nums if not alle.get(h)])
 
 
 def lesen_alt():
@@ -199,7 +242,7 @@ def kal_auf(t, frs):
 
 def alt_kalender(alt, gem, strasse, hnr=None):
     """Termine einer Strasse (bzw. Hausnummer) aus der alten Datei.
-    Strasse = Kalender-Index, oder geteilt: [Standard, "h1|h2|...", {Hausnummer: Kalender}]."""
+    Strasse = Kalender-Index, oder geteilt: [Standard, "h1|h2|...", {Hausnummer: Kalender}(, "ohne Plan")]."""
     try:
         e = alt["g"][gem]["s"][strasse]
         if isinstance(e, list):
@@ -261,13 +304,19 @@ def main():
             touren.append(t)
         return tour_id[k]
 
-    def geteilt(paare):
-        """[(hnr, tour)] -> [Standard, "h1|h2", {Abweichung}] - Standard = haeufigster Kalender."""
+    def geteilt(paare, ohne=()):
+        """[(hnr, tour)] -> [Standard, "h1|h2", {Abweichung}(, "h7|h9")] - Standard = haeufigster Kalender;
+        das vierte Feld nennt Hausnummern ohne eigenen Plan beim Dienst (sie bekommen den Standard)."""
         zaehl = {}
         for _, t in paare:
             zaehl[t] = zaehl.get(t, 0) + 1
         std = max(zaehl, key=zaehl.get)
-        return [std, "|".join(h for h, _ in paare), {h: t for h, t in paare if t != std}]
+        ohne = [h for h in ohne if h not in {h_ for h_, _ in paare}]
+        alle = sorted([h for h, _ in paare] + ohne, key=lambda h: (hnr_zahl(h), h))
+        out = [std, "|".join(alle), {h: t for h, t in paare if t != std}]
+        if ohne:
+            out.append("|".join(ohne))
+        return out
 
     def mit_alt(kal, gem, strasse, hnr=None):
         """vergangene Woche aus der alten Datei behalten (der neue Jahreskalender beginnt im Januar)."""
@@ -297,14 +346,15 @@ def main():
                 if alt and n in alt.get("g", {}).get(gem, {}).get("s", {}):
                     e = alt["g"][gem]["s"][n]
                     if isinstance(e, list):
-                        s_out[n] = geteilt([(h, tour(alt_kalender(alt, gem, n, h))) for h in e[1].split("|")])
+                        oh = e[3].split("|") if len(e) > 3 else []
+                        s_out[n] = geteilt([(h, tour(alt_kalender(alt, gem, n, h))) for h in e[1].split("|") if h not in oh], oh)
                     else:
                         s_out[n] = tour(alt_kalender(alt, gem, n))
                 continue
             if r[0] == "all":
                 s_out[n] = tour(mit_alt(r[1], gem, n))
             else:
-                s_out[n] = geteilt([(h, tour(mit_alt(k, gem, n, h))) for h, k in r[1]])
+                s_out[n] = geteilt([(h, tour(mit_alt(k, gem, n, h))) for h, k in r[1]], r[2])
             if i % 25 == 0:
                 print(f"{gem}: {i + 1}/{len(namen)} Strassen, {len(touren)} Kalender, {ABRUFE} Abrufe, {time.time() - t0:.0f} s", flush=True)
         if fehl > len(namen) * 0.2:

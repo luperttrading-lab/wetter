@@ -4233,7 +4233,15 @@ veroeffentlicht", ab 30 Tagen vor dem Ende. Kalenderdatei-Import nimmt jetzt auc
 Gemeinden des Kreises: in `GEMEINDEN` (Python) UND im Rahmen von MUELL_DATEI_K eintragen. LIZENZEN.md: C-Trace ungeklaert,
 AWIDO nachgetragen. Geprueft (`t714.py`, Testdatei 20 Strassen): Norden ohne Kachel -> Pool-Eintrag -> Landkreis Aurich /
 Norden / Altendeichsweg / Hausnummer 28 -> Termine = Dienst, Kachel Mo 23.11. Bio; Wettenberg unveraendert. Nicht am iPhone
-geprueft.
+geprueft. HAUSNUMMERN OHNE PLAN (Nutzer: "Marschweg 3 wird gar nicht angeboten, da wohnt mein Freund"): der Dienst kennt das
+Objekt (AktuelleObjekte: 1, 2, 3, 12, 13, 14, 16, 17), liefert fuer 3/14/16/17 aber HTTP 500 - auch seine eigene Seite zeigt
+dort keinen Plan. Die Tonnen-Saetze unterscheiden sich je Haus (Nr. 1 ohne Biotonne; Gelbe Tonne 4-woechentlich in zwei Touren,
+Nr. 13 in beiden) - eine Strasse "ohne Hausnummer" gibt es im Dienst nicht. Jetzt viertes Feld der geteilten Strasse = Nummern
+ohne Plan ("3|14|16|17"); sie stehen in der Auswahl als "3 (kein eigener Plan)" und bekommen den Standard der Strasse, das Fenster
+sagt das ("vor allem bei der Gelben Tonne kann es abweichen"). Der erste volle Lauf lief noch mit dem alten Skript, das vierte
+Feld kam per einmaligem Nachlauf (je geteilte Strasse ein AktuelleObjekte-Abruf). Dazu holt `holen()` ueber EINE offene
+Verbindung (`_get`, http.client mit Tunnel durch HTTPS_PROXY; Umleitung oder Fehler -> neuer Versuch ueber urlopen): 0,9 -> 0,68 s
+je Abruf, der Rest ist der Dienst selbst.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
