@@ -4129,6 +4129,33 @@ ALLGEMEIN neu: eine Kachel darf `weg()` liefern - `kzRender` setzt sie dann auss
 (Luecke bleibt, v5.32), am Ende faellt der Platz ganz weg (sonst bliebe eine leere Reihe). Im Bearbeiten steht sie da mit
 "nur zu Hause", damit man sie verschieben oder entfernen kann. Weg = kein Abruf. Geprueft (Playwright, vier Orte): Kachelflaeche
 214 -> 140 px, wenn die Muell-Kachel allein in der letzten Reihe stand.
+v7.10 MUELL FUER ANDERE KREISE (Nutzer 20.11.: "was ist fuer Leute aus anderen Landkreisen, z. B. Norden?" -> "beides, erst die
+AWIDO-Kreise"). (1) 48 AWIDO-GEBIETE waehlbar (`MUELL_KREISE` = Schluessel, Name, Rahmen S/N/W/O). Kundenliste aus dem Projekt
+hacs_waste_collection_schedule (`source/awido_de.py`, per raw.githubusercontent geholt), jeder Kunde am 20.11. mit getPlaces UND
+einer Beispieladresse bis getData geprueft (alle 48 liefern JSON; vier brauchten wegen Verbindungsabbruechen im Pruefstand einen
+zweiten Versuch). Rahmen der Kreise aus Nominatim. Vorbelegt: kleinster Kreis-Rahmen um den angezeigten Ort; ueberlappen mehrere
+(Huettenberg liegt in Giessen UND Lahn-Dill), gewinnt der Kreis mit einer Gemeinde dieses Namens (`mlKreisKand`, `mlOrtTreffer`,
+laedt getPlaces der Kandidaten). Neue Felder in `muellAdr`: `k` (Kreis; alte Adressen ohne k = lkgi), `b` (Rahmen der Gemeinde
+aus Nominatim, nur im Kreis-Rahmen gesucht, `mlGeo`, nach dem Uebernehmen; `mlNameRein` macht aus "SLF-RU-Allendorf" /
+"VG Altenkirchen - Flammersfeld" einen suchbaren Namen). Heimat (`mlRahmen`): Gemeinde (Giessen-Tabelle bzw. `b`), sonst der
+ganze Kreis; mindestens +-3 km um die Mitte. TONNEN nach Art statt Kennung (`MUELL_KAT`: Bio, Papier, Gelb, Rest, Garten, Glas,
+Schadstoff, Sperrmuell - Regex auf den Namen; jeder Kreis hat eigene Kennungen), Namen per textarea entschluesselt ("Weihnachts&shy;
+baeume"). VORWAHL ausser Giessen (dort weiter Bio/Rest 2W/Gelb): je Art die Tonne mit dem kuerzesten Namen, ohne Container/
+1.100-Liter/Schadstoff/Sperrmuell/Unbekanntes ("Ferien", "Faelligkeit Abfallgebuehr", "Repair Cafe" stehen bei manchen Kreisen als
+eigene Fraktion). Kachel nennt gleiche Kurznamen nur einmal. Bei Kreiswechsel wird `muellFr` verworfen. (2) NORDEN / LANDKREIS
+AURICH: Abfuhrkalender ueber C-Trace (`apps.c-trace.de/web.aurich-abfallkalender`, OData.svc/Orte, /Strassen; Norden = Ort 19) -
+OHNE CORS-Kopf, aus der App nicht abrufbar (geprueft 20.11.). Darum KALENDERDATEI: Auswahl "Anderer Kreis: Kalenderdatei"
+(vorgewaehlt, wenn kein AWIDO-Kreis den Ort umfasst), Dateiwahl `#mlDatei` (FileReader, nichts wird hochgeladen), Heimatort aus
+"Deine Orte" (`mlHeimOrte`, Kachel nur im Umkreis `MUELL_HEIM_KM` 6 km). `mlIcsLesen`: VEVENT/DTSTART/SUMMARY, ganztaegig,
+Ortszeit oder UTC (23 Uhr UTC am Vortag -> deutscher Tag), RRULE DAILY/WEEKLY mit INTERVAL/COUNT/UNTIL, EXDATE, gefaltete Zeilen,
+VALARM uebersprungen, " in <Ort>" und "; ..." am Namen abgeschnitten (AWIDO-Export "Gelbe Tonne in Wettenberg"), 7 Tage zurueck
+bis 2 Jahre voraus. Adresse `{typ:"ics", o:"ics:<Zeit>", pn, sn: Dateiname, h:{lat,lon,n}}`, Termine in `muellCache`, kein
+Nachladen; reicht die Datei weniger als 45 Tage, erinnert die Liste an die neue Datei, ohne Termine sagt die Kachel "neue Datei".
+Geprueft (Playwright, echte Daten): Huettenberg -> Lahn-Dill vorgewaehlt, Gemeinde Huettenberg, Strasse, Rahmen per Nominatim,
+Kachel "Fr 27.11. Bio / Mo 30.11. Papier"; Norden mit Testdatei (UTC, RRULE, EXDATE, Faltung, VALARM) und mit dem echten
+AWIDO-ICS-Export Weiherstrasse 2026 (`awido.cubefour.de/Customer/lkgi/KalenderICS.aspx?oid=..&jahr=2026`, Warnhinweis
+"reicht nur bis 30.12."); alte Giessen-Adresse ohne Kreis unveraendert. Am iPhone nicht geprueft (Dateiwahl aus "Dateien").
+Bestandsnutzer in einem AWIDO-Gebiet ausser um Giessen bekommen die Kachel einmalig (`kzMuellNeu2`).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
