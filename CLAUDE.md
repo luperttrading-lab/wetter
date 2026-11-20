@@ -4241,7 +4241,15 @@ ohne Plan ("3|14|16|17"); sie stehen in der Auswahl als "3 (kein eigener Plan)" 
 sagt das ("vor allem bei der Gelben Tonne kann es abweichen"). Der erste volle Lauf lief noch mit dem alten Skript, das vierte
 Feld kam per einmaligem Nachlauf (je geteilte Strasse ein AktuelleObjekte-Abruf). Dazu holt `holen()` ueber EINE offene
 Verbindung (`_get`, http.client mit Tunnel durch HTTPS_PROXY; Umleitung oder Fehler -> neuer Versuch ueber urlopen): 0,9 -> 0,68 s
-je Abruf, der Rest ist der Dienst selbst.
+je Abruf, der Rest ist der Dienst selbst. NACHBAR-REGEL (Nutzer: "bei 3 nehmen wir 1, bei 2 die 4"): eine Nummer ohne Plan bekommt in
+der App (`mlDateiDaten`, `mlHnNr`) den Kalender des naechsten Hauses auf DERSELBEN Strassenseite (gleiche Paritaet, kleinster
+Abstand, bei Gleichstand die kleinere Nummer), Tonnen, die es dort nicht gibt, aus dem Standard der Strasse (Marschweg 3 -> Nr. 1:
+Gelbe Tonne 10.12., Biotonne aus dem Standard); der Hinweis nennt die Nummer. NUR WO NOETIG (Nutzer: "brauchen wir ueberhaupt
+Hausnummern?"): `vereinen()` macht aus einer geteilten Strasse EINE, wenn sich die Haeuser nur in den Tonnen unterscheiden, nicht
+in den Tagen (je Tonne gleiche Termine bei allen, die sie haben) - dann nur Strasse, Tonnen per Haken. In der Testdatei (20
+Strassen) waren 6 geteilt, vereint wurde nur eine: die anderen haben echte Unterschiede (Altendeichsweg zwei Bezirke - Rest
+18.11. gegen 25.11.; Gelbe Tonne in zwei Touren; Einzelobjekte mit Zusatzleerungen). ERST VEROEFFENTLICHT mit 21 Strassen
+(Testdatei + Marschweg, Nutzer wollte probieren), die volle Datei folgte nach dem ersten vollen Lauf.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

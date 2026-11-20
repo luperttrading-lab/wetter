@@ -9030,13 +9030,19 @@ function mlHnHolen(k,x){if(/^datei:/.test(k))return mlDateiJson(k).then(j=>{cons
    Tonnen-Schluessel = Name ("Biotonne"), damit die eigene Tonnenwahl einen neuen Lauf der Action uebersteht */
 function mlDateiDaten(A){const t=String(A.o).split("|");
   return mlDateiJson(mlKd(A)).then(j=>{const g=j.g[t[1]],e=g&&g.s[t[2]];if(e==null)throw new Error("Straße nicht mehr im Kalender");
-    const ti=Array.isArray(e)?(t[3]!=null&&e[2][t[3]]!=null?e[2][t[3]]:e[0]):e,T=j.t[ti];if(!T)throw new Error("kein Kalender");
-    const oh=Array.isArray(e)&&e[3]&&t[3]!=null&&String(e[3]).split("|").includes(t[3]);
+    const ti=Array.isArray(e)?(t[3]!=null&&e[2][t[3]]!=null?e[2][t[3]]:e[0]):e;let T=j.t[ti];if(!T)throw new Error("kein Kalender");
+    // Hausnummer ohne eigenen Plan beim Landkreis (Nutzer, Marschweg 3): Termine des NAECHSTEN Hauses auf derselben
+    // Strassenseite (3 -> 1, 2 -> 4), Tonnen, die es dort nicht gibt, wie bei den meisten Haeusern der Strasse
+    let oh="";const OH=Array.isArray(e)&&e[3]&&t[3]!=null?String(e[3]).split("|"):[];
+    if(OH.includes(t[3])){const z=mlHnNr(t[3]),K=e[1].split("|").filter(h=>!OH.includes(h)&&isFinite(mlHnNr(h)));
+      K.sort((a,b)=>{const x=mlHnNr(a),y=mlHnNr(b);return ((x%2!==z%2)-(y%2!==z%2))||(Math.abs(x-z)-Math.abs(y-z))||(x-y);});
+      oh=K.length&&isFinite(z)?K[0]:"-";const TN=K.length?j.t[e[2][K[0]]!=null?e[2][K[0]]:e[0]]:null;if(TN)T=Object.assign({},T,TN);}
     const fr={},tage={},ab=mlTag(Date.now()-7*864e5);
     Object.keys(T).forEach(f=>{const nm=String(j.fr[+f]||f);fr[nm]={nm};const p=String(T[f]).split(" ");let ms=mlUTC(p[0]);
       for(let i=0;i<p.length;i++){if(i)ms+=(+p[i])*864e5;const d=new Date(ms),dt=d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,"0")+String(d.getUTCDate()).padStart(2,"0");
         if(dt>=ab)(tage[dt]=tage[dt]||[]).push(nm);}});
-    return {fr,d:Object.keys(tage).sort().map(dt=>[dt,tage[dt]]),st:Date.parse(j.stand)||null,oh:oh?1:0};});}
+    return {fr,d:Object.keys(tage).sort().map(dt=>[dt,tage[dt]]),st:Date.parse(j.stand)||null,oh};});}
+function mlHnNr(h){const m=/^\s*(\d+)/.exec(String(h));return m?+m[1]:NaN;}
 function mlIcs(A){return !!(A&&A.typ==="ics");}
 function mlKm(a,b,c,d){const r=Math.PI/180,x=(d-b)*r*Math.cos((a+c)/2*r),y=(c-a)*r;return 6371*Math.hypot(x,y);}
 // Rahmen [S,N,W,O] der Heimat: Gemeinde (Tabelle bzw. A.b), sonst der Kreis; mindestens +-3 km um die Mitte, 1,5 km Rand
@@ -9256,7 +9262,9 @@ function mlHtml(root){
     // Kalenderdatei: rechtzeitig an die Datei fuers naechste Jahr erinnern
     const bis=C.d.length?C.d[C.d.length-1][0]:null;
     if(mlIcs(A)&&bis&&mlTage(bis)<45)h+=`<div class="kzg-sub ml-warn">Die Kalenderdatei reicht nur bis ${mlDatum(bis)} – bitte die neue Datei deines Abfallbetriebs einlesen.</div>`;
-    if(mlDatei(A)&&C.oh)h+=`<div class="kzg-sub ml-warn">Für ${mlEsc(A.sn)} ${mlEsc(A.h)} hat der Landkreis keinen eigenen Abfuhrplan – auch auf seiner Seite erscheint dort keiner. Gezeigt werden die Termine der meisten Häuser der Straße; vor allem bei der Gelben Tonne kann es abweichen.</div>`;
+    if(mlDatei(A)&&C.oh)h+=`<div class="kzg-sub ml-warn">Für ${mlEsc(A.sn)} ${mlEsc(A.h)} hat der Landkreis keinen eigenen Abfuhrplan – auch auf seiner Seite erscheint keiner. `
+      +(C.oh!=="-"&&C.oh!==1?`Gezeigt werden die Termine von Nr. ${mlEsc(C.oh)} (nächstes Haus auf derselben Straßenseite), Tonnen, die es dort nicht gibt, wie bei den meisten Häusern der Straße.`
+        :"Gezeigt werden die Termine der meisten Häuser der Straße.")+` Stimmt etwas nicht, unter „Tonnen und Adresse“ eine Nachbarnummer wählen.</div>`;
     if(mlDatei(A)&&(!bis||mlTage(bis)<30))h+=`<div class="kzg-sub ml-warn">Der Kalender reicht ${bis?"nur bis "+mlDatum(bis):"nicht weiter"} – der Landkreis hat das nächste Jahr noch nicht veröffentlicht. Die App holt es, sobald es da ist (wöchentlich geprüft).</div>`;}
   // Tonnen zum An- und Abwaehlen: alle, die es an dieser Adresse gibt
   const fr=C?Object.keys(C.fr).filter(f=>C.d.some(x=>x[1].includes(f))):[],sel=mlWahl(A),ht=mlHeimText(A);

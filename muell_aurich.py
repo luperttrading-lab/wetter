@@ -200,9 +200,27 @@ def strasse_lesen(gem, ort, strasse, cache):
         return None
     if len(kals) == 1:
         return ("all", json.loads(kals.pop()))
+    v = vereinen([[tuple(x) for x in json.loads(k)] for k in kals])
+    if v:
+        return ("all", v)
     # Hausnummern, fuer die der Dienst keinen Plan liefert (HTTP 500 - auch auf seiner eigenen Seite kommt dann
     # nichts, z. B. Marschweg 3): bleiben waehlbar, die App zeigt den Standard der Strasse mit Hinweis
     return ("hn", [(h, alle[h]) for h in nums if alle.get(h)], [h for h in nums if not alle.get(h)])
+
+
+def vereinen(kals):
+    """Kalender mehrerer Hausnummern zu EINEM, wenn sie sich nur in den Tonnen unterscheiden (Nr. 1 ohne Biotonne),
+    nicht in den Tagen: je Tonne muessen alle Haeuser, die sie haben, dieselben Termine haben. Sonst None.
+    Die App laesst dann nur die Strasse waehlen; welche Tonnen man hat, hakt man dort an."""
+    je = {}
+    for k in kals:
+        tage = {}
+        for d, n in k:
+            tage.setdefault(n, []).append(d)
+        for n, ds in tage.items():
+            if je.setdefault(n, ds) != ds:
+                return None
+    return sorted((d, n) for n, ds in je.items() for d in ds)
 
 
 def lesen_alt():
