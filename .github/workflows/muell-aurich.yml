@@ -1,0 +1,46 @@
+name: Muellkalender Landkreis Aurich holen
+
+# Der Abfuhrkalender des Landkreises Aurich (C-Trace) sendet keinen CORS-Kopf - die App darf ihn nicht
+# selbst lesen. muell_aurich.py legt ihn als muell-aurich.json neben die App.
+# Woechentlich: meist nur eine Stichprobe (~12 Abrufe); ein voller Lauf (~5000 Abrufe, ~1,5 h) nur,
+# wenn die Stichprobe abweicht (z. B. neuer Jahreskalender im Dezember) oder alle 35 Tage.
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      voll:
+        description: "Vollen Lauf erzwingen"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: muell-aurich
+  cancel-in-progress: false
+
+jobs:
+  aurich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: muell-aurich.json schreiben
+        run: python3 muell_aurich.py ${{ inputs.voll && '--voll' || '' }}
+      - name: committen
+        run: |
+          if git diff --quiet -- muell-aurich.json && git ls-files --error-unmatch muell-aurich.json >/dev/null 2>&1; then echo "unveraendert"; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add muell-aurich.json
+          git commit -q -m "Muellkalender Landkreis Aurich aktualisiert"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push abgelehnt, Versuch $i - hole main neu"
+            sleep $((i*3))
+            git pull --rebase -q origin main
+          done
+          exit 1

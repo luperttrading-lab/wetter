@@ -21,6 +21,8 @@ Drittquellen oder abgeleitet, [Vermutung] = nicht belegt.
 | daten.gdz.bkg.bund.de (VG250) | Grenzen in den Karten (`grenzen.json`) | frei | frei, "© GeoBasis-DE / BKG (Jahr)" (dl-de/by-2-0) |
 | Mondfoto (`MOON_IMG`, eingebettet in index.html) | Mondanzeige | - | **Herkunft unbekannt** - vor jeder Veroeffentlichung klaeren |
 | GitHub Pages und Actions | Ausliefern, Datenlaeufe | frei (Repo oeffentlich) | Pages **nicht** fuer Geschaeft/SaaS [Sicher], siehe unten |
+| awido.cubefour.de (AWIDO) | Muellabfuhr, 48 Kreise (v7.08-v7.10), direkt aus der App | frei, CORS erlaubt | nicht geprueft [Vermutung: Abfuhrtermine sind oeffentliche Angaben der Kreise, die Schnittstelle selbst gehoert dem Anbieter] |
+| apps.c-trace.de (Landkreis Aurich) | Muellabfuhr Norden (v7.14), von der Action `muell-aurich.yml` geholt und als `muell-aurich.json` im Repo abgelegt | frei | **ungeklaert** - siehe unten |
 
 ## Esri - der haerteste Punkt
 
@@ -43,6 +45,17 @@ State University would be appreciated." Genutzt fuer Flughafen-Messungen (METAR)
 je Station und Ortstag (2 Abrufe je Laden, nur dort), Stationsliste `metar-stationen.json` (einmal von Hand gebaut,
 `tools/metar_stationen.py`). Kein Schluessel, CORS erlaubt. Quellvermerk steht im Fuss der App. Die Rohdaten selbst sind
 METAR-Meldungen der Wetterdienste der Laender (ueber NOAA/WMO) - [Vermutung] ebenfalls frei verbreitet, nicht einzeln geprueft.
+
+## Abfuhrkalender Landkreis Aurich (seit v7.14)
+
+Die Termine stammen vom Abfallwirtschaftsbetrieb Landkreis Aurich (Abfuhrkalender ueber C-Trace,
+apps.c-trace.de/web.aurich-abfallkalender). Der Dienst sendet keinen CORS-Kopf, darum holt `muell_aurich.py` den
+oeffentlichen Kalender fuer die Gemeinde Norden (je Strasse Stichproben, ~5000 Abrufe je vollem Lauf, hoechstens
+monatlich bzw. beim neuen Jahreskalender, sonst woechentlich ~12 Abrufe) und legt ihn als `muell-aurich.json` in das
+oeffentliche Repo. [Vermutung] Fuer eine private Nutzung unbedenklich - es sind dieselben Termine, die jeder auf der Seite
+abrufen kann, und ein Kalender je Strasse ist keine personenbezogene Angabe. Nutzungsbedingungen fuer die Schnittstelle
+habe ich nicht gefunden (nicht gesucht: Impressum des Landkreises). Vor einer kommerziellen Nutzung beim Landkreis
+nachfragen; die Quelle steht unter jeder Muell-Liste in der App.
 
 ## Open-Meteo
 

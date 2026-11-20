@@ -4206,6 +4206,34 @@ getPlaces oder Nominatim, wird beim naechsten Laden neu gefragt). In v7.12 stand
 Oeffnen von "Kacheln waehlen" da. Geprueft (`t712b.py`, `t712.py`): Huettenberg normal und im Bearbeiten ohne Muell-Kachel, Plaetze
 dahinter mit echtem data-slot, Pool-Eintrag sofort, Einrichtung "Ortsteil" -> Reiskirchen -> Kachel Do 26.11. Bio; Wettenberg weiter
 "Strasse"; Wetzlar ok:false; Norden im Bearbeiten ohne Kachel. Nicht am iPhone geprueft.
+v7.14 MUELL NORDEN AUTOMATISCH (Nutzer 20.11.: "fuer Norden eine Moeglichkeit finden, automatisch - du hattest vorhin die
+Seite, wo ich den Muell abfrage, koennen wir das importieren?"). Der Landkreis Aurich fuehrt den Kalender ueber C-Trace
+(`apps.c-trace.de/web.aurich-abfallkalender`, Sitzungs-ID im Pfad per Umleitung von /Abfallkalender); KEIN CORS-Kopf (am 20.11.
+wieder geprueft: OData und Kalenderdatei). Darum DATEI-QUELLE: `muell_aurich.py` + Workflow `muell-aurich.yml` (Mo 02:17 UTC
++ Handstart mit "voll") schreiben `muell-aurich.json` auf main (wie pollen.json). Schnittstelle: OData.svc/Strassen
+($filter Ort/Gebiet/Name, Ort/Name; Norden 584 Strassen), Funktion AktuelleObjekte?gemeinde=&ort=&strasse= (Hausnummern),
+abfallkalender/cal?Ort=&Gemeinde=&Strasse=&Hausnr=&Abfall=0|1|...|299 = ICS je HAUSNUMMER (leere Hausnummer -> HTTP 500;
+SUMMARY "Abfuhr: Biotonne|Blaue Tonne|Gelbe Tonne|Reststoff"; ~37 KB, nur das laufende Jahr - 2026 bis 24.-28.12.).
+Keine Bezirke in der Schnittstelle -> je Strasse Stichproben: erste/mittlere/letzte Nummer, gerade und ungerade getrennt,
+bei Abweichung halbieren. Verglichen werden nur Termine ab heute - 7 Tage (`AB_TAG`): neue Objekte haben Termine erst ab
+Einzug (Alleestrasse 6a ab 28.08.) und galten sonst als "andere Abfuhr". Ergebnis echt verschieden: Altendeichsweg 5 (Blau
+20.11., Gelb 27.11.) gegen 28 (Gelb 30.11., Blau 4.12.) - am Dienst gegengeprueft. FORMAT: fr = Tonnennamen, t = Kalender je
+{Tonnen-Index: "JJJJMMTT d d d" (erstes Datum, dann Tagesabstaende)}, g.Norden = {o: Ort, b: Rahmen, s: {Strasse: Kalender
+| [Standard, "h1|h2|...", {Hausnummer: Kalender}]}}. Voller Lauf nur ohne Datei, nach 35 Tagen oder wenn die Stichprobe
+(6 Strassen) abweicht - so kommt der Jahreskalender 2027 von selbst; vergangene Termine der letzten Woche bleiben beim
+Jahreswechsel stehen. Ein voller Lauf: ~5000 Abrufe, ~80 min (0,25 s Pause). Erster Lauf aus dem Pruefstand (siehe
+Commit). APP: `MUELL_DATEI_K` = [Schluessel, Name, Rahmen, Datei, Quelle] (Kreis-Liste wie MUELL_KREISE, `mlKreis` sucht in
+beiden), Adresse k "datei:aurich", o "datei:aurich|Norden|Strasse[|Hausnummer]", Rahmen = Gemeinde (kein Nominatim).
+`mlOrteHolen/mlStrHolen/mlHnHolen` liefern AWIDO-Form (key/value) aus Dienst bzw. Datei; Hausnummer nur bei geteilten
+Strassen; `mlDateiDaten` baut die Termine, Tonnen-Schluessel = NAME (Index wechselt je Lauf). Datei je Sitzung 6 h
+zwischengespeichert. `mlHierPruefen`: liegt der Ort im Rahmen einer Datei-Quelle, sofort ok (kein Abruf) -> "+ Muellabfuhr
+fuer Norden" unter "Kacheln waehlen", Einrichtung mit "Landkreis Aurich (Norden)" vorbelegt. Leere Termine (Jahresende vor
+dem neuen Kalender) sind kein Fehler; Hinweis "Der Kalender reicht nur bis ... - der Landkreis hat das naechste Jahr noch nicht
+veroeffentlicht", ab 30 Tagen vor dem Ende. Kalenderdatei-Import nimmt jetzt auch "Abfuhr: " vor dem Namen weg. Weitere
+Gemeinden des Kreises: in `GEMEINDEN` (Python) UND im Rahmen von MUELL_DATEI_K eintragen. LIZENZEN.md: C-Trace ungeklaert,
+AWIDO nachgetragen. Geprueft (`t714.py`, Testdatei 20 Strassen): Norden ohne Kachel -> Pool-Eintrag -> Landkreis Aurich /
+Norden / Altendeichsweg / Hausnummer 28 -> Termine = Dienst, Kachel Mo 23.11. Bio; Wettenberg unveraendert. Nicht am iPhone
+geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
