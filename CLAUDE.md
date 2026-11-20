@@ -4173,6 +4173,20 @@ AWIDO nur fuer Adressen, die gerade gezeigt werden. Geprueft (Playwright `t711.p
 Umstellung behaelt die Tonnenwahl; Kalenderdatei fuer Norden von Wettenberg aus angelegt; Kachel Wettenberg = Wettenberg,
 Norden = Norden, Huettenberg ohne Kachel; Haekchen -> Huettenberg "WETTENBERG", Norden behaelt die eigene; Loeschen; keine
 Fehler. Nicht am iPhone geprueft.
+v7.12 (Nutzer zu v7.11, Bild des Muell-Fensters in Norden: "das Haekchen, die Karte auch an den anderen Orten anzeigen, macht
+keinen Sinn - ich will nicht den Wettenberger Muell an anderen Orten; an anderen Orten muss ich den Muell unten anklicken
+koennen, wenn er fuer diesen Ort vorhanden ist, und dann die Einstellung, dass es zu meiner Strasse passt"): Haekchen
+`ueberall` ENTFERNT (gespeicherte Flags werden beim Start geloescht), die Kachel zeigt nur noch die Adresse des angezeigten Orts.
+ANGEBOT unter "Kacheln waehlen" (Pool, an erster Stelle): "+ Muellabfuhr fuer Huettenberg" - nur, wenn es hier keine Adresse
+gibt UND der Ort im AWIDO-Kalender steht (`mlHierPruefen`, einmal je Ort): eine Gemeinde eines Kandidaten-Kreises muss so heissen
+wie der Ortsname, sonst wie die Gemeinde laut Nominatim reverse (zoom 10, `municipality`; Ortsteile). Der Kreis-RAHMEN allein
+taugt nicht: Wetzlar liegt im Rahmen des Lahn-Dill-Kreises, hat aber eigene Abfuhr (fehlt in getPlaces wie die Stadt Giessen) -
+dort kein Angebot. Norden (kein AWIDO): kein Angebot. Tipp -> `mlHierEinrichten`: Einrichtung mit Kreis und Gemeinde vorbelegt,
+kurzer Text "Muellabfuhr fuer X: Strasse waehlen"; ist die Kachel noch nicht gewaehlt, traegt ihr eigener Pool-Eintrag diesen Namen
+und oeffnet nach dem Hinzufuegen dieselbe Einrichtung. Das Fenster zeigt weiter alle gespeicherten Adressen per Knopf.
+Geprueft (`t712.py`, echte AWIDO-Daten): Flag geloescht, Huettenberg ohne Kachel -> Angebot -> Lahn-Dill/Huettenberg vorbelegt ->
+Strasse -> Kachel mit Huettenberger Terminen; Norden und Wetzlar ohne Angebot; Lollar ohne gewaehlte Kachel -> Eintrag "Muellabfuhr
+fuer Lollar" -> Einrichtung Landkreis Giessen/Lollar; Wettenberg unveraendert. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
