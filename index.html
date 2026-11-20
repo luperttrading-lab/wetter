@@ -2693,7 +2693,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.17</span>
+      <span class="ver">v7.18</span>
     </div>
   </header>
 
@@ -9213,7 +9213,14 @@ function mlHierPruefen(){const k=mlHierKey();if(MUELL.hier&&MUELL.hier.k===k)ret
     if(_kzEdit)try{kzRender();}catch(e){}})().catch(()=>{});
   return H;}
 function mlOrtKurz(){return String(LOC&&LOC.name||"").split(/\s*[\/,]\s*/).filter(Boolean).pop()||"diesen Ort";}
-function mlHierEinrichten(){const L=mlListe();kzGrossZeigen("");const inn=el("kzGrossIn");if(!inn)return;
+/* v7.18 (Nutzer: "wenn ich in einem Ort die Muellkachel loesche, soll sie an den anderen Orten stehen bleiben - die anderen
+   Kacheln sind gekoppelt, das ist gut so, Muell soll getrennt bleiben"): Minus auf der Muell-Kachel blendet sie nur fuer den
+   ANGEZEIGTEN Ort aus (`muellAus`, Liste von mlHierKey, 0,001 Grad); ihr Platz in der Auswahl bleibt. Hinzufuegen dort hebt es auf. */
+function mlAusListe(){try{const a=JSON.parse(localStorage.getItem("muellAus")||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
+function mlAusHier(){return mlAusListe().includes(mlHierKey());}
+function mlAusSetz(an){const k=mlHierKey();let a=mlAusListe().filter(x=>x!==k);if(an)a.push(k);
+  try{localStorage.setItem("muellAus",JSON.stringify(a.slice(-40)));}catch(e){}}
+function mlHierEinrichten(){mlAusSetz(false);const L=mlListe();kzGrossZeigen("");const inn=el("kzGrossIn");if(!inn)return;
   inn._mlSetup=true;inn._mlModus="neu";inn._mlHier=true;inn._mlO=L.length?L[0].o:null;inn._mlEin=false;inn._mlIcs=null;mlZeichne(inn);}
 /* v7.17 (Nutzer: "wenn ich die Kachel loesche und wieder hinzufuege, die gespeicherte Adresse einblenden statt direkt zu
    uebernehmen"): beim Hinzufuegen aus "Kacheln waehlen" gleich das Fenster mit der Adresse oben und "Passt so" / "Adresse aendern" */
@@ -9669,7 +9676,7 @@ const KZ_DEF={
   // v5.44: Rasen-Planer - Kachel "Gras jetzt" <-> "Maehen", Tipp oeffnet die Grossansicht mit Einstellungen
   rasen:{name:"Rasen mähen",kurz:"Rasen",ziel:{text:"Rasen"},gross(){return rzGross();},r(){return rzKachel();}},
   // v7.08: Muellabfuhr (EKW Landkreis Giessen), Tipp oeffnet Liste und Adresswahl
-  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){const w=mlListe().length>0&&!mlAktiv();if(w)try{mlHierPruefen();}catch(e){}return w;},gross(){return mlGross();},r(){return mlKachel();}}
+  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){const aus=mlAusHier(),w=mlListe().length>0&&!mlAktiv();if(w&&!aus)try{mlHierPruefen();}catch(e){}return aus||w;},gross(){return mlGross();},r(){return mlKachel();}}
 };
 /* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
    noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
@@ -9856,8 +9863,10 @@ function kzRender(){
        AWIDO-Gebiet liegt; ist die Kachel noch nicht gewaehlt, traegt ihr eigener Eintrag diesen Namen */
     let mh=false;try{mh=_kzEdit&&mlListe().length>0&&mlHierMoeglich();}catch(e){}
     const mhN=mh?"Müllabfuhr für "+mlEsc(mlOrtKurz()):"";
-    pool.innerHTML=_kzEdit?(mh&&ord.includes("muell")?`<div class="kp" data-mlhier="1"><b>+</b>${mhN}</div>`:"")
-      +Object.keys(KZ_DEF).filter(id=>!ord.includes(id)).sort((x,y)=>mh?(y==="muell")-(x==="muell"):0).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${id==="muell"?mlPoolName(mh,mhN):KZ_DEF[id].name}</div>`).join(""):"";}
+    // v7.18: hier ausgeblendete Muell-Kachel steht im Pool, obwohl sie in der Auswahl ist (an anderen Orten sichtbar)
+    let mAus=false;try{mAus=_kzEdit&&mlAusHier();}catch(e){}
+    pool.innerHTML=_kzEdit?(mh&&ord.includes("muell")&&!mAus?`<div class="kp" data-mlhier="1"><b>+</b>${mhN}</div>`:"")
+      +Object.keys(KZ_DEF).filter(id=>!ord.includes(id)||(id==="muell"&&mAus)).sort((x,y)=>mh||mAus?(y==="muell")-(x==="muell"):0).map(id=>`<div class="kp" data-add="${id}"><b>+</b>${id==="muell"?mlPoolName(mh,mhN):KZ_DEF[id].name}</div>`).join(""):"";}
   /* v6.78 (Nutzer 13.11.: "das Ziehen und Entfernen muss oben bei den Kacheln stehen"): der Hinweis steht direkt unter den
      Kacheln (#kzHint), nicht mehr im Fuss unter den Einstellungen; "Fertig" steht seit v6.76 im Sockel - der Fuss ist im
      Bearbeiten leer */
@@ -10109,11 +10118,14 @@ function kzVerschieben(to){if(!_kzDrag||to==null||!(to>=0))return;const d=_kzDra
   window.addEventListener("blur",()=>{if(_kzDrag){kzGhostWeg();kzRender();}});
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState!=="visible"&&_kzDrag){kzGhostWeg();kzRender();}});
   box.addEventListener("click",e=>{const m=e.target.closest(".kzmin");if(!m)return;e.preventDefault();e.stopPropagation();
+    if(m.dataset.min==="muell"){mlAusSetz(true);kzRender();return;}   // v7.18: nur an diesem Ort
     const a=kzSlots(),i=a.indexOf(m.dataset.min);if(i>=0)a[i]=null;while(a.length&&!a[a.length-1])a.pop();_kzWahl=a;kzSpeichern();kzRender();});   // v5.32: Platz bleibt frei
   if(pool)pool.addEventListener("click",e=>{const p=e.target.closest(".kp");if(!p)return;
     if(p.dataset.mlhier){mlHierEinrichten();return;}   // v7.12
     const id=p.dataset.add;if(!KZ_DEF[id])return;
-    const w=kzSlots(),f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();kzRender();
+    if(id==="muell")mlAusSetz(false);
+    const w=kzSlots();if(!w.includes(id)){const f=w.indexOf(null);if(f>=0)w[f]=id;else w.push(id);_kzWahl=w;kzSpeichern();}
+    kzRender();
     // v7.17: gespeicherte Adresse hier -> zeigen und fragen; keine hier, aber moeglich (oder noch gar keine) -> Einrichtung
     if(id==="muell"){if(mlAktiv())mlGespeichert();else if(!mlListe().length||mlHierMoeglich())mlHierEinrichten();}});   // v5.32: in den ersten freien Platz
   if(foot)foot.addEventListener("click",e=>{

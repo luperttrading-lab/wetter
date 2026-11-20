@@ -4288,6 +4288,17 @@ gleich die Einrichtung. Der Pool-Eintrag nennt die gespeicherte Adresse schon vo
 nach "Passt so" stand man ploetzlich ausserhalb. Geprueft (`t717.py`, Himmel und hell): Minus -> Pool-Eintrag mit Adresse ->
 Kasten -> Passt so (Fenster zu, Bearbeiten bleibt) -> nochmal -> Adresse aendern (vorbelegt Marschweg 3) -> Abbrechen; ohne
 Adresse -> Einrichtung mit Landkreis Aurich vorbelegt.
+v7.18 (Nutzer: "wenn ich in einem Ort die Muellkachel loesche, sollen sie an den anderen Orten stehen bleiben - sonst sind
+die Kacheln gekoppelt, das ist auch gut so, aber Muell soll getrennt bleiben"; er hatte sie in Norden entfernt, dann fehlte sie
+auch in Huettenberg und Erlental): Minus auf der MUELL-Kachel nimmt sie nicht mehr aus der Auswahl (`_kzWahl`, gilt fuer alle
+Orte), sondern blendet sie nur am ANGEZEIGTEN Ort aus: Liste `muellAus` (mlHierKey = Breite/Laenge auf 0,001 Grad, hoechstens 40),
+`mlAusHier()` macht `weg()` wahr. Im Pool steht sie dort wieder (oben, mit gespeicherter Adresse "Müllabfuhr · Marschweg 3");
+Hinzufuegen hebt die Ausblendung NUR fuer diesen Ort auf, ohne einen zweiten Platz anzulegen (`mlAusSetz(false)`; ebenso
+`mlHierEinrichten`). Alle anderen Kacheln bleiben gekoppelt wie bisher. Geprueft (`t718.py`): Norden Minus -> Norden weg,
+Wettenberg und Krofdorf (gleiche Adresse) da; Norden wieder hinzugefuegt -> "Passt so"; Krofdorf Minus -> nur Krofdorf weg,
+Wettenberg (500 m daneben, anderer Ort) bleibt; `t717.py` unveraendert. FOLGE fuer den Nutzer: seine alte Entfernung in Norden
+(vor v7.18) hatte die Kachel aus der Auswahl genommen - nach dem Wieder-Hinzufuegen erscheint sie auch in Norden, dort einmal
+entfernen.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
