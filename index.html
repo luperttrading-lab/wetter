@@ -2665,7 +2665,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.12</span>
+      <span class="ver">v7.13</span>
     </div>
   </header>
 
@@ -9065,6 +9065,12 @@ function mlKreisVor(){return mlKreisKand()[0]||null;}
 function mlOrtTreffer(L){const H=MUELL.hier,f=n=>L.find(x=>{const r=mlNameRein(x.value);return r.length>2&&n.includes(r);});
   return f(String(LOC&&LOC.name||""))||(H&&H.gem?f(H.gem):null)||null;}
 // Gemeindename fuer die Kartensuche: "SLF-RU-Allendorf" -> "Allendorf", "VG Altenkirchen - Flammersfeld" -> "Altenkirchen"
+/* v7.12b: Was steht in der zweiten Liste? Bei rund einem Drittel der 48 Kreise fuehrt AWIDO den Kalender je ORTSTEIL
+   (Lahn-Dill: Huettenberg -> Huettenberg, Rechtenbach, Reiskirchen ...; Strassen gibt es dort gar nicht), bei manchen gemischt
+   (Strassen und Weiler). Gezaehlt am 20.11. an je drei Gemeinden aller Kreise; Erkennung an Strassenwoertern im Namen. */
+function mlStrArt(L){const n=L.length;if(!n)return "Straße";
+  const st=L.filter(x=>/(stra(ß|ss)e|str\.|weg\b|gasse|platz|ring\b|allee|damm|pfad|steig|chaussee|ufer|graben|markt|siedlung|\bam |\ban der |\bzum |\bzur |\bim |\bin der )/i.test(String(x.value))).length/n;
+  return st<.3?"Ortsteil":st<.85?"Straße oder Ortsteil":"Straße";}
 function mlNameRein(v){return String(v||"").replace(/^[A-ZÄÖÜ]{2,4}-[A-ZÄÖÜ]{2,4}-/,"").replace(/^(Gemeinde|Stadt|Markt|VG|Verbandsgemeinde)\s+/i,"")
   .split(/\s+-\s+|\s+mit\s+|\s*\(|\s*\//)[0].trim();}
 /* ---- v7.11 MEHRERE ADRESSEN (Nutzer 20.11.: "den Muell auch von woanders anzeigen, wenn ich es unbedingt einfuegen will -
@@ -9114,15 +9120,23 @@ function mlHierMoeglich(){return !mlVerfuegbar().length&&mlHierPruefen().ok===tr
    Ort; bis zur Antwort kein Angebot, danach zeichnet das Bearbeiten neu. */
 function mlHierKey(){return (+LOC.lat).toFixed(3)+","+(+LOC.lon).toFixed(3);}
 function mlHierPruefen(){const k=mlHierKey();if(MUELL.hier&&MUELL.hier.k===k)return MUELL.hier;
+  // gemerkt je Ort (30 Tage): ein Ortswechsel laedt die Seite neu, sonst stuende der Eintrag erst nach Sekunden da
+  let M={};try{M=JSON.parse(localStorage.getItem("muellHier")||"{}")||{};}catch(e){}
+  if(M[k]&&Date.now()-M[k].t<30*864e5){const G=M[k];return MUELL.hier={k,ok:!!G.ok,kd:G.kd,gem:G.gem};}
   const H=MUELL.hier={k,ok:null},kand=mlKreisKand();if(!kand.length){H.ok=false;return H;}
   (async()=>{const such=async()=>{for(const kd of kand){let L=MUELL.orte[kd];
         if(!L){try{L=MUELL.orte[kd]=await fetchJSON(MUELL_API+"getPlaces/client="+encodeURIComponent(kd),15000);}catch(e){continue;}}
         const t=mlOrtTreffer(L);if(t)return {kd,t};}return null;};
     let r=await such();
     if(!r){try{const j=await fetchJSON("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat="+(+LOC.lat)+"&lon="+(+LOC.lon),9000);
-        const a=j&&j.address||{};H.gem=a.municipality||a.city||a.town||a.village||"";}catch(e){}
+        const a=j&&j.address||{};H.gem=a.municipality||a.city||a.town||a.village||"";H.rev=1;}catch(e){}
       if(H.gem)r=await such();}
     if(MUELL.hier!==H)return;H.ok=!!r;if(r)H.kd=r.kd;
+    // merken nur, wenn die Abfrage durchkam (sonst beim naechsten Laden neu versuchen)
+    if(r||(H.rev&&kand.every(kd=>MUELL.orte[kd])))try{const M2=JSON.parse(localStorage.getItem("muellHier")||"{}")||{};
+      M2[k]={t:Date.now(),ok:H.ok?1:0,kd:H.kd||"",gem:H.gem||""};
+      const ks=Object.keys(M2).sort((a,b)=>M2[b].t-M2[a].t);ks.slice(20).forEach(x=>delete M2[x]);
+      localStorage.setItem("muellHier",JSON.stringify(M2));}catch(e){}
     if(_kzEdit)try{kzRender();}catch(e){}})().catch(()=>{});
   return H;}
 function mlOrtKurz(){return String(LOC&&LOC.name||"").split(/\s*[\/,]\s*/).filter(Boolean).pop()||"diesen Ort";}
@@ -9220,7 +9234,7 @@ function mlSetupHtml(E,mitListe,hier){
   const H=MUELL.hier,hk=H&&H.ok&&H.k===mlHierKey()?H.kd:null;   // v7.12: Kreis, in dem der Ort gefunden wurde
   const kv=E&&!mlIcs(E)?mlKd(E):(E&&mlIcs(E)?"ics":hk||mlKreisVor()||"ics");
   const ok=mlEsc(mlOrtKurz());
-  const intro=hier&&!E?`Müllabfuhr für ${ok}: Straße wählen. Die Kachel zeigt sie, wenn oben ${ok} eingestellt ist – deine anderen Adressen bleiben an ihrem Ort.`
+  const intro=hier&&!E?`Müllabfuhr für ${ok}: Gemeinde und Straße wählen (manche Kreise führen den Kalender nur je Ortsteil). Die Kachel zeigt sie, wenn oben ${ok} eingestellt ist – deine anderen Adressen bleiben an ihrem Ort.`
     :(E?"Adresse ändern: ":mitListe?"Weitere Adresse - die Kachel zeigt sie, wenn oben ihr Ort eingestellt ist. ":"Einmal die Adresse wählen, an der deine Tonnen stehen. ")
       +'Die Liste enthält die Gebiete, deren Abfuhrkalender über den Dienst AWIDO läuft (Landkreis Gießen ohne die Stadt Gießen); '
       +'für alle anderen ganz unten „Anderer Kreis: Kalenderdatei“.';
@@ -9229,8 +9243,8 @@ function mlSetupHtml(E,mitListe,hier){
     +MUELL_KREISE.map(r=>`<option value="${r[0]}"${r[0]===kv?" selected":""}>${mlEsc(r[1])}</option>`).join("")
     +`<option value="ics"${kv==="ics"?" selected":""}>Anderer Kreis: Kalenderdatei</option></select></label>`
     +'<div id="mlAw"><label>Gemeinde<select id="mlP" disabled><option value="">–</option></select></label>'
-    +'<label>Straße<select id="mlS" disabled><option value="">–</option></select></label>'
-    +'<label id="mlHw" hidden>Hausnummer<select id="mlH"></select></label></div>'
+    +'<label id="mlSw"><span id="mlSl">Straße</span><select id="mlS" disabled><option value="">–</option></select></label>'
+    +'<label id="mlHw" hidden><span id="mlHl">Hausnummer</span><select id="mlH"></select></label></div>'
     +'<div id="mlIcsW" hidden><div class="kzg-sub">Auf der Internetseite deines Abfallbetriebs den Abfuhrkalender für deine Adresse '
     +'als Kalenderdatei (.ics, „iCal“) herunterladen. Am iPhone: lange auf den Link drücken → „Verknüpfte Datei laden“, sie liegt '
     +'dann in „Dateien“ unter „Downloads“. Die Datei bleibt im Gerät, nichts wird hochgeladen.</div>'
@@ -9288,13 +9302,15 @@ function mlBinden(root){
   const fehler=e=>{HIN.textContent="Abfall-Dienst nicht erreichbar ("+(e&&e.message||e)+") – später nochmal versuchen.";};
   const strassen=p=>{S.disabled=true;OK.disabled=true;HW.hidden=true;mlOpt(S,[],"wird geladen …");
     const da=MUELL.str[p]?Promise.resolve(MUELL.str[p]):fetchJSON(MUELL_API+"getGroupedStreets/"+encodeURIComponent(p)+"?selectedOID="+encodeURIComponent(p)+"&client="+encodeURIComponent(kd()),15000).then(L=>MUELL.str[p]=L);
-    da.then(L=>{mlOpt(S,L,L.length>1?"Straße wählen":"",A&&A.p===p?A.s:"");S.disabled=false;if(S.value)hausnr(S.value);}).catch(fehler);};
+    da.then(L=>{const art=mlStrArt(L);q("#mlSl").textContent=art;q("#mlSw").hidden=L.length===1;
+      mlOpt(S,L,L.length>1?art+" wählen":"",A&&A.p===p?A.s:"");S.disabled=false;if(S.value)hausnr(S.value);}).catch(fehler);};
   const hausnr=s=>{OK.disabled=true;HW.hidden=true;S.dataset.o="";
     const da=MUELL.hn[s]?Promise.resolve(MUELL.hn[s]):fetchJSON(MUELL_API+"getStreetAddons/"+encodeURIComponent(s)+"?client="+encodeURIComponent(kd()),15000).then(L=>MUELL.hn[s]=L);
     da.then(L=>{if(!L.length){S.dataset.o=s;OK.disabled=false;return;}
       if(L.length===1&&!L[0].value){S.dataset.o=L[0].key;OK.disabled=false;return;}
-      mlOpt(H,L.filter(x=>x.value),"",A&&A.s===s?A.o:"");HW.hidden=false;OK.disabled=false;}).catch(fehler);};
-  const gemeinden=()=>{const k=kd();HIN.textContent="";OK.disabled=true;HW.hidden=true;mlOpt(S,[],"–");S.disabled=true;
+      const LH=L.filter(x=>x.value);q("#mlHl").textContent=LH.filter(x=>/^\s*\d/.test(x.value)).length*2>=LH.length?"Hausnummer":"Bereich";
+      mlOpt(H,LH,"",A&&A.s===s?A.o:"");HW.hidden=false;OK.disabled=false;}).catch(fehler);};
+  const gemeinden=()=>{const k=kd();HIN.textContent="";OK.disabled=true;HW.hidden=true;mlOpt(S,[],"–");S.disabled=true;q("#mlSw").hidden=false;q("#mlSl").textContent="Straße";
     const ics=k==="ics";AW.hidden=ics;IW.hidden=!ics;
     if(ics){OK.disabled=!(root._mlIcs&&root._mlIcs.d.length);return;}
     if(!k){mlOpt(P,[],"–");P.disabled=true;return;}
@@ -9525,7 +9541,7 @@ const KZ_DEF={
   // v5.44: Rasen-Planer - Kachel "Gras jetzt" <-> "Maehen", Tipp oeffnet die Grossansicht mit Einstellungen
   rasen:{name:"Rasen mähen",kurz:"Rasen",ziel:{text:"Rasen"},gross(){return rzGross();},r(){return rzKachel();}},
   // v7.08: Muellabfuhr (EKW Landkreis Giessen), Tipp oeffnet Liste und Adresswahl
-  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){return mlListe().length>0&&!mlAktiv();},gross(){return mlGross();},r(){return mlKachel();}}
+  muell:{name:"Müllabfuhr",kurz:"Müll",ziel:{text:"Müll"},weg(){const w=mlListe().length>0&&!mlAktiv();if(w)try{mlHierPruefen();}catch(e){}return w;},gross(){return mlGross();},r(){return mlKachel();}}
 };
 /* Regen des Kalendertags (gefallen + erwartet bis 24 Uhr) - steht seit v5.32 nur
    noch in der Grossansicht von "Regen 24 h" (bis v5.31 eigene Kachel "Bis 24 Uhr") */
@@ -9607,11 +9623,16 @@ function kzRender(){
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
   /* v7.09: eine Kachel mit weg() (Muell nur am Heimatort) steht ausserhalb des Bearbeitens wie ein freier Platz da;
      am Ende faellt der Platz ganz weg, sonst bliebe eine leere Reihe stehen */
-  const S=kzSlots().map(id=>id&&!_kzEdit&&KZ_DEF[id].weg&&KZ_DEF[id].weg()?null:id),ord=S.filter(Boolean);
-  if(!_kzEdit)while(S.length&&!S[S.length-1])S.pop();
-  if(_kzEdit){let c=0;S.forEach(id=>{const w=id&&KZ_DEF[id].breit?2:1;if(c+w>3)c=0;c=(c+w)%3;});for(let i=c?3-c:3;i>0;i--)S.push(null);}
+  /* v7.12b (Nutzer, Bild Huettenberg im Bearbeiten: "oben die kleine Karte muss weg sein, wenn ich nicht auf meinem
+     Heimatstandort bin"): eine Kachel mit weg() faellt hier GANZ heraus - auch im Bearbeiten und ohne Luecke, als waere
+     sie an diesem Ort nicht gewaehlt. Ihr Platz in _kzWahl bleibt (zu Hause steht sie wieder dort); data-slot nennt den
+     ECHTEN Platz, damit Ziehen und Einfuegen weiter stimmen. */
+  const REAL=kzSlots(),S=[];REAL.forEach((id,i)=>{if(!(id&&KZ_DEF[id].weg&&KZ_DEF[id].weg()))S.push([id,i]);});
+  const ord=(_kzEdit?REAL:S.map(x=>x[0])).filter(Boolean);
+  if(!_kzEdit)while(S.length&&!S[S.length-1][0])S.pop();
+  if(_kzEdit){let c=0,n=REAL.length;S.forEach(([id])=>{const w=id&&KZ_DEF[id].breit?2:1;if(c+w>3)c=0;c=(c+w)%3;});for(let i=c?3-c:3;i>0;i--)S.push([null,n++]);}
   box.classList.toggle("edit",_kzEdit);
-  box.innerHTML=S.map((id,si)=>{if(!id)return `<div class="kzleer" data-slot="${si}"></div>`;let x=null;try{x=KZ_DEF[id].r();}catch(e){console.warn("Kachel",id,e);}
+  box.innerHTML=S.map(([id,si])=>{if(!id)return `<div class="kzleer" data-slot="${si}"></div>`;let x=null;try{x=KZ_DEF[id].r();}catch(e){console.warn("Kachel",id,e);}
     if(!x)x={l:KZ_DEF[id].kurz||KZ_DEF[id].name.split(" ·")[0],v:"–",s:"lädt"};
     const _alt=x.roh?null:kzAlter(id);if(_alt)x=Object.assign({},x,{alt:(x.alt||[]).concat([{s:"Stand "+kzHM(_alt)}]),_alt:1});   // v4.66: kurz = Beschriftung, solange Daten fehlen
     const lock=kzGesperrt(id,ord)?1:0;

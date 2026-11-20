@@ -4187,6 +4187,25 @@ und oeffnet nach dem Hinzufuegen dieselbe Einrichtung. Das Fenster zeigt weiter 
 Geprueft (`t712.py`, echte AWIDO-Daten): Flag geloescht, Huettenberg ohne Kachel -> Angebot -> Lahn-Dill/Huettenberg vorbelegt ->
 Strasse -> Kachel mit Huettenberger Terminen; Norden und Wetzlar ohne Angebot; Lollar ohne gewaehlte Kachel -> Eintrag "Muellabfuhr
 fuer Lollar" -> Einrichtung Landkreis Giessen/Lollar; Wettenberg unveraendert. Nicht am iPhone geprueft.
+v7.13 (Nutzer, zwei Bilder Huettenberg mit v7.12: "oben steht die Muellkachel schon an der Stelle, wo ich meinen eigenen
+Muell habe, unten kommt 'Muell fuer Huettenberg' - oben muss die kleine Karte weg sein, wenn ich nicht auf meinem Heimatstandort
+bin"; "bei der Strasse kommen die Ortschaften von Huettenberg, nicht die Strassen - das falsche Auswahlmenue"). (1) KACHELN:
+eine Kachel mit weg() faellt in `kzRender` ganz heraus - auch IM BEARBEITEN und ohne Luecke (v7.09: Luecke ausserhalb, "nur zu
+Hause" im Bearbeiten). Ihr Platz in `_kzWahl` bleibt; die Anzeige-Liste traegt je Kachel den ECHTEN Platz als data-slot, damit
+Ziehen/Einfuegen weiter auf `kzSlots()` stimmen. Folge: an Orten ohne Adresse ruecken die Kacheln dahinter auf. (2) ORTSTEILE:
+AWIDO fuehrt bei rund einem Drittel der 48 Kreise den Kalender je ORTSTEIL statt je Strasse (getGroupedStreets liefert dann
+Ortsteile, getStreetAddons einen leeren Eintrag) - Lahn-Dill (Huettenberg: Huettenberg, Rechtenbach, Reiskirchen, Vollnkirchen,
+Volpertshausen, Weidenhausen), Aschaffenburg, Coburg, Kelheim, Suedl. Weinstrasse ...; gemischt (Strassen + Weiler) z. B.
+Ansbach, Rottal-Inn. Gezaehlt am 20.11. an je drei Gemeinden aller Kreise (`aw2/scan.py` im Scratchpad). Die Auswahl war also
+richtig, nur falsch beschriftet. `mlStrArt(L)`: Anteil der Namen mit Strassenwort (Strasse, Weg, Gasse, Platz, Ring, Allee, "Am",
+"An der" ...) < 30 % -> "Ortsteil", < 85 % -> "Strasse oder Ortsteil", sonst "Strasse"; ein einziger Eintrag -> Feld ausgeblendet.
+Drittes Feld "Hausnummer", oder "Bereich", wenn die Eintraege nicht mit einer Ziffer beginnen (Neustadt/WN: "noerdlich der B 470").
+(3) Die Pruefung "gibt es den Ort im AWIDO-Kalender" (`mlHierPruefen`) laeuft schon beim Laden, sobald die Muell-Kachel an diesem
+Ort weg() ist, und wird je Ort 30 Tage gemerkt (`muellHier`, hoechstens 20 Orte; nur eindeutige Ergebnisse - scheitert
+getPlaces oder Nominatim, wird beim naechsten Laden neu gefragt). In v7.12 stand "+ Muellabfuhr fuer ..." erst Sekunden nach dem
+Oeffnen von "Kacheln waehlen" da. Geprueft (`t712b.py`, `t712.py`): Huettenberg normal und im Bearbeiten ohne Muell-Kachel, Plaetze
+dahinter mit echtem data-slot, Pool-Eintrag sofort, Einrichtung "Ortsteil" -> Reiskirchen -> Kachel Do 26.11. Bio; Wettenberg weiter
+"Strasse"; Wetzlar ok:false; Norden im Bearbeiten ohne Kachel. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
