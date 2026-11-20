@@ -4265,6 +4265,13 @@ reduzieren" (beim Nutzer vermutlich an, v6.66) eine CSS-Animation abschalten wue
 Raendern ab 22/78 % - bei 0/100 % blieben an den Ecken des schraegen Streifens sichtbare Kanten. Geprueft (`t715.py`, hell und
 Himmel, reduced_motion): "alt" -> 10 Treffer, "marschw" -> Marschweg gewaehlt, Hausnummer, Knopf gruen mit laufender Animation;
 "xyz" -> nichts gefunden, Knopf aus; Vorschlag antippen waehlt. Nicht am iPhone geprueft.
+v7.16 (Nutzer: "die alte gespeicherte Adresse ist gut, aber man muss sie trotzdem irgendwo aendern koennen"): Die Funktion gab
+es seit v7.08, aber nur im ZUGEKLAPPTEN Teil "Tonnen und Adresse" - nicht gefunden. Jetzt Knopf "ändern" (Stift, Pille
+`.ml-aend`, data-mlk="adr") direkt neben der Adresszeile im Fenster (`.ml-adrz`); oeffnet die Einrichtung mit der gespeicherten
+Adresse vorbelegt (Abbrechen fuehrt zurueck), Uebernehmen ERSETZT sie. Bei Kalenderdatei heisst er "neue Datei". Adress-Knoepfe
+oben nennen jetzt auch die Hausnummer (`mlLabel`). Hinweis bei Nummern ohne Plan: "ueber „ändern“ eine Nachbarnummer waehlen".
+Geprueft (`t716.py`): Wettenberg Weiherstrasse -> "schul" -> Schulstrasse (ein Treffer, gleich gewaehlt) -> ersetzt, weiter 2
+Adressen; Norden Marschweg 3 -> 1, Kachel folgt (Nr. 1 ohne Biotonne: "Do 3.12. Rest").
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
