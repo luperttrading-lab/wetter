@@ -4299,6 +4299,25 @@ Wettenberg und Krofdorf (gleiche Adresse) da; Norden wieder hinzugefuegt -> "Pas
 Wettenberg (500 m daneben, anderer Ort) bleibt; `t717.py` unveraendert. FOLGE fuer den Nutzer: seine alte Entfernung in Norden
 (vor v7.18) hatte die Kachel aus der Auswahl genommen - nach dem Wieder-Hinzufuegen erscheint sie auch in Norden, dort einmal
 entfernen.
+v7.19 MOND-EREIGNISSE (Nutzer 24.11., Bild der Startseite am Vollmondtag: "Ereignisse wie Supermond oben in der Kachel
+einblenden und evtl. zusaetzlich als Popup 2-3 Sekunden beim Oeffnen an solchen Tagen"). `mondVollmonde(jahr)` (Vollmonde per
+Bisektion auf moonInfo().frac = 0,5, je Jahr gemerkt, 6-7 ms): SUPERMOND nach Espenak (EarthSky/Farmer's Almanac/Sky at Night) =
+Vollmond naeher als Perigaeum + 10 % (Apogaeum - Perigaeum) des eigenen Umlaufs (+-15 Tage) - die feste Schwelle 361 500 km der
+Mondkarte (bis v7.18) liess den 3.1.2026 (362 312 km) weg; BLAUER MOND = zweiter Vollmond im Kalendermonat; GROESSTER = naechster
+Vollmond des Kalenderjahres. Gegen PyEphem: 2026 = 3.1., 24.11., 24.12. (groesster); 2027 = 22.1. (groesster), 21.2.; 2028 = 12.1.,
+10.2., 11.3., 9.4.; Blauer Mond 31.5.2026, 31.12.2028. `mondEreignis(ms)`: Ortsdatum des Vollmonds gestern/heute/morgen ("morgen"
+wird "heute Nacht", wenn er vor 12 Uhr faellt); sichtbare Mondfinsternis aus SKYEVENTS (big) geht vor - die Halbschatten-Finsternis
+20.2.2027 nicht (kaum zu sehen, in derselben Nacht Supermond 21.2. 00:23). KACHEL Mond: Beschriftung "Supermond heute" / "Supermond
+heute Nacht" / "Mondfinsternis morgen" (`mondKachelL`; 320 pt 9,5 px ohne Umbruch, 393 pt 155 von 196 px). MONDKARTE: Zeile
+"Supermond heute · Vollmond Di 24.11. gegen 16:00 Uhr, 361.000 km entfernt (· groesster Vollmond des Jahres)". GERUNDET, weil die
+verkuerzte Mondtheorie (moonPos/sunEcl) gegen PyEphem bis 8 min und 300 km daneben liegt (24.11.: 15:59 statt 15:53, 360 889 statt
+360 765 km): Zeit auf die Viertelstunde, Entfernung auf 1000 km. HINWEIS beim Oeffnen: dieselbe Pille wie bei Finsternissen
+(`evtToastBox`, jetzt mit zweiter Zeile `#evtToastS`), 3 s (`MOND_TOAST_MS`, Nutzer "2-3 Sekunden"), am Tag des Vollmonds bzw. in der
+Nacht davor, je Ereignis einmal am Tag (`mondToastGesehen`), wartet bis der Inhalt eingeblendet ist (nach einem Wisch 2,6 s laenger -
+dort steht unten die Orts-Pille). "Heute Supermond / Aufgang 15:46 · 361.000 km entfernt" (abends "jetzt am Himmel"), Tipp springt
+zur Mondkarte. Am Tag eines Mond-Hinweises faellt der Finsternis-Hinweis (Vorlauf 20 Tage) aus. Geprueft (Playwright, Uhr 24.11.
+13:26/21:30 und 23.11. 19:00, Himmel und hell; weitere Tage nur ueber `mondEreignis(ms)` - fuer Zukunftsdaten liefert Bright Sky
+nichts). Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

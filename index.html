@@ -69,6 +69,11 @@
   #evtToast .ico{flex:none;width:17px;height:17px;color:#f3c778}
   #evtToast .tt{font-size:13.5px;font-weight:700;color:#fff;line-height:1.3;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* v7.19: zweite Zeile (Mond-Ereignisse) */
+  #evtToast .tx{min-width:0}
+  #evtToast .su{font-size:12px;font-weight:600;color:rgba(255,255,255,.8);line-height:1.3;margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #evtToast.lang{border-radius:20px}
   @media (prefers-reduced-motion:reduce){#evtToast{transition:none}}
   /* naher Termin in der Karte unten deutlicher als bisher */
   #evtSec .evt-box.jetzt{border:2px solid #e08a1e;background:#fffaf1}
@@ -2674,7 +2679,7 @@ function hiAnzeigen(){
 </script>
 <div id="evtToast" role="button" tabindex="0" aria-live="polite" hidden>
   <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
-  <div class="tt" id="evtToastT"></div>
+  <div class="tx"><div class="tt" id="evtToastT"></div><div class="su" id="evtToastS" hidden></div></div>
 </div>
 <div id="app">
   <header>
@@ -2693,7 +2698,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.18</span>
+      <span class="ver">v7.19</span>
     </div>
   </header>
 
@@ -9578,7 +9583,7 @@ const KZ_DEF={
        Zeiten rechts daneben - deshalb "roh" statt v/s. Die Klassen v und s
        bleiben, damit Schriftgroesse und Farbe dieselben sind wie ueberall. */
     const zeile=zeilen.length?zeilen.join(" \u00b7 "):"heute kein Auf- und Untergang";
-    return {l:"Mond",roh:`<div class="kzmondzeile">${moonSvg(mo,mondHellDreh(mo.frac))}<div class="kzmondtext">`
+    return {l:mondKachelL(),roh:`<div class="kzmondzeile">${moonSvg(mo,mondHellDreh(mo.frac))}<div class="kzmondtext">`
       +`<div class="v">${mo.illum} %<span class="kzmondp"> · ${richtung}</span></div>`
       +`<div class="s">${zeile}</div></div></div>`};}},
   /* v4.63 (Nutzer): fuenf weitere Kacheln zum Ausprobieren - im Pool unter
@@ -10643,6 +10648,71 @@ function renderForecast(j){
   try{sbLeiste();}catch(e){console.warn("symbole",e);}
 }
 
+/* v7.19 MOND-EREIGNISSE (Nutzer 24.11.2026 - Vollmond 15:53 MEZ in 360 765 km: "Ereignisse wie Supermond oben in der
+   Kachel einblenden und evtl. zusaetzlich als Popup 2-3 Sekunden beim Oeffnen an solchen Tagen").
+   SUPERMOND nach Espenak (EarthSky, Farmer's Almanac, Sky at Night): Vollmond naeher als Perigaeum + 10 % des Abstands
+   Perigaeum-Apogaeum DIESES Umlaufs (+-15 Tage um den Vollmond). Die feste Schwelle 361 500 km der Mondkarte (bis v7.18) liess
+   den 3.1.2026 (362 312 km) weg, den die meisten Listen fuehren. Gegen PyEphem: 2026 = 3.1., 24.11., 24.12.; 2027 = 22.1., 21.2.
+   BLAUER MOND = zweiter Vollmond im selben Kalendermonat (Ortszeit). GROESSTER = naechster Vollmond des Kalenderjahres.
+   Zeitfenster: Ortsdatum des Vollmonds gestern / heute / morgen. */
+var _mondVmC={};
+function mondVollmonde(jahr){
+  if(_mondVmC[jahr])return _mondVmC[jahr];
+  const fr=ms=>moonInfo(new Date(ms)).frac,a=Date.UTC(jahr,0,1)-20*864e5,b=Date.UTC(jahr,11,31)+20*864e5,st=6*36e5,out=[];
+  let p=fr(a);
+  for(let t=a+st;t<=b;t+=st){const c=fr(t);
+    if(p<0.5&&c>=0.5){let lo=t-st,hi=t;for(let k=0;k<22;k++){const m=(lo+hi)/2;if(fr(m)<0.5)lo=m;else hi=m;}
+      const ms=(lo+hi)/2,jd=ms/864e5+2440587.5,km=moonPos(jd).dist;let pe=1e9,ap=0;
+      for(let h=-360;h<=360;h+=2){const d=moonPos(jd+h/24).dist;if(d<pe)pe=d;if(d>ap)ap=d;}
+      out.push({ms,km:Math.round(km),sup:km<=pe+0.1*(ap-pe),tag:ymd(ms)});}
+    p=c;}
+  out.forEach((v,i)=>{v.blau=i>0&&out[i-1].tag.slice(0,7)===v.tag.slice(0,7);});
+  let mi=null;out.forEach(v=>{if(+v.tag.slice(0,4)===jahr&&(!mi||v.km<mi.km))mi=v;});if(mi)mi.gr=true;
+  _mondVmC[jahr]=out;return out;
+}
+/* Ereignis, das heute zaehlt: {art, dd (Ortstage bis zum Ereignis: -1/0/1), wann ("heute", "heute Nacht", "morgen", ""), v} */
+function mondEreignis(ms){
+  ms=ms||Date.now();const heute=ymd(ms),j=+heute.slice(0,4),T=Date.parse(heute);
+  /* Finsternis nur, wenn man sie sieht (big) - die Halbschatten-Finsternis am 20.2.2027 ist "kaum zu erkennen", in derselben
+     Nacht steht ein Supermond (21.2. 00:23) */
+  try{for(const e of SKYEVENTS){if(!/Mondfinsternis/.test(e.t)||!e.big)continue;
+    const dd=Math.round((Date.UTC(e.y,e.m-1,e.d)-T)/864e5);
+    if(dd===0||dd===1)return {art:"Mondfinsternis",dd,wann:dd?"morgen":"heute",e};}}catch(e){}
+  const L=mondVollmonde(j);
+  for(const v of L){const dd=Math.round((Date.parse(v.tag)-T)/864e5);if(dd<-1||dd>1||!(v.sup||v.blau))continue;
+    const gr=v.gr||(mondVollmonde(+v.tag.slice(0,4)).find(x=>x.ms===v.ms)||{}).gr;
+    const std=+dtfS("en-GB",{timeZone:TZ,hour:"2-digit",hourCycle:"h23"},v.ms);
+    return {art:v.sup?"Supermond":"Blauer Mond",dd,wann:dd===0?"heute":dd===1?(std<12?"heute Nacht":"morgen"):"",v,gr:!!(gr&&v.sup)};}
+  return null;
+}
+/* Genauigkeit der verkuerzten Mondtheorie (moonPos/sunEcl) gegen PyEphem, 27 Vollmonde 2026/27: Zeitpunkt bis 8 min,
+   Entfernung bis 300 km daneben (24.11.2026: 15:59 statt 15:53, 360 889 statt 360 765 km). Darum gerundet gezeigt:
+   Zeit auf die Viertelstunde ("gegen 16:00"), Entfernung auf 1000 km. */
+function mondEvZeit(ms){return "gegen "+kzHM(Math.round(ms/9e5)*9e5);}
+function mondEvKm(km){return (Math.round(km/1000)*1000).toLocaleString("de-DE")+" km";}
+/* Beschriftung der Kachel: "Supermond heute" usw.; ohne Ereignis "Mond" */
+function mondKachelL(){try{const e=mondEreignis();if(!e)return "Mond";
+  return e.art+(e.wann?" "+e.wann:"");}catch(e){return "Mond";}}
+/* Hinweis beim Oeffnen (Nutzer: 2-3 s). Am Tag des Vollmonds bzw. in der Nacht davor, je Ereignis einmal am Tag.
+   Finsternisse haben seit v2.73 ihren eigenen Hinweis (evtToastZeigen, 20 Tage Vorlauf). */
+var MOND_TOAST_MS=3000;
+function mondToastFaellig(){const e=mondEreignis();
+  if(!e||!e.v||!(e.dd===0||(e.dd===1&&e.wann==="heute Nacht")))return null;
+  e.marke=e.v.tag+"@"+ymd(Date.now());try{e.gesehen=localStorage.getItem("mondToastGesehen")===e.marke;}catch(x){}
+  return e;}
+function mondToastZeigen(n){try{
+  n=n||0;const h=document.documentElement;
+  if(n<25&&((SANFT.an&&!SANFT.fertig)||h.classList.contains("sanft")||h.classList.contains("sanft-aus"))){setTimeout(()=>mondToastZeigen(n+1),400);return;}
+  const e=mondToastFaellig();if(!e||e.gesehen)return;
+  try{localStorage.setItem("mondToastGesehen",e.marke);}catch(x){}
+  const now=Date.now(),nx=mondNaechste(now),oben=_moonAlt(now)>0.125,km=mondEvKm(e.v.km);
+  const titel=(e.dd===0?"Heute ":"Heute Nacht ")+e.art+(e.art==="Supermond"&&e.v.blau?" und Blauer Mond":"");
+  const sub=[oben?"jetzt am Himmel":nx.rise!=null?"Aufgang "+kzHM(nx.rise):"",e.gr?"größter Vollmond des Jahres":"",
+    e.art==="Supermond"?km+" entfernt":"zweiter Vollmond im Monat"].filter(Boolean).join(" · ");
+  evtToastBox(titel,sub,()=>{try{kzSpring({id:"mondSec"});}catch(x){}},MOND_TOAST_MS,true);
+}catch(x){console.warn("mondToast",x&&x.message);}}
+setTimeout(()=>{const w=/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className);setTimeout(mondToastZeigen,w?2600:900);},300);
+
 /* --- Render: Luft, Pollen, Mond --- */
 function moonTile(mo,ph){
   const bg=mondBogen(Date.now()), heute=ymd(Date.now());
@@ -10653,8 +10723,15 @@ function moonTile(mo,ph){
   if(bg.rise!=null&&bg.set!=null){const g=Math.round((bg.set-bg.rise)/60000);
     dau=" · "+Math.floor(g/60)+" h "+String(g%60).padStart(2,"0")+" min";}
   const dk=ph.dist.toLocaleString("de-DE");
-  const sup=(mo.illum>=98&&ph.dist<361500)?"Supermond":(mo.illum>=98&&ph.dist>405000)?"Mini-Mond":(ph.dist<362000?"erdnah":ph.dist>405000?"erdfern":"");
-  return `<div class="tile wide"><div class="k">Mond</div><div style="display:flex;align-items:center;gap:13px;margin-top:6px">${moonSvg(mo,mondHellDreh(mo.frac))}<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:750">${mo.illum}% beleuchtet · ${mo.name}</div><div class="sub" style="margin-top:4px">↑ ${ft(bg.rise)} · ↓ ${ft(bg.set)}${dau}</div><div class="sub" style="margin-top:2px">Entfernung ${dk} km${sup?" · "+sup:""}</div></div></div></div>`;}
+  // v7.19: Supermond nach Espenak (mondEreignis), nicht mehr feste 361 500 km
+  let ev=null;try{ev=mondEreignis();}catch(e){}
+  const sup=(ev&&ev.v&&ev.art==="Supermond")?"":(mo.illum>=98&&ph.dist>405000)?"Mini-Mond":(ph.dist<362000?"erdnah":ph.dist>405000?"erdfern":"");
+  let evz="";
+  if(ev&&ev.v){const wt=["So","Mo","Di","Mi","Do","Fr","Sa"][ortsDatum(ev.v.ms).getDay()];
+    evz=`<div class="sub mond-ev" style="margin-top:4px"><span><b>${ev.art}${ev.wann?" "+ev.wann:""}</b> · Vollmond ${wt} ${dtfS("de-DE",{timeZone:TZ,day:"numeric",month:"numeric"},ev.v.ms)} ${mondEvZeit(ev.v.ms)} Uhr, ${mondEvKm(ev.v.km)} entfernt`
+      +(ev.gr?" · größter Vollmond des Jahres":"")+(ev.art==="Supermond"&&ev.v.blau?" · zugleich Blauer Mond":"")+`</span></div>`;}
+  else if(ev)evz=`<div class="sub mond-ev" style="margin-top:4px"><span><b>${ev.e.t} ${ev.wann}</b> · Einzelheiten unter „Besondere Ereignisse“</span></div>`;
+  return `<div class="tile wide"><div class="k">Mond</div><div style="display:flex;align-items:center;gap:13px;margin-top:6px">${moonSvg(mo,mondHellDreh(mo.frac))}<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:750">${mo.illum}% beleuchtet · ${mo.name}</div><div class="sub" style="margin-top:4px">↑ ${ft(bg.rise)} · ↓ ${ft(bg.set)}${dau}</div><div class="sub" style="margin-top:2px">Entfernung ${dk} km${sup?" · "+sup:""}</div>${evz}</div></div></div>`;}
 var lastUVH=null;
 /* --- Tag-Auswahl fuer die eigene UV-Grafik (heute / gestern) aus der 2-Tage-Reihe --- */
 function filterUvDay(h,off){
@@ -14440,6 +14517,7 @@ function evtToastZeigen(){try{
   const nx=skyEventNext(SKYEVENTS,Date.now(),5)
             .filter(x=>x.e.big&&x.days<=EVT_TOAST_TAGE&&!evtVorbei(x));
   if(!nx.length)return;
+  try{const m=mondToastFaellig();if(m&&!m.gesehen)return;}catch(e){}   // v7.19: am Tag eines Supermonds hat der Mond-Hinweis Vorrang
   const x=nx[0];
   const marke=x.e.y+"-"+x.e.m+"-"+x.e.d+"@"+ymd(new Date());
   try{if(localStorage.getItem("evtToastGesehen")===marke)return;}catch(e){}
@@ -14450,18 +14528,24 @@ function evtToastZeigen(){try{
 /* Reines Einblenden — von der Auswahl getrennt, damit die Vorschau denselben
    Weg nimmt wie der Ernstfall und nicht eine Nachbildung davon zeigt. */
 function evtToastAnzeigen(x,vorschau){
-  const box=el("evtToast"); if(!box)return;
   const w=evtToastText(x);
-  el("evtToastT").textContent=w.titel;
-  box.setAttribute("aria-label",w.titel+" \u2013 antippen zeigt die Einzelheiten");
+  evtToastBox(w.titel,"",()=>{const sec=el("evtSec");
+    if(sec&&!sec.classList.contains("hidden"))sec.scrollIntoView({behavior:"smooth",block:"center"});},EVT_TOAST_MS);
+}
+/* v7.19: Box getrennt von der Auswahl - auch fuer die Mond-Ereignisse (mondToastZeigen), mit zweiter Zeile */
+function evtToastBox(titel,sub,ziel,ms){
+  const box=el("evtToast"); if(!box)return;
+  el("evtToastT").textContent=titel;
+  const s=el("evtToastS");if(s){s.textContent=sub||"";s.hidden=!sub;}
+  box.classList.toggle("lang",!!sub);
+  box.setAttribute("aria-label",titel+(sub?" \u2013 "+sub:"")+" \u2013 antippen zeigt die Einzelheiten");
   if(_evtToastTimer){clearTimeout(_evtToastTimer);_evtToastTimer=null;}
   box.hidden=false;box.classList.remove("an");
   requestAnimationFrame(()=>requestAnimationFrame(()=>box.classList.add("an")));
   const zu=()=>{if(_evtToastTimer){clearTimeout(_evtToastTimer);_evtToastTimer=null;}
     box.classList.remove("an");setTimeout(()=>{box.hidden=true;},420);};
-  _evtToastTimer=setTimeout(zu,EVT_TOAST_MS);
-  const hin=()=>{zu();const sec=el("evtSec");
-    if(sec&&!sec.classList.contains("hidden"))sec.scrollIntoView({behavior:"smooth",block:"center"});};
+  _evtToastTimer=setTimeout(zu,ms||EVT_TOAST_MS);
+  const hin=()=>{zu();try{ziel();}catch(e){}};
   box.onclick=hin;
   box.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();hin();}};
 }
