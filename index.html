@@ -2701,7 +2701,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.21</span>
+      <span class="ver">v7.22</span>
     </div>
   </header>
 
@@ -14554,12 +14554,19 @@ function evtToastBox(titel,sub,ziel,ms,bild){
   box.classList.toggle("mitbild",!!bild);
   box.setAttribute("aria-label",titel+(sub?" \u2013 "+sub:"")+" \u2013 antippen zeigt die Einzelheiten");
   if(_evtToastTimer){clearTimeout(_evtToastTimer);_evtToastTimer=null;}
-  try{const hd=document.querySelector("header"),r=hd?hd.getBoundingClientRect():null;
-    box.style.top=r&&r.bottom>0?`max(calc(var(--sat,0px) + 10px), ${Math.round(r.bottom+8)}px)`:"";}catch(e){}
   const red=(()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){return false;}})();
   const tok=box._tok=(box._tok||0)+1;
   if(box._an){try{box._an.cancel();}catch(e){}box._an=null;}
   box.hidden=false;box.style.opacity="1";
+  /* v7.22 (Nutzer: "mittig ueber die Temperatur, da guckt man als erstes hin"): Mitte der Karte = Mitte der grossen Zahl;
+     nie unter den Kopf; ist die Zahl nicht im Bild (gescrollt), direkt unter dem Kopf */
+  /* folgt der Zahl, solange die Karte steht: Warnungen kommen oft erst nach dem Einblenden und schieben sie 60 px nach unten */
+  const lage=()=>{try{const hd=document.querySelector("header"),r=hd?hd.getBoundingClientRect():null,
+      kopf=r&&r.bottom>0?Math.round(r.bottom+8):0,tp=el("temp"),rt=tp?tp.getBoundingClientRect():null,bh=box.offsetHeight;
+    let y=kopf;
+    if(rt&&rt.height>0&&rt.bottom>kopf+20&&rt.top<innerHeight-20)y=Math.max(kopf,Math.min(innerHeight-bh-24,Math.round(rt.top+rt.height/2-bh/2)));
+    if(y!==box._y){box._y=y;box.style.top=y>0?`max(calc(var(--sat,0px) + 10px), ${y}px)`:"";}}catch(e){}};
+  box._y=null;lage();
   try{box._an=box.animate(red?[{opacity:0},{opacity:1}]
       :[{opacity:0,transform:"translate(-50%,-14px)"},{opacity:1,transform:"translate(-50%,0)"}],
     {duration:red?260:420,easing:"cubic-bezier(.22,.9,.3,1)"});}catch(e){}
@@ -14572,6 +14579,7 @@ function evtToastBox(titel,sub,ziel,ms,bild){
           :[{opacity:1,transform:"translate(-50%,0)"},{opacity:0,transform:"translate(-50%,-10px)"}],
         {duration:red?220:300,easing:"ease-in",fill:"forwards"});
       box._an=an;an.onfinish=weg;setTimeout(weg,450);}catch(e){weg();}};
+  const folge=()=>{if(box._tok!==tok||box.hidden)return;lage();requestAnimationFrame(folge);};requestAnimationFrame(folge);
   _evtToastTimer=setTimeout(zu,ms||EVT_TOAST_MS);
   const hin=()=>{zu();try{ziel();}catch(e){}};
   box.onclick=hin;

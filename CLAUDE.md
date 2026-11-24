@@ -4338,6 +4338,12 @@ Schrift darf umbrechen ("361.000 km" mit festem Leerzeichen). Ein- und Ausblende
 reduzieren" nur Deckkraft) - die CSS-Uebergaenge der alten Pille schaltete die Sperrregel ab. Nach einem Wisch 1,3 statt 2,6 s
 Vorlauf (die Orts-Pille unten stoert nicht mehr). Geprueft (`t721.py`, `t721b.py`, Uhr 24.11. 15:10): Himmel 393/320, hell, dunkel,
 mit `?warntest`; sichtbar 4,2-4,3 s, x schliesst ohne zu scrollen, Tipp springt zur Mondkarte. Nicht am iPhone geprueft.
+v7.22 (Nutzer zu v7.21: "zentral genau mittig ueber die Temperatur - wenn kein Frostsymbol ist, rutscht es mit nach oben"):
+Die Hinweis-Karte steht mit ihrer Mitte auf der Mitte der grossen Zahl (`#temp`), nie unter dem Kopf (Kopf + 8 px) und nie ueber
+den unteren Rand hinaus (innerHeight - Hoehe - 24); ist die Zahl nicht im Bild (gescrollt), direkt unter dem Kopf. Sie FOLGT der
+Zahl, solange sie steht (`lage()` je Bild per rAF, setzt top nur bei Aenderung): im Test kam die echte Frostwarnung 1,2 s NACH dem
+Einblenden (SANFT_MAX war abgelaufen) und schob die Zahl 71 px nach unten - ohne Nachfuehren stand die Karte dann ueber "Live".
+Geprueft (`t722.py`, `t722b.py`): Mitte Karte = Mitte Zahl auf den Pixel in Himmel 393/320, hell, dunkel, mit und ohne Warnung.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
