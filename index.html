@@ -2698,7 +2698,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.19</span>
+      <span class="ver">v7.20</span>
     </div>
   </header>
 
@@ -10693,25 +10693,33 @@ function mondEvKm(km){return (Math.round(km/1000)*1000).toLocaleString("de-DE")+
 /* Beschriftung der Kachel: "Supermond heute" usw.; ohne Ereignis "Mond" */
 function mondKachelL(){try{const e=mondEreignis();if(!e)return "Mond";
   return e.art+(e.wann?" "+e.wann:"");}catch(e){return "Mond";}}
-/* Hinweis beim Oeffnen (Nutzer: 2-3 s). Am Tag des Vollmonds bzw. in der Nacht davor, je Ereignis einmal am Tag.
-   Finsternisse haben seit v2.73 ihren eigenen Hinweis (evtToastZeigen, 20 Tage Vorlauf). */
-var MOND_TOAST_MS=3000;
+/* Hinweis beim Oeffnen (Nutzer: 2-3 s). Am Tag des Vollmonds bzw. in der Nacht davor.
+   Finsternisse haben seit v2.73 ihren eigenen Hinweis (evtToastZeigen, 20 Tage Vorlauf).
+   v7.20 (Nutzer: "kein Pop-up zum Supermond"): v7.19 lief nur beim NEULADEN der Seite und einmal am Tag. Vom Home-Bildschirm
+   laeuft die App meist aus dem Hintergrund weiter - dann kam nie ein Hinweis. Jetzt bei JEDEM Oeffnen: beim Laden und bei der
+   Rueckkehr nach mindestens MOND_TOAST_WEG 5 min im Hintergrund (wie das x der Warnungen, v6.95); ist die Seite beim Laden
+   verborgen, wartet er auf das Sichtbarwerden. Kein Merker im Geraet mehr (`mondToastGesehen` wird geloescht). */
+var MOND_TOAST_MS=3000,MOND_TOAST_WEG=5*60e3,_mondWeg=0,_mondOffen=0;
+try{localStorage.removeItem("mondToastGesehen");}catch(e){}
 function mondToastFaellig(){const e=mondEreignis();
   if(!e||!e.v||!(e.dd===0||(e.dd===1&&e.wann==="heute Nacht")))return null;
-  e.marke=e.v.tag+"@"+ymd(Date.now());try{e.gesehen=localStorage.getItem("mondToastGesehen")===e.marke;}catch(x){}
   return e;}
-function mondToastZeigen(n){try{
+function mondToastZeigen(n,vorschau){try{
   n=n||0;const h=document.documentElement;
-  if(n<25&&((SANFT.an&&!SANFT.fertig)||h.classList.contains("sanft")||h.classList.contains("sanft-aus"))){setTimeout(()=>mondToastZeigen(n+1),400);return;}
-  const e=mondToastFaellig();if(!e||e.gesehen)return;
-  try{localStorage.setItem("mondToastGesehen",e.marke);}catch(x){}
+  if(!vorschau&&document.visibilityState!=="visible"){_mondOffen=1;return;}
+  if(n<25&&((SANFT.an&&!SANFT.fertig)||h.classList.contains("sanft")||h.classList.contains("sanft-aus"))){setTimeout(()=>mondToastZeigen(n+1,vorschau),400);return;}
+  const e=mondToastFaellig();if(!e)return false;
   const now=Date.now(),nx=mondNaechste(now),oben=_moonAlt(now)>0.125,km=mondEvKm(e.v.km);
   const titel=(e.dd===0?"Heute ":"Heute Nacht ")+e.art+(e.art==="Supermond"&&e.v.blau?" und Blauer Mond":"");
   const sub=[oben?"jetzt am Himmel":nx.rise!=null?"Aufgang "+kzHM(nx.rise):"",e.gr?"größter Vollmond des Jahres":"",
     e.art==="Supermond"?km+" entfernt":"zweiter Vollmond im Monat"].filter(Boolean).join(" · ");
   evtToastBox(titel,sub,()=>{try{kzSpring({id:"mondSec"});}catch(x){}},MOND_TOAST_MS,true);
+  return true;
 }catch(x){console.warn("mondToast",x&&x.message);}}
 setTimeout(()=>{const w=/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className);setTimeout(mondToastZeigen,w?2600:900);},300);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){_mondWeg=Date.now();return;}
+  if(_mondOffen||(_mondWeg&&Date.now()-_mondWeg>=MOND_TOAST_WEG)){_mondOffen=0;setTimeout(mondToastZeigen,900);}});
 
 /* --- Render: Luft, Pollen, Mond --- */
 function moonTile(mo,ph){
@@ -14517,7 +14525,7 @@ function evtToastZeigen(){try{
   const nx=skyEventNext(SKYEVENTS,Date.now(),5)
             .filter(x=>x.e.big&&x.days<=EVT_TOAST_TAGE&&!evtVorbei(x));
   if(!nx.length)return;
-  try{const m=mondToastFaellig();if(m&&!m.gesehen)return;}catch(e){}   // v7.19: am Tag eines Supermonds hat der Mond-Hinweis Vorrang
+  try{if(mondToastFaellig())return;}catch(e){}   // v7.19: am Tag eines Supermonds hat der Mond-Hinweis Vorrang
   const x=nx[0];
   const marke=x.e.y+"-"+x.e.m+"-"+x.e.d+"@"+ymd(new Date());
   try{if(localStorage.getItem("evtToastGesehen")===marke)return;}catch(e){}
@@ -14571,6 +14579,8 @@ setTimeout(evtToastZeigen,1400);   // nach renderSkyEvents, damit das Ziel exist
 let _evtVorschauId=null;
 function evtToastVorschau(tage){
   try{
+    /* v7.20: steht heute ein Mond-Ereignis an, zeigt der Langdruck auf die Versionsnummer DESSEN Hinweis */
+    if(tage==null&&mondToastFaellig()){mondToastZeigen(0,1);return;}
     const kommend=skyEventNext(SKYEVENTS,Date.now(),8).filter(x=>x.e.big&&!evtVorbei(x));
     const x=kommend[0]; if(!x)return;
     const n=(tage==null||tage==="")?x.days:Math.max(0,Math.min(3650,parseInt(tage,10)));

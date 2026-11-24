@@ -4318,6 +4318,15 @@ dort steht unten die Orts-Pille). "Heute Supermond / Aufgang 15:46 · 361.000 km
 zur Mondkarte. Am Tag eines Mond-Hinweises faellt der Finsternis-Hinweis (Vorlauf 20 Tage) aus. Geprueft (Playwright, Uhr 24.11.
 13:26/21:30 und 23.11. 19:00, Himmel und hell; weitere Tage nur ueber `mondEreignis(ms)` - fuer Zukunftsdaten liefert Bright Sky
 nichts). Nicht am iPhone geprueft.
+v7.20 (Nutzer 24.11. nach v7.19: "es geht kein Pop-up zum Supermond auf"): Der Hinweis lief nur beim NEULADEN der Seite und
+einmal am Tag (Merker im Geraet). Vom Home-Bildschirm laeuft die App meist aus dem Hintergrund weiter - beim "Oeffnen" lief kein
+Script, es kam nie ein Hinweis [Wahrscheinlich die Ursache; am Geraet nicht nachgewiesen]. Jetzt bei JEDEM Oeffnen: beim Laden
+und bei der Rueckkehr nach mindestens `MOND_TOAST_WEG` 5 min im Hintergrund (`_mondWeg`, wie das x der Warnungen v6.95); ist die
+Seite beim Laden verborgen, merkt `_mondOffen` ihn fuer das Sichtbarwerden. Kein Merker mehr, `mondToastGesehen` wird geloescht.
+LANGDRUCK auf die Versionsnummer (~1 s, `evtToastVorschau(null)`) zeigt an einem Mond-Ereignis-Tag DESSEN Hinweis (sonst wie
+bisher die naechste Finsternis) - zum Nachsehen am Geraet. Geprueft (`t720.py`, `t720b.py`, Uhr 24.11. 15:10, sichtbarkeit per
+Object.defineProperty nachgestellt): Laden mit altem Merker -> Hinweis; nach 3 s weg; Rueckkehr nach 1 min nichts, nach 6 min
+Hinweis; Neuladen -> Hinweis; Langdruck -> Hinweis; verborgen geladen -> Hinweis beim Sichtbarwerden. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
