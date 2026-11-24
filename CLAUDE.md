@@ -4327,6 +4327,17 @@ LANGDRUCK auf die Versionsnummer (~1 s, `evtToastVorschau(null)`) zeigt an einem
 bisher die naechste Finsternis) - zum Nachsehen am Geraet. Geprueft (`t720.py`, `t720b.py`, Uhr 24.11. 15:10, sichtbarkeit per
 Object.defineProperty nachgestellt): Laden mit altem Merker -> Hinweis; nach 3 s weg; Rueckkehr nach 1 min nichts, nach 6 min
 Hinweis; Neuladen -> Hinweis; Langdruck -> Hinweis; verborgen geladen -> Hinweis beim Sichtbarwerden. Nicht am iPhone geprueft.
+v7.21 (Nutzer 24.11., Bild v7.20 mit dunkler Pille unten: "1 Sekunde laenger, nicht auf haesslichem dunklem Hintergrund,
+lieber weiter oben - da wo Frost steht oder ueber der Temperatur - mit einem X"): Der Ereignis-Hinweis (`#evtToast`, gilt fuer
+Mond-Ereignisse UND Finsternisse) ist jetzt eine Karte mit Farbverlauf Indigo -> Violett (#4657cc -> #8d4cbc, weisse Schrift
+~5 : 1), 18 px Ecken, OBEN: `evtToastBox` setzt top = Unterkante des Kopfs + 8 px (mindestens Statusleiste + 10), liegt damit
+ueber der ersten Warnkarte bzw. der Zeile "Live"; gescrollt in den klassischen Ansichten oben am Rand. Mond-Ereignisse zeigen das
+Mondfoto (`moonSvg`, 40 px mit warmem Schein, 5. Parameter `bild`), Finsternisse weiter das Zeichen. x rechts oben (`#evtToastX`,
+32 px) schliesst ohne Sprung; Tipp auf die Karte springt wie bisher. Mond 4 statt 3 s (`MOND_TOAST_MS`), Finsternis wie bisher 4 s;
+Schrift darf umbrechen ("361.000 km" mit festem Leerzeichen). Ein- und Ausblenden per WEB-ANIMATION (0,42 / 0,3 s, bei "Bewegung
+reduzieren" nur Deckkraft) - die CSS-Uebergaenge der alten Pille schaltete die Sperrregel ab. Nach einem Wisch 1,3 statt 2,6 s
+Vorlauf (die Orts-Pille unten stoert nicht mehr). Geprueft (`t721.py`, `t721b.py`, Uhr 24.11. 15:10): Himmel 393/320, hell, dunkel,
+mit `?warntest`; sichtbar 4,2-4,3 s, x schliesst ohne zu scrollen, Tipp springt zur Mondkarte. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
