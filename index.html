@@ -50,31 +50,32 @@
   .act-btn.spin .ico-refresh{animation:spin .9s linear infinite}
   .ver{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
   .kopf-r{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
-  /* v2.75 Ereignis-Hinweis: Pille, faehrt unten quer ein, antippbar.
-     Bewusst unten und schmal: der Hinweis nennt nur, DASS etwas ansteht.
-     Wer mehr wissen will, tippt drauf und landet bei der Ereignis-Karte. */
-  #evtToast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);z-index:60;
-    max-width:min(340px,calc(100vw - 28px));background:rgba(23,32,46,.90);
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-    border-radius:999px;box-shadow:0 8px 26px rgba(16,24,40,.26);
-    padding:10px 17px;display:flex;gap:9px;align-items:center;cursor:pointer;
-    /* v2.78: 190 % der Pillenhoehe sind rund 76 px — sie sitzt aber gut 90 px
-       ueber der Bildkante und blieb deshalb sichtbar stehen. Jetzt ein fester
-       Weg plus Deckkraft, damit sie unabhaengig von Hoehe und Geraet verschwindet. */
-    transform:translate(-50%,calc(100% + 120px));opacity:0;
-    transition:transform .42s cubic-bezier(.22,.9,.3,1),opacity .30s ease;
+  /* v2.75 Ereignis-Hinweis, antippbar - Tipp springt zur Karte.
+     v7.21 (Nutzer: "nicht auf dunklem Hintergrund, weiter oben, wo man es sieht, mit x"): Karte mit
+     Farbverlauf Indigo -> Violett OBEN unter dem Kopf (top setzt evtToastBox: Unterkante des Kopfs + 8 px,
+     liegt damit ueber der ersten Warnkarte bzw. der Zeile "Live"), Ein-/Ausblenden per Web-Animation
+     (CSS-Uebergaenge schaltet die Sperre bei "Bewegung reduzieren" ab), x rechts oben schliesst nur. */
+  #evtToast{position:fixed;left:50%;top:calc(var(--sat,0px) + 10px);z-index:60;
+    width:min(360px,calc(100vw - 32px));box-sizing:border-box;transform:translateX(-50%);
+    background:linear-gradient(135deg,#4657cc 0%,#6650c6 55%,#8d4cbc 100%);
+    border:1px solid rgba(255,255,255,.34);border-radius:18px;
+    box-shadow:0 12px 32px rgba(24,16,70,.36),inset 0 1px 0 rgba(255,255,255,.26);
+    padding:12px 46px 12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;
     -webkit-tap-highlight-color:transparent}
-  #evtToast.an{transform:translate(-50%,0);opacity:1}
-  #evtToast.an:active{transform:translate(-50%,0) scale(.97)}
-  #evtToast .ico{flex:none;width:17px;height:17px;color:#f3c778}
-  #evtToast .tt{font-size:13.5px;font-weight:700;color:#fff;line-height:1.3;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* v7.19: zweite Zeile (Mond-Ereignisse) */
-  #evtToast .tx{min-width:0}
-  #evtToast .su{font-size:12px;font-weight:600;color:rgba(255,255,255,.8);line-height:1.3;margin-top:1px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #evtToast.lang{border-radius:20px}
-  @media (prefers-reduced-motion:reduce){#evtToast{transition:none}}
+  #evtToast[hidden]{display:none}
+  #evtToast .ico{flex:none;width:24px;height:24px;color:#ffd98a}
+  #evtToast .evbild{flex:none;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+    border-radius:50%;background:radial-gradient(circle,rgba(255,236,186,.42) 0%,rgba(255,236,186,0) 68%)}
+  #evtToast:not(.mitbild) .evbild,#evtToast.mitbild .ico{display:none}
+  #evtToast .evbild svg{width:40px;height:40px;filter:drop-shadow(0 0 6px rgba(255,240,200,.55))}
+  #evtToast .tx{min-width:0;flex:1}
+  #evtToast .tt{font-size:15.5px;font-weight:800;color:#fff;line-height:1.28;letter-spacing:.1px}
+  #evtToast .su{font-size:13px;font-weight:600;color:rgba(255,255,255,.9);line-height:1.32;margin-top:2px}
+  #evtToast .evx{position:absolute;top:7px;right:7px;width:32px;height:32px;border:0;padding:0;margin:0;
+    border-radius:50%;background:rgba(255,255,255,.17);color:#fff;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #evtToast .evx svg{width:13px;height:13px}
+  #evtToast .evx:active{background:rgba(255,255,255,.3)}
   /* naher Termin in der Karte unten deutlicher als bisher */
   #evtSec .evt-box.jetzt{border:2px solid #e08a1e;background:#fffaf1}
   #evtSec .evt-chip{display:inline-block;background:#e08a1e;color:#fff;font-size:11px;font-weight:700;
@@ -2679,7 +2680,9 @@ function hiAnzeigen(){
 </script>
 <div id="evtToast" role="button" tabindex="0" aria-live="polite" hidden>
   <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+  <span class="evbild" id="evtToastB" aria-hidden="true"></span>
   <div class="tx"><div class="tt" id="evtToastT"></div><div class="su" id="evtToastS" hidden></div></div>
+  <button type="button" class="evx" id="evtToastX" aria-label="Hinweis schließen"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
 </div>
 <div id="app">
   <header>
@@ -2698,7 +2701,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.20</span>
+      <span class="ver">v7.21</span>
     </div>
   </header>
 
@@ -10699,7 +10702,7 @@ function mondKachelL(){try{const e=mondEreignis();if(!e)return "Mond";
    laeuft die App meist aus dem Hintergrund weiter - dann kam nie ein Hinweis. Jetzt bei JEDEM Oeffnen: beim Laden und bei der
    Rueckkehr nach mindestens MOND_TOAST_WEG 5 min im Hintergrund (wie das x der Warnungen, v6.95); ist die Seite beim Laden
    verborgen, wartet er auf das Sichtbarwerden. Kein Merker im Geraet mehr (`mondToastGesehen` wird geloescht). */
-var MOND_TOAST_MS=3000,MOND_TOAST_WEG=5*60e3,_mondWeg=0,_mondOffen=0;
+var MOND_TOAST_MS=4000,MOND_TOAST_WEG=5*60e3,_mondWeg=0,_mondOffen=0;
 try{localStorage.removeItem("mondToastGesehen");}catch(e){}
 function mondToastFaellig(){const e=mondEreignis();
   if(!e||!e.v||!(e.dd===0||(e.dd===1&&e.wann==="heute Nacht")))return null;
@@ -10709,14 +10712,15 @@ function mondToastZeigen(n,vorschau){try{
   if(!vorschau&&document.visibilityState!=="visible"){_mondOffen=1;return;}
   if(n<25&&((SANFT.an&&!SANFT.fertig)||h.classList.contains("sanft")||h.classList.contains("sanft-aus"))){setTimeout(()=>mondToastZeigen(n+1,vorschau),400);return;}
   const e=mondToastFaellig();if(!e)return false;
-  const now=Date.now(),nx=mondNaechste(now),oben=_moonAlt(now)>0.125,km=mondEvKm(e.v.km);
+  const now=Date.now(),nx=mondNaechste(now),oben=_moonAlt(now)>0.125,km=mondEvKm(e.v.km).replace(/ /g,"\u00a0");
   const titel=(e.dd===0?"Heute ":"Heute Nacht ")+e.art+(e.art==="Supermond"&&e.v.blau?" und Blauer Mond":"");
-  const sub=[oben?"jetzt am Himmel":nx.rise!=null?"Aufgang "+kzHM(nx.rise):"",e.gr?"größter Vollmond des Jahres":"",
+  const sub=[oben?"jetzt am Himmel":nx.rise!=null?"Aufgang\u00a0"+kzHM(nx.rise):"",e.gr?"größter Vollmond des Jahres":"",
     e.art==="Supermond"?km+" entfernt":"zweiter Vollmond im Monat"].filter(Boolean).join(" · ");
-  evtToastBox(titel,sub,()=>{try{kzSpring({id:"mondSec"});}catch(x){}},MOND_TOAST_MS,true);
+  let bild="";try{const mo=moonInfo(new Date());bild=moonSvg(mo,mondHellDreh(mo.frac));}catch(x){}
+  evtToastBox(titel,sub,()=>{try{kzSpring({id:"mondSec"});}catch(x){}},MOND_TOAST_MS,bild);
   return true;
 }catch(x){console.warn("mondToast",x&&x.message);}}
-setTimeout(()=>{const w=/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className);setTimeout(mondToastZeigen,w?2600:900);},300);
+setTimeout(()=>{const w=/(^|\s)wisch-[nv](\s|$)/.test(document.documentElement.className);setTimeout(mondToastZeigen,w?1300:900);},300);
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){_mondWeg=Date.now();return;}
   if(_mondOffen||(_mondWeg&&Date.now()-_mondWeg>=MOND_TOAST_WEG)){_mondOffen=0;setTimeout(mondToastZeigen,900);}});
@@ -14541,21 +14545,38 @@ function evtToastAnzeigen(x,vorschau){
     if(sec&&!sec.classList.contains("hidden"))sec.scrollIntoView({behavior:"smooth",block:"center"});},EVT_TOAST_MS);
 }
 /* v7.19: Box getrennt von der Auswahl - auch fuer die Mond-Ereignisse (mondToastZeigen), mit zweiter Zeile */
-function evtToastBox(titel,sub,ziel,ms){
+function evtToastBox(titel,sub,ziel,ms,bild){
+  /* v7.21: oben unter dem Kopf, Web-Animation statt CSS-Uebergang, x schliesst ohne Sprung; bild = HTML (Mondfoto) statt Zeichen */
   const box=el("evtToast"); if(!box)return;
   el("evtToastT").textContent=titel;
   const s=el("evtToastS");if(s){s.textContent=sub||"";s.hidden=!sub;}
-  box.classList.toggle("lang",!!sub);
+  const bi=el("evtToastB");if(bi)bi.innerHTML=bild||"";
+  box.classList.toggle("mitbild",!!bild);
   box.setAttribute("aria-label",titel+(sub?" \u2013 "+sub:"")+" \u2013 antippen zeigt die Einzelheiten");
   if(_evtToastTimer){clearTimeout(_evtToastTimer);_evtToastTimer=null;}
-  box.hidden=false;box.classList.remove("an");
-  requestAnimationFrame(()=>requestAnimationFrame(()=>box.classList.add("an")));
+  try{const hd=document.querySelector("header"),r=hd?hd.getBoundingClientRect():null;
+    box.style.top=r&&r.bottom>0?`max(calc(var(--sat,0px) + 10px), ${Math.round(r.bottom+8)}px)`:"";}catch(e){}
+  const red=(()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){return false;}})();
+  const tok=box._tok=(box._tok||0)+1;
+  if(box._an){try{box._an.cancel();}catch(e){}box._an=null;}
+  box.hidden=false;box.style.opacity="1";
+  try{box._an=box.animate(red?[{opacity:0},{opacity:1}]
+      :[{opacity:0,transform:"translate(-50%,-14px)"},{opacity:1,transform:"translate(-50%,0)"}],
+    {duration:red?260:420,easing:"cubic-bezier(.22,.9,.3,1)"});}catch(e){}
   const zu=()=>{if(_evtToastTimer){clearTimeout(_evtToastTimer);_evtToastTimer=null;}
-    box.classList.remove("an");setTimeout(()=>{box.hidden=true;},420);};
+    if(box._tok!==tok||box.hidden)return;
+    box._tok++;const t2=box._tok;
+    const weg=()=>{if(box._tok===t2&&!box.hidden){box.hidden=true;box.style.opacity="";}};
+    try{if(box._an)box._an.cancel();
+      const an=box.animate(red?[{opacity:1},{opacity:0}]
+          :[{opacity:1,transform:"translate(-50%,0)"},{opacity:0,transform:"translate(-50%,-10px)"}],
+        {duration:red?220:300,easing:"ease-in",fill:"forwards"});
+      box._an=an;an.onfinish=weg;setTimeout(weg,450);}catch(e){weg();}};
   _evtToastTimer=setTimeout(zu,ms||EVT_TOAST_MS);
   const hin=()=>{zu();try{ziel();}catch(e){}};
   box.onclick=hin;
-  box.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();hin();}};
+  box.onkeydown=ev=>{if(ev.target===box&&(ev.key==="Enter"||ev.key===" ")){ev.preventDefault();hin();}};
+  const x=el("evtToastX");if(x)x.onclick=ev=>{ev.stopPropagation();zu();};
 }
 setTimeout(evtToastZeigen,1400);   // nach renderSkyEvents, damit das Ziel existiert
 
