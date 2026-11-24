@@ -1,4 +1,4 @@
-Radar-Eichung an den Bodenmessern, 24.11.2026 11:34 UTC
+Radar-Eichung an den Bodenmessern, 24.11.2026 23:14 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            0 Paare  (FRANKFURT/M)
   Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
@@ -22,14 +22,14 @@ Radar-Eichung an den Bodenmessern, 24.11.2026 11:34 UTC
 gesammelt: 2 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       445   2002     1.85      1.11      3.64     0.40 mm     0.23 mm
-leicht       464    525     1.01      0.65      1.41     1.00 mm     0.95 mm
+niesel       445   2003     1.85      1.11      3.64     0.40 mm     0.23 mm
+leicht       464    526     1.01      0.65      1.41     1.00 mm     0.95 mm
 regen         77     78     0.79      0.57      1.09     2.80 mm     3.45 mm
 
-Radar sah nichts, Station mass etwas: 66 von 2671 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 66 von 2673 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      1138 Stunden, davon 962 trocken (85 %)
+  Radarsumme bis  0 1      1139 Stunden, davon 963 trocken (85 %)
   Radarsumme 0 1 bis  0 25 542 Stunden, davon 291 trocken (54 %)
   Radarsumme 0 25 bis  0 5 322 Stunden, davon  70 trocken (22 %)
-  Radarsumme ab 0 5        603 Stunden, davon  38 trocken (6 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 60 Tage, 2671 Paare)
+  Radarsumme ab 0 5        604 Stunden, davon  39 trocken (6 %)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 60 Tage, 2673 Paare)
