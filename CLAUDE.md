@@ -4402,6 +4402,19 @@ von heute auch nach 10 Uhr - ab SCH_OBEN_P oder Schnee). Steigt die Luft ueber 0
 (schOben laeuft bei jedem kzRender und je Minute). x-Schluessel "SCHEIBE|tag|<Zielmorgen>". Im Schatten sicher, in der Sonne kann
 die Scheibe schon frei sein. Geprueft (Playwright, echte Daten 25.11., Uhr 10:16): geteilt und eigene Karte, Himmel/hell, 393/320
 pt; eingespielte Luft +1,2 -> nichts, -0,4 -> noch Eis; 08:30 unveraendert. Nicht am iPhone geprueft.
+v7.26 SCHEIBE TAGSUEBER NACH FEUCHTTEMPERATUR (Nutzer 25.11. 10:47, Norden 1,0 Grad ohne Scheiben-Hinweis: "ist die Scheibe
+nicht mehr vereist?"; dann: "bei 1 Grad, wenn es leicht abtaut, grenzwertig, laesst sich leicht wegkratzen - wichtig ist der
+Hinweis, wenn es hart festgefroren ist"). (1) DATEN: "Norden" bekommt Temperatur/Taupunkt/Bedeckung von NORDERNEY (03631, Insel,
+Bright-Sky-Ersatzquelle), Norden-Leybuchtpolder (02763) misst keine Temperatur; MOSMIX fuer Norden lag zur selben Zeit bei -1,0 /
+-0,7 Grad. Nicht geaendert (eigene Baustelle). (2) `schTagsDaten` (10-17 Uhr) zweistufig: Luft <= 0 -> "noch Eis / fest gefroren"
+(eigene Karte mit Zusatz "Luft -3,0 °C"); Luft ueber 0 -> "Eis, weich / geht leicht ab", bis seit der kaeltesten Stunde der Nacht
+(R.m.t) `SCH_TAU_KH` 0,7 Grad-Stunden FEUCHTTEMPERATUR ueber 0 zusammenkommen (`schTauSumme`: gemessene volle Stunden + die Messung
+oben anteilig; MEINE Schaetzung: Reif ~0,15 mm = 50 kJ/m2 bei ~20 W/m2K). `schFeucht(T,Td)` loest die Psychrometergleichung
+(Bisektion, ueber Eis unter 0 Grad): Norden 10:30 Luft 1,0 / Taupunkt -1,8 -> -0,07 Grad (taut nicht); Luft 3 / Taupunkt -5 ->
++0,10. Die Stull-Naeherung gab dort -0,5 (im Chat 10:49 so genannt - zu tief, die Aussage "taut kaum" bleibt). Sonne zaehlt nicht
+(Auto im Schatten). "leicht zu kratzen" brach in der halben Karte um, darum "geht leicht ab" (gemessen 393/375/320 pt einzeilig).
+Geprueft (`e/t728.py`, echte Daten 10:47 Norden/Erlental, eingespielte Messungen -0,4/-2 fest, 1,2/-1 weich, 2,5/1,0 und getaute
+Stunden -> nichts), Himmel/hell, 393/320. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
