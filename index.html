@@ -1814,6 +1814,20 @@ html.dunkel .sch .lf{stroke:#7fb8ff}html.dunkel .sch .l2{stroke:#ffb26b}html.dun
 html.dunkel .sch .mk{fill:#7fb8ff;stroke:#13203a}
 html.dunkel .sch-leg i{border-top-color:#7fb8ff}html.dunkel .sch-leg i.k2{border-top-color:#ffb26b}html.dunkel .sch-leg i.ktd{border-top-color:#b9c4d4}
 html.dunkel .sch .jz{stroke:#ff8080}html.dunkel .sch svg text.tjz{fill:#ff8080}
+/* v7.24 Autoscheibe oben: Frostkarte geteilt (.alsplit + .alsch) bzw. eigene Karte (.alert.eis) */
+.alert.alsplit{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto;align-items:start}
+.alert .alsch{display:flex;gap:8px;min-width:0;border-left:1px solid rgba(29,79,134,.22);padding-left:10px;color:#1d4f86;cursor:pointer;-webkit-tap-highlight-color:transparent}
+html.dunkel .alert .alsch{border-left-color:rgba(255,255,255,.2);color:#c4e4ff}
+html:root.himmel .alert .alsch .at,html:root.himmel .alert .alsch .ai{color:#cfe8ff}
+html:root.himmel .alert .alsch .ad{color:#fff}
+.alert.eis{background:#eef6ff;border-color:#b9d8f5;color:#1d4f86;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.alert.eis .ax{font-size:12px;margin-top:2px;opacity:.85}
+.alert .alpf{flex:none;align-self:center;font-style:normal;font-size:19px;line-height:1;opacity:.7;margin-right:2px}
+html.dunkel .alert.eis{background:#122a44;border-color:#4a90d9;color:#b9dcff}
+html:root.himmel .alert.eis{--wf:110,185,255;--wr:150,205,255;--wt:205,232,255;color:#fff;border-color:rgba(var(--wr),.75);
+  background:linear-gradient(90deg,rgba(var(--wf),.26),rgba(var(--wf),.05) 60%),var(--hi-k,rgba(22,30,48,.6))}
+html.scheibeoben #heat.cold{display:none!important}
+@media (max-width:360px){.alert .alsch .ai{display:none}.alert .alsch{padding-left:8px}}
 </style>
 </head>
 <body>
@@ -2732,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.23</span>
+      <span class="ver">v7.24</span>
     </div>
   </header>
 
@@ -7476,7 +7490,9 @@ function warnWegHat(k){return !!_warnWeg[k];}
 function warnWegSetzen(k){_warnWeg[k]=1;}
 document.addEventListener("visibilitychange",()=>{if(document.hidden){_warnVersteckt=Date.now();return;}
   if(_warnVersteckt&&Date.now()-_warnVersteckt>=3e5&&Object.keys(_warnWeg).length){_warnWeg={};try{if(_warnLetzt)renderAlerts(_warnLetzt);}catch(e){}}});
-function renderAlerts(j){_warnLetzt=j;const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
+/* v7.24: nach jedem Zeichnen der Warnungen die Autoscheibe oben dazu (schOben) - renderAlerts endet an mehreren Stellen */
+function renderAlerts(j){renderAlerts0(j);try{schOben(true);}catch(e){console.warn("scheibe oben",e);}}
+function renderAlerts0(j){_warnLetzt=j;const box=el("alerts");box.innerHTML="";let al=(j&&j.alerts)||[];
   document.documentElement.classList.toggle("warnfrost",al.some(a=>/frost|gl(ä|ae)tte|glatteis/i.test((a.event_de||"")+" "+(a.headline_de||"")+" "+(a.event_en||""))));if(!al.length)return;
   const rank={minor:1,moderate:2,severe:3,extreme:4};
   const isHeat=a=>/hitze|uv-?index/i.test(a.event_de||a.event_en||"");
@@ -7509,6 +7525,7 @@ function renderAlerts(j){_warnLetzt=j;const box=el("alerts");box.innerHTML="";le
     if(/VORAB/i.test(a.headline_de||""))sub="Vorabinformation"+(sub?" \u00b7 "+sub:"");
     const wk=g.k+"|"+sev+"|"+(g.onset||"");if(warnWegHat(wk))return;
     const div=document.createElement("div");div.className="alert "+sev;
+    if(/frost|gl(ä|ae)tte|glatteis/i.test(g.k))div.dataset.frost=/frost/i.test(g.k)?"1":"2";
     div.innerHTML=`<div class="ai">${warnIc("currentColor")}</div><div style="flex:1;min-width:0"><div class="at">${a.event_de||a.event_en||"Wetterwarnung"}</div>${sub?`<div class="ad">${sub}</div>`:""}</div><button class="alx" aria-label="Warnung ausblenden">\u00d7</button>`;
     div.querySelector(".alx").onclick=e=>{e.stopPropagation();warnWegSetzen(wk,g.expires);div.style.transition="opacity .25s";div.style.opacity="0";setTimeout(()=>div.remove(),260);};
     box.appendChild(div);});
@@ -9624,6 +9641,62 @@ function schGross(){var R=schRechnen();if(!R)return null;
     +'<details class="sch-wie"><summary>So wird gerechnet</summary><div>Gemessen an der Station Gießen/Wettenberg (DWD 01639), 349 Nächte von September bis Mai (Mai 2025 bis November 2026): wie viel kälter die Luft 5 cm über dem Gras wird als die Luft in 2 m – je nach Bewölkung und Wind. Klar und windstill rund 3,7 K, bedeckt rund 1,2 K, klar mit kräftigem Wind rund 1,2 K. '
     +'Damit trifft die Schätzung den Frost am Boden deutlich besser als die Luft in 2 m allein (geschätzt unter −1 °C: in 98 % der Nächte Frost, 0 bis +2 °C: in 30 %, über +2 °C: nie). '
     +'Die Windschutzscheibe ist meist etwas wärmer als die Luft über dem Gras – die Angabe ist eher vorsichtig. Unter Carport, Bäumen oder an der Hauswand friert sie seltener.</div></details></div>';}
+/* ===== v7.24 AUTOSCHEIBE OBEN (Nutzer 25.11.: Vorschlag B aus scheibetest.html) =====
+   Gibt es eine DWD-Warnung zu Frost oder Glaette, wird ihre Karte GETEILT: links die Warnung, rechts "SCHEIBE / Eis 95 % /
+   seit gestern". Ohne solche Warnung steht eine eigene, eisblaue Karte "AUTOSCHEIBE" hinter den DWD-Karten. Nur abends und
+   morgens (SCH_OBEN_VON bis SCH_OBEN_BIS Ortszeit) und ab SCH_OBEN_P (die Kachel zeigt schon ab 10 %); bei Schnee in der
+   Nacht immer. Tipp auf den Scheiben-Teil = Grossansicht (schGross). Das x der geteilten Karte blendet BEIDES aus, das x der
+   eigenen Karte nur sie - wie die Warnungen bis zum naechsten Oeffnen (warnWegSetzen, v6.95). Daten (Station 01639, 353
+   Naechte): Luftfrost ohne Scheibenfrost nie, Scheibenfrost ohne Luftfrost in 51 von 117 Naechten. */
+var SCH_OBEN_P=.5,SCH_OBEN_VON=17,SCH_OBEN_BIS=10,_schObenSig="";
+var SCH_IC='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+  +'<path d="M3.6 17.4 5.6 7.3Q5.9 6 7.2 6h9.6q1.3 0 1.6 1.3l2 10.1q.3 1.6-1.3 1.6H4.9q-1.6 0-1.3-1.6Z"/>'
+  +'<path d="M12 9v7.4M8.8 10.9l6.4 3.7M15.2 10.9l-6.4 3.7" stroke-width="1.55"/></svg>';
+function schObenDaten(){
+  var R=schRechnen();if(!R)return null;
+  var h=tzTeile(Date.now(),TZ).hour;if(h>=SCH_OBEN_BIS&&h<SCH_OBEN_VON)return null;
+  if(!(R.schnee||R.P>=SCH_OBEN_P))return null;
+  var k=schKachel();if(!k)return null;
+  var t=document.createElement("div");t.innerHTML=k.v;
+  var D={v:t.textContent,z:k.s,key:"SCHEIBE|"+R.F.e,x:""};
+  /* Luft blieb die ganze Nacht ueber 0 Grad: das ist der Fall, den man nicht erwartet - dazuschreiben */
+  if(!R.schnee){var Nh=R.H.filter(function(x){return x.nacht;}),lm=Infinity;Nh.forEach(function(x){if(x.T<lm)lm=x.T;});
+    if(Nh.length&&lm>.5)D.x=Date.now()>R.m.t?"Luft blieb über 0 °C – die Scheibe fror trotzdem":"Luft bleibt über 0 °C – die Scheibe friert trotzdem";}
+  return D;}
+function schObenTipp(e){if(e&&e.target&&e.target.closest&&e.target.closest(".alx"))return;
+  try{var g=schGross();if(g)kzGrossZeigen(typeof g==="string"?g:g.html);}catch(x){console.warn("scheibe",x);}}
+function schOben(neu){
+  var box=el("alerts");if(!box)return;
+  var D=null;try{D=schObenDaten();}catch(e){D=null;}
+  if(D&&warnWegHat(D.key))D=null;
+  var fk=box.querySelector('.alert[data-frost="1"]')||box.querySelector(".alert[data-frost]");
+  var sig=(D?D.v+"|"+D.z+"|"+D.x+"|"+D.key:"-")+"|"+(fk?1:0);
+  if(!neu&&sig===_schObenSig)return;
+  _schObenSig=sig;
+  box.querySelectorAll(".alsch").forEach(function(n){n.remove();});
+  box.querySelectorAll(".alert.alsplit").forEach(function(n){n.classList.remove("alsplit");delete n.dataset.sch;});
+  box.querySelectorAll(".alert.eis").forEach(function(n){n.remove();});
+  document.documentElement.classList.toggle("scheibeoben",!!D);
+  if(!D)return;
+  if(fk){
+    fk.classList.add("alsplit");fk.dataset.sch=D.key;
+    var h=document.createElement("div");h.className="alsch";h.setAttribute("role","button");
+    h.innerHTML='<div class="ai">'+SCH_IC+'</div><div style="min-width:0"><div class="at">SCHEIBE</div><div class="ad">'+D.v+'<br>'+D.z+'</div></div>';
+    h.onclick=schObenTipp;
+    var x=fk.querySelector(".alx");fk.insertBefore(h,x);
+    if(x&&!x._sch){var alt=x.onclick;x._sch=1;x.onclick=function(e){if(fk.dataset.sch)warnWegSetzen(fk.dataset.sch);if(alt)alt.call(this,e);};}
+  }else{
+    var c=document.createElement("div");c.className="alert eis";c.setAttribute("role","button");
+    c.innerHTML='<div class="ai">'+SCH_IC+'</div><div style="flex:1;min-width:0"><div class="at">AUTOSCHEIBE</div><div class="ad">'+D.v+' · '+D.z+'</div>'
+      +(D.x?'<div class="ad ax">'+D.x+'</div>':'')+'</div><i class="alpf" aria-hidden="true">›</i><button class="alx" aria-label="Hinweis ausblenden">×</button>';
+    c.onclick=schObenTipp;
+    c.querySelector(".alx").onclick=function(e){e.stopPropagation();warnWegSetzen(D.key);c.style.transition="opacity .25s";c.style.opacity="0";
+      setTimeout(function(){c.remove();document.documentElement.classList.remove("scheibeoben");},260);};
+    box.insertBefore(c,box.querySelector(".alert.test"));
+  }}
+/* die Zeitgrenzen (17 und 10 Uhr) kommen ohne neue Daten - einmal je Minute nachsehen */
+setInterval(function(){try{schOben();}catch(e){}},60e3);
+
 const KZ_DEF={
   /* v3.99: Tiefst- und Hoechstwert fuer den GANZEN Tag. Bis v3.98 kamen sie
      aus den Stundenzeilen, und die reichen kaum in die Zukunft - in Huettenberg
@@ -9903,6 +9976,7 @@ function kzPassen(box){
 (()=>{const b=document.getElementById("kz");if(!b||!window.ResizeObserver)return;let w0=0;
   new ResizeObserver(en=>{const w=Math.round(en[0].contentRect.width);if(w&&w!==w0){w0=w;requestAnimationFrame(()=>kzPassen(b));}}).observe(b);})();
 function kzRender(){
+  try{schOben();}catch(e){}   // v7.24: neue Daten -> Autoscheibe oben nachziehen (nur bei Aenderung)
   const box=el("kz"),pool=el("kzPool"),foot=el("kzFoot");if(!box)return;
   /* v7.09: eine Kachel mit weg() (Muell nur am Heimatort) steht ausserhalb des Bearbeitens wie ein freier Platz da;
      am Ende faellt der Platz ganz weg, sonst bliebe eine leere Reihe stehen */
