@@ -4378,6 +4378,20 @@ den Speicher). DATEN (Station 01639, Naechte 17-09 Uhr Sep-Mai, 10-Minuten-Werte
 in 2 m UND an der Oberflaeche (5 cm) 66, NUR Oberflaeche 51 (Luftminimum 0,0 bis +3,2 Grad), NUR Luft 0, keins 236 - Luftfrost
 ohne Scheibenfrost kam nie vor. "Nur Warnung" entsteht darum nur ueber die Zeit (Warnung bis 12 Uhr, Scheibe rechnet ab 10 Uhr
 fuer den naechsten Morgen) oder weil der DWD fuer den Kreis warnt und wir fuer den Punkt rechnen. Wahl steht aus.
+v7.24 AUTOSCHEIBE OBEN (Nutzer 25.11.: "B bitte einbauen" nach `scheibetest.html`). Gibt es eine DWD-Warnung zu Frost/
+Glaette (renderAlerts markiert die Karte mit `data-frost`, FROST vor GLAETTE), wird ihre Karte GETEILT (`.alsplit`: Grid
+Zeichen | Warnung | `.alsch` | x): links die Warnung, rechts "SCHEIBE / Eis 95 % / seit gestern" (Texte aus `schKachel`).
+Ohne solche Warnung eine eigene eisblaue Karte `.alert.eis` "AUTOSCHEIBE / Eis 95 % · seit gestern ›" hinter den DWD-Karten,
+mit Zusatz "Luft bleibt (blieb) ueber 0 °C - die Scheibe friert (fror) trotzdem", wenn die Luft in allen Nachtstunden ueber
+0,5 Grad liegt. Regeln (`schObenDaten`, MEINE Wahl, vom Nutzer nicht festgelegt): nur 17 bis 10 Uhr Ortszeit
+(`SCH_OBEN_VON/BIS`), ab 50 % (`SCH_OBEN_P`, Kachel ab 10 %), bei Schnee in der Nacht immer. Tipp auf den Scheiben-Teil ->
+`schGross()`. x der geteilten Karte blendet BEIDES aus, x der Eiskarte nur sie - bis zum naechsten Oeffnen (Schluessel
+"SCHEIBE|<Zielmorgen>" in `_warnWeg`, v6.95). Steht die Scheibe oben (`html.scheibeoben`), entfaellt der eigene Hinweis
+"Frost moeglich" (#heat.cold). Aufrufe: `renderAlerts` ist jetzt eine Huelle um `renderAlerts0` + `schOben(true)`;
+`kzRender` ruft `schOben()` (zeichnet nur bei geaenderter Signatur), dazu einmal je Minute fuer die Zeitgrenzen. Unter 360 px
+faellt das Scheibensymbol der rechten Haelfte weg (sonst drei Zeilen). Geprueft (Playwright, echte Daten 25.11., Uhr per
+page.clock): 08:30 mit echter FROST-Warnung geteilt, ohne Warnung Eiskarte, 12:00 nichts, 17:30 "schon jetzt"; x, Neuzeichnen,
+Grossansicht, ?warntest, Himmel/hell/dunkel, 393/320 pt. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
