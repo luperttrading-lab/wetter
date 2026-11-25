@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.24</span>
+      <span class="ver">v7.25</span>
     </div>
   </header>
 
@@ -9558,12 +9558,13 @@ function schPhi(z){var x=Math.abs(z)/Math.SQRT2,t=1/(1+.3275911*x),
   y=1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);
   return z>=0?.5*(1+y):.5*(1-y);}
 /* Zielmorgen: vor 10 Uhr Ortszeit heute, sonst morgen; Fenster 17 Uhr am Vorabend bis 9 Uhr */
-function schFenster(){var now=Date.now(),t=tzTeile(now,TZ),y=t.year,m=t.month-1,d=t.day,heute=t.hour<10;
+/* fz (v7.25): immer der Morgen von heute, auch nach 10 Uhr */
+function schFenster(fz){var now=Date.now(),t=tzTeile(now,TZ),y=t.year,m=t.month-1,d=t.day,heute=!!fz||t.hour<10;
   if(!heute){var n=new Date(Date.UTC(y,m,d+1));y=n.getUTCFullYear();m=n.getUTCMonth();d=n.getUTCDate();}
   var e=ortsMs(y,m,d,9,0,TZ);
   return {a:e-16*36e5,e:e,heute:heute,wd:new Date(Date.UTC(y,m,d)).getUTCDay(),d:d,m:m};}
-function schRechnen(){
-  if(!Array.isArray(chartRows))return null;var F=schFenster(),now=Date.now(),M=new Map();
+function schRechnen(fz){
+  if(!Array.isArray(chartRows))return null;var F=schFenster(fz),now=Date.now(),M=new Map();
   for(var r of chartRows){if(!r||r.temperature==null)continue;var t=new Date(r.timestamp).getTime();
     if(!(t>=F.a&&t<=F.e)||new Date(t).getUTCMinutes()!==0)continue;
     var al=M.get(t);if(al&&(!al._fc||r._fc))continue;   // Messung vor Vorhersage
@@ -9654,7 +9655,7 @@ var SCH_IC='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="
   +'<path d="M12 9v7.4M8.8 10.9l6.4 3.7M15.2 10.9l-6.4 3.7" stroke-width="1.55"/></svg>';
 function schObenDaten(){
   var R=schRechnen();if(!R)return null;
-  var h=tzTeile(Date.now(),TZ).hour;if(h>=SCH_OBEN_BIS&&h<SCH_OBEN_VON)return null;
+  var h=tzTeile(Date.now(),TZ).hour;if(h>=SCH_OBEN_BIS&&h<SCH_OBEN_VON)return schTagsDaten();
   if(!(R.schnee||R.P>=SCH_OBEN_P))return null;
   var k=schKachel();if(!k)return null;
   var t=document.createElement("div");t.innerHTML=k.v;
@@ -9663,6 +9664,19 @@ function schObenDaten(){
   if(!R.schnee){var Nh=R.H.filter(function(x){return x.nacht;}),lm=Infinity;Nh.forEach(function(x){if(x.T<lm)lm=x.T;});
     if(Nh.length&&lm>.5)D.x=Date.now()>R.m.t?"Luft blieb über 0 °C – die Scheibe fror trotzdem":"Luft bleibt über 0 °C – die Scheibe friert trotzdem";}
   return D;}
+/* v7.25 TAGSUEBER (Nutzer 25.11. 10:16: oben stand nur "FROST", die Scheibe fehlte - Zeitregel 17-10 Uhr): zwischen 10 und
+   17 Uhr steht "Scheibe: noch Eis", solange die GEMESSENE Luft (die Messung oben, kzLetzte, hoechstens MESS_VOR_MIN alt, keine
+   Vorhersage) bei SCH_TAG_T 0 Grad oder darunter liegt UND heute frueh Eis zu erwarten war (Morgen von heute, schRechnen(true),
+   ab SCH_OBEN_P oder Schnee) - ohne Eis am Morgen kein "noch". Steigt die Luft ueber 0 Grad, verschwindet es mit der naechsten
+   Messung. Im Schatten stimmt das sicher, in der Sonne kann die Scheibe schon frei sein. */
+var SCH_TAG_T=0;
+function schTagsDaten(){
+  var r=null;try{r=kzLetzte();}catch(e){r=null;}
+  if(!r||r._fc||r.temperature==null)return null;
+  var tm=new Date(r.timestamp).getTime();if(!(Date.now()-tm<=MESS_VOR_MIN*6e4))return null;
+  var T=+r.temperature;if(!(T<=SCH_TAG_T))return null;
+  var R=schRechnen(true);if(!R||!(R.schnee||R.P>=SCH_OBEN_P))return null;
+  return {v:"noch Eis",z:"Luft "+kzF1(T)+"°",key:"SCHEIBE|tag|"+R.F.e,x:""};}
 function schObenTipp(e){if(e&&e.target&&e.target.closest&&e.target.closest(".alx"))return;
   try{var g=schGross();if(g)kzGrossZeigen(typeof g==="string"?g:g.html);}catch(x){console.warn("scheibe",x);}}
 function schOben(neu){

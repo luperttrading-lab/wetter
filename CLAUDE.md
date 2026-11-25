@@ -4392,6 +4392,16 @@ mit Zusatz "Luft bleibt (blieb) ueber 0 °C - die Scheibe friert (fror) trotzdem
 faellt das Scheibensymbol der rechten Haelfte weg (sonst drei Zeilen). Geprueft (Playwright, echte Daten 25.11., Uhr per
 page.clock): 08:30 mit echter FROST-Warnung geteilt, ohne Warnung Eiskarte, 12:00 nichts, 17:30 "schon jetzt"; x, Neuzeichnen,
 Grossansicht, ?warntest, Himmel/hell/dunkel, 393/320 pt. Nicht am iPhone geprueft.
+v7.25 SCHEIBE AUCH TAGSUEBER (Nutzer 25.11. 10:16, Bild Erlental: oben nur "FROST bis Mi 12:00", die Scheibe fehlte - Grund
+war die Zeitregel 17-10 Uhr aus v7.24, nicht die fehlende Kachel; die Anzeige oben haengt NICHT an der Kachel, geprueft mit
+`kzScheibeNeu` gesetzt und ohne "scheibe" in kzWahl; "Ja, bau das bitte ein"): zwischen 10 und 17 Uhr liefert `schObenDaten`
+jetzt `schTagsDaten()`: "SCHEIBE / noch Eis / Luft -3,0°" (geteilt) bzw. "AUTOSCHEIBE / noch Eis · Luft -3,0°", solange die
+GEMESSENE Luft (`kzLetzte()`, keine Vorhersage, hoechstens MESS_VOR_MIN alt) bei `SCH_TAG_T` 0 Grad oder darunter liegt UND fuer
+den Morgen von heute Eis zu erwarten war (`schRechnen(true)` - neuer Parameter `fz` in schFenster/schRechnen erzwingt den Morgen
+von heute auch nach 10 Uhr - ab SCH_OBEN_P oder Schnee). Steigt die Luft ueber 0 Grad, verschwindet es mit der naechsten Messung
+(schOben laeuft bei jedem kzRender und je Minute). x-Schluessel "SCHEIBE|tag|<Zielmorgen>". Im Schatten sicher, in der Sonne kann
+die Scheibe schon frei sein. Geprueft (Playwright, echte Daten 25.11., Uhr 10:16): geteilt und eigene Karte, Himmel/hell, 393/320
+pt; eingespielte Luft +1,2 -> nichts, -0,4 -> noch Eis; 08:30 unveraendert. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
