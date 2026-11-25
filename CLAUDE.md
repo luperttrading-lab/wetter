@@ -4422,6 +4422,13 @@ v7.27 (Nutzer 25.11. 23:10, zwei Bilder: Erlental "SCHEIBE Eis 95 % / schon jetz
 Grossansicht ebenso ("seit etwa 18 Uhr"). "schon jetzt" bleibt fuer Frost schon in der ERSTEN Nachtstunde des Fensters (17 Uhr,
 `R.abend`) - die Scheibe war da vermutlich schon vor 17 Uhr kalt genug, eine Uhrzeit waere zu genau. Zahlen 25.11.: Erlental 17 Uhr
 Oberflaeche -1,8 (abend), Norden 17 Uhr +0,1 / 18 Uhr -0,1 (knapp, darum 18 Uhr). Geprueft (`e/t730.py`, Uhr 23:10 und 17:30).
+v7.28 (Nutzer zu v7.27: "ob wir uns diese Prognose ueberhaupt antun muessen - es geht nur darum, ob ich morgens Eis kratzen
+muss"): Kachel "Scheibe" und Scheiben-Teil oben nennen keine Uhrzeit des Frostbeginns mehr ("seit ~18 Uhr", "schon jetzt", "ab ~3
+Uhr", "seit gestern" - alles weg), sondern den Morgen, um den es geht: "Eis 95 % / Do frueh" bzw. "heute frueh" (vor 10 Uhr), wie
+bisher schon bei "frei" und "Schnee". Grund neben dem Wunsch: der Beginn hing oft an Zehntelgrad (Norden 25.11.: 17 Uhr +0,1 / 18
+Uhr -0,1 bei sigma 1,05 K) - eine Genauigkeit, die das Modell nicht hat. Die Grossansicht nennt den Beginn weiter ("seit etwa 18
+Uhr", Kurve), die zweite Kachelansicht weiter die kaelteste Stunde. Tagsueber (10-17 Uhr) unveraendert "noch Eis / fest gefroren"
+bzw. "Eis, weich". Geprueft (`e/t730.py`, Uhr 23:10 Norden/Erlental, 08:30 Erlental).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und

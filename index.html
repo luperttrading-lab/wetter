@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.27</span>
+      <span class="ver">v7.28</span>
     </div>
   </header>
 
@@ -9590,9 +9590,9 @@ function schKachel(){var R=schRechnen();if(!R)return null;
   var F=R.F,m=R.m,now=Date.now(),tag=F.heute?"heute":KZ_WT[F.wd],frueh=F.heute?"heute früh":tag+" früh",a;
   if(R.schnee)a={l:"Scheibe",v:'<span class="dn">Schnee</span>',s:frueh};
   else if(R.P<.1)a={l:"Scheibe",v:'<span class="ok">frei</span>',s:frueh};
-  else{var tb=R.ab?R.ab.t:m.t,hh=schStd(tb),
-      s=R.abend?(F.heute?"seit gestern":(now>=R.ab.t?"schon jetzt":"schon abends")):R.ab?(tb<=now?"seit ~"+hh+" Uhr":F.heute||hh>=12?"ab ~"+hh+" Uhr":tag+" ab ~"+hh+" Uhr"):(F.heute?"gegen "+hh+" Uhr":tag+" ~"+hh+" Uhr");
-    a={l:"Scheibe",v:'<span'+(R.P>=.5?' class="dn"':'')+'>Eis '+schProz(R.P)+' %</span>',s:s};}
+  /* v7.28 (Nutzer: "es geht nur darum, ob ich morgens kratzen muss"): Unterzeile = der Morgen, um den es geht - keine
+     Uhrzeit des Frostbeginns mehr (sie hing oft an 0,1 Grad, Norden 25.11.: 17 Uhr +0,1 / 18 Uhr -0,1) */
+  else a={l:"Scheibe",v:'<span'+(R.P>=.5?' class="dn"':'')+'>Eis '+schProz(R.P)+' %</span>',s:frueh};
   /* zweite Ansicht: geschaetzte Oberflaeche zur kaeltesten Stunde ("Oberflaeche" brach bei 320 pt um) */
   a.alt=[{l:"Scheibe",v:kzF1(m.ts)+"°",s:(F.heute?"heute":tag)+" ~"+schStd(m.t)+" Uhr"}];
   return a;}
