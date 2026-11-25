@@ -1,0 +1,176 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scheibe-Test</title>
+<style>
+:root{--bg:#f3f1ec;--karte:#fff;--tx:#17202e;--mu:#5c6b80;--li:#e0dcd3;--wahl:#2f6fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1219;--karte:#202a38;--tx:#e7edf5;--mu:#a3b2c6;--li:#2c3848}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);
+     padding:calc(env(safe-area-inset-top,0px) + 10px) 10px 60px;-webkit-text-size-adjust:100%}
+h1{font-size:19px;margin:2px 2px 3px}
+.hin{color:var(--mu);font-size:13px;margin:0 2px 8px}
+.zeile{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:3px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.zeile::-webkit-scrollbar{display:none}
+.zeile span{flex:0 0 66px;font-size:12.5px;color:var(--mu)}
+button{flex:0 0 auto;font:inherit;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid var(--li);background:var(--karte);color:var(--tx);cursor:pointer;white-space:nowrap}
+button.an{background:var(--wahl);border-color:var(--wahl);color:#fff}
+iframe{width:100%;height:720px;border:1px solid var(--li);border-radius:18px;background:var(--karte);margin-top:8px}
+.stand{font-size:13px;color:var(--mu);margin:6px 2px 0;min-height:3.9em}
+.stand b{color:var(--tx)}
+</style></head><body>
+
+<h1>Autoscheibe oben – Vorschläge</h1>
+<p class="hin">Die echte App mit fünf Vorschlägen, wie der Hinweis „Autoscheibe“ zur Frostwarnung des DWD kommt. Ein Tipp auf den Scheiben-Teil öffnet die echte Großansicht (Daten von heute). Die Beispielwerte sind ausgedacht, nur „Echt“ nimmt die Daten von jetzt.</p>
+
+<div class="zeile" id="zV"><span>Vorschlag</span><button data-v="A">A · Zusatzzeile</button><button data-v="B">B · Geteilt</button><button data-v="C">C · Chip</button><button data-v="D">D · Eigene Karte</button><button data-v="E">E · Unten im Kasten</button></div>
+<div class="zeile" id="zF"><span>Fall</span><button data-v="beide">Beides</button><button data-v="scheibe">Nur Scheibe</button><button data-v="warn">Nur Warnung</button><button data-v="echt">Echt (jetzt)</button></div>
+<div class="zeile" id="zA"><span>Ansicht</span><button data-v="himmel">Himmel</button><button data-v="hell">Hell</button><button data-v="dunkel">Dunkel</button></div>
+<div class="stand" id="stand">lädt …</div>
+<iframe id="app" src="index.html" title="Wetter-App"></iframe>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const E={v:"A",f:"beide",a:"himmel"};
+/* Ab dieser Wahrscheinlichkeit erscheint die Scheibe oben (die Kachel zeigt schon ab 10 %). */
+const SCHWELLE=.5;
+
+const VOR={
+  A:"<b>A · Zusatzzeile:</b> die DWD-Karte bleibt, darunter eine Zeile „Autoscheibe“. Ohne Warnung eine eigene, eisblaue Karte.",
+  B:"<b>B · Geteilt:</b> eine Karte, links die DWD-Warnung, rechts die Scheibe. Ohne Warnung eine eigene, eisblaue Karte.",
+  C:"<b>C · Chip:</b> ein kleiner Knopf „95 %“ rechts in der Warnkarte. Ohne Warnung eine schmale Zeile statt einer Karte.",
+  D:"<b>D · Eigene Karte:</b> DWD-Warnung und Scheibe getrennt, die Scheibe in Eisblau darunter.",
+  E:"<b>E · Unten im Kasten:</b> oben nur die DWD-Warnung, die Scheibe unten im Wetterkasten, wo heute „Frost möglich“ steht."
+};
+const FALL={
+  beide:{txt:"<b>Beides</b> (wie dein Bild von 09:15): der DWD warnt vor Frost, die Scheibe ist gefroren.",
+    w:{t:"FROST",d:"bis Mi 12:00 Uhr",sev:"minor"},s:{P:.95,v:"Eis 95 %",z:"seit gestern"}},
+  scheibe:{txt:"<b>Nur Scheibe:</b> die Luft bleibt über 0 °C, die Scheibe friert trotzdem. An der Station Gießen/Wettenberg war das in 51 von 117 Nächten mit Frost an der Oberfläche so.",
+    w:null,s:{P:.7,v:"Eis 70 %",z:"Do ab ~4 Uhr",x:"Luft bleibt über 0 °C – die Scheibe friert trotzdem"}},
+  warn:{txt:"<b>Nur Warnung:</b> die Warnung gilt noch bis 12 Uhr, ab 10 Uhr rechnet die Scheibe aber schon für morgen früh – und die ist frei. Unter 50 % erscheint oben nichts.",
+    w:{t:"FROST",d:"bis Mi 12:00 Uhr",sev:"minor"},s:{P:.05,v:"frei",z:"Do früh"}},
+  echt:{txt:"<b>Echt:</b> die Frost- oder Glättewarnung, die jetzt gilt, und die Scheibe aus der App."}
+};
+
+let F=null,doc=null;
+const ICS='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+  +'<path d="M3.6 17.4 5.6 7.3Q5.9 6 7.2 6h9.6q1.3 0 1.6 1.3l2 10.1q.3 1.6-1.3 1.6H4.9q-1.6 0-1.3-1.6Z"/>'
+  +'<path d="M12 9v7.4M8.8 10.9l6.4 3.7M15.2 10.9l-6.4 3.7" stroke-width="1.55"/></svg>';
+const X='<button class="alx" aria-label="ausblenden">×</button>';
+
+const CSS=`
+#alerts{display:none!important}
+#heat{display:none!important}
+#stBox .st-sch{cursor:pointer;-webkit-tap-highlight-color:transparent}
+#stBox .alert.eis{background:#eef6ff;border-color:#b9d8f5;color:#1d4f86}
+html.dunkel:not(.himmel) #stBox .alert.eis{background:#122a44;border-color:#4a90d9;color:#b9dcff}
+html:root.himmel #stBox .alert.eis{--wf:110,185,255;--wr:150,205,255;--wt:205,232,255;color:#fff;border-color:rgba(var(--wr),.75);
+  background:linear-gradient(90deg,rgba(var(--wf),.26),rgba(var(--wf),.05) 60%),var(--hi-k,rgba(22,30,48,.6))}
+#stBox .st-pf{margin-left:auto;font-style:normal;opacity:.7;font-size:19px;line-height:1;padding-left:6px}
+#stBox .alert.eis .st-x{font-size:12px;font-weight:500;margin-top:2px;opacity:.85}
+/* A */
+#stBox .st-z{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(29,79,134,.22);
+  font-size:12.5px;font-weight:600;color:#1d4f86;line-height:1.3}
+#stBox .st-z svg{flex:none;width:17px;height:17px}
+#stBox .st-z b{font-weight:780}
+html.dunkel #stBox .st-z{border-top-color:rgba(255,255,255,.18);color:#c4e4ff}
+/* B */
+#stBox .alert.st-b{display:grid;grid-template-columns:1fr 1fr auto;align-items:start;gap:0}
+#stBox .st-h{display:flex;gap:8px;min-width:0}
+#stBox .st-h+.st-h{border-left:1px solid rgba(29,79,134,.22);padding-left:10px;margin-left:8px;color:#1d4f86}
+html.dunkel #stBox .st-h+.st-h{border-left-color:rgba(255,255,255,.2);color:#c4e4ff}
+html:root.himmel #stBox .alert .st-h+.st-h .at,html:root.himmel #stBox .alert .st-h+.st-h .ai{color:#cfe8ff}
+/* C */
+#stBox .st-chip{flex:none;align-self:center;display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 7px;border-radius:999px;
+  background:#dcecff;color:#1d4f86;font-size:12.5px;font-weight:760;margin:-3px 0 -3px 4px;white-space:nowrap}
+#stBox .st-chip svg{width:17px;height:17px}
+html.dunkel #stBox .st-chip{background:rgba(140,200,255,.18);color:#d6ecff;box-shadow:inset 0 0 0 1px rgba(160,210,255,.38)}
+#stBox .st-cl{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border-radius:999px;margin-bottom:11px;font-size:13px;
+  font-weight:650;background:#e6f1ff;color:#1d4f86;box-shadow:inset 0 0 0 1px #c3dcf6}
+#stBox .st-cl svg{flex:none;width:18px;height:18px}
+html.dunkel #stBox .st-cl{background:rgba(120,190,255,.14);color:#d6ecff;box-shadow:inset 0 0 0 1px rgba(160,210,255,.32)}
+html:root.himmel #stBox .st-cl{background:linear-gradient(90deg,rgba(110,185,255,.24),rgba(110,185,255,.06) 70%),var(--hi-k);color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 1px rgba(150,205,255,.5),0 3px 10px rgba(0,12,35,.2)}
+/* E */
+.st-e .tx b{font-weight:760}
+`;
+
+function sKurz(s){return s.v+" · "+s.z;}
+function karteWarn(w,innen,cls){return `<div class="alert ${w.sev}${cls?" "+cls:""}"><div class="ai">${F.warnIc("currentColor")}</div>`
+  +`<div style="flex:1;min-width:0"><div class="at">${w.t}</div><div class="ad">${w.d}</div>${innen||""}</div>${X}</div>`;}
+function karteEis(s){return `<div class="alert eis st-sch"><div class="ai">${ICS}</div><div style="flex:1;min-width:0"><div class="at">AUTOSCHEIBE</div>`
+  +`<div class="ad">${sKurz(s)}</div>${s.x?`<div class="st-x">${s.x}</div>`:""}</div><i class="st-pf">›</i>${X}</div>`;}
+
+function daten(){
+  if(E.f!=="echt")return FALL[E.f];
+  let w=null,s=null;
+  try{const al=doc.querySelectorAll("#alerts .alert");
+    for(const a of al){const t=(a.querySelector(".at")||{}).textContent||"";
+      if(/frost|gl(ä|ae)tte|glatteis/i.test(t)){w={t:t,d:((a.querySelector(".ad")||{}).textContent)||"",sev:(a.className.match(/minor|moderate|severe|extreme/)||["minor"])[0]};break;}}}catch(e){}
+  try{const R=F.schRechnen(),k=F.schKachel();
+    if(R&&k){const tmp=doc.createElement("div");tmp.innerHTML=k.v;s={P:R.P,v:tmp.textContent,z:k.s};}}catch(e){}
+  return {w,s};
+}
+
+function bauen(){
+  if(!F||!doc)return;
+  let st=doc.getElementById("stCss");
+  if(!st){st=doc.createElement("style");st.id="stCss";st.textContent=CSS;doc.head.appendChild(st);}
+  let box=doc.getElementById("stBox");
+  if(!box){box=doc.createElement("div");box.id="stBox";const al=doc.getElementById("alerts");al.parentNode.insertBefore(box,al);}
+  doc.querySelectorAll(".st-e").forEach(n=>n.remove());
+  const D=daten(),w=D.w,s=D.s&&D.s.P>=SCHWELLE&&!/frei/.test(D.s.v)?D.s:null;
+  let h="";
+  if(E.v==="A"){
+    if(w)h=karteWarn(w,s?`<div class="st-z st-sch">${ICS}<span><b>Scheibe:</b> ${sKurz(s)}</span><i class="st-pf">›</i></div>`:"");
+    else if(s)h=karteEis(s);
+  }else if(E.v==="B"){
+    if(w&&s)h=`<div class="alert ${w.sev} st-b"><div class="st-h"><div class="ai">${F.warnIc("currentColor")}</div><div style="min-width:0"><div class="at">${w.t}</div><div class="ad">${w.d}</div></div></div>`
+      +`<div class="st-h st-sch"><div class="ai">${ICS}</div><div style="min-width:0"><div class="at">SCHEIBE</div><div class="ad">${s.v}<br>${s.z}</div></div></div>${X}</div>`;
+    else if(w)h=karteWarn(w);
+    else if(s)h=karteEis(s);
+  }else if(E.v==="C"){
+    if(w)h=karteWarn(w,"").replace(X,(s?`<span class="st-chip st-sch">${ICS}${s.v.replace("Eis ","")}</span>`:"")+X);
+    else if(s)h=`<div class="st-cl st-sch">${ICS}<span><b>Autoscheibe:</b> ${sKurz(s)}</span><i class="st-pf">›</i></div>`;
+  }else if(E.v==="D"){
+    if(w)h+=karteWarn(w);
+    if(s)h+=karteEis(s);
+  }else if(E.v==="E"){
+    if(w)h=karteWarn(w);
+    if(s){const heat=doc.getElementById("heat"),d=doc.createElement("div");d.className="heat on cold st-e st-sch";
+      d.innerHTML=`<span class="ic">${ICS.replace('width="19" height="19"','width="18" height="18"')}</span><div class="tx"><b>Autoscheibe:</b> ${sKurz(s)}${s.x?" – "+s.x.replace(/^Luft bleibt über 0 °C – /,"Luft über 0 °C, "):""}</div>`;
+      d.style.color="#1d4f86";if(doc.documentElement.classList.contains("dunkel"))d.style.color="#cfe8ff";
+      d.onclick=gross;heat.parentNode.insertBefore(d,heat.nextSibling);}
+  }
+  box.innerHTML=h;
+  box.querySelectorAll(".st-sch").forEach(n=>n.onclick=gross);
+  box.querySelectorAll(".alx").forEach(b=>b.onclick=e=>{e.stopPropagation();const c=b.closest(".alert");c.style.transition="opacity .25s";c.style.opacity="0";setTimeout(()=>c.remove(),260);});
+  let t=VOR[E.v]+"<br>"+FALL[E.f].txt;
+  if(E.f==="echt")t+=` Jetzt: Warnung ${w?w.t+" "+w.d:"keine"}, Scheibe ${D.s?D.s.v+" · "+D.s.z:"–"}${D.s&&D.s.P<SCHWELLE?" (unter 50 %, oben nichts)":""}.`;
+  $("stand").innerHTML=t;
+}
+function gross(e){if(e)e.stopPropagation();try{const g=F.schGross();if(!g)return;F.kzGrossZeigen(typeof g==="string"?g:g.html);}catch(x){console.warn(x);}}
+
+function ansicht(){
+  if(!F)return;
+  try{F.ansichtGespeichert=()=>E.a;F.ansichtAnwenden(true);}catch(e){console.warn(e);}
+  setTimeout(bauen,60);
+}
+function knoepfe(){
+  [["zV","v"],["zF","f"],["zA","a"]].forEach(([z,k])=>$(z).querySelectorAll("button").forEach(b=>{
+    b.classList.toggle("an",b.dataset.v===E[k]);
+    b.onclick=()=>{E[k]=b.dataset.v;knoepfe();if(k==="a")ansicht();else bauen();};}));
+}
+knoepfe();
+function bereit(){
+  try{F=$("app").contentWindow;doc=$("app").contentDocument;}catch(e){F=null;doc=null;}
+  const ok=F&&doc&&typeof F.schRechnen==="function"&&doc.getElementById("alerts")&&!doc.documentElement.classList.contains("sanft");
+  if(!ok){setTimeout(bereit,250);return;}
+  ansicht();
+  /* die App zeichnet bei neuen Daten nach - der eigene Kasten liegt ausserhalb von #alerts und bleibt */
+  setInterval(()=>{if(!doc.getElementById("stBox"))bauen();},2000);
+}
+bereit();
+</script>
+</body></html>
