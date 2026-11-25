@@ -4415,6 +4415,13 @@ oben anteilig; MEINE Schaetzung: Reif ~0,15 mm = 50 kJ/m2 bei ~20 W/m2K). `schFe
 (Auto im Schatten). "leicht zu kratzen" brach in der halben Karte um, darum "geht leicht ab" (gemessen 393/375/320 pt einzeilig).
 Geprueft (`e/t728.py`, echte Daten 10:47 Norden/Erlental, eingespielte Messungen -0,4/-2 fest, 1,2/-1 weich, 2,5/1,0 und getaute
 Stunden -> nichts), Himmel/hell, 393/320. Nicht am iPhone geprueft.
+v7.27 (Nutzer 25.11. 23:10, zwei Bilder: Erlental "SCHEIBE Eis 95 % / schon jetzt", Norden "SCHEIBE Eis 95 % / ab ~18 Uhr" -
+"wo ist der Unterschied?"): KEINER in der Sache, beide Scheiben sind seit dem Abend vereist - "ab ~18 Uhr" war ein TEXTFEHLER.
+`schKachel` pruefte nur fuer den Morgen von HEUTE, ob der Frostbeginn schon vorbei ist ("seit"); fuer den naechsten Morgen (nach
+10 Uhr) stand immer "ab", auch um 23 Uhr fuer 18 Uhr. Jetzt fuer beide Ziele: Beginn vorbei -> "seit ~18 Uhr", sonst "ab ~18 Uhr";
+Grossansicht ebenso ("seit etwa 18 Uhr"). "schon jetzt" bleibt fuer Frost schon in der ERSTEN Nachtstunde des Fensters (17 Uhr,
+`R.abend`) - die Scheibe war da vermutlich schon vor 17 Uhr kalt genug, eine Uhrzeit waere zu genau. Zahlen 25.11.: Erlental 17 Uhr
+Oberflaeche -1,8 (abend), Norden 17 Uhr +0,1 / 18 Uhr -0,1 (knapp, darum 18 Uhr). Geprueft (`e/t730.py`, Uhr 23:10 und 17:30).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
