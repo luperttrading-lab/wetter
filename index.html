@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.26</span>
+      <span class="ver">v7.27</span>
     </div>
   </header>
 
@@ -9591,7 +9591,7 @@ function schKachel(){var R=schRechnen();if(!R)return null;
   if(R.schnee)a={l:"Scheibe",v:'<span class="dn">Schnee</span>',s:frueh};
   else if(R.P<.1)a={l:"Scheibe",v:'<span class="ok">frei</span>',s:frueh};
   else{var tb=R.ab?R.ab.t:m.t,hh=schStd(tb),
-      s=R.abend?(F.heute?"seit gestern":(now>=R.ab.t?"schon jetzt":"schon abends")):R.ab?(F.heute?(tb<=now?"seit ~"+hh+" Uhr":"ab ~"+hh+" Uhr"):(hh>=12?"ab ~"+hh+" Uhr":tag+" ab ~"+hh+" Uhr")):(F.heute?"gegen "+hh+" Uhr":tag+" ~"+hh+" Uhr");
+      s=R.abend?(F.heute?"seit gestern":(now>=R.ab.t?"schon jetzt":"schon abends")):R.ab?(tb<=now?"seit ~"+hh+" Uhr":F.heute||hh>=12?"ab ~"+hh+" Uhr":tag+" ab ~"+hh+" Uhr"):(F.heute?"gegen "+hh+" Uhr":tag+" ~"+hh+" Uhr");
     a={l:"Scheibe",v:'<span'+(R.P>=.5?' class="dn"':'')+'>Eis '+schProz(R.P)+' %</span>',s:s};}
   /* zweite Ansicht: geschaetzte Oberflaeche zur kaeltesten Stunde ("Oberflaeche" brach bei 320 pt um) */
   a.alt=[{l:"Scheibe",v:kzF1(m.ts)+"°",s:(F.heute?"heute":tag)+" ~"+schStd(m.t)+" Uhr"}];
@@ -9617,7 +9617,7 @@ function schGross(){var R=schRechnen();if(!R)return null;
   g+='<circle class="mk" cx="'+X(m.t).toFixed(1)+'" cy="'+Y(m.ts).toFixed(1)+'" r="3.2"/>';
   if(now>F.a&&now<F.e)g+='<line class="jz" x1="'+X(now).toFixed(1)+'" x2="'+X(now).toFixed(1)+'" y1="'+To+'" y2="'+(Hh-Bo)+'"/><text class="tjz" x="'+X(now).toFixed(1)+'" y="'+(To+8)+'" text-anchor="middle">jetzt</text>';
   var nacht=F.heute?"letzte Nacht":"Nacht zum "+KZ_WT[F.wd]+" "+F.d+"."+(F.m+1)+".",
-    pz=schProz(P),hh=schStd(R.ab?R.ab.t:m.t),ab=R.abend?", schon ab dem Abend":R.ab?", ab etwa "+hh+" Uhr":"",urt;
+    pz=schProz(P),hh=schStd(R.ab?R.ab.t:m.t),ab=R.abend?", schon ab dem Abend":R.ab?(R.ab.t<=now?", seit etwa ":", ab etwa ")+hh+" Uhr":"",urt;
   if(P>=.7)urt="Eis an der Scheibe wahrscheinlich ("+pz+" %)"+ab+".";
   else if(P>=.3)urt="Eis an der Scheibe möglich ("+pz+" %)"+ab+".";
   else if(P>=.1)urt="Eis eher nicht ("+pz+" %).";else urt="Die Scheibe bleibt frei (unter 10 %).";
