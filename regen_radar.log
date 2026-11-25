@@ -1,4 +1,4 @@
-Radar-Eichung an den Bodenmessern, 25.11.2026 10:23 UTC
+Radar-Eichung an den Bodenmessern, 25.11.2026 22:42 UTC
   Giessen/Wettenberg        0 Paare  (GIESSEN)
   Frankfurt/Main            0 Paare  (FRANKFURT/M)
   Kassel                    0 Paare  (SCHAUENBURG-ELGERSH.)
@@ -10,26 +10,26 @@ Radar-Eichung an den Bodenmessern, 25.11.2026 10:23 UTC
   Hannover                  0 Paare  (HANNOVER)
   Berlin-Tegel              0 Paare  (BERLIN-TEGEL)
   Leipzig/Halle             0 Paare  (LEIPZIG/SCHKEUDITZ)
-  Dresden-Klotzsche         0 Paare  (DRESDEN/FLUGHAFEN)
+  Dresden-Klotzsche         1 Paare  (DRESDEN/FLUGHAFEN)
   Erfurt-Weimar             0 Paare  (ERFURT)
   Nuernberg                 0 Paare  (NUERNBERG)
   Muenchen-Flughafen        0 Paare  (MUENCHEN-FL.)
   Stuttgart-Echterdingen    0 Paare  (STUTTGART-ECHT.)
   Karlsruhe/Rheinstetten    0 Paare  (RHEINSTETTEN)
   Trier-Petrisberg          0 Paare  (TRIER)
-  Saarbruecken              0 Paare  (SAARBRUECKEN)
+  Saarbruecken              1 Paare  (SAARBRUECKEN)
   Freiburg                  2 Paare  (FREIBURG)
-gesammelt: 2 Paare
+gesammelt: 4 Paare
 
 Klasse     Paare    roh   Faktor      25 %      75 %     Messung       Radar
-niesel       445   2003     1.85      1.11      3.64     0.40 mm     0.23 mm
+niesel       445   2007     1.85      1.11      3.64     0.40 mm     0.23 mm
 leicht       462    524     1.01      0.66      1.41     1.00 mm     0.95 mm
 regen         77     78     0.79      0.57      1.09     2.80 mm     3.45 mm
 
-Radar sah nichts, Station mass etwas: 66 von 2671 Paaren (Median 0.10 mm)
+Radar sah nichts, Station mass etwas: 66 von 2675 Paaren (Median 0.10 mm)
 Umgekehrt - Radar sah etwas, am Boden kam nichts an:
-  Radarsumme bis  0 1      1139 Stunden, davon 963 trocken (85 %)
+  Radarsumme bis  0 1      1143 Stunden, davon 967 trocken (85 %)
   Radarsumme 0 1 bis  0 25 542 Stunden, davon 291 trocken (54 %)
   Radarsumme 0 25 bis  0 5 322 Stunden, davon  70 trocken (22 %)
   Radarsumme ab 0 5        602 Stunden, davon  39 trocken (6 %)
-regen-radar.json geschrieben (3 von 3 Klassen belegt, 60 Tage, 2671 Paare)
+regen-radar.json geschrieben (3 von 3 Klassen belegt, 60 Tage, 2675 Paare)
