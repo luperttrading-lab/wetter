@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.25</span>
+      <span class="ver">v7.26</span>
     </div>
   </header>
 
@@ -9670,13 +9670,38 @@ function schObenDaten(){
    ab SCH_OBEN_P oder Schnee) - ohne Eis am Morgen kein "noch". Steigt die Luft ueber 0 Grad, verschwindet es mit der naechsten
    Messung. Im Schatten stimmt das sicher, in der Sonne kann die Scheibe schon frei sein. */
 var SCH_TAG_T=0;
+/* v7.26 (Nutzer 25.11. 10:47, Norden: "1,0 Grad - ist die Scheibe nicht mehr vereist?"; "bei 1 Grad, wenn es leicht abtaut,
+   grenzwertig, laesst sich leicht wegkratzen - wichtig ist der Hinweis, wenn es hart festgefroren ist"). Ob Eis TAUT, entscheidet
+   nicht die Luft, sondern die FEUCHTTEMPERATUR (schFeucht): in trockener Luft verdunstet das Eis an der Oberflaeche und kuehlt sich
+   dabei selbst - Norden 10:30 Luft +1,0, Taupunkt -1,6 -> Feuchttemperatur -0,5 Grad, Reif taut im Schatten nicht. Getaut ist es
+   erst, wenn seit der kaeltesten Stunde der Nacht (R.m.t) SCH_TAU_KH 0,7 Grad-Stunden Feuchttemperatur ueber 0 zusammenkommen
+   (schTauSumme; MEINE Schaetzung: duenner Reif ~0,15 mm Wasser = 50 kJ/m2, Waermeuebergang ~20 W/m2K bei maessigem Wind).
+   Zwei Stufen: Luft <= 0 Grad -> "noch Eis / fest gefroren"; Luft ueber 0, aber noch nicht getaut -> "Eis, weich / geht leicht
+   ab" ("leicht zu kratzen" brach in der halben Karte um). Die Sonne zaehlt nicht mit (Auto im Schatten). Ohne Taupunkt gilt die Lufttemperatur. */
+var SCH_TAU_KH=.7;
+function schFeucht(T,Td){
+  if(Td==null||isNaN(Td)||Td>=T)return T;
+  var esW=function(t){return 6.112*Math.exp(17.62*t/(243.12+t));},esI=function(t){return 6.112*Math.exp(22.46*t/(272.62+t));};
+  var ea=esW(Td),lo=Td-2,hi=T,f=function(tw){return (tw<0?esI(tw):esW(tw))-0.00066*1013*(T-tw)-ea;};
+  for(var i=0;i<40;i++){var mi=(lo+hi)/2;if(f(mi)>0)hi=mi;else lo=mi;}
+  return (lo+hi)/2;}
+function schTauSumme(ab,r){
+  var now=Date.now(),last=ab,sum=0;
+  (chartRows||[]).forEach(function(x){if(!x||x._fc||x.temperature==null)return;var t=new Date(x.timestamp).getTime();
+    if(t<=ab||t>now||new Date(t).getUTCMinutes()!==0)return;
+    sum+=Math.max(0,schFeucht(+x.temperature,x.dew_point))*1;if(t>last)last=t;});
+  if(r){var tr=new Date(r.timestamp).getTime();if(tr>last)sum+=Math.max(0,schFeucht(+r.temperature,r.dew_point))*Math.min(1,(tr-last)/36e5);}
+  return sum;}
 function schTagsDaten(){
   var r=null;try{r=kzLetzte();}catch(e){r=null;}
   if(!r||r._fc||r.temperature==null)return null;
   var tm=new Date(r.timestamp).getTime();if(!(Date.now()-tm<=MESS_VOR_MIN*6e4))return null;
-  var T=+r.temperature;if(!(T<=SCH_TAG_T))return null;
   var R=schRechnen(true);if(!R||!(R.schnee||R.P>=SCH_OBEN_P))return null;
-  return {v:"noch Eis",z:"Luft "+kzF1(T)+"°",key:"SCHEIBE|tag|"+R.F.e,x:""};}
+  var T=+r.temperature,key="SCHEIBE|tag|"+R.F.e;
+  if(T<=SCH_TAG_T)return {v:"noch Eis",z:"fest gefroren",x:"Luft "+kzF1(T)+" °C",key:key,hart:1};
+  if(schTauSumme(R.m.t,r)>=SCH_TAU_KH)return null;
+  var Tw=schFeucht(T,r.dew_point);
+  return {v:"Eis, weich",z:"geht leicht ab",x:"Luft "+kzF1(T)+" °C"+(Tw<=0?" – trockene Luft, das Eis taut kaum":" – es taut langsam"),key:key,hart:0};}
 function schObenTipp(e){if(e&&e.target&&e.target.closest&&e.target.closest(".alx"))return;
   try{var g=schGross();if(g)kzGrossZeigen(typeof g==="string"?g:g.html);}catch(x){console.warn("scheibe",x);}}
 function schOben(neu){
