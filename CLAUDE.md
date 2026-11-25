@@ -4367,6 +4367,17 @@ waermer - die Angabe ist vorsichtig), Carport/Baeume/Hauswand, eine Station, kna
 geeicht. Auswertung: Scratchpad `frostsk/` (lade.py, fit.py, nacht2.py, feucht.py). Geprueft (`t723.py`, `t723b.py`): echte
 Daten 25.11. 08:47 (heute, Messung: Eis 95 %, Oberflaeche -8,7) und 15:00 (morgen, MOSMIX), dazu Temperatur +3 / +6 K und klar +
 still mit Regen eingespielt; Himmel 393/320, hell, dunkel; bei 320 pt wird der Wert auf 14 px verkleinert. Nicht am iPhone geprueft.
+VARIANTENSEITE `scheibetest.html` (Nutzer 25.11., Bild 09:15 mit DWD-Karte "FROST bis Mi 12:00" und Kachel "Scheibe Eis 95 %":
+"die Scheibe oben beim Frostschild integrieren - aufteilen, immer gemeinsam, oder einzeln, wenn nur eins gilt? Vorschlaege").
+Die echte App im Rahmen, oben fuenf Vorschlaege: A Zusatzzeile in der Warnkarte, B Karte geteilt (links DWD, rechts
+Scheibe), C Chip "95 %" in der Warnkarte (ohne Warnung schmale Zeile), D eigene eisblaue Karte unter der Warnung, E unten im
+Kasten an der Stelle von "Frost moeglich" (#heat, liegt UNTER den Kacheln). Faelle Beides / Nur Scheibe / Nur Warnung / Echt.
+Scheibe oben erst ab 50 % (Kachel ab 10 %). Tipp auf den Scheiben-Teil oeffnet `schGross()`. Die Seite blendet #alerts und
+#heat der App aus und legt `#stBox` davor; die Ansicht setzt sie ueber ein ersetztes `ansichtGespeichert` (schreibt nichts in
+den Speicher). DATEN (Station 01639, Naechte 17-09 Uhr Sep-Mai, 10-Minuten-Werte 23.05.2025-23.11.2026, 353 Naechte): Frost
+in 2 m UND an der Oberflaeche (5 cm) 66, NUR Oberflaeche 51 (Luftminimum 0,0 bis +3,2 Grad), NUR Luft 0, keins 236 - Luftfrost
+ohne Scheibenfrost kam nie vor. "Nur Warnung" entsteht darum nur ueber die Zeit (Warnung bis 12 Uhr, Scheibe rechnet ab 10 Uhr
+fuer den naechsten Morgen) oder weil der DWD fuer den Kreis warnt und wir fuer den Punkt rechnen. Wahl steht aus.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
