@@ -4344,6 +4344,29 @@ den unteren Rand hinaus (innerHeight - Hoehe - 24); ist die Zahl nicht im Bild (
 Zahl, solange sie steht (`lage()` je Bild per rAF, setzt top nur bei Aenderung): im Test kam die echte Frostwarnung 1,2 s NACH dem
 Einblenden (SANFT_MAX war abgelaufen) und schob die Zahl 71 px nach unten - ohne Nachfuehren stand die Karte dann ueber "Live".
 Geprueft (`t722.py`, `t722b.py`): Mitte Karte = Mitte Zahl auf den Pixel in Himmel 393/320, hell, dunkel, mit und ohne Warnung.
+v7.23 AUTOSCHEIBE (Nutzer 24./25.11.: "warum sind die Scheiben gefroren, obwohl es nachts kaum unter 0 Grad hatte - kann
+man das vorhersagen?" -> "Ja bitte einbauen"). Kachel `scheibe` ("Autoscheibe · Eis am Morgen", Pool; Bestandsnutzer einmalig
+per `kzScheibeNeu` angehaengt), Modul `SCH_P`/`sch*` vor KZ_DEF. ZIEL: vor 10 Uhr Ortszeit der heutige Morgen, sonst der naechste;
+Fenster 17 Uhr am Vorabend bis 9 Uhr (`schFenster`). DATEN: `chartRows` (Bright Sky, Messung vor MOSMIX), volle Stunden.
+MODELL: Oberflaeche = Luft 2 m - dT nur bei Nacht (`isNight`), dT = a + c*w + b*(1-N^p)*w, w = 1/(1+(v/v0)^q), N Bedeckung 0..1,
+v Wind m/s; a .676, c .593, b 2.432, p 1.3, v0 3.75, q 2.5 - Kleinste Quadrate an 5776 Nachtstunden (Sonne < -3 Grad) der Station
+01639, Ziel = TT_10 - TM5_10 (2 m gegen 5 cm ueber Gras, DWD-10-Minuten-Werte 23.05.2025-23.11.2026), N und Wind stuendlich
+derselben Station (hourly/cloudiness, hourly/wind). Klar + still 3,7 K, bedeckt 1,2 K, klar bei 7 m/s 1,2 K; Stunden-R2 0,39.
+WAHRSCHEINLICHKEIT, dass die Oberflaeche in der Nacht 0 Grad erreicht = Phi((0,2 - Min)/sigma): 349 Naechte Sep-Mai, sigma 1,05,
+Brier 0,035 gegen 0,049 nur mit dem 2-m-Minimum (Skill 29 %) und 0,219 Klimatologie; Test Jun-Nov 2026 mit Fit bis Mai Brier
+0,018. Geschaetzt < -1: 98 % Frost, 0..+2: 30 %, > +2: nie. VORHERSAGE: sigma = Hypot(1,05; 0,8 + 0,05 K je Stunde Vorlauf,
+hoechstens 30 h) - MEINE Schaetzung aus der MOSMIX-Temperatur-MAE im RUC-Vergleich (0,66 K bei 1 h bis 1,09 K bei 13 h); der
+Fehler der Bewoelkungsprognose steckt darin nur grob. FEUCHTE: in 116 von 117 Frostnaechten lag die Oberflaeche hoechstens 2 K
+ueber dem 2-m-Taupunkt - erst darueber Abschlag 15 % je K (mindestens x0,4). KACHEL: "SCHEIBE / Eis 85 % / Mi ab ~3 Uhr"
+(abends "ab ~21 Uhr", Frost schon ab Fensterbeginn "schon abends" / "schon jetzt" / heute "seit gestern"), unter 10 % "frei",
+Schnee in der Nacht "Schnee"; zweite Ansicht geschaetzte Oberflaeche zur kaeltesten Stunde. Prozent auf 5 gerundet, 5-95.
+GROSSANSICHT `schGross`: SVG Luft / Oberflaeche (+-1 sigma, nur nachts) / Taupunkt, Frostzone, jetzt-Strich, Tabelle alle 3 h
+(Luft, Flaeche, Wolken, Wind), Begruendung (Wolken/Wind, Regen vorher = festes Eis, trockene Luft, Vorhersage-Unsicherheit),
+aufklappbar "So wird gerechnet". GRENZEN (dem Nutzer gesagt): 5 cm ueber Gras ist nicht die Windschutzscheibe (die ist eher etwas
+waermer - die Angabe ist vorsichtig), Carport/Baeume/Hauswand, eine Station, knapp zwei Herbste/Winter; ausserhalb Hessens nicht
+geeicht. Auswertung: Scratchpad `frostsk/` (lade.py, fit.py, nacht2.py, feucht.py). Geprueft (`t723.py`, `t723b.py`): echte
+Daten 25.11. 08:47 (heute, Messung: Eis 95 %, Oberflaeche -8,7) und 15:00 (morgen, MOSMIX), dazu Temperatur +3 / +6 K und klar +
+still mit Regen eingespielt; Himmel 393/320, hell, dunkel; bei 320 pt wird der Wert auf 14 px verkleinert. Nicht am iPhone geprueft.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
