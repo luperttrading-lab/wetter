@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.29</span>
+      <span class="ver">v7.30</span>
     </div>
   </header>
 
@@ -9816,9 +9816,12 @@ const KZ_DEF={
     if(p3==null)return {l:"Luftdruck",v:`${kzR0(p)} hPa`,s:"Tendenz fehlt"};const d=p-p3;const pf=d>0.5?'<span class="up">↑</span>':d<-0.5?'<span class="dn">↓</span>':"→";
     return {l:"Luftdruck",v:`${kzR0(p)} ${pf}`,s:`${d>=0?"+":"−"}${fmt1(Math.abs(d))} in 3 h`};}},
   uvmax:{name:"UV heute max",kurz:"UV heute",ziel:{label:"UV-Index",alt:"uvSec"},r(){return kzUvHeute();}},
-  taupunkt:{name:"Taupunkt / Feuchte",ziel:{label:"Taupunkt",text:"Details"},r(){const r=kzLetzte();if(!r||r.dew_point==null)return null;
-    const rh=r.relative_humidity!=null?r.relative_humidity:(_kz.hero&&_kz.hero.s?_kz.hero.s.rh:null);
-    return {l:"Taupunkt",v:`${fmt1(r.dew_point)}°`,s:rh!=null?(rh>=99.5?"gesättigt":`Feuchte ${kzR0(rh)}%`):""};}},
+  /* v7.30 (Nutzer: "Luftfeuchtigkeit hinschreiben und unten drunter klein den Taupunkt - genau umgekehrt"): Wert = relative
+     Feuchte, Unterzeile = Taupunkt. Ohne Feuchte wie bisher der Taupunkt als Wert. Schluessel bleibt "taupunkt" (gespeicherte Auswahl). */
+  taupunkt:{name:"Luftfeuchte / Taupunkt",kurz:"Feuchte",ziel:{label:"Taupunkt",text:"Details"},r(){const r=kzLetzte();if(!r)return null;
+    const rh=r.relative_humidity!=null?r.relative_humidity:(_kz.hero&&_kz.hero.s?_kz.hero.s.rh:null),td=r.dew_point;
+    if(rh==null)return td==null?null:{l:"Taupunkt",v:`${fmt1(td)}°`,s:""};
+    return {l:"Feuchte",v:`${rh>=99.5?100:kzR0(rh)}\u00a0%`,s:td!=null?`Taupunkt ${fmt1(td)}°`:(rh>=99.5?"gesättigt":"")};}},
   pv:{name:"Photovoltaik heute",kurz:"PV heute",ziel:{label:"PV heute",alt:"pvCard"},r(){if(typeof pvKonfig==="function"&&!pvKonfig())return {l:"PV heute",v:"–",s:"keine Anlage"};const p=_kz.pv;if(!p)return null;
     return {l:"PV heute",v:`${kzF1(p.kwh)} kWh`,s:p.erwartet!=null?`von ~${kzF1(p.erwartet)}`:"bisher"};}},
   /* v4.02: Der Mond mit echter Sichel. Prozent und Phasenname kommen aus

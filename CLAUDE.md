@@ -4447,6 +4447,11 @@ Tabellenzeile "Reif ab", Satz "Die Luft ist trocken: Reif erst unter ... - die S
 Frostpunkt aus dem Taupunkt in 2 m, die Feuchte an der Scheibe kann anders sein; Taupunkt-Vorhersage von MOSMIX hat eigene Fehler.
 Nebenbei: Kommentar v7.26 korrigiert (Feuchttemperatur Norden -0,07, nicht -0,5). Auswertung: Scratchpad `frostsk/eis.py`,
 `frost26/nacht.py`. Geprueft (`e/t732.py`, Uhr 26.11. 08:00 / 25.11. 08:30 / 25.11. 23:10, Erlental und Norden).
+v7.30 (Nutzer 26.11., Bild Erlental 10:42 mit Kachel "TAUPUNKT -4,0° / Feuchte 78 %": "die Luftfeuchtigkeit hinschreiben und
+unten drunter klein den Taupunkt - genau umgekehrt wie jetzt"): Kachel `taupunkt` (Schluessel bleibt, gespeicherte Auswahl gilt
+weiter) zeigt "FEUCHTE / 78 % / Taupunkt -4,0°", im Pool "Luftfeuchte / Taupunkt". Ohne Feuchtewert wie bisher der Taupunkt als
+Wert. Beschriftung "Feuchte" statt "Luftfeuchte": "LUFTFEUCHTE" (11 Zeichen) wurde bei 375 pt auf 10 px verkleinert und brach bei
+320 pt um. Gemessen (`e/t733.py`): 393/375 pt einzeilig, 320 pt bricht "Taupunkt -4,0°" um wie Wind und Luftdruck daneben.
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
