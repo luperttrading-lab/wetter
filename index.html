@@ -2746,7 +2746,7 @@ function hiAnzeigen(){
           <span class="ico-refresh"></span>
         </div>
       </div>
-      <span class="ver">v7.28</span>
+      <span class="ver">v7.29</span>
     </div>
   </header>
 
@@ -9551,7 +9551,17 @@ try{if(!localStorage.getItem("kzMuellNeu2")){const imK=o=>o&&MUELL_KREISE.some(r
    Oberflaeche hoechstens 2 K ueber dem Taupunkt (2 m) - erst darueber wird abgeschwaecht (Reif braucht Wasser).
    GRENZEN: 5 cm ueber Gras ist nicht die Windschutzscheibe (die ist eher etwas waermer - die Angabe ist vorsichtig);
    unter Carport, Baeumen, an der Hauswand friert sie seltener. Nur eine Station, knapp zwei Herbste/Winter. */
-var SCH_P={a:.676,c:.593,b:2.432,p:1.3,v0:3.75,q:2.5,ver:.2,sig:1.05};
+var SCH_P={a:.676,c:.593,b:2.432,p:1.3,v0:3.75,q:2.5,ver:.2,sig:1.05,rc:-.25,rs:.65};
+/* v7.29 (Nutzer 26.11.: "heute Morgen kein Eis auf den Autos im Erlental") - bis v7.28 galt "Oberflaeche unter 0 Grad" als
+   Eis. Reif setzt sich aber erst ab, wenn die Oberflaeche unter den FROSTPUNKT der Luft faellt (Taupunkt ueber Eis). Station
+   01639, 350 Naechte Sep-Mai: 114 mit 5 cm unter 0 Grad, davon 21 OHNE 30 min unter dem Frostpunkt (trockene Luft, z. B.
+   24.12.2025: 5 cm -5,9 Grad, kein Reif). Nacht zum 26.11.2026: 5 cm bis -4,4 Grad, Frostpunkt -4,6 Grad, Wind 5 m/s - kein Reif;
+   Nacht davor 1-3 K unter dem Frostpunkt - Reif. Jetzt: Marge je Stunde = Oberflaeche - min(Frostpunkt, 0), Eis wahrscheinlich
+   = Phi((rc - kleinste Marge)/rs), rc -0,25 K, rs 0,65 K (gefittet auf Brier, Ziel >= 30 min Oberflaeche unter min(Frostpunkt,
+   0)); Brier 0,040 gegen 0,058 mit der alten Regel auf dasselbe Ziel, Klimatologie 0,195. Bei Vorhersage rs = Hypot(0,65;
+   0,8 + 0,05 K je Stunde Vorlauf). Liegt der Taupunkt ueber 0, faellt Tau und friert bei 0 Grad - dann zaehlt 0. */
+function schFrostpkt(Td){if(Td==null||isNaN(Td))return null;if(Td>=0)return Td;
+  var x=17.62*Td/(243.12+Td);return 272.62*x/(22.46-x);}
 function schDT(N,vms){var w=1/(1+Math.pow(Math.max(0,vms)/SCH_P.v0,SCH_P.q)),n=Math.min(1,Math.max(0,N));
   return SCH_P.a+SCH_P.c*w+SCH_P.b*(1-Math.pow(n,SCH_P.p))*w;}
 function schPhi(z){var x=Math.abs(z)/Math.SQRT2,t=1/(1+.3275911*x),
@@ -9572,16 +9582,19 @@ function schRechnen(fz){
   var H=[...M.keys()].sort(function(x,y){return x-y;}).map(function(t){var r=M.get(t),
       N=r.cloud_cover!=null?r.cloud_cover/100:null,v=r.wind_speed!=null?r.wind_speed/3.6:null,
       nacht=isNight(t),dT=nacht?schDT(N!=null?N:.6,v!=null?v:2.5):0,fc=!!r._fc,lead=Math.max(0,(t-now)/36e5);
-    return {t:t,T:+r.temperature,Td:r.dew_point!=null?+r.dew_point:null,N:N,v:v,dT:dT,ts:+r.temperature-dT,nacht:nacht,fc:fc,
-      sig:fc?Math.hypot(SCH_P.sig,.8+.05*Math.min(30,lead)):SCH_P.sig,pr:+r.precipitation||0,
+    var Td=r.dew_point!=null?+r.dew_point:null,fp=schFrostpkt(Td),ts=+r.temperature-dT;
+    return {t:t,T:+r.temperature,Td:Td,fp:fp,rg:Math.min(fp!=null?fp:0,0),mg:ts-Math.min(fp!=null?fp:0,0),N:N,v:v,dT:dT,ts:ts,nacht:nacht,fc:fc,
+      sig:fc?Math.hypot(SCH_P.sig,.8+.05*Math.min(30,lead)):SCH_P.sig,rs:fc?Math.hypot(SCH_P.rs,.8+.05*Math.min(30,lead)):SCH_P.rs,pr:+r.precipitation||0,
       sn:/snow|sleet/.test((r.condition||"")+" "+(r.icon||""))};});
   if(H.length<6)return null;
   var Nh=H.filter(function(h){return h.nacht;});if(!Nh.length)Nh=H;
   var m=Nh[0];Nh.forEach(function(h){if(h.ts<m.ts)m=h;});
-  var P=schPhi((SCH_P.ver-m.ts)/m.sig),tr=null;
-  if(m.Td!=null&&m.ts-m.Td>2){tr=m.ts-m.Td;P*=Math.max(.4,1-(tr-2)*.15);}
-  var ab=null;for(var h of Nh)if(h.ts<=0){ab=h;break;}
-  return {F:F,H:H,m:m,P:P,tr:tr,ab:ab,abend:!!ab&&ab===Nh[0],
+  var mm=Nh[0];Nh.forEach(function(h){if(h.mg<mm.mg)mm=h;});
+  var P=schPhi((SCH_P.rc-mm.mg)/mm.rs),tr=null;
+  /* trocken: die Scheibe wird kaelter als 0 Grad, bleibt aber ueber dem Frostpunkt */
+  if(m.ts<=.5&&mm.mg>0&&mm.fp!=null&&mm.fp<0)tr=mm;
+  var ab=null;for(var h of Nh)if(h.mg<=SCH_P.rc){ab=h;break;}
+  return {F:F,H:H,m:m,mm:mm,P:P,tr:tr,ab:ab,abend:!!ab&&ab===Nh[0],
     schnee:H.some(function(h){return h.sn&&h.pr>=.1;}),
     regen:H.some(function(h){return !h.sn&&h.pr>=.1&&h.t<=m.t;})};}
 function schProz(P){return Math.min(95,Math.max(5,Math.round(P*20)*5));}
@@ -9598,7 +9611,7 @@ function schKachel(){var R=schRechnen();if(!R)return null;
   return a;}
 function schGross(){var R=schRechnen();if(!R)return null;
   var F=R.F,H=R.H,m=R.m,P=R.P,now=Date.now(),W=300,Hh=150,L=26,Rr=6,To=8,Bo=18;
-  var lo=0,hi=0;H.forEach(function(h){lo=Math.min(lo,h.T,h.ts-(h.nacht?h.sig:0),h.Td!=null?h.Td:h.T);hi=Math.max(hi,h.T);});
+  var lo=0,hi=0;H.forEach(function(h){lo=Math.min(lo,h.T,h.ts-(h.nacht?h.sig:0),h.rg);hi=Math.max(hi,h.T);});
   lo=Math.floor(lo-.3);hi=Math.ceil(hi+.3);var sp=hi-lo,st=sp<=6?1:sp<=12?2:sp<=30?5:10;lo=Math.floor(lo/st)*st;hi=Math.ceil(hi/st)*st;
   var X=function(t){return L+(t-F.a)/(F.e-F.a)*(W-L-Rr);},Y=function(v){return To+(hi-v)/(hi-lo)*(Hh-To-Bo);},
     pth=function(A){return A.map(function(p,i){return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1);}).join("");};
@@ -9609,8 +9622,9 @@ function schGross(){var R=schRechnen();if(!R)return null;
     g+='<line class="gl" x1="'+X(h.t).toFixed(1)+'" x2="'+X(h.t).toFixed(1)+'" y1="'+To+'" y2="'+(Hh-Bo)+'"/><text x="'+X(h.t).toFixed(1)+'" y="'+(Hh-5)+'" text-anchor="middle">'+hh+'</text>';});
   var Nn=H.filter(function(h){return h.nacht;});
   if(Nn.length>1)g+='<path class="bd" d="'+pth(Nn.map(function(h){return [X(h.t),Y(h.ts+h.sig)];}).concat(Nn.slice().reverse().map(function(h){return [X(h.t),Y(h.ts-h.sig)];})))+'Z"/>';
-  var Hd=H.filter(function(h){return h.Td!=null;});
-  if(Hd.length>1)g+='<path class="ltd" d="'+pth(Hd.map(function(h){return [X(h.t),Y(h.Td)];}))+'"/>';
+  /* v7.29: Reifgrenze = min(Frostpunkt, 0) - faellt die Oberflaeche darunter, setzt sich Reif ab */
+  var Hd=H.filter(function(h){return h.fp!=null;});
+  if(Hd.length>1)g+='<path class="ltd" d="'+pth(Hd.map(function(h){return [X(h.t),Y(h.rg)];}))+'"/>';
   g+='<path class="l2" d="'+pth(H.map(function(h){return [X(h.t),Y(h.T)];}))+'"/>';
   /* Oberflaeche nur, solange die Sonne unten ist - nach Sonnenaufgang sprang die Linie sonst auf die Lufttemperatur */
   if(Nn.length>1)g+='<path class="lf" d="'+pth(Nn.map(function(h){return [X(h.t),Y(h.ts)];}))+'"/>';
@@ -9628,19 +9642,21 @@ function schGross(){var R=schRechnen();if(!R)return null;
     gr.push("Gegen "+schStd(m.t)+" Uhr Wolken "+Np+" %, Wind "+kmh+" km/h: die Oberfläche wird etwa "+fmt1(m.dT)+" K kälter als die Luft"+
       (m.N<.35&&m.v<3?" – klar und wenig Wind, die Scheibe strahlt ihre Wärme in den Himmel ab.":m.N>=.85?" – die Wolkendecke hält die Wärme zurück.":m.v>=5?" – der Wind mischt wärmere Luft heran.":"."));}
   if(R.regen&&P>=.3)gr.push("Vorher Regen: eine nasse Scheibe friert zu festem Eis – mehr Zeit zum Kratzen einplanen.");
-  if(R.tr!=null)gr.push("Die Luft ist eher trocken (Taupunkt "+f1(m.Td)+" °C) – dann bildet sich weniger Reif.");
+  if(R.tr)gr.push("Die Luft ist trocken: Reif setzt sich erst unter "+f1(R.tr.rg)+" °C ab (Frostpunkt), die Scheibe "+(R.tr.mg<.4?"kommt nur knapp heran ("+f1(R.tr.ts)+" °C) – es kann auf der Kippe stehen.":"kommt nur auf etwa "+f1(R.tr.ts)+" °C – sie wird kälter als 0 °C, bleibt aber wohl ohne Eis."));
+  else if(P>=.3&&R.mm)gr.push("Gegen "+schStd(R.mm.t)+" Uhr liegt die Oberfläche "+fmt1(Math.abs(R.mm.mg))+" K "+(R.mm.mg<0?"unter":"über")+" der Reifgrenze ("+f1(R.mm.rg)+" °C).");
   if(m.fc)gr.push("Vorhersage (DWD-MOSMIX): je weiter voraus, desto breiter das blaue Band (±"+fmt1(m.sig)+" K um "+schStd(m.t)+" Uhr).");
   var tb=H.filter(function(h){return schStd(h.t)%3===0;}),
     zl=function(k,fn){return '<tr><th>'+k+'</th>'+tb.map(function(h){return '<td>'+fn(h)+'</td>';}).join("")+'</tr>';};
   return '<div class="sch"><div class="kzg-titel">Autoscheibe · '+nacht+'</div>'
     +'<div class="kzg-sub"><b>'+urt+'</b><br>Kälteste Stunde gegen '+schStd(m.t)+' Uhr: Luft '+f1(m.T)+' °C, Oberfläche geschätzt '+f1(m.ts)+' °C.</div>'
     +'<svg class="sch-g" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Luft und geschätzte Oberfläche in der Nacht">'+g+'</svg>'
-    +'<div class="sch-leg"><span><i class="k2"></i>Luft in 2 m</span><span><i class="kf"></i>Oberfläche (geschätzt, Band ±1σ)</span><span><i class="ktd"></i>Taupunkt</span></div>'
-    +'<table class="sch-t">'+zl("Uhr",function(h){return schStd(h.t);})+zl("Luft",function(h){return f1(h.T);})+zl("Fläche",function(h){return h.nacht?f1(h.ts):"–";})
+    +'<div class="sch-leg"><span><i class="k2"></i>Luft in 2 m</span><span><i class="kf"></i>Oberfläche (geschätzt, Band ±1σ)</span><span><i class="ktd"></i>Reif ab (Frostpunkt)</span></div>'
+    +'<table class="sch-t">'+zl("Uhr",function(h){return schStd(h.t);})+zl("Luft",function(h){return f1(h.T);})+zl("Fläche",function(h){return h.nacht?f1(h.ts):"–";})+zl("Reif ab",function(h){return f1(h.rg);})
       +zl("Wolken",function(h){return h.N!=null?Math.round(h.N*100)+"%":"–";})+zl("Wind",function(h){return h.v!=null?Math.round(h.v*3.6):"–";})+'</table>'
     +'<div class="kzg-leg">'+gr.join("<br>")+'</div>'
     +'<details class="sch-wie"><summary>So wird gerechnet</summary><div>Gemessen an der Station Gießen/Wettenberg (DWD 01639), 349 Nächte von September bis Mai (Mai 2025 bis November 2026): wie viel kälter die Luft 5 cm über dem Gras wird als die Luft in 2 m – je nach Bewölkung und Wind. Klar und windstill rund 3,7 K, bedeckt rund 1,2 K, klar mit kräftigem Wind rund 1,2 K. '
-    +'Damit trifft die Schätzung den Frost am Boden deutlich besser als die Luft in 2 m allein (geschätzt unter −1 °C: in 98 % der Nächte Frost, 0 bis +2 °C: in 30 %, über +2 °C: nie). '
+    +'Eis gibt es aber erst, wenn die Oberfläche unter den Frostpunkt der Luft fällt – sonst setzt sich kein Reif ab. In 21 von 114 Nächten mit Frost am Boden war die Luft dafür zu trocken. '
+    +'Gerechnet wird deshalb der Abstand zur Reifgrenze: mehr als 1 K darunter in 91 % der Nächte Eis, 0 bis 0,5 K darunter in 47 %, 0 bis 1 K darüber in 9 %, mehr als 2 K darüber nie. '
     +'Die Windschutzscheibe ist meist etwas wärmer als die Luft über dem Gras – die Angabe ist eher vorsichtig. Unter Carport, Bäumen oder an der Hauswand friert sie seltener.</div></details></div>';}
 /* ===== v7.24 AUTOSCHEIBE OBEN (Nutzer 25.11.: Vorschlag B aus scheibetest.html) =====
    Gibt es eine DWD-Warnung zu Frost oder Glaette, wird ihre Karte GETEILT: links die Warnung, rechts "SCHEIBE / Eis 95 % /
@@ -9673,7 +9689,7 @@ var SCH_TAG_T=0;
 /* v7.26 (Nutzer 25.11. 10:47, Norden: "1,0 Grad - ist die Scheibe nicht mehr vereist?"; "bei 1 Grad, wenn es leicht abtaut,
    grenzwertig, laesst sich leicht wegkratzen - wichtig ist der Hinweis, wenn es hart festgefroren ist"). Ob Eis TAUT, entscheidet
    nicht die Luft, sondern die FEUCHTTEMPERATUR (schFeucht): in trockener Luft verdunstet das Eis an der Oberflaeche und kuehlt sich
-   dabei selbst - Norden 10:30 Luft +1,0, Taupunkt -1,6 -> Feuchttemperatur -0,5 Grad, Reif taut im Schatten nicht. Getaut ist es
+   dabei selbst - Norden 10:30 Luft +1,0, Taupunkt -1,8 -> Feuchttemperatur -0,07 Grad, Reif taut im Schatten nicht. Getaut ist es
    erst, wenn seit der kaeltesten Stunde der Nacht (R.m.t) SCH_TAU_KH 0,7 Grad-Stunden Feuchttemperatur ueber 0 zusammenkommen
    (schTauSumme; MEINE Schaetzung: duenner Reif ~0,15 mm Wasser = 50 kJ/m2, Waermeuebergang ~20 W/m2K bei maessigem Wind).
    Zwei Stufen: Luft <= 0 Grad -> "noch Eis / fest gefroren"; Luft ueber 0, aber noch nicht getaut -> "Eis, weich / geht leicht

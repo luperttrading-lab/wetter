@@ -4429,6 +4429,24 @@ bisher schon bei "frei" und "Schnee". Grund neben dem Wunsch: der Beginn hing of
 Uhr -0,1 bei sigma 1,05 K) - eine Genauigkeit, die das Modell nicht hat. Die Grossansicht nennt den Beginn weiter ("seit etwa 18
 Uhr", Kurve), die zweite Kachelansicht weiter die kaelteste Stunde. Tagsueber (10-17 Uhr) unveraendert "noch Eis / fest gefroren"
 bzw. "Eis, weich". Geprueft (`e/t730.py`, Uhr 23:10 Norden/Erlental, 08:30 Erlental).
+v7.29 AUTOSCHEIBE NACH FROSTPUNKT (Nutzer 26.11. morgens: "heute Morgen kein Eis auf den Autos im Erlental und Umgebung" -
+die App hatte 95 % gesagt). URSACHE: bis v7.28 war das ZIEL "Oberflaeche (5 cm) unter 0 Grad" - das ist nicht "Eis". Reif setzt
+sich erst ab, wenn die Oberflaeche unter den FROSTPUNKT der Luft faellt (Taupunkt ueber Eis). Station 01639, 10-Minuten-Werte (TM5_10,
+TD_10): Nacht 24./25.11. Oberflaeche die ganze Nacht 1-3,5 K unter dem Frostpunkt (Wind 2-2,5 m/s, klar) -> Reif; Nacht 25./26.11.
+Oberflaeche bis -4,4 Grad, Frostpunkt -4,6 (Luft 78-86 %, Wind 5 m/s), nur ein 10-Minuten-Wert darunter -> kein Reif. Ueber 350
+Naechte Sep-Mai: 114 mit 5 cm unter 0, davon 21 OHNE 30 min unter dem Frostpunkt ("trocken gefroren", z. B. 24.12.2025 -5,9 Grad).
+JETZT `schRechnen`: je Stunde `fp` = schFrostpkt(Td), Reifgrenze `rg` = min(fp, 0) (Taupunkt ueber 0: Tau, friert bei 0), Marge
+`mg` = Oberflaeche - rg; P = Phi((SCH_P.rc - kleinste Marge)/rs), rc -0,25 K, rs 0,65 K (gemessen) bzw. Hypot(0,65; 0,8 + 0,05 K je
+Stunde Vorlauf). Fit auf Brier, Ziel >= 30 min Oberflaeche unter rg: 0,040 gegen 0,058 mit der alten Regel, Klimatologie 0,195;
+Kalibrierung: Marge unter -1 K 91 % Eis, -0,5..0 47 %, 0..1 9 %, ueber 2 K nie. Test Jun-Nov 2026 (79 Naechte, wenig Frost) neu 0,039
+gegen alt 0,038 - ausserhalb der Stichprobe NICHT besser belegt, nur gleich. Der alte Feuchte-Abschlag (Oberflaeche > Taupunkt + 2 K)
+entfaellt. Beginn (`R.ab`) = erste Stunde mit Marge <= rc. Grossansicht: gestrichelte Linie "Reif ab (Frostpunkt)" statt Taupunkt,
+Tabellenzeile "Reif ab", Satz "Die Luft ist trocken: Reif erst unter ... - die Scheibe kommt nur knapp heran ... auf der Kippe" bzw.
+"Gegen X Uhr liegt die Oberflaeche ... K unter der Reifgrenze". Ergebnis fuer die Nacht 25./26.11. mit Messwerten: Erlental Marge
++0,06 K -> "Eis 30 %" (Kachel; oben keine Karte, die braucht 50 %), Nacht 24./25. -> 95 %; Norden 26.11. 08:00 -> "frei". GRENZEN:
+Frostpunkt aus dem Taupunkt in 2 m, die Feuchte an der Scheibe kann anders sein; Taupunkt-Vorhersage von MOSMIX hat eigene Fehler.
+Nebenbei: Kommentar v7.26 korrigiert (Feuchttemperatur Norden -0,07, nicht -0,5). Auswertung: Scratchpad `frostsk/eis.py`,
+`frost26/nacht.py`. Geprueft (`e/t732.py`, Uhr 26.11. 08:00 / 25.11. 08:30 / 25.11. 23:10, Erlental und Norden).
 v5.26 (Nutzer: "auf Regen jetzt tippen soll das Diagramm oben aufgehen, nicht nach
 unten verweisen"): `regen.gross()` -> `kzNowGross(_kz.nowcast)`: die 25 Radarschritte
 gross, FESTE Skala 1/2/5/10... mm/h (nicht relativ zur Spitze wie in Kachel und
